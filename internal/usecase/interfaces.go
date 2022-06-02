@@ -8,17 +8,31 @@ import (
 	"toc-machine-trading/pkg/pb"
 )
 
-// Stock -.
-type Stock interface {
-	GetAllStockDetail(ctx context.Context) ([]*entity.Stock, error)
-}
+type (
+	// Basic -.
+	Basic interface {
+		GetAllStockDetail(ctx context.Context) ([]*entity.Stock, error)
+	}
 
-// StockRepo -.
-type StockRepo interface {
-	Store(ctx context.Context, t []*entity.Stock) error
-}
+	// BasicRepo -.
+	BasicRepo interface {
+		GetAllStockDetail(ctx context.Context) ([]*entity.Stock, error)
+		StoreStockDetail(ctx context.Context, t []*entity.Stock) error
+	}
 
-// StockgRPCAPI -.
-type StockgRPCAPI interface {
-	GetAllStockDetail() ([]*pb.StockDetailMessage, error)
-}
+	// BasicgRPCAPI -.
+	BasicgRPCAPI interface {
+		GetAllStockDetail() ([]*pb.StockDetailMessage, error)
+	}
+)
+
+type (
+	// Stream -.
+	Stream interface{}
+
+	// StreamRepo -.
+	StreamRepo interface{}
+
+	// StreamgRPCAPI -.
+	StreamgRPCAPI interface{}
+)

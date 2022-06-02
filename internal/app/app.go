@@ -15,6 +15,7 @@ import (
 	"toc-machine-trading/pkg/httpserver"
 	"toc-machine-trading/pkg/logger"
 	"toc-machine-trading/pkg/postgres"
+	"toc-machine-trading/pkg/sinopac"
 
 	"github.com/gin-gonic/gin"
 )
@@ -29,14 +30,16 @@ func Run(cfg *config.Config) {
 	}
 	defer pg.Close()
 
-	stockUsecase := usecase.New(
-		repo.New(pg),
-		grpcapi.New(cfg.Sinopac.URL, cfg.Sinopac.PoolMax),
-	)
+	sc, err := sinopac.New(cfg.Sinopac.URL, sinopac.MaxPoolSize(cfg.Sinopac.PoolMax))
+	if err != nil {
+		logger.Get().Panic(err)
+	}
+
+	basicUseCase := usecase.NewBasic(repo.New(pg), grpcapi.New(sc))
 
 	// HTTP Server
 	handler := gin.New()
-	v1.NewRouter(handler, stockUsecase)
+	v1.NewRouter(handler, basicUseCase)
 	httpServer := httpserver.New(handler, httpserver.Port(cfg.HTTP.Port))
 
 	// Waiting signal

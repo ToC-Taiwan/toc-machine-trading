@@ -8,22 +8,22 @@ import (
 	"toc-machine-trading/internal/usecase/repo"
 )
 
-// StockUseCase -.
-type StockUseCase struct {
-	repo    StockRepo
-	gRPCAPI StockgRPCAPI
+// BasicUseCase -.
+type BasicUseCase struct {
+	repo    BasicRepo
+	gRPCAPI BasicgRPCAPI
 }
 
-// New -.
-func New(r *repo.StockRepo, t *grpcapi.StockgRPCAPI) *StockUseCase {
-	return &StockUseCase{
+// NewBasic -.
+func NewBasic(r *repo.BasicRepo, t *grpcapi.BasicgRPCAPI) *BasicUseCase {
+	return &BasicUseCase{
 		repo:    r,
 		gRPCAPI: t,
 	}
 }
 
 // GetAllStockDetail -.
-func (uc *StockUseCase) GetAllStockDetail(ctx context.Context) ([]*entity.Stock, error) {
+func (uc *BasicUseCase) GetAllStockDetail(ctx context.Context) ([]*entity.Stock, error) {
 	stockArr, err := uc.gRPCAPI.GetAllStockDetail()
 	if err != nil {
 		return []*entity.Stock{}, err
@@ -34,7 +34,7 @@ func (uc *StockUseCase) GetAllStockDetail(ctx context.Context) ([]*entity.Stock,
 		stockDetail = append(stockDetail, v.ToStockEntity())
 	}
 
-	err = uc.repo.Store(context.Background(), stockDetail)
+	err = uc.repo.StoreStockDetail(context.Background(), stockDetail)
 	if err != nil {
 		return []*entity.Stock{}, err
 	}

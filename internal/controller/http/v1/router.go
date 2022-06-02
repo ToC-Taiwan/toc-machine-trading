@@ -16,7 +16,7 @@ import (
 // @title       TOC MACHINE TRADING API
 // @description Auto Trade on sinopac
 // @version     1.0.0
-func NewRouter(handler *gin.Engine, t usecase.Stock) {
+func NewRouter(handler *gin.Engine, t usecase.Basic) {
 	docs.SwaggerInfo.BasePath = "/v1"
 	docs.SwaggerInfo.Host = "127.0.0.1:8080"
 

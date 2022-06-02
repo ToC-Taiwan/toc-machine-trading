@@ -11,10 +11,10 @@ import (
 )
 
 type stockRoutes struct {
-	t usecase.Stock
+	t usecase.Basic
 }
 
-func newStockRoutes(handler *gin.RouterGroup, t usecase.Stock) {
+func newStockRoutes(handler *gin.RouterGroup, t usecase.Basic) {
 	r := &stockRoutes{t}
 
 	h := handler.Group("/basic")

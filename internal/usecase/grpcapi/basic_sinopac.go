@@ -4,32 +4,24 @@ package grpcapi
 import (
 	"context"
 
-	"toc-machine-trading/pkg/logger"
 	"toc-machine-trading/pkg/pb"
 	"toc-machine-trading/pkg/sinopac"
 
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
-// StockgRPCAPI -.
-type StockgRPCAPI struct {
+// BasicgRPCAPI -.
+type BasicgRPCAPI struct {
 	conn *sinopac.Connection
 }
 
 // New -.
-func New(url string, poolSize int) *StockgRPCAPI {
-	client, err := sinopac.New(url, sinopac.MaxPoolSize(poolSize))
-	if err != nil {
-		logger.Get().Panic(err)
-	}
-
-	return &StockgRPCAPI{
-		conn: client,
-	}
+func New(client *sinopac.Connection) *BasicgRPCAPI {
+	return &BasicgRPCAPI{client}
 }
 
 // GetAllStockDetail GetAllStockDetail
-func (t *StockgRPCAPI) GetAllStockDetail() ([]*pb.StockDetailMessage, error) {
+func (t *BasicgRPCAPI) GetAllStockDetail() ([]*pb.StockDetailMessage, error) {
 	conn := t.conn.GetReadyConn()
 	defer t.conn.PutReadyConn(conn)
 	c := pb.NewSinopacForwarderClient(conn)
