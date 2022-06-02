@@ -56,6 +56,7 @@ go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@$ve
 echo 'DEPLOYMENT=prod
 DISABLE_SWAGGER_HTTP_HANDLER=true
 GIN_MODE=release
+SINOPAC_URL=127.0.0.1:56666
 PG_URL=postgres://user:password@localhost:5432/
 DB_NAME=trade' > .env
 ```

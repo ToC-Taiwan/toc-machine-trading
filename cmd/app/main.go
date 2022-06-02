@@ -35,6 +35,6 @@ func init() {
 }
 
 func main() {
-	app.MigrateDB()
+	app.MigrateDB(cfg)
 	app.Run(cfg)
 }

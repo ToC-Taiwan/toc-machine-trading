@@ -3,3 +3,6 @@ http:
 
 postgres:
     pool_max: 80
+
+sinopac:
+    pool_max: 20

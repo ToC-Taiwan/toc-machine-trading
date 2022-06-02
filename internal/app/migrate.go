@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"os"
 	"time"
 
 	"toc-machine-trading/pkg/config"
@@ -25,18 +24,8 @@ const (
 )
 
 // MigrateDB -.
-func MigrateDB() {
-	databaseURL, ok := os.LookupEnv("PG_URL")
-	if !ok || len(databaseURL) == 0 {
-		logger.Get().Fatal("environment variable not declared: PG_URL")
-	}
-
-	databaseName, ok := os.LookupEnv("DB_NAME")
-	if !ok || len(databaseURL) == 0 {
-		logger.Get().Fatal("environment variable not declared: DB_NAME")
-	}
-
-	createErr := createDB(databaseName)
+func MigrateDB(cfg *config.Config) {
+	createErr := tryCreateDB(cfg.PG.DBName)
 	if createErr != nil {
 		logger.Get().Panic(createErr)
 	}
@@ -47,7 +36,7 @@ func MigrateDB() {
 		m        *migrate.Migrate
 	)
 
-	dbPath := fmt.Sprintf("%s%s%s", databaseURL, databaseName, "?sslmode=disable")
+	dbPath := fmt.Sprintf("%s%s%s", cfg.PG.URL, cfg.PG.DBName, "?sslmode=disable")
 	for attempts > 0 {
 		m, err = migrate.New("file://migrations", dbPath)
 		if err == nil {
@@ -81,7 +70,7 @@ func MigrateDB() {
 	logger.Get().Info("Migrate: up success")
 }
 
-func createDB(dbName string) error {
+func tryCreateDB(dbName string) error {
 	cfg, err := config.NewConfig()
 	if err != nil {
 		return err
