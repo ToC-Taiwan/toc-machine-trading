@@ -2,8 +2,10 @@
 package logger
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"sync"
 	"time"
@@ -26,12 +28,11 @@ func initLogger() {
 
 	// Get current path
 	basePath := global.GetBasePath()
-	// if basePath == "" {
-	// 	basePath = global.GetRuntimePath()
-	// }
 
 	// create new instance
 	globalLogger = logrus.New()
+	globalLogger.SetReportCaller(true)
+
 	if global.GetIsDevelopment() {
 		globalLogger.SetFormatter(&logrus.TextFormatter{
 			TimestampFormat:  "2006/01/02 15:04:05",
@@ -40,15 +41,22 @@ func initLogger() {
 			PadLevelText:     false,
 			ForceColors:      true,
 			ForceQuote:       true,
+			CallerPrettyfier: func(frame *runtime.Frame) (function string, file string) {
+				fileName := strings.ReplaceAll(frame.File, fmt.Sprintf("%s/", basePath), "")
+				return fmt.Sprintf("[%s:%d]", fileName, frame.Line), ""
+			},
 		})
 	} else {
 		globalLogger.SetFormatter(&logrus.JSONFormatter{
 			TimestampFormat: global.LongTimeLayout,
 			PrettyPrint:     false,
+			CallerPrettyfier: func(frame *runtime.Frame) (function string, file string) {
+				fileName := strings.ReplaceAll(frame.File, fmt.Sprintf("%s/", basePath), "")
+				return fmt.Sprintf("%s:%d", fileName, frame.Line), ""
+			},
 		})
 	}
 
-	// globalLogger.SetReportCaller(true)
 	folderName := time.Now().Format(time.RFC3339)[:10]
 	folderName = strings.ReplaceAll(folderName, ":", "")
 	globalLogger.SetLevel(logrus.TraceLevel)
@@ -64,7 +72,14 @@ func initLogger() {
 	}
 	globalLogger.Hooks.Add(lfshook.NewHook(
 		pathMap,
-		&logrus.JSONFormatter{},
+		&logrus.JSONFormatter{
+			TimestampFormat: global.LongTimeLayout,
+			PrettyPrint:     false,
+			CallerPrettyfier: func(frame *runtime.Frame) (function string, file string) {
+				fileName := strings.ReplaceAll(frame.File, fmt.Sprintf("%s/", basePath), "")
+				return fmt.Sprintf("%s:%d", fileName, frame.Line), ""
+			},
+		},
 	))
 }
 
