@@ -1,5 +1,9 @@
 # TOC MACHINE TRADING
 
+## Layers
+
+![Example](docs/img/layers-2.png)
+
 ## Tools
 
 ### Conventional Commit
