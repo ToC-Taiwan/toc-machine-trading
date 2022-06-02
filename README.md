@@ -2,7 +2,7 @@
 
 ## Layers
 
-![Example](docs/img/layers-2.png)
+![Example](docs/img/layers.png)
 
 ## Tools
 
