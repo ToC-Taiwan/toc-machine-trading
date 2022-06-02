@@ -1,0 +1,10 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "Auto Trade on sinopac",
+        "title": "TOC MACHINE TRADING API",
+        "contact": {},
+        "version": "1.0.0"
+    },
+    "paths": {}
+}

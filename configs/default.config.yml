@@ -1,0 +1,5 @@
+http:
+    port: "8080"
+
+postgres:
+    pool_max: 80
