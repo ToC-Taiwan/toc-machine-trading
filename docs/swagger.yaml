@@ -1,7 +1,58 @@
+definitions:
+  entity.Stock:
+    properties:
+      category:
+        type: string
+      day_trade:
+        type: boolean
+      exchange:
+        type: string
+      id:
+        type: integer
+      last_close:
+        type: number
+      name:
+        type: string
+      number:
+        type: string
+    type: object
+  v1.response:
+    properties:
+      error:
+        example: message
+        type: string
+    type: object
+  v1.stockDetailResponse:
+    properties:
+      stock_detail:
+        items:
+          $ref: '#/definitions/entity.Stock'
+        type: array
+    type: object
 info:
   contact: {}
   description: Auto Trade on sinopac
   title: TOC MACHINE TRADING API
   version: 1.0.0
-paths: {}
+paths:
+  /basic/stock:
+    get:
+      consumes:
+      - application/json
+      description: getAllStockDetail
+      operationId: stock_detail
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.stockDetailResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+      summary: getAllStockDetail
+      tags:
+      - basic
 swagger: "2.0"

@@ -3,6 +3,7 @@ package v1
 
 import (
 	"toc-machine-trading/docs"
+	"toc-machine-trading/internal/usecase"
 
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -15,9 +16,9 @@ import (
 // @title       TOC MACHINE TRADING API
 // @description Auto Trade on sinopac
 // @version     1.0.0
-func NewRouter(handler *gin.Engine) {
+func NewRouter(handler *gin.Engine, t usecase.Stock) {
 	docs.SwaggerInfo.BasePath = "/v1"
-	docs.SwaggerInfo.Host = "127.0.0.1"
+	docs.SwaggerInfo.Host = "127.0.0.1:8080"
 
 	// Options
 	handler.Use(gin.Logger())
@@ -31,8 +32,8 @@ func NewRouter(handler *gin.Engine) {
 	handler.GET("/metrics", gin.WrapH(promhttp.Handler()))
 
 	// Routers
-	// h := handler.Group("/v1")
-	// {
-	// 	newTranslationRoutes(h, t, l)
-	// }
+	h := handler.Group("/v1")
+	{
+		newStockRoutes(h, t)
+	}
 }

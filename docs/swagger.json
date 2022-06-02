@@ -6,5 +6,84 @@
         "contact": {},
         "version": "1.0.0"
     },
-    "paths": {}
+    "paths": {
+        "/basic/stock": {
+            "get": {
+                "description": "getAllStockDetail",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "basic"
+                ],
+                "summary": "getAllStockDetail",
+                "operationId": "stock_detail",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v1.stockDetailResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/v1.response"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "entity.Stock": {
+            "type": "object",
+            "properties": {
+                "category": {
+                    "type": "string"
+                },
+                "day_trade": {
+                    "type": "boolean"
+                },
+                "exchange": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "last_close": {
+                    "type": "number"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "number": {
+                    "type": "string"
+                }
+            }
+        },
+        "v1.response": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "example": "message"
+                }
+            }
+        },
+        "v1.stockDetailResponse": {
+            "type": "object",
+            "properties": {
+                "stock_detail": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entity.Stock"
+                    }
+                }
+            }
+        }
+    }
 }

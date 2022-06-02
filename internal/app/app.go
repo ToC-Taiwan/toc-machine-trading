@@ -8,6 +8,9 @@ import (
 	"syscall"
 
 	v1 "toc-machine-trading/internal/controller/http/v1"
+	"toc-machine-trading/internal/usecase"
+	"toc-machine-trading/internal/usecase/grpcapi"
+	"toc-machine-trading/internal/usecase/repo"
 	"toc-machine-trading/pkg/config"
 	"toc-machine-trading/pkg/httpserver"
 	"toc-machine-trading/pkg/logger"
@@ -26,9 +29,14 @@ func Run(cfg *config.Config) {
 	}
 	defer pg.Close()
 
+	stockUsecase := usecase.New(
+		repo.New(pg),
+		grpcapi.New(cfg.Sinopac.URL, cfg.Sinopac.PoolMax),
+	)
+
 	// HTTP Server
 	handler := gin.New()
-	v1.NewRouter(handler)
+	v1.NewRouter(handler, stockUsecase)
 	httpServer := httpserver.New(handler, httpserver.Port(cfg.HTTP.Port))
 
 	// Waiting signal
@@ -46,27 +54,4 @@ func Run(cfg *config.Config) {
 	if err != nil {
 		logger.Get().Error(err)
 	}
-
-	// stuck := make(chan struct{})
-	// sinopac.HealthCheck()
-	// logger.New("INOF").Warn("message string")
-	// go sinopac.EventChannel()
-	// go sinopac.TickChannel()
-	// go sinopac.BidAskChannel()
-	// // time.Sleep(time.Second * 3)
-	// sinopac.SubscribeStockTick()
-	// sinopac.UnSubscribeStockTick()
-	// sinopac.SubscribeStockBidAsk()
-	// sinopac.UnSubscribeStockBidAsk()
-	// sinopac.GetAllStockDetail()
-	// sinopac.GetAllSnapshot()
-	// sinopac.GetStockSnapshotByStockNumArr()
-	// sinopac.GetAllSnapshotTSE()
-	// sinopac.GetStockHistoryTick()
-	// sinopac.GetStockHistoryKbar()
-	// sinopac.GetStockHistoryClose()
-	// sinopac.GetStockVolumeRank()
-	// sinopac.GetStockTSEHistoryTick()
-	// sinopac.GetStockTSEHistoryClose()
-	// <-stuck
 }
