@@ -35,12 +35,12 @@ info:
   title: TOC MACHINE TRADING API
   version: 1.0.0
 paths:
-  /basic/stock:
+  /basic/stock/repo:
     get:
       consumes:
       - application/json
-      description: getAllStockDetail
-      operationId: stock_detail
+      description: getAllRepoStock
+      operationId: getAllRepoStock
       produces:
       - application/json
       responses:
@@ -52,7 +52,27 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/v1.response'
-      summary: getAllStockDetail
+      summary: getAllRepoStock
+      tags:
+      - basic
+  /basic/stock/sinopac-to-repo:
+    get:
+      consumes:
+      - application/json
+      description: getAllSinopacStockAndUpdateRepo
+      operationId: getAllSinopacStockAndUpdateRepo
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.stockDetailResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+      summary: getAllSinopacStockAndUpdateRepo
       tags:
       - basic
 swagger: "2.0"

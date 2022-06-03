@@ -12,6 +12,7 @@ import (
 	"toc-machine-trading/internal/usecase/grpcapi"
 	"toc-machine-trading/internal/usecase/repo"
 	"toc-machine-trading/pkg/config"
+	"toc-machine-trading/pkg/eventbus"
 	"toc-machine-trading/pkg/httpserver"
 	"toc-machine-trading/pkg/logger"
 	"toc-machine-trading/pkg/postgres"
@@ -35,7 +36,8 @@ func Run(cfg *config.Config) {
 		logger.Get().Panic(err)
 	}
 
-	basicUseCase := usecase.NewBasic(repo.New(pg), grpcapi.New(sc))
+	bus := eventbus.New()
+	basicUseCase := usecase.NewBasic(repo.New(pg), grpcapi.New(sc), bus)
 
 	// HTTP Server
 	handler := gin.New()

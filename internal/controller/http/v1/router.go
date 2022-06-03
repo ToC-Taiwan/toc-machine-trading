@@ -34,6 +34,6 @@ func NewRouter(handler *gin.Engine, t usecase.Basic) {
 	// Routers
 	h := handler.Group("/v1")
 	{
-		newStockRoutes(h, t)
+		newBasicRoutes(h, t)
 	}
 }

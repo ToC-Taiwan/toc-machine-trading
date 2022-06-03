@@ -10,16 +10,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type stockRoutes struct {
+type basicRoutes struct {
 	t usecase.Basic
 }
 
-func newStockRoutes(handler *gin.RouterGroup, t usecase.Basic) {
-	r := &stockRoutes{t}
+func newBasicRoutes(handler *gin.RouterGroup, t usecase.Basic) {
+	r := &basicRoutes{t}
 
 	h := handler.Group("/basic")
 	{
-		h.GET("/stock", r.getAllStockDetail)
+		h.GET("/stock/sinopac-to-repo", r.getAllSinopacStockAndUpdateRepo)
+		h.GET("/stock/repo", r.getAllRepoStock)
 	}
 }
 
@@ -27,20 +28,42 @@ type stockDetailResponse struct {
 	StockDetail []*entity.Stock `json:"stock_detail"`
 }
 
-// @Summary     getAllStockDetail
-// @Description getAllStockDetail
-// @ID          stock_detail
+// @Summary     getAllSinopacStockAndUpdateRepo
+// @Description getAllSinopacStockAndUpdateRepo
+// @ID          getAllSinopacStockAndUpdateRepo
 // @Tags  	    basic
 // @Accept      json
 // @Produce     json
 // @Success     200 {object} stockDetailResponse
 // @Failure     500 {object} response
-// @Router      /basic/stock [get]
-func (r *stockRoutes) getAllStockDetail(c *gin.Context) {
-	stockDetail, err := r.t.GetAllStockDetail(c.Request.Context())
+// @Router      /basic/stock/sinopac-to-repo [get]
+func (r *basicRoutes) getAllSinopacStockAndUpdateRepo(c *gin.Context) {
+	stockDetail, err := r.t.GetAllSinopacStockAndUpdateRepo(c.Request.Context())
 	if err != nil {
 		logger.Get().Error(err)
-		errorResponse(c, http.StatusInternalServerError, "grpc sinopac problems")
+		errorResponse(c, http.StatusInternalServerError, "sinopac problems")
+		return
+	}
+
+	c.JSON(http.StatusOK, stockDetailResponse{
+		StockDetail: stockDetail,
+	})
+}
+
+// @Summary     getAllRepoStock
+// @Description getAllRepoStock
+// @ID          getAllRepoStock
+// @Tags  	    basic
+// @Accept      json
+// @Produce     json
+// @Success     200 {object} stockDetailResponse
+// @Failure     500 {object} response
+// @Router      /basic/stock/repo [get]
+func (r *basicRoutes) getAllRepoStock(c *gin.Context) {
+	stockDetail, err := r.t.GetAllRepoStock(c.Request.Context())
+	if err != nil {
+		logger.Get().Error(err)
+		errorResponse(c, http.StatusInternalServerError, "repo problems")
 		return
 	}
 

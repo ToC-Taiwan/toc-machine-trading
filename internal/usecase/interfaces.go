@@ -11,13 +11,14 @@ import (
 type (
 	// Basic -.
 	Basic interface {
-		GetAllStockDetail(ctx context.Context) ([]*entity.Stock, error)
+		GetAllSinopacStockAndUpdateRepo(ctx context.Context) ([]*entity.Stock, error)
+		GetAllRepoStock(ctx context.Context) ([]*entity.Stock, error)
 	}
 
 	// BasicRepo -.
 	BasicRepo interface {
-		GetAllStockDetail(ctx context.Context) ([]*entity.Stock, error)
-		StoreStockDetail(ctx context.Context, t []*entity.Stock) error
+		QueryAllStock(ctx context.Context) ([]*entity.Stock, error)
+		InsertStock(ctx context.Context, t []*entity.Stock) error
 	}
 
 	// BasicgRPCAPI -.
@@ -26,13 +27,13 @@ type (
 	}
 )
 
-type (
-	// Stream -.
-	Stream interface{}
+// type (
+// 	// Stream -.
+// 	Stream interface{}
 
-	// StreamRepo -.
-	StreamRepo interface{}
+// 	// StreamRepo -.
+// 	StreamRepo interface{}
 
-	// StreamgRPCAPI -.
-	StreamgRPCAPI interface{}
-)
+// 	// StreamgRPCAPI -.
+// 	StreamgRPCAPI interface{}
+// )

@@ -48,16 +48,3 @@ func GetIsDevelopment() bool {
 	globalSetting.lock.RLock()
 	return globalSetting.isDevelopment
 }
-
-// GetRuntimePath GetRuntimePath
-// func GetRuntimePath() string {
-// 	// get runtime path
-// 	_, file, _, ok := runtime.Caller(0)
-// 	if !ok {
-// 		panic("Get runtime path fail")
-// 	}
-
-// 	// set base path to runtime path's parent path
-// 	runtimePath := filepath.Dir(file)
-// 	return filepath.Join(runtimePath, "..")
-// }

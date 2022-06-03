@@ -2,8 +2,6 @@
 package eventbus
 
 import (
-	"sync"
-
 	"github.com/asaskevich/EventBus"
 )
 
@@ -12,26 +10,9 @@ type Bus struct {
 	bus EventBus.Bus
 }
 
-var (
-	globalBus *Bus
-	once      sync.Once
-)
-
-func initBus() {
-	if globalBus != nil {
-		return
-	}
-	newAgent := &Bus{
+// New New
+func New() *Bus {
+	return &Bus{
 		bus: EventBus.New(),
 	}
-	globalBus = newAgent
-}
-
-// Get Get
-func Get() *Bus {
-	if globalBus != nil {
-		return globalBus
-	}
-	once.Do(initBus)
-	return globalBus
 }

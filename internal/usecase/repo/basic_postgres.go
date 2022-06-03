@@ -8,7 +8,7 @@ import (
 	"toc-machine-trading/pkg/postgres"
 )
 
-// const _defaultEntityCap = 64
+const _defaultEntityCap = 1800
 
 // BasicRepo -.
 type BasicRepo struct {
@@ -20,8 +20,8 @@ func New(pg *postgres.Postgres) *BasicRepo {
 	return &BasicRepo{pg}
 }
 
-// StoreStockDetail -.
-func (r *BasicRepo) StoreStockDetail(ctx context.Context, t []*entity.Stock) error {
+// InsertStock -.
+func (r *BasicRepo) InsertStock(ctx context.Context, t []*entity.Stock) error {
 	builder := r.Builder.Insert("basic_stock").Columns("number, name, exchange, category, day_trade, last_close")
 	for _, v := range t {
 		builder = builder.Values(v.Number, v.Name, v.Exchange, v.Category, v.DayTrade, v.LastClose)
@@ -39,21 +39,38 @@ func (r *BasicRepo) StoreStockDetail(ctx context.Context, t []*entity.Stock) err
 	return nil
 }
 
-// GetAllStockDetail -.
-func (r *BasicRepo) GetAllStockDetail(ctx context.Context) ([]*entity.Stock, error) {
-	// builder := r.Builder.Insert("basic_stock").Columns("number, name, exchange, category, day_trade, last_close")
-	// for _, v := range t {
-	// 	builder = builder.Values(v.Number, v.Name, v.Exchange, v.Category, v.DayTrade, v.LastClose)
-	// }
+// QueryAllStock -.
+func (r *BasicRepo) QueryAllStock(ctx context.Context) ([]*entity.Stock, error) {
+	sql, _, err := r.Builder.
+		Select("*").
+		From("basic_stock").
+		ToSql()
+	if err != nil {
+		return nil, err
+	}
 
-	// sql, args, err := builder.ToSql()
-	// if err != nil {
-	// 	return err
-	// }
+	rows, err := r.Pool.Query(ctx, sql)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
 
-	// _, err = r.Pool.Exec(ctx, sql, args...)
-	// if err != nil {
-	// 	return err
-	// }
-	return nil, nil
+	entities := make([]*entity.Stock, 0, _defaultEntityCap)
+	for rows.Next() {
+		e := &entity.Stock{}
+		err = rows.Scan(
+			&e.ID,
+			&e.Number,
+			&e.Name,
+			&e.Exchange,
+			&e.Category,
+			&e.DayTrade,
+			&e.LastClose,
+		)
+		if err != nil {
+			return nil, err
+		}
+		entities = append(entities, e)
+	}
+	return entities, nil
 }

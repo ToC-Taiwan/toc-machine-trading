@@ -16,9 +16,9 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/basic/stock": {
+        "/basic/stock/repo": {
             "get": {
-                "description": "getAllStockDetail",
+                "description": "getAllRepoStock",
                 "consumes": [
                     "application/json"
                 ],
@@ -28,8 +28,38 @@ const docTemplate = `{
                 "tags": [
                     "basic"
                 ],
-                "summary": "getAllStockDetail",
-                "operationId": "stock_detail",
+                "summary": "getAllRepoStock",
+                "operationId": "getAllRepoStock",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v1.stockDetailResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/v1.response"
+                        }
+                    }
+                }
+            }
+        },
+        "/basic/stock/sinopac-to-repo": {
+            "get": {
+                "description": "getAllSinopacStockAndUpdateRepo",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "basic"
+                ],
+                "summary": "getAllSinopacStockAndUpdateRepo",
+                "operationId": "getAllSinopacStockAndUpdateRepo",
                 "responses": {
                     "200": {
                         "description": "OK",
