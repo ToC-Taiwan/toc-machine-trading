@@ -2,11 +2,15 @@ package usecase
 
 import (
 	"context"
+	"encoding/json"
+	"io/ioutil"
+	"time"
 
 	"toc-machine-trading/internal/entity"
 	"toc-machine-trading/internal/usecase/grpcapi"
 	"toc-machine-trading/internal/usecase/repo"
 	"toc-machine-trading/pkg/eventbus"
+	"toc-machine-trading/pkg/global"
 	"toc-machine-trading/pkg/logger"
 )
 
@@ -25,6 +29,10 @@ func NewBasic(r *repo.BasicRepo, t *grpcapi.BasicgRPCAPI, bus *eventbus.Bus) *Ba
 		bus:     bus,
 	}
 
+	if err := uc.importCalendarDate(context.Background()); err != nil {
+		logger.Get().Panic(err)
+	}
+
 	if _, err := uc.GetAllSinopacStockAndUpdateRepo(context.Background()); err != nil {
 		logger.Get().Panic(err)
 	}
@@ -41,6 +49,9 @@ func (uc *BasicUseCase) GetAllSinopacStockAndUpdateRepo(ctx context.Context) ([]
 
 	var stockDetail []*entity.Stock
 	for _, v := range stockArr {
+		if v.GetReference() == 0 {
+			continue
+		}
 		stock := new(entity.Stock).FromProto(v)
 		stockDetail = append(stockDetail, stock)
 
@@ -69,4 +80,56 @@ func (uc *BasicUseCase) GetAllRepoStock(ctx context.Context) ([]*entity.Stock, e
 	}
 
 	return data, nil
+}
+
+func parseHolidayFile() ([]string, error) {
+	var holidayArr struct {
+		DateArr []string `json:"date_arr"`
+	}
+
+	holidayFile, err := ioutil.ReadFile("./data/holidays.json")
+	if err != nil {
+		return []string{}, err
+	}
+
+	if err := json.Unmarshal(holidayFile, &holidayArr); err != nil {
+		return []string{}, err
+	}
+
+	return holidayArr.DateArr, nil
+}
+
+func (uc *BasicUseCase) importCalendarDate(ctx context.Context) (err error) {
+	holidayArr, err := parseHolidayFile()
+	if err != nil {
+		return err
+	}
+
+	holidayTimeMap := make(map[string]bool)
+	for _, v := range holidayArr {
+		holidayTimeMap[v] = true
+	}
+
+	firstDay := time.Date(global.StartTradeYear, 1, 1, 0, 0, 0, 0, time.Local)
+	var tmp []*entity.CalendarDate
+	for {
+		var isTradeDay bool
+		if firstDay.Year() > global.EndTradeYear {
+			break
+		}
+		if firstDay.Weekday() != time.Saturday && firstDay.Weekday() != time.Sunday && !holidayTimeMap[firstDay.Format(global.ShortTimeLayout)] {
+			isTradeDay = true
+		}
+		tmp = append(tmp, &entity.CalendarDate{
+			Date:       firstDay,
+			IsTradeDay: isTradeDay,
+		})
+		firstDay = firstDay.AddDate(0, 0, 1)
+	}
+
+	if err := uc.repo.InserOrUpdatetCalendarDateArr(ctx, tmp); err != nil {
+		return err
+	}
+
+	return nil
 }

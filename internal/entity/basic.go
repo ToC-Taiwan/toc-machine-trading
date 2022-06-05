@@ -1,7 +1,11 @@
 // Package entity package entity
 package entity
 
-import "toc-machine-trading/pkg/pb"
+import (
+	"time"
+
+	"toc-machine-trading/pkg/pb"
+)
 
 // Stock -.
 type Stock struct {
@@ -11,6 +15,12 @@ type Stock struct {
 	Category  string  `json:"category"`
 	DayTrade  bool    `json:"day_trade"`
 	LastClose float64 `json:"last_close"`
+}
+
+// CalendarDate CalendarDate
+type CalendarDate struct {
+	Date       time.Time `json:"date"`
+	IsTradeDay bool      `json:"is_trade_day"`
 }
 
 // FromProto -.

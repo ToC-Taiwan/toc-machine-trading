@@ -18,7 +18,9 @@ type (
 	// BasicRepo -.
 	BasicRepo interface {
 		QueryAllStock(ctx context.Context) ([]*entity.Stock, error)
+
 		InserOrUpdatetStockArr(ctx context.Context, t []*entity.Stock) error
+		InserOrUpdatetCalendarDateArr(ctx context.Context, t []*entity.CalendarDate) error
 	}
 
 	// BasicgRPCAPI -.

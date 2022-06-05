@@ -12,6 +12,13 @@ const (
 	ShortTimeLayout string = "2006-01-02"
 )
 
+const (
+	// StartTradeYear -.
+	StartTradeYear int = 2021
+	// EndTradeYear -.
+	EndTradeYear int = 2022
+)
+
 // Setting Setting
 type Setting struct {
 	lock          sync.RWMutex
