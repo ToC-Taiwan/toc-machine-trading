@@ -5,7 +5,6 @@ import "toc-machine-trading/pkg/pb"
 
 // Stock -.
 type Stock struct {
-	ID        int64   `json:"id"`
 	Number    string  `json:"number"`
 	Name      string  `json:"name"`
 	Exchange  string  `json:"exchange"`

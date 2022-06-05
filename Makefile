@@ -14,7 +14,7 @@ swag-v1: ### swag init
 
 run: swag-v1 ### swag run
 	@go mod tidy && go mod download && \
-	DISABLE_SWAGGER_HTTP_HANDLER='' GIN_MODE=debug CGO_ENABLED=0 go build -o toc-machine-trading ./cmd/app && ./toc-machine-trading
+	CGO_ENABLED=0 go build -o toc-machine-trading ./cmd/app && ./toc-machine-trading
 .PHONY: run
 
 lint: ### check by golangci linter

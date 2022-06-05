@@ -21,7 +21,7 @@ func NewRouter(handler *gin.Engine, t usecase.Basic) {
 	docs.SwaggerInfo.Host = "127.0.0.1:8080"
 
 	// Options
-	handler.Use(gin.Logger())
+	// handler.Use(gin.Logger())
 	handler.Use(gin.Recovery())
 
 	// Swagger

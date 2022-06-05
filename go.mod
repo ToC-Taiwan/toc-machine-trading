@@ -7,6 +7,7 @@ require (
 	github.com/asaskevich/EventBus v0.0.0-20200907212545-49d423059eef
 	github.com/gin-gonic/gin v1.8.0
 	github.com/golang-migrate/migrate/v4 v4.15.2
+	github.com/google/go-cmp v0.5.8
 	github.com/ilyakaznacheev/cleanenv v1.2.6
 	github.com/jackc/pgx/v4 v4.16.1
 	github.com/markcheno/go-talib v0.0.0-20190307022042-cd53a9264d70

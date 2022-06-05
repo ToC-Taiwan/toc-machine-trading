@@ -90,9 +90,6 @@ const docTemplate = `{
                 "exchange": {
                     "type": "string"
                 },
-                "id": {
-                    "type": "integer"
-                },
                 "last_close": {
                     "type": "number"
                 },

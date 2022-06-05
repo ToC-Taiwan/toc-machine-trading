@@ -1,8 +1,7 @@
 BEGIN;
 
 CREATE TABLE basic_stock (
-    "id" SERIAL PRIMARY KEY,
-    "number" VARCHAR NOT NULL,
+    "number" VARCHAR PRIMARY KEY,
     "name" VARCHAR NOT NULL,
     "exchange" VARCHAR NOT NULL,
     "category" VARCHAR NOT NULL,
