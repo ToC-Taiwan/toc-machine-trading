@@ -3,16 +3,15 @@ package cache
 
 import (
 	"sync"
+	"time"
 
 	"github.com/patrickmn/go-cache"
 )
 
-type cacheType string
-
-// const (
-// 	noExpired time.Duration = 0
-// 	noCleanUp time.Duration = 0
-// )
+const (
+	noExpired time.Duration = 0
+	noCleanUp time.Duration = 0
+)
 
 // Cache Cache
 type Cache struct {
@@ -22,23 +21,14 @@ type Cache struct {
 
 // Key Key
 type Key struct {
+	Type string
 	Name string
-	Type cacheType
 }
 
 var (
 	globalCache *Cache
 	once        sync.Once
 )
-
-// GetCache GetCache
-func GetCache() *Cache {
-	if globalCache != nil {
-		return globalCache
-	}
-	once.Do(initGlobalCache)
-	return globalCache
-}
 
 func initGlobalCache() {
 	if globalCache != nil {
@@ -49,34 +39,30 @@ func initGlobalCache() {
 	globalCache = &newCache
 }
 
-// getCacheByType getCacheByType
-// func (c *Cache) getCacheByType(cacheType cacheType) *cache.Cache {
-// 	c.lock.RLock()
-// 	tmp := c.CacheMap[string(cacheType)]
-// 	c.lock.RUnlock()
-// 	if tmp == nil {
-// 		tmp = cache.New(noExpired, noCleanUp)
-// 		c.lock.Lock()
-// 		c.CacheMap[string(cacheType)] = tmp
-// 		c.lock.Unlock()
-// 	}
-// 	return tmp
-// }
-
-// GetAllCacheType GetAllCacheType
-func (c *Cache) GetAllCacheType() []string {
-	c.lock.RLock()
-	var typeArr []string
-	for k := range c.CacheMap {
-		typeArr = append(typeArr, k)
+func getCacheByType(keyType string) *cache.Cache {
+	if globalCache == nil {
+		once.Do(initGlobalCache)
 	}
-	c.lock.RUnlock()
-	return typeArr
+
+	globalCache.lock.RLock()
+	tmp := globalCache.CacheMap[keyType]
+	globalCache.lock.RUnlock()
+
+	if tmp == nil {
+		tmp = cache.New(noExpired, noCleanUp)
+		globalCache.lock.Lock()
+		globalCache.CacheMap[keyType] = tmp
+		globalCache.lock.Unlock()
+	}
+	return tmp
 }
 
-// GetAllCacheByType GetAllCacheByType
-func (c *Cache) GetAllCacheByType(cacheType string) interface{} {
-	defer c.lock.RUnlock()
-	c.lock.RLock()
-	return c.CacheMap[cacheType].Items()
+// Set -.
+func Set(k Key, x interface{}) {
+	getCacheByType(k.Type).Set(k.Name, x, noExpired)
+}
+
+// Get -.
+func Get(k Key) (interface{}, bool) {
+	return getCacheByType(k.Type).Get(k.Name)
 }

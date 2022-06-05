@@ -7,6 +7,7 @@ import (
 	"toc-machine-trading/internal/usecase/grpcapi"
 	"toc-machine-trading/internal/usecase/repo"
 	"toc-machine-trading/pkg/eventbus"
+	"toc-machine-trading/pkg/logger"
 )
 
 // BasicUseCase -.
@@ -18,11 +19,17 @@ type BasicUseCase struct {
 
 // NewBasic -.
 func NewBasic(r *repo.BasicRepo, t *grpcapi.BasicgRPCAPI, bus *eventbus.Bus) *BasicUseCase {
-	return &BasicUseCase{
+	uc := &BasicUseCase{
 		repo:    r,
 		gRPCAPI: t,
 		bus:     bus,
 	}
+
+	if _, err := uc.GetAllSinopacStockAndUpdateRepo(context.Background()); err != nil {
+		logger.Get().Panic(err)
+	}
+
+	return uc
 }
 
 // GetAllSinopacStockAndUpdateRepo -.
@@ -34,8 +41,11 @@ func (uc *BasicUseCase) GetAllSinopacStockAndUpdateRepo(ctx context.Context) ([]
 
 	var stockDetail []*entity.Stock
 	for _, v := range stockArr {
-		new := entity.Stock{}
-		stockDetail = append(stockDetail, new.FromProto(v))
+		stock := new(entity.Stock).FromProto(v)
+		stockDetail = append(stockDetail, stock)
+
+		// save to cache
+		SetStockDetail(stock)
 	}
 
 	err = uc.repo.InserOrUpdatetStockArr(context.Background(), stockDetail)
@@ -52,5 +62,11 @@ func (uc *BasicUseCase) GetAllRepoStock(ctx context.Context) ([]*entity.Stock, e
 	if err != nil {
 		return []*entity.Stock{}, err
 	}
+
+	for _, s := range data {
+		// save to cache
+		SetStockDetail(s)
+	}
+
 	return data, nil
 }
