@@ -3,8 +3,6 @@ package entity
 
 import (
 	"time"
-
-	"toc-machine-trading/pkg/pb"
 )
 
 // Stock -.
@@ -21,15 +19,4 @@ type Stock struct {
 type CalendarDate struct {
 	Date       time.Time `json:"date"`
 	IsTradeDay bool      `json:"is_trade_day"`
-}
-
-// FromProto -.
-func (c *Stock) FromProto(data *pb.StockDetailMessage) *Stock {
-	c.Number = data.GetCode()
-	c.Name = data.GetName()
-	c.Exchange = data.GetExchange()
-	c.Category = data.GetCategory()
-	c.DayTrade = data.GetDayTrade() == "Yes"
-	c.LastClose = data.GetReference()
-	return c
 }

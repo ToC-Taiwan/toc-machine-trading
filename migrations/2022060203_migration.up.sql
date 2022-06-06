@@ -9,4 +9,17 @@ CREATE TABLE basic_stock (
     "last_close" DECIMAL NOT NULL
 );
 
+CREATE TABLE basic_calendar (
+    "date" TIMESTAMP WITH Time Zone PRIMARY KEY,
+    "is_trade_day" BOOLEAN NOT NULL
+);
+
+CREATE TABLE sinopac_event (
+    "id" SERIAL PRIMARY KEY,
+    "event_code" INT NOT NULL,
+    "response" INT NOT NULL,
+    "event" VARCHAR NOT NULL,
+    "info" VARCHAR NOT NULL
+);
+
 COMMIT;

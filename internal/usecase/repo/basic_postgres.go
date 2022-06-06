@@ -16,8 +16,8 @@ type BasicRepo struct {
 	*postgres.Postgres
 }
 
-// New -.
-func New(pg *postgres.Postgres) *BasicRepo {
+// NewBasic -.
+func NewBasic(pg *postgres.Postgres) *BasicRepo {
 	return &BasicRepo{pg}
 }
 

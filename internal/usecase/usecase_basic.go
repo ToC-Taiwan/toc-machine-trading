@@ -9,7 +9,6 @@ import (
 	"toc-machine-trading/internal/entity"
 	"toc-machine-trading/internal/usecase/grpcapi"
 	"toc-machine-trading/internal/usecase/repo"
-	"toc-machine-trading/pkg/eventbus"
 	"toc-machine-trading/pkg/global"
 	"toc-machine-trading/pkg/logger"
 )
@@ -18,15 +17,13 @@ import (
 type BasicUseCase struct {
 	repo    BasicRepo
 	gRPCAPI BasicgRPCAPI
-	bus     *eventbus.Bus
 }
 
 // NewBasic -.
-func NewBasic(r *repo.BasicRepo, t *grpcapi.BasicgRPCAPI, bus *eventbus.Bus) *BasicUseCase {
+func NewBasic(r *repo.BasicRepo, t *grpcapi.BasicgRPCAPI) *BasicUseCase {
 	uc := &BasicUseCase{
 		repo:    r,
 		gRPCAPI: t,
-		bus:     bus,
 	}
 
 	if err := uc.importCalendarDate(context.Background()); err != nil {
@@ -52,7 +49,14 @@ func (uc *BasicUseCase) GetAllSinopacStockAndUpdateRepo(ctx context.Context) ([]
 		if v.GetReference() == 0 {
 			continue
 		}
-		stock := new(entity.Stock).FromProto(v)
+		stock := &entity.Stock{
+			Number:    v.GetCode(),
+			Name:      v.GetName(),
+			Exchange:  v.GetExchange(),
+			Category:  v.GetCategory(),
+			DayTrade:  v.GetDayTrade() == "Yes",
+			LastClose: v.GetReference(),
+		}
 		stockDetail = append(stockDetail, stock)
 
 		// save to cache

@@ -4,7 +4,7 @@ package grpcapi
 import (
 	"context"
 
-	"toc-machine-trading/pkg/pb"
+	"toc-machine-trading/pb"
 	"toc-machine-trading/pkg/sinopac"
 
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -15,8 +15,8 @@ type BasicgRPCAPI struct {
 	conn *sinopac.Connection
 }
 
-// New -.
-func New(client *sinopac.Connection) *BasicgRPCAPI {
+// NewBasic -.
+func NewBasic(client *sinopac.Connection) *BasicgRPCAPI {
 	return &BasicgRPCAPI{client}
 }
 
@@ -32,17 +32,6 @@ func (t *BasicgRPCAPI) GetAllStockDetail() ([]*pb.StockDetailMessage, error) {
 	return r.GetStock(), nil
 }
 
-// func connectSinopac() {
-// 	// gRPC
-// 	client, err := sinopac.New("127.0.0.1:56666")
-// 	if err != nil {
-// 		logger.Get().Panic(err)
-// 	}
-// 	// go client.EventChannel()
-// 	// logger.Get().Warn(client.HealthCheck())
-// 	// client.GetAllStockDetail()
-// }
-
 // // HealthCheck HealthCheck
 // func (s *Connection) HealthCheck() (string, error) {
 // 	conn := s.getReadyConn()
@@ -53,112 +42,6 @@ func (t *BasicgRPCAPI) GetAllStockDetail() ([]*pb.StockDetailMessage, error) {
 // 		return "", err
 // 	}
 // 	return r.GetToken(), nil
-// }
-
-// // EventChannel EventChannel
-// func (s *Connection) EventChannel() {
-// 	conn := s.getReadyConn()
-// 	defer s.putReadyConn(conn)
-// 	c := pb.NewLongConeectionServiceClient(conn)
-// 	var stream pb.LongConeectionService_EventChannelClient
-// 	var err error
-// 	var wg sync.WaitGroup
-// 	wg.Add(1)
-// 	go func() {
-// 		defer wg.Done()
-// 		for {
-// 			if stream == nil {
-// 				if stream, err = c.EventChannel(context.Background(), &emptypb.Empty{}); err != nil {
-// 					logger.Get().Error(err)
-// 					time.Sleep(time.Second * 5)
-// 					continue
-// 				}
-// 			} else {
-// 				break
-// 			}
-// 		}
-// 	}()
-// 	wg.Wait()
-// 	for {
-// 		response, err := stream.Recv()
-// 		if err != nil {
-// 			if !errors.Is(io.EOF, err) {
-// 				panic(err)
-// 			}
-// 			continue
-// 		}
-// 		logger.Get().Infof("%d %d %s %s\n", response.GetRespCode(), response.GetEventCode(), response.GetInfo(), response.GetEvent())
-// 	}
-// }
-
-// var wg sync.WaitGroup
-
-// // BidAskChannel BidAskChannel
-// func BidAskChannel() {
-// 	conn := newConnection()
-// 	defer func() {
-// 		_ = conn.Close()
-// 	}()
-// 	c := pb.NewLongConeectionServiceClient(conn)
-// 	var stream pb.LongConeectionService_BidAskChannelClient
-// 	ctx := context.Background()
-// 	var err error
-// 	for {
-// 		if stream == nil {
-// 			if stream, err = c.BidAskChannel(ctx, &emptypb.Empty{}); err != nil {
-// 				fmt.Println(err)
-// 				time.Sleep(time.Second * 5)
-// 				continue
-// 			}
-// 		} else {
-// 			break
-// 		}
-// 	}
-// 	wg.Done()
-// 	for {
-// 		response, err := stream.Recv()
-// 		if err != nil {
-// 			if !errors.Is(io.EOF, err) {
-// 				panic(err)
-// 			}
-// 			continue
-// 		}
-// 		fmt.Println(response)
-// 	}
-// }
-
-// // TickChannel TickChannel
-// func TickChannel() {
-// 	conn := newConnection()
-// 	defer func() {
-// 		_ = conn.Close()
-// 	}()
-// 	c := pb.NewLongConeectionServiceClient(conn)
-// 	var stream pb.LongConeectionService_TickChannelClient
-// 	ctx := context.Background()
-// 	var err error
-// 	for {
-// 		if stream == nil {
-// 			if stream, err = c.TickChannel(ctx, &emptypb.Empty{}); err != nil {
-// 				fmt.Println(err)
-// 				time.Sleep(time.Second * 5)
-// 				continue
-// 			}
-// 		} else {
-// 			break
-// 		}
-// 	}
-// 	wg.Done()
-// 	for {
-// 		response, err := stream.Recv()
-// 		if err != nil {
-// 			if !errors.Is(io.EOF, err) {
-// 				panic(err)
-// 			}
-// 			continue
-// 		}
-// 		fmt.Println(response)
-// 	}
 // }
 
 // // GetAllSnapshot GetAllSnapshot

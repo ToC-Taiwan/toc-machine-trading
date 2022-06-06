@@ -5,9 +5,10 @@ import (
 	"context"
 
 	"toc-machine-trading/internal/entity"
-	"toc-machine-trading/pkg/pb"
+	"toc-machine-trading/pb"
 )
 
+//go:generate mockgen -source=interfaces.go -destination=./mocks_test.go -package=usecase_test
 type (
 	// Basic -.
 	Basic interface {
@@ -18,8 +19,8 @@ type (
 	// BasicRepo -.
 	BasicRepo interface {
 		QueryAllStock(ctx context.Context) ([]*entity.Stock, error)
-
 		InserOrUpdatetStockArr(ctx context.Context, t []*entity.Stock) error
+		QueryAllTradeDay(ctx context.Context) ([]*entity.CalendarDate, error)
 		InserOrUpdatetCalendarDateArr(ctx context.Context, t []*entity.CalendarDate) error
 	}
 
@@ -29,13 +30,21 @@ type (
 	}
 )
 
-// type (
-// 	// Stream -.
-// 	Stream interface{}
+type (
+	// Stream -.
+	Stream interface {
+		ReceiveEvent(ctx context.Context)
+	}
 
-// 	// StreamRepo -.
-// 	StreamRepo interface{}
+	// StreamRepo -.
+	StreamRepo interface {
+		InsertEvent(ctx context.Context, t *entity.SinopacEvent) error
+	}
 
-// 	// StreamgRPCAPI -.
-// 	StreamgRPCAPI interface{}
-// )
+	// StreamgRPCAPI -.
+	StreamgRPCAPI interface {
+		EventChannel(eventChan chan *entity.SinopacEvent) error
+		BidAskChannel(bidAskChan chan *entity.RealTimeBidAsk) error
+		TickChannel(tickChan chan *entity.RealTimeTick) error
+	}
+)
