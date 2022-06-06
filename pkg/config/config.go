@@ -2,14 +2,49 @@
 package config
 
 import (
+	"sync"
+
+	"toc-machine-trading/pkg/logger"
+
 	"github.com/ilyakaznacheev/cleanenv"
 )
 
+var (
+	globalConfig *Config
+	once         sync.Once
+)
+
+// GetConfig -.
+func GetConfig() (*Config, error) {
+	if globalConfig != nil {
+		return globalConfig, nil
+	}
+
+	once.Do(parseConfigFile)
+	return globalConfig, nil
+}
+
+func parseConfigFile() {
+	newConfig := Config{}
+	err := cleanenv.ReadConfig("./configs/config.yml", &newConfig)
+	if err != nil {
+		logger.Get().Panic(err)
+	}
+
+	err = cleanenv.ReadEnv(&newConfig)
+	if err != nil {
+		logger.Get().Panic(err)
+	}
+
+	globalConfig = &newConfig
+}
+
 // Config -.
 type Config struct {
-	HTTP       `yaml:"http"`
-	PG         `yaml:"postgres"`
-	Sinopac    `yaml:"sinopac"`
+	HTTP     `env-required:"true" yaml:"http"`
+	Postgres `env-required:"true" yaml:"postgres"`
+	Sinopac  `env-required:"true" yaml:"sinopac"`
+
 	Deployment string `env-required:"true" env:"DEPLOYMENT"`
 }
 
@@ -18,32 +53,17 @@ type HTTP struct {
 	Port string `env-required:"true" yaml:"port" env:"HTTP_PORT"`
 }
 
-// PG -.
-type PG struct {
-	PoolMax int    `env-required:"true" yaml:"pool_max"`
-	URL     string `env-required:"true" env:"PG_URL"`
-	DBName  string `env-required:"true" env:"DB_NAME"`
+// Postgres -.
+type Postgres struct {
+	PoolMax int `env-required:"true" yaml:"pool_max"`
+
+	URL    string `env-required:"true" env:"PG_URL"`
+	DBName string `env-required:"true" env:"DB_NAME"`
 }
 
 // Sinopac -.
 type Sinopac struct {
-	PoolMax int    `env-required:"true" yaml:"pool_max"`
-	URL     string `env-required:"true" env:"SINOPAC_URL"`
-}
+	PoolMax int `env-required:"true" yaml:"pool_max"`
 
-// NewConfig returns app config.
-func NewConfig() (*Config, error) {
-	cfg := &Config{}
-
-	err := cleanenv.ReadConfig("./configs/config.yml", cfg)
-	if err != nil {
-		return nil, err
-	}
-
-	err = cleanenv.ReadEnv(cfg)
-	if err != nil {
-		return nil, err
-	}
-
-	return cfg, nil
+	URL string `env-required:"true" env:"SINOPAC_URL"`
 }

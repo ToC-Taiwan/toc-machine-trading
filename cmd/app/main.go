@@ -16,7 +16,7 @@ var (
 
 func init() {
 	// Configuration
-	cfg, err = config.NewConfig()
+	cfg, err = config.GetConfig()
 	if err != nil {
 		panic(err)
 	}

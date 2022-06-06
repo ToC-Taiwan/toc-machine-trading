@@ -23,9 +23,8 @@ import (
 
 // Run -.
 func Run(cfg *config.Config) {
-	dbPath := fmt.Sprintf("%s%s", cfg.PG.URL, cfg.PG.DBName)
-
-	pg, err := postgres.New(dbPath, postgres.MaxPoolSize(cfg.PG.PoolMax))
+	dbPath := fmt.Sprintf("%s%s", cfg.Postgres.URL, cfg.Postgres.DBName)
+	pg, err := postgres.New(dbPath, postgres.MaxPoolSize(cfg.Postgres.PoolMax))
 	if err != nil {
 		logger.Get().Panic(err)
 	}

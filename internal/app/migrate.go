@@ -25,7 +25,7 @@ const (
 
 // MigrateDB -.
 func MigrateDB(cfg *config.Config) {
-	createErr := tryCreateDB(cfg.PG.DBName)
+	createErr := tryCreateDB(cfg.Postgres.DBName)
 	if createErr != nil {
 		logger.Get().Panic(createErr)
 	}
@@ -36,7 +36,7 @@ func MigrateDB(cfg *config.Config) {
 		m        *migrate.Migrate
 	)
 
-	dbPath := fmt.Sprintf("%s%s%s", cfg.PG.URL, cfg.PG.DBName, "?sslmode=disable")
+	dbPath := fmt.Sprintf("%s%s%s", cfg.Postgres.URL, cfg.Postgres.DBName, "?sslmode=disable")
 	for attempts > 0 {
 		m, err = migrate.New("file://migrations", dbPath)
 		if err == nil {
@@ -71,12 +71,12 @@ func MigrateDB(cfg *config.Config) {
 }
 
 func tryCreateDB(dbName string) error {
-	cfg, err := config.NewConfig()
+	cfg, err := config.GetConfig()
 	if err != nil {
 		return err
 	}
 
-	pg, err := postgres.New(cfg.PG.URL, postgres.MaxPoolSize(cfg.PG.PoolMax))
+	pg, err := postgres.New(cfg.Postgres.URL, postgres.MaxPoolSize(cfg.Postgres.PoolMax))
 	if err != nil {
 		return err
 	}
