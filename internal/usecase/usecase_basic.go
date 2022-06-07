@@ -59,13 +59,13 @@ func NewBasic(r *repo.BasicRepo, t *grpcapi.BasicgRPCAPI) *BasicUseCase {
 			tmp[v.Date] = true
 		}
 	}
-	SetCalendar(tmp)
+	CacheSetCalendar(tmp)
 
 	tradeDay, err := tradeDay()
 	if err != nil {
 		logger.Get().Panic(err)
 	}
-	SetTradeDay(tradeDay)
+	CacheSetTradeDay(tradeDay)
 
 	return uc
 }
@@ -93,7 +93,7 @@ func (uc *BasicUseCase) GetAllSinopacStockAndUpdateRepo(ctx context.Context) ([]
 		stockDetail = append(stockDetail, stock)
 
 		// save to cache
-		SetStockDetail(stock)
+		CacheSetStockDetail(stock)
 	}
 
 	err = uc.repo.InserOrUpdatetStockArr(context.Background(), stockDetail)
@@ -113,7 +113,7 @@ func (uc *BasicUseCase) GetAllRepoStock(ctx context.Context) ([]*entity.Stock, e
 
 	for _, s := range data {
 		// save to cache
-		SetStockDetail(s)
+		CacheSetStockDetail(s)
 	}
 
 	return data, nil
@@ -187,7 +187,7 @@ func tradeDay() (tradeDay time.Time, err error) {
 
 func getNextTradeDayTime(nowTime time.Time) (tradeDay time.Time, err error) {
 	tmp := time.Date(nowTime.Year(), nowTime.Month(), nowTime.Day(), 0, 0, 0, 0, time.Local)
-	calendar := GetCalendar()
+	calendar := CacheGetCalendar()
 	if !calendar[tmp] {
 		nowTime = nowTime.AddDate(0, 0, 1)
 		return getNextTradeDayTime(nowTime)
@@ -197,7 +197,7 @@ func getNextTradeDayTime(nowTime time.Time) (tradeDay time.Time, err error) {
 
 // GetLastNTradeDayByDate -.
 func GetLastNTradeDayByDate(n int64, firstDay time.Time) []time.Time {
-	calendar := GetCalendar()
+	calendar := CacheGetCalendar()
 	var tmp []time.Time
 	for {
 		if calendar[firstDay.AddDate(0, 0, -1)] {

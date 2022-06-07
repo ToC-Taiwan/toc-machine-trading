@@ -28,13 +28,13 @@ func NewTarget(r *repo.TargetRepo, t *grpcapi.TargetgRPCAPI, bus *eventbus.Bus) 
 		bus:     bus,
 	}
 
-	targetArr, err := uc.repo.QueryTargetsByTradeDay(context.Background(), GetTradeDay())
+	targetArr, err := uc.repo.QueryTargetsByTradeDay(context.Background(), CacheGetTradeDay())
 	if err != nil {
 		logger.Get().Panic(err)
 	}
 
 	if len(targetArr) == 0 {
-		targetArr, err = uc.SearchTradeDayTargets(context.Background(), GetTradeDay())
+		targetArr, err = uc.SearchTradeDayTargets(context.Background(), CacheGetTradeDay())
 		if err != nil {
 			logger.Get().Panic(err)
 		}

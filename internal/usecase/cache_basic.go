@@ -15,8 +15,8 @@ const (
 	keyTypeTradeDay string = "trade_day"
 )
 
-// SetStockDetail SetStockDetail
-func SetStockDetail(stock *entity.Stock) {
+// CacheSetStockDetail CacheSetStockDetail
+func CacheSetStockDetail(stock *entity.Stock) {
 	key := cache.Key{
 		Type: keyTypeStockDetail,
 		Name: fmt.Sprintf("%s:%s", keyTypeStockDetail, stock.Number),
@@ -24,8 +24,8 @@ func SetStockDetail(stock *entity.Stock) {
 	cache.Set(key, stock)
 }
 
-// GetStockDetail GetStockDetail
-func GetStockDetail(stockNum string) *entity.Stock {
+// CacheGetStockDetail CacheGetStockDetail
+func CacheGetStockDetail(stockNum string) *entity.Stock {
 	key := cache.Key{
 		Type: keyTypeStockDetail,
 		Name: fmt.Sprintf("%s:%s", keyTypeStockDetail, stockNum),
@@ -36,8 +36,8 @@ func GetStockDetail(stockNum string) *entity.Stock {
 	return nil
 }
 
-// SetCalendar SetCalendar
-func SetCalendar(calendar map[time.Time]bool) {
+// CacheSetCalendar CacheSetCalendar
+func CacheSetCalendar(calendar map[time.Time]bool) {
 	key := cache.Key{
 		Type: keyTypeCalendar,
 		Name: keyTypeCalendar,
@@ -45,8 +45,8 @@ func SetCalendar(calendar map[time.Time]bool) {
 	cache.Set(key, calendar)
 }
 
-// GetCalendar GetCalendar
-func GetCalendar() map[time.Time]bool {
+// CacheGetCalendar CacheGetCalendar
+func CacheGetCalendar() map[time.Time]bool {
 	key := cache.Key{
 		Type: keyTypeCalendar,
 		Name: keyTypeCalendar,
@@ -57,8 +57,8 @@ func GetCalendar() map[time.Time]bool {
 	return nil
 }
 
-// SetTradeDay SetTradeDay
-func SetTradeDay(tradeDay time.Time) {
+// CacheSetTradeDay CacheSetTradeDay
+func CacheSetTradeDay(tradeDay time.Time) {
 	key := cache.Key{
 		Type: keyTypeTradeDay,
 		Name: keyTypeTradeDay,
@@ -66,8 +66,8 @@ func SetTradeDay(tradeDay time.Time) {
 	cache.Set(key, tradeDay)
 }
 
-// GetTradeDay GetTradeDay
-func GetTradeDay() time.Time {
+// CacheGetTradeDay CacheGetTradeDay
+func CacheGetTradeDay() time.Time {
 	key := cache.Key{
 		Type: keyTypeTradeDay,
 		Name: keyTypeTradeDay,
