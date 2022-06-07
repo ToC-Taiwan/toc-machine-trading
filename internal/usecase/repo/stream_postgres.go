@@ -7,10 +7,6 @@ import (
 	"toc-machine-trading/pkg/postgres"
 )
 
-const (
-	tableNameEvent string = "sinopac_event"
-)
-
 // StreamRepo -.
 type StreamRepo struct {
 	*postgres.Postgres
@@ -27,12 +23,9 @@ func (r *StreamRepo) InsertEvent(ctx context.Context, t *entity.SinopacEvent) er
 		Columns("event, event_code, info, response").
 		Values(t.Event, t.EventCode, t.Info, t.Response)
 
-	sql, args, err := builder.ToSql()
-	if err != nil {
+	if sql, args, err := builder.ToSql(); err != nil {
 		return err
-	}
-	_, err = r.Pool.Exec(ctx, sql, args...)
-	if err != nil {
+	} else if _, err := r.Pool.Exec(ctx, sql, args...); err != nil {
 		return err
 	}
 

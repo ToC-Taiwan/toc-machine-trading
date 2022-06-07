@@ -7,6 +7,7 @@ package usecase_test
 import (
 	context "context"
 	reflect "reflect"
+	time "time"
 	entity "toc-machine-trading/internal/entity"
 	pb "toc-machine-trading/pb"
 
@@ -305,6 +306,21 @@ func (mr *MockTargetRepoMockRecorder) InsertTargetArr(ctx, t interface{}) *gomoc
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertTargetArr", reflect.TypeOf((*MockTargetRepo)(nil).InsertTargetArr), ctx, t)
 }
 
+// QueryTargetsByTradeDay mocks base method.
+func (m *MockTargetRepo) QueryTargetsByTradeDay(ctx context.Context, tradeDay time.Time) ([]*entity.Target, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "QueryTargetsByTradeDay", ctx, tradeDay)
+	ret0, _ := ret[0].([]*entity.Target)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// QueryTargetsByTradeDay indicates an expected call of QueryTargetsByTradeDay.
+func (mr *MockTargetRepoMockRecorder) QueryTargetsByTradeDay(ctx, tradeDay interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryTargetsByTradeDay", reflect.TypeOf((*MockTargetRepo)(nil).QueryTargetsByTradeDay), ctx, tradeDay)
+}
+
 // MockTargetRPCAPI is a mock of TargetRPCAPI interface.
 type MockTargetRPCAPI struct {
 	ctrl     *gomock.Controller
@@ -600,16 +616,60 @@ func (m *MockStream) EXPECT() *MockStreamMockRecorder {
 	return m.recorder
 }
 
-// ReceiveEvent mocks base method.
-func (m *MockStream) ReceiveEvent(ctx context.Context) {
+// ReceiveBidAsk mocks base method.
+func (m *MockStream) ReceiveBidAsk(ctx context.Context) error {
 	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "ReceiveEvent", ctx)
+	ret := m.ctrl.Call(m, "ReceiveBidAsk", ctx)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// ReceiveBidAsk indicates an expected call of ReceiveBidAsk.
+func (mr *MockStreamMockRecorder) ReceiveBidAsk(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReceiveBidAsk", reflect.TypeOf((*MockStream)(nil).ReceiveBidAsk), ctx)
+}
+
+// ReceiveEvent mocks base method.
+func (m *MockStream) ReceiveEvent(ctx context.Context) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ReceiveEvent", ctx)
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
 // ReceiveEvent indicates an expected call of ReceiveEvent.
 func (mr *MockStreamMockRecorder) ReceiveEvent(ctx interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReceiveEvent", reflect.TypeOf((*MockStream)(nil).ReceiveEvent), ctx)
+}
+
+// ReceiveOrderStatus mocks base method.
+func (m *MockStream) ReceiveOrderStatus(ctx context.Context) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ReceiveOrderStatus", ctx)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// ReceiveOrderStatus indicates an expected call of ReceiveOrderStatus.
+func (mr *MockStreamMockRecorder) ReceiveOrderStatus(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReceiveOrderStatus", reflect.TypeOf((*MockStream)(nil).ReceiveOrderStatus), ctx)
+}
+
+// ReceiveTicks mocks base method.
+func (m *MockStream) ReceiveTicks(ctx context.Context) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ReceiveTicks", ctx)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// ReceiveTicks indicates an expected call of ReceiveTicks.
+func (mr *MockStreamMockRecorder) ReceiveTicks(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReceiveTicks", reflect.TypeOf((*MockStream)(nil).ReceiveTicks), ctx)
 }
 
 // MockStreamRepo is a mock of StreamRepo interface.

@@ -3,6 +3,7 @@ package usecase
 
 import (
 	"context"
+	"time"
 
 	"toc-machine-trading/internal/entity"
 	"toc-machine-trading/pb"
@@ -20,7 +21,7 @@ type (
 	BasicRepo interface {
 		QueryAllStock(ctx context.Context) ([]*entity.Stock, error)
 		InserOrUpdatetStockArr(ctx context.Context, t []*entity.Stock) error
-		QueryAllTradeDay(ctx context.Context) ([]*entity.CalendarDate, error)
+		QueryAllCalendar(ctx context.Context) ([]*entity.CalendarDate, error)
 		InserOrUpdatetCalendarDateArr(ctx context.Context, t []*entity.CalendarDate) error
 	}
 
@@ -41,6 +42,7 @@ type (
 	// TargetRepo -.
 	TargetRepo interface {
 		InsertTargetArr(ctx context.Context, t []*entity.Target) error
+		QueryTargetsByTradeDay(ctx context.Context, tradeDay time.Time) ([]*entity.Target, error)
 	}
 
 	// TargetRPCAPI -.
@@ -75,7 +77,10 @@ type (
 type (
 	// Stream -.
 	Stream interface {
-		ReceiveEvent(ctx context.Context)
+		ReceiveEvent(ctx context.Context) error
+		ReceiveTicks(ctx context.Context) error
+		ReceiveBidAsk(ctx context.Context) error
+		ReceiveOrderStatus(ctx context.Context) error
 	}
 
 	// StreamRepo -.

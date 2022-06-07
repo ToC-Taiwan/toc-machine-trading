@@ -21,18 +21,51 @@ type BasicUseCase struct {
 
 // NewBasic -.
 func NewBasic(r *repo.BasicRepo, t *grpcapi.BasicgRPCAPI) *BasicUseCase {
-	uc := &BasicUseCase{
-		repo:    r,
-		gRPCAPI: t,
-	}
+	uc := &BasicUseCase{repo: r, gRPCAPI: t}
+	ctx := context.Background()
 
-	if err := uc.importCalendarDate(context.Background()); err != nil {
+	go func() {
+		var sinopacToken string
+		for {
+			token, err := uc.gRPCAPI.GetServerToken()
+			if err != nil {
+				logger.Get().Panic(err)
+			}
+			if sinopacToken == "" {
+				sinopacToken = token
+			} else if sinopacToken != token {
+				logger.Get().Panic("token changed")
+			}
+			time.Sleep(time.Second * 30)
+		}
+	}()
+
+	if err := uc.importCalendarDate(ctx); err != nil {
 		logger.Get().Panic(err)
 	}
 
-	if _, err := uc.GetAllSinopacStockAndUpdateRepo(context.Background()); err != nil {
+	if _, err := uc.GetAllSinopacStockAndUpdateRepo(ctx); err != nil {
 		logger.Get().Panic(err)
 	}
+
+	tradeDayArr, err := uc.repo.QueryAllCalendar(ctx)
+	if err != nil {
+		logger.Get().Panic(err)
+	}
+
+	tmp := make(map[time.Time]bool)
+	for _, v := range tradeDayArr {
+		if v.IsTradeDay {
+			tmp[v.Date] = true
+		}
+	}
+	SetCalendar(tmp)
+
+	tradeDay, err := tradeDay()
+	if err != nil {
+		logger.Get().Panic(err)
+	}
+	SetTradeDay(tradeDay)
 
 	return uc
 }
@@ -136,4 +169,44 @@ func (uc *BasicUseCase) importCalendarDate(ctx context.Context) (err error) {
 	}
 
 	return nil
+}
+
+func tradeDay() (tradeDay time.Time, err error) {
+	var today time.Time
+	if time.Now().Hour() >= 15 {
+		today = time.Now().AddDate(0, 0, 1)
+	} else {
+		today = time.Now()
+	}
+	tradeDay, err = getNextTradeDayTime(today)
+	if err != nil {
+		return tradeDay, err
+	}
+	return tradeDay, err
+}
+
+func getNextTradeDayTime(nowTime time.Time) (tradeDay time.Time, err error) {
+	tmp := time.Date(nowTime.Year(), nowTime.Month(), nowTime.Day(), 0, 0, 0, 0, time.Local)
+	calendar := GetCalendar()
+	if !calendar[tmp] {
+		nowTime = nowTime.AddDate(0, 0, 1)
+		return getNextTradeDayTime(nowTime)
+	}
+	return tmp, err
+}
+
+// GetLastNTradeDayByDate -.
+func GetLastNTradeDayByDate(n int64, firstDay time.Time) []time.Time {
+	calendar := GetCalendar()
+	var tmp []time.Time
+	for {
+		if calendar[firstDay.AddDate(0, 0, -1)] {
+			tmp = append(tmp, firstDay.AddDate(0, 0, -1))
+		}
+		if len(tmp) == int(n) {
+			break
+		}
+		firstDay = firstDay.AddDate(0, 0, -1)
+	}
+	return tmp
 }

@@ -46,3 +46,63 @@ func (uc *StreamUseCase) ReceiveEvent(ctx context.Context) error {
 		}
 	}
 }
+
+// ReceiveTicks -.
+func (uc *StreamUseCase) ReceiveTicks(ctx context.Context) error {
+	tickChan := make(chan *entity.RealTimeTick)
+	if err := uc.gRPCAPI.TickChannel(tickChan); err != nil {
+		return err
+	}
+
+	for {
+		select {
+		case <-ctx.Done():
+			return nil
+		case tick := <-tickChan:
+			// if err := uc.repo.InsertEvent(ctx, event); err != nil {
+			// 	return err
+			// }
+			logger.Get().Info(tick)
+		}
+	}
+}
+
+// ReceiveBidAsk -.
+func (uc *StreamUseCase) ReceiveBidAsk(ctx context.Context) error {
+	bidAskChan := make(chan *entity.RealTimeBidAsk)
+	if err := uc.gRPCAPI.BidAskChannel(bidAskChan); err != nil {
+		return err
+	}
+
+	for {
+		select {
+		case <-ctx.Done():
+			return nil
+		case bidAsk := <-bidAskChan:
+			// if err := uc.repo.InsertEvent(ctx, event); err != nil {
+			// 	return err
+			// }
+			logger.Get().Info(bidAsk)
+		}
+	}
+}
+
+// ReceiveOrderStatus -.
+func (uc *StreamUseCase) ReceiveOrderStatus(ctx context.Context) error {
+	orderStatusChan := make(chan *entity.OrderStatus)
+	if err := uc.gRPCAPI.OrderStatusChannel(orderStatusChan); err != nil {
+		return err
+	}
+
+	for {
+		select {
+		case <-ctx.Done():
+			return nil
+		case orderStatus := <-orderStatusChan:
+			// if err := uc.repo.InsertEvent(ctx, event); err != nil {
+			// 	return err
+			// }
+			logger.Get().Info(orderStatus)
+		}
+	}
+}

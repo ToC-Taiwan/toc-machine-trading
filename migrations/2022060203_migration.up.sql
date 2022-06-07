@@ -11,15 +11,16 @@ CREATE TABLE basic_stock (
 
 CREATE TABLE basic_targets (
     "id" SERIAL PRIMARY KEY,
-    "trade_day" TIMESTAMP WITH Time Zone,
     "rank" INT NOT NULL,
     "volume" INT NOT NULL,
     "subscribe" BOOLEAN NOT NULL,
-    "real_time_add" BOOLEAN NOT NULL
+    "real_time_add" BOOLEAN NOT NULL,
+    "stock_num" VARCHAR NOT NULL,
+    "trade_day" TIMESTAMPTZ
 );
 
 CREATE TABLE basic_calendar (
-    "date" TIMESTAMP WITH Time Zone PRIMARY KEY,
+    "date" TIMESTAMPTZ PRIMARY KEY,
     "is_trade_day" BOOLEAN NOT NULL
 );
 

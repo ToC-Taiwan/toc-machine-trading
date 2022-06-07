@@ -11,11 +11,6 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
-const (
-	tableNameStock    string = "basic_stock"
-	tableNameCalendar string = "basic_calendar"
-)
-
 // BasicRepo -.
 type BasicRepo struct {
 	*postgres.Postgres
@@ -38,14 +33,15 @@ func (r *BasicRepo) InserOrUpdatetStockArr(ctx context.Context, t []*entity.Stoc
 	}
 
 	var insert, update int
-	builder := r.Builder.Insert(tableNameStock).Columns("number, name, exchange, category, day_trade, last_close")
+	builder := r.Builder.Insert(tableNameStock).
+		Columns("number, name, exchange, category, day_trade, last_close")
 	for _, v := range t {
 		if _, ok := inDBStockMap[v.Number]; !ok {
 			insert++
 			builder = builder.Values(v.Number, v.Name, v.Exchange, v.Category, v.DayTrade, v.LastClose)
 		} else if !cmp.Equal(v, inDBStockMap[v.Number]) {
 			update++
-			builder := r.Builder.
+			b := r.Builder.
 				Update(tableNameStock).
 				Set("number", v.Number).
 				Set("name", v.Name).
@@ -54,24 +50,18 @@ func (r *BasicRepo) InserOrUpdatetStockArr(ctx context.Context, t []*entity.Stoc
 				Set("day_trade", v.DayTrade).
 				Set("last_close", v.LastClose).
 				Where("number = ?", v.Number)
-			sql, args, updateErr := builder.ToSql()
-			if updateErr != nil {
+			if sql, args, err := b.ToSql(); err != nil {
 				return err
-			}
-			_, err = r.Pool.Exec(ctx, sql, args...)
-			if err != nil {
+			} else if _, err := r.Pool.Exec(ctx, sql, args...); err != nil {
 				return err
 			}
 		}
 	}
 
 	if insert != 0 {
-		sql, args, err := builder.ToSql()
-		if err != nil {
+		if sql, args, err := builder.ToSql(); err != nil {
 			return err
-		}
-		_, err = r.Pool.Exec(ctx, sql, args...)
-		if err != nil {
+		} else if _, err := r.Pool.Exec(ctx, sql, args...); err != nil {
 			return err
 		}
 	}
@@ -86,12 +76,10 @@ func (r *BasicRepo) InserOrUpdatetStockArr(ctx context.Context, t []*entity.Stoc
 
 // QueryAllStock -.
 func (r *BasicRepo) QueryAllStock(ctx context.Context) ([]*entity.Stock, error) {
-	sql, _, err := r.Builder.
-		Select("*").From(tableNameStock).ToSql()
+	sql, _, err := r.Builder.Select("number, name, exchange, category, day_trade, last_close").From(tableNameStock).ToSql()
 	if err != nil {
 		return nil, err
 	}
-
 	rows, err := r.Pool.Query(ctx, sql)
 	if err != nil {
 		return nil, err
@@ -100,21 +88,18 @@ func (r *BasicRepo) QueryAllStock(ctx context.Context) ([]*entity.Stock, error) 
 
 	entities := make([]*entity.Stock, 0, 2048)
 	for rows.Next() {
-		e := &entity.Stock{}
-		err = rows.Scan(
-			&e.Number, &e.Name, &e.Exchange, &e.Category, &e.DayTrade, &e.LastClose,
-		)
-		if err != nil {
+		e := entity.Stock{}
+		if err := rows.Scan(&e.Number, &e.Name, &e.Exchange, &e.Category, &e.DayTrade, &e.LastClose); err != nil {
 			return nil, err
 		}
-		entities = append(entities, e)
+		entities = append(entities, &e)
 	}
 	return entities, nil
 }
 
 // InserOrUpdatetCalendarDateArr -.
 func (r *BasicRepo) InserOrUpdatetCalendarDateArr(ctx context.Context, t []*entity.CalendarDate) error {
-	inDBCalendar, err := r.QueryAllTradeDay(ctx)
+	inDBCalendar, err := r.QueryAllCalendar(ctx)
 	if err != nil {
 		return err
 	}
@@ -136,24 +121,18 @@ func (r *BasicRepo) InserOrUpdatetCalendarDateArr(ctx context.Context, t []*enti
 				Set("date", v.Date).
 				Set("is_trade_day", v.IsTradeDay).
 				Where("date = ?", v.Date)
-			sql, args, updateErr := builder.ToSql()
-			if updateErr != nil {
+			if sql, args, err := builder.ToSql(); err != nil {
 				return err
-			}
-			_, err = r.Pool.Exec(ctx, sql, args...)
-			if err != nil {
+			} else if _, err := r.Pool.Exec(ctx, sql, args...); err != nil {
 				return err
 			}
 		}
 	}
 
 	if insert != 0 {
-		sql, args, err := builder.ToSql()
-		if err != nil {
+		if sql, args, err := builder.ToSql(); err != nil {
 			return err
-		}
-		_, err = r.Pool.Exec(ctx, sql, args...)
-		if err != nil {
+		} else if _, err := r.Pool.Exec(ctx, sql, args...); err != nil {
 			return err
 		}
 	}
@@ -166,10 +145,10 @@ func (r *BasicRepo) InserOrUpdatetCalendarDateArr(ctx context.Context, t []*enti
 	return nil
 }
 
-// QueryAllTradeDay -.
-func (r *BasicRepo) QueryAllTradeDay(ctx context.Context) ([]*entity.CalendarDate, error) {
+// QueryAllCalendar -.
+func (r *BasicRepo) QueryAllCalendar(ctx context.Context) ([]*entity.CalendarDate, error) {
 	sql, _, err := r.Builder.
-		Select("*").
+		Select("date, is_trade_day").
 		From(tableNameCalendar).
 		ToSql()
 	if err != nil {
@@ -184,15 +163,11 @@ func (r *BasicRepo) QueryAllTradeDay(ctx context.Context) ([]*entity.CalendarDat
 
 	entities := make([]*entity.CalendarDate, 0, 1024)
 	for rows.Next() {
-		e := &entity.CalendarDate{}
-		err = rows.Scan(
-			&e.Date,
-			&e.IsTradeDay,
-		)
-		if err != nil {
+		e := entity.CalendarDate{}
+		if err := rows.Scan(&e.Date, &e.IsTradeDay); err != nil {
 			return nil, err
 		}
-		entities = append(entities, e)
+		entities = append(entities, &e)
 	}
 	return entities, nil
 }
