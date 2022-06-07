@@ -26,10 +26,8 @@ func GetStockDetail(stockNum string) *entity.Stock {
 		Type: stockDetailKeyType,
 		Name: fmt.Sprintf("%s:%s", stockDetailKeyType, stockNum),
 	}
-
 	if value, ok := cache.Get(key); ok {
 		return value.(*entity.Stock)
 	}
-
 	return nil
 }

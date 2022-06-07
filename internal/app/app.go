@@ -12,6 +12,7 @@ import (
 	"toc-machine-trading/internal/usecase/grpcapi"
 	"toc-machine-trading/internal/usecase/repo"
 	"toc-machine-trading/pkg/config"
+	"toc-machine-trading/pkg/eventbus"
 	"toc-machine-trading/pkg/httpserver"
 	"toc-machine-trading/pkg/logger"
 	"toc-machine-trading/pkg/postgres"
@@ -22,21 +23,28 @@ import (
 
 // Run -.
 func Run(cfg *config.Config) {
-	dbPath := fmt.Sprintf("%s%s", cfg.Postgres.URL, cfg.Postgres.DBName)
-	pg, err := postgres.New(dbPath, postgres.MaxPoolSize(cfg.Postgres.PoolMax))
+	pg, err := postgres.New(
+		fmt.Sprintf("%s%s", cfg.Postgres.URL, cfg.Postgres.DBName),
+		postgres.MaxPoolSize(cfg.Postgres.PoolMax),
+	)
 	if err != nil {
 		logger.Get().Panic(err)
 	}
 	defer pg.Close()
 
-	sc, err := sinopac.New(cfg.Sinopac.URL, sinopac.MaxPoolSize(cfg.Sinopac.PoolMax))
+	sc, err := sinopac.New(
+		cfg.Sinopac.URL,
+		sinopac.MaxPoolSize(cfg.Sinopac.PoolMax),
+	)
 	if err != nil {
 		logger.Get().Panic(err)
 	}
 
+	bus := eventbus.New()
+	// Order cannot be modifided
 	usecase.NewStream(repo.NewStream(pg), grpcapi.NewStream(sc))
-
 	basicUseCase := usecase.NewBasic(repo.NewBasic(pg), grpcapi.NewBasic(sc))
+	usecase.NewTarget(repo.NewTarget(pg), grpcapi.NewTarget(sc), bus)
 
 	// HTTP Server
 	handler := gin.New()

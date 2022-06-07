@@ -261,7 +261,7 @@ linters:
         - govet
         - ineffassign
         - interfacer
-        - misspell
+        # - misspell
         - nakedret
         - scopelint
         - staticcheck

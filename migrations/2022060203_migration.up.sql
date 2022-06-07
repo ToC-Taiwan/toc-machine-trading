@@ -9,6 +9,15 @@ CREATE TABLE basic_stock (
     "last_close" DECIMAL NOT NULL
 );
 
+CREATE TABLE basic_targets (
+    "id" SERIAL PRIMARY KEY,
+    "trade_day" TIMESTAMP WITH Time Zone,
+    "rank" INT NOT NULL,
+    "volume" INT NOT NULL,
+    "subscribe" BOOLEAN NOT NULL,
+    "real_time_add" BOOLEAN NOT NULL
+);
+
 CREATE TABLE basic_calendar (
     "date" TIMESTAMP WITH Time Zone PRIMARY KEY,
     "is_trade_day" BOOLEAN NOT NULL

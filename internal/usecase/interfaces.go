@@ -26,7 +26,49 @@ type (
 
 	// BasicgRPCAPI -.
 	BasicgRPCAPI interface {
+		GetServerToken() (string, error)
 		GetAllStockDetail() ([]*pb.StockDetailMessage, error)
+		GetAllStockSnapshot() ([]*pb.StockSnapshotMessage, error)
+		GetStockSnapshotByNumArr(stockNumArr []string) ([]*pb.StockSnapshotMessage, error)
+		GetStockSnapshotTSE() ([]*pb.StockSnapshotMessage, error)
+	}
+)
+
+type (
+	// Target -.
+	Target interface{}
+
+	// TargetRepo -.
+	TargetRepo interface {
+		InsertTargetArr(ctx context.Context, t []*entity.Target) error
+	}
+
+	// TargetRPCAPI -.
+	TargetRPCAPI interface {
+		GetStockVolumeRank(date string) ([]*pb.StockVolumeRankMessage, error)
+		SubscribeStockTick(stockNumArr []string) ([]string, error)
+		UnSubscribeStockTick(stockNumArr []string) ([]string, error)
+		SubscribeStockBidAsk(stockNumArr []string) ([]string, error)
+		UnSubscribeStockBidAsk(stockNumArr []string) ([]string, error)
+	}
+)
+
+type (
+	// History -.
+	History interface{}
+
+	// HistoryRepo -.
+	HistoryRepo interface{}
+
+	// HistorygRPCAPI -.
+	HistorygRPCAPI interface {
+		GetStockHistoryTick(stockNumArr []string, date string) ([]*pb.StockHistoryTickMessage, error)
+		GetStockHistoryKbar(stockNumArr []string, date string) ([]*pb.StockHistoryKbarMessage, error)
+		GetStockHistoryClose(stockNumArr []string, date string) ([]*pb.StockHistoryCloseMessage, error)
+		GetStockHistoryCloseByDateArr(stockNumArr []string, date []string) ([]*pb.StockHistoryCloseMessage, error)
+		GetStockTSEHistoryTick(date string) ([]*pb.StockHistoryTickMessage, error)
+		GetStockTSEHistoryKbar(date string) ([]*pb.StockHistoryKbarMessage, error)
+		GetStockTSEHistoryClose(date string) ([]*pb.StockHistoryCloseMessage, error)
 	}
 )
 
@@ -46,5 +88,25 @@ type (
 		EventChannel(eventChan chan *entity.SinopacEvent) error
 		BidAskChannel(bidAskChan chan *entity.RealTimeBidAsk) error
 		TickChannel(tickChan chan *entity.RealTimeTick) error
+		OrderStatusChannel(orderStatusChan chan *entity.OrderStatus) error
+	}
+)
+
+type (
+	// Order -.
+	Order interface{}
+
+	// OrderRepo -.
+	OrderRepo interface{}
+
+	// OrdergRPCAPI -.
+	OrdergRPCAPI interface {
+		BuyStock(order *entity.Order, sim bool) (*pb.TradeResult, error)
+		SellStock(order *entity.Order, sim bool) (*pb.TradeResult, error)
+		SellFirstStock(order *entity.Order, sim bool) (*pb.TradeResult, error)
+		CancelStock(orderID string, sim bool) (*pb.TradeResult, error)
+		GetOrderStatusByID(orderID string, sim bool) (*pb.TradeResult, error)
+		GetOrderStatusArr() ([]*pb.StockOrderStatus, error)
+		GetNonBlockOrderStatusArr() (*pb.FunctionErr, error)
 	}
 )

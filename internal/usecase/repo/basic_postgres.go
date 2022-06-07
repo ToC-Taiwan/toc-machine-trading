@@ -11,6 +11,11 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
+const (
+	tableNameStock    string = "basic_stock"
+	tableNameCalendar string = "basic_calendar"
+)
+
 // BasicRepo -.
 type BasicRepo struct {
 	*postgres.Postgres
@@ -33,7 +38,7 @@ func (r *BasicRepo) InserOrUpdatetStockArr(ctx context.Context, t []*entity.Stoc
 	}
 
 	var insert, update int
-	builder := r.Builder.Insert("basic_stock").Columns("number, name, exchange, category, day_trade, last_close")
+	builder := r.Builder.Insert(tableNameStock).Columns("number, name, exchange, category, day_trade, last_close")
 	for _, v := range t {
 		if _, ok := inDBStockMap[v.Number]; !ok {
 			insert++
@@ -41,7 +46,7 @@ func (r *BasicRepo) InserOrUpdatetStockArr(ctx context.Context, t []*entity.Stoc
 		} else if !cmp.Equal(v, inDBStockMap[v.Number]) {
 			update++
 			builder := r.Builder.
-				Update("basic_stock").
+				Update(tableNameStock).
 				Set("number", v.Number).
 				Set("name", v.Name).
 				Set("exchange", v.Exchange).
@@ -82,9 +87,7 @@ func (r *BasicRepo) InserOrUpdatetStockArr(ctx context.Context, t []*entity.Stoc
 // QueryAllStock -.
 func (r *BasicRepo) QueryAllStock(ctx context.Context) ([]*entity.Stock, error) {
 	sql, _, err := r.Builder.
-		Select("*").
-		From("basic_stock").
-		ToSql()
+		Select("*").From(tableNameStock).ToSql()
 	if err != nil {
 		return nil, err
 	}
@@ -99,12 +102,7 @@ func (r *BasicRepo) QueryAllStock(ctx context.Context) ([]*entity.Stock, error) 
 	for rows.Next() {
 		e := &entity.Stock{}
 		err = rows.Scan(
-			&e.Number,
-			&e.Name,
-			&e.Exchange,
-			&e.Category,
-			&e.DayTrade,
-			&e.LastClose,
+			&e.Number, &e.Name, &e.Exchange, &e.Category, &e.DayTrade, &e.LastClose,
 		)
 		if err != nil {
 			return nil, err
@@ -126,7 +124,7 @@ func (r *BasicRepo) InserOrUpdatetCalendarDateArr(ctx context.Context, t []*enti
 	}
 
 	var insert, update int
-	builder := r.Builder.Insert("basic_calendar").Columns("date, is_trade_day")
+	builder := r.Builder.Insert(tableNameCalendar).Columns("date, is_trade_day")
 	for _, v := range t {
 		if _, ok := inDBCalendarMap[v.Date.String()]; !ok {
 			insert++
@@ -134,7 +132,7 @@ func (r *BasicRepo) InserOrUpdatetCalendarDateArr(ctx context.Context, t []*enti
 		} else if !cmp.Equal(v, inDBCalendarMap[v.Date.String()]) {
 			update++
 			builder := r.Builder.
-				Update("basic_calendar").
+				Update(tableNameCalendar).
 				Set("date", v.Date).
 				Set("is_trade_day", v.IsTradeDay).
 				Where("date = ?", v.Date)
@@ -172,7 +170,7 @@ func (r *BasicRepo) InserOrUpdatetCalendarDateArr(ctx context.Context, t []*enti
 func (r *BasicRepo) QueryAllTradeDay(ctx context.Context) ([]*entity.CalendarDate, error) {
 	sql, _, err := r.Builder.
 		Select("*").
-		From("basic_calendar").
+		From(tableNameCalendar).
 		ToSql()
 	if err != nil {
 		return nil, err

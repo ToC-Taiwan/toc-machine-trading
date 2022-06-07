@@ -185,6 +185,398 @@ func (mr *MockBasicgRPCAPIMockRecorder) GetAllStockDetail() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllStockDetail", reflect.TypeOf((*MockBasicgRPCAPI)(nil).GetAllStockDetail))
 }
 
+// GetAllStockSnapshot mocks base method.
+func (m *MockBasicgRPCAPI) GetAllStockSnapshot() ([]*pb.StockSnapshotMessage, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAllStockSnapshot")
+	ret0, _ := ret[0].([]*pb.StockSnapshotMessage)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAllStockSnapshot indicates an expected call of GetAllStockSnapshot.
+func (mr *MockBasicgRPCAPIMockRecorder) GetAllStockSnapshot() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllStockSnapshot", reflect.TypeOf((*MockBasicgRPCAPI)(nil).GetAllStockSnapshot))
+}
+
+// GetServerToken mocks base method.
+func (m *MockBasicgRPCAPI) GetServerToken() (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetServerToken")
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetServerToken indicates an expected call of GetServerToken.
+func (mr *MockBasicgRPCAPIMockRecorder) GetServerToken() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetServerToken", reflect.TypeOf((*MockBasicgRPCAPI)(nil).GetServerToken))
+}
+
+// GetStockSnapshotByNumArr mocks base method.
+func (m *MockBasicgRPCAPI) GetStockSnapshotByNumArr(stockNumArr []string) ([]*pb.StockSnapshotMessage, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetStockSnapshotByNumArr", stockNumArr)
+	ret0, _ := ret[0].([]*pb.StockSnapshotMessage)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetStockSnapshotByNumArr indicates an expected call of GetStockSnapshotByNumArr.
+func (mr *MockBasicgRPCAPIMockRecorder) GetStockSnapshotByNumArr(stockNumArr interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStockSnapshotByNumArr", reflect.TypeOf((*MockBasicgRPCAPI)(nil).GetStockSnapshotByNumArr), stockNumArr)
+}
+
+// GetStockSnapshotTSE mocks base method.
+func (m *MockBasicgRPCAPI) GetStockSnapshotTSE() ([]*pb.StockSnapshotMessage, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetStockSnapshotTSE")
+	ret0, _ := ret[0].([]*pb.StockSnapshotMessage)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetStockSnapshotTSE indicates an expected call of GetStockSnapshotTSE.
+func (mr *MockBasicgRPCAPIMockRecorder) GetStockSnapshotTSE() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStockSnapshotTSE", reflect.TypeOf((*MockBasicgRPCAPI)(nil).GetStockSnapshotTSE))
+}
+
+// MockTarget is a mock of Target interface.
+type MockTarget struct {
+	ctrl     *gomock.Controller
+	recorder *MockTargetMockRecorder
+}
+
+// MockTargetMockRecorder is the mock recorder for MockTarget.
+type MockTargetMockRecorder struct {
+	mock *MockTarget
+}
+
+// NewMockTarget creates a new mock instance.
+func NewMockTarget(ctrl *gomock.Controller) *MockTarget {
+	mock := &MockTarget{ctrl: ctrl}
+	mock.recorder = &MockTargetMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockTarget) EXPECT() *MockTargetMockRecorder {
+	return m.recorder
+}
+
+// MockTargetRepo is a mock of TargetRepo interface.
+type MockTargetRepo struct {
+	ctrl     *gomock.Controller
+	recorder *MockTargetRepoMockRecorder
+}
+
+// MockTargetRepoMockRecorder is the mock recorder for MockTargetRepo.
+type MockTargetRepoMockRecorder struct {
+	mock *MockTargetRepo
+}
+
+// NewMockTargetRepo creates a new mock instance.
+func NewMockTargetRepo(ctrl *gomock.Controller) *MockTargetRepo {
+	mock := &MockTargetRepo{ctrl: ctrl}
+	mock.recorder = &MockTargetRepoMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockTargetRepo) EXPECT() *MockTargetRepoMockRecorder {
+	return m.recorder
+}
+
+// InsertTargetArr mocks base method.
+func (m *MockTargetRepo) InsertTargetArr(ctx context.Context, t []*entity.Target) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "InsertTargetArr", ctx, t)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// InsertTargetArr indicates an expected call of InsertTargetArr.
+func (mr *MockTargetRepoMockRecorder) InsertTargetArr(ctx, t interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertTargetArr", reflect.TypeOf((*MockTargetRepo)(nil).InsertTargetArr), ctx, t)
+}
+
+// MockTargetRPCAPI is a mock of TargetRPCAPI interface.
+type MockTargetRPCAPI struct {
+	ctrl     *gomock.Controller
+	recorder *MockTargetRPCAPIMockRecorder
+}
+
+// MockTargetRPCAPIMockRecorder is the mock recorder for MockTargetRPCAPI.
+type MockTargetRPCAPIMockRecorder struct {
+	mock *MockTargetRPCAPI
+}
+
+// NewMockTargetRPCAPI creates a new mock instance.
+func NewMockTargetRPCAPI(ctrl *gomock.Controller) *MockTargetRPCAPI {
+	mock := &MockTargetRPCAPI{ctrl: ctrl}
+	mock.recorder = &MockTargetRPCAPIMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockTargetRPCAPI) EXPECT() *MockTargetRPCAPIMockRecorder {
+	return m.recorder
+}
+
+// GetStockVolumeRank mocks base method.
+func (m *MockTargetRPCAPI) GetStockVolumeRank(date string) ([]*pb.StockVolumeRankMessage, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetStockVolumeRank", date)
+	ret0, _ := ret[0].([]*pb.StockVolumeRankMessage)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetStockVolumeRank indicates an expected call of GetStockVolumeRank.
+func (mr *MockTargetRPCAPIMockRecorder) GetStockVolumeRank(date interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStockVolumeRank", reflect.TypeOf((*MockTargetRPCAPI)(nil).GetStockVolumeRank), date)
+}
+
+// SubscribeStockBidAsk mocks base method.
+func (m *MockTargetRPCAPI) SubscribeStockBidAsk(stockNumArr []string) ([]string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SubscribeStockBidAsk", stockNumArr)
+	ret0, _ := ret[0].([]string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SubscribeStockBidAsk indicates an expected call of SubscribeStockBidAsk.
+func (mr *MockTargetRPCAPIMockRecorder) SubscribeStockBidAsk(stockNumArr interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SubscribeStockBidAsk", reflect.TypeOf((*MockTargetRPCAPI)(nil).SubscribeStockBidAsk), stockNumArr)
+}
+
+// SubscribeStockTick mocks base method.
+func (m *MockTargetRPCAPI) SubscribeStockTick(stockNumArr []string) ([]string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SubscribeStockTick", stockNumArr)
+	ret0, _ := ret[0].([]string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SubscribeStockTick indicates an expected call of SubscribeStockTick.
+func (mr *MockTargetRPCAPIMockRecorder) SubscribeStockTick(stockNumArr interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SubscribeStockTick", reflect.TypeOf((*MockTargetRPCAPI)(nil).SubscribeStockTick), stockNumArr)
+}
+
+// UnSubscribeStockBidAsk mocks base method.
+func (m *MockTargetRPCAPI) UnSubscribeStockBidAsk(stockNumArr []string) ([]string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UnSubscribeStockBidAsk", stockNumArr)
+	ret0, _ := ret[0].([]string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UnSubscribeStockBidAsk indicates an expected call of UnSubscribeStockBidAsk.
+func (mr *MockTargetRPCAPIMockRecorder) UnSubscribeStockBidAsk(stockNumArr interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UnSubscribeStockBidAsk", reflect.TypeOf((*MockTargetRPCAPI)(nil).UnSubscribeStockBidAsk), stockNumArr)
+}
+
+// UnSubscribeStockTick mocks base method.
+func (m *MockTargetRPCAPI) UnSubscribeStockTick(stockNumArr []string) ([]string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UnSubscribeStockTick", stockNumArr)
+	ret0, _ := ret[0].([]string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UnSubscribeStockTick indicates an expected call of UnSubscribeStockTick.
+func (mr *MockTargetRPCAPIMockRecorder) UnSubscribeStockTick(stockNumArr interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UnSubscribeStockTick", reflect.TypeOf((*MockTargetRPCAPI)(nil).UnSubscribeStockTick), stockNumArr)
+}
+
+// MockHistory is a mock of History interface.
+type MockHistory struct {
+	ctrl     *gomock.Controller
+	recorder *MockHistoryMockRecorder
+}
+
+// MockHistoryMockRecorder is the mock recorder for MockHistory.
+type MockHistoryMockRecorder struct {
+	mock *MockHistory
+}
+
+// NewMockHistory creates a new mock instance.
+func NewMockHistory(ctrl *gomock.Controller) *MockHistory {
+	mock := &MockHistory{ctrl: ctrl}
+	mock.recorder = &MockHistoryMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockHistory) EXPECT() *MockHistoryMockRecorder {
+	return m.recorder
+}
+
+// MockHistoryRepo is a mock of HistoryRepo interface.
+type MockHistoryRepo struct {
+	ctrl     *gomock.Controller
+	recorder *MockHistoryRepoMockRecorder
+}
+
+// MockHistoryRepoMockRecorder is the mock recorder for MockHistoryRepo.
+type MockHistoryRepoMockRecorder struct {
+	mock *MockHistoryRepo
+}
+
+// NewMockHistoryRepo creates a new mock instance.
+func NewMockHistoryRepo(ctrl *gomock.Controller) *MockHistoryRepo {
+	mock := &MockHistoryRepo{ctrl: ctrl}
+	mock.recorder = &MockHistoryRepoMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockHistoryRepo) EXPECT() *MockHistoryRepoMockRecorder {
+	return m.recorder
+}
+
+// MockHistorygRPCAPI is a mock of HistorygRPCAPI interface.
+type MockHistorygRPCAPI struct {
+	ctrl     *gomock.Controller
+	recorder *MockHistorygRPCAPIMockRecorder
+}
+
+// MockHistorygRPCAPIMockRecorder is the mock recorder for MockHistorygRPCAPI.
+type MockHistorygRPCAPIMockRecorder struct {
+	mock *MockHistorygRPCAPI
+}
+
+// NewMockHistorygRPCAPI creates a new mock instance.
+func NewMockHistorygRPCAPI(ctrl *gomock.Controller) *MockHistorygRPCAPI {
+	mock := &MockHistorygRPCAPI{ctrl: ctrl}
+	mock.recorder = &MockHistorygRPCAPIMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockHistorygRPCAPI) EXPECT() *MockHistorygRPCAPIMockRecorder {
+	return m.recorder
+}
+
+// GetStockHistoryClose mocks base method.
+func (m *MockHistorygRPCAPI) GetStockHistoryClose(stockNumArr []string, date string) ([]*pb.StockHistoryCloseMessage, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetStockHistoryClose", stockNumArr, date)
+	ret0, _ := ret[0].([]*pb.StockHistoryCloseMessage)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetStockHistoryClose indicates an expected call of GetStockHistoryClose.
+func (mr *MockHistorygRPCAPIMockRecorder) GetStockHistoryClose(stockNumArr, date interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStockHistoryClose", reflect.TypeOf((*MockHistorygRPCAPI)(nil).GetStockHistoryClose), stockNumArr, date)
+}
+
+// GetStockHistoryCloseByDateArr mocks base method.
+func (m *MockHistorygRPCAPI) GetStockHistoryCloseByDateArr(stockNumArr, date []string) ([]*pb.StockHistoryCloseMessage, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetStockHistoryCloseByDateArr", stockNumArr, date)
+	ret0, _ := ret[0].([]*pb.StockHistoryCloseMessage)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetStockHistoryCloseByDateArr indicates an expected call of GetStockHistoryCloseByDateArr.
+func (mr *MockHistorygRPCAPIMockRecorder) GetStockHistoryCloseByDateArr(stockNumArr, date interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStockHistoryCloseByDateArr", reflect.TypeOf((*MockHistorygRPCAPI)(nil).GetStockHistoryCloseByDateArr), stockNumArr, date)
+}
+
+// GetStockHistoryKbar mocks base method.
+func (m *MockHistorygRPCAPI) GetStockHistoryKbar(stockNumArr []string, date string) ([]*pb.StockHistoryKbarMessage, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetStockHistoryKbar", stockNumArr, date)
+	ret0, _ := ret[0].([]*pb.StockHistoryKbarMessage)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetStockHistoryKbar indicates an expected call of GetStockHistoryKbar.
+func (mr *MockHistorygRPCAPIMockRecorder) GetStockHistoryKbar(stockNumArr, date interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStockHistoryKbar", reflect.TypeOf((*MockHistorygRPCAPI)(nil).GetStockHistoryKbar), stockNumArr, date)
+}
+
+// GetStockHistoryTick mocks base method.
+func (m *MockHistorygRPCAPI) GetStockHistoryTick(stockNumArr []string, date string) ([]*pb.StockHistoryTickMessage, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetStockHistoryTick", stockNumArr, date)
+	ret0, _ := ret[0].([]*pb.StockHistoryTickMessage)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetStockHistoryTick indicates an expected call of GetStockHistoryTick.
+func (mr *MockHistorygRPCAPIMockRecorder) GetStockHistoryTick(stockNumArr, date interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStockHistoryTick", reflect.TypeOf((*MockHistorygRPCAPI)(nil).GetStockHistoryTick), stockNumArr, date)
+}
+
+// GetStockTSEHistoryClose mocks base method.
+func (m *MockHistorygRPCAPI) GetStockTSEHistoryClose(date string) ([]*pb.StockHistoryCloseMessage, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetStockTSEHistoryClose", date)
+	ret0, _ := ret[0].([]*pb.StockHistoryCloseMessage)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetStockTSEHistoryClose indicates an expected call of GetStockTSEHistoryClose.
+func (mr *MockHistorygRPCAPIMockRecorder) GetStockTSEHistoryClose(date interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStockTSEHistoryClose", reflect.TypeOf((*MockHistorygRPCAPI)(nil).GetStockTSEHistoryClose), date)
+}
+
+// GetStockTSEHistoryKbar mocks base method.
+func (m *MockHistorygRPCAPI) GetStockTSEHistoryKbar(date string) ([]*pb.StockHistoryKbarMessage, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetStockTSEHistoryKbar", date)
+	ret0, _ := ret[0].([]*pb.StockHistoryKbarMessage)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetStockTSEHistoryKbar indicates an expected call of GetStockTSEHistoryKbar.
+func (mr *MockHistorygRPCAPIMockRecorder) GetStockTSEHistoryKbar(date interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStockTSEHistoryKbar", reflect.TypeOf((*MockHistorygRPCAPI)(nil).GetStockTSEHistoryKbar), date)
+}
+
+// GetStockTSEHistoryTick mocks base method.
+func (m *MockHistorygRPCAPI) GetStockTSEHistoryTick(date string) ([]*pb.StockHistoryTickMessage, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetStockTSEHistoryTick", date)
+	ret0, _ := ret[0].([]*pb.StockHistoryTickMessage)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetStockTSEHistoryTick indicates an expected call of GetStockTSEHistoryTick.
+func (mr *MockHistorygRPCAPIMockRecorder) GetStockTSEHistoryTick(date interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStockTSEHistoryTick", reflect.TypeOf((*MockHistorygRPCAPI)(nil).GetStockTSEHistoryTick), date)
+}
+
 // MockStream is a mock of Stream interface.
 type MockStream struct {
 	ctrl     *gomock.Controller
@@ -308,6 +700,20 @@ func (mr *MockStreamgRPCAPIMockRecorder) EventChannel(eventChan interface{}) *go
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EventChannel", reflect.TypeOf((*MockStreamgRPCAPI)(nil).EventChannel), eventChan)
 }
 
+// OrderStatusChannel mocks base method.
+func (m *MockStreamgRPCAPI) OrderStatusChannel(orderStatusChan chan *entity.OrderStatus) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "OrderStatusChannel", orderStatusChan)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// OrderStatusChannel indicates an expected call of OrderStatusChannel.
+func (mr *MockStreamgRPCAPIMockRecorder) OrderStatusChannel(orderStatusChan interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "OrderStatusChannel", reflect.TypeOf((*MockStreamgRPCAPI)(nil).OrderStatusChannel), orderStatusChan)
+}
+
 // TickChannel mocks base method.
 func (m *MockStreamgRPCAPI) TickChannel(tickChan chan *entity.RealTimeTick) error {
 	m.ctrl.T.Helper()
@@ -320,4 +726,178 @@ func (m *MockStreamgRPCAPI) TickChannel(tickChan chan *entity.RealTimeTick) erro
 func (mr *MockStreamgRPCAPIMockRecorder) TickChannel(tickChan interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "TickChannel", reflect.TypeOf((*MockStreamgRPCAPI)(nil).TickChannel), tickChan)
+}
+
+// MockOrder is a mock of Order interface.
+type MockOrder struct {
+	ctrl     *gomock.Controller
+	recorder *MockOrderMockRecorder
+}
+
+// MockOrderMockRecorder is the mock recorder for MockOrder.
+type MockOrderMockRecorder struct {
+	mock *MockOrder
+}
+
+// NewMockOrder creates a new mock instance.
+func NewMockOrder(ctrl *gomock.Controller) *MockOrder {
+	mock := &MockOrder{ctrl: ctrl}
+	mock.recorder = &MockOrderMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockOrder) EXPECT() *MockOrderMockRecorder {
+	return m.recorder
+}
+
+// MockOrderRepo is a mock of OrderRepo interface.
+type MockOrderRepo struct {
+	ctrl     *gomock.Controller
+	recorder *MockOrderRepoMockRecorder
+}
+
+// MockOrderRepoMockRecorder is the mock recorder for MockOrderRepo.
+type MockOrderRepoMockRecorder struct {
+	mock *MockOrderRepo
+}
+
+// NewMockOrderRepo creates a new mock instance.
+func NewMockOrderRepo(ctrl *gomock.Controller) *MockOrderRepo {
+	mock := &MockOrderRepo{ctrl: ctrl}
+	mock.recorder = &MockOrderRepoMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockOrderRepo) EXPECT() *MockOrderRepoMockRecorder {
+	return m.recorder
+}
+
+// MockOrdergRPCAPI is a mock of OrdergRPCAPI interface.
+type MockOrdergRPCAPI struct {
+	ctrl     *gomock.Controller
+	recorder *MockOrdergRPCAPIMockRecorder
+}
+
+// MockOrdergRPCAPIMockRecorder is the mock recorder for MockOrdergRPCAPI.
+type MockOrdergRPCAPIMockRecorder struct {
+	mock *MockOrdergRPCAPI
+}
+
+// NewMockOrdergRPCAPI creates a new mock instance.
+func NewMockOrdergRPCAPI(ctrl *gomock.Controller) *MockOrdergRPCAPI {
+	mock := &MockOrdergRPCAPI{ctrl: ctrl}
+	mock.recorder = &MockOrdergRPCAPIMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockOrdergRPCAPI) EXPECT() *MockOrdergRPCAPIMockRecorder {
+	return m.recorder
+}
+
+// BuyStock mocks base method.
+func (m *MockOrdergRPCAPI) BuyStock(order *entity.Order, sim bool) (*pb.TradeResult, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "BuyStock", order, sim)
+	ret0, _ := ret[0].(*pb.TradeResult)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// BuyStock indicates an expected call of BuyStock.
+func (mr *MockOrdergRPCAPIMockRecorder) BuyStock(order, sim interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BuyStock", reflect.TypeOf((*MockOrdergRPCAPI)(nil).BuyStock), order, sim)
+}
+
+// CancelStock mocks base method.
+func (m *MockOrdergRPCAPI) CancelStock(orderID string, sim bool) (*pb.TradeResult, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CancelStock", orderID, sim)
+	ret0, _ := ret[0].(*pb.TradeResult)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CancelStock indicates an expected call of CancelStock.
+func (mr *MockOrdergRPCAPIMockRecorder) CancelStock(orderID, sim interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CancelStock", reflect.TypeOf((*MockOrdergRPCAPI)(nil).CancelStock), orderID, sim)
+}
+
+// GetNonBlockOrderStatusArr mocks base method.
+func (m *MockOrdergRPCAPI) GetNonBlockOrderStatusArr() (*pb.FunctionErr, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetNonBlockOrderStatusArr")
+	ret0, _ := ret[0].(*pb.FunctionErr)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetNonBlockOrderStatusArr indicates an expected call of GetNonBlockOrderStatusArr.
+func (mr *MockOrdergRPCAPIMockRecorder) GetNonBlockOrderStatusArr() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNonBlockOrderStatusArr", reflect.TypeOf((*MockOrdergRPCAPI)(nil).GetNonBlockOrderStatusArr))
+}
+
+// GetOrderStatusArr mocks base method.
+func (m *MockOrdergRPCAPI) GetOrderStatusArr() ([]*pb.StockOrderStatus, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetOrderStatusArr")
+	ret0, _ := ret[0].([]*pb.StockOrderStatus)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetOrderStatusArr indicates an expected call of GetOrderStatusArr.
+func (mr *MockOrdergRPCAPIMockRecorder) GetOrderStatusArr() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOrderStatusArr", reflect.TypeOf((*MockOrdergRPCAPI)(nil).GetOrderStatusArr))
+}
+
+// GetOrderStatusByID mocks base method.
+func (m *MockOrdergRPCAPI) GetOrderStatusByID(orderID string, sim bool) (*pb.TradeResult, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetOrderStatusByID", orderID, sim)
+	ret0, _ := ret[0].(*pb.TradeResult)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetOrderStatusByID indicates an expected call of GetOrderStatusByID.
+func (mr *MockOrdergRPCAPIMockRecorder) GetOrderStatusByID(orderID, sim interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOrderStatusByID", reflect.TypeOf((*MockOrdergRPCAPI)(nil).GetOrderStatusByID), orderID, sim)
+}
+
+// SellFirstStock mocks base method.
+func (m *MockOrdergRPCAPI) SellFirstStock(order *entity.Order, sim bool) (*pb.TradeResult, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SellFirstStock", order, sim)
+	ret0, _ := ret[0].(*pb.TradeResult)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SellFirstStock indicates an expected call of SellFirstStock.
+func (mr *MockOrdergRPCAPIMockRecorder) SellFirstStock(order, sim interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SellFirstStock", reflect.TypeOf((*MockOrdergRPCAPI)(nil).SellFirstStock), order, sim)
+}
+
+// SellStock mocks base method.
+func (m *MockOrdergRPCAPI) SellStock(order *entity.Order, sim bool) (*pb.TradeResult, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SellStock", order, sim)
+	ret0, _ := ret[0].(*pb.TradeResult)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SellStock indicates an expected call of SellStock.
+func (mr *MockOrdergRPCAPIMockRecorder) SellStock(order, sim interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SellStock", reflect.TypeOf((*MockOrdergRPCAPI)(nil).SellStock), order, sim)
 }

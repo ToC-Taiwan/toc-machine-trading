@@ -7,6 +7,10 @@ import (
 	"toc-machine-trading/pkg/postgres"
 )
 
+const (
+	tableNameEvent string = "sinopac_event"
+)
+
 // StreamRepo -.
 type StreamRepo struct {
 	*postgres.Postgres
@@ -19,7 +23,7 @@ func NewStream(pg *postgres.Postgres) *StreamRepo {
 
 // InsertEvent -.
 func (r *StreamRepo) InsertEvent(ctx context.Context, t *entity.SinopacEvent) error {
-	builder := r.Builder.Insert("sinopac_event").
+	builder := r.Builder.Insert(tableNameEvent).
 		Columns("event, event_code, info, response").
 		Values(t.Event, t.EventCode, t.Info, t.Response)
 

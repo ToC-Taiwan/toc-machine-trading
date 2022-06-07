@@ -57,7 +57,8 @@ func initLogger() {
 		})
 	}
 
-	folderName := time.Now().Format(time.RFC3339)[:10]
+	// folderName := time.Now().Format(time.RFC3339)[:10]
+	folderName := time.Now().Format("20060102")
 	folderName = strings.ReplaceAll(folderName, ":", "")
 	globalLogger.SetLevel(logrus.TraceLevel)
 	globalLogger.SetOutput(os.Stdout)
