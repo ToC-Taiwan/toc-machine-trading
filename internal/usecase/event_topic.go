@@ -1,5 +1,6 @@
 package usecase
 
 const (
-	targetsTopic string = "targets"
+	topicTargets          string = "targets"
+	topicSubscribeTargets string = "subscribe_targets"
 )

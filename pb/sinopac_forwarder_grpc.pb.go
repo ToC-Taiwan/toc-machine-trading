@@ -23,19 +23,22 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type SinopacForwarderClient interface {
+	// Basic
 	GetServerToken(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*TokenResponse, error)
 	GetAllStockDetail(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*StockDetailResponse, error)
 	GetAllStockSnapshot(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*StockSnapshotResponse, error)
-	GetStockSnapshotTSE(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*StockSnapshotResponse, error)
-	GetStockTSEHistoryTick(ctx context.Context, in *Date, opts ...grpc.CallOption) (*StockHistoryTickResponse, error)
-	GetStockTSEHistoryKbar(ctx context.Context, in *Date, opts ...grpc.CallOption) (*StockHistoryKbarResponse, error)
-	GetStockTSEHistoryClose(ctx context.Context, in *Date, opts ...grpc.CallOption) (*StockHistoryCloseResponse, error)
-	GetStockVolumeRank(ctx context.Context, in *VolumeRankRequest, opts ...grpc.CallOption) (*StockVolumeRankResponse, error)
 	GetStockSnapshotByNumArr(ctx context.Context, in *StockNumArr, opts ...grpc.CallOption) (*StockSnapshotResponse, error)
+	GetStockSnapshotTSE(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*StockSnapshotResponse, error)
+	// History
 	GetStockHistoryTick(ctx context.Context, in *StockNumArrWithDate, opts ...grpc.CallOption) (*StockHistoryTickResponse, error)
 	GetStockHistoryKbar(ctx context.Context, in *StockNumArrWithDate, opts ...grpc.CallOption) (*StockHistoryKbarResponse, error)
 	GetStockHistoryClose(ctx context.Context, in *StockNumArrWithDate, opts ...grpc.CallOption) (*StockHistoryCloseResponse, error)
 	GetStockHistoryCloseByDateArr(ctx context.Context, in *StockNumArrWithDateArr, opts ...grpc.CallOption) (*StockHistoryCloseResponse, error)
+	GetStockTSEHistoryTick(ctx context.Context, in *Date, opts ...grpc.CallOption) (*StockHistoryTickResponse, error)
+	GetStockTSEHistoryKbar(ctx context.Context, in *Date, opts ...grpc.CallOption) (*StockHistoryKbarResponse, error)
+	GetStockTSEHistoryClose(ctx context.Context, in *Date, opts ...grpc.CallOption) (*StockHistoryCloseResponse, error)
+	// Target
+	GetStockVolumeRank(ctx context.Context, in *VolumeRankRequest, opts ...grpc.CallOption) (*StockVolumeRankResponse, error)
 	SubscribeStockTick(ctx context.Context, in *StockNumArr, opts ...grpc.CallOption) (*SubscribeResponse, error)
 	SubscribeStockBidAsk(ctx context.Context, in *StockNumArr, opts ...grpc.CallOption) (*SubscribeResponse, error)
 	UnSubscribeStockTick(ctx context.Context, in *StockNumArr, opts ...grpc.CallOption) (*SubscribeResponse, error)
@@ -77,54 +80,18 @@ func (c *sinopacForwarderClient) GetAllStockSnapshot(ctx context.Context, in *em
 	return out, nil
 }
 
-func (c *sinopacForwarderClient) GetStockSnapshotTSE(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*StockSnapshotResponse, error) {
-	out := new(StockSnapshotResponse)
-	err := c.cc.Invoke(ctx, "/sinopac_forwarder.SinopacForwarder/GetStockSnapshotTSE", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *sinopacForwarderClient) GetStockTSEHistoryTick(ctx context.Context, in *Date, opts ...grpc.CallOption) (*StockHistoryTickResponse, error) {
-	out := new(StockHistoryTickResponse)
-	err := c.cc.Invoke(ctx, "/sinopac_forwarder.SinopacForwarder/GetStockTSEHistoryTick", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *sinopacForwarderClient) GetStockTSEHistoryKbar(ctx context.Context, in *Date, opts ...grpc.CallOption) (*StockHistoryKbarResponse, error) {
-	out := new(StockHistoryKbarResponse)
-	err := c.cc.Invoke(ctx, "/sinopac_forwarder.SinopacForwarder/GetStockTSEHistoryKbar", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *sinopacForwarderClient) GetStockTSEHistoryClose(ctx context.Context, in *Date, opts ...grpc.CallOption) (*StockHistoryCloseResponse, error) {
-	out := new(StockHistoryCloseResponse)
-	err := c.cc.Invoke(ctx, "/sinopac_forwarder.SinopacForwarder/GetStockTSEHistoryClose", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *sinopacForwarderClient) GetStockVolumeRank(ctx context.Context, in *VolumeRankRequest, opts ...grpc.CallOption) (*StockVolumeRankResponse, error) {
-	out := new(StockVolumeRankResponse)
-	err := c.cc.Invoke(ctx, "/sinopac_forwarder.SinopacForwarder/GetStockVolumeRank", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *sinopacForwarderClient) GetStockSnapshotByNumArr(ctx context.Context, in *StockNumArr, opts ...grpc.CallOption) (*StockSnapshotResponse, error) {
 	out := new(StockSnapshotResponse)
 	err := c.cc.Invoke(ctx, "/sinopac_forwarder.SinopacForwarder/GetStockSnapshotByNumArr", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *sinopacForwarderClient) GetStockSnapshotTSE(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*StockSnapshotResponse, error) {
+	out := new(StockSnapshotResponse)
+	err := c.cc.Invoke(ctx, "/sinopac_forwarder.SinopacForwarder/GetStockSnapshotTSE", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -161,6 +128,42 @@ func (c *sinopacForwarderClient) GetStockHistoryClose(ctx context.Context, in *S
 func (c *sinopacForwarderClient) GetStockHistoryCloseByDateArr(ctx context.Context, in *StockNumArrWithDateArr, opts ...grpc.CallOption) (*StockHistoryCloseResponse, error) {
 	out := new(StockHistoryCloseResponse)
 	err := c.cc.Invoke(ctx, "/sinopac_forwarder.SinopacForwarder/GetStockHistoryCloseByDateArr", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *sinopacForwarderClient) GetStockTSEHistoryTick(ctx context.Context, in *Date, opts ...grpc.CallOption) (*StockHistoryTickResponse, error) {
+	out := new(StockHistoryTickResponse)
+	err := c.cc.Invoke(ctx, "/sinopac_forwarder.SinopacForwarder/GetStockTSEHistoryTick", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *sinopacForwarderClient) GetStockTSEHistoryKbar(ctx context.Context, in *Date, opts ...grpc.CallOption) (*StockHistoryKbarResponse, error) {
+	out := new(StockHistoryKbarResponse)
+	err := c.cc.Invoke(ctx, "/sinopac_forwarder.SinopacForwarder/GetStockTSEHistoryKbar", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *sinopacForwarderClient) GetStockTSEHistoryClose(ctx context.Context, in *Date, opts ...grpc.CallOption) (*StockHistoryCloseResponse, error) {
+	out := new(StockHistoryCloseResponse)
+	err := c.cc.Invoke(ctx, "/sinopac_forwarder.SinopacForwarder/GetStockTSEHistoryClose", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *sinopacForwarderClient) GetStockVolumeRank(ctx context.Context, in *VolumeRankRequest, opts ...grpc.CallOption) (*StockVolumeRankResponse, error) {
+	out := new(StockVolumeRankResponse)
+	err := c.cc.Invoke(ctx, "/sinopac_forwarder.SinopacForwarder/GetStockVolumeRank", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -207,19 +210,22 @@ func (c *sinopacForwarderClient) UnSubscribeStockBidAsk(ctx context.Context, in 
 // All implementations must embed UnimplementedSinopacForwarderServer
 // for forward compatibility
 type SinopacForwarderServer interface {
+	// Basic
 	GetServerToken(context.Context, *emptypb.Empty) (*TokenResponse, error)
 	GetAllStockDetail(context.Context, *emptypb.Empty) (*StockDetailResponse, error)
 	GetAllStockSnapshot(context.Context, *emptypb.Empty) (*StockSnapshotResponse, error)
-	GetStockSnapshotTSE(context.Context, *emptypb.Empty) (*StockSnapshotResponse, error)
-	GetStockTSEHistoryTick(context.Context, *Date) (*StockHistoryTickResponse, error)
-	GetStockTSEHistoryKbar(context.Context, *Date) (*StockHistoryKbarResponse, error)
-	GetStockTSEHistoryClose(context.Context, *Date) (*StockHistoryCloseResponse, error)
-	GetStockVolumeRank(context.Context, *VolumeRankRequest) (*StockVolumeRankResponse, error)
 	GetStockSnapshotByNumArr(context.Context, *StockNumArr) (*StockSnapshotResponse, error)
+	GetStockSnapshotTSE(context.Context, *emptypb.Empty) (*StockSnapshotResponse, error)
+	// History
 	GetStockHistoryTick(context.Context, *StockNumArrWithDate) (*StockHistoryTickResponse, error)
 	GetStockHistoryKbar(context.Context, *StockNumArrWithDate) (*StockHistoryKbarResponse, error)
 	GetStockHistoryClose(context.Context, *StockNumArrWithDate) (*StockHistoryCloseResponse, error)
 	GetStockHistoryCloseByDateArr(context.Context, *StockNumArrWithDateArr) (*StockHistoryCloseResponse, error)
+	GetStockTSEHistoryTick(context.Context, *Date) (*StockHistoryTickResponse, error)
+	GetStockTSEHistoryKbar(context.Context, *Date) (*StockHistoryKbarResponse, error)
+	GetStockTSEHistoryClose(context.Context, *Date) (*StockHistoryCloseResponse, error)
+	// Target
+	GetStockVolumeRank(context.Context, *VolumeRankRequest) (*StockVolumeRankResponse, error)
 	SubscribeStockTick(context.Context, *StockNumArr) (*SubscribeResponse, error)
 	SubscribeStockBidAsk(context.Context, *StockNumArr) (*SubscribeResponse, error)
 	UnSubscribeStockTick(context.Context, *StockNumArr) (*SubscribeResponse, error)
@@ -240,23 +246,11 @@ func (UnimplementedSinopacForwarderServer) GetAllStockDetail(context.Context, *e
 func (UnimplementedSinopacForwarderServer) GetAllStockSnapshot(context.Context, *emptypb.Empty) (*StockSnapshotResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAllStockSnapshot not implemented")
 }
-func (UnimplementedSinopacForwarderServer) GetStockSnapshotTSE(context.Context, *emptypb.Empty) (*StockSnapshotResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetStockSnapshotTSE not implemented")
-}
-func (UnimplementedSinopacForwarderServer) GetStockTSEHistoryTick(context.Context, *Date) (*StockHistoryTickResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetStockTSEHistoryTick not implemented")
-}
-func (UnimplementedSinopacForwarderServer) GetStockTSEHistoryKbar(context.Context, *Date) (*StockHistoryKbarResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetStockTSEHistoryKbar not implemented")
-}
-func (UnimplementedSinopacForwarderServer) GetStockTSEHistoryClose(context.Context, *Date) (*StockHistoryCloseResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetStockTSEHistoryClose not implemented")
-}
-func (UnimplementedSinopacForwarderServer) GetStockVolumeRank(context.Context, *VolumeRankRequest) (*StockVolumeRankResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetStockVolumeRank not implemented")
-}
 func (UnimplementedSinopacForwarderServer) GetStockSnapshotByNumArr(context.Context, *StockNumArr) (*StockSnapshotResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetStockSnapshotByNumArr not implemented")
+}
+func (UnimplementedSinopacForwarderServer) GetStockSnapshotTSE(context.Context, *emptypb.Empty) (*StockSnapshotResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetStockSnapshotTSE not implemented")
 }
 func (UnimplementedSinopacForwarderServer) GetStockHistoryTick(context.Context, *StockNumArrWithDate) (*StockHistoryTickResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetStockHistoryTick not implemented")
@@ -269,6 +263,18 @@ func (UnimplementedSinopacForwarderServer) GetStockHistoryClose(context.Context,
 }
 func (UnimplementedSinopacForwarderServer) GetStockHistoryCloseByDateArr(context.Context, *StockNumArrWithDateArr) (*StockHistoryCloseResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetStockHistoryCloseByDateArr not implemented")
+}
+func (UnimplementedSinopacForwarderServer) GetStockTSEHistoryTick(context.Context, *Date) (*StockHistoryTickResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetStockTSEHistoryTick not implemented")
+}
+func (UnimplementedSinopacForwarderServer) GetStockTSEHistoryKbar(context.Context, *Date) (*StockHistoryKbarResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetStockTSEHistoryKbar not implemented")
+}
+func (UnimplementedSinopacForwarderServer) GetStockTSEHistoryClose(context.Context, *Date) (*StockHistoryCloseResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetStockTSEHistoryClose not implemented")
+}
+func (UnimplementedSinopacForwarderServer) GetStockVolumeRank(context.Context, *VolumeRankRequest) (*StockVolumeRankResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetStockVolumeRank not implemented")
 }
 func (UnimplementedSinopacForwarderServer) SubscribeStockTick(context.Context, *StockNumArr) (*SubscribeResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SubscribeStockTick not implemented")
@@ -349,96 +355,6 @@ func _SinopacForwarder_GetAllStockSnapshot_Handler(srv interface{}, ctx context.
 	return interceptor(ctx, in, info, handler)
 }
 
-func _SinopacForwarder_GetStockSnapshotTSE_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(emptypb.Empty)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(SinopacForwarderServer).GetStockSnapshotTSE(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/sinopac_forwarder.SinopacForwarder/GetStockSnapshotTSE",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SinopacForwarderServer).GetStockSnapshotTSE(ctx, req.(*emptypb.Empty))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _SinopacForwarder_GetStockTSEHistoryTick_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Date)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(SinopacForwarderServer).GetStockTSEHistoryTick(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/sinopac_forwarder.SinopacForwarder/GetStockTSEHistoryTick",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SinopacForwarderServer).GetStockTSEHistoryTick(ctx, req.(*Date))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _SinopacForwarder_GetStockTSEHistoryKbar_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Date)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(SinopacForwarderServer).GetStockTSEHistoryKbar(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/sinopac_forwarder.SinopacForwarder/GetStockTSEHistoryKbar",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SinopacForwarderServer).GetStockTSEHistoryKbar(ctx, req.(*Date))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _SinopacForwarder_GetStockTSEHistoryClose_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Date)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(SinopacForwarderServer).GetStockTSEHistoryClose(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/sinopac_forwarder.SinopacForwarder/GetStockTSEHistoryClose",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SinopacForwarderServer).GetStockTSEHistoryClose(ctx, req.(*Date))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _SinopacForwarder_GetStockVolumeRank_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(VolumeRankRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(SinopacForwarderServer).GetStockVolumeRank(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/sinopac_forwarder.SinopacForwarder/GetStockVolumeRank",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SinopacForwarderServer).GetStockVolumeRank(ctx, req.(*VolumeRankRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _SinopacForwarder_GetStockSnapshotByNumArr_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(StockNumArr)
 	if err := dec(in); err != nil {
@@ -453,6 +369,24 @@ func _SinopacForwarder_GetStockSnapshotByNumArr_Handler(srv interface{}, ctx con
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(SinopacForwarderServer).GetStockSnapshotByNumArr(ctx, req.(*StockNumArr))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SinopacForwarder_GetStockSnapshotTSE_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SinopacForwarderServer).GetStockSnapshotTSE(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/sinopac_forwarder.SinopacForwarder/GetStockSnapshotTSE",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SinopacForwarderServer).GetStockSnapshotTSE(ctx, req.(*emptypb.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -525,6 +459,78 @@ func _SinopacForwarder_GetStockHistoryCloseByDateArr_Handler(srv interface{}, ct
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(SinopacForwarderServer).GetStockHistoryCloseByDateArr(ctx, req.(*StockNumArrWithDateArr))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SinopacForwarder_GetStockTSEHistoryTick_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Date)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SinopacForwarderServer).GetStockTSEHistoryTick(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/sinopac_forwarder.SinopacForwarder/GetStockTSEHistoryTick",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SinopacForwarderServer).GetStockTSEHistoryTick(ctx, req.(*Date))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SinopacForwarder_GetStockTSEHistoryKbar_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Date)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SinopacForwarderServer).GetStockTSEHistoryKbar(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/sinopac_forwarder.SinopacForwarder/GetStockTSEHistoryKbar",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SinopacForwarderServer).GetStockTSEHistoryKbar(ctx, req.(*Date))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SinopacForwarder_GetStockTSEHistoryClose_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Date)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SinopacForwarderServer).GetStockTSEHistoryClose(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/sinopac_forwarder.SinopacForwarder/GetStockTSEHistoryClose",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SinopacForwarderServer).GetStockTSEHistoryClose(ctx, req.(*Date))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SinopacForwarder_GetStockVolumeRank_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(VolumeRankRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SinopacForwarderServer).GetStockVolumeRank(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/sinopac_forwarder.SinopacForwarder/GetStockVolumeRank",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SinopacForwarderServer).GetStockVolumeRank(ctx, req.(*VolumeRankRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -621,28 +627,12 @@ var SinopacForwarder_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _SinopacForwarder_GetAllStockSnapshot_Handler,
 		},
 		{
-			MethodName: "GetStockSnapshotTSE",
-			Handler:    _SinopacForwarder_GetStockSnapshotTSE_Handler,
-		},
-		{
-			MethodName: "GetStockTSEHistoryTick",
-			Handler:    _SinopacForwarder_GetStockTSEHistoryTick_Handler,
-		},
-		{
-			MethodName: "GetStockTSEHistoryKbar",
-			Handler:    _SinopacForwarder_GetStockTSEHistoryKbar_Handler,
-		},
-		{
-			MethodName: "GetStockTSEHistoryClose",
-			Handler:    _SinopacForwarder_GetStockTSEHistoryClose_Handler,
-		},
-		{
-			MethodName: "GetStockVolumeRank",
-			Handler:    _SinopacForwarder_GetStockVolumeRank_Handler,
-		},
-		{
 			MethodName: "GetStockSnapshotByNumArr",
 			Handler:    _SinopacForwarder_GetStockSnapshotByNumArr_Handler,
+		},
+		{
+			MethodName: "GetStockSnapshotTSE",
+			Handler:    _SinopacForwarder_GetStockSnapshotTSE_Handler,
 		},
 		{
 			MethodName: "GetStockHistoryTick",
@@ -659,6 +649,22 @@ var SinopacForwarder_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetStockHistoryCloseByDateArr",
 			Handler:    _SinopacForwarder_GetStockHistoryCloseByDateArr_Handler,
+		},
+		{
+			MethodName: "GetStockTSEHistoryTick",
+			Handler:    _SinopacForwarder_GetStockTSEHistoryTick_Handler,
+		},
+		{
+			MethodName: "GetStockTSEHistoryKbar",
+			Handler:    _SinopacForwarder_GetStockTSEHistoryKbar_Handler,
+		},
+		{
+			MethodName: "GetStockTSEHistoryClose",
+			Handler:    _SinopacForwarder_GetStockTSEHistoryClose_Handler,
+		},
+		{
+			MethodName: "GetStockVolumeRank",
+			Handler:    _SinopacForwarder_GetStockVolumeRank_Handler,
 		},
 		{
 			MethodName: "SubscribeStockTick",

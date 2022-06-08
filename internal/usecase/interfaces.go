@@ -77,10 +77,10 @@ type (
 type (
 	// Stream -.
 	Stream interface {
-		ReceiveEvent(ctx context.Context) error
-		ReceiveTicks(ctx context.Context) error
-		ReceiveBidAsk(ctx context.Context) error
-		ReceiveOrderStatus(ctx context.Context) error
+		ReceiveEvent(ctx context.Context)
+		ReceiveTicks(ctx context.Context)
+		ReceiveBidAsk(ctx context.Context)
+		ReceiveOrderStatus(ctx context.Context)
 	}
 
 	// StreamRepo -.

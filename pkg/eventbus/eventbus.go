@@ -18,13 +18,13 @@ func New() *Bus {
 }
 
 // PublishTopicEvent PublishTopicEvent
-func (c *Bus) PublishTopicEvent(topic string, event interface{}) {
-	go c.bus.Publish(topic, event)
+func (c *Bus) PublishTopicEvent(topic string, arg ...interface{}) {
+	go c.bus.Publish(topic, arg...)
 }
 
 // SubscribeTopic SubscribeTopic
-func (c *Bus) SubscribeTopic(topic string, f func(opt ...interface{})) error {
-	err := c.bus.Subscribe(topic, f)
+func (c *Bus) SubscribeTopic(topic string, fn interface{}) error {
+	err := c.bus.Subscribe(topic, fn)
 	if err != nil {
 		return err
 	}

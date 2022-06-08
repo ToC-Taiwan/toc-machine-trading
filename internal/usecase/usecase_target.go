@@ -2,7 +2,6 @@ package usecase
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"toc-machine-trading/internal/entity"
@@ -46,16 +45,20 @@ func NewTarget(r *repo.TargetRepo, t *grpcapi.TargetgRPCAPI, bus *eventbus.Bus) 
 		}
 	}
 
-	for _, v := range targetArr {
-		logger.Get().Warnf("%+v\n", v)
+	bus.PublishTopicEvent(topicTargets, targetArr)
+
+	if err := bus.SubscribeTopic(topicSubscribeTargets, uc.SubscribeStockTick); err != nil {
+		logger.Get().Panic(err)
 	}
 
-	bus.PublishTopicEvent(targetsTopic, targetArr)
+	if err := bus.SubscribeTopic(topicSubscribeTargets, uc.SubscribeStockBidAsk); err != nil {
+		logger.Get().Panic(err)
+	}
 }
 
 // SearchTradeDayTargets -.
-func (uc *TargetUseCase) SearchTradeDayTargets(ctx context.Context, dateTime time.Time) ([]*entity.Target, error) {
-	lastTradeDay := GetLastNTradeDayByDate(1, dateTime)[0]
+func (uc *TargetUseCase) SearchTradeDayTargets(ctx context.Context, tradeDay time.Time) ([]*entity.Target, error) {
+	lastTradeDay := GetLastNTradeDayByDate(1, tradeDay)[0]
 	t, err := uc.gRPCAPI.GetStockVolumeRank(lastTradeDay.Format(global.ShortTimeLayout))
 	if err != nil {
 		return nil, err
@@ -64,10 +67,10 @@ func (uc *TargetUseCase) SearchTradeDayTargets(ctx context.Context, dateTime tim
 	for i, v := range t {
 		result = append(result, &entity.Target{
 			StockNum:    v.GetCode(),
-			TradeDay:    dateTime,
+			TradeDay:    tradeDay,
 			Rank:        i + 1,
 			Volume:      v.GetTotalVolume(),
-			Subscribe:   false,
+			Subscribe:   true,
 			RealTimeAdd: false,
 		})
 	}
@@ -87,7 +90,26 @@ func (uc *TargetUseCase) SubscribeStockTick(ctx context.Context, targetArr []*en
 	}
 
 	if len(fail) != 0 {
-		return fmt.Errorf("subscribe fail %+v", fail)
+		logger.Get().Panic("subscribe fail")
+	}
+
+	return nil
+}
+
+// SubscribeStockBidAsk -.
+func (uc *TargetUseCase) SubscribeStockBidAsk(ctx context.Context, targetArr []*entity.Target) error {
+	var tmp []string
+	for _, v := range targetArr {
+		tmp = append(tmp, v.StockNum)
+	}
+
+	fail, err := uc.gRPCAPI.SubscribeStockBidAsk(tmp)
+	if err != nil {
+		return err
+	}
+
+	if len(fail) != 0 {
+		logger.Get().Panic("subscribe fail")
 	}
 
 	return nil

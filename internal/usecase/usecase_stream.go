@@ -21,88 +21,88 @@ func NewStream(r *repo.StreamRepo, t *grpcapi.StreamgRPCAPI) {
 		repo:    r,
 		gRPCAPI: t,
 	}
-	go func() {
-		if err := uc.ReceiveEvent(context.Background()); err != nil {
-			logger.Get().Panic(err)
-		}
-	}()
+
+	go uc.ReceiveEvent(context.Background())
+	go uc.ReceiveTicks(context.Background())
+	go uc.ReceiveBidAsk(context.Background())
+	go uc.ReceiveOrderStatus(context.Background())
 }
 
 // ReceiveEvent -.
-func (uc *StreamUseCase) ReceiveEvent(ctx context.Context) error {
+func (uc *StreamUseCase) ReceiveEvent(ctx context.Context) {
 	eventChan := make(chan *entity.SinopacEvent)
-	if err := uc.gRPCAPI.EventChannel(eventChan); err != nil {
-		return err
-	}
-
-	for {
-		select {
-		case <-ctx.Done():
-			return nil
-		case event := <-eventChan:
-			if err := uc.repo.InsertEvent(ctx, event); err != nil {
-				return err
+	go func() {
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case event := <-eventChan:
+				logger.Get().Warn(event)
+				if err := uc.repo.InsertEvent(ctx, event); err != nil {
+					logger.Get().Panic(err)
+				}
 			}
 		}
+	}()
+
+	if err := uc.gRPCAPI.EventChannel(eventChan); err != nil {
+		logger.Get().Panic(err)
 	}
 }
 
 // ReceiveTicks -.
-func (uc *StreamUseCase) ReceiveTicks(ctx context.Context) error {
+func (uc *StreamUseCase) ReceiveTicks(ctx context.Context) {
 	tickChan := make(chan *entity.RealTimeTick)
-	if err := uc.gRPCAPI.TickChannel(tickChan); err != nil {
-		return err
-	}
-
-	for {
-		select {
-		case <-ctx.Done():
-			return nil
-		case tick := <-tickChan:
-			// if err := uc.repo.InsertEvent(ctx, event); err != nil {
-			// 	return err
-			// }
-			logger.Get().Info(tick)
+	go func() {
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case tick := <-tickChan:
+				CacheGetTickChan(tick.StockNum) <- tick
+			}
 		}
+	}()
+
+	if err := uc.gRPCAPI.TickChannel(tickChan); err != nil {
+		logger.Get().Panic(err)
 	}
 }
 
 // ReceiveBidAsk -.
-func (uc *StreamUseCase) ReceiveBidAsk(ctx context.Context) error {
+func (uc *StreamUseCase) ReceiveBidAsk(ctx context.Context) {
 	bidAskChan := make(chan *entity.RealTimeBidAsk)
-	if err := uc.gRPCAPI.BidAskChannel(bidAskChan); err != nil {
-		return err
-	}
-
-	for {
-		select {
-		case <-ctx.Done():
-			return nil
-		case bidAsk := <-bidAskChan:
-			// if err := uc.repo.InsertEvent(ctx, event); err != nil {
-			// 	return err
-			// }
-			logger.Get().Info(bidAsk)
+	go func() {
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case bidAsk := <-bidAskChan:
+				CacheGetBidAskChan(bidAsk.StockNum) <- bidAsk
+			}
 		}
+	}()
+
+	if err := uc.gRPCAPI.BidAskChannel(bidAskChan); err != nil {
+		logger.Get().Panic(err)
 	}
 }
 
 // ReceiveOrderStatus -.
-func (uc *StreamUseCase) ReceiveOrderStatus(ctx context.Context) error {
+func (uc *StreamUseCase) ReceiveOrderStatus(ctx context.Context) {
 	orderStatusChan := make(chan *entity.OrderStatus)
-	if err := uc.gRPCAPI.OrderStatusChannel(orderStatusChan); err != nil {
-		return err
-	}
-
-	for {
-		select {
-		case <-ctx.Done():
-			return nil
-		case orderStatus := <-orderStatusChan:
-			// if err := uc.repo.InsertEvent(ctx, event); err != nil {
-			// 	return err
-			// }
-			logger.Get().Info(orderStatus)
+	go func() {
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case orderStatus := <-orderStatusChan:
+				logger.Get().Info(orderStatus)
+			}
 		}
+	}()
+
+	if err := uc.gRPCAPI.OrderStatusChannel(orderStatusChan); err != nil {
+		logger.Get().Panic(err)
 	}
 }

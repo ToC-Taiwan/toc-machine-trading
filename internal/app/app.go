@@ -40,10 +40,11 @@ func Run(cfg *config.Config) {
 		logger.Get().Panic(err)
 	}
 
-	bus := eventbus.New()
 	// Order cannot be modifided
-	usecase.NewStream(repo.NewStream(pg), grpcapi.NewStream(sc))
+	bus := eventbus.New()
 	basicUseCase := usecase.NewBasic(repo.NewBasic(pg), grpcapi.NewBasic(sc))
+	usecase.NewStream(repo.NewStream(pg), grpcapi.NewStream(sc))
+	usecase.NewOrder(repo.NewOrder(pg), grpcapi.NewOrder(sc), bus)
 	usecase.NewTarget(repo.NewTarget(pg), grpcapi.NewTarget(sc), bus)
 
 	// HTTP Server

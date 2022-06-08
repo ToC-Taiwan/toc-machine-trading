@@ -28,7 +28,9 @@ brew install pre-commit
 - install/modify from config
 
 ```sh
+pre-commit autoupdate
 pre-commit install
+pre-commit run --all-files
 ```
 
 ### Modify CHANGELOG
