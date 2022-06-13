@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"toc-machine-trading/pkg/config"
-	"toc-machine-trading/pkg/logger"
 	"toc-machine-trading/pkg/postgres"
 
 	"github.com/golang-migrate/migrate/v4"
@@ -27,7 +26,7 @@ const (
 func MigrateDB(cfg *config.Config) {
 	createErr := tryCreateDB(cfg.Postgres.DBName)
 	if createErr != nil {
-		logger.Get().Panic(createErr)
+		log.Panic(createErr)
 	}
 
 	var (
@@ -43,13 +42,13 @@ func MigrateDB(cfg *config.Config) {
 			break
 		}
 
-		logger.Get().Infof("Migrate: postgres is trying to connect, attempts left: %d", attempts)
+		log.Infof("Migrate: postgres is trying to connect, attempts left: %d", attempts)
 		time.Sleep(_defaultTimeout)
 		attempts--
 	}
 
 	if err != nil {
-		logger.Get().Fatalf("Migrate: postgres connect error: %s", err)
+		log.Fatalf("Migrate: postgres connect error: %s", err)
 	}
 
 	err = m.Up()
@@ -58,16 +57,16 @@ func MigrateDB(cfg *config.Config) {
 	}()
 
 	if err != nil && !errors.Is(err, migrate.ErrNoChange) {
-		logger.Get().Infof("Migrate: up error: %s", err)
+		log.Infof("Migrate: up error: %s", err)
 		return
 	}
 
 	if errors.Is(err, migrate.ErrNoChange) {
-		logger.Get().Info("Migrate: no change")
+		log.Info("Migrate: no change")
 		return
 	}
 
-	logger.Get().Info("Migrate: up success")
+	log.Info("Migrate: up success")
 }
 
 func tryCreateDB(dbName string) error {

@@ -11,6 +11,8 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
+var log = logger.Get()
+
 const (
 	_defaultMaxPoolSize  = 10
 	_defaultConnAttempts = 10
@@ -58,7 +60,7 @@ func New(url string, opts ...Option) (*Connection, error) {
 			continue
 		}
 
-		logger.Get().Infof("gRPC trying connect, attempts left: %d", conn.connAttempts)
+		log.Infof("gRPC trying connect, attempts left: %d", conn.connAttempts)
 		time.Sleep(conn.connTimeout)
 		conn.connAttempts--
 	}
@@ -92,7 +94,7 @@ func (s *Connection) PutReadyConn(conn *grpc.ClientConn) {
 func (s *Connection) Shutdown() error {
 	for {
 		if len(s.ReadyConn) != len(s.pool) {
-			logger.Get().Warnf("All connection: %d, idle connection: %d", len(s.pool), len(s.ReadyConn))
+			log.Warnf("All connection: %d, idle connection: %d", len(s.pool), len(s.ReadyConn))
 			continue
 		} else {
 			break

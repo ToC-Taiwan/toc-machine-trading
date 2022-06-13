@@ -4,12 +4,15 @@ package v1
 import (
 	"toc-machine-trading/docs"
 	"toc-machine-trading/internal/usecase"
+	"toc-machine-trading/pkg/logger"
 
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
+
+var log = logger.Get()
 
 // NewRouter -.
 // Swagger spec:

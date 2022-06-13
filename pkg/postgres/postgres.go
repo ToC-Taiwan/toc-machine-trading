@@ -11,6 +11,8 @@ import (
 	"github.com/jackc/pgx/v4/pgxpool"
 )
 
+var log = logger.Get()
+
 const (
 	_defaultMaxPoolSize  = 1
 	_defaultConnAttempts = 10
@@ -55,7 +57,7 @@ func New(url string, opts ...Option) (*Postgres, error) {
 			break
 		}
 
-		logger.Get().Infof("Postgres trying connect, attempts left: %d", pg.connAttempts)
+		log.Infof("Postgres trying connect, attempts left: %d", pg.connAttempts)
 
 		time.Sleep(pg.connTimeout)
 

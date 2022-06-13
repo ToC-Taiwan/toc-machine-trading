@@ -10,7 +10,6 @@ import (
 	"toc-machine-trading/internal/usecase/grpcapi"
 	"toc-machine-trading/internal/usecase/repo"
 	"toc-machine-trading/pkg/global"
-	"toc-machine-trading/pkg/logger"
 )
 
 // BasicUseCase -.
@@ -29,28 +28,28 @@ func NewBasic(r *repo.BasicRepo, t *grpcapi.BasicgRPCAPI) *BasicUseCase {
 		for {
 			token, err := uc.gRPCAPI.GetServerToken()
 			if err != nil {
-				logger.Get().Panic(err)
+				log.Panic(err)
 			}
 			if sinopacToken == "" {
 				sinopacToken = token
 			} else if sinopacToken != token {
-				logger.Get().Panic("token changed")
+				log.Panic("token changed")
 			}
 			time.Sleep(time.Second * 30)
 		}
 	}()
 
 	if err := uc.importCalendarDate(ctx); err != nil {
-		logger.Get().Panic(err)
+		log.Panic(err)
 	}
 
 	if _, err := uc.GetAllSinopacStockAndUpdateRepo(ctx); err != nil {
-		logger.Get().Panic(err)
+		log.Panic(err)
 	}
 
 	tradeDayArr, err := uc.repo.QueryAllCalendar(ctx)
 	if err != nil {
-		logger.Get().Panic(err)
+		log.Panic(err)
 	}
 
 	tmp := make(map[time.Time]bool)
@@ -63,7 +62,7 @@ func NewBasic(r *repo.BasicRepo, t *grpcapi.BasicgRPCAPI) *BasicUseCase {
 
 	tradeDay, err := tradeDay()
 	if err != nil {
-		logger.Get().Panic(err)
+		log.Panic(err)
 	}
 	CacheSetTradeDay(tradeDay)
 

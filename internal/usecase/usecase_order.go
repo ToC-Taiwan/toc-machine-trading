@@ -20,6 +20,17 @@ func NewOrder(r *repo.OrderRepo, t *grpcapi.OrdergRPCAPI, bus *eventbus.Bus) {
 		gRPCAPI: t,
 		bus:     bus,
 	}
-	tmp := make(chan interface{})
-	tmp <- uc
+
+	if err := uc.bus.SubscribeTopic(topicBuyOrder, nil); err != nil {
+		log.Panic(err)
+	}
+	if err := uc.bus.SubscribeTopic(topicSellOrder, nil); err != nil {
+		log.Panic(err)
+	}
+	if err := uc.bus.SubscribeTopic(topicSellFirstOrder, nil); err != nil {
+		log.Panic(err)
+	}
+	if err := uc.bus.SubscribeTopic(topicBuyOrder, nil); err != nil {
+		log.Panic(err)
+	}
 }

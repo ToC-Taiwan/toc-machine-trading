@@ -9,6 +9,8 @@ import (
 	"github.com/ilyakaznacheev/cleanenv"
 )
 
+var log = logger.Get()
+
 var (
 	globalConfig *Config
 	once         sync.Once
@@ -28,12 +30,12 @@ func parseConfigFile() {
 	newConfig := Config{}
 	err := cleanenv.ReadConfig("./configs/config.yml", &newConfig)
 	if err != nil {
-		logger.Get().Panic(err)
+		log.Panic(err)
 	}
 
 	err = cleanenv.ReadEnv(&newConfig)
 	if err != nil {
-		logger.Get().Panic(err)
+		log.Panic(err)
 	}
 
 	globalConfig = &newConfig

@@ -10,7 +10,6 @@ import (
 	"toc-machine-trading/internal/usecase/repo"
 	"toc-machine-trading/pkg/eventbus"
 	"toc-machine-trading/pkg/global"
-	"toc-machine-trading/pkg/logger"
 )
 
 // TargetUseCase -.
@@ -32,23 +31,23 @@ func NewTarget(r *repo.TargetRepo, t *grpcapi.TargetgRPCAPI, bus *eventbus.Bus) 
 
 	// unsubscriba all first
 	if err := uc.UnSubscribeAll(ctx); err != nil {
-		logger.Get().Panic("unsubscribe all fail")
+		log.Panic("unsubscribe all fail")
 	}
 
 	targetArr, err := uc.repo.QueryTargetsByTradeDay(ctx, CacheGetTradeDay())
 	if err != nil {
-		logger.Get().Panic(err)
+		log.Panic(err)
 	}
 
 	if len(targetArr) == 0 {
 		targetArr, err = uc.SearchTradeDayTargets(ctx, CacheGetTradeDay())
 		if err != nil {
-			logger.Get().Panic(err)
+			log.Panic(err)
 		}
 
 		if len(targetArr) != 0 {
 			if err = uc.repo.InsertTargetArr(ctx, targetArr); err != nil {
-				logger.Get().Panic(err)
+				log.Panic(err)
 			}
 		}
 	}
@@ -58,10 +57,10 @@ func NewTarget(r *repo.TargetRepo, t *grpcapi.TargetgRPCAPI, bus *eventbus.Bus) 
 
 	// sub events
 	if err := bus.SubscribeTopic(topicSubscribeTickTargets, uc.SubscribeStockTick); err != nil {
-		logger.Get().Panic(err)
+		log.Panic(err)
 	}
 	if err := bus.SubscribeTopic(topicSubscribeBidAskTargets, uc.SubscribeStockBidAsk); err != nil {
-		logger.Get().Panic(err)
+		log.Panic(err)
 	}
 }
 

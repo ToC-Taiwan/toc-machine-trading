@@ -647,15 +647,15 @@ func (m *MockStream) EXPECT() *MockStreamMockRecorder {
 }
 
 // ReceiveBidAsk mocks base method.
-func (m *MockStream) ReceiveBidAsk(ctx context.Context) {
+func (m *MockStream) ReceiveBidAsk(ctx context.Context, targetArr []*entity.Target) {
 	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "ReceiveBidAsk", ctx)
+	m.ctrl.Call(m, "ReceiveBidAsk", ctx, targetArr)
 }
 
 // ReceiveBidAsk indicates an expected call of ReceiveBidAsk.
-func (mr *MockStreamMockRecorder) ReceiveBidAsk(ctx interface{}) *gomock.Call {
+func (mr *MockStreamMockRecorder) ReceiveBidAsk(ctx, targetArr interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReceiveBidAsk", reflect.TypeOf((*MockStream)(nil).ReceiveBidAsk), ctx)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReceiveBidAsk", reflect.TypeOf((*MockStream)(nil).ReceiveBidAsk), ctx, targetArr)
 }
 
 // ReceiveEvent mocks base method.
@@ -683,15 +683,15 @@ func (mr *MockStreamMockRecorder) ReceiveOrderStatus(ctx interface{}) *gomock.Ca
 }
 
 // ReceiveTicks mocks base method.
-func (m *MockStream) ReceiveTicks(ctx context.Context) {
+func (m *MockStream) ReceiveTicks(ctx context.Context, targetArr []*entity.Target) {
 	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "ReceiveTicks", ctx)
+	m.ctrl.Call(m, "ReceiveTicks", ctx, targetArr)
 }
 
 // ReceiveTicks indicates an expected call of ReceiveTicks.
-func (mr *MockStreamMockRecorder) ReceiveTicks(ctx interface{}) *gomock.Call {
+func (mr *MockStreamMockRecorder) ReceiveTicks(ctx, targetArr interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReceiveTicks", reflect.TypeOf((*MockStream)(nil).ReceiveTicks), ctx)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReceiveTicks", reflect.TypeOf((*MockStream)(nil).ReceiveTicks), ctx, targetArr)
 }
 
 // MockStreamRepo is a mock of StreamRepo interface.
@@ -755,15 +755,15 @@ func (m *MockStreamRabbit) EXPECT() *MockStreamRabbitMockRecorder {
 }
 
 // BidAskConsumer mocks base method.
-func (m *MockStreamRabbit) BidAskConsumer(bidAskChan chan *entity.RealTimeBidAsk) {
+func (m *MockStreamRabbit) BidAskConsumer(key string, bidAskChan chan *entity.RealTimeBidAsk) {
 	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "BidAskConsumer", bidAskChan)
+	m.ctrl.Call(m, "BidAskConsumer", key, bidAskChan)
 }
 
 // BidAskConsumer indicates an expected call of BidAskConsumer.
-func (mr *MockStreamRabbitMockRecorder) BidAskConsumer(bidAskChan interface{}) *gomock.Call {
+func (mr *MockStreamRabbitMockRecorder) BidAskConsumer(key, bidAskChan interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BidAskConsumer", reflect.TypeOf((*MockStreamRabbit)(nil).BidAskConsumer), bidAskChan)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BidAskConsumer", reflect.TypeOf((*MockStreamRabbit)(nil).BidAskConsumer), key, bidAskChan)
 }
 
 // EventConsumer mocks base method.
@@ -791,15 +791,15 @@ func (mr *MockStreamRabbitMockRecorder) OrderStatusConsumer(orderStatusChan inte
 }
 
 // TickConsumer mocks base method.
-func (m *MockStreamRabbit) TickConsumer(tickChan chan *entity.RealTimeTick) {
+func (m *MockStreamRabbit) TickConsumer(key string, tickChan chan *entity.RealTimeTick) {
 	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "TickConsumer", tickChan)
+	m.ctrl.Call(m, "TickConsumer", key, tickChan)
 }
 
 // TickConsumer indicates an expected call of TickConsumer.
-func (mr *MockStreamRabbitMockRecorder) TickConsumer(tickChan interface{}) *gomock.Call {
+func (mr *MockStreamRabbitMockRecorder) TickConsumer(key, tickChan interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "TickConsumer", reflect.TypeOf((*MockStreamRabbit)(nil).TickConsumer), tickChan)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "TickConsumer", reflect.TypeOf((*MockStreamRabbit)(nil).TickConsumer), key, tickChan)
 }
 
 // MockOrder is a mock of Order interface.

@@ -22,6 +22,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+var log = logger.Get()
+
 // Run -.
 func Run(cfg *config.Config) {
 	pg, err := postgres.New(
@@ -29,7 +31,7 @@ func Run(cfg *config.Config) {
 		postgres.MaxPoolSize(cfg.Postgres.PoolMax),
 	)
 	if err != nil {
-		logger.Get().Panic(err)
+		log.Panic(err)
 	}
 	defer pg.Close()
 
@@ -38,15 +40,25 @@ func Run(cfg *config.Config) {
 		sinopac.MaxPoolSize(cfg.Sinopac.PoolMax),
 	)
 	if err != nil {
-		logger.Get().Panic(err)
+		log.Panic(err)
 	}
 
 	// Order cannot be modifided
 	bus := eventbus.New()
+
+	// basic
 	basicUseCase := usecase.NewBasic(repo.NewBasic(pg), grpcapi.NewBasic(sc))
-	// usecase.NewOrder(repo.NewOrder(pg), grpcapi.NewOrder(sc), bus)
+
+	// order
+	usecase.NewOrder(repo.NewOrder(pg), grpcapi.NewOrder(sc), bus)
+
+	// stream
 	usecase.NewStream(repo.NewStream(pg), rabbit.NewStream(), bus)
+
+	// history
 	usecase.NewHistory(repo.NewHistory(pg), grpcapi.NewHistory(sc), bus)
+
+	// target
 	usecase.NewTarget(repo.NewTarget(pg), grpcapi.NewTarget(sc), bus)
 
 	// HTTP Server
@@ -59,19 +71,19 @@ func Run(cfg *config.Config) {
 	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
 	select {
 	case s := <-interrupt:
-		logger.Get().Info(s.String())
+		log.Info(s.String())
 	case err = <-httpServer.Notify():
-		logger.Get().Error(err)
+		log.Error(err)
 	}
 
 	err = sc.Shutdown()
 	if err != nil {
-		logger.Get().Error(err)
+		log.Error(err)
 	}
 
 	// Shutdown
 	err = httpServer.Shutdown()
 	if err != nil {
-		logger.Get().Error(err)
+		log.Error(err)
 	}
 }

@@ -7,7 +7,10 @@ import (
 
 	"toc-machine-trading/internal/entity"
 	"toc-machine-trading/pb"
+	"toc-machine-trading/pkg/logger"
 )
+
+var log = logger.Get()
 
 //go:generate mockgen -source=interfaces.go -destination=./mocks_test.go -package=usecase_test
 type (
@@ -80,9 +83,9 @@ type (
 	// Stream -.
 	Stream interface {
 		ReceiveEvent(ctx context.Context)
-		ReceiveTicks(ctx context.Context)
-		ReceiveBidAsk(ctx context.Context)
 		ReceiveOrderStatus(ctx context.Context)
+		ReceiveTicks(ctx context.Context, targetArr []*entity.Target)
+		ReceiveBidAsk(ctx context.Context, targetArr []*entity.Target)
 	}
 
 	// StreamRepo -.

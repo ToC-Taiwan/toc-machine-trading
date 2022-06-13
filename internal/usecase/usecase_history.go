@@ -7,7 +7,6 @@ import (
 	"toc-machine-trading/internal/usecase/grpcapi"
 	"toc-machine-trading/internal/usecase/repo"
 	"toc-machine-trading/pkg/eventbus"
-	"toc-machine-trading/pkg/logger"
 )
 
 // HistoryUseCase -.
@@ -26,7 +25,7 @@ func NewHistory(r *repo.HistoryRepo, t *grpcapi.HistorygRPCAPI, bus *eventbus.Bu
 	}
 
 	if err := uc.bus.SubscribeTopic(topicTargets, uc.FetchHistory); err != nil {
-		logger.Get().Panic(err)
+		log.Panic(err)
 	}
 }
 

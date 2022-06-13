@@ -9,7 +9,6 @@ import (
 	"toc-machine-trading/internal/usecase/rabbit"
 	"toc-machine-trading/internal/usecase/repo"
 	"toc-machine-trading/pkg/eventbus"
-	"toc-machine-trading/pkg/logger"
 )
 
 // StreamUseCase -.
@@ -31,10 +30,10 @@ func NewStream(r *repo.StreamRepo, t *rabbit.StreamRabbit, bus *eventbus.Bus) {
 	go uc.ReceiveOrderStatus(context.Background())
 
 	if err := uc.bus.SubscribeTopic(topicStreamTickTargets, uc.ReceiveTicks); err != nil {
-		logger.Get().Panic(err)
+		log.Panic(err)
 	}
 	if err := uc.bus.SubscribeTopic(topicStreamBidAskTargets, uc.ReceiveBidAsk); err != nil {
-		logger.Get().Panic(err)
+		log.Panic(err)
 	}
 }
 
@@ -44,9 +43,9 @@ func (uc *StreamUseCase) ReceiveEvent(ctx context.Context) {
 	go func() {
 		for {
 			event := <-eventChan
-			logger.Get().Info(time.Since(event.EventTime).String(), event)
+			log.Info(time.Since(event.EventTime).String(), event)
 			if err := uc.repo.InsertEvent(ctx, event); err != nil {
-				logger.Get().Error(err)
+				log.Error(err)
 			}
 		}
 	}()
@@ -59,7 +58,7 @@ func (uc *StreamUseCase) ReceiveOrderStatus(ctx context.Context) {
 	go func() {
 		for {
 			orderStatus := <-orderStatusChan
-			logger.Get().Info(orderStatus)
+			log.Info(orderStatus)
 		}
 	}()
 	uc.rabbit.OrderStatusConsumer(orderStatusChan)
@@ -74,7 +73,7 @@ func (uc *StreamUseCase) ReceiveTicks(ctx context.Context, targetArr []*entity.T
 			go func() {
 				for {
 					tick := <-tickChan
-					fmt.Printf("tick:%s\n", time.Since(tick.TickTime).String())
+					log.Infof("tick:%s\n", time.Since(tick.TickTime).String())
 				}
 			}()
 			uc.rabbit.TickConsumer(fmt.Sprintf("tick:%s", target.StockNum), tickChan)
@@ -92,7 +91,7 @@ func (uc *StreamUseCase) ReceiveBidAsk(ctx context.Context, targetArr []*entity.
 			go func() {
 				for {
 					bidAsk := <-bidAskChan
-					fmt.Printf("bidask:%s\n", time.Since(bidAsk.TickTime).String())
+					log.Infof("bidask:%s\n", time.Since(bidAsk.TickTime).String())
 				}
 			}()
 			uc.rabbit.BidAskConsumer(fmt.Sprintf("bid_ask:%s", target.StockNum), bidAskChan)

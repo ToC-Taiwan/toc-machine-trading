@@ -15,6 +15,8 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
+var log = logger.Get()
+
 // ActionListMap ActionListMap
 var ActionListMap = map[string]int64{
 	"Buy":  1,
@@ -41,7 +43,7 @@ type StreamRabbit struct {
 func NewStream() *StreamRabbit {
 	allConfig, err := config.GetConfig()
 	if err != nil {
-		logger.Get().Panic(err)
+		log.Panic(err)
 	}
 
 	conn := rabbitmq.NewConnection(
@@ -52,16 +54,16 @@ func NewStream() *StreamRabbit {
 	)
 
 	if err := conn.AttemptConnect(); err != nil {
-		logger.Get().Error(err)
+		log.Error(err)
 	}
 
 	return &StreamRabbit{conn}
 }
 
-func (c *StreamRabbit) getDelivery(key string) <-chan amqp.Delivery {
+func (c *StreamRabbit) establishDelivery(key string) <-chan amqp.Delivery {
 	delivery, err := c.conn.BindAndConsume(key)
 	if err != nil {
-		logger.Get().Panic(err)
+		log.Panic(err)
 	}
 	return delivery
 }
@@ -69,23 +71,23 @@ func (c *StreamRabbit) getDelivery(key string) <-chan amqp.Delivery {
 // EventConsumer -.
 func (c *StreamRabbit) EventConsumer(eventChan chan *entity.SinopacEvent) {
 	key := "event"
-	delivery := c.getDelivery(key)
+	delivery := c.establishDelivery(key)
 	for {
 		d, opened := <-delivery
 		if !opened {
-			logger.Get().Error("RabbitMQ is closed")
+			log.Error("RabbitMQ is closed")
 			return
 		}
 
 		body := pb.EventResponse{}
 		if err := proto.Unmarshal(d.Body, &body); err != nil {
-			logger.Get().Error(err)
+			log.Error(err)
 			continue
 		}
 
 		dataTime, err := time.ParseInLocation(global.LongTimeLayout, body.GetEventTime(), time.Local)
 		if err != nil {
-			logger.Get().Error(err)
+			log.Error(err)
 			continue
 		}
 
@@ -102,17 +104,17 @@ func (c *StreamRabbit) EventConsumer(eventChan chan *entity.SinopacEvent) {
 // OrderStatusConsumer OrderStatusConsumer
 func (c *StreamRabbit) OrderStatusConsumer(orderStatusChan chan *entity.OrderStatus) {
 	key := "order_status"
-	delivery := c.getDelivery(key)
+	delivery := c.establishDelivery(key)
 	for {
 		d, opened := <-delivery
 		if !opened {
-			logger.Get().Error("RabbitMQ is closed")
+			log.Error("RabbitMQ is closed")
 			return
 		}
 
 		body := pb.StockOrderStatus{}
 		if err := proto.Unmarshal(d.Body, &body); err != nil {
-			logger.Get().Error(err)
+			log.Error(err)
 			continue
 		}
 
@@ -120,7 +122,7 @@ func (c *StreamRabbit) OrderStatusConsumer(orderStatusChan chan *entity.OrderSta
 		statusMap := StatusListMap
 		orderTime, err := time.ParseInLocation(global.LongTimeLayout, body.GetOrderTime(), time.Local)
 		if err != nil {
-			logger.Get().Error(err)
+			log.Error(err)
 			continue
 		}
 		orderStatusChan <- &entity.OrderStatus{
@@ -137,23 +139,23 @@ func (c *StreamRabbit) OrderStatusConsumer(orderStatusChan chan *entity.OrderSta
 
 // TickConsumer -.
 func (c *StreamRabbit) TickConsumer(key string, tickChan chan *entity.RealTimeTick) {
-	delivery := c.getDelivery(key)
+	delivery := c.establishDelivery(key)
 	for {
 		d, opened := <-delivery
 		if !opened {
-			logger.Get().Error("RabbitMQ is closed")
+			log.Error("RabbitMQ is closed")
 			return
 		}
 
 		body := pb.StockRealTimeTickResponse{}
 		if err := proto.Unmarshal(d.Body, &body); err != nil {
-			logger.Get().Error(err)
+			log.Error(err)
 			continue
 		}
 
 		dataTime, err := time.ParseInLocation(global.LongTimeLayout, body.GetDateTime(), time.Local)
 		if err != nil {
-			logger.Get().Error(err)
+			log.Error(err)
 			continue
 		}
 
@@ -185,23 +187,23 @@ func (c *StreamRabbit) TickConsumer(key string, tickChan chan *entity.RealTimeTi
 
 // BidAskConsumer -.
 func (c *StreamRabbit) BidAskConsumer(key string, bidAskChan chan *entity.RealTimeBidAsk) {
-	delivery := c.getDelivery(key)
+	delivery := c.establishDelivery(key)
 	for {
 		d, opened := <-delivery
 		if !opened {
-			logger.Get().Error("RabbitMQ is closed")
+			log.Error("RabbitMQ is closed")
 			return
 		}
 
 		body := pb.StockRealTimeBidAskResponse{}
 		if err := proto.Unmarshal(d.Body, &body); err != nil {
-			logger.Get().Error(err)
+			log.Error(err)
 			continue
 		}
 
 		dataTime, err := time.ParseInLocation(global.LongTimeLayout, body.GetDateTime(), time.Local)
 		if err != nil {
-			logger.Get().Error(err)
+			log.Error(err)
 			continue
 		}
 		bidAskChan <- &entity.RealTimeBidAsk{

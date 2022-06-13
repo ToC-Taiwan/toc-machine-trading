@@ -5,7 +5,6 @@ import (
 	"context"
 
 	"toc-machine-trading/internal/entity"
-	"toc-machine-trading/pkg/logger"
 	"toc-machine-trading/pkg/postgres"
 
 	"github.com/google/go-cmp/cmp"
@@ -66,7 +65,7 @@ func (r *BasicRepo) InserOrUpdatetStockArr(ctx context.Context, t []*entity.Stoc
 		}
 	}
 
-	logger.Get().WithFields(map[string]interface{}{
+	log.WithFields(map[string]interface{}{
 		"Update": update,
 		"Exist":  len(t) - update - insert,
 		"Insert": insert,
@@ -137,7 +136,7 @@ func (r *BasicRepo) InserOrUpdatetCalendarDateArr(ctx context.Context, t []*enti
 		}
 	}
 
-	logger.Get().WithFields(map[string]interface{}{
+	log.WithFields(map[string]interface{}{
 		"Update": update,
 		"Exist":  len(t) - update - insert,
 		"Insert": insert,

@@ -5,7 +5,6 @@ import (
 
 	"toc-machine-trading/internal/entity"
 	"toc-machine-trading/internal/usecase"
-	"toc-machine-trading/pkg/logger"
 
 	"github.com/gin-gonic/gin"
 )
@@ -40,7 +39,7 @@ type stockDetailResponse struct {
 func (r *basicRoutes) getAllSinopacStockAndUpdateRepo(c *gin.Context) {
 	stockDetail, err := r.t.GetAllSinopacStockAndUpdateRepo(c.Request.Context())
 	if err != nil {
-		logger.Get().Error(err)
+		log.Error(err)
 		errorResponse(c, http.StatusInternalServerError, "sinopac problems")
 		return
 	}
@@ -62,7 +61,7 @@ func (r *basicRoutes) getAllSinopacStockAndUpdateRepo(c *gin.Context) {
 func (r *basicRoutes) getAllRepoStock(c *gin.Context) {
 	stockDetail, err := r.t.GetAllRepoStock(c.Request.Context())
 	if err != nil {
-		logger.Get().Error(err)
+		log.Error(err)
 		errorResponse(c, http.StatusInternalServerError, "repo problems")
 		return
 	}
