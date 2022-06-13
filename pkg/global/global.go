@@ -1,10 +1,6 @@
 // Package global package global
 package global
 
-import (
-	"sync"
-)
-
 const (
 	// LongTimeLayout LongTimeLayout
 	LongTimeLayout string = "2006-01-02 15:04:05"
@@ -19,39 +15,14 @@ const (
 	EndTradeYear int = 2022
 )
 
-// Setting Setting
-type Setting struct {
-	lock          sync.RWMutex
-	basePath      string
-	isDevelopment bool
-}
-
-var globalSetting = &Setting{}
+var basePath string
 
 // SetBasePath SetBasePath
 func SetBasePath(path string) {
-	defer globalSetting.lock.RUnlock()
-	globalSetting.lock.RLock()
-	globalSetting.basePath = path
+	basePath = path
 }
 
 // GetBasePath GetBasePath
 func GetBasePath() string {
-	defer globalSetting.lock.RUnlock()
-	globalSetting.lock.RLock()
-	return globalSetting.basePath
-}
-
-// SetIsDevelopment SetIsDevelopment
-func SetIsDevelopment(is bool) {
-	defer globalSetting.lock.RUnlock()
-	globalSetting.lock.RLock()
-	globalSetting.isDevelopment = is
-}
-
-// GetIsDevelopment GetIsDevelopment
-func GetIsDevelopment() bool {
-	defer globalSetting.lock.RUnlock()
-	globalSetting.lock.RLock()
-	return globalSetting.isDevelopment
+	return basePath
 }

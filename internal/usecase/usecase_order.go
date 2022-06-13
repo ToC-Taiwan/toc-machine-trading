@@ -21,16 +21,24 @@ func NewOrder(r *repo.OrderRepo, t *grpcapi.OrdergRPCAPI, bus *eventbus.Bus) {
 		bus:     bus,
 	}
 
-	if err := uc.bus.SubscribeTopic(topicBuyOrder, nil); err != nil {
+	if err := uc.bus.SubscribeTopic(topicBuyOrder, uc.buyOrder); err != nil {
 		log.Panic(err)
 	}
-	if err := uc.bus.SubscribeTopic(topicSellOrder, nil); err != nil {
+	if err := uc.bus.SubscribeTopic(topicSellOrder, uc.sellOrder); err != nil {
 		log.Panic(err)
 	}
-	if err := uc.bus.SubscribeTopic(topicSellFirstOrder, nil); err != nil {
+	if err := uc.bus.SubscribeTopic(topicSellFirstOrder, uc.sellFirstOrder); err != nil {
 		log.Panic(err)
 	}
-	if err := uc.bus.SubscribeTopic(topicBuyOrder, nil); err != nil {
+	if err := uc.bus.SubscribeTopic(topicBuyOrder, uc.buyLaterOrder); err != nil {
 		log.Panic(err)
 	}
 }
+
+func (c *OrderUseCase) buyOrder() {}
+
+func (c *OrderUseCase) sellOrder() {}
+
+func (c *OrderUseCase) sellFirstOrder() {}
+
+func (c *OrderUseCase) buyLaterOrder() {}

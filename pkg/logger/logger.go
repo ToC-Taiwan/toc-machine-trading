@@ -21,19 +21,30 @@ var (
 	once         sync.Once
 )
 
+func init() {
+	ex, err := os.Executable()
+	if err != nil {
+		panic(err)
+	}
+
+	global.SetBasePath(filepath.Clean(filepath.Dir(ex)))
+}
+
 func initLogger() {
 	if globalLogger != nil {
 		return
 	}
-
 	// Get current path
 	basePath := global.GetBasePath()
-
-	// create new instance
 	globalLogger = logrus.New()
 	globalLogger.SetReportCaller(true)
 
-	if global.GetIsDevelopment() {
+	var dev bool
+	mode, ok := os.LookupEnv("DEPLOYMENT")
+	if !ok || mode != "prod" {
+		dev = true
+	}
+	if dev {
 		globalLogger.SetFormatter(&logrus.TextFormatter{
 			TimestampFormat:  "2006/01/02 15:04:05",
 			FullTimestamp:    true,
@@ -56,8 +67,6 @@ func initLogger() {
 			},
 		})
 	}
-
-	// folderName := time.Now().Format(time.RFC3339)[:10]
 	folderName := time.Now().Format("20060102")
 	folderName = strings.ReplaceAll(folderName, ":", "")
 	globalLogger.SetLevel(logrus.TraceLevel)
