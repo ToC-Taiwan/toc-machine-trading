@@ -20,8 +20,8 @@ func NewStream(pg *postgres.Postgres) *StreamRepo {
 // InsertEvent -.
 func (r *StreamRepo) InsertEvent(ctx context.Context, t *entity.SinopacEvent) error {
 	builder := r.Builder.Insert(tableNameEvent).
-		Columns("event, event_code, info, response").
-		Values(t.Event, t.EventCode, t.Info, t.Response)
+		Columns("event, event_code, info, response, event_time").
+		Values(t.Event, t.EventCode, t.Info, t.Response, t.EventTime)
 
 	if sql, args, err := builder.ToSql(); err != nil {
 		return err

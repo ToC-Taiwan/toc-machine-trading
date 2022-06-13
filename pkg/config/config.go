@@ -44,6 +44,7 @@ type Config struct {
 	HTTP     `env-required:"true" yaml:"http"`
 	Postgres `env-required:"true" yaml:"postgres"`
 	Sinopac  `env-required:"true" yaml:"sinopac"`
+	RabbitMQ `env-required:"true" yaml:"rabbitmq"`
 
 	Deployment string `env-required:"true" env:"DEPLOYMENT"`
 }
@@ -66,4 +67,13 @@ type Sinopac struct {
 	PoolMax int `env-required:"true" yaml:"pool_max"`
 
 	URL string `env-required:"true" env:"SINOPAC_URL"`
+}
+
+// RabbitMQ -.
+type RabbitMQ struct {
+	URL      string `env-required:"true" env:"RABBITMQ_URL"`
+	Exchange string `env-required:"true" env:"RABBITMQ_EXCHANGE"`
+
+	WaitTime int64 `env-required:"true" yaml:"wait_time"`
+	Attempts int   `env-required:"true" yaml:"attempts"`
 }

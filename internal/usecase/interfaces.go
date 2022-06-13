@@ -50,8 +50,10 @@ type (
 		GetStockVolumeRank(date string) ([]*pb.StockVolumeRankMessage, error)
 		SubscribeStockTick(stockNumArr []string) ([]string, error)
 		UnSubscribeStockTick(stockNumArr []string) ([]string, error)
+		UnSubscribeStockAllTick() (*pb.FunctionErr, error)
 		SubscribeStockBidAsk(stockNumArr []string) ([]string, error)
 		UnSubscribeStockBidAsk(stockNumArr []string) ([]string, error)
+		UnSubscribeStockAllBidAsk() (*pb.FunctionErr, error)
 	}
 )
 
@@ -88,12 +90,12 @@ type (
 		InsertEvent(ctx context.Context, t *entity.SinopacEvent) error
 	}
 
-	// StreamgRPCAPI -.
-	StreamgRPCAPI interface {
-		EventChannel(eventChan chan *entity.SinopacEvent) error
-		BidAskChannel(bidAskChan chan *entity.RealTimeBidAsk) error
-		TickChannel(tickChan chan *entity.RealTimeTick) error
-		OrderStatusChannel(orderStatusChan chan *entity.OrderStatus) error
+	// StreamRabbit -.
+	StreamRabbit interface {
+		EventConsumer(eventChan chan *entity.SinopacEvent)
+		OrderStatusConsumer(orderStatusChan chan *entity.OrderStatus)
+		TickConsumer(key string, tickChan chan *entity.RealTimeTick)
+		BidAskConsumer(key string, bidAskChan chan *entity.RealTimeBidAsk)
 	}
 )
 

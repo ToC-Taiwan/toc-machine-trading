@@ -4,5 +4,10 @@ http:
 postgres:
     pool_max: 80
 
+rabbitmq:
+    # seconds
+    wait_time: 5
+    attempts: 10
+
 sinopac:
     pool_max: 20

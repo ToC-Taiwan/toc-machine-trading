@@ -40,9 +40,11 @@ type SinopacForwarderClient interface {
 	// Target
 	GetStockVolumeRank(ctx context.Context, in *VolumeRankRequest, opts ...grpc.CallOption) (*StockVolumeRankResponse, error)
 	SubscribeStockTick(ctx context.Context, in *StockNumArr, opts ...grpc.CallOption) (*SubscribeResponse, error)
-	SubscribeStockBidAsk(ctx context.Context, in *StockNumArr, opts ...grpc.CallOption) (*SubscribeResponse, error)
 	UnSubscribeStockTick(ctx context.Context, in *StockNumArr, opts ...grpc.CallOption) (*SubscribeResponse, error)
+	UnSubscribeStockAllTick(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*FunctionErr, error)
+	SubscribeStockBidAsk(ctx context.Context, in *StockNumArr, opts ...grpc.CallOption) (*SubscribeResponse, error)
 	UnSubscribeStockBidAsk(ctx context.Context, in *StockNumArr, opts ...grpc.CallOption) (*SubscribeResponse, error)
+	UnSubscribeStockAllBidAsk(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*FunctionErr, error)
 }
 
 type sinopacForwarderClient struct {
@@ -179,15 +181,6 @@ func (c *sinopacForwarderClient) SubscribeStockTick(ctx context.Context, in *Sto
 	return out, nil
 }
 
-func (c *sinopacForwarderClient) SubscribeStockBidAsk(ctx context.Context, in *StockNumArr, opts ...grpc.CallOption) (*SubscribeResponse, error) {
-	out := new(SubscribeResponse)
-	err := c.cc.Invoke(ctx, "/sinopac_forwarder.SinopacForwarder/SubscribeStockBidAsk", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *sinopacForwarderClient) UnSubscribeStockTick(ctx context.Context, in *StockNumArr, opts ...grpc.CallOption) (*SubscribeResponse, error) {
 	out := new(SubscribeResponse)
 	err := c.cc.Invoke(ctx, "/sinopac_forwarder.SinopacForwarder/UnSubscribeStockTick", in, out, opts...)
@@ -197,9 +190,36 @@ func (c *sinopacForwarderClient) UnSubscribeStockTick(ctx context.Context, in *S
 	return out, nil
 }
 
+func (c *sinopacForwarderClient) UnSubscribeStockAllTick(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*FunctionErr, error) {
+	out := new(FunctionErr)
+	err := c.cc.Invoke(ctx, "/sinopac_forwarder.SinopacForwarder/UnSubscribeStockAllTick", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *sinopacForwarderClient) SubscribeStockBidAsk(ctx context.Context, in *StockNumArr, opts ...grpc.CallOption) (*SubscribeResponse, error) {
+	out := new(SubscribeResponse)
+	err := c.cc.Invoke(ctx, "/sinopac_forwarder.SinopacForwarder/SubscribeStockBidAsk", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *sinopacForwarderClient) UnSubscribeStockBidAsk(ctx context.Context, in *StockNumArr, opts ...grpc.CallOption) (*SubscribeResponse, error) {
 	out := new(SubscribeResponse)
 	err := c.cc.Invoke(ctx, "/sinopac_forwarder.SinopacForwarder/UnSubscribeStockBidAsk", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *sinopacForwarderClient) UnSubscribeStockAllBidAsk(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*FunctionErr, error) {
+	out := new(FunctionErr)
+	err := c.cc.Invoke(ctx, "/sinopac_forwarder.SinopacForwarder/UnSubscribeStockAllBidAsk", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -227,9 +247,11 @@ type SinopacForwarderServer interface {
 	// Target
 	GetStockVolumeRank(context.Context, *VolumeRankRequest) (*StockVolumeRankResponse, error)
 	SubscribeStockTick(context.Context, *StockNumArr) (*SubscribeResponse, error)
-	SubscribeStockBidAsk(context.Context, *StockNumArr) (*SubscribeResponse, error)
 	UnSubscribeStockTick(context.Context, *StockNumArr) (*SubscribeResponse, error)
+	UnSubscribeStockAllTick(context.Context, *emptypb.Empty) (*FunctionErr, error)
+	SubscribeStockBidAsk(context.Context, *StockNumArr) (*SubscribeResponse, error)
 	UnSubscribeStockBidAsk(context.Context, *StockNumArr) (*SubscribeResponse, error)
+	UnSubscribeStockAllBidAsk(context.Context, *emptypb.Empty) (*FunctionErr, error)
 	mustEmbedUnimplementedSinopacForwarderServer()
 }
 
@@ -279,14 +301,20 @@ func (UnimplementedSinopacForwarderServer) GetStockVolumeRank(context.Context, *
 func (UnimplementedSinopacForwarderServer) SubscribeStockTick(context.Context, *StockNumArr) (*SubscribeResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SubscribeStockTick not implemented")
 }
-func (UnimplementedSinopacForwarderServer) SubscribeStockBidAsk(context.Context, *StockNumArr) (*SubscribeResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SubscribeStockBidAsk not implemented")
-}
 func (UnimplementedSinopacForwarderServer) UnSubscribeStockTick(context.Context, *StockNumArr) (*SubscribeResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UnSubscribeStockTick not implemented")
 }
+func (UnimplementedSinopacForwarderServer) UnSubscribeStockAllTick(context.Context, *emptypb.Empty) (*FunctionErr, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UnSubscribeStockAllTick not implemented")
+}
+func (UnimplementedSinopacForwarderServer) SubscribeStockBidAsk(context.Context, *StockNumArr) (*SubscribeResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SubscribeStockBidAsk not implemented")
+}
 func (UnimplementedSinopacForwarderServer) UnSubscribeStockBidAsk(context.Context, *StockNumArr) (*SubscribeResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UnSubscribeStockBidAsk not implemented")
+}
+func (UnimplementedSinopacForwarderServer) UnSubscribeStockAllBidAsk(context.Context, *emptypb.Empty) (*FunctionErr, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UnSubscribeStockAllBidAsk not implemented")
 }
 func (UnimplementedSinopacForwarderServer) mustEmbedUnimplementedSinopacForwarderServer() {}
 
@@ -553,24 +581,6 @@ func _SinopacForwarder_SubscribeStockTick_Handler(srv interface{}, ctx context.C
 	return interceptor(ctx, in, info, handler)
 }
 
-func _SinopacForwarder_SubscribeStockBidAsk_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(StockNumArr)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(SinopacForwarderServer).SubscribeStockBidAsk(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/sinopac_forwarder.SinopacForwarder/SubscribeStockBidAsk",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SinopacForwarderServer).SubscribeStockBidAsk(ctx, req.(*StockNumArr))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _SinopacForwarder_UnSubscribeStockTick_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(StockNumArr)
 	if err := dec(in); err != nil {
@@ -589,6 +599,42 @@ func _SinopacForwarder_UnSubscribeStockTick_Handler(srv interface{}, ctx context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _SinopacForwarder_UnSubscribeStockAllTick_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SinopacForwarderServer).UnSubscribeStockAllTick(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/sinopac_forwarder.SinopacForwarder/UnSubscribeStockAllTick",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SinopacForwarderServer).UnSubscribeStockAllTick(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SinopacForwarder_SubscribeStockBidAsk_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(StockNumArr)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SinopacForwarderServer).SubscribeStockBidAsk(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/sinopac_forwarder.SinopacForwarder/SubscribeStockBidAsk",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SinopacForwarderServer).SubscribeStockBidAsk(ctx, req.(*StockNumArr))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _SinopacForwarder_UnSubscribeStockBidAsk_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(StockNumArr)
 	if err := dec(in); err != nil {
@@ -603,6 +649,24 @@ func _SinopacForwarder_UnSubscribeStockBidAsk_Handler(srv interface{}, ctx conte
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(SinopacForwarderServer).UnSubscribeStockBidAsk(ctx, req.(*StockNumArr))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SinopacForwarder_UnSubscribeStockAllBidAsk_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SinopacForwarderServer).UnSubscribeStockAllBidAsk(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/sinopac_forwarder.SinopacForwarder/UnSubscribeStockAllBidAsk",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SinopacForwarderServer).UnSubscribeStockAllBidAsk(ctx, req.(*emptypb.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -671,321 +735,27 @@ var SinopacForwarder_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _SinopacForwarder_SubscribeStockTick_Handler,
 		},
 		{
-			MethodName: "SubscribeStockBidAsk",
-			Handler:    _SinopacForwarder_SubscribeStockBidAsk_Handler,
-		},
-		{
 			MethodName: "UnSubscribeStockTick",
 			Handler:    _SinopacForwarder_UnSubscribeStockTick_Handler,
+		},
+		{
+			MethodName: "UnSubscribeStockAllTick",
+			Handler:    _SinopacForwarder_UnSubscribeStockAllTick_Handler,
+		},
+		{
+			MethodName: "SubscribeStockBidAsk",
+			Handler:    _SinopacForwarder_SubscribeStockBidAsk_Handler,
 		},
 		{
 			MethodName: "UnSubscribeStockBidAsk",
 			Handler:    _SinopacForwarder_UnSubscribeStockBidAsk_Handler,
 		},
+		{
+			MethodName: "UnSubscribeStockAllBidAsk",
+			Handler:    _SinopacForwarder_UnSubscribeStockAllBidAsk_Handler,
+		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "src/sinopac_forwarder.proto",
-}
-
-// LongConeectionServiceClient is the client API for LongConeectionService service.
-//
-// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type LongConeectionServiceClient interface {
-	EventChannel(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (LongConeectionService_EventChannelClient, error)
-	TickChannel(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (LongConeectionService_TickChannelClient, error)
-	BidAskChannel(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (LongConeectionService_BidAskChannelClient, error)
-	OrderStatusChannel(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (LongConeectionService_OrderStatusChannelClient, error)
-}
-
-type longConeectionServiceClient struct {
-	cc grpc.ClientConnInterface
-}
-
-func NewLongConeectionServiceClient(cc grpc.ClientConnInterface) LongConeectionServiceClient {
-	return &longConeectionServiceClient{cc}
-}
-
-func (c *longConeectionServiceClient) EventChannel(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (LongConeectionService_EventChannelClient, error) {
-	stream, err := c.cc.NewStream(ctx, &LongConeectionService_ServiceDesc.Streams[0], "/sinopac_forwarder.LongConeectionService/EventChannel", opts...)
-	if err != nil {
-		return nil, err
-	}
-	x := &longConeectionServiceEventChannelClient{stream}
-	if err := x.ClientStream.SendMsg(in); err != nil {
-		return nil, err
-	}
-	if err := x.ClientStream.CloseSend(); err != nil {
-		return nil, err
-	}
-	return x, nil
-}
-
-type LongConeectionService_EventChannelClient interface {
-	Recv() (*EventResponse, error)
-	grpc.ClientStream
-}
-
-type longConeectionServiceEventChannelClient struct {
-	grpc.ClientStream
-}
-
-func (x *longConeectionServiceEventChannelClient) Recv() (*EventResponse, error) {
-	m := new(EventResponse)
-	if err := x.ClientStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
-}
-
-func (c *longConeectionServiceClient) TickChannel(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (LongConeectionService_TickChannelClient, error) {
-	stream, err := c.cc.NewStream(ctx, &LongConeectionService_ServiceDesc.Streams[1], "/sinopac_forwarder.LongConeectionService/TickChannel", opts...)
-	if err != nil {
-		return nil, err
-	}
-	x := &longConeectionServiceTickChannelClient{stream}
-	if err := x.ClientStream.SendMsg(in); err != nil {
-		return nil, err
-	}
-	if err := x.ClientStream.CloseSend(); err != nil {
-		return nil, err
-	}
-	return x, nil
-}
-
-type LongConeectionService_TickChannelClient interface {
-	Recv() (*StockRealTimeTickResponse, error)
-	grpc.ClientStream
-}
-
-type longConeectionServiceTickChannelClient struct {
-	grpc.ClientStream
-}
-
-func (x *longConeectionServiceTickChannelClient) Recv() (*StockRealTimeTickResponse, error) {
-	m := new(StockRealTimeTickResponse)
-	if err := x.ClientStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
-}
-
-func (c *longConeectionServiceClient) BidAskChannel(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (LongConeectionService_BidAskChannelClient, error) {
-	stream, err := c.cc.NewStream(ctx, &LongConeectionService_ServiceDesc.Streams[2], "/sinopac_forwarder.LongConeectionService/BidAskChannel", opts...)
-	if err != nil {
-		return nil, err
-	}
-	x := &longConeectionServiceBidAskChannelClient{stream}
-	if err := x.ClientStream.SendMsg(in); err != nil {
-		return nil, err
-	}
-	if err := x.ClientStream.CloseSend(); err != nil {
-		return nil, err
-	}
-	return x, nil
-}
-
-type LongConeectionService_BidAskChannelClient interface {
-	Recv() (*StockRealTimeBidAskResponse, error)
-	grpc.ClientStream
-}
-
-type longConeectionServiceBidAskChannelClient struct {
-	grpc.ClientStream
-}
-
-func (x *longConeectionServiceBidAskChannelClient) Recv() (*StockRealTimeBidAskResponse, error) {
-	m := new(StockRealTimeBidAskResponse)
-	if err := x.ClientStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
-}
-
-func (c *longConeectionServiceClient) OrderStatusChannel(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (LongConeectionService_OrderStatusChannelClient, error) {
-	stream, err := c.cc.NewStream(ctx, &LongConeectionService_ServiceDesc.Streams[3], "/sinopac_forwarder.LongConeectionService/OrderStatusChannel", opts...)
-	if err != nil {
-		return nil, err
-	}
-	x := &longConeectionServiceOrderStatusChannelClient{stream}
-	if err := x.ClientStream.SendMsg(in); err != nil {
-		return nil, err
-	}
-	if err := x.ClientStream.CloseSend(); err != nil {
-		return nil, err
-	}
-	return x, nil
-}
-
-type LongConeectionService_OrderStatusChannelClient interface {
-	Recv() (*StockOrderStatus, error)
-	grpc.ClientStream
-}
-
-type longConeectionServiceOrderStatusChannelClient struct {
-	grpc.ClientStream
-}
-
-func (x *longConeectionServiceOrderStatusChannelClient) Recv() (*StockOrderStatus, error) {
-	m := new(StockOrderStatus)
-	if err := x.ClientStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
-}
-
-// LongConeectionServiceServer is the server API for LongConeectionService service.
-// All implementations must embed UnimplementedLongConeectionServiceServer
-// for forward compatibility
-type LongConeectionServiceServer interface {
-	EventChannel(*emptypb.Empty, LongConeectionService_EventChannelServer) error
-	TickChannel(*emptypb.Empty, LongConeectionService_TickChannelServer) error
-	BidAskChannel(*emptypb.Empty, LongConeectionService_BidAskChannelServer) error
-	OrderStatusChannel(*emptypb.Empty, LongConeectionService_OrderStatusChannelServer) error
-	mustEmbedUnimplementedLongConeectionServiceServer()
-}
-
-// UnimplementedLongConeectionServiceServer must be embedded to have forward compatible implementations.
-type UnimplementedLongConeectionServiceServer struct {
-}
-
-func (UnimplementedLongConeectionServiceServer) EventChannel(*emptypb.Empty, LongConeectionService_EventChannelServer) error {
-	return status.Errorf(codes.Unimplemented, "method EventChannel not implemented")
-}
-func (UnimplementedLongConeectionServiceServer) TickChannel(*emptypb.Empty, LongConeectionService_TickChannelServer) error {
-	return status.Errorf(codes.Unimplemented, "method TickChannel not implemented")
-}
-func (UnimplementedLongConeectionServiceServer) BidAskChannel(*emptypb.Empty, LongConeectionService_BidAskChannelServer) error {
-	return status.Errorf(codes.Unimplemented, "method BidAskChannel not implemented")
-}
-func (UnimplementedLongConeectionServiceServer) OrderStatusChannel(*emptypb.Empty, LongConeectionService_OrderStatusChannelServer) error {
-	return status.Errorf(codes.Unimplemented, "method OrderStatusChannel not implemented")
-}
-func (UnimplementedLongConeectionServiceServer) mustEmbedUnimplementedLongConeectionServiceServer() {}
-
-// UnsafeLongConeectionServiceServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to LongConeectionServiceServer will
-// result in compilation errors.
-type UnsafeLongConeectionServiceServer interface {
-	mustEmbedUnimplementedLongConeectionServiceServer()
-}
-
-func RegisterLongConeectionServiceServer(s grpc.ServiceRegistrar, srv LongConeectionServiceServer) {
-	s.RegisterService(&LongConeectionService_ServiceDesc, srv)
-}
-
-func _LongConeectionService_EventChannel_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(emptypb.Empty)
-	if err := stream.RecvMsg(m); err != nil {
-		return err
-	}
-	return srv.(LongConeectionServiceServer).EventChannel(m, &longConeectionServiceEventChannelServer{stream})
-}
-
-type LongConeectionService_EventChannelServer interface {
-	Send(*EventResponse) error
-	grpc.ServerStream
-}
-
-type longConeectionServiceEventChannelServer struct {
-	grpc.ServerStream
-}
-
-func (x *longConeectionServiceEventChannelServer) Send(m *EventResponse) error {
-	return x.ServerStream.SendMsg(m)
-}
-
-func _LongConeectionService_TickChannel_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(emptypb.Empty)
-	if err := stream.RecvMsg(m); err != nil {
-		return err
-	}
-	return srv.(LongConeectionServiceServer).TickChannel(m, &longConeectionServiceTickChannelServer{stream})
-}
-
-type LongConeectionService_TickChannelServer interface {
-	Send(*StockRealTimeTickResponse) error
-	grpc.ServerStream
-}
-
-type longConeectionServiceTickChannelServer struct {
-	grpc.ServerStream
-}
-
-func (x *longConeectionServiceTickChannelServer) Send(m *StockRealTimeTickResponse) error {
-	return x.ServerStream.SendMsg(m)
-}
-
-func _LongConeectionService_BidAskChannel_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(emptypb.Empty)
-	if err := stream.RecvMsg(m); err != nil {
-		return err
-	}
-	return srv.(LongConeectionServiceServer).BidAskChannel(m, &longConeectionServiceBidAskChannelServer{stream})
-}
-
-type LongConeectionService_BidAskChannelServer interface {
-	Send(*StockRealTimeBidAskResponse) error
-	grpc.ServerStream
-}
-
-type longConeectionServiceBidAskChannelServer struct {
-	grpc.ServerStream
-}
-
-func (x *longConeectionServiceBidAskChannelServer) Send(m *StockRealTimeBidAskResponse) error {
-	return x.ServerStream.SendMsg(m)
-}
-
-func _LongConeectionService_OrderStatusChannel_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(emptypb.Empty)
-	if err := stream.RecvMsg(m); err != nil {
-		return err
-	}
-	return srv.(LongConeectionServiceServer).OrderStatusChannel(m, &longConeectionServiceOrderStatusChannelServer{stream})
-}
-
-type LongConeectionService_OrderStatusChannelServer interface {
-	Send(*StockOrderStatus) error
-	grpc.ServerStream
-}
-
-type longConeectionServiceOrderStatusChannelServer struct {
-	grpc.ServerStream
-}
-
-func (x *longConeectionServiceOrderStatusChannelServer) Send(m *StockOrderStatus) error {
-	return x.ServerStream.SendMsg(m)
-}
-
-// LongConeectionService_ServiceDesc is the grpc.ServiceDesc for LongConeectionService service.
-// It's only intended for direct use with grpc.RegisterService,
-// and not to be introspected or modified (even as a copy)
-var LongConeectionService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "sinopac_forwarder.LongConeectionService",
-	HandlerType: (*LongConeectionServiceServer)(nil),
-	Methods:     []grpc.MethodDesc{},
-	Streams: []grpc.StreamDesc{
-		{
-			StreamName:    "EventChannel",
-			Handler:       _LongConeectionService_EventChannel_Handler,
-			ServerStreams: true,
-		},
-		{
-			StreamName:    "TickChannel",
-			Handler:       _LongConeectionService_TickChannel_Handler,
-			ServerStreams: true,
-		},
-		{
-			StreamName:    "BidAskChannel",
-			Handler:       _LongConeectionService_BidAskChannel_Handler,
-			ServerStreams: true,
-		},
-		{
-			StreamName:    "OrderStatusChannel",
-			Handler:       _LongConeectionService_OrderStatusChannel_Handler,
-			ServerStreams: true,
-		},
-	},
 	Metadata: "src/sinopac_forwarder.proto",
 }
 

@@ -29,7 +29,8 @@ CREATE TABLE sinopac_event (
     "event_code" INT NOT NULL,
     "response" INT NOT NULL,
     "event" VARCHAR NOT NULL,
-    "info" VARCHAR NOT NULL
+    "info" VARCHAR NOT NULL,
+    "event_time" TIMESTAMPTZ NOT NULL
 );
 
 COMMIT;

@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"toc-machine-trading/internal/entity"
@@ -27,31 +28,39 @@ func NewTarget(r *repo.TargetRepo, t *grpcapi.TargetgRPCAPI, bus *eventbus.Bus) 
 		bus:     bus,
 	}
 
-	targetArr, err := uc.repo.QueryTargetsByTradeDay(context.Background(), CacheGetTradeDay())
+	ctx := context.Background()
+
+	// unsubscriba all first
+	if err := uc.UnSubscribeAll(ctx); err != nil {
+		logger.Get().Panic("unsubscribe all fail")
+	}
+
+	targetArr, err := uc.repo.QueryTargetsByTradeDay(ctx, CacheGetTradeDay())
 	if err != nil {
 		logger.Get().Panic(err)
 	}
 
 	if len(targetArr) == 0 {
-		targetArr, err = uc.SearchTradeDayTargets(context.Background(), CacheGetTradeDay())
+		targetArr, err = uc.SearchTradeDayTargets(ctx, CacheGetTradeDay())
 		if err != nil {
 			logger.Get().Panic(err)
 		}
 
 		if len(targetArr) != 0 {
-			if err = uc.repo.InsertTargetArr(context.Background(), targetArr); err != nil {
+			if err = uc.repo.InsertTargetArr(ctx, targetArr); err != nil {
 				logger.Get().Panic(err)
 			}
 		}
 	}
 
-	bus.PublishTopicEvent(topicTargets, targetArr)
+	// pub events
+	bus.PublishTopicEvent(topicTargets, ctx, targetArr)
 
-	if err := bus.SubscribeTopic(topicSubscribeTargets, uc.SubscribeStockTick); err != nil {
+	// sub events
+	if err := bus.SubscribeTopic(topicSubscribeTickTargets, uc.SubscribeStockTick); err != nil {
 		logger.Get().Panic(err)
 	}
-
-	if err := bus.SubscribeTopic(topicSubscribeTargets, uc.SubscribeStockBidAsk); err != nil {
+	if err := bus.SubscribeTopic(topicSubscribeBidAskTargets, uc.SubscribeStockBidAsk); err != nil {
 		logger.Get().Panic(err)
 	}
 }
@@ -77,20 +86,43 @@ func (uc *TargetUseCase) SearchTradeDayTargets(ctx context.Context, tradeDay tim
 	return result, nil
 }
 
-// SubscribeStockTick -.
-func (uc *TargetUseCase) SubscribeStockTick(ctx context.Context, targetArr []*entity.Target) error {
-	var tmp []string
-	for _, v := range targetArr {
-		tmp = append(tmp, v.StockNum)
+// UnSubscribeAll -.
+func (uc *TargetUseCase) UnSubscribeAll(ctx context.Context) error {
+	fail, err := uc.gRPCAPI.UnSubscribeStockAllTick()
+	if err != nil {
+		return err
 	}
 
-	fail, err := uc.gRPCAPI.SubscribeStockTick(tmp)
+	if fail.GetErr() != "" {
+		return errors.New(fail.GetErr())
+	}
+
+	fail, err = uc.gRPCAPI.UnSubscribeStockAllBidAsk()
+	if err != nil {
+		return err
+	}
+
+	if fail.GetErr() != "" {
+		return errors.New(fail.GetErr())
+	}
+
+	return nil
+}
+
+// SubscribeStockTick -.
+func (uc *TargetUseCase) SubscribeStockTick(ctx context.Context, targetArr []*entity.Target) error {
+	var subArr []string
+	for _, v := range targetArr {
+		subArr = append(subArr, v.StockNum)
+	}
+
+	fail, err := uc.gRPCAPI.SubscribeStockTick(subArr)
 	if err != nil {
 		return err
 	}
 
 	if len(fail) != 0 {
-		logger.Get().Panic("subscribe fail")
+		return errors.New("subscribe fail")
 	}
 
 	return nil
@@ -98,18 +130,18 @@ func (uc *TargetUseCase) SubscribeStockTick(ctx context.Context, targetArr []*en
 
 // SubscribeStockBidAsk -.
 func (uc *TargetUseCase) SubscribeStockBidAsk(ctx context.Context, targetArr []*entity.Target) error {
-	var tmp []string
+	var subArr []string
 	for _, v := range targetArr {
-		tmp = append(tmp, v.StockNum)
+		subArr = append(subArr, v.StockNum)
 	}
 
-	fail, err := uc.gRPCAPI.SubscribeStockBidAsk(tmp)
+	fail, err := uc.gRPCAPI.SubscribeStockBidAsk(subArr)
 	if err != nil {
 		return err
 	}
 
 	if len(fail) != 0 {
-		logger.Get().Panic("subscribe fail")
+		return errors.New("subscribe fail")
 	}
 
 	return nil

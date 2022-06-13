@@ -2,30 +2,40 @@ package usecase
 
 import (
 	"context"
+	"fmt"
+	"time"
 
 	"toc-machine-trading/internal/entity"
-	"toc-machine-trading/internal/usecase/grpcapi"
+	"toc-machine-trading/internal/usecase/rabbit"
 	"toc-machine-trading/internal/usecase/repo"
+	"toc-machine-trading/pkg/eventbus"
 	"toc-machine-trading/pkg/logger"
 )
 
 // StreamUseCase -.
 type StreamUseCase struct {
-	repo    StreamRepo
-	gRPCAPI StreamgRPCAPI
+	repo   StreamRepo
+	rabbit StreamRabbit
+	bus    *eventbus.Bus
 }
 
 // NewStream -.
-func NewStream(r *repo.StreamRepo, t *grpcapi.StreamgRPCAPI) {
+func NewStream(r *repo.StreamRepo, t *rabbit.StreamRabbit, bus *eventbus.Bus) {
 	uc := &StreamUseCase{
-		repo:    r,
-		gRPCAPI: t,
+		repo:   r,
+		rabbit: t,
+		bus:    bus,
 	}
 
 	go uc.ReceiveEvent(context.Background())
-	go uc.ReceiveTicks(context.Background())
-	go uc.ReceiveBidAsk(context.Background())
 	go uc.ReceiveOrderStatus(context.Background())
+
+	if err := uc.bus.SubscribeTopic(topicStreamTickTargets, uc.ReceiveTicks); err != nil {
+		logger.Get().Panic(err)
+	}
+	if err := uc.bus.SubscribeTopic(topicStreamBidAskTargets, uc.ReceiveBidAsk); err != nil {
+		logger.Get().Panic(err)
+	}
 }
 
 // ReceiveEvent -.
@@ -33,59 +43,14 @@ func (uc *StreamUseCase) ReceiveEvent(ctx context.Context) {
 	eventChan := make(chan *entity.SinopacEvent)
 	go func() {
 		for {
-			select {
-			case <-ctx.Done():
-				return
-			case event := <-eventChan:
-				logger.Get().Warn(event)
-				if err := uc.repo.InsertEvent(ctx, event); err != nil {
-					logger.Get().Panic(err)
-				}
+			event := <-eventChan
+			logger.Get().Info(time.Since(event.EventTime).String(), event)
+			if err := uc.repo.InsertEvent(ctx, event); err != nil {
+				logger.Get().Error(err)
 			}
 		}
 	}()
-
-	if err := uc.gRPCAPI.EventChannel(eventChan); err != nil {
-		logger.Get().Panic(err)
-	}
-}
-
-// ReceiveTicks -.
-func (uc *StreamUseCase) ReceiveTicks(ctx context.Context) {
-	tickChan := make(chan *entity.RealTimeTick)
-	go func() {
-		for {
-			select {
-			case <-ctx.Done():
-				return
-			case tick := <-tickChan:
-				CacheGetTickChan(tick.StockNum) <- tick
-			}
-		}
-	}()
-
-	if err := uc.gRPCAPI.TickChannel(tickChan); err != nil {
-		logger.Get().Panic(err)
-	}
-}
-
-// ReceiveBidAsk -.
-func (uc *StreamUseCase) ReceiveBidAsk(ctx context.Context) {
-	bidAskChan := make(chan *entity.RealTimeBidAsk)
-	go func() {
-		for {
-			select {
-			case <-ctx.Done():
-				return
-			case bidAsk := <-bidAskChan:
-				CacheGetBidAskChan(bidAsk.StockNum) <- bidAsk
-			}
-		}
-	}()
-
-	if err := uc.gRPCAPI.BidAskChannel(bidAskChan); err != nil {
-		logger.Get().Panic(err)
-	}
+	uc.rabbit.EventConsumer(eventChan)
 }
 
 // ReceiveOrderStatus -.
@@ -93,16 +58,45 @@ func (uc *StreamUseCase) ReceiveOrderStatus(ctx context.Context) {
 	orderStatusChan := make(chan *entity.OrderStatus)
 	go func() {
 		for {
-			select {
-			case <-ctx.Done():
-				return
-			case orderStatus := <-orderStatusChan:
-				logger.Get().Info(orderStatus)
-			}
+			orderStatus := <-orderStatusChan
+			logger.Get().Info(orderStatus)
 		}
 	}()
+	uc.rabbit.OrderStatusConsumer(orderStatusChan)
+}
 
-	if err := uc.gRPCAPI.OrderStatusChannel(orderStatusChan); err != nil {
-		logger.Get().Panic(err)
+// ReceiveTicks -.
+func (uc *StreamUseCase) ReceiveTicks(ctx context.Context, targetArr []*entity.Target) {
+	for _, t := range targetArr {
+		target := t
+		go func() {
+			tickChan := make(chan *entity.RealTimeTick)
+			go func() {
+				for {
+					tick := <-tickChan
+					fmt.Printf("tick:%s\n", time.Since(tick.TickTime).String())
+				}
+			}()
+			uc.rabbit.TickConsumer(fmt.Sprintf("tick:%s", target.StockNum), tickChan)
+		}()
 	}
+	uc.bus.PublishTopicEvent(topicSubscribeTickTargets, ctx, targetArr)
+}
+
+// ReceiveBidAsk -.
+func (uc *StreamUseCase) ReceiveBidAsk(ctx context.Context, targetArr []*entity.Target) {
+	for _, t := range targetArr {
+		target := t
+		go func() {
+			bidAskChan := make(chan *entity.RealTimeBidAsk)
+			go func() {
+				for {
+					bidAsk := <-bidAskChan
+					fmt.Printf("bidask:%s\n", time.Since(bidAsk.TickTime).String())
+				}
+			}()
+			uc.rabbit.BidAskConsumer(fmt.Sprintf("bid_ask:%s", target.StockNum), bidAskChan)
+		}()
+	}
+	uc.bus.PublishTopicEvent(topicSubscribeBidAskTargets, ctx, targetArr)
 }

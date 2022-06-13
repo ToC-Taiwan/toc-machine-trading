@@ -64,6 +64,8 @@ DISABLE_SWAGGER_HTTP_HANDLER=true
 GIN_MODE=release
 SINOPAC_URL=127.0.0.1:56666
 PG_URL=postgres://user:password@localhost:5432/
+RABBITMQ_URL=amqp://guest:guest@localhost:5672/%2f
+RABBITMQ_EXCHANGE=exchange
 DB_NAME=trade' > .env
 ```
 

@@ -5,6 +5,8 @@ import (
 
 	"toc-machine-trading/pb"
 	"toc-machine-trading/pkg/sinopac"
+
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 // TargetgRPCAPI -.
@@ -56,6 +58,18 @@ func (t *TargetgRPCAPI) UnSubscribeStockTick(stockNumArr []string) ([]string, er
 	return r.GetFailArr(), nil
 }
 
+// UnSubscribeStockAllTick -.
+func (t *TargetgRPCAPI) UnSubscribeStockAllTick() (*pb.FunctionErr, error) {
+	conn := t.conn.GetReadyConn()
+	defer t.conn.PutReadyConn(conn)
+	c := pb.NewSinopacForwarderClient(conn)
+	r, err := c.UnSubscribeStockAllTick(context.Background(), &emptypb.Empty{})
+	if err != nil {
+		return nil, err
+	}
+	return r, nil
+}
+
 // SubscribeStockBidAsk return arry means fail to subscribe
 func (t *TargetgRPCAPI) SubscribeStockBidAsk(stockNumArr []string) ([]string, error) {
 	conn := t.conn.GetReadyConn()
@@ -78,4 +92,16 @@ func (t *TargetgRPCAPI) UnSubscribeStockBidAsk(stockNumArr []string) ([]string, 
 		return []string{}, err
 	}
 	return r.GetFailArr(), nil
+}
+
+// UnSubscribeStockAllBidAsk -.
+func (t *TargetgRPCAPI) UnSubscribeStockAllBidAsk() (*pb.FunctionErr, error) {
+	conn := t.conn.GetReadyConn()
+	defer t.conn.PutReadyConn(conn)
+	c := pb.NewSinopacForwarderClient(conn)
+	r, err := c.UnSubscribeStockAllBidAsk(context.Background(), &emptypb.Empty{})
+	if err != nil {
+		return nil, err
+	}
+	return r, nil
 }

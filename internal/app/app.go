@@ -10,6 +10,7 @@ import (
 	v1 "toc-machine-trading/internal/controller/http/v1"
 	"toc-machine-trading/internal/usecase"
 	"toc-machine-trading/internal/usecase/grpcapi"
+	"toc-machine-trading/internal/usecase/rabbit"
 	"toc-machine-trading/internal/usecase/repo"
 	"toc-machine-trading/pkg/config"
 	"toc-machine-trading/pkg/eventbus"
@@ -43,8 +44,9 @@ func Run(cfg *config.Config) {
 	// Order cannot be modifided
 	bus := eventbus.New()
 	basicUseCase := usecase.NewBasic(repo.NewBasic(pg), grpcapi.NewBasic(sc))
-	usecase.NewStream(repo.NewStream(pg), grpcapi.NewStream(sc))
-	usecase.NewOrder(repo.NewOrder(pg), grpcapi.NewOrder(sc), bus)
+	// usecase.NewOrder(repo.NewOrder(pg), grpcapi.NewOrder(sc), bus)
+	usecase.NewStream(repo.NewStream(pg), rabbit.NewStream(), bus)
+	usecase.NewHistory(repo.NewHistory(pg), grpcapi.NewHistory(sc), bus)
 	usecase.NewTarget(repo.NewTarget(pg), grpcapi.NewTarget(sc), bus)
 
 	// HTTP Server
@@ -59,6 +61,11 @@ func Run(cfg *config.Config) {
 	case s := <-interrupt:
 		logger.Get().Info(s.String())
 	case err = <-httpServer.Notify():
+		logger.Get().Error(err)
+	}
+
+	err = sc.Shutdown()
+	if err != nil {
 		logger.Get().Error(err)
 	}
 
