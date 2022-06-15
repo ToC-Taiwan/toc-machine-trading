@@ -24,18 +24,9 @@ func NewBasic(r *repo.BasicRepo, t *grpcapi.BasicgRPCAPI) *BasicUseCase {
 	ctx := context.Background()
 
 	go func() {
-		var sinopacToken string
-		for {
-			token, err := uc.gRPCAPI.GetServerToken()
-			if err != nil {
-				log.Panic(err)
-			}
-			if sinopacToken == "" {
-				sinopacToken = token
-			} else if sinopacToken != token {
-				log.Panic("token changed")
-			}
-			time.Sleep(time.Second * 30)
+		err := uc.gRPCAPI.Heartbeat()
+		if err != nil {
+			log.Panic(err)
 		}
 	}()
 

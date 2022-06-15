@@ -3,6 +3,9 @@ package grpcapi
 
 import (
 	"context"
+	"errors"
+	"io"
+	"time"
 
 	"toc-machine-trading/pb"
 	"toc-machine-trading/pkg/sinopac"
@@ -20,16 +23,35 @@ func NewBasic(client *sinopac.Connection) *BasicgRPCAPI {
 	return &BasicgRPCAPI{client}
 }
 
-// GetServerToken GetServerToken
-func (t *BasicgRPCAPI) GetServerToken() (string, error) {
+// Heartbeat Heartbeat
+func (t *BasicgRPCAPI) Heartbeat() error {
 	conn := t.conn.GetReadyConn()
 	defer t.conn.PutReadyConn(conn)
 	c := pb.NewSinopacForwarderClient(conn)
-	r, err := c.GetServerToken(context.Background(), &emptypb.Empty{})
+	stream, err := c.Heartbeat(context.Background())
 	if err != nil {
-		return "", err
+		return err
 	}
-	return r.GetToken(), nil
+
+	err = stream.Send(&pb.Beat{Message: "beat"})
+	if err != nil {
+		return err
+	}
+
+	for {
+		response, err := stream.Recv()
+		if err != nil {
+			if !errors.Is(io.EOF, err) {
+				return err
+			}
+			continue
+		}
+		time.Sleep(3 * time.Second)
+		err = stream.Send(&pb.Beat{Message: response.GetMessage()})
+		if err != nil {
+			return err
+		}
+	}
 }
 
 // GetAllStockDetail GetAllStockDetail

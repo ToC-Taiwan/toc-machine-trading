@@ -30,7 +30,7 @@ type (
 
 	// BasicgRPCAPI -.
 	BasicgRPCAPI interface {
-		GetServerToken() (string, error)
+		Heartbeat() error
 		GetAllStockDetail() ([]*pb.StockDetailMessage, error)
 		GetAllStockSnapshot() ([]*pb.StockSnapshotMessage, error)
 		GetStockSnapshotByNumArr(stockNumArr []string) ([]*pb.StockSnapshotMessage, error)

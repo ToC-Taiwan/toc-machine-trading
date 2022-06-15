@@ -76,11 +76,6 @@ func Run(cfg *config.Config) {
 		log.Error(err)
 	}
 
-	err = sc.Shutdown()
-	if err != nil {
-		log.Error(err)
-	}
-
 	// Shutdown
 	err = httpServer.Shutdown()
 	if err != nil {

@@ -6,10 +6,11 @@ import (
 
 // SinopacEvent SinopacEvent
 type SinopacEvent struct {
-	Event     string    `json:"event"`
+	ID        int64     `json:"id"`
 	EventCode int64     `json:"event_code"`
-	Info      string    `json:"info"`
 	Response  int64     `json:"response"`
+	Event     string    `json:"event"`
+	Info      string    `json:"info"`
 	EventTime time.Time `json:"event_time"`
 }
 

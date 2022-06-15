@@ -43,7 +43,9 @@ func (uc *StreamUseCase) ReceiveEvent(ctx context.Context) {
 	go func() {
 		for {
 			event := <-eventChan
+
 			log.Info(time.Since(event.EventTime).String(), event)
+
 			if err := uc.repo.InsertEvent(ctx, event); err != nil {
 				log.Error(err)
 			}
@@ -70,12 +72,8 @@ func (uc *StreamUseCase) ReceiveTicks(ctx context.Context, targetArr []*entity.T
 		target := t
 		go func() {
 			tickChan := make(chan *entity.RealTimeTick)
-			go func() {
-				for {
-					tick := <-tickChan
-					log.Infof("tick:%s\n", time.Since(tick.TickTime).String())
-				}
-			}()
+			go tickProcessor(tickChan)
+
 			uc.rabbit.TickConsumer(fmt.Sprintf("tick:%s", target.StockNum), tickChan)
 		}()
 	}
@@ -88,14 +86,24 @@ func (uc *StreamUseCase) ReceiveBidAsk(ctx context.Context, targetArr []*entity.
 		target := t
 		go func() {
 			bidAskChan := make(chan *entity.RealTimeBidAsk)
-			go func() {
-				for {
-					bidAsk := <-bidAskChan
-					log.Infof("bidask:%s\n", time.Since(bidAsk.TickTime).String())
-				}
-			}()
+			go bidAskProcessor(bidAskChan)
+
 			uc.rabbit.BidAskConsumer(fmt.Sprintf("bid_ask:%s", target.StockNum), bidAskChan)
 		}()
 	}
 	uc.bus.PublishTopicEvent(topicSubscribeBidAskTargets, ctx, targetArr)
+}
+
+func tickProcessor(tickChan chan *entity.RealTimeTick) {
+	for {
+		tick := <-tickChan
+		log.Infof("tick:%s\n", time.Since(tick.TickTime).String())
+	}
+}
+
+func bidAskProcessor(bidAskChan chan *entity.RealTimeBidAsk) {
+	for {
+		bidAsk := <-bidAskChan
+		log.Infof("bidask:%s\n", time.Since(bidAsk.TickTime).String())
+	}
 }

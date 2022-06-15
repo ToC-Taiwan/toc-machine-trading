@@ -30,10 +30,16 @@ func init() {
 	global.SetBasePath(filepath.Clean(filepath.Dir(ex)))
 }
 
-func initLogger() {
+// Get Get
+func Get() *logrus.Logger {
 	if globalLogger != nil {
-		return
+		return globalLogger
 	}
+	once.Do(initLogger)
+	return globalLogger
+}
+
+func initLogger() {
 	// Get current path
 	basePath := global.GetBasePath()
 	globalLogger = logrus.New()
@@ -44,6 +50,7 @@ func initLogger() {
 	if !ok || mode != "prod" {
 		dev = true
 	}
+
 	if dev {
 		globalLogger.SetFormatter(&logrus.TextFormatter{
 			TimestampFormat:  "2006/01/02 15:04:05",
@@ -67,10 +74,16 @@ func initLogger() {
 			},
 		})
 	}
-	folderName := time.Now().Format("20060102")
-	folderName = strings.ReplaceAll(folderName, ":", "")
+
 	globalLogger.SetLevel(logrus.TraceLevel)
 	globalLogger.SetOutput(os.Stdout)
+	globalLogger.Hooks.Add(fileHook(basePath))
+}
+
+func fileHook(basePath string) *lfshook.LfsHook {
+	folderName := time.Now().Format("20060102")
+	folderName = strings.ReplaceAll(folderName, ":", "")
+
 	pathMap := lfshook.PathMap{
 		logrus.PanicLevel: filepath.Join(basePath, "/logs/", folderName, "/panic.json"),
 		logrus.FatalLevel: filepath.Join(basePath, "/logs/", folderName, "/fetal.json"),
@@ -80,7 +93,8 @@ func initLogger() {
 		logrus.DebugLevel: filepath.Join(basePath, "/logs/", folderName, "/debug.json"),
 		logrus.TraceLevel: filepath.Join(basePath, "/logs/", folderName, "/error.json"),
 	}
-	globalLogger.Hooks.Add(lfshook.NewHook(
+
+	return lfshook.NewHook(
 		pathMap,
 		&logrus.JSONFormatter{
 			TimestampFormat: global.LongTimeLayout,
@@ -90,14 +104,5 @@ func initLogger() {
 				return fmt.Sprintf("%s:%d", fileName, frame.Line), ""
 			},
 		},
-	))
-}
-
-// Get Get
-func Get() *logrus.Logger {
-	if globalLogger != nil {
-		return globalLogger
-	}
-	once.Do(initLogger)
-	return globalLogger
+	)
 }

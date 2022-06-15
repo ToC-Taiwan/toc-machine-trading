@@ -5,6 +5,12 @@ import (
 	"time"
 )
 
+// CalendarDate CalendarDate
+type CalendarDate struct {
+	Date       time.Time `json:"date"`
+	IsTradeDay bool      `json:"is_trade_day"`
+}
+
 // Stock -.
 type Stock struct {
 	Number    string  `json:"number"`
@@ -13,10 +19,4 @@ type Stock struct {
 	Category  string  `json:"category"`
 	DayTrade  bool    `json:"day_trade"`
 	LastClose float64 `json:"last_close"`
-}
-
-// CalendarDate CalendarDate
-type CalendarDate struct {
-	Date       time.Time `json:"date"`
-	IsTradeDay bool      `json:"is_trade_day"`
 }

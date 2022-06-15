@@ -89,20 +89,3 @@ func (s *Connection) GetReadyConn() *grpc.ClientConn {
 func (s *Connection) PutReadyConn(conn *grpc.ClientConn) {
 	s.ReadyConn <- conn
 }
-
-// Shutdown -.
-func (s *Connection) Shutdown() error {
-	for {
-		if len(s.ReadyConn) != len(s.pool) {
-			log.Warnf("All connection: %d, idle connection: %d", len(s.pool), len(s.ReadyConn))
-			continue
-		} else {
-			break
-		}
-	}
-
-	for _, conn := range s.pool {
-		_ = conn.Close()
-	}
-	return nil
-}

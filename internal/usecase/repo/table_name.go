@@ -5,8 +5,13 @@ import "toc-machine-trading/pkg/logger"
 var log = logger.Get()
 
 const (
-	tableNameStock    string = "basic_stock"
-	tableNameCalendar string = "basic_calendar"
-	tableNameEvent    string = "sinopac_event"
-	tableNameTarget   string = "basic_targets"
+	tableNameCalendar     string = "basic_calendar"
+	tableNameStock        string = "basic_stock"
+	tableNameTarget       string = "basic_targets"
+	tableNameHistoryClose string = "history_close"
+	tableNameHistoryKbar  string = "history_kbar"
+	tableNameHistoryTick  string = "history_tick"
+	tableNameOrderStatus  string = "order_status"
+	tableNameEvent        string = "sinopac_event"
+	tableNameTradeBalance string = "trade_balance"
 )

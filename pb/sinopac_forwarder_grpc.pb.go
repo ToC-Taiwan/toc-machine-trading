@@ -23,8 +23,9 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type SinopacForwarderClient interface {
+	// Health check
+	Heartbeat(ctx context.Context, opts ...grpc.CallOption) (SinopacForwarder_HeartbeatClient, error)
 	// Basic
-	GetServerToken(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*TokenResponse, error)
 	GetAllStockDetail(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*StockDetailResponse, error)
 	GetAllStockSnapshot(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*StockSnapshotResponse, error)
 	GetStockSnapshotByNumArr(ctx context.Context, in *StockNumArr, opts ...grpc.CallOption) (*StockSnapshotResponse, error)
@@ -55,13 +56,35 @@ func NewSinopacForwarderClient(cc grpc.ClientConnInterface) SinopacForwarderClie
 	return &sinopacForwarderClient{cc}
 }
 
-func (c *sinopacForwarderClient) GetServerToken(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*TokenResponse, error) {
-	out := new(TokenResponse)
-	err := c.cc.Invoke(ctx, "/sinopac_forwarder.SinopacForwarder/GetServerToken", in, out, opts...)
+func (c *sinopacForwarderClient) Heartbeat(ctx context.Context, opts ...grpc.CallOption) (SinopacForwarder_HeartbeatClient, error) {
+	stream, err := c.cc.NewStream(ctx, &SinopacForwarder_ServiceDesc.Streams[0], "/sinopac_forwarder.SinopacForwarder/Heartbeat", opts...)
 	if err != nil {
 		return nil, err
 	}
-	return out, nil
+	x := &sinopacForwarderHeartbeatClient{stream}
+	return x, nil
+}
+
+type SinopacForwarder_HeartbeatClient interface {
+	Send(*Beat) error
+	Recv() (*Beat, error)
+	grpc.ClientStream
+}
+
+type sinopacForwarderHeartbeatClient struct {
+	grpc.ClientStream
+}
+
+func (x *sinopacForwarderHeartbeatClient) Send(m *Beat) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *sinopacForwarderHeartbeatClient) Recv() (*Beat, error) {
+	m := new(Beat)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
 }
 
 func (c *sinopacForwarderClient) GetAllStockDetail(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*StockDetailResponse, error) {
@@ -230,8 +253,9 @@ func (c *sinopacForwarderClient) UnSubscribeStockAllBidAsk(ctx context.Context, 
 // All implementations must embed UnimplementedSinopacForwarderServer
 // for forward compatibility
 type SinopacForwarderServer interface {
+	// Health check
+	Heartbeat(SinopacForwarder_HeartbeatServer) error
 	// Basic
-	GetServerToken(context.Context, *emptypb.Empty) (*TokenResponse, error)
 	GetAllStockDetail(context.Context, *emptypb.Empty) (*StockDetailResponse, error)
 	GetAllStockSnapshot(context.Context, *emptypb.Empty) (*StockSnapshotResponse, error)
 	GetStockSnapshotByNumArr(context.Context, *StockNumArr) (*StockSnapshotResponse, error)
@@ -259,8 +283,8 @@ type SinopacForwarderServer interface {
 type UnimplementedSinopacForwarderServer struct {
 }
 
-func (UnimplementedSinopacForwarderServer) GetServerToken(context.Context, *emptypb.Empty) (*TokenResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetServerToken not implemented")
+func (UnimplementedSinopacForwarderServer) Heartbeat(SinopacForwarder_HeartbeatServer) error {
+	return status.Errorf(codes.Unimplemented, "method Heartbeat not implemented")
 }
 func (UnimplementedSinopacForwarderServer) GetAllStockDetail(context.Context, *emptypb.Empty) (*StockDetailResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAllStockDetail not implemented")
@@ -329,22 +353,30 @@ func RegisterSinopacForwarderServer(s grpc.ServiceRegistrar, srv SinopacForwarde
 	s.RegisterService(&SinopacForwarder_ServiceDesc, srv)
 }
 
-func _SinopacForwarder_GetServerToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(emptypb.Empty)
-	if err := dec(in); err != nil {
+func _SinopacForwarder_Heartbeat_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(SinopacForwarderServer).Heartbeat(&sinopacForwarderHeartbeatServer{stream})
+}
+
+type SinopacForwarder_HeartbeatServer interface {
+	Send(*Beat) error
+	Recv() (*Beat, error)
+	grpc.ServerStream
+}
+
+type sinopacForwarderHeartbeatServer struct {
+	grpc.ServerStream
+}
+
+func (x *sinopacForwarderHeartbeatServer) Send(m *Beat) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func (x *sinopacForwarderHeartbeatServer) Recv() (*Beat, error) {
+	m := new(Beat)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
-	if interceptor == nil {
-		return srv.(SinopacForwarderServer).GetServerToken(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/sinopac_forwarder.SinopacForwarder/GetServerToken",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SinopacForwarderServer).GetServerToken(ctx, req.(*emptypb.Empty))
-	}
-	return interceptor(ctx, in, info, handler)
+	return m, nil
 }
 
 func _SinopacForwarder_GetAllStockDetail_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -679,10 +711,6 @@ var SinopacForwarder_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*SinopacForwarderServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "GetServerToken",
-			Handler:    _SinopacForwarder_GetServerToken_Handler,
-		},
-		{
 			MethodName: "GetAllStockDetail",
 			Handler:    _SinopacForwarder_GetAllStockDetail_Handler,
 		},
@@ -755,7 +783,14 @@ var SinopacForwarder_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _SinopacForwarder_UnSubscribeStockAllBidAsk_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "Heartbeat",
+			Handler:       _SinopacForwarder_Heartbeat_Handler,
+			ServerStreams: true,
+			ClientStreams: true,
+		},
+	},
 	Metadata: "src/sinopac_forwarder.proto",
 }
 
