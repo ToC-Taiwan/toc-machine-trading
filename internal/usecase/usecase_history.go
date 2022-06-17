@@ -43,6 +43,11 @@ func (uc *HistoryUseCase) FetchHistory(ctx context.Context, targetArr []*entity.
 		log.Panic(err)
 	}
 
+	err = uc.fetchHistoryKbar(targetArr[:100])
+	if err != nil {
+		log.Panic(err)
+	}
+
 	uc.bus.PublishTopicEvent(topicStreamTickTargets, ctx, targetArr)
 	uc.bus.PublishTopicEvent(topicStreamBidAskTargets, ctx, targetArr)
 }
@@ -73,9 +78,6 @@ func (uc *HistoryUseCase) fetchHistoryClose(targetArr []*entity.Target) error {
 		close(wait)
 	}()
 	for d, s := range stockNumArrInDayMap {
-		if len(s) == 0 {
-			continue
-		}
 		stockArr := s
 		date := d
 		log.Infof("Fetching History Close -> StockCount: %d, Date: %s", len(stockArr), date.Format(global.ShortTimeLayout))
@@ -147,9 +149,6 @@ func (uc *HistoryUseCase) fetchHistoryTick(targetArr []*entity.Target) error {
 		close(wait)
 	}()
 	for d, s := range stockNumArrInDayMap {
-		if len(s) == 0 {
-			continue
-		}
 		stockArr := s
 		date := d
 		log.Infof("Fetching History Tick -> StockCount: %d, Date: %s", len(stockArr), date.Format(global.ShortTimeLayout))
@@ -183,6 +182,79 @@ func (uc *HistoryUseCase) findExistHistoryTick(fetchTradeDayArr []time.Time, sto
 		var stockNumArrInDay []string
 		for _, s := range stockNumArr {
 			exist, err := uc.repo.CheckHistoryTickExist(context.Background(), s, d)
+			if err != nil {
+				return nil, err
+			}
+			if !exist {
+				stockNumArrInDay = append(stockNumArrInDay, s)
+			}
+		}
+		result[d] = stockNumArrInDay
+	}
+	return result, nil
+}
+
+func (uc *HistoryUseCase) fetchHistoryKbar(targetArr []*entity.Target) error {
+	fetchTradeDayArr := cc.GetBasicInfo().HistoryKbarRange
+	stockNumArr := []string{}
+	for _, target := range targetArr {
+		stockNumArr = append(stockNumArr, target.StockNum)
+	}
+
+	stockNumArrInDayMap, err := uc.findExistHistoryKbar(fetchTradeDayArr, stockNumArr)
+	if err != nil {
+		return err
+	}
+	defer log.Info("Fetching History Kbar Done")
+	result := []*entity.HistoryKbar{}
+	dataChan := make(chan *entity.HistoryKbar)
+	wait := make(chan struct{})
+	go func() {
+		for {
+			close, ok := <-dataChan
+			if !ok {
+				break
+			}
+			result = append(result, close)
+		}
+		close(wait)
+	}()
+	for d, s := range stockNumArrInDayMap {
+		stockArr := s
+		date := d
+		log.Infof("Fetching History Kbar -> StockCount: %d, Date: %s", len(stockArr), date.Format(global.ShortTimeLayout))
+		tickArr, err := uc.grpcapi.GetStockHistoryKbar(stockArr, date.Format(global.ShortTimeLayout))
+		if err != nil {
+			log.Error(err)
+		}
+		for _, t := range tickArr {
+			dataChan <- &entity.HistoryKbar{
+				StockNum: t.GetStockNum(),
+				KbarTime: time.Unix(0, t.GetTs()).Add(-8 * time.Hour),
+				Open:     t.GetOpen(),
+				High:     t.GetHigh(),
+				Low:      t.GetLow(),
+				Close:    t.GetClose(),
+				Volume:   t.GetVolume(),
+			}
+		}
+	}
+	close(dataChan)
+	<-wait
+	if len(result) != 0 {
+		if err := uc.repo.InsertHistoryKbarArr(context.Background(), result); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (uc *HistoryUseCase) findExistHistoryKbar(fetchTradeDayArr []time.Time, stockNumArr []string) (map[time.Time][]string, error) {
+	result := make(map[time.Time][]string)
+	for _, d := range fetchTradeDayArr {
+		var stockNumArrInDay []string
+		for _, s := range stockNumArr {
+			exist, err := uc.repo.CheckHistoryKbarExist(context.Background(), s, d)
 			if err != nil {
 				return nil, err
 			}

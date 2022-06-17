@@ -131,3 +131,54 @@ func (r *HistoryRepo) CheckHistoryTickExist(ctx context.Context, stockNum string
 	}
 	return false, nil
 }
+
+// InsertHistoryKbarArr -.
+func (r *HistoryRepo) InsertHistoryKbarArr(ctx context.Context, t []*entity.HistoryKbar) error {
+	var split [][]*entity.HistoryKbar
+	count := len(t)/batchSize + 1
+	for i := 0; i < count; i++ {
+		if i == count-1 {
+			if l := len(t[batchSize*i:]); l != 0 {
+				split = append(split, t[batchSize*i:])
+			}
+		} else {
+			split = append(split, t[batchSize*i:batchSize*(i+1)])
+		}
+	}
+
+	for _, s := range split {
+		builder := r.Builder.Insert(tableNameHistoryKbar).Columns("stock_num, kbar_time, open, high, low, close, volume")
+		for _, v := range s {
+			builder = builder.Values(v.StockNum, v.KbarTime, v.Open, v.High, v.Low, v.Close, v.Volume)
+		}
+
+		if sql, args, err := builder.ToSql(); err != nil {
+			return err
+		} else if _, err := r.Pool.Exec(ctx, sql, args...); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// CheckHistoryKbarExist -.
+func (r *HistoryRepo) CheckHistoryKbarExist(ctx context.Context, stockNum string, date time.Time) (bool, error) {
+	sql, args, err := r.Builder.
+		Select("stock_num").
+		From(tableNameHistoryKbar).
+		Where(squirrel.GtOrEq{"kbar_time": date}).
+		Where(squirrel.Lt{"kbar_time": date.Add(time.Hour * 24)}).
+		Where(squirrel.Eq{"stock_num": stockNum}).Limit(1).ToSql()
+	if err != nil {
+		return false, err
+	}
+	row := r.Pool.QueryRow(ctx, sql, args...)
+	var e string
+	if err := row.Scan(&e); err != nil && !errors.Is(err, pgx.ErrNoRows) {
+		return false, err
+	}
+	if e != "" {
+		return true, nil
+	}
+	return false, nil
+}

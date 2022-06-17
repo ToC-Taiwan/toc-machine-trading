@@ -72,6 +72,8 @@ type (
 		QueryHistoryCloseByMutltiStockNumDate(ctx context.Context, stockNumArr []string, date time.Time) (map[string]*entity.HistoryClose, error)
 		InsertHistoryTickArr(ctx context.Context, t []*entity.HistoryTick) error
 		CheckHistoryTickExist(ctx context.Context, stockNum string, date time.Time) (bool, error)
+		InsertHistoryKbarArr(ctx context.Context, t []*entity.HistoryKbar) error
+		CheckHistoryKbarExist(ctx context.Context, stockNum string, date time.Time) (bool, error)
 	}
 
 	// HistorygRPCAPI -.
