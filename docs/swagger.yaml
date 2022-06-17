@@ -74,7 +74,7 @@ paths:
       tags:
       - basic
   /basic/system/terminate:
-    get:
+    put:
       consumes:
       - application/json
       description: terminateSinopac

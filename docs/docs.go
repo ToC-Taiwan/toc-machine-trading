@@ -77,7 +77,7 @@ const docTemplate = `{
             }
         },
         "/basic/system/terminate": {
-            "get": {
+            "put": {
                 "description": "terminateSinopac",
                 "consumes": [
                     "application/json"
