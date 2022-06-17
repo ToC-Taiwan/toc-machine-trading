@@ -70,6 +70,8 @@ type (
 	HistoryRepo interface {
 		InsertHistoryCloseArr(ctx context.Context, t []*entity.HistoryClose) error
 		QueryHistoryCloseByMutltiStockNumDate(ctx context.Context, stockNumArr []string, date time.Time) (map[string]*entity.HistoryClose, error)
+		InsertHistoryTickArr(ctx context.Context, t []*entity.HistoryTick) error
+		CheckHistoryTickExist(ctx context.Context, stockNum string, date time.Time) (bool, error)
 	}
 
 	// HistorygRPCAPI -.

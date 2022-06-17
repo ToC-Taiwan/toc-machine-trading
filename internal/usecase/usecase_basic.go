@@ -192,8 +192,8 @@ func (uc *BasicUseCase) fillBasicInfo() error {
 		TradeDay:          tradeDay,
 		LastTradeDay:      getLastNTradeDayByDate(1, tradeDay)[0],
 		HistoryCloseRange: getLastNTradeDayByDate(cfg.HistoryClosePeriod, tradeDay),
-		HistoryKbarRange:  getLastNTradeDayByDate(cfg.HistoryTickPeriod, tradeDay),
-		HistoryTickRange:  getLastNTradeDayByDate(cfg.HistoryKbarPeriod, tradeDay),
+		HistoryKbarRange:  getLastNTradeDayByDate(cfg.HistoryKbarPeriod, tradeDay),
+		HistoryTickRange:  getLastNTradeDayByDate(cfg.HistoryTickPeriod, tradeDay),
 	}
 	cc.SetBasicInfo(basic)
 	return nil

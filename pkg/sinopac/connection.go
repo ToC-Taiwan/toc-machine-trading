@@ -2,7 +2,6 @@
 package sinopac
 
 import (
-	"context"
 	"time"
 
 	"toc-machine-trading/pkg/logger"
@@ -51,9 +50,15 @@ func New(url string, opts ...Option) (*Connection, error) {
 			err = nil
 			break
 		}
-		ctx, cancel := context.WithTimeout(context.Background(), conn.connTimeout)
-		newConn, err = grpc.DialContext(ctx, url, grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithBlock())
-		cancel()
+		newConn, err = grpc.Dial(
+			url,
+			grpc.WithTransportCredentials(insecure.NewCredentials()),
+			grpc.WithBlock(),
+			grpc.WithDefaultCallOptions(
+				grpc.MaxCallRecvMsgSize(1024*1024*1024),
+				grpc.MaxCallSendMsgSize(1024*1024*1024),
+			),
+		)
 		if err == nil && newConn != nil {
 			conn.pool = append(conn.pool, newConn)
 			conn.ReadyConn <- newConn
