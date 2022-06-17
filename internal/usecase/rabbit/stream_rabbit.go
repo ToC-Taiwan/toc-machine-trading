@@ -17,23 +17,6 @@ import (
 
 var log = logger.Get()
 
-// ActionListMap ActionListMap
-var ActionListMap = map[string]int64{
-	"Buy":  1,
-	"Sell": 2,
-}
-
-// StatusListMap StatusListMap
-var StatusListMap = map[string]int64{
-	"PendingSubmit": 1, // 傳送中
-	"PreSubmitted":  2, // 預約單
-	"Submitted":     3, // 傳送成功
-	"Failed":        4, // 失敗
-	"Cancelled":     5, // 已刪除
-	"Filled":        6, // 完全成交
-	"Filling":       7, // 部分成交
-}
-
 // StreamRabbit -.
 type StreamRabbit struct {
 	conn *rabbitmq.Connection
@@ -118,8 +101,8 @@ func (c *StreamRabbit) OrderStatusConsumer(orderStatusChan chan *entity.OrderSta
 			continue
 		}
 
-		actionMap := ActionListMap
-		statusMap := StatusListMap
+		actionMap := entity.ActionListMap
+		statusMap := entity.StatusListMap
 		orderTime, err := time.ParseInLocation(global.LongTimeLayout, body.GetOrderTime(), time.Local)
 		if err != nil {
 			log.Error(err)
