@@ -15,3 +15,5 @@ const (
 	tableNameEvent        string = "sinopac_event"
 	tableNameTradeBalance string = "trade_balance"
 )
+
+var batchSize int = 2000

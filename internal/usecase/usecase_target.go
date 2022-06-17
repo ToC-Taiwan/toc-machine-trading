@@ -34,13 +34,14 @@ func NewTarget(r *repo.TargetRepo, t *grpcapi.TargetgRPCAPI, bus *eventbus.Bus) 
 		log.Panic("unsubscribe all fail")
 	}
 
-	targetArr, err := uc.repo.QueryTargetsByTradeDay(ctx, CacheGetTradeDay())
+	tradeDay := cc.GetBasicInfo().TradeDay
+	targetArr, err := uc.repo.QueryTargetsByTradeDay(ctx, tradeDay)
 	if err != nil {
 		log.Panic(err)
 	}
 
 	if len(targetArr) == 0 {
-		targetArr, err = uc.SearchTradeDayTargets(ctx, CacheGetTradeDay())
+		targetArr, err = uc.SearchTradeDayTargets(ctx, tradeDay)
 		if err != nil {
 			log.Panic(err)
 		}
@@ -66,7 +67,7 @@ func NewTarget(r *repo.TargetRepo, t *grpcapi.TargetgRPCAPI, bus *eventbus.Bus) 
 
 // SearchTradeDayTargets -.
 func (uc *TargetUseCase) SearchTradeDayTargets(ctx context.Context, tradeDay time.Time) ([]*entity.Target, error) {
-	lastTradeDay := GetLastNTradeDayByDate(1, tradeDay)[0]
+	lastTradeDay := cc.GetBasicInfo().LastTradeDay
 	t, err := uc.gRPCAPI.GetStockVolumeRank(lastTradeDay.Format(global.ShortTimeLayout))
 	if err != nil {
 		return nil, err

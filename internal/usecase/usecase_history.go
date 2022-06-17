@@ -44,7 +44,7 @@ func (uc *HistoryUseCase) FetchHistory(ctx context.Context, targetArr []*entity.
 }
 
 func (uc *HistoryUseCase) fetchHistoryClose(targetArr []*entity.Target) error {
-	fetchTradeDayArr := GetLastNTradeDayByDate(20, CacheGetTradeDay())
+	fetchTradeDayArr := cc.GetBasicInfo().HistoryCloseRange
 	stockNumArr := []string{}
 	for _, target := range targetArr {
 		stockNumArr = append(stockNumArr, target.StockNum)
@@ -52,13 +52,10 @@ func (uc *HistoryUseCase) fetchHistoryClose(targetArr []*entity.Target) error {
 
 	stockNumArrInDayMap, err := uc.findExistHistoryClose(fetchTradeDayArr, stockNumArr)
 	if err != nil {
-		result := make(map[time.Time][]string)
-		for _, d := range fetchTradeDayArr {
-			result[d] = stockNumArr
-		}
-		stockNumArrInDayMap = result
+		return err
 	}
-
+	defer log.Info("Fetching History Close Done")
+	log.Infof("Fetching History Close -> Days: %d, Targets Count: %d", len(stockNumArrInDayMap), len(targetArr))
 	result := []*entity.HistoryClose{}
 	dataChan := make(chan *entity.HistoryClose)
 	wait := make(chan struct{})

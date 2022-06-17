@@ -9,6 +9,7 @@ import (
 	"toc-machine-trading/internal/entity"
 	"toc-machine-trading/internal/usecase/grpcapi"
 	"toc-machine-trading/internal/usecase/repo"
+	"toc-machine-trading/pkg/config"
 	"toc-machine-trading/pkg/global"
 )
 
@@ -21,8 +22,6 @@ type BasicUseCase struct {
 // NewBasic -.
 func NewBasic(r *repo.BasicRepo, t *grpcapi.BasicgRPCAPI) *BasicUseCase {
 	uc := &BasicUseCase{repo: r, gRPCAPI: t}
-	ctx := context.Background()
-
 	go func() {
 		err := uc.gRPCAPI.Heartbeat()
 		if err != nil {
@@ -30,33 +29,17 @@ func NewBasic(r *repo.BasicRepo, t *grpcapi.BasicgRPCAPI) *BasicUseCase {
 		}
 	}()
 
-	if err := uc.importCalendarDate(ctx); err != nil {
+	if err := uc.importCalendarDate(context.Background()); err != nil {
 		log.Panic(err)
 	}
 
-	if _, err := uc.GetAllSinopacStockAndUpdateRepo(ctx); err != nil {
+	if err := uc.fillBasicInfo(); err != nil {
 		log.Panic(err)
 	}
 
-	tradeDayArr, err := uc.repo.QueryAllCalendar(ctx)
-	if err != nil {
+	if _, err := uc.GetAllSinopacStockAndUpdateRepo(context.Background()); err != nil {
 		log.Panic(err)
 	}
-
-	tmp := make(map[time.Time]bool)
-	for _, v := range tradeDayArr {
-		if v.IsTradeDay {
-			tmp[v.Date] = true
-		}
-	}
-	CacheSetCalendar(tmp)
-
-	tradeDay, err := tradeDay()
-	if err != nil {
-		log.Panic(err)
-	}
-	CacheSetTradeDay(tradeDay)
-
 	return uc
 }
 
@@ -86,16 +69,13 @@ func (uc *BasicUseCase) GetAllSinopacStockAndUpdateRepo(ctx context.Context) ([]
 			LastClose: v.GetReference(),
 		}
 		stockDetail = append(stockDetail, stock)
-
-		// save to cache
-		CacheSetStockDetail(stock)
+		cc.SetStockDetail(stock)
 	}
 
 	err = uc.repo.InserOrUpdatetStockArr(context.Background(), stockDetail)
 	if err != nil {
 		return []*entity.Stock{}, err
 	}
-
 	return stockDetail, nil
 }
 
@@ -105,12 +85,6 @@ func (uc *BasicUseCase) GetAllRepoStock(ctx context.Context) ([]*entity.Stock, e
 	if err != nil {
 		return []*entity.Stock{}, err
 	}
-
-	for _, s := range data {
-		// save to cache
-		CacheSetStockDetail(s)
-	}
-
 	return data, nil
 }
 
@@ -127,11 +101,10 @@ func parseHolidayFile() ([]string, error) {
 	if err := json.Unmarshal(holidayFile, &holidayArr); err != nil {
 		return []string{}, err
 	}
-
 	return holidayArr.DateArr, nil
 }
 
-func (uc *BasicUseCase) importCalendarDate(ctx context.Context) (err error) {
+func (uc *BasicUseCase) importCalendarDate(ctx context.Context) error {
 	holidayArr, err := parseHolidayFile()
 	if err != nil {
 		return err
@@ -159,49 +132,69 @@ func (uc *BasicUseCase) importCalendarDate(ctx context.Context) (err error) {
 		firstDay = firstDay.AddDate(0, 0, 1)
 	}
 
+	tradeDayMap := make(map[time.Time]bool)
+	for _, v := range tmp {
+		if v.IsTradeDay {
+			tradeDayMap[v.Date] = true
+		}
+	}
+	cc.SetCalendar(tradeDayMap)
+
 	if err := uc.repo.InserOrUpdatetCalendarDateArr(ctx, tmp); err != nil {
 		return err
 	}
-
 	return nil
 }
 
-func tradeDay() (tradeDay time.Time, err error) {
+func getTradeDay() time.Time {
 	var today time.Time
 	if time.Now().Hour() >= 15 {
 		today = time.Now().AddDate(0, 0, 1)
 	} else {
 		today = time.Now()
 	}
-	tradeDay, err = getNextTradeDayTime(today)
-	if err != nil {
-		return tradeDay, err
-	}
-	return tradeDay, err
+	return getNextTradeDay(today)
 }
 
-func getNextTradeDayTime(nowTime time.Time) (tradeDay time.Time, err error) {
-	tmp := time.Date(nowTime.Year(), nowTime.Month(), nowTime.Day(), 0, 0, 0, 0, time.Local)
-	calendar := CacheGetCalendar()
-	if !calendar[tmp] {
+func getNextTradeDay(nowTime time.Time) time.Time {
+	d := time.Date(nowTime.Year(), nowTime.Month(), nowTime.Day(), 0, 0, 0, 0, time.Local)
+	calendar := cc.GetCalendar()
+	if !calendar[d] {
 		nowTime = nowTime.AddDate(0, 0, 1)
-		return getNextTradeDayTime(nowTime)
+		return getNextTradeDay(nowTime)
 	}
-	return tmp, err
+	return d
 }
 
-// GetLastNTradeDayByDate -.
-func GetLastNTradeDayByDate(n int64, firstDay time.Time) []time.Time {
-	calendar := CacheGetCalendar()
-	var tmp []time.Time
+func getLastNTradeDayByDate(n int64, firstDay time.Time) []time.Time {
+	calendar := cc.GetCalendar()
+	var arr []time.Time
 	for {
 		if calendar[firstDay.AddDate(0, 0, -1)] {
-			tmp = append(tmp, firstDay.AddDate(0, 0, -1))
+			arr = append(arr, firstDay.AddDate(0, 0, -1))
 		}
-		if len(tmp) == int(n) {
+		if len(arr) == int(n) {
 			break
 		}
 		firstDay = firstDay.AddDate(0, 0, -1)
 	}
-	return tmp
+	return arr
+}
+
+func (uc *BasicUseCase) fillBasicInfo() error {
+	tradeDay := getTradeDay()
+	cfg, err := config.GetConfig()
+	if err != nil {
+		return err
+	}
+
+	basic := &entity.BasicInfo{
+		TradeDay:          tradeDay,
+		LastTradeDay:      getLastNTradeDayByDate(1, tradeDay)[0],
+		HistoryCloseRange: getLastNTradeDayByDate(cfg.HistoryClosePeriod, tradeDay),
+		HistoryKbarRange:  getLastNTradeDayByDate(cfg.HistoryTickPeriod, tradeDay),
+		HistoryTickRange:  getLastNTradeDayByDate(cfg.HistoryKbarPeriod, tradeDay),
+	}
+	cc.SetBasicInfo(basic)
+	return nil
 }

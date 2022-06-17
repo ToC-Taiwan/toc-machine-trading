@@ -22,15 +22,29 @@ func NewHistory(pg *postgres.Postgres) *HistoryRepo {
 
 // InsertHistoryCloseArr -.
 func (r *HistoryRepo) InsertHistoryCloseArr(ctx context.Context, t []*entity.HistoryClose) error {
-	builder := r.Builder.Insert(tableNameHistoryClose).Columns("date, stock_num, close")
-	for _, v := range t {
-		builder = builder.Values(v.Date, v.StockNum, v.Close)
+	var split [][]*entity.HistoryClose
+	count := len(t)/batchSize + 1
+	for i := 0; i < count; i++ {
+		if i == count-1 {
+			if l := len(t[batchSize*i:]); l != 0 {
+				split = append(split, t[batchSize*i:])
+			}
+		} else {
+			split = append(split, t[batchSize*i:batchSize*(i+1)])
+		}
 	}
 
-	if sql, args, err := builder.ToSql(); err != nil {
-		return err
-	} else if _, err := r.Pool.Exec(ctx, sql, args...); err != nil {
-		return err
+	for _, s := range split {
+		builder := r.Builder.Insert(tableNameHistoryClose).Columns("date, stock_num, close")
+		for _, v := range s {
+			builder = builder.Values(v.Date, v.StockNum, v.Close)
+		}
+
+		if sql, args, err := builder.ToSql(); err != nil {
+			return err
+		} else if _, err := r.Pool.Exec(ctx, sql, args...); err != nil {
+			return err
+		}
 	}
 	return nil
 }

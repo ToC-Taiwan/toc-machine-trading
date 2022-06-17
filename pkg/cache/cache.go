@@ -7,56 +7,52 @@ import (
 	"github.com/patrickmn/go-cache"
 )
 
-var (
-	globalCache *Cache
-	once        sync.Once
-)
-
 // Cache Cache
 type Cache struct {
 	CacheMap map[string]*cache.Cache
 	lock     sync.RWMutex
 }
 
+// Category -.
+type Category string
+
+func (c Category) String() string {
+	return string(c)
+}
+
 // Key Key
 type Key struct {
-	Type string
-	Name string
+	Category Category
+	ID       string
 }
 
-func initGlobalCache() {
-	if globalCache != nil {
-		return
-	}
-	var newCache Cache
+// New -.
+func New() *Cache {
+	newCache := &Cache{}
 	newCache.CacheMap = make(map[string]*cache.Cache)
-	globalCache = &newCache
+	return newCache
 }
 
-func getOrCreateCache(keyType string) *cache.Cache {
-	if globalCache == nil {
-		once.Do(initGlobalCache)
-	}
+func (c *Cache) getOrNewCache(category string) *cache.Cache {
+	c.lock.RLock()
+	cc := c.CacheMap[category]
+	c.lock.RUnlock()
 
-	globalCache.lock.RLock()
-	tmp := globalCache.CacheMap[keyType]
-	globalCache.lock.RUnlock()
-
-	if tmp == nil {
-		tmp = cache.New(0, 0)
-		globalCache.lock.Lock()
-		globalCache.CacheMap[keyType] = tmp
-		globalCache.lock.Unlock()
+	if cc == nil {
+		cc = cache.New(0, 0)
+		c.lock.Lock()
+		c.CacheMap[category] = cc
+		c.lock.Unlock()
 	}
-	return tmp
+	return cc
 }
 
 // Set -.
-func Set(k Key, x interface{}) {
-	getOrCreateCache(k.Type).Set(k.Name, x, 0)
+func (c *Cache) Set(k Key, x interface{}) {
+	c.getOrNewCache(k.Category.String()).Set(k.ID, x, 0)
 }
 
 // Get -.
-func Get(k Key) (interface{}, bool) {
-	return getOrCreateCache(k.Type).Get(k.Name)
+func (c *Cache) Get(k Key) (interface{}, bool) {
+	return c.getOrNewCache(k.Category.String()).Get(k.ID)
 }
