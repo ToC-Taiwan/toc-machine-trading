@@ -19,12 +19,167 @@ import (
 // Requires gRPC-Go v1.32.0 or later.
 const _ = grpc.SupportPackageIsVersion7
 
+// HealthCheckClient is the client API for HealthCheck service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+type HealthCheckClient interface {
+	// Health check
+	Heartbeat(ctx context.Context, opts ...grpc.CallOption) (HealthCheck_HeartbeatClient, error)
+	Terminate(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error)
+}
+
+type healthCheckClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewHealthCheckClient(cc grpc.ClientConnInterface) HealthCheckClient {
+	return &healthCheckClient{cc}
+}
+
+func (c *healthCheckClient) Heartbeat(ctx context.Context, opts ...grpc.CallOption) (HealthCheck_HeartbeatClient, error) {
+	stream, err := c.cc.NewStream(ctx, &HealthCheck_ServiceDesc.Streams[0], "/sinopac_forwarder.HealthCheck/Heartbeat", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &healthCheckHeartbeatClient{stream}
+	return x, nil
+}
+
+type HealthCheck_HeartbeatClient interface {
+	Send(*Beat) error
+	Recv() (*Beat, error)
+	grpc.ClientStream
+}
+
+type healthCheckHeartbeatClient struct {
+	grpc.ClientStream
+}
+
+func (x *healthCheckHeartbeatClient) Send(m *Beat) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *healthCheckHeartbeatClient) Recv() (*Beat, error) {
+	m := new(Beat)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func (c *healthCheckClient) Terminate(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/sinopac_forwarder.HealthCheck/Terminate", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// HealthCheckServer is the server API for HealthCheck service.
+// All implementations must embed UnimplementedHealthCheckServer
+// for forward compatibility
+type HealthCheckServer interface {
+	// Health check
+	Heartbeat(HealthCheck_HeartbeatServer) error
+	Terminate(context.Context, *emptypb.Empty) (*emptypb.Empty, error)
+	mustEmbedUnimplementedHealthCheckServer()
+}
+
+// UnimplementedHealthCheckServer must be embedded to have forward compatible implementations.
+type UnimplementedHealthCheckServer struct {
+}
+
+func (UnimplementedHealthCheckServer) Heartbeat(HealthCheck_HeartbeatServer) error {
+	return status.Errorf(codes.Unimplemented, "method Heartbeat not implemented")
+}
+func (UnimplementedHealthCheckServer) Terminate(context.Context, *emptypb.Empty) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Terminate not implemented")
+}
+func (UnimplementedHealthCheckServer) mustEmbedUnimplementedHealthCheckServer() {}
+
+// UnsafeHealthCheckServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to HealthCheckServer will
+// result in compilation errors.
+type UnsafeHealthCheckServer interface {
+	mustEmbedUnimplementedHealthCheckServer()
+}
+
+func RegisterHealthCheckServer(s grpc.ServiceRegistrar, srv HealthCheckServer) {
+	s.RegisterService(&HealthCheck_ServiceDesc, srv)
+}
+
+func _HealthCheck_Heartbeat_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(HealthCheckServer).Heartbeat(&healthCheckHeartbeatServer{stream})
+}
+
+type HealthCheck_HeartbeatServer interface {
+	Send(*Beat) error
+	Recv() (*Beat, error)
+	grpc.ServerStream
+}
+
+type healthCheckHeartbeatServer struct {
+	grpc.ServerStream
+}
+
+func (x *healthCheckHeartbeatServer) Send(m *Beat) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func (x *healthCheckHeartbeatServer) Recv() (*Beat, error) {
+	m := new(Beat)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func _HealthCheck_Terminate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(HealthCheckServer).Terminate(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/sinopac_forwarder.HealthCheck/Terminate",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(HealthCheckServer).Terminate(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+// HealthCheck_ServiceDesc is the grpc.ServiceDesc for HealthCheck service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var HealthCheck_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "sinopac_forwarder.HealthCheck",
+	HandlerType: (*HealthCheckServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "Terminate",
+			Handler:    _HealthCheck_Terminate_Handler,
+		},
+	},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "Heartbeat",
+			Handler:       _HealthCheck_Heartbeat_Handler,
+			ServerStreams: true,
+			ClientStreams: true,
+		},
+	},
+	Metadata: "src/sinopac_forwarder.proto",
+}
+
 // SinopacForwarderClient is the client API for SinopacForwarder service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type SinopacForwarderClient interface {
-	// Health check
-	Heartbeat(ctx context.Context, opts ...grpc.CallOption) (SinopacForwarder_HeartbeatClient, error)
 	// Basic
 	GetAllStockDetail(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*StockDetailResponse, error)
 	GetAllStockSnapshot(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*StockSnapshotResponse, error)
@@ -54,37 +209,6 @@ type sinopacForwarderClient struct {
 
 func NewSinopacForwarderClient(cc grpc.ClientConnInterface) SinopacForwarderClient {
 	return &sinopacForwarderClient{cc}
-}
-
-func (c *sinopacForwarderClient) Heartbeat(ctx context.Context, opts ...grpc.CallOption) (SinopacForwarder_HeartbeatClient, error) {
-	stream, err := c.cc.NewStream(ctx, &SinopacForwarder_ServiceDesc.Streams[0], "/sinopac_forwarder.SinopacForwarder/Heartbeat", opts...)
-	if err != nil {
-		return nil, err
-	}
-	x := &sinopacForwarderHeartbeatClient{stream}
-	return x, nil
-}
-
-type SinopacForwarder_HeartbeatClient interface {
-	Send(*Beat) error
-	Recv() (*Beat, error)
-	grpc.ClientStream
-}
-
-type sinopacForwarderHeartbeatClient struct {
-	grpc.ClientStream
-}
-
-func (x *sinopacForwarderHeartbeatClient) Send(m *Beat) error {
-	return x.ClientStream.SendMsg(m)
-}
-
-func (x *sinopacForwarderHeartbeatClient) Recv() (*Beat, error) {
-	m := new(Beat)
-	if err := x.ClientStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
 }
 
 func (c *sinopacForwarderClient) GetAllStockDetail(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*StockDetailResponse, error) {
@@ -253,8 +377,6 @@ func (c *sinopacForwarderClient) UnSubscribeStockAllBidAsk(ctx context.Context, 
 // All implementations must embed UnimplementedSinopacForwarderServer
 // for forward compatibility
 type SinopacForwarderServer interface {
-	// Health check
-	Heartbeat(SinopacForwarder_HeartbeatServer) error
 	// Basic
 	GetAllStockDetail(context.Context, *emptypb.Empty) (*StockDetailResponse, error)
 	GetAllStockSnapshot(context.Context, *emptypb.Empty) (*StockSnapshotResponse, error)
@@ -283,9 +405,6 @@ type SinopacForwarderServer interface {
 type UnimplementedSinopacForwarderServer struct {
 }
 
-func (UnimplementedSinopacForwarderServer) Heartbeat(SinopacForwarder_HeartbeatServer) error {
-	return status.Errorf(codes.Unimplemented, "method Heartbeat not implemented")
-}
 func (UnimplementedSinopacForwarderServer) GetAllStockDetail(context.Context, *emptypb.Empty) (*StockDetailResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAllStockDetail not implemented")
 }
@@ -351,32 +470,6 @@ type UnsafeSinopacForwarderServer interface {
 
 func RegisterSinopacForwarderServer(s grpc.ServiceRegistrar, srv SinopacForwarderServer) {
 	s.RegisterService(&SinopacForwarder_ServiceDesc, srv)
-}
-
-func _SinopacForwarder_Heartbeat_Handler(srv interface{}, stream grpc.ServerStream) error {
-	return srv.(SinopacForwarderServer).Heartbeat(&sinopacForwarderHeartbeatServer{stream})
-}
-
-type SinopacForwarder_HeartbeatServer interface {
-	Send(*Beat) error
-	Recv() (*Beat, error)
-	grpc.ServerStream
-}
-
-type sinopacForwarderHeartbeatServer struct {
-	grpc.ServerStream
-}
-
-func (x *sinopacForwarderHeartbeatServer) Send(m *Beat) error {
-	return x.ServerStream.SendMsg(m)
-}
-
-func (x *sinopacForwarderHeartbeatServer) Recv() (*Beat, error) {
-	m := new(Beat)
-	if err := x.ServerStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
 }
 
 func _SinopacForwarder_GetAllStockDetail_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -783,14 +876,7 @@ var SinopacForwarder_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _SinopacForwarder_UnSubscribeStockAllBidAsk_Handler,
 		},
 	},
-	Streams: []grpc.StreamDesc{
-		{
-			StreamName:    "Heartbeat",
-			Handler:       _SinopacForwarder_Heartbeat_Handler,
-			ServerStreams: true,
-			ClientStreams: true,
-		},
-	},
+	Streams:  []grpc.StreamDesc{},
 	Metadata: "src/sinopac_forwarder.proto",
 }
 

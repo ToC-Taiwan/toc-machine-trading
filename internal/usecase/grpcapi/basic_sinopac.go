@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"io"
+	"os"
 	"time"
 
 	"toc-machine-trading/pb"
@@ -15,25 +16,35 @@ import (
 
 // BasicgRPCAPI -.
 type BasicgRPCAPI struct {
-	conn *sinopac.Connection
+	conn         *sinopac.Connection
+	heartbeatMsg string
 }
 
 // NewBasic -.
 func NewBasic(client *sinopac.Connection) *BasicgRPCAPI {
-	return &BasicgRPCAPI{client}
+	instance := &BasicgRPCAPI{
+		conn:         client,
+		heartbeatMsg: "beat",
+	}
+
+	mode, ok := os.LookupEnv("DEPLOYMENT")
+	if !ok || mode != "prod" {
+		instance.heartbeatMsg = "debug"
+	}
+	return instance
 }
 
 // Heartbeat Heartbeat
 func (t *BasicgRPCAPI) Heartbeat() error {
 	conn := t.conn.GetReadyConn()
 	defer t.conn.PutReadyConn(conn)
-	c := pb.NewSinopacForwarderClient(conn)
+	c := pb.NewHealthCheckClient(conn)
 	stream, err := c.Heartbeat(context.Background())
 	if err != nil {
 		return err
 	}
 
-	err = stream.Send(&pb.Beat{Message: "beat"})
+	err = stream.Send(&pb.Beat{Message: t.heartbeatMsg})
 	if err != nil {
 		return err
 	}
@@ -52,6 +63,18 @@ func (t *BasicgRPCAPI) Heartbeat() error {
 			return err
 		}
 	}
+}
+
+// Terminate -.
+func (t *BasicgRPCAPI) Terminate() error {
+	conn := t.conn.GetReadyConn()
+	defer t.conn.PutReadyConn(conn)
+	c := pb.NewHealthCheckClient(conn)
+	_, err := c.Terminate(context.Background(), &emptypb.Empty{})
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // GetAllStockDetail GetAllStockDetail

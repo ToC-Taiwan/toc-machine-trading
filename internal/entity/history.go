@@ -7,7 +7,6 @@ type HistoryClose struct {
 	ID       int64     `json:"id"`
 	Date     time.Time `json:"date"`
 	StockNum string    `json:"stock_num"`
-	Open     float64   `json:"open"`
 	Close    float64   `json:"close"`
 	Stock    *Stock    `json:"stock"`
 }

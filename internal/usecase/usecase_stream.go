@@ -43,9 +43,6 @@ func (uc *StreamUseCase) ReceiveEvent(ctx context.Context) {
 	go func() {
 		for {
 			event := <-eventChan
-
-			log.Info(time.Since(event.EventTime).String(), event)
-
 			if err := uc.repo.InsertEvent(ctx, event); err != nil {
 				log.Error(err)
 			}

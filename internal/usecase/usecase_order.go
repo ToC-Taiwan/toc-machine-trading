@@ -33,12 +33,17 @@ func NewOrder(r *repo.OrderRepo, t *grpcapi.OrdergRPCAPI, bus *eventbus.Bus) {
 	if err := uc.bus.SubscribeTopic(topicBuyOrder, uc.buyLaterOrder); err != nil {
 		log.Panic(err)
 	}
+	if err := uc.bus.SubscribeTopic(topicCancelOrder, uc.cancelOrder); err != nil {
+		log.Panic(err)
+	}
 }
 
-func (c *OrderUseCase) buyOrder() {}
+func (uc *OrderUseCase) buyOrder() {}
 
-func (c *OrderUseCase) sellOrder() {}
+func (uc *OrderUseCase) sellOrder() {}
 
-func (c *OrderUseCase) sellFirstOrder() {}
+func (uc *OrderUseCase) sellFirstOrder() {}
 
-func (c *OrderUseCase) buyLaterOrder() {}
+func (uc *OrderUseCase) buyLaterOrder() {}
+
+func (uc *OrderUseCase) cancelOrder() {}

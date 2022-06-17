@@ -60,6 +60,11 @@ func NewBasic(r *repo.BasicRepo, t *grpcapi.BasicgRPCAPI) *BasicUseCase {
 	return uc
 }
 
+// TerminateSinopac -.
+func (uc *BasicUseCase) TerminateSinopac(ctx context.Context) error {
+	return uc.gRPCAPI.Terminate()
+}
+
 // GetAllSinopacStockAndUpdateRepo -.
 func (uc *BasicUseCase) GetAllSinopacStockAndUpdateRepo(ctx context.Context) ([]*entity.Stock, error) {
 	stockArr, err := uc.gRPCAPI.GetAllStockDetail()

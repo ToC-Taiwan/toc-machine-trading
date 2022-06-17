@@ -18,6 +18,7 @@ type (
 	Basic interface {
 		GetAllSinopacStockAndUpdateRepo(ctx context.Context) ([]*entity.Stock, error)
 		GetAllRepoStock(ctx context.Context) ([]*entity.Stock, error)
+		TerminateSinopac(ctx context.Context) error
 	}
 
 	// BasicRepo -.
@@ -31,6 +32,7 @@ type (
 	// BasicgRPCAPI -.
 	BasicgRPCAPI interface {
 		Heartbeat() error
+		Terminate() error
 		GetAllStockDetail() ([]*pb.StockDetailMessage, error)
 		GetAllStockSnapshot() ([]*pb.StockSnapshotMessage, error)
 		GetStockSnapshotByNumArr(stockNumArr []string) ([]*pb.StockSnapshotMessage, error)
@@ -65,7 +67,10 @@ type (
 	History interface{}
 
 	// HistoryRepo -.
-	HistoryRepo interface{}
+	HistoryRepo interface {
+		InsertHistoryCloseArr(ctx context.Context, t []*entity.HistoryClose) error
+		QueryHistoryCloseByMutltiStockNumDate(ctx context.Context, stockNumArr []string, date time.Time) (map[string]*entity.HistoryClose, error)
+	}
 
 	// HistorygRPCAPI -.
 	HistorygRPCAPI interface {

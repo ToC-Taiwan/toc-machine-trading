@@ -9,12 +9,13 @@ help: ## display this help screen
 swag-v1: ### swag init
 	@echo 'package main' > ./tradebot.go && \
 	swag init -g internal/controller/http/v1/router.go && \
-	rm -rf ./tradebot.go
+	rm -rf ./tradebot.go && \
+	echo "" >> ./docs/swagger.json
 .PHONY: swag-v1
 
 run: swag-v1 ### swag run
 	@go mod tidy && go mod download && \
-	CGO_ENABLED=0 go build -o toc-machine-trading ./cmd/app && ./toc-machine-trading
+	CGO_ENABLED=0 go build -gcflags=all="-N -l" -o toc-machine-trading ./cmd/app && ./toc-machine-trading
 .PHONY: run
 
 lint: ### check by golangci linter

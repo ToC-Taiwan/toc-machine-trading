@@ -28,7 +28,6 @@ CREATE TABLE history_close (
     "id" SERIAL PRIMARY KEY,
     "date" TIMESTAMPTZ NOT NULL,
     "stock_num" VARCHAR NOT NULL,
-    "open" DECIMAL NOT NULL,
     "close" DECIMAL NOT NULL
 );
 

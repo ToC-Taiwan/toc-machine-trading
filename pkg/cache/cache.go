@@ -3,14 +3,13 @@ package cache
 
 import (
 	"sync"
-	"time"
 
 	"github.com/patrickmn/go-cache"
 )
 
-const (
-	noExpired time.Duration = 0
-	noCleanUp time.Duration = 0
+var (
+	globalCache *Cache
+	once        sync.Once
 )
 
 // Cache Cache
@@ -25,11 +24,6 @@ type Key struct {
 	Name string
 }
 
-var (
-	globalCache *Cache
-	once        sync.Once
-)
-
 func initGlobalCache() {
 	if globalCache != nil {
 		return
@@ -39,7 +33,7 @@ func initGlobalCache() {
 	globalCache = &newCache
 }
 
-func getCacheByType(keyType string) *cache.Cache {
+func getOrCreateCache(keyType string) *cache.Cache {
 	if globalCache == nil {
 		once.Do(initGlobalCache)
 	}
@@ -49,7 +43,7 @@ func getCacheByType(keyType string) *cache.Cache {
 	globalCache.lock.RUnlock()
 
 	if tmp == nil {
-		tmp = cache.New(noExpired, noCleanUp)
+		tmp = cache.New(0, 0)
 		globalCache.lock.Lock()
 		globalCache.CacheMap[keyType] = tmp
 		globalCache.lock.Unlock()
@@ -59,10 +53,10 @@ func getCacheByType(keyType string) *cache.Cache {
 
 // Set -.
 func Set(k Key, x interface{}) {
-	getCacheByType(k.Type).Set(k.Name, x, noExpired)
+	getOrCreateCache(k.Type).Set(k.Name, x, 0)
 }
 
 // Get -.
 func Get(k Key) (interface{}, bool) {
-	return getCacheByType(k.Type).Get(k.Name)
+	return getOrCreateCache(k.Type).Get(k.Name)
 }

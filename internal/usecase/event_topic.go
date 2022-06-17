@@ -13,4 +13,5 @@ const (
 	topicSellOrder      string = "sell_order"
 	topicSellFirstOrder string = "sell_first_order"
 	topicBuyLaterOrder  string = "buy_later_order"
+	topicCancelOrder    string = "cancel_order"
 )

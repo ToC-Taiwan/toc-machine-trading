@@ -20,6 +20,7 @@ func newBasicRoutes(handler *gin.RouterGroup, t usecase.Basic) {
 	{
 		h.GET("/stock/sinopac-to-repo", r.getAllSinopacStockAndUpdateRepo)
 		h.GET("/stock/repo", r.getAllRepoStock)
+		h.PUT("/system/terminate", r.terminateSinopac)
 	}
 }
 
@@ -69,4 +70,24 @@ func (r *basicRoutes) getAllRepoStock(c *gin.Context) {
 	c.JSON(http.StatusOK, stockDetailResponse{
 		StockDetail: stockDetail,
 	})
+}
+
+// @Summary     terminateSinopac
+// @Description terminateSinopac
+// @ID          terminateSinopac
+// @Tags  	    system
+// @Accept      json
+// @Produce     json
+// @Success     200
+// @Failure     500 {object} response
+// @Router      /basic/system/terminate [put]
+func (r *basicRoutes) terminateSinopac(c *gin.Context) {
+	err := r.t.TerminateSinopac(c.Request.Context())
+	if err != nil {
+		log.Error(err)
+		errorResponse(c, http.StatusInternalServerError, "terminate fail")
+		return
+	}
+
+	c.JSON(http.StatusOK, nil)
 }

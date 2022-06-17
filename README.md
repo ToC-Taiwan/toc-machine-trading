@@ -69,6 +69,23 @@ RABBITMQ_EXCHANGE=exchange
 DB_NAME=trade' > .env
 ```
 
+### VSCode Debug Setting
+
+```json
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug",
+            "type": "go",
+            "request": "attach",
+            "debugAdapter": "dlv-dap",
+            "processId": "toc-machine-trading",
+        }
+    ]
+}
+```
+
 ### Config
 
 ```sh

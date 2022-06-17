@@ -75,6 +75,33 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/basic/system/terminate": {
+            "get": {
+                "description": "terminateSinopac",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "system"
+                ],
+                "summary": "terminateSinopac",
+                "operationId": "terminateSinopac",
+                "responses": {
+                    "200": {
+                        "description": ""
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/v1.response"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
