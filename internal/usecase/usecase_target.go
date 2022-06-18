@@ -8,6 +8,7 @@ import (
 	"toc-machine-trading/internal/entity"
 	"toc-machine-trading/internal/usecase/grpcapi"
 	"toc-machine-trading/internal/usecase/repo"
+	"toc-machine-trading/pkg/config"
 	"toc-machine-trading/pkg/eventbus"
 	"toc-machine-trading/pkg/global"
 )
@@ -72,8 +73,16 @@ func (uc *TargetUseCase) SearchTradeDayTargets(ctx context.Context, tradeDay tim
 	if err != nil {
 		return nil, err
 	}
+	cfg, err := config.GetConfig()
+	if err != nil {
+		return nil, err
+	}
+	cond := cfg.TargetCond
 	var result []*entity.Target
 	for i, v := range t {
+		if v.GetClose() < cond.LimitPriceLow || v.GetClose() > cond.LimitPriceHigh || v.GetTotalAmount() < cond.LimitVolume {
+			continue
+		}
 		result = append(result, &entity.Target{
 			StockNum:    v.GetCode(),
 			TradeDay:    tradeDay,

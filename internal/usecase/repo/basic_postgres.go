@@ -64,12 +64,7 @@ func (r *BasicRepo) InserOrUpdatetStockArr(ctx context.Context, t []*entity.Stoc
 			return err
 		}
 	}
-
-	log.WithFields(map[string]interface{}{
-		"Update": update,
-		"Exist":  len(t) - update - insert,
-		"Insert": insert,
-	}).Info("InserOrUpdatetStockArr")
+	log.Infof("InserOrUpdatetStockArr -> Exist: %d, Insert: %d, Update: %d", len(t)-update-insert, insert, update)
 	return nil
 }
 
@@ -135,12 +130,7 @@ func (r *BasicRepo) InserOrUpdatetCalendarDateArr(ctx context.Context, t []*enti
 			return err
 		}
 	}
-
-	log.WithFields(map[string]interface{}{
-		"Update": update,
-		"Exist":  len(t) - update - insert,
-		"Insert": insert,
-	}).Info("InserOrUpdatetCalendarDateArr")
+	log.Infof("InserOrUpdatetCalendarDateArr -> Exist: %d, Insert: %d, Update: %d", len(t)-update-insert, insert, update)
 	return nil
 }
 

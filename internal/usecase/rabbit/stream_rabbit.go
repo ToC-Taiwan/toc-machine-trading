@@ -142,6 +142,10 @@ func (c *StreamRabbit) TickConsumer(key string, tickChan chan *entity.RealTimeTi
 			continue
 		}
 
+		if body.GetSimtrade() == 1 {
+			continue
+		}
+
 		tickChan <- &entity.RealTimeTick{
 			StockNum:        body.GetCode(),
 			TickTime:        dataTime,
@@ -189,6 +193,11 @@ func (c *StreamRabbit) BidAskConsumer(key string, bidAskChan chan *entity.RealTi
 			log.Error(err)
 			continue
 		}
+
+		if body.GetSimtrade() == 1 {
+			continue
+		}
+
 		bidAskChan <- &entity.RealTimeBidAsk{
 			StockNum:  body.GetCode(),
 			TickTime:  dataTime,

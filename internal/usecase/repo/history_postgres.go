@@ -24,6 +24,7 @@ func NewHistory(pg *postgres.Postgres) *HistoryRepo {
 
 // InsertHistoryCloseArr -.
 func (r *HistoryRepo) InsertHistoryCloseArr(ctx context.Context, t []*entity.HistoryClose) error {
+	log.Infof("InsertHistoryCloseArr -> Count: %d", len(t))
 	var split [][]*entity.HistoryClose
 	count := len(t)/batchSize + 1
 	for i := 0; i < count; i++ {
@@ -83,6 +84,7 @@ func (r *HistoryRepo) QueryHistoryCloseByMutltiStockNumDate(ctx context.Context,
 
 // InsertHistoryTickArr -.
 func (r *HistoryRepo) InsertHistoryTickArr(ctx context.Context, t []*entity.HistoryTick) error {
+	log.Infof("InsertHistoryTickArr -> Count: %d", len(t))
 	var split [][]*entity.HistoryTick
 	count := len(t)/batchSize + 1
 	for i := 0; i < count; i++ {
@@ -134,6 +136,7 @@ func (r *HistoryRepo) CheckHistoryTickExist(ctx context.Context, stockNum string
 
 // InsertHistoryKbarArr -.
 func (r *HistoryRepo) InsertHistoryKbarArr(ctx context.Context, t []*entity.HistoryKbar) error {
+	log.Infof("InsertHistoryKbarArr -> Count: %d", len(t))
 	var split [][]*entity.HistoryKbar
 	count := len(t)/batchSize + 1
 	for i := 0; i < count; i++ {

@@ -38,12 +38,12 @@ func (uc *HistoryUseCase) FetchHistory(ctx context.Context, targetArr []*entity.
 		log.Panic(err)
 	}
 
-	err = uc.fetchHistoryTick(targetArr[:100])
+	err = uc.fetchHistoryTick(targetArr)
 	if err != nil {
 		log.Panic(err)
 	}
 
-	err = uc.fetchHistoryKbar(targetArr[:100])
+	err = uc.fetchHistoryKbar(targetArr)
 	if err != nil {
 		log.Panic(err)
 	}
@@ -78,6 +78,9 @@ func (uc *HistoryUseCase) fetchHistoryClose(targetArr []*entity.Target) error {
 		close(wait)
 	}()
 	for d, s := range stockNumArrInDayMap {
+		if len(s) == 0 {
+			continue
+		}
 		stockArr := s
 		date := d
 		log.Infof("Fetching History Close -> StockCount: %d, Date: %s", len(stockArr), date.Format(global.ShortTimeLayout))
@@ -149,6 +152,9 @@ func (uc *HistoryUseCase) fetchHistoryTick(targetArr []*entity.Target) error {
 		close(wait)
 	}()
 	for d, s := range stockNumArrInDayMap {
+		if len(s) == 0 {
+			continue
+		}
 		stockArr := s
 		date := d
 		log.Infof("Fetching History Tick -> StockCount: %d, Date: %s", len(stockArr), date.Format(global.ShortTimeLayout))
@@ -220,6 +226,9 @@ func (uc *HistoryUseCase) fetchHistoryKbar(targetArr []*entity.Target) error {
 		close(wait)
 	}()
 	for d, s := range stockNumArrInDayMap {
+		if len(s) == 0 {
+			continue
+		}
 		stockArr := s
 		date := d
 		log.Infof("Fetching History Kbar -> StockCount: %d, Date: %s", len(stockArr), date.Format(global.ShortTimeLayout))
