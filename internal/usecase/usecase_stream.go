@@ -29,10 +29,7 @@ func NewStream(r *repo.StreamRepo, t *rabbit.StreamRabbit, bus *eventbus.Bus) {
 	go uc.ReceiveEvent(context.Background())
 	go uc.ReceiveOrderStatus(context.Background())
 
-	if err := uc.bus.SubscribeTopic(topicStreamTickTargets, uc.ReceiveTicks); err != nil {
-		log.Panic(err)
-	}
-	if err := uc.bus.SubscribeTopic(topicStreamBidAskTargets, uc.ReceiveBidAsk); err != nil {
+	if err := uc.bus.SubscribeTopic(topicStreamTargets, uc.ReceiveTicks); err != nil {
 		log.Panic(err)
 	}
 }
@@ -66,41 +63,28 @@ func (uc *StreamUseCase) ReceiveOrderStatus(ctx context.Context) {
 // ReceiveTicks -.
 func (uc *StreamUseCase) ReceiveTicks(ctx context.Context, targetArr []*entity.Target) {
 	for _, t := range targetArr {
-		target := t
-		go func() {
-			tickChan := make(chan *entity.RealTimeTick)
-			go tickProcessor(tickChan)
-
-			uc.rabbit.TickConsumer(fmt.Sprintf("tick:%s", target.StockNum), tickChan)
-		}()
+		tickChan := make(chan *entity.RealTimeTick)
+		bidAskChan := make(chan *entity.RealTimeBidAsk)
+		go uc.tradeAgent(tickChan, bidAskChan)
+		go uc.rabbit.TickConsumer(fmt.Sprintf("tick:%s", t.StockNum), tickChan)
+		go uc.rabbit.BidAskConsumer(fmt.Sprintf("bid_ask:%s", t.StockNum), bidAskChan)
 	}
 	uc.bus.PublishTopicEvent(topicSubscribeTickTargets, ctx, targetArr)
 }
 
-// ReceiveBidAsk -.
-func (uc *StreamUseCase) ReceiveBidAsk(ctx context.Context, targetArr []*entity.Target) {
-	for _, t := range targetArr {
-		target := t
-		go func() {
-			bidAskChan := make(chan *entity.RealTimeBidAsk)
-			go bidAskProcessor(bidAskChan)
-
-			uc.rabbit.BidAskConsumer(fmt.Sprintf("bid_ask:%s", target.StockNum), bidAskChan)
-		}()
-	}
-	uc.bus.PublishTopicEvent(topicSubscribeBidAskTargets, ctx, targetArr)
-}
-
-func tickProcessor(tickChan chan *entity.RealTimeTick) {
-	for {
-		tick := <-tickChan
-		log.Infof("tick:%s\n", time.Since(tick.TickTime).String())
-	}
-}
-
-func bidAskProcessor(bidAskChan chan *entity.RealTimeBidAsk) {
-	for {
-		bidAsk := <-bidAskChan
-		log.Infof("bidask:%s\n", time.Since(bidAsk.TickTime).String())
-	}
+func (uc *StreamUseCase) tradeAgent(tickChan chan *entity.RealTimeTick, bidAskChan chan *entity.RealTimeBidAsk) {
+	wait := make(chan struct{})
+	go func() {
+		for {
+			tick := <-tickChan
+			log.Infof("tick:%s\n", time.Since(tick.TickTime).String())
+		}
+	}()
+	go func() {
+		for {
+			bidAsk := <-bidAskChan
+			log.Infof("bidask:%s\n", time.Since(bidAsk.TickTime).String())
+		}
+	}()
+	<-wait
 }

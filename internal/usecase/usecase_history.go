@@ -48,8 +48,7 @@ func (uc *HistoryUseCase) FetchHistory(ctx context.Context, targetArr []*entity.
 		log.Panic(err)
 	}
 
-	uc.bus.PublishTopicEvent(topicStreamTickTargets, ctx, targetArr)
-	uc.bus.PublishTopicEvent(topicStreamBidAskTargets, ctx, targetArr)
+	uc.bus.PublishTopicEvent(topicStreamTargets, ctx, targetArr)
 }
 
 func (uc *HistoryUseCase) fetchHistoryClose(targetArr []*entity.Target) error {
@@ -112,7 +111,7 @@ func (uc *HistoryUseCase) findExistHistoryClose(fetchTradeDayArr []time.Time, st
 	result := make(map[time.Time][]string)
 	for _, d := range fetchTradeDayArr {
 		var stockNumArrInDay []string
-		closeMap, err := uc.repo.QueryHistoryCloseByMutltiStockNumDate(context.Background(), stockNumArr, d)
+		closeMap, err := uc.repo.QueryMutltiStockCloseByDate(context.Background(), stockNumArr, d)
 		if err != nil {
 			return nil, err
 		}
@@ -186,12 +185,12 @@ func (uc *HistoryUseCase) findExistHistoryTick(fetchTradeDayArr []time.Time, sto
 	result := make(map[time.Time][]string)
 	for _, d := range fetchTradeDayArr {
 		var stockNumArrInDay []string
+		tickArrMap, err := uc.repo.QueryMultiStockTickArrByDate(context.Background(), stockNumArr, d)
+		if err != nil {
+			return nil, err
+		}
 		for _, s := range stockNumArr {
-			exist, err := uc.repo.CheckHistoryTickExist(context.Background(), s, d)
-			if err != nil {
-				return nil, err
-			}
-			if !exist {
+			if _, ok := tickArrMap[s]; !ok {
 				stockNumArrInDay = append(stockNumArrInDay, s)
 			}
 		}
@@ -262,12 +261,12 @@ func (uc *HistoryUseCase) findExistHistoryKbar(fetchTradeDayArr []time.Time, sto
 	result := make(map[time.Time][]string)
 	for _, d := range fetchTradeDayArr {
 		var stockNumArrInDay []string
+		kbarArrMap, err := uc.repo.QueryMultiStockKbarArrByDate(context.Background(), stockNumArr, d)
+		if err != nil {
+			return nil, err
+		}
 		for _, s := range stockNumArr {
-			exist, err := uc.repo.CheckHistoryKbarExist(context.Background(), s, d)
-			if err != nil {
-				return nil, err
-			}
-			if !exist {
+			if _, ok := kbarArrMap[s]; !ok {
 				stockNumArrInDay = append(stockNumArrInDay, s)
 			}
 		}
