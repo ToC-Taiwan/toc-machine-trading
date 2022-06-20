@@ -58,10 +58,7 @@ func NewTarget(r *repo.TargetRepo, t *grpcapi.TargetgRPCAPI, bus *eventbus.Bus) 
 	bus.PublishTopicEvent(topicTargets, ctx, targetArr)
 
 	// sub events
-	if err := bus.SubscribeTopic(topicSubscribeTickTargets, uc.SubscribeStockTick); err != nil {
-		log.Panic(err)
-	}
-	if err := bus.SubscribeTopic(topicSubscribeBidAskTargets, uc.SubscribeStockBidAsk); err != nil {
+	if err := bus.SubscribeTopic(topicSubscribeTickTargets, uc.SubscribeStockTick, uc.SubscribeStockBidAsk); err != nil {
 		log.Panic(err)
 	}
 }

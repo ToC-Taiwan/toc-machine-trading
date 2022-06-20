@@ -23,10 +23,12 @@ func (c *Bus) PublishTopicEvent(topic string, arg ...interface{}) {
 }
 
 // SubscribeTopic SubscribeTopic
-func (c *Bus) SubscribeTopic(topic string, fn interface{}) error {
-	err := c.bus.Subscribe(topic, fn)
-	if err != nil {
-		return err
+func (c *Bus) SubscribeTopic(topic string, fn ...interface{}) error {
+	for _, f := range fn {
+		err := c.bus.Subscribe(topic, f)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }

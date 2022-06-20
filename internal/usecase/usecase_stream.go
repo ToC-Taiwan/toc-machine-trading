@@ -63,16 +63,24 @@ func (uc *StreamUseCase) ReceiveOrderStatus(ctx context.Context) {
 // ReceiveTicks -.
 func (uc *StreamUseCase) ReceiveTicks(ctx context.Context, targetArr []*entity.Target) {
 	for _, t := range targetArr {
+		target := t
 		tickChan := make(chan *entity.RealTimeTick)
 		bidAskChan := make(chan *entity.RealTimeBidAsk)
-		go uc.tradeAgent(tickChan, bidAskChan)
-		go uc.rabbit.TickConsumer(fmt.Sprintf("tick:%s", t.StockNum), tickChan)
-		go uc.rabbit.BidAskConsumer(fmt.Sprintf("bid_ask:%s", t.StockNum), bidAskChan)
+		finishChan := make(chan struct{})
+		go uc.tradeAgent(tickChan, bidAskChan, finishChan)
+		for {
+			_, ok := <-finishChan
+			if !ok {
+				break
+			}
+		}
+		go uc.rabbit.TickConsumer(fmt.Sprintf("tick:%s", target.StockNum), tickChan)
+		go uc.rabbit.BidAskConsumer(fmt.Sprintf("bid_ask:%s", target.StockNum), bidAskChan)
 	}
 	uc.bus.PublishTopicEvent(topicSubscribeTickTargets, ctx, targetArr)
 }
 
-func (uc *StreamUseCase) tradeAgent(tickChan chan *entity.RealTimeTick, bidAskChan chan *entity.RealTimeBidAsk) {
+func (uc *StreamUseCase) tradeAgent(tickChan chan *entity.RealTimeTick, bidAskChan chan *entity.RealTimeBidAsk, finishChan chan struct{}) {
 	wait := make(chan struct{})
 	go func() {
 		for {
@@ -86,5 +94,8 @@ func (uc *StreamUseCase) tradeAgent(tickChan chan *entity.RealTimeTick, bidAskCh
 			log.Infof("bidask:%s\n", time.Since(bidAsk.TickTime).String())
 		}
 	}()
+
+	// close channel to start receive data from rabbitmq
+	close(finishChan)
 	<-wait
 }
