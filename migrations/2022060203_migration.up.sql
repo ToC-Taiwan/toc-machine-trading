@@ -55,7 +55,7 @@ CREATE TABLE history_tick (
     "ask_volume" INT NOT NULL
 );
 
-CREATE TABLE order (
+CREATE TABLE trade_order (
     "order_id" VARCHAR PRIMARY KEY,
     "stock_num" VARCHAR NOT NULL,
     "action" INT NOT NULL,
