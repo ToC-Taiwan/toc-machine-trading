@@ -11,7 +11,7 @@ const (
 	tableNameHistoryClose string = "history_close"
 	tableNameHistoryKbar  string = "history_kbar"
 	tableNameHistoryTick  string = "history_tick"
-	tableNameOrderStatus  string = "order_status"
+	tableNameOrderStatus  string = "order"
 	tableNameEvent        string = "sinopac_event"
 	tableNameTradeBalance string = "trade_balance"
 )

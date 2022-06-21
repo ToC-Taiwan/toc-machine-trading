@@ -13,7 +13,6 @@ import (
 	"toc-machine-trading/internal/usecase/rabbit"
 	"toc-machine-trading/internal/usecase/repo"
 	"toc-machine-trading/pkg/config"
-	"toc-machine-trading/pkg/eventbus"
 	"toc-machine-trading/pkg/httpserver"
 	"toc-machine-trading/pkg/logger"
 	"toc-machine-trading/pkg/postgres"
@@ -43,23 +42,20 @@ func Run(cfg *config.Config) {
 		log.Panic(err)
 	}
 
-	// Order cannot be modifided
-	bus := eventbus.New()
-
 	// basic
 	basicUseCase := usecase.NewBasic(repo.NewBasic(pg), grpcapi.NewBasic(sc))
 
 	// order
-	usecase.NewOrder(repo.NewOrder(pg), grpcapi.NewOrder(sc), bus)
+	usecase.NewOrder(repo.NewOrder(pg), grpcapi.NewOrder(sc))
 
 	// stream
-	usecase.NewStream(repo.NewStream(pg), rabbit.NewStream(), bus)
+	usecase.NewStream(repo.NewStream(pg), rabbit.NewStream())
 
 	// history
-	usecase.NewHistory(repo.NewHistory(pg), grpcapi.NewHistory(sc), bus)
+	usecase.NewHistory(repo.NewHistory(pg), grpcapi.NewHistory(sc))
 
 	// target
-	usecase.NewTarget(repo.NewTarget(pg), grpcapi.NewTarget(sc), bus)
+	usecase.NewTarget(repo.NewTarget(pg), grpcapi.NewTarget(sc))
 
 	// HTTP Server
 	handler := gin.New()

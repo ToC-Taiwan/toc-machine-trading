@@ -12,7 +12,7 @@ DROP TABLE IF EXISTS history_kbar;
 
 DROP TABLE IF EXISTS history_tick;
 
-DROP TABLE IF EXISTS order_status;
+DROP TABLE IF EXISTS order;
 
 DROP TABLE IF EXISTS sinopac_event;
 

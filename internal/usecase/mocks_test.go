@@ -67,6 +67,20 @@ func (mr *MockBasicMockRecorder) GetAllSinopacStockAndUpdateRepo(ctx interface{}
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllSinopacStockAndUpdateRepo", reflect.TypeOf((*MockBasic)(nil).GetAllSinopacStockAndUpdateRepo), ctx)
 }
 
+// TerminateSinopac mocks base method.
+func (m *MockBasic) TerminateSinopac(ctx context.Context) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "TerminateSinopac", ctx)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// TerminateSinopac indicates an expected call of TerminateSinopac.
+func (mr *MockBasicMockRecorder) TerminateSinopac(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "TerminateSinopac", reflect.TypeOf((*MockBasic)(nil).TerminateSinopac), ctx)
+}
+
 // MockBasicRepo is a mock of BasicRepo interface.
 type MockBasicRepo struct {
 	ctrl     *gomock.Controller
@@ -201,21 +215,6 @@ func (mr *MockBasicgRPCAPIMockRecorder) GetAllStockSnapshot() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllStockSnapshot", reflect.TypeOf((*MockBasicgRPCAPI)(nil).GetAllStockSnapshot))
 }
 
-// GetServerToken mocks base method.
-func (m *MockBasicgRPCAPI) GetServerToken() (string, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetServerToken")
-	ret0, _ := ret[0].(string)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetServerToken indicates an expected call of GetServerToken.
-func (mr *MockBasicgRPCAPIMockRecorder) GetServerToken() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetServerToken", reflect.TypeOf((*MockBasicgRPCAPI)(nil).GetServerToken))
-}
-
 // GetStockSnapshotByNumArr mocks base method.
 func (m *MockBasicgRPCAPI) GetStockSnapshotByNumArr(stockNumArr []string) ([]*pb.StockSnapshotMessage, error) {
 	m.ctrl.T.Helper()
@@ -244,6 +243,34 @@ func (m *MockBasicgRPCAPI) GetStockSnapshotTSE() ([]*pb.StockSnapshotMessage, er
 func (mr *MockBasicgRPCAPIMockRecorder) GetStockSnapshotTSE() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStockSnapshotTSE", reflect.TypeOf((*MockBasicgRPCAPI)(nil).GetStockSnapshotTSE))
+}
+
+// Heartbeat mocks base method.
+func (m *MockBasicgRPCAPI) Heartbeat() error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Heartbeat")
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Heartbeat indicates an expected call of Heartbeat.
+func (mr *MockBasicgRPCAPIMockRecorder) Heartbeat() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Heartbeat", reflect.TypeOf((*MockBasicgRPCAPI)(nil).Heartbeat))
+}
+
+// Terminate mocks base method.
+func (m *MockBasicgRPCAPI) Terminate() error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Terminate")
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Terminate indicates an expected call of Terminate.
+func (mr *MockBasicgRPCAPIMockRecorder) Terminate() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Terminate", reflect.TypeOf((*MockBasicgRPCAPI)(nil).Terminate))
 }
 
 // MockTarget is a mock of Target interface.
@@ -493,6 +520,93 @@ func NewMockHistoryRepo(ctrl *gomock.Controller) *MockHistoryRepo {
 // EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockHistoryRepo) EXPECT() *MockHistoryRepoMockRecorder {
 	return m.recorder
+}
+
+// InsertHistoryCloseArr mocks base method.
+func (m *MockHistoryRepo) InsertHistoryCloseArr(ctx context.Context, t []*entity.HistoryClose) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "InsertHistoryCloseArr", ctx, t)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// InsertHistoryCloseArr indicates an expected call of InsertHistoryCloseArr.
+func (mr *MockHistoryRepoMockRecorder) InsertHistoryCloseArr(ctx, t interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertHistoryCloseArr", reflect.TypeOf((*MockHistoryRepo)(nil).InsertHistoryCloseArr), ctx, t)
+}
+
+// InsertHistoryKbarArr mocks base method.
+func (m *MockHistoryRepo) InsertHistoryKbarArr(ctx context.Context, t []*entity.HistoryKbar) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "InsertHistoryKbarArr", ctx, t)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// InsertHistoryKbarArr indicates an expected call of InsertHistoryKbarArr.
+func (mr *MockHistoryRepoMockRecorder) InsertHistoryKbarArr(ctx, t interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertHistoryKbarArr", reflect.TypeOf((*MockHistoryRepo)(nil).InsertHistoryKbarArr), ctx, t)
+}
+
+// InsertHistoryTickArr mocks base method.
+func (m *MockHistoryRepo) InsertHistoryTickArr(ctx context.Context, t []*entity.HistoryTick) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "InsertHistoryTickArr", ctx, t)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// InsertHistoryTickArr indicates an expected call of InsertHistoryTickArr.
+func (mr *MockHistoryRepoMockRecorder) InsertHistoryTickArr(ctx, t interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertHistoryTickArr", reflect.TypeOf((*MockHistoryRepo)(nil).InsertHistoryTickArr), ctx, t)
+}
+
+// QueryMultiStockKbarArrByDate mocks base method.
+func (m *MockHistoryRepo) QueryMultiStockKbarArrByDate(ctx context.Context, stockNumArr []string, date time.Time) (map[string][]*entity.HistoryKbar, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "QueryMultiStockKbarArrByDate", ctx, stockNumArr, date)
+	ret0, _ := ret[0].(map[string][]*entity.HistoryKbar)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// QueryMultiStockKbarArrByDate indicates an expected call of QueryMultiStockKbarArrByDate.
+func (mr *MockHistoryRepoMockRecorder) QueryMultiStockKbarArrByDate(ctx, stockNumArr, date interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryMultiStockKbarArrByDate", reflect.TypeOf((*MockHistoryRepo)(nil).QueryMultiStockKbarArrByDate), ctx, stockNumArr, date)
+}
+
+// QueryMultiStockTickArrByDate mocks base method.
+func (m *MockHistoryRepo) QueryMultiStockTickArrByDate(ctx context.Context, stockNumArr []string, date time.Time) (map[string][]*entity.HistoryTick, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "QueryMultiStockTickArrByDate", ctx, stockNumArr, date)
+	ret0, _ := ret[0].(map[string][]*entity.HistoryTick)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// QueryMultiStockTickArrByDate indicates an expected call of QueryMultiStockTickArrByDate.
+func (mr *MockHistoryRepoMockRecorder) QueryMultiStockTickArrByDate(ctx, stockNumArr, date interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryMultiStockTickArrByDate", reflect.TypeOf((*MockHistoryRepo)(nil).QueryMultiStockTickArrByDate), ctx, stockNumArr, date)
+}
+
+// QueryMutltiStockCloseByDate mocks base method.
+func (m *MockHistoryRepo) QueryMutltiStockCloseByDate(ctx context.Context, stockNumArr []string, date time.Time) (map[string]*entity.HistoryClose, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "QueryMutltiStockCloseByDate", ctx, stockNumArr, date)
+	ret0, _ := ret[0].(map[string]*entity.HistoryClose)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// QueryMutltiStockCloseByDate indicates an expected call of QueryMutltiStockCloseByDate.
+func (mr *MockHistoryRepoMockRecorder) QueryMutltiStockCloseByDate(ctx, stockNumArr, date interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryMutltiStockCloseByDate", reflect.TypeOf((*MockHistoryRepo)(nil).QueryMutltiStockCloseByDate), ctx, stockNumArr, date)
 }
 
 // MockHistorygRPCAPI is a mock of HistorygRPCAPI interface.
@@ -779,7 +893,7 @@ func (mr *MockStreamRabbitMockRecorder) EventConsumer(eventChan interface{}) *go
 }
 
 // OrderStatusConsumer mocks base method.
-func (m *MockStreamRabbit) OrderStatusConsumer(orderStatusChan chan *entity.OrderStatus) {
+func (m *MockStreamRabbit) OrderStatusConsumer(orderStatusChan chan *entity.Order) {
 	m.ctrl.T.Helper()
 	m.ctrl.Call(m, "OrderStatusConsumer", orderStatusChan)
 }

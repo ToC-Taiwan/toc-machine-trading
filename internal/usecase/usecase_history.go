@@ -7,7 +7,6 @@ import (
 	"toc-machine-trading/internal/entity"
 	"toc-machine-trading/internal/usecase/grpcapi"
 	"toc-machine-trading/internal/usecase/repo"
-	"toc-machine-trading/pkg/eventbus"
 	"toc-machine-trading/pkg/global"
 )
 
@@ -15,18 +14,16 @@ import (
 type HistoryUseCase struct {
 	repo    HistoryRepo
 	grpcapi HistorygRPCAPI
-	bus     *eventbus.Bus
 }
 
 // NewHistory -.
-func NewHistory(r *repo.HistoryRepo, t *grpcapi.HistorygRPCAPI, bus *eventbus.Bus) {
+func NewHistory(r *repo.HistoryRepo, t *grpcapi.HistorygRPCAPI) {
 	uc := &HistoryUseCase{
 		repo:    r,
 		grpcapi: t,
-		bus:     bus,
 	}
 
-	if err := uc.bus.SubscribeTopic(topicTargets, uc.FetchHistory); err != nil {
+	if err := bus.SubscribeTopic(topicTargets, uc.FetchHistory); err != nil {
 		log.Panic(err)
 	}
 }
@@ -48,7 +45,7 @@ func (uc *HistoryUseCase) FetchHistory(ctx context.Context, targetArr []*entity.
 		log.Panic(err)
 	}
 
-	uc.bus.PublishTopicEvent(topicStreamTargets, ctx, targetArr)
+	bus.PublishTopicEvent(topicStreamTargets, ctx, targetArr)
 }
 
 func (uc *HistoryUseCase) fetchHistoryClose(targetArr []*entity.Target) error {

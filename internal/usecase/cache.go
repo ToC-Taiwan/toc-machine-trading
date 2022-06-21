@@ -10,12 +10,15 @@ import (
 
 const (
 	cacheCatagoryBasic cache.Category = "basic"
+	cacheCatagoryOrder cache.Category = "order"
 )
 
 const (
-	cacheIDStockDetail string = "stock_detail"
-	cacheIDCalendar    string = "calendar"
-	cacheIDBasicInfo   string = "basic_info"
+	cacheIDCalendar  string = "calendar"
+	cacheIDBasicInfo string = "basic_info"
+
+	cacheIDStockNum string = "stock_num"
+	cacheIDOrderID  string = "order_id"
 )
 
 var cc = New()
@@ -36,7 +39,7 @@ func New() *GlobalCache {
 func (c *GlobalCache) SetStockDetail(stock *entity.Stock) {
 	key := cache.Key{
 		Category: cacheCatagoryBasic,
-		ID:       fmt.Sprintf("%s:%s", cacheIDStockDetail, stock.Number),
+		ID:       fmt.Sprintf("%s:%s", cacheIDStockNum, stock.Number),
 	}
 	c.Set(key, stock)
 }
@@ -45,7 +48,7 @@ func (c *GlobalCache) SetStockDetail(stock *entity.Stock) {
 func (c *GlobalCache) GetStockDetail(stockNum string) *entity.Stock {
 	key := cache.Key{
 		Category: cacheCatagoryBasic,
-		ID:       fmt.Sprintf("%s:%s", cacheIDStockDetail, stockNum),
+		ID:       fmt.Sprintf("%s:%s", cacheIDStockNum, stockNum),
 	}
 	if value, ok := c.Get(key); ok {
 		return value.(*entity.Stock)
@@ -91,6 +94,27 @@ func (c *GlobalCache) GetBasicInfo() *entity.BasicInfo {
 	}
 	if value, ok := c.Get(key); ok {
 		return value.(*entity.BasicInfo)
+	}
+	return nil
+}
+
+// SetOrderByOrderID -.
+func (c *GlobalCache) SetOrderByOrderID(order *entity.Order) {
+	key := cache.Key{
+		Category: cacheCatagoryOrder,
+		ID:       fmt.Sprintf("%s:%s", cacheIDOrderID, order.OrderID),
+	}
+	c.Set(key, order)
+}
+
+// GetOrderByOrderID -.
+func (c *GlobalCache) GetOrderByOrderID(orderID string) *entity.Order {
+	key := cache.Key{
+		Category: cacheCatagoryOrder,
+		ID:       fmt.Sprintf("%s:%s", cacheIDOrderID, orderID),
+	}
+	if value, ok := c.Get(key); ok {
+		return value.(*entity.Order)
 	}
 	return nil
 }

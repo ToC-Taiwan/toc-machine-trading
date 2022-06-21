@@ -9,7 +9,6 @@ import (
 	"toc-machine-trading/internal/usecase/grpcapi"
 	"toc-machine-trading/internal/usecase/repo"
 	"toc-machine-trading/pkg/config"
-	"toc-machine-trading/pkg/eventbus"
 	"toc-machine-trading/pkg/global"
 )
 
@@ -17,15 +16,13 @@ import (
 type TargetUseCase struct {
 	repo    TargetRepo
 	gRPCAPI TargetRPCAPI
-	bus     *eventbus.Bus
 }
 
 // NewTarget -.
-func NewTarget(r *repo.TargetRepo, t *grpcapi.TargetgRPCAPI, bus *eventbus.Bus) {
+func NewTarget(r *repo.TargetRepo, t *grpcapi.TargetgRPCAPI) {
 	uc := &TargetUseCase{
 		repo:    r,
 		gRPCAPI: t,
-		bus:     bus,
 	}
 
 	ctx := context.Background()

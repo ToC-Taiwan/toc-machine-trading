@@ -4,33 +4,76 @@ import (
 	"time"
 )
 
+// OrderAction -.
+type OrderAction int64
+
+// OrderStatus -.
+type OrderStatus int64
+
+const (
+	// ActionNone -.
+	ActionNone OrderAction = iota
+	// ActionBuy -.
+	ActionBuy
+	// ActionSell -.
+	ActionSell
+	// ActionSellFirst -.
+	ActionSellFirst
+	// ActionBuyLater -.
+	ActionBuyLater
+	// ActionWait -.
+	ActionWait
+)
+
+const (
+	// StatusUnknow -.
+	StatusUnknow OrderStatus = iota
+	// StatusPendingSubmit -.
+	StatusPendingSubmit
+	// StatusPreSubmitted -.
+	StatusPreSubmitted
+	// StatusSubmitted -.
+	StatusSubmitted
+	// StatusFailed -.
+	StatusFailed
+	// StatusCancelled -.
+	StatusCancelled
+	// StatusFilled -.
+	StatusFilled
+	// StatusFilling -.
+	StatusFilling
+)
+
 // ActionListMap ActionListMap
-var ActionListMap = map[string]int64{
-	"Buy":  1,
-	"Sell": 2,
+var ActionListMap = map[string]OrderAction{
+	"Buy":  ActionBuy,
+	"Sell": ActionSell,
 }
 
 // StatusListMap StatusListMap
-var StatusListMap = map[string]int64{
-	"PendingSubmit": 1, // 傳送中
-	"PreSubmitted":  2, // 預約單
-	"Submitted":     3, // 傳送成功
-	"Failed":        4, // 失敗
-	"Cancelled":     5, // 已刪除
-	"Filled":        6, // 完全成交
-	"Filling":       7, // 部分成交
+var StatusListMap = map[string]OrderStatus{
+	"PendingSubmit": StatusPendingSubmit, // 傳送中
+	"PreSubmitted":  StatusPreSubmitted,  // 預約單
+	"Submitted":     StatusSubmitted,     // 傳送成功
+	"Failed":        StatusFailed,        // 失敗
+	"Cancelled":     StatusCancelled,     // 已刪除
+	"Filled":        StatusFilled,        // 完全成交
+	"Filling":       StatusFilling,       // 部分成交
 }
 
-// OrderStatus OrderStatus
-type OrderStatus struct {
-	OrderID   string    `json:"order_id"`
-	StockNum  string    `json:"stock_num"`
-	Action    int64     `json:"action"`
-	Price     float64   `json:"price"`
-	Quantity  int64     `json:"quantity"`
-	Status    int64     `json:"status"`
-	OrderTime time.Time `json:"order_time"`
-	Stock     *Stock    `json:"stock"`
+// Order -.
+type Order struct {
+	OrderID   string      `json:"order_id"`
+	Status    OrderStatus `json:"status"`
+	OrderTime time.Time   `json:"order_time"`
+
+	StockNum  string      `json:"stock_num"`
+	Action    OrderAction `json:"action"`
+	Price     float64     `json:"price"`
+	Quantity  int64       `json:"quantity"`
+	TradeTime time.Time   `json:"trade_time"`
+
+	Stock *Stock `json:"stock"`
 }
 
 // TradeBalance -.
@@ -43,12 +86,4 @@ type TradeBalance struct {
 	Discount        int64     `json:"discount"`
 	Total           int64     `json:"total"`
 	TradeDay        time.Time `json:"trade_day"`
-}
-
-// Order Order
-type Order struct {
-	StockNum string  `json:"stock_num"`
-	Action   int64   `json:"action"`
-	Price    float64 `json:"price"`
-	Quantity int64   `json:"quantity"`
 }

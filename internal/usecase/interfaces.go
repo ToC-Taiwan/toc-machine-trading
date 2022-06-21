@@ -7,10 +7,14 @@ import (
 
 	"toc-machine-trading/internal/entity"
 	"toc-machine-trading/pb"
+	"toc-machine-trading/pkg/eventbus"
 	"toc-machine-trading/pkg/logger"
 )
 
-var log = logger.Get()
+var (
+	log = logger.Get()
+	bus = eventbus.New()
+)
 
 //go:generate mockgen -source=interfaces.go -destination=./mocks_test.go -package=usecase_test
 type (
@@ -93,8 +97,7 @@ type (
 	Stream interface {
 		ReceiveEvent(ctx context.Context)
 		ReceiveOrderStatus(ctx context.Context)
-		ReceiveTicks(ctx context.Context, targetArr []*entity.Target)
-		ReceiveBidAsk(ctx context.Context, targetArr []*entity.Target)
+		ReceiveStreamData(ctx context.Context, targetArr []*entity.Target)
 	}
 
 	// StreamRepo -.
@@ -105,7 +108,7 @@ type (
 	// StreamRabbit -.
 	StreamRabbit interface {
 		EventConsumer(eventChan chan *entity.SinopacEvent)
-		OrderStatusConsumer(orderStatusChan chan *entity.OrderStatus)
+		OrderStatusConsumer(orderStatusChan chan *entity.Order)
 		TickConsumer(key string, tickChan chan *entity.RealTimeTick)
 		BidAskConsumer(key string, bidAskChan chan *entity.RealTimeBidAsk)
 	}

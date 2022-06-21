@@ -3,33 +3,33 @@ package usecase
 import (
 	"context"
 	"fmt"
+	"sync"
 	"time"
 
 	"toc-machine-trading/internal/entity"
 	"toc-machine-trading/internal/usecase/rabbit"
 	"toc-machine-trading/internal/usecase/repo"
-	"toc-machine-trading/pkg/eventbus"
+
+	"github.com/google/go-cmp/cmp"
 )
 
 // StreamUseCase -.
 type StreamUseCase struct {
 	repo   StreamRepo
 	rabbit StreamRabbit
-	bus    *eventbus.Bus
 }
 
 // NewStream -.
-func NewStream(r *repo.StreamRepo, t *rabbit.StreamRabbit, bus *eventbus.Bus) {
+func NewStream(r *repo.StreamRepo, t *rabbit.StreamRabbit) {
 	uc := &StreamUseCase{
 		repo:   r,
 		rabbit: t,
-		bus:    bus,
 	}
 
 	go uc.ReceiveEvent(context.Background())
 	go uc.ReceiveOrderStatus(context.Background())
 
-	if err := uc.bus.SubscribeTopic(topicStreamTargets, uc.ReceiveTicks); err != nil {
+	if err := bus.SubscribeTopic(topicStreamTargets, uc.ReceiveStreamData); err != nil {
 		log.Panic(err)
 	}
 }
@@ -50,18 +50,21 @@ func (uc *StreamUseCase) ReceiveEvent(ctx context.Context) {
 
 // ReceiveOrderStatus -.
 func (uc *StreamUseCase) ReceiveOrderStatus(ctx context.Context) {
-	orderStatusChan := make(chan *entity.OrderStatus)
+	orderStatusChan := make(chan *entity.Order)
 	go func() {
 		for {
-			orderStatus := <-orderStatusChan
-			log.Info(orderStatus)
+			order := <-orderStatusChan
+			cacheOrder := cc.GetOrderByOrderID(order.OrderID)
+			if !cmp.Equal(order, cacheOrder) {
+				cc.SetOrderByOrderID(order)
+			}
 		}
 	}()
 	uc.rabbit.OrderStatusConsumer(orderStatusChan)
 }
 
-// ReceiveTicks -.
-func (uc *StreamUseCase) ReceiveTicks(ctx context.Context, targetArr []*entity.Target) {
+// ReceiveStreamData -.
+func (uc *StreamUseCase) ReceiveStreamData(ctx context.Context, targetArr []*entity.Target) {
 	for _, t := range targetArr {
 		target := t
 		tickChan := make(chan *entity.RealTimeTick)
@@ -77,25 +80,76 @@ func (uc *StreamUseCase) ReceiveTicks(ctx context.Context, targetArr []*entity.T
 		go uc.rabbit.TickConsumer(fmt.Sprintf("tick:%s", target.StockNum), tickChan)
 		go uc.rabbit.BidAskConsumer(fmt.Sprintf("bid_ask:%s", target.StockNum), bidAskChan)
 	}
-	uc.bus.PublishTopicEvent(topicSubscribeTickTargets, ctx, targetArr)
+	bus.PublishTopicEvent(topicSubscribeTickTargets, ctx, targetArr)
 }
 
 func (uc *StreamUseCase) tradeAgent(tickChan chan *entity.RealTimeTick, bidAskChan chan *entity.RealTimeBidAsk, finishChan chan struct{}) {
-	wait := make(chan struct{})
+	var bidAsk *entity.RealTimeBidAsk
+	var currentStatus orderMap
 	go func() {
 		for {
 			tick := <-tickChan
-			log.Infof("tick:%s\n", time.Since(tick.TickTime).String())
+			action := currentStatus.checkNeededPost()
+			switch action {
+			case entity.ActionNone:
+				if bidAsk != nil && bidAsk.AskPrice1 == tick.Close {
+					order := &entity.Order{
+						StockNum:  tick.StockNum,
+						Action:    entity.ActionBuy,
+						Price:     tick.Close,
+						Quantity:  1,
+						TradeTime: time.Now(),
+					}
+					bus.PublishTopicEvent(topicOrder, order)
+					go currentStatus.checkOrderStatus(order)
+				}
+			case entity.ActionWait:
+				continue
+			}
 		}
 	}()
 	go func() {
 		for {
-			bidAsk := <-bidAskChan
-			log.Infof("bidask:%s\n", time.Since(bidAsk.TickTime).String())
+			bidAsk = <-bidAskChan
 		}
 	}()
 
 	// close channel to start receive data from rabbitmq
 	close(finishChan)
-	<-wait
+}
+
+type orderMap struct {
+	data     map[entity.OrderAction][]*entity.Order
+	mu       sync.RWMutex
+	checking bool
+}
+
+func (o *orderMap) checkOrderStatus(order *entity.Order) {
+	o.checking = true
+	for {
+		if order.OrderID != "" {
+			break
+		}
+		time.Sleep(time.Second)
+	}
+	o.mu.Lock()
+	o.data[order.Action] = append(o.data[order.Action], order)
+	o.mu.Unlock()
+	o.checking = false
+}
+
+func (o *orderMap) checkNeededPost() entity.OrderAction {
+	if o.checking {
+		return entity.ActionWait
+	}
+	o.mu.RLock()
+	defer o.mu.RUnlock()
+	if len(o.data[entity.ActionBuy]) > len(o.data[entity.ActionSell]) {
+		return entity.ActionSell
+	}
+
+	if len(o.data[entity.ActionSellFirst]) > len(o.data[entity.ActionBuyLater]) {
+		return entity.ActionBuyLater
+	}
+	return entity.ActionNone
 }

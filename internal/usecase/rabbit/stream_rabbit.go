@@ -85,8 +85,8 @@ func (c *StreamRabbit) EventConsumer(eventChan chan *entity.SinopacEvent) {
 }
 
 // OrderStatusConsumer OrderStatusConsumer
-func (c *StreamRabbit) OrderStatusConsumer(orderStatusChan chan *entity.OrderStatus) {
-	key := "order_status"
+func (c *StreamRabbit) OrderStatusConsumer(orderStatusChan chan *entity.Order) {
+	key := "order"
 	delivery := c.establishDelivery(key)
 	for {
 		d, opened := <-delivery
@@ -108,7 +108,7 @@ func (c *StreamRabbit) OrderStatusConsumer(orderStatusChan chan *entity.OrderSta
 			log.Error(err)
 			continue
 		}
-		orderStatusChan <- &entity.OrderStatus{
+		orderStatusChan <- &entity.Order{
 			StockNum:  body.GetCode(),
 			Action:    actionMap[body.GetAction()],
 			Price:     body.GetPrice(),
