@@ -103,23 +103,22 @@ type (
 	// StreamRepo -.
 	StreamRepo interface {
 		InsertEvent(ctx context.Context, t *entity.SinopacEvent) error
+		InserOrUpdatetOrder(ctx context.Context, t *entity.Order) error
+		QueryOrderByID(ctx context.Context, orderID string) (*entity.Order, error)
 	}
 
 	// StreamRabbit -.
 	StreamRabbit interface {
 		EventConsumer(eventChan chan *entity.SinopacEvent)
 		OrderStatusConsumer(orderStatusChan chan *entity.Order)
-		TickConsumer(key string, tickChan chan *entity.RealTimeTick)
-		BidAskConsumer(key string, bidAskChan chan *entity.RealTimeBidAsk)
+		TickConsumer(stockNum string, tickChan chan *entity.RealTimeTick)
+		BidAskConsumer(stockNum string, bidAskChan chan *entity.RealTimeBidAsk)
 	}
 )
 
 type (
 	// Order -.
 	Order interface{}
-
-	// OrderRepo -.
-	OrderRepo interface{}
 
 	// OrdergRPCAPI -.
 	OrdergRPCAPI interface {

@@ -4,5 +4,6 @@ const (
 	topicTargets              string = "targets"
 	topicStreamTargets        string = "stream_tick_targets"
 	topicSubscribeTickTargets string = "subscribe_targets"
-	topicOrder                string = "order"
+	topicPlaceOrder           string = "place_order"
+	topicCancelOrder          string = "cancel_order"
 )

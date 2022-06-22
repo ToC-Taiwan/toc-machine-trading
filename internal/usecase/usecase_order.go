@@ -5,21 +5,18 @@ import (
 
 	"toc-machine-trading/internal/entity"
 	"toc-machine-trading/internal/usecase/grpcapi"
-	"toc-machine-trading/internal/usecase/repo"
 	"toc-machine-trading/pkg/config"
 )
 
 // OrderUseCase -.
 type OrderUseCase struct {
-	repo     OrderRepo
 	gRPCAPI  OrdergRPCAPI
 	simTrade bool
 }
 
 // NewOrder -.
-func NewOrder(r *repo.OrderRepo, t *grpcapi.OrdergRPCAPI) {
+func NewOrder(t *grpcapi.OrdergRPCAPI) {
 	uc := &OrderUseCase{
-		repo:    r,
 		gRPCAPI: t,
 	}
 
@@ -32,19 +29,30 @@ func NewOrder(r *repo.OrderRepo, t *grpcapi.OrdergRPCAPI) {
 
 	go func() {
 		for range time.NewTicker(1500 * time.Millisecond).C {
-			uc.callOrderStatus()
+			msg, err := uc.gRPCAPI.GetNonBlockOrderStatusArr()
+			if err != nil {
+				log.Panic(err)
+			}
+
+			if errMsg := msg.GetErr(); errMsg != "" {
+				log.Panic(errMsg)
+			}
 		}
 	}()
 
-	if err := bus.SubscribeTopic(topicOrder, uc.processOrder); err != nil {
+	if err := bus.SubscribeTopic(topicPlaceOrder, uc.placeOrder); err != nil {
+		log.Panic(err)
+	}
+	if err := bus.SubscribeTopic(topicCancelOrder, uc.cancelOrder); err != nil {
 		log.Panic(err)
 	}
 }
 
-func (uc *OrderUseCase) processOrder(order *entity.Order) {
+func (uc *OrderUseCase) placeOrder(order *entity.Order) {
 	var orderID string
 	var status entity.OrderStatus
 	var err error
+
 	switch order.Action {
 	case entity.ActionBuy, entity.ActionBuyLater:
 		orderID, status, err = uc.BuyStock(order)
@@ -57,10 +65,29 @@ func (uc *OrderUseCase) processOrder(order *entity.Order) {
 		log.Error(err)
 		return
 	}
-	if status == entity.StatusCancelled || status == entity.StatusFailed {
+
+	if status == entity.StatusFailed {
 		return
 	}
+
 	order.OrderID = orderID
+	order.Status = status
+	cc.SetOrderByOrderID(order)
+}
+
+func (uc *OrderUseCase) cancelOrder(orderID string) {
+	orderID, status, err := uc.CancelOrderID(orderID)
+	if err != nil {
+		log.Error(err)
+		return
+	}
+
+	order := cc.GetOrderByOrderID(orderID)
+	if order == nil {
+		log.Error("Order not found")
+		return
+	}
+
 	order.Status = status
 	cc.SetOrderByOrderID(order)
 }
@@ -105,23 +132,12 @@ func (uc *OrderUseCase) BuyLaterStock(order *entity.Order) (string, entity.Order
 	return result.GetOrderId(), statusMap[result.GetStatus()], nil
 }
 
-// CancelOrder -.
-func (uc *OrderUseCase) CancelOrder(orderID string) (string, entity.OrderStatus, error) {
+// CancelOrderID -.
+func (uc *OrderUseCase) CancelOrderID(orderID string) (string, entity.OrderStatus, error) {
 	result, err := uc.gRPCAPI.CancelStock(orderID, uc.simTrade)
 	if err != nil {
 		return "", entity.StatusUnknow, err
 	}
 	statusMap := entity.StatusListMap
 	return result.GetOrderId(), statusMap[result.GetStatus()], nil
-}
-
-func (uc *OrderUseCase) callOrderStatus() {
-	msg, err := uc.gRPCAPI.GetNonBlockOrderStatusArr()
-	if err != nil {
-		log.Error(err)
-	}
-
-	if errMsg := msg.GetErr(); errMsg != "" {
-		log.Error(errMsg)
-	}
 }

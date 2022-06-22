@@ -11,6 +11,12 @@ rabbitmq:
 sinopac:
     pool_max: 20
 
+history:
+    # unit: day
+    history_close_period: 120
+    history_tick_period: 7
+    history_kbar_period: 120
+
 trade_switch:
     simulation: true
     buy: true
@@ -29,14 +35,8 @@ trade_switch:
     trade_in_wait_time: 45
     trade_out_wait_time: 90
     # unit: hour(s) from 9:00
-    trade_in_end_time: 3.75 # 10:15
+    trade_in_end_time: 1.75 # 10:45
     trade_out_end_time: 4 # 13:00
-
-history:
-    # unit: day
-    history_close_period: 120
-    history_tick_period: 3
-    history_kbar_period: 120
 
 quota:
     trade_quota: 1000000
@@ -48,14 +48,6 @@ target_cond:
     limit_price_low: 50
     limit_price_high: 125
     limit_volume: 2000
-    black_stock:
-        - 1314
-        - 2317
-        - 3481
-        - 3701
-    black_category:
-        - 17
-    real_time_targets_count: 10
 
 analyze:
     # unit: %

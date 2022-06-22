@@ -2,6 +2,7 @@
 package rabbit
 
 import (
+	"fmt"
 	"time"
 
 	"toc-machine-trading/internal/entity"
@@ -16,6 +17,13 @@ import (
 )
 
 var log = logger.Get()
+
+const (
+	routingKeyEvent  = "event"
+	routingKeyOrder  = "order"
+	routingKeyTick   = "tick"
+	routingKeyBidAsk = "bidask"
+)
 
 // StreamRabbit -.
 type StreamRabbit struct {
@@ -53,8 +61,7 @@ func (c *StreamRabbit) establishDelivery(key string) <-chan amqp.Delivery {
 
 // EventConsumer -.
 func (c *StreamRabbit) EventConsumer(eventChan chan *entity.SinopacEvent) {
-	key := "event"
-	delivery := c.establishDelivery(key)
+	delivery := c.establishDelivery(routingKeyEvent)
 	for {
 		d, opened := <-delivery
 		if !opened {
@@ -86,8 +93,7 @@ func (c *StreamRabbit) EventConsumer(eventChan chan *entity.SinopacEvent) {
 
 // OrderStatusConsumer OrderStatusConsumer
 func (c *StreamRabbit) OrderStatusConsumer(orderStatusChan chan *entity.Order) {
-	key := "order"
-	delivery := c.establishDelivery(key)
+	delivery := c.establishDelivery(routingKeyOrder)
 	for {
 		d, opened := <-delivery
 		if !opened {
@@ -110,19 +116,19 @@ func (c *StreamRabbit) OrderStatusConsumer(orderStatusChan chan *entity.Order) {
 		}
 		orderStatusChan <- &entity.Order{
 			StockNum:  body.GetCode(),
+			OrderID:   body.GetOrderId(),
 			Action:    actionMap[body.GetAction()],
 			Price:     body.GetPrice(),
 			Quantity:  body.GetQuantity(),
 			Status:    statusMap[body.GetStatus()],
-			OrderID:   body.GetOrderId(),
 			OrderTime: orderTime,
 		}
 	}
 }
 
 // TickConsumer -.
-func (c *StreamRabbit) TickConsumer(key string, tickChan chan *entity.RealTimeTick) {
-	delivery := c.establishDelivery(key)
+func (c *StreamRabbit) TickConsumer(stockNum string, tickChan chan *entity.RealTimeTick) {
+	delivery := c.establishDelivery(fmt.Sprintf("%s:%s", routingKeyTick, stockNum))
 	for {
 		d, opened := <-delivery
 		if !opened {
@@ -173,8 +179,8 @@ func (c *StreamRabbit) TickConsumer(key string, tickChan chan *entity.RealTimeTi
 }
 
 // BidAskConsumer -.
-func (c *StreamRabbit) BidAskConsumer(key string, bidAskChan chan *entity.RealTimeBidAsk) {
-	delivery := c.establishDelivery(key)
+func (c *StreamRabbit) BidAskConsumer(stockNum string, bidAskChan chan *entity.RealTimeBidAsk) {
+	delivery := c.establishDelivery(fmt.Sprintf("%s:%s", routingKeyBidAsk, stockNum))
 	for {
 		d, opened := <-delivery
 		if !opened {

@@ -2,7 +2,10 @@ package repo
 
 import "toc-machine-trading/pkg/logger"
 
-var log = logger.Get()
+var (
+	log           = logger.Get()
+	batchSize int = 2000
+)
 
 const (
 	tableNameCalendar     string = "basic_calendar"
@@ -11,9 +14,7 @@ const (
 	tableNameHistoryClose string = "history_close"
 	tableNameHistoryKbar  string = "history_kbar"
 	tableNameHistoryTick  string = "history_tick"
-	tableNameOrderStatus  string = "trade_order"
+	tableNameTradeOrder   string = "trade_order"
 	tableNameEvent        string = "sinopac_event"
 	tableNameTradeBalance string = "trade_balance"
 )
-
-var batchSize int = 2000

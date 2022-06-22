@@ -46,7 +46,7 @@ func Run(cfg *config.Config) {
 	basicUseCase := usecase.NewBasic(repo.NewBasic(pg), grpcapi.NewBasic(sc))
 
 	// order
-	usecase.NewOrder(repo.NewOrder(pg), grpcapi.NewOrder(sc))
+	usecase.NewOrder(grpcapi.NewOrder(sc))
 
 	// stream
 	usecase.NewStream(repo.NewStream(pg), rabbit.NewStream())

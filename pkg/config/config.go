@@ -84,21 +84,26 @@ type RabbitMQ struct {
 
 // TradeSwitch -.
 type TradeSwitch struct {
-	Simulation       bool    `env-required:"true" yaml:"simulation"`
-	Buy              bool    `env-required:"true" yaml:"buy"`
-	Sell             bool    `env-required:"true" yaml:"sell"`
-	SellFirst        bool    `env-required:"true" yaml:"sell_first"`
-	BuyLater         bool    `env-required:"true" yaml:"buy_later"`
+	Simulation bool `env-required:"true" yaml:"simulation"`
+
+	Buy       bool `env-required:"true" yaml:"buy"`
+	Sell      bool `env-required:"true" yaml:"sell"`
+	SellFirst bool `env-required:"true" yaml:"sell_first"`
+	BuyLater  bool `env-required:"true" yaml:"buy_later"`
+
 	HoldTimeFromOpen float64 `env-required:"true" yaml:"hold_time_from_open"`
 	TotalOpenTime    float64 `env-required:"true" yaml:"total_open_time"`
+
 	TradeInWaitTime  int64   `env-required:"true" yaml:"trade_in_wait_time"`
 	TradeOutWaitTime int64   `env-required:"true" yaml:"trade_out_wait_time"`
 	TradeInEndTime   float64 `env-required:"true" yaml:"trade_in_end_time"`
 	TradeOutEndTime  float64 `env-required:"true" yaml:"trade_out_end_time"`
-	MeanTimeForward  int64   `env-required:"true" yaml:"mean_time_forward"`
-	MeanTimeReverse  int64   `env-required:"true" yaml:"mean_time_reverse"`
-	ForwardMax       int64   `env-required:"true" yaml:"forward_max"`
-	ReverseMax       int64   `env-required:"true" yaml:"reverse_max"`
+
+	MeanTimeForward int64 `env-required:"true" yaml:"mean_time_forward"`
+	MeanTimeReverse int64 `env-required:"true" yaml:"mean_time_reverse"`
+
+	ForwardMax int64 `env-required:"true" yaml:"forward_max"`
+	ReverseMax int64 `env-required:"true" yaml:"reverse_max"`
 }
 
 // History -.
@@ -118,12 +123,9 @@ type Quota struct {
 
 // TargetCond -.
 type TargetCond struct {
-	LimitPriceLow        float64  `env-required:"true" yaml:"limit_price_low"`
-	LimitPriceHigh       float64  `env-required:"true" yaml:"limit_price_high"`
-	LimitVolume          int64    `env-required:"true" yaml:"limit_volume"`
-	BlackStock           []string `env-required:"true" yaml:"black_stock"`
-	BlackCategory        []string `env-required:"true" yaml:"black_category"`
-	RealTimeTargetsCount int64    `env-required:"true" yaml:"real_time_targets_count"`
+	LimitPriceLow  float64 `env-required:"true" yaml:"limit_price_low"`
+	LimitPriceHigh float64 `env-required:"true" yaml:"limit_price_high"`
+	LimitVolume    int64   `env-required:"true" yaml:"limit_volume"`
 }
 
 // Analyze -.
