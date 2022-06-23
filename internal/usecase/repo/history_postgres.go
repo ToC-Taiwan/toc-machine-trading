@@ -118,6 +118,7 @@ func (r *HistoryRepo) QueryMultiStockTickArrByDate(ctx context.Context, stockNum
 		Where(squirrel.GtOrEq{"tick_time": date}).
 		Where(squirrel.Lt{"tick_time": date.AddDate(0, 0, 1)}).
 		Where(squirrel.Eq{"stock_num": stockNumArr}).
+		OrderBy("tick_time ASC").
 		Join("basic_stock ON history_tick.stock_num = basic_stock.number").ToSql()
 	if err != nil {
 		return nil, err
@@ -180,6 +181,7 @@ func (r *HistoryRepo) QueryMultiStockKbarArrByDate(ctx context.Context, stockNum
 		Where(squirrel.GtOrEq{"kbar_time": date}).
 		Where(squirrel.Lt{"kbar_time": date.AddDate(0, 0, 1)}).
 		Where(squirrel.Eq{"stock_num": stockNumArr}).
+		OrderBy("kbar_time ASC").
 		Join("basic_stock ON history_kbar.stock_num = basic_stock.number").ToSql()
 	if err != nil {
 		return nil, err

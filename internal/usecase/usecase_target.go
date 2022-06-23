@@ -51,13 +51,10 @@ func NewTarget(r *repo.TargetRepo, t *grpcapi.TargetgRPCAPI) {
 		}
 	}
 
+	// sub events
+	bus.SubscribeTopic(topicSubscribeTickTargets, uc.SubscribeStockTick, uc.SubscribeStockBidAsk)
 	// pub events
 	bus.PublishTopicEvent(topicTargets, ctx, targetArr)
-
-	// sub events
-	if err := bus.SubscribeTopic(topicSubscribeTickTargets, uc.SubscribeStockTick, uc.SubscribeStockBidAsk); err != nil {
-		log.Panic(err)
-	}
 }
 
 // SearchTradeDayTargets -.

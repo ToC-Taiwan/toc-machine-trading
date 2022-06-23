@@ -22,7 +22,7 @@ const (
 	routingKeyEvent  = "event"
 	routingKeyOrder  = "order"
 	routingKeyTick   = "tick"
-	routingKeyBidAsk = "bidask"
+	routingKeyBidAsk = "bid_ask"
 )
 
 // StreamRabbit -.

@@ -38,12 +38,11 @@ func NewStream(r *repo.StreamRepo, t *rabbit.StreamRabbit) {
 	uc.analyzeCfg = cfg.Analyze
 	uc.basic = *cc.GetBasicInfo()
 
+	bus.SubscribeTopic(topicStreamTargets, uc.ReceiveStreamData)
+	bus.SubscribeTopic(topicUpdateOrderStatus, uc.updateOrderSatusCache)
+
 	go uc.ReceiveEvent(context.Background())
 	go uc.ReceiveOrderStatus(context.Background())
-
-	if err := bus.SubscribeTopic(topicStreamTargets, uc.ReceiveStreamData); err != nil {
-		log.Panic(err)
-	}
 }
 
 // ReceiveEvent -.
@@ -66,19 +65,22 @@ func (uc *StreamUseCase) ReceiveOrderStatus(ctx context.Context) {
 	go func() {
 		for {
 			order := <-orderStatusChan
-			cacheOrder := cc.GetOrderByOrderID(order.OrderID)
-			order.TradeTime = cacheOrder.TradeTime
-
-			if !cmp.Equal(order, cacheOrder) {
-				cc.SetOrderByOrderID(order)
-			}
-
-			if err := uc.repo.InserOrUpdatetOrder(ctx, order); err != nil {
-				log.Error(err)
-			}
+			uc.updateOrderSatusCache(ctx, order)
 		}
 	}()
 	uc.rabbit.OrderStatusConsumer(orderStatusChan)
+}
+
+func (uc *StreamUseCase) updateOrderSatusCache(ctx context.Context, order *entity.Order) {
+	cacheOrder := cc.GetOrderByOrderID(order.OrderID)
+	order.TradeTime = cacheOrder.TradeTime
+	if !cmp.Equal(order, cacheOrder) {
+		cc.SetOrderByOrderID(order)
+	}
+
+	if err := uc.repo.InserOrUpdatetOrder(ctx, order); err != nil {
+		log.Error(err)
+	}
 }
 
 // ReceiveStreamData -.
@@ -112,6 +114,10 @@ func (uc *StreamUseCase) tradeAgent(data *RealTimeData, finishChan chan struct{}
 		for {
 			tick := <-data.tickChan
 			data.tickArr = append(data.tickArr, tick)
+			if data.bidAsk == nil {
+				continue
+			}
+
 			order := data.generateOrder(uc.analyzeCfg)
 			if order == nil {
 				continue

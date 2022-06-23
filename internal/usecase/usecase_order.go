@@ -1,11 +1,13 @@
 package usecase
 
 import (
+	"context"
 	"time"
 
 	"toc-machine-trading/internal/entity"
 	"toc-machine-trading/internal/usecase/grpcapi"
 	"toc-machine-trading/pkg/config"
+	"toc-machine-trading/pkg/global"
 )
 
 // OrderUseCase -.
@@ -27,25 +29,14 @@ func NewOrder(t *grpcapi.OrdergRPCAPI) {
 
 	uc.simTrade = cfg.TradeSwitch.Simulation
 
+	bus.SubscribeTopic(topicPlaceOrder, uc.placeOrder)
+	bus.SubscribeTopic(topicCancelOrder, uc.cancelOrder)
+
 	go func() {
 		for range time.NewTicker(1500 * time.Millisecond).C {
-			msg, err := uc.gRPCAPI.GetNonBlockOrderStatusArr()
-			if err != nil {
-				log.Panic(err)
-			}
-
-			if errMsg := msg.GetErr(); errMsg != "" {
-				log.Panic(errMsg)
-			}
+			uc.updateOrderStatusCache()
 		}
 	}()
-
-	if err := bus.SubscribeTopic(topicPlaceOrder, uc.placeOrder); err != nil {
-		log.Panic(err)
-	}
-	if err := bus.SubscribeTopic(topicCancelOrder, uc.cancelOrder); err != nil {
-		log.Panic(err)
-	}
 }
 
 func (uc *OrderUseCase) placeOrder(order *entity.Order) {
@@ -140,4 +131,41 @@ func (uc *OrderUseCase) CancelOrderID(orderID string) (string, entity.OrderStatu
 	}
 	statusMap := entity.StatusListMap
 	return result.GetOrderId(), statusMap[result.GetStatus()], nil
+}
+
+func (uc *OrderUseCase) updateOrderStatusCache() {
+	if !uc.simTrade {
+		msg, err := uc.gRPCAPI.GetNonBlockOrderStatusArr()
+		if err != nil {
+			log.Panic(err)
+		}
+
+		if errMsg := msg.GetErr(); errMsg != "" {
+			log.Panic(errMsg)
+		}
+	} else {
+		orders, err := uc.gRPCAPI.GetOrderStatusArr()
+		if err != nil {
+			log.Panic(err)
+		}
+		actionMap := entity.ActionListMap
+		statusMap := entity.StatusListMap
+		for _, v := range orders {
+			orderTime, err := time.ParseInLocation(global.LongTimeLayout, v.GetOrderTime(), time.Local)
+			if err != nil {
+				log.Error(err)
+				continue
+			}
+			o := &entity.Order{
+				StockNum:  v.GetCode(),
+				OrderID:   v.GetOrderId(),
+				Action:    actionMap[v.GetAction()],
+				Price:     v.GetPrice(),
+				Quantity:  v.GetQuantity(),
+				Status:    statusMap[v.GetStatus()],
+				OrderTime: orderTime,
+			}
+			bus.PublishTopicEvent(topicUpdateOrderStatus, context.Background(), o)
+		}
+	}
 }

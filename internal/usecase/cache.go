@@ -1,24 +1,10 @@
 package usecase
 
 import (
-	"fmt"
 	"time"
 
 	"toc-machine-trading/internal/entity"
 	"toc-machine-trading/pkg/cache"
-)
-
-const (
-	cacheCatagoryBasic cache.Category = "basic"
-	cacheCatagoryOrder cache.Category = "order"
-)
-
-const (
-	cacheIDCalendar  string = "calendar"
-	cacheIDBasicInfo string = "basic_info"
-
-	cacheIDStockNum string = "stock_num"
-	cacheIDOrderID  string = "order_id"
 )
 
 var cc = New()
@@ -35,64 +21,40 @@ func New() *GlobalCache {
 	}
 }
 
-// SetStockDetail SetStockDetail
+// SetStockDetail -.
 func (c *GlobalCache) SetStockDetail(stock *entity.Stock) {
-	key := cache.Key{
-		Category: cacheCatagoryBasic,
-		ID:       fmt.Sprintf("%s:%s", cacheIDStockNum, stock.Number),
-	}
-	c.Set(key, stock)
+	c.Set(c.stockDetailKey(stock.Number), stock)
 }
 
-// GetStockDetail GetStockDetail
+// GetStockDetail -.
 func (c *GlobalCache) GetStockDetail(stockNum string) *entity.Stock {
-	key := cache.Key{
-		Category: cacheCatagoryBasic,
-		ID:       fmt.Sprintf("%s:%s", cacheIDStockNum, stockNum),
-	}
-	if value, ok := c.Get(key); ok {
+	if value, ok := c.Get(c.stockDetailKey(stockNum)); ok {
 		return value.(*entity.Stock)
 	}
 	return nil
 }
 
-// SetCalendar SetCalendar
+// SetCalendar -.
 func (c *GlobalCache) SetCalendar(calendar map[time.Time]bool) {
-	key := cache.Key{
-		Category: cacheCatagoryBasic,
-		ID:       cacheIDCalendar,
-	}
-	c.Set(key, calendar)
+	c.Set(c.calendarKey(), calendar)
 }
 
-// GetCalendar GetCalendar
+// GetCalendar -.
 func (c *GlobalCache) GetCalendar() map[time.Time]bool {
-	key := cache.Key{
-		Category: cacheCatagoryBasic,
-		ID:       cacheIDCalendar,
-	}
-	if value, ok := c.Get(key); ok {
+	if value, ok := c.Get(c.calendarKey()); ok {
 		return value.(map[time.Time]bool)
 	}
 	return nil
 }
 
-// SetBasicInfo SetBasicInfo
+// SetBasicInfo -.
 func (c *GlobalCache) SetBasicInfo(info *entity.BasicInfo) {
-	key := cache.Key{
-		Category: cacheCatagoryBasic,
-		ID:       cacheIDBasicInfo,
-	}
-	c.Set(key, info)
+	c.Set(c.basicInfoKey(), info)
 }
 
-// GetBasicInfo GetBasicInfo
+// GetBasicInfo -.
 func (c *GlobalCache) GetBasicInfo() *entity.BasicInfo {
-	key := cache.Key{
-		Category: cacheCatagoryBasic,
-		ID:       cacheIDBasicInfo,
-	}
-	if value, ok := c.Get(key); ok {
+	if value, ok := c.Get(c.basicInfoKey()); ok {
 		return value.(*entity.BasicInfo)
 	}
 	return nil
@@ -100,21 +62,26 @@ func (c *GlobalCache) GetBasicInfo() *entity.BasicInfo {
 
 // SetOrderByOrderID -.
 func (c *GlobalCache) SetOrderByOrderID(order *entity.Order) {
-	key := cache.Key{
-		Category: cacheCatagoryOrder,
-		ID:       fmt.Sprintf("%s:%s", cacheIDOrderID, order.OrderID),
-	}
-	c.Set(key, order)
+	c.Set(c.orderKey(order.OrderID), order)
 }
 
 // GetOrderByOrderID -.
 func (c *GlobalCache) GetOrderByOrderID(orderID string) *entity.Order {
-	key := cache.Key{
-		Category: cacheCatagoryOrder,
-		ID:       fmt.Sprintf("%s:%s", cacheIDOrderID, orderID),
-	}
-	if value, ok := c.Get(key); ok {
+	if value, ok := c.Get(c.orderKey(orderID)); ok {
 		return value.(*entity.Order)
 	}
 	return nil
+}
+
+// SetHistoryOpen -.
+func (c *GlobalCache) SetHistoryOpen(stockNum string, date time.Time, open float64) {
+	c.Set(c.historyOpenKey(stockNum, date), open)
+}
+
+// GetHistoryOpen -.
+func (c *GlobalCache) GetHistoryOpen(stockNum string, date time.Time) float64 {
+	if value, ok := c.Get(c.historyOpenKey(stockNum, date)); ok {
+		return value.(float64)
+	}
+	return 0
 }

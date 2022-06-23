@@ -2,8 +2,12 @@
 package eventbus
 
 import (
+	"toc-machine-trading/pkg/logger"
+
 	"github.com/asaskevich/EventBus"
 )
+
+var log = logger.Get()
 
 // Bus Bus
 type Bus struct {
@@ -23,12 +27,11 @@ func (c *Bus) PublishTopicEvent(topic string, arg ...interface{}) {
 }
 
 // SubscribeTopic SubscribeTopic
-func (c *Bus) SubscribeTopic(topic string, fn ...interface{}) error {
+func (c *Bus) SubscribeTopic(topic string, fn ...interface{}) {
 	for _, f := range fn {
 		err := c.bus.Subscribe(topic, f)
 		if err != nil {
-			return err
+			log.Panic(err)
 		}
 	}
-	return nil
 }
