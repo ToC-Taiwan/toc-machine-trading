@@ -46,7 +46,9 @@ type (
 
 type (
 	// Target -.
-	Target interface{}
+	Target interface {
+		GetTargets(ctx context.Context) []*entity.Target
+	}
 
 	// TargetRepo -.
 	TargetRepo interface {

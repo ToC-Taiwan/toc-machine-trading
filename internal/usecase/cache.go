@@ -111,3 +111,16 @@ func (c *GlobalCache) GetBiasRate(stockNum string) float64 {
 	}
 	return 0
 }
+
+// SetTargets -.
+func (c *GlobalCache) SetTargets(targets []*entity.Target) {
+	c.Set(c.targetsKey(), targets)
+}
+
+// GetTargets -.
+func (c *GlobalCache) GetTargets() []*entity.Target {
+	if value, ok := c.Get(c.targetsKey()); ok {
+		return value.([]*entity.Target)
+	}
+	return nil
+}

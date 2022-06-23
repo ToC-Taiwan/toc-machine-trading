@@ -8,6 +8,7 @@ import (
 	"toc-machine-trading/pkg/postgres"
 
 	"github.com/Masterminds/squirrel"
+	"github.com/jackc/pgx/v4"
 )
 
 // HistoryRepo -.
@@ -35,6 +36,17 @@ func (r *HistoryRepo) InsertHistoryCloseArr(ctx context.Context, t []*entity.His
 		}
 	}
 
+	tx, err := r.Pool.BeginTx(ctx, pgx.TxOptions{})
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if err != nil {
+			err = tx.Rollback(context.Background())
+		} else {
+			err = tx.Commit(context.Background())
+		}
+	}()
 	for _, s := range split {
 		builder := r.Builder.Insert(tableNameHistoryClose).Columns("date, stock_num, close")
 		for _, v := range s {
@@ -43,7 +55,7 @@ func (r *HistoryRepo) InsertHistoryCloseArr(ctx context.Context, t []*entity.His
 
 		if sql, args, err := builder.ToSql(); err != nil {
 			return err
-		} else if _, err := r.Pool.Exec(ctx, sql, args...); err != nil {
+		} else if _, err := tx.Exec(ctx, sql, args...); err != nil {
 			return err
 		}
 	}
@@ -95,6 +107,18 @@ func (r *HistoryRepo) InsertHistoryTickArr(ctx context.Context, t []*entity.Hist
 		}
 	}
 
+	tx, err := r.Pool.BeginTx(ctx, pgx.TxOptions{})
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if err != nil {
+			err = tx.Rollback(context.Background())
+		} else {
+			err = tx.Commit(context.Background())
+		}
+	}()
+
 	for _, s := range split {
 		builder := r.Builder.Insert(tableNameHistoryTick).Columns("stock_num, tick_time, close, tick_type, volume, bid_price, bid_volume, ask_price, ask_volume")
 		for _, v := range s {
@@ -103,7 +127,7 @@ func (r *HistoryRepo) InsertHistoryTickArr(ctx context.Context, t []*entity.Hist
 
 		if sql, args, err := builder.ToSql(); err != nil {
 			return err
-		} else if _, err := r.Pool.Exec(ctx, sql, args...); err != nil {
+		} else if _, err := tx.Exec(ctx, sql, args...); err != nil {
 			return err
 		}
 	}
@@ -158,6 +182,18 @@ func (r *HistoryRepo) InsertHistoryKbarArr(ctx context.Context, t []*entity.Hist
 		}
 	}
 
+	tx, err := r.Pool.BeginTx(ctx, pgx.TxOptions{})
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if err != nil {
+			err = tx.Rollback(context.Background())
+		} else {
+			err = tx.Commit(context.Background())
+		}
+	}()
+
 	for _, s := range split {
 		builder := r.Builder.Insert(tableNameHistoryKbar).Columns("stock_num, kbar_time, open, high, low, close, volume")
 		for _, v := range s {
@@ -166,7 +202,7 @@ func (r *HistoryRepo) InsertHistoryKbarArr(ctx context.Context, t []*entity.Hist
 
 		if sql, args, err := builder.ToSql(); err != nil {
 			return err
-		} else if _, err := r.Pool.Exec(ctx, sql, args...); err != nil {
+		} else if _, err := tx.Exec(ctx, sql, args...); err != nil {
 			return err
 		}
 	}
@@ -214,11 +250,23 @@ func (r *HistoryRepo) InsertQuaterMA(ctx context.Context, t *entity.HistoryAnaly
 		return err
 	}
 
+	tx, err := r.Pool.BeginTx(ctx, pgx.TxOptions{})
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if err != nil {
+			err = tx.Rollback(context.Background())
+		} else {
+			err = tx.Commit(context.Background())
+		}
+	}()
+
 	if _, ok := dbQuaterMA[t.Date]; !ok {
 		builder := r.Builder.Insert(tableNameHistoryAnalyze).Columns("date, stock_num, quater_ma").Values(t.Date, t.StockNum, t.QuaterMA)
 		if sql, args, err := builder.ToSql(); err != nil {
 			return err
-		} else if _, err := r.Pool.Exec(ctx, sql, args...); err != nil {
+		} else if _, err := tx.Exec(ctx, sql, args...); err != nil {
 			return err
 		}
 	}

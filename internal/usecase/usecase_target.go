@@ -19,7 +19,7 @@ type TargetUseCase struct {
 }
 
 // NewTarget -.
-func NewTarget(r *repo.TargetRepo, t *grpcapi.TargetgRPCAPI) {
+func NewTarget(r *repo.TargetRepo, t *grpcapi.TargetgRPCAPI) *TargetUseCase {
 	uc := &TargetUseCase{
 		repo:    r,
 		gRPCAPI: t,
@@ -44,6 +44,10 @@ func NewTarget(r *repo.TargetRepo, t *grpcapi.TargetgRPCAPI) {
 			log.Panic(err)
 		}
 
+		for i, v := range targetArr {
+			v.Rank = i + 1
+		}
+
 		if len(targetArr) != 0 {
 			if err = uc.repo.InsertTargetArr(ctx, targetArr); err != nil {
 				log.Panic(err)
@@ -51,10 +55,14 @@ func NewTarget(r *repo.TargetRepo, t *grpcapi.TargetgRPCAPI) {
 		}
 	}
 
+	// save to cache
+	cc.SetTargets(targetArr)
 	// sub events
 	bus.SubscribeTopic(topicSubscribeTickTargets, uc.SubscribeStockTick, uc.SubscribeStockBidAsk)
 	// pub events
 	bus.PublishTopicEvent(topicTargets, ctx, targetArr)
+
+	return uc
 }
 
 // SearchTradeDayTargets -.
@@ -145,4 +153,9 @@ func (uc *TargetUseCase) SubscribeStockBidAsk(ctx context.Context, targetArr []*
 	}
 
 	return nil
+}
+
+// GetTargets -.
+func (uc *TargetUseCase) GetTargets(ctx context.Context) []*entity.Target {
+	return cc.GetTargets()
 }

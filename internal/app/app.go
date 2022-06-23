@@ -58,11 +58,16 @@ func Run(cfg *config.Config) {
 	usecase.NewHistory(repo.NewHistory(pg), grpcapi.NewHistory(sc))
 
 	// target
-	usecase.NewTarget(repo.NewTarget(pg), grpcapi.NewTarget(sc))
+	targetUseCase := usecase.NewTarget(repo.NewTarget(pg), grpcapi.NewTarget(sc))
 
 	// HTTP Server
 	handler := gin.New()
-	v1.NewRouter(handler, basicUseCase, analyzeUseCase)
+	v1.NewRouter(
+		handler,
+		basicUseCase,
+		analyzeUseCase,
+		targetUseCase,
+	)
 	httpServer := httpserver.New(handler, httpserver.Port(cfg.HTTP.Port))
 
 	// Waiting signal

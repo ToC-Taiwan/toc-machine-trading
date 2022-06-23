@@ -9,7 +9,8 @@ import (
 )
 
 const (
-	cacheCatagoryBasic        cache.Category = "basic"
+	cacheCatagoryBasic cache.Category = "basic"
+
 	cacheCatagoryOrder        cache.Category = "order"
 	cacheCatagoryHistoryOpen  cache.Category = "history_open"
 	cacheCatagoryHistoryClose cache.Category = "history_close"
@@ -21,6 +22,7 @@ const (
 	// no variable id
 	cacheIDCalendar  string = "calendar"
 	cacheIDBasicInfo string = "basic_info"
+	cacheIDTargets   string = "targets"
 
 	// with variable id
 	cacheIDStockNum string = "stock_num"
@@ -59,6 +61,13 @@ func (c *GlobalCache) basicInfoKey() cache.Key {
 	return cache.Key{
 		Category: cacheCatagoryBasic,
 		ID:       cacheIDBasicInfo,
+	}
+}
+
+func (c *GlobalCache) targetsKey() cache.Key {
+	return cache.Key{
+		Category: cacheCatagoryBasic,
+		ID:       cacheIDTargets,
 	}
 }
 

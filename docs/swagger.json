@@ -120,6 +120,33 @@
                     }
                 }
             }
+        },
+        "/targets": {
+            "get": {
+                "description": "getTargets",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "target"
+                ],
+                "summary": "getTargets",
+                "operationId": "getTargets",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entity.Target"
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -143,6 +170,35 @@
                 },
                 "number": {
                     "type": "string"
+                }
+            }
+        },
+        "entity.Target": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "rank": {
+                    "type": "integer"
+                },
+                "real_time_add": {
+                    "type": "boolean"
+                },
+                "stock": {
+                    "$ref": "#/definitions/entity.Stock"
+                },
+                "stock_num": {
+                    "type": "string"
+                },
+                "subscribe": {
+                    "type": "boolean"
+                },
+                "trade_day": {
+                    "type": "string"
+                },
+                "volume": {
+                    "type": "integer"
                 }
             }
         },

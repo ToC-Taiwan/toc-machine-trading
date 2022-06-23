@@ -14,6 +14,25 @@ definitions:
       number:
         type: string
     type: object
+  entity.Target:
+    properties:
+      id:
+        type: integer
+      rank:
+        type: integer
+      real_time_add:
+        type: boolean
+      stock:
+        $ref: '#/definitions/entity.Stock'
+      stock_num:
+        type: string
+      subscribe:
+        type: boolean
+      trade_day:
+        type: string
+      volume:
+        type: integer
+    type: object
   v1.BelowQuaterMA:
     properties:
       date:
@@ -118,4 +137,22 @@ paths:
       summary: terminateSinopac
       tags:
       - system
+  /targets:
+    get:
+      consumes:
+      - application/json
+      description: getTargets
+      operationId: getTargets
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.Target'
+            type: array
+      summary: getTargets
+      tags:
+      - target
 swagger: "2.0"

@@ -124,11 +124,11 @@ func (uc *HistoryUseCase) findExistHistoryClose(fetchTradeDayArr []time.Time, st
 			return nil, err
 		}
 		for _, s := range stockNumArr {
-			if close := closeMap[s]; (close != nil && close.Close == 0) || close == nil {
-				stockNumArrInDay = append(stockNumArrInDay, s)
-			} else {
-				dbCloseMap[s] = append(dbCloseMap[s], close)
+			if c := closeMap[s]; c != nil && c.Close != 0 {
+				dbCloseMap[s] = append(dbCloseMap[s], c)
+				continue
 			}
+			stockNumArrInDay = append(stockNumArrInDay, s)
 		}
 		result[d] = stockNumArrInDay
 	}
@@ -303,6 +303,7 @@ func (uc *HistoryUseCase) processCloseArr(arr []*entity.HistoryClose) {
 	sort.Slice(arr, func(i, j int) bool {
 		return arr[i].Date.After(arr[j].Date)
 	})
+
 	stockNum := arr[0].StockNum
 	closeArr := []float64{}
 	for _, v := range arr {
