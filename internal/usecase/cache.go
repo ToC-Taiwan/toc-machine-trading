@@ -98,3 +98,16 @@ func (c *GlobalCache) GetBiasRate(stockNum string) float64 {
 	}
 	return 0
 }
+
+// SetQuaterMA -.
+func (c *GlobalCache) SetQuaterMA(stockNum string, quaterMA float64) {
+	c.Set(c.quaterMAKey(stockNum), quaterMA)
+}
+
+// GetQuaterMA -.
+func (c *GlobalCache) GetQuaterMA(stockNum string) float64 {
+	if value, ok := c.Get(c.quaterMAKey(stockNum)); ok {
+		return value.(float64)
+	}
+	return 0
+}

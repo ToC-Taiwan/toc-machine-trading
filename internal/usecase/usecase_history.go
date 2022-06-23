@@ -8,6 +8,7 @@ import (
 	"toc-machine-trading/internal/entity"
 	"toc-machine-trading/internal/usecase/grpcapi"
 	"toc-machine-trading/internal/usecase/repo"
+	"toc-machine-trading/pkg/config"
 	"toc-machine-trading/pkg/global"
 	"toc-machine-trading/pkg/utils"
 )
@@ -16,6 +17,8 @@ import (
 type HistoryUseCase struct {
 	repo    HistoryRepo
 	grpcapi HistorygRPCAPI
+
+	analyzeCfg config.Analyze
 }
 
 // NewHistory -.
@@ -24,6 +27,12 @@ func NewHistory(r *repo.HistoryRepo, t *grpcapi.HistorygRPCAPI) {
 		repo:    r,
 		grpcapi: t,
 	}
+
+	cfg, err := config.GetConfig()
+	if err != nil {
+		log.Panic(err)
+	}
+	uc.analyzeCfg = cfg.Analyze
 
 	bus.SubscribeTopic(topicTargets, uc.FetchHistory)
 }
@@ -294,7 +303,7 @@ func (uc *HistoryUseCase) processCloseArr(arr []*entity.HistoryClose) {
 	sort.Slice(arr, func(i, j int) bool {
 		return arr[i].Date.Before(arr[j].Date)
 	})
-
+	stockNum := arr[0].StockNum
 	closeArr := []float64{}
 	for _, v := range arr {
 		closeArr = append(closeArr, v.Close)
@@ -304,10 +313,24 @@ func (uc *HistoryUseCase) processCloseArr(arr []*entity.HistoryClose) {
 	if err != nil {
 		return
 	}
-	cc.SetBiasRate(arr[0].StockNum, biasRate)
+	cc.SetBiasRate(stockNum, biasRate)
+	i := 0
+	for {
+		if i+int(uc.analyzeCfg.MAPeriod) > len(closeArr) {
+			break
+		}
+		tmp := closeArr[i : i+int(uc.analyzeCfg.MAPeriod)]
+		ma := utils.GenerareMAByCloseArr(tmp)
+		cc.SetQuaterMA(stockNum, ma)
+		i++
+	}
 }
 
-func (uc *HistoryUseCase) processTickArr(arr []*entity.HistoryTick) {}
+func (uc *HistoryUseCase) processTickArr(arr []*entity.HistoryTick) {
+	sort.Slice(arr, func(i, j int) bool {
+		return arr[i].TickTime.Before(arr[j].TickTime)
+	})
+}
 
 func (uc *HistoryUseCase) processKbarArr(arr []*entity.HistoryKbar) {
 	firstKbar := arr[0]

@@ -13,6 +13,7 @@ const (
 	cacheCatagoryOrder       cache.Category = "order"
 	cacheCatagoryHistoryOpen cache.Category = "history_open"
 	cacheCatagoryBiasRate    cache.Category = "bias_rate"
+	cacheCatagoryQuaterMA    cache.Category = "quater_ma"
 )
 
 const (
@@ -83,6 +84,15 @@ func (c *GlobalCache) historyOpenKey(stockNum string, date time.Time) cache.Key 
 func (c *GlobalCache) biasRateKey(stockNum string) cache.Key {
 	return cache.Key{
 		Category: cacheCatagoryBiasRate,
+		ID:       c.generateID(cacheIDStockNum, stockNum),
+	}
+}
+
+// QuaterMA
+//
+func (c *GlobalCache) quaterMAKey(stockNum string) cache.Key {
+	return cache.Key{
+		Category: cacheCatagoryQuaterMA,
 		ID:       c.generateID(cacheIDStockNum, stockNum),
 	}
 }
