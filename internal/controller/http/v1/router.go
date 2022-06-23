@@ -19,7 +19,7 @@ var log = logger.Get()
 // @title       TOC MACHINE TRADING API
 // @description Auto Trade on sinopac
 // @version     1.0.0
-func NewRouter(handler *gin.Engine, t usecase.Basic) {
+func NewRouter(handler *gin.Engine, b usecase.Basic, a usecase.Analyze) {
 	docs.SwaggerInfo.BasePath = "/v1"
 	docs.SwaggerInfo.Host = "127.0.0.1:8080"
 
@@ -37,6 +37,7 @@ func NewRouter(handler *gin.Engine, t usecase.Basic) {
 	// Routers
 	h := handler.Group("/v1")
 	{
-		newBasicRoutes(h, t)
+		newBasicRoutes(h, b)
+		newAnalyzeRoutes(h, a)
 	}
 }

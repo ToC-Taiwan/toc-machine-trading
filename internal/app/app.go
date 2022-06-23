@@ -51,6 +51,9 @@ func Run(cfg *config.Config) {
 	// stream
 	usecase.NewStream(repo.NewStream(pg), rabbit.NewStream())
 
+	// analyze
+	analyzeUseCase := usecase.NewAnalyze(repo.NewHistory(pg))
+
 	// history
 	usecase.NewHistory(repo.NewHistory(pg), grpcapi.NewHistory(sc))
 
@@ -59,7 +62,7 @@ func Run(cfg *config.Config) {
 
 	// HTTP Server
 	handler := gin.New()
-	v1.NewRouter(handler, basicUseCase)
+	v1.NewRouter(handler, basicUseCase, analyzeUseCase)
 	httpServer := httpserver.New(handler, httpserver.Port(cfg.HTTP.Port))
 
 	// Waiting signal

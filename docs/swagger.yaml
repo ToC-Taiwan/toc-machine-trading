@@ -14,6 +14,15 @@ definitions:
       number:
         type: string
     type: object
+  v1.BelowQuaterMA:
+    properties:
+      date:
+        type: string
+      stocks:
+        items:
+          $ref: '#/definitions/entity.Stock'
+        type: array
+    type: object
   v1.response:
     properties:
       error:
@@ -33,6 +42,24 @@ info:
   title: TOC MACHINE TRADING API
   version: 1.0.0
 paths:
+  /analyze/below-quater:
+    get:
+      consumes:
+      - application/json
+      description: getQuaterTargets
+      operationId: getQuaterTargets
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/v1.BelowQuaterMA'
+            type: array
+      summary: getQuaterTargets
+      tags:
+      - analyze
   /basic/stock/repo:
     get:
       consumes:

@@ -16,6 +16,33 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/analyze/below-quater": {
+            "get": {
+                "description": "getQuaterTargets",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "analyze"
+                ],
+                "summary": "getQuaterTargets",
+                "operationId": "getQuaterTargets",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/v1.BelowQuaterMA"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/basic/stock/repo": {
             "get": {
                 "description": "getAllRepoStock",
@@ -125,6 +152,20 @@ const docTemplate = `{
                 },
                 "number": {
                     "type": "string"
+                }
+            }
+        },
+        "v1.BelowQuaterMA": {
+            "type": "object",
+            "properties": {
+                "date": {
+                    "type": "string"
+                },
+                "stocks": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entity.Stock"
+                    }
                 }
             }
         },

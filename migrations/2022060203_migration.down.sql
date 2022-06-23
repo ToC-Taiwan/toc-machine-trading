@@ -6,6 +6,8 @@ DROP TABLE IF EXISTS basic_stock;
 
 DROP TABLE IF EXISTS basic_targets;
 
+DROP TABLE IF EXISTS history_analyze;
+
 DROP TABLE IF EXISTS history_close;
 
 DROP TABLE IF EXISTS history_kbar;

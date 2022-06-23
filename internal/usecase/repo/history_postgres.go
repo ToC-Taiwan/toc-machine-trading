@@ -206,3 +206,50 @@ func (r *HistoryRepo) QueryMultiStockKbarArrByDate(ctx context.Context, stockNum
 	}
 	return result, nil
 }
+
+// InsertQuaterMA -.
+func (r *HistoryRepo) InsertQuaterMA(ctx context.Context, t *entity.HistoryAnalyze) error {
+	dbQuaterMA, err := r.QueryAllQuaterMAByStockNum(ctx, t.StockNum)
+	if err != nil {
+		return err
+	}
+
+	if _, ok := dbQuaterMA[t.Date]; !ok {
+		builder := r.Builder.Insert(tableNameHistoryAnalyze).Columns("date, stock_num, quater_ma").Values(t.Date, t.StockNum, t.QuaterMA)
+		if sql, args, err := builder.ToSql(); err != nil {
+			return err
+		} else if _, err := r.Pool.Exec(ctx, sql, args...); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// QueryAllQuaterMAByStockNum -.
+func (r *HistoryRepo) QueryAllQuaterMAByStockNum(ctx context.Context, stockNum string) (map[time.Time]*entity.HistoryAnalyze, error) {
+	sql, args, err := r.Builder.
+		Select("date, stock_num, quater_ma, number, name, exchange, category, day_trade, last_close").
+		From(tableNameHistoryAnalyze).
+		Where(squirrel.Eq{"stock_num": stockNum}).
+		OrderBy("date ASC").
+		Join("basic_stock ON history_analyze.stock_num = basic_stock.number").ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	rows, err := r.Pool.Query(ctx, sql, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	result := make(map[time.Time]*entity.HistoryAnalyze)
+	for rows.Next() {
+		e := entity.HistoryAnalyze{Stock: new(entity.Stock)}
+		if err := rows.Scan(&e.Date, &e.StockNum, &e.QuaterMA, &e.Stock.Number, &e.Stock.Name, &e.Stock.Exchange, &e.Stock.Category, &e.Stock.DayTrade, &e.Stock.LastClose); err != nil {
+			return nil, err
+		}
+		result[e.Date] = &e
+	}
+	return result, nil
+}

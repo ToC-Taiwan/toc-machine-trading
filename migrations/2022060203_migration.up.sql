@@ -24,6 +24,13 @@ CREATE TABLE basic_targets (
     "trade_day" TIMESTAMPTZ
 );
 
+CREATE TABLE history_analyze (
+    "id" SERIAL PRIMARY KEY,
+    "stock_num" VARCHAR NOT NULL,
+    "date" TIMESTAMPTZ,
+    "quater_ma" DECIMAL NOT NULL
+);
+
 CREATE TABLE history_close (
     "id" SERIAL PRIMARY KEY,
     "date" TIMESTAMPTZ NOT NULL,

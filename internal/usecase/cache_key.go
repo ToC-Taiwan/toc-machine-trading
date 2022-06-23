@@ -9,11 +9,12 @@ import (
 )
 
 const (
-	cacheCatagoryBasic       cache.Category = "basic"
-	cacheCatagoryOrder       cache.Category = "order"
-	cacheCatagoryHistoryOpen cache.Category = "history_open"
-	cacheCatagoryBiasRate    cache.Category = "bias_rate"
-	cacheCatagoryQuaterMA    cache.Category = "quater_ma"
+	cacheCatagoryBasic        cache.Category = "basic"
+	cacheCatagoryOrder        cache.Category = "order"
+	cacheCatagoryHistoryOpen  cache.Category = "history_open"
+	cacheCatagoryHistoryClose cache.Category = "history_close"
+	cacheCatagoryBiasRate     cache.Category = "bias_rate"
+	cacheCatagoryQuaterMA     cache.Category = "quater_ma"
 )
 
 const (
@@ -79,20 +80,20 @@ func (c *GlobalCache) historyOpenKey(stockNum string, date time.Time) cache.Key 
 	}
 }
 
+// HistoryClose
+//
+func (c *GlobalCache) historyCloseKey(stockNum string, date time.Time) cache.Key {
+	return cache.Key{
+		Category: cacheCatagoryHistoryClose,
+		ID:       c.generateID(cacheIDStockNum, stockNum, date.Format(global.ShortTimeLayout)),
+	}
+}
+
 // BiasRate
 //
 func (c *GlobalCache) biasRateKey(stockNum string) cache.Key {
 	return cache.Key{
 		Category: cacheCatagoryBiasRate,
-		ID:       c.generateID(cacheIDStockNum, stockNum),
-	}
-}
-
-// QuaterMA
-//
-func (c *GlobalCache) quaterMAKey(stockNum string) cache.Key {
-	return cache.Key{
-		Category: cacheCatagoryQuaterMA,
 		ID:       c.generateID(cacheIDStockNum, stockNum),
 	}
 }

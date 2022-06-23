@@ -2,7 +2,7 @@ package entity
 
 import "time"
 
-// HistoryClose HistoryClose
+// HistoryClose -.
 type HistoryClose struct {
 	ID       int64     `json:"id"`
 	Date     time.Time `json:"date"`
@@ -11,7 +11,7 @@ type HistoryClose struct {
 	Stock    *Stock    `json:"stock"`
 }
 
-// HistoryKbar HistoryKbar
+// HistoryKbar -.
 type HistoryKbar struct {
 	ID       int64     `json:"id"`
 	StockNum string    `json:"stock_num"`
@@ -24,7 +24,7 @@ type HistoryKbar struct {
 	Stock    *Stock    `json:"stock"`
 }
 
-// HistoryTick HistoryTick
+// HistoryTick -.
 type HistoryTick struct {
 	ID        int64     `json:"id"`
 	StockNum  string    `json:"stock_num"`
@@ -37,4 +37,13 @@ type HistoryTick struct {
 	AskPrice  float64   `json:"ask_price"`
 	AskVolume int64     `json:"ask_volume"`
 	Stock     *Stock    `json:"stock"`
+}
+
+// HistoryAnalyze -.
+type HistoryAnalyze struct {
+	ID       int64     `json:"id"`
+	Date     time.Time `json:"date"`
+	StockNum string    `json:"stock_num"`
+	QuaterMA float64   `json:"quater_ma"`
+	Stock    *Stock    `json:"stock"`
 }

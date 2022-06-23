@@ -78,6 +78,8 @@ type (
 		QueryMultiStockTickArrByDate(ctx context.Context, stockNumArr []string, date time.Time) (map[string][]*entity.HistoryTick, error)
 		InsertHistoryKbarArr(ctx context.Context, t []*entity.HistoryKbar) error
 		QueryMultiStockKbarArrByDate(ctx context.Context, stockNumArr []string, date time.Time) (map[string][]*entity.HistoryKbar, error)
+		InsertQuaterMA(ctx context.Context, t *entity.HistoryAnalyze) error
+		QueryAllQuaterMAByStockNum(ctx context.Context, stockNum string) (map[time.Time]*entity.HistoryAnalyze, error)
 	}
 
 	// HistorygRPCAPI -.
@@ -129,5 +131,12 @@ type (
 		GetOrderStatusByID(orderID string, sim bool) (*pb.TradeResult, error)
 		GetOrderStatusArr() ([]*pb.StockOrderStatus, error)
 		GetNonBlockOrderStatusArr() (*pb.FunctionErr, error)
+	}
+)
+
+type (
+	// Analyze -.
+	Analyze interface {
+		GetBelowQuaterMap(ctx context.Context) map[time.Time][]entity.Stock
 	}
 )

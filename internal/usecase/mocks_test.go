@@ -564,6 +564,35 @@ func (mr *MockHistoryRepoMockRecorder) InsertHistoryTickArr(ctx, t interface{}) 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertHistoryTickArr", reflect.TypeOf((*MockHistoryRepo)(nil).InsertHistoryTickArr), ctx, t)
 }
 
+// InsertQuaterMA mocks base method.
+func (m *MockHistoryRepo) InsertQuaterMA(ctx context.Context, t *entity.HistoryAnalyze) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "InsertQuaterMA", ctx, t)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// InsertQuaterMA indicates an expected call of InsertQuaterMA.
+func (mr *MockHistoryRepoMockRecorder) InsertQuaterMA(ctx, t interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertQuaterMA", reflect.TypeOf((*MockHistoryRepo)(nil).InsertQuaterMA), ctx, t)
+}
+
+// QueryAllQuaterMAByStockNum mocks base method.
+func (m *MockHistoryRepo) QueryAllQuaterMAByStockNum(ctx context.Context, stockNum string) (map[time.Time]*entity.HistoryAnalyze, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "QueryAllQuaterMAByStockNum", ctx, stockNum)
+	ret0, _ := ret[0].(map[time.Time]*entity.HistoryAnalyze)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// QueryAllQuaterMAByStockNum indicates an expected call of QueryAllQuaterMAByStockNum.
+func (mr *MockHistoryRepoMockRecorder) QueryAllQuaterMAByStockNum(ctx, stockNum interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryAllQuaterMAByStockNum", reflect.TypeOf((*MockHistoryRepo)(nil).QueryAllQuaterMAByStockNum), ctx, stockNum)
+}
+
 // QueryMultiStockKbarArrByDate mocks base method.
 func (m *MockHistoryRepo) QueryMultiStockKbarArrByDate(ctx context.Context, stockNumArr []string, date time.Time) (map[string][]*entity.HistoryKbar, error) {
 	m.ctrl.T.Helper()
@@ -1082,4 +1111,41 @@ func (m *MockOrdergRPCAPI) SellStock(order *entity.Order, sim bool) (*pb.TradeRe
 func (mr *MockOrdergRPCAPIMockRecorder) SellStock(order, sim interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SellStock", reflect.TypeOf((*MockOrdergRPCAPI)(nil).SellStock), order, sim)
+}
+
+// MockAnalyze is a mock of Analyze interface.
+type MockAnalyze struct {
+	ctrl     *gomock.Controller
+	recorder *MockAnalyzeMockRecorder
+}
+
+// MockAnalyzeMockRecorder is the mock recorder for MockAnalyze.
+type MockAnalyzeMockRecorder struct {
+	mock *MockAnalyze
+}
+
+// NewMockAnalyze creates a new mock instance.
+func NewMockAnalyze(ctrl *gomock.Controller) *MockAnalyze {
+	mock := &MockAnalyze{ctrl: ctrl}
+	mock.recorder = &MockAnalyzeMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockAnalyze) EXPECT() *MockAnalyzeMockRecorder {
+	return m.recorder
+}
+
+// GetBelowQuaterMap mocks base method.
+func (m *MockAnalyze) GetBelowQuaterMap(ctx context.Context) map[time.Time][]entity.Stock {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetBelowQuaterMap", ctx)
+	ret0, _ := ret[0].(map[time.Time][]entity.Stock)
+	return ret0
+}
+
+// GetBelowQuaterMap indicates an expected call of GetBelowQuaterMap.
+func (mr *MockAnalyzeMockRecorder) GetBelowQuaterMap(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBelowQuaterMap", reflect.TypeOf((*MockAnalyze)(nil).GetBelowQuaterMap), ctx)
 }

@@ -86,6 +86,19 @@ func (c *GlobalCache) GetHistoryOpen(stockNum string, date time.Time) float64 {
 	return 0
 }
 
+// SetHistoryClose -.
+func (c *GlobalCache) SetHistoryClose(stockNum string, date time.Time, close float64) {
+	c.Set(c.historyCloseKey(stockNum, date), close)
+}
+
+// GetHistoryClose -.
+func (c *GlobalCache) GetHistoryClose(stockNum string, date time.Time) float64 {
+	if value, ok := c.Get(c.historyCloseKey(stockNum, date)); ok {
+		return value.(float64)
+	}
+	return 0
+}
+
 // SetBiasRate -.
 func (c *GlobalCache) SetBiasRate(stockNum string, biasRate float64) {
 	c.Set(c.biasRateKey(stockNum), biasRate)
@@ -94,19 +107,6 @@ func (c *GlobalCache) SetBiasRate(stockNum string, biasRate float64) {
 // GetBiasRate -.
 func (c *GlobalCache) GetBiasRate(stockNum string) float64 {
 	if value, ok := c.Get(c.biasRateKey(stockNum)); ok {
-		return value.(float64)
-	}
-	return 0
-}
-
-// SetQuaterMA -.
-func (c *GlobalCache) SetQuaterMA(stockNum string, quaterMA float64) {
-	c.Set(c.quaterMAKey(stockNum), quaterMA)
-}
-
-// GetQuaterMA -.
-func (c *GlobalCache) GetQuaterMA(stockNum string) float64 {
-	if value, ok := c.Get(c.quaterMAKey(stockNum)); ok {
 		return value.(float64)
 	}
 	return 0

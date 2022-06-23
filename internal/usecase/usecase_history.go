@@ -54,7 +54,7 @@ func (uc *HistoryUseCase) FetchHistory(ctx context.Context, targetArr []*entity.
 		log.Panic(err)
 	}
 
-	bus.PublishTopicEvent(topicStreamTargets, ctx, targetArr)
+	bus.PublishTopicEvent(topicAnalyzeTargets, ctx, targetArr)
 }
 
 func (uc *HistoryUseCase) fetchHistoryClose(targetArr []*entity.Target) error {
@@ -301,12 +301,13 @@ func (uc *HistoryUseCase) findExistHistoryKbar(fetchTradeDayArr []time.Time, sto
 
 func (uc *HistoryUseCase) processCloseArr(arr []*entity.HistoryClose) {
 	sort.Slice(arr, func(i, j int) bool {
-		return arr[i].Date.Before(arr[j].Date)
+		return arr[i].Date.After(arr[j].Date)
 	})
 	stockNum := arr[0].StockNum
 	closeArr := []float64{}
 	for _, v := range arr {
 		closeArr = append(closeArr, v.Close)
+		cc.SetHistoryClose(stockNum, v.Date, v.Close)
 	}
 
 	biasRate, err := utils.GetBiasRateByCloseArr(closeArr)
@@ -314,6 +315,7 @@ func (uc *HistoryUseCase) processCloseArr(arr []*entity.HistoryClose) {
 		return
 	}
 	cc.SetBiasRate(stockNum, biasRate)
+
 	i := 0
 	for {
 		if i+int(uc.analyzeCfg.MAPeriod) > len(closeArr) {
@@ -321,7 +323,13 @@ func (uc *HistoryUseCase) processCloseArr(arr []*entity.HistoryClose) {
 		}
 		tmp := closeArr[i : i+int(uc.analyzeCfg.MAPeriod)]
 		ma := utils.GenerareMAByCloseArr(tmp)
-		cc.SetQuaterMA(stockNum, ma)
+		if err := uc.repo.InsertQuaterMA(context.Background(), &entity.HistoryAnalyze{
+			Date:     arr[i].Date,
+			StockNum: stockNum,
+			QuaterMA: ma,
+		}); err != nil {
+			log.Error(err)
+		}
 		i++
 	}
 }
@@ -333,6 +341,9 @@ func (uc *HistoryUseCase) processTickArr(arr []*entity.HistoryTick) {
 }
 
 func (uc *HistoryUseCase) processKbarArr(arr []*entity.HistoryKbar) {
+	sort.Slice(arr, func(i, j int) bool {
+		return arr[i].KbarTime.Before(arr[j].KbarTime)
+	})
 	firstKbar := arr[0]
 	cc.SetHistoryOpen(firstKbar.StockNum, firstKbar.KbarTime, firstKbar.Open)
 }

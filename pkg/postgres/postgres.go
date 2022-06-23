@@ -49,6 +49,7 @@ func New(url string, opts ...Option) (*Postgres, error) {
 		return nil, err
 	}
 
+	poolConfig.MaxConnIdleTime = time.Second * 30
 	poolConfig.MaxConns = int32(pg.maxPoolSize)
 
 	for pg.connAttempts > 0 {
