@@ -2,12 +2,14 @@ package usecase
 
 import (
 	"context"
+	"sort"
 	"time"
 
 	"toc-machine-trading/internal/entity"
 	"toc-machine-trading/internal/usecase/grpcapi"
 	"toc-machine-trading/internal/usecase/repo"
 	"toc-machine-trading/pkg/global"
+	"toc-machine-trading/pkg/utils"
 )
 
 // HistoryUseCase -.
@@ -58,7 +60,7 @@ func (uc *HistoryUseCase) fetchHistoryClose(targetArr []*entity.Target) error {
 		return err
 	}
 	defer log.Info("Fetching History Close Done")
-	result := []*entity.HistoryClose{}
+	result := make(map[string][]*entity.HistoryClose)
 	dataChan := make(chan *entity.HistoryClose)
 	wait := make(chan struct{})
 	go func() {
@@ -67,7 +69,7 @@ func (uc *HistoryUseCase) fetchHistoryClose(targetArr []*entity.Target) error {
 			if !ok {
 				break
 			}
-			result = append(result, close)
+			result[close.StockNum] = append(result[close.StockNum], close)
 		}
 		close(wait)
 	}()
@@ -83,20 +85,21 @@ func (uc *HistoryUseCase) fetchHistoryClose(targetArr []*entity.Target) error {
 			log.Error(err)
 		}
 		for _, close := range closeArr {
-			if close.GetClose() != 0 {
-				dataChan <- &entity.HistoryClose{
-					Date:     date,
-					StockNum: close.GetCode(),
-					Close:    close.GetClose(),
-				}
+			dataChan <- &entity.HistoryClose{
+				Date:     date,
+				StockNum: close.GetCode(),
+				Close:    close.GetClose(),
 			}
 		}
 	}
 	close(dataChan)
 	<-wait
 	if len(result) != 0 {
-		if err := uc.repo.InsertHistoryCloseArr(context.Background(), result); err != nil {
-			return err
+		for _, v := range result {
+			go uc.processCloseArr(v)
+			if err := uc.repo.InsertHistoryCloseArr(context.Background(), v); err != nil {
+				return err
+			}
 		}
 	}
 	return nil
@@ -104,6 +107,7 @@ func (uc *HistoryUseCase) fetchHistoryClose(targetArr []*entity.Target) error {
 
 func (uc *HistoryUseCase) findExistHistoryClose(fetchTradeDayArr []time.Time, stockNumArr []string) (map[time.Time][]string, error) {
 	result := make(map[time.Time][]string)
+	dbCloseMap := make(map[string][]*entity.HistoryClose)
 	for _, d := range fetchTradeDayArr {
 		var stockNumArrInDay []string
 		closeMap, err := uc.repo.QueryMutltiStockCloseByDate(context.Background(), stockNumArr, d)
@@ -113,9 +117,15 @@ func (uc *HistoryUseCase) findExistHistoryClose(fetchTradeDayArr []time.Time, st
 		for _, s := range stockNumArr {
 			if close := closeMap[s]; (close != nil && close.Close == 0) || close == nil {
 				stockNumArrInDay = append(stockNumArrInDay, s)
+			} else {
+				dbCloseMap[s] = append(dbCloseMap[s], close)
 			}
 		}
 		result[d] = stockNumArrInDay
+	}
+
+	for _, v := range dbCloseMap {
+		go uc.processCloseArr(v)
 	}
 	return result, nil
 }
@@ -280,9 +290,26 @@ func (uc *HistoryUseCase) findExistHistoryKbar(fetchTradeDayArr []time.Time, sto
 	return result, nil
 }
 
+func (uc *HistoryUseCase) processCloseArr(arr []*entity.HistoryClose) {
+	sort.Slice(arr, func(i, j int) bool {
+		return arr[i].Date.Before(arr[j].Date)
+	})
+
+	closeArr := []float64{}
+	for _, v := range arr {
+		closeArr = append(closeArr, v.Close)
+	}
+
+	biasRate, err := utils.GetBiasRateByCloseArr(closeArr)
+	if err != nil {
+		return
+	}
+	cc.SetBiasRate(arr[0].StockNum, biasRate)
+}
+
+func (uc *HistoryUseCase) processTickArr(arr []*entity.HistoryTick) {}
+
 func (uc *HistoryUseCase) processKbarArr(arr []*entity.HistoryKbar) {
 	firstKbar := arr[0]
 	cc.SetHistoryOpen(firstKbar.StockNum, firstKbar.KbarTime, firstKbar.Open)
 }
-
-func (uc *HistoryUseCase) processTickArr(arr []*entity.HistoryTick) {}

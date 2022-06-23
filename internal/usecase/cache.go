@@ -85,3 +85,16 @@ func (c *GlobalCache) GetHistoryOpen(stockNum string, date time.Time) float64 {
 	}
 	return 0
 }
+
+// SetBiasRate -.
+func (c *GlobalCache) SetBiasRate(stockNum string, biasRate float64) {
+	c.Set(c.biasRateKey(stockNum), biasRate)
+}
+
+// GetBiasRate -.
+func (c *GlobalCache) GetBiasRate(stockNum string) float64 {
+	if value, ok := c.Get(c.biasRateKey(stockNum)); ok {
+		return value.(float64)
+	}
+	return 0
+}

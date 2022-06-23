@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"toc-machine-trading/internal/entity"
@@ -89,6 +90,11 @@ func (uc *OrderUseCase) BuyStock(order *entity.Order) (string, entity.OrderStatu
 	if err != nil {
 		return "", entity.StatusUnknow, err
 	}
+
+	if e := result.GetError(); e != "" {
+		return "", entity.StatusUnknow, errors.New(e)
+	}
+
 	statusMap := entity.StatusListMap
 	return result.GetOrderId(), statusMap[result.GetStatus()], nil
 }
@@ -99,6 +105,11 @@ func (uc *OrderUseCase) SellStock(order *entity.Order) (string, entity.OrderStat
 	if err != nil {
 		return "", entity.StatusUnknow, err
 	}
+
+	if e := result.GetError(); e != "" {
+		return "", entity.StatusUnknow, errors.New(e)
+	}
+
 	statusMap := entity.StatusListMap
 	return result.GetOrderId(), statusMap[result.GetStatus()], nil
 }
@@ -109,6 +120,11 @@ func (uc *OrderUseCase) SellFirstStock(order *entity.Order) (string, entity.Orde
 	if err != nil {
 		return "", entity.StatusUnknow, err
 	}
+
+	if e := result.GetError(); e != "" {
+		return "", entity.StatusUnknow, errors.New(e)
+	}
+
 	statusMap := entity.StatusListMap
 	return result.GetOrderId(), statusMap[result.GetStatus()], nil
 }
@@ -119,6 +135,11 @@ func (uc *OrderUseCase) BuyLaterStock(order *entity.Order) (string, entity.Order
 	if err != nil {
 		return "", entity.StatusUnknow, err
 	}
+
+	if e := result.GetError(); e != "" {
+		return "", entity.StatusUnknow, errors.New(e)
+	}
+
 	statusMap := entity.StatusListMap
 	return result.GetOrderId(), statusMap[result.GetStatus()], nil
 }
@@ -129,6 +150,11 @@ func (uc *OrderUseCase) CancelOrderID(orderID string) (string, entity.OrderStatu
 	if err != nil {
 		return "", entity.StatusUnknow, err
 	}
+
+	if e := result.GetError(); e != "" {
+		return "", entity.StatusUnknow, errors.New(e)
+	}
+
 	statusMap := entity.StatusListMap
 	return result.GetOrderId(), statusMap[result.GetStatus()], nil
 }

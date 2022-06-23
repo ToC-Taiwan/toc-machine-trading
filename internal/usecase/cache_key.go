@@ -12,6 +12,7 @@ const (
 	cacheCatagoryBasic       cache.Category = "basic"
 	cacheCatagoryOrder       cache.Category = "order"
 	cacheCatagoryHistoryOpen cache.Category = "history_open"
+	cacheCatagoryBiasRate    cache.Category = "bias_rate"
 )
 
 const (
@@ -74,5 +75,14 @@ func (c *GlobalCache) historyOpenKey(stockNum string, date time.Time) cache.Key 
 	return cache.Key{
 		Category: cacheCatagoryHistoryOpen,
 		ID:       c.generateID(cacheIDStockNum, stockNum, date.Format(global.ShortTimeLayout)),
+	}
+}
+
+// BiasRate
+//
+func (c *GlobalCache) biasRateKey(stockNum string) cache.Key {
+	return cache.Key{
+		Category: cacheCatagoryBiasRate,
+		ID:       c.generateID(cacheIDStockNum, stockNum),
 	}
 }
