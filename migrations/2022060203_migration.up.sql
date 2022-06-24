@@ -64,12 +64,13 @@ CREATE TABLE history_tick (
 
 CREATE TABLE trade_order (
     "order_id" VARCHAR PRIMARY KEY,
+    "status" INT NOT NULL,
+    "order_time" TIMESTAMPTZ NOT NULL,
     "stock_num" VARCHAR NOT NULL,
     "action" INT NOT NULL,
     "price" DECIMAL NOT NULL,
     "quantity" INT NOT NULL,
-    "status" INT NOT NULL,
-    "order_time" TIMESTAMPTZ NOT NULL
+    "trade_time" TIMESTAMPTZ NOT NULL
 );
 
 CREATE TABLE sinopac_event (

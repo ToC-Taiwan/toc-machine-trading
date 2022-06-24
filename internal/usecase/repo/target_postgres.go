@@ -25,9 +25,17 @@ func (r *TargetRepo) InsertTargetArr(ctx context.Context, t []*entity.Target) er
 		builder = builder.Values(v.StockNum, v.TradeDay, v.Rank, v.Volume, v.Subscribe, v.RealTimeAdd)
 	}
 
-	if sql, args, err := builder.ToSql(); err != nil {
+	tx, err := r.BeginTransaction()
+	if err != nil {
 		return err
-	} else if _, err := r.Pool.Exec(ctx, sql, args...); err != nil {
+	}
+	defer r.EndTransaction(tx, err)
+	var sql string
+	var args []interface{}
+
+	if sql, args, err = builder.ToSql(); err != nil {
+		return err
+	} else if _, err = tx.Exec(ctx, sql, args...); err != nil {
 		return err
 	}
 	return nil
@@ -44,7 +52,7 @@ func (r *TargetRepo) QueryTargetsByTradeDay(ctx context.Context, tradeDay time.T
 		return nil, err
 	}
 
-	rows, err := r.Pool.Query(ctx, sql, args...)
+	rows, err := r.Pool().Query(ctx, sql, args...)
 	if err != nil {
 		return nil, err
 	}

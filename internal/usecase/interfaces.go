@@ -27,9 +27,9 @@ type (
 
 	// BasicRepo -.
 	BasicRepo interface {
-		QueryAllStock(ctx context.Context) ([]*entity.Stock, error)
+		QueryAllStock(ctx context.Context) (map[string]*entity.Stock, error)
 		InserOrUpdatetStockArr(ctx context.Context, t []*entity.Stock) error
-		QueryAllCalendar(ctx context.Context) ([]*entity.CalendarDate, error)
+		QueryAllCalendar(ctx context.Context) (map[time.Time]*entity.CalendarDate, error)
 		InserOrUpdatetCalendarDateArr(ctx context.Context, t []*entity.CalendarDate) error
 	}
 
@@ -109,6 +109,7 @@ type (
 		InsertEvent(ctx context.Context, t *entity.SinopacEvent) error
 		InserOrUpdatetOrder(ctx context.Context, t *entity.Order) error
 		QueryOrderByID(ctx context.Context, orderID string) (*entity.Order, error)
+		QueryAllOrderByDate(ctx context.Context, date time.Time) ([]*entity.Order, error)
 	}
 
 	// StreamRabbit -.
@@ -123,6 +124,11 @@ type (
 type (
 	// Order -.
 	Order interface{}
+
+	// OrderRepo -.
+	OrderRepo interface {
+		InserOrUpdateTradeBalance(ctx context.Context, t *entity.TradeBalance) error
+	}
 
 	// OrdergRPCAPI -.
 	OrdergRPCAPI interface {

@@ -85,23 +85,12 @@ func (uc *BasicUseCase) GetAllRepoStock(ctx context.Context) ([]*entity.Stock, e
 	if err != nil {
 		return []*entity.Stock{}, err
 	}
-	return data, nil
-}
 
-func parseHolidayFile() ([]string, error) {
-	var holidayArr struct {
-		DateArr []string `json:"date_arr"`
+	var result []*entity.Stock
+	for _, v := range data {
+		result = append(result, v)
 	}
-
-	holidayFile, err := ioutil.ReadFile("./data/holidays.json")
-	if err != nil {
-		return []string{}, err
-	}
-
-	if err := json.Unmarshal(holidayFile, &holidayArr); err != nil {
-		return []string{}, err
-	}
-	return holidayArr.DateArr, nil
+	return result, nil
 }
 
 func (uc *BasicUseCase) importCalendarDate(ctx context.Context) error {
@@ -162,4 +151,20 @@ func (uc *BasicUseCase) fillBasicInfo() error {
 	}
 	cc.SetBasicInfo(basic)
 	return nil
+}
+
+func parseHolidayFile() ([]string, error) {
+	var holidayArr struct {
+		DateArr []string `json:"date_arr"`
+	}
+
+	holidayFile, err := ioutil.ReadFile("./data/holidays.json")
+	if err != nil {
+		return []string{}, err
+	}
+
+	if err := json.Unmarshal(holidayFile, &holidayArr); err != nil {
+		return []string{}, err
+	}
+	return holidayArr.DateArr, nil
 }

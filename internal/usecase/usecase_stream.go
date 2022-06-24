@@ -38,6 +38,12 @@ func NewStream(r *repo.StreamRepo, t *rabbit.StreamRabbit) {
 	uc.analyzeCfg = cfg.Analyze
 	uc.basic = *cc.GetBasicInfo()
 
+	go func() {
+		for range time.Tick(time.Minute) {
+			uc.sendAllOrders(context.Background())
+		}
+	}()
+
 	bus.SubscribeTopic(topicStreamTargets, uc.ReceiveStreamData)
 	bus.SubscribeTopic(topicUpdateOrderStatus, uc.updateOrderSatusCache)
 
@@ -73,7 +79,10 @@ func (uc *StreamUseCase) ReceiveOrderStatus(ctx context.Context) {
 
 func (uc *StreamUseCase) updateOrderSatusCache(ctx context.Context, order *entity.Order) {
 	cacheOrder := cc.GetOrderByOrderID(order.OrderID)
+
 	order.TradeTime = cacheOrder.TradeTime
+	order.Action = cacheOrder.Action
+
 	if !cmp.Equal(order, cacheOrder) {
 		cc.SetOrderByOrderID(order)
 	}
@@ -81,6 +90,15 @@ func (uc *StreamUseCase) updateOrderSatusCache(ctx context.Context, order *entit
 	if err := uc.repo.InserOrUpdatetOrder(ctx, order); err != nil {
 		log.Error(err)
 	}
+}
+
+func (uc *StreamUseCase) sendAllOrders(ctx context.Context) {
+	allOrders, err := uc.repo.QueryAllOrderByDate(ctx, cc.GetBasicInfo().TradeDay)
+	if err != nil {
+		log.Panic(err)
+	}
+
+	bus.PublishTopicEvent(topicAllOrders, allOrders)
 }
 
 // ReceiveStreamData -.

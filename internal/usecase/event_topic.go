@@ -9,4 +9,5 @@ const (
 	topicPlaceOrder        string = "place_order"
 	topicCancelOrder       string = "cancel_order"
 	topicUpdateOrderStatus string = "update_order_status"
+	topicAllOrders         string = "all_orders"
 )

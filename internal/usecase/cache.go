@@ -122,5 +122,5 @@ func (c *GlobalCache) GetTargets() []*entity.Target {
 	if value, ok := c.Get(c.targetsKey()); ok {
 		return value.([]*entity.Target)
 	}
-	return nil
+	return []*entity.Target{}
 }

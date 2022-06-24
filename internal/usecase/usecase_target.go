@@ -65,6 +65,11 @@ func NewTarget(r *repo.TargetRepo, t *grpcapi.TargetgRPCAPI) *TargetUseCase {
 	return uc
 }
 
+// GetTargets -.
+func (uc *TargetUseCase) GetTargets(ctx context.Context) []*entity.Target {
+	return cc.GetTargets()
+}
+
 // SearchTradeDayTargets -.
 func (uc *TargetUseCase) SearchTradeDayTargets(ctx context.Context, tradeDay time.Time) ([]*entity.Target, error) {
 	lastTradeDay := cc.GetBasicInfo().LastTradeDay
@@ -153,9 +158,4 @@ func (uc *TargetUseCase) SubscribeStockBidAsk(ctx context.Context, targetArr []*
 	}
 
 	return nil
-}
-
-// GetTargets -.
-func (uc *TargetUseCase) GetTargets(ctx context.Context) []*entity.Target {
-	return cc.GetTargets()
 }

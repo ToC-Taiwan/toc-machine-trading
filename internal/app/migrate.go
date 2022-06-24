@@ -82,16 +82,16 @@ func tryCreateDB(dbName string) error {
 	defer pg.Close()
 
 	var name string
-	err = pg.Pool.QueryRow(context.Background(), "SELECT datname FROM pg_catalog.pg_database WHERE datname = $1", dbName).Scan(&name)
-	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
-		return err
-	}
-
-	if name == "" {
-		_, err := pg.Pool.Exec(context.Background(), fmt.Sprintf("CREATE DATABASE %s", dbName))
-		if err != nil {
-			return err
+	err = pg.Pool().QueryRow(context.Background(), "SELECT datname FROM pg_catalog.pg_database WHERE datname = $1", dbName).Scan(&name)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			_, err = pg.Pool().Exec(context.Background(), fmt.Sprintf("CREATE DATABASE %s", dbName))
+			if err != nil {
+				return err
+			}
+			return nil
 		}
+		return err
 	}
 	return nil
 }

@@ -3,11 +3,13 @@ package postgres
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"toc-machine-trading/pkg/logger"
 
 	"github.com/Masterminds/squirrel"
+	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
 )
 
@@ -26,7 +28,7 @@ type Postgres struct {
 	connTimeout  time.Duration
 
 	Builder squirrel.StatementBuilderType
-	Pool    *pgxpool.Pool
+	pool    *pgxpool.Pool
 }
 
 // New -.
@@ -49,11 +51,11 @@ func New(url string, opts ...Option) (*Postgres, error) {
 		return nil, err
 	}
 
-	poolConfig.MaxConnIdleTime = time.Second * 30
+	poolConfig.MaxConnIdleTime = time.Second * 10
 	poolConfig.MaxConns = int32(pg.maxPoolSize)
 
 	for pg.connAttempts > 0 {
-		pg.Pool, err = pgxpool.ConnectConfig(context.Background(), poolConfig)
+		pg.pool, err = pgxpool.ConnectConfig(context.Background(), poolConfig)
 		if err == nil {
 			break
 		}
@@ -74,7 +76,36 @@ func New(url string, opts ...Option) (*Postgres, error) {
 
 // Close -.
 func (p *Postgres) Close() {
-	if p.Pool != nil {
-		p.Pool.Close()
+	if p.pool != nil {
+		p.pool.Close()
+	}
+}
+
+// Pool -.
+func (p *Postgres) Pool() *pgxpool.Pool {
+	return p.pool
+}
+
+// BeginTransaction -.
+func (p *Postgres) BeginTransaction() (pgx.Tx, error) {
+	tx, err := p.pool.Begin(context.Background())
+	if err != nil {
+		return nil, fmt.Errorf("Postgres: error on begin transaction: %s", err)
+	}
+	return tx, nil
+}
+
+// EndTransaction -.
+func (p *Postgres) EndTransaction(tx pgx.Tx, err error) {
+	if err != nil {
+		rollErr := tx.Rollback(context.Background())
+		if rollErr != nil {
+			log.Errorf("Postgres: error on rollback transaction: %s", rollErr)
+		}
+	} else {
+		commitErr := tx.Commit(context.Background())
+		if commitErr != nil {
+			log.Errorf("Postgres: error on commit transaction: %s", commitErr)
+		}
 	}
 }
