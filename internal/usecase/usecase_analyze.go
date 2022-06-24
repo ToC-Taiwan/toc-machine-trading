@@ -39,7 +39,6 @@ func (uc *AnalyzeUseCase) AnalyzeAll(ctx context.Context, targetArr []*entity.Ta
 // GetBelowQuaterMap GetBelowQuaterMap
 func (uc *AnalyzeUseCase) GetBelowQuaterMap(ctx context.Context) map[time.Time][]entity.Stock {
 	uc.belowQuaterLock.Lock()
-	tmp := uc.belowQuaterMap
 	basicInfo := cc.GetBasicInfo()
 	if len(uc.lastBelowMAStock) != 0 {
 		for _, s := range uc.lastBelowMAStock {
@@ -52,10 +51,11 @@ func (uc *AnalyzeUseCase) GetBelowQuaterMap(ctx context.Context) map[time.Time][
 		}
 	}
 	uc.belowQuaterLock.Unlock()
-	return tmp
+	return uc.belowQuaterMap
 }
 
 func (uc *AnalyzeUseCase) findBelowQuaterMATargets(ctx context.Context, targetArr []*entity.Target) {
+	log.Info("findBelowQuaterMATargets")
 	defer uc.belowQuaterLock.Unlock()
 	uc.belowQuaterLock.Lock()
 	for _, t := range targetArr {
@@ -66,14 +66,14 @@ func (uc *AnalyzeUseCase) findBelowQuaterMATargets(ctx context.Context, targetAr
 
 		basicInfo := cc.GetBasicInfo()
 		for _, ma := range maMap {
+			tmp := ma
 			if close := cc.GetHistoryClose(ma.StockNum, ma.Date); close != 0 && close-ma.QuaterMA > 0 {
 				continue
 			}
 			if nextTradeDay := getAbsNextTradeDayTime(ma.Date); nextTradeDay.Equal(basicInfo.TradeDay) {
-				tmp := ma
 				uc.lastBelowMAStock[tmp.StockNum] = tmp
 			} else if nextOpen := cc.GetHistoryOpen(ma.StockNum, nextTradeDay); nextOpen != 0 && nextOpen-ma.QuaterMA > 0 {
-				uc.belowQuaterMap[ma.Date] = append(uc.belowQuaterMap[ma.Date], *t.Stock)
+				uc.belowQuaterMap[ma.Date] = append(uc.belowQuaterMap[ma.Date], *tmp.Stock)
 			}
 		}
 	}

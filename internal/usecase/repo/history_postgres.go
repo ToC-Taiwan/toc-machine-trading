@@ -63,6 +63,27 @@ func (r *HistoryRepo) InsertHistoryCloseArr(ctx context.Context, t []*entity.His
 	return nil
 }
 
+// DeleteHistoryCloseByStockAndDate -.
+func (r *HistoryRepo) DeleteHistoryCloseByStockAndDate(ctx context.Context, stockNumArr []string, date time.Time) error {
+	tx, err := r.BeginTransaction()
+	if err != nil {
+		return err
+	}
+	defer r.EndTransaction(tx, err)
+	var sql string
+	var args []interface{}
+
+	builder := r.Builder.Delete(tableNameHistoryClose).
+		Where(squirrel.Eq{"stock_num": stockNumArr}).
+		Where(squirrel.Eq{"date": date})
+	if sql, args, err = builder.ToSql(); err != nil {
+		return err
+	} else if _, err = tx.Exec(ctx, sql, args...); err != nil {
+		return err
+	}
+	return nil
+}
+
 // QueryMutltiStockCloseByDate -.
 func (r *HistoryRepo) QueryMutltiStockCloseByDate(ctx context.Context, stockNumArr []string, date time.Time) (map[string]*entity.HistoryClose, error) {
 	sql, args, err := r.Builder.
@@ -134,6 +155,28 @@ func (r *HistoryRepo) InsertHistoryTickArr(ctx context.Context, t []*entity.Hist
 		} else if _, err = tx.Exec(ctx, sql, args...); err != nil {
 			return err
 		}
+	}
+	return nil
+}
+
+// DeleteHistoryTickByStockAndDate -.
+func (r *HistoryRepo) DeleteHistoryTickByStockAndDate(ctx context.Context, stockNumArr []string, date time.Time) error {
+	tx, err := r.BeginTransaction()
+	if err != nil {
+		return err
+	}
+	defer r.EndTransaction(tx, err)
+	var sql string
+	var args []interface{}
+
+	builder := r.Builder.Delete(tableNameHistoryTick).
+		Where(squirrel.Eq{"stock_num": stockNumArr}).
+		Where(squirrel.GtOrEq{"tick_time": date}).
+		Where(squirrel.Lt{"tick_time": date.AddDate(0, 0, 1)})
+	if sql, args, err = builder.ToSql(); err != nil {
+		return err
+	} else if _, err = tx.Exec(ctx, sql, args...); err != nil {
+		return err
 	}
 	return nil
 }
@@ -211,6 +254,28 @@ func (r *HistoryRepo) InsertHistoryKbarArr(ctx context.Context, t []*entity.Hist
 		} else if _, err = tx.Exec(ctx, sql, args...); err != nil {
 			return err
 		}
+	}
+	return nil
+}
+
+// DeleteHistoryKbarByStockAndDate -.
+func (r *HistoryRepo) DeleteHistoryKbarByStockAndDate(ctx context.Context, stockNumArr []string, date time.Time) error {
+	tx, err := r.BeginTransaction()
+	if err != nil {
+		return err
+	}
+	defer r.EndTransaction(tx, err)
+	var sql string
+	var args []interface{}
+
+	builder := r.Builder.Delete(tableNameHistoryKbar).
+		Where(squirrel.Eq{"stock_num": stockNumArr}).
+		Where(squirrel.GtOrEq{"kbar_time": date}).
+		Where(squirrel.Lt{"kbar_time": date.AddDate(0, 0, 1)})
+	if sql, args, err = builder.ToSql(); err != nil {
+		return err
+	} else if _, err = tx.Exec(ctx, sql, args...); err != nil {
+		return err
 	}
 	return nil
 }

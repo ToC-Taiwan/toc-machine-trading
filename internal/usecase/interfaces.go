@@ -82,6 +82,9 @@ type (
 		QueryMultiStockKbarArrByDate(ctx context.Context, stockNumArr []string, date time.Time) (map[string][]*entity.HistoryKbar, error)
 		InsertQuaterMA(ctx context.Context, t *entity.HistoryAnalyze) error
 		QueryAllQuaterMAByStockNum(ctx context.Context, stockNum string) (map[time.Time]*entity.HistoryAnalyze, error)
+		DeleteHistoryKbarByStockAndDate(ctx context.Context, stockNumArr []string, date time.Time) error
+		DeleteHistoryTickByStockAndDate(ctx context.Context, stockNumArr []string, date time.Time) error
+		DeleteHistoryCloseByStockAndDate(ctx context.Context, stockNumArr []string, date time.Time) error
 	}
 
 	// HistorygRPCAPI -.

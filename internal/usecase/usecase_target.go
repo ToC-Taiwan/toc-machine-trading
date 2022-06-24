@@ -87,14 +87,17 @@ func (uc *TargetUseCase) SearchTradeDayTargets(ctx context.Context, tradeDay tim
 		if v.GetClose() < cond.LimitPriceLow || v.GetClose() > cond.LimitPriceHigh || v.GetTotalAmount() < cond.LimitVolume {
 			continue
 		}
-		result = append(result, &entity.Target{
-			StockNum:    v.GetCode(),
-			TradeDay:    tradeDay,
-			Rank:        i + 1,
-			Volume:      v.GetTotalVolume(),
-			Subscribe:   true,
-			RealTimeAdd: false,
-		})
+		if stock := cc.GetStockDetail(v.GetCode()); stock != nil {
+			result = append(result, &entity.Target{
+				Rank:        i + 1,
+				StockNum:    v.GetCode(),
+				Volume:      v.GetTotalVolume(),
+				Subscribe:   true,
+				RealTimeAdd: false,
+				TradeDay:    tradeDay,
+				Stock:       stock,
+			})
+		}
 	}
 	return result, nil
 }

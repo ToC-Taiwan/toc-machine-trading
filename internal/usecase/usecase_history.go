@@ -118,17 +118,22 @@ func (uc *HistoryUseCase) findExistHistoryClose(fetchTradeDayArr []time.Time, st
 	result := make(map[time.Time][]string)
 	dbCloseMap := make(map[string][]*entity.HistoryClose)
 	for _, d := range fetchTradeDayArr {
-		var stockNumArrInDay []string
 		closeMap, err := uc.repo.QueryMutltiStockCloseByDate(context.Background(), stockNumArr, d)
 		if err != nil {
 			return nil, err
 		}
+
+		var stockNumArrInDay []string
 		for _, s := range stockNumArr {
 			if c := closeMap[s]; c != nil && c.Close != 0 {
 				dbCloseMap[s] = append(dbCloseMap[s], c)
 				continue
 			}
 			stockNumArrInDay = append(stockNumArrInDay, s)
+		}
+		dErr := uc.repo.DeleteHistoryCloseByStockAndDate(context.Background(), stockNumArrInDay, d)
+		if dErr != nil {
+			log.Panic(dErr)
 		}
 		result[d] = stockNumArrInDay
 	}
@@ -201,17 +206,22 @@ func (uc *HistoryUseCase) fetchHistoryTick(targetArr []*entity.Target) error {
 func (uc *HistoryUseCase) findExistHistoryTick(fetchTradeDayArr []time.Time, stockNumArr []string) (map[time.Time][]string, error) {
 	result := make(map[time.Time][]string)
 	for _, d := range fetchTradeDayArr {
-		var stockNumArrInDay []string
 		tickArrMap, err := uc.repo.QueryMultiStockTickArrByDate(context.Background(), stockNumArr, d)
 		if err != nil {
 			return nil, err
 		}
+
+		var stockNumArrInDay []string
 		for _, s := range stockNumArr {
 			if _, ok := tickArrMap[s]; !ok {
 				stockNumArrInDay = append(stockNumArrInDay, s)
 			} else {
 				go uc.processTickArr(tickArrMap[s])
 			}
+		}
+		dErr := uc.repo.DeleteHistoryTickByStockAndDate(context.Background(), stockNumArrInDay, d)
+		if dErr != nil {
+			log.Panic(dErr)
 		}
 		result[d] = stockNumArrInDay
 	}
@@ -282,17 +292,22 @@ func (uc *HistoryUseCase) fetchHistoryKbar(targetArr []*entity.Target) error {
 func (uc *HistoryUseCase) findExistHistoryKbar(fetchTradeDayArr []time.Time, stockNumArr []string) (map[time.Time][]string, error) {
 	result := make(map[time.Time][]string)
 	for _, d := range fetchTradeDayArr {
-		var stockNumArrInDay []string
 		kbarArrMap, err := uc.repo.QueryMultiStockKbarArrByDate(context.Background(), stockNumArr, d)
 		if err != nil {
 			return nil, err
 		}
+
+		var stockNumArrInDay []string
 		for _, s := range stockNumArr {
 			if _, ok := kbarArrMap[s]; !ok {
 				stockNumArrInDay = append(stockNumArrInDay, s)
 			} else {
 				go uc.processKbarArr(kbarArrMap[s])
 			}
+		}
+		dErr := uc.repo.DeleteHistoryKbarByStockAndDate(context.Background(), stockNumArrInDay, d)
+		if dErr != nil {
+			log.Panic(dErr)
 		}
 		result[d] = stockNumArrInDay
 	}
