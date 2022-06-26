@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"fmt"
 	"sort"
 	"time"
 
@@ -104,6 +105,7 @@ func (uc *HistoryUseCase) fetchHistoryClose(targetArr []*entity.Target) error {
 	close(dataChan)
 	<-wait
 	if len(result) != 0 {
+		log.Info("Inserting History Close")
 		for _, v := range result {
 			uc.processCloseArr(v)
 			if err := uc.repo.InsertHistoryCloseArr(context.Background(), v); err != nil {
@@ -168,7 +170,8 @@ func (uc *HistoryUseCase) fetchHistoryTick(targetArr []*entity.Target) error {
 			if !ok {
 				break
 			}
-			result[tick.StockNum] = append(result[tick.StockNum], tick)
+			key := fmt.Sprintf("%s:%s", tick.StockNum, tick.TickTime.Format(global.ShortTimeLayout))
+			result[key] = append(result[key], tick)
 		}
 		close(wait)
 	}()
@@ -196,6 +199,7 @@ func (uc *HistoryUseCase) fetchHistoryTick(targetArr []*entity.Target) error {
 	close(dataChan)
 	<-wait
 	if len(result) != 0 {
+		log.Info("Inserting History Tick")
 		for _, v := range result {
 			uc.processTickArr(v)
 			if err := uc.repo.InsertHistoryTickArr(context.Background(), v); err != nil {
@@ -255,7 +259,8 @@ func (uc *HistoryUseCase) fetchHistoryKbar(targetArr []*entity.Target) error {
 			if !ok {
 				break
 			}
-			result[kbar.StockNum] = append(result[kbar.StockNum], kbar)
+			key := fmt.Sprintf("%s:%s", kbar.StockNum, kbar.KbarTime.Format(global.ShortTimeLayout))
+			result[key] = append(result[key], kbar)
 		}
 		close(wait)
 	}()
@@ -285,6 +290,7 @@ func (uc *HistoryUseCase) fetchHistoryKbar(targetArr []*entity.Target) error {
 	close(dataChan)
 	<-wait
 	if len(result) != 0 {
+		log.Info("Inserting History Kbar")
 		for _, v := range result {
 			uc.processKbarArr(v)
 			if err := uc.repo.InsertHistoryKbarArr(context.Background(), v); err != nil {
