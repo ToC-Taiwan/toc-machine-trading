@@ -39,7 +39,7 @@ func NewHistory(r *repo.HistoryRepo, t *grpcapi.HistorygRPCAPI) {
 
 // FetchHistory FetchHistory
 func (uc *HistoryUseCase) FetchHistory(ctx context.Context, targetArr []*entity.Target) {
-	err := uc.fetchHistoryClose(targetArr)
+	err := uc.fetchHistoryKbar(targetArr)
 	if err != nil {
 		log.Panic(err)
 	}
@@ -49,7 +49,7 @@ func (uc *HistoryUseCase) FetchHistory(ctx context.Context, targetArr []*entity.
 		log.Panic(err)
 	}
 
-	err = uc.fetchHistoryKbar(targetArr)
+	err = uc.fetchHistoryClose(targetArr)
 	if err != nil {
 		log.Panic(err)
 	}
@@ -105,7 +105,7 @@ func (uc *HistoryUseCase) fetchHistoryClose(targetArr []*entity.Target) error {
 	<-wait
 	if len(result) != 0 {
 		for _, v := range result {
-			go uc.processCloseArr(v)
+			uc.processCloseArr(v)
 			if err := uc.repo.InsertHistoryCloseArr(context.Background(), v); err != nil {
 				return err
 			}
@@ -131,15 +131,18 @@ func (uc *HistoryUseCase) findExistHistoryClose(fetchTradeDayArr []time.Time, st
 			}
 			stockNumArrInDay = append(stockNumArrInDay, s)
 		}
-		dErr := uc.repo.DeleteHistoryCloseByStockAndDate(context.Background(), stockNumArrInDay, d)
-		if dErr != nil {
-			log.Panic(dErr)
+
+		if len(stockNumArrInDay) != 0 {
+			dErr := uc.repo.DeleteHistoryCloseByStockAndDate(context.Background(), stockNumArrInDay, d)
+			if dErr != nil {
+				log.Panic(dErr)
+			}
+			result[d] = stockNumArrInDay
 		}
-		result[d] = stockNumArrInDay
 	}
 
 	for _, v := range dbCloseMap {
-		go uc.processCloseArr(v)
+		uc.processCloseArr(v)
 	}
 	return result, nil
 }
@@ -194,7 +197,7 @@ func (uc *HistoryUseCase) fetchHistoryTick(targetArr []*entity.Target) error {
 	<-wait
 	if len(result) != 0 {
 		for _, v := range result {
-			go uc.processTickArr(v)
+			uc.processTickArr(v)
 			if err := uc.repo.InsertHistoryTickArr(context.Background(), v); err != nil {
 				return err
 			}
@@ -216,14 +219,17 @@ func (uc *HistoryUseCase) findExistHistoryTick(fetchTradeDayArr []time.Time, sto
 			if _, ok := tickArrMap[s]; !ok {
 				stockNumArrInDay = append(stockNumArrInDay, s)
 			} else {
-				go uc.processTickArr(tickArrMap[s])
+				uc.processTickArr(tickArrMap[s])
 			}
 		}
-		dErr := uc.repo.DeleteHistoryTickByStockAndDate(context.Background(), stockNumArrInDay, d)
-		if dErr != nil {
-			log.Panic(dErr)
+
+		if len(stockNumArrInDay) != 0 {
+			dErr := uc.repo.DeleteHistoryTickByStockAndDate(context.Background(), stockNumArrInDay, d)
+			if dErr != nil {
+				log.Panic(dErr)
+			}
+			result[d] = stockNumArrInDay
 		}
-		result[d] = stockNumArrInDay
 	}
 	return result, nil
 }
@@ -280,7 +286,7 @@ func (uc *HistoryUseCase) fetchHistoryKbar(targetArr []*entity.Target) error {
 	<-wait
 	if len(result) != 0 {
 		for _, v := range result {
-			go uc.processKbarArr(v)
+			uc.processKbarArr(v)
 			if err := uc.repo.InsertHistoryKbarArr(context.Background(), v); err != nil {
 				return err
 			}
@@ -302,14 +308,17 @@ func (uc *HistoryUseCase) findExistHistoryKbar(fetchTradeDayArr []time.Time, sto
 			if _, ok := kbarArrMap[s]; !ok {
 				stockNumArrInDay = append(stockNumArrInDay, s)
 			} else {
-				go uc.processKbarArr(kbarArrMap[s])
+				uc.processKbarArr(kbarArrMap[s])
 			}
 		}
-		dErr := uc.repo.DeleteHistoryKbarByStockAndDate(context.Background(), stockNumArrInDay, d)
-		if dErr != nil {
-			log.Panic(dErr)
+
+		if len(stockNumArrInDay) != 0 {
+			dErr := uc.repo.DeleteHistoryKbarByStockAndDate(context.Background(), stockNumArrInDay, d)
+			if dErr != nil {
+				log.Panic(dErr)
+			}
+			result[d] = stockNumArrInDay
 		}
-		result[d] = stockNumArrInDay
 	}
 	return result, nil
 }
