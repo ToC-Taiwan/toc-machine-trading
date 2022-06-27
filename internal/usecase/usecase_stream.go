@@ -60,6 +60,10 @@ func (uc *StreamUseCase) ReceiveEvent(ctx context.Context) {
 			if err := uc.repo.InsertEvent(ctx, event); err != nil {
 				log.Error(err)
 			}
+
+			if event.EventCode != 16 {
+				log.Warnf("EventCode: %d, Event: %s, ResoCode: %d, Info: %s", event.EventCode, event.Event, event.Response, event.Info)
+			}
 		}
 	}()
 	uc.rabbit.EventConsumer(eventChan)
