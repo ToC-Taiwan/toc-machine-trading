@@ -142,9 +142,12 @@ func (uc *BasicUseCase) fillBasicInfo() error {
 		return err
 	}
 
+	openTime := 9 * time.Hour
 	basic := &entity.BasicInfo{
 		TradeDay:          tradeDay,
 		LastTradeDay:      getLastNTradeDayByDate(1, tradeDay)[0],
+		OpenTime:          tradeDay.Add(openTime).Add(time.Duration(cfg.HoldTimeFromOpen) * time.Minute),
+		EndTime:           tradeDay.Add(openTime).Add(time.Duration(cfg.TotalOpenTime) * time.Hour),
 		HistoryCloseRange: getLastNTradeDayByDate(cfg.HistoryClosePeriod, tradeDay),
 		HistoryKbarRange:  getLastNTradeDayByDate(cfg.HistoryKbarPeriod, tradeDay),
 		HistoryTickRange:  getLastNTradeDayByDate(cfg.HistoryTickPeriod, tradeDay),

@@ -25,6 +25,8 @@ type Stock struct {
 type BasicInfo struct {
 	TradeDay     time.Time
 	LastTradeDay time.Time
+	OpenTime     time.Time
+	EndTime      time.Time
 
 	HistoryCloseRange []time.Time
 	HistoryKbarRange  []time.Time

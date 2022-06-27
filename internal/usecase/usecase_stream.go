@@ -20,6 +20,8 @@ type StreamUseCase struct {
 	tradeSwitchCfg config.TradeSwitch
 	analyzeCfg     config.Analyze
 	basic          entity.BasicInfo
+
+	tradeInSwitch bool
 }
 
 // NewStream -.
@@ -43,6 +45,8 @@ func NewStream(r *repo.StreamRepo, t *rabbit.StreamRabbit) {
 			uc.sendAllOrders(context.Background())
 		}
 	}()
+
+	go uc.checkTradeSwitch()
 
 	bus.SubscribeTopic(topicStreamTargets, uc.ReceiveStreamData)
 	bus.SubscribeTopic(topicUpdateOrderStatus, uc.updateOrderSatusCache)
@@ -151,7 +155,7 @@ func (uc *StreamUseCase) tradeAgent(data *RealTimeData, finishChan chan struct{}
 			var timeout time.Duration
 			switch order.Action {
 			case entity.ActionBuy, entity.ActionSellFirst:
-				if time.Now().After(uc.basic.TradeDay.Add(time.Duration(uc.tradeSwitchCfg.TradeInEndTime) * time.Hour)) {
+				if !uc.tradeInSwitch {
 					continue
 				}
 
@@ -170,4 +174,16 @@ func (uc *StreamUseCase) tradeAgent(data *RealTimeData, finishChan chan struct{}
 
 	// close channel to start receive data from rabbitmq
 	close(finishChan)
+}
+
+func (uc *StreamUseCase) checkTradeSwitch() {
+	openTime := uc.basic.OpenTime
+
+	for range time.Tick(5 * time.Second) {
+		if uc.basic.TradeDay.After(openTime) && uc.basic.TradeDay.Before(openTime.Add(time.Duration(uc.tradeSwitchCfg.TradeInEndTime)*time.Hour)) {
+			uc.tradeInSwitch = true
+		} else {
+			uc.tradeInSwitch = false
+		}
+	}
 }
