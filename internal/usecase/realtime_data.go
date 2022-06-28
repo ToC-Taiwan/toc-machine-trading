@@ -66,7 +66,7 @@ func (o *RealTimeData) generateOrder(cfg config.Analyze) *entity.Order {
 	}
 	periodOutInRation := periodData.getOutInRatio()
 	// need to compare with all and period
-	if periodOutInRation < cfg.OutInRatio && periodOutInRation > cfg.InOutRatio {
+	if periodOutInRation < cfg.OutInRatio && 100-periodOutInRation > cfg.InOutRatio {
 		return nil
 	}
 
