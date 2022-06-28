@@ -44,7 +44,7 @@ func Run(cfg *config.Config) {
 
 	basicUseCase := usecase.NewBasic(repo.NewBasic(pg), grpcapi.NewBasic(sc))
 	orderUseCase := usecase.NewOrder(grpcapi.NewOrder(sc), repo.NewOrder(pg))
-	streamUseCase := usecase.NewStream(repo.NewStream(pg), rabbit.NewStream())
+	streamUseCase := usecase.NewStream(repo.NewStream(pg), grpcapi.NewStream(sc), rabbit.NewStream())
 	analyzeUseCase := usecase.NewAnalyze(repo.NewHistory(pg))
 	historyUseCase := usecase.NewHistory(repo.NewHistory(pg), grpcapi.NewHistory(sc))
 	targetUseCase := usecase.NewTarget(repo.NewTarget(pg), grpcapi.NewTarget(sc))

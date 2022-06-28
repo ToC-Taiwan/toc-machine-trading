@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"toc-machine-trading/internal/entity"
+	"toc-machine-trading/internal/usecase/grpcapi"
 	"toc-machine-trading/internal/usecase/rabbit"
 	"toc-machine-trading/internal/usecase/repo"
 	"toc-machine-trading/pkg/config"
@@ -12,8 +13,9 @@ import (
 
 // StreamUseCase -.
 type StreamUseCase struct {
-	repo   StreamRepo
-	rabbit StreamRabbit
+	repo    StreamRepo
+	rabbit  StreamRabbit
+	grpcapi StreamgRPCAPI
 
 	tradeSwitchCfg config.TradeSwitch
 	analyzeCfg     config.Analyze
@@ -23,10 +25,11 @@ type StreamUseCase struct {
 }
 
 // NewStream -.
-func NewStream(r *repo.StreamRepo, t *rabbit.StreamRabbit) *StreamUseCase {
+func NewStream(r *repo.StreamRepo, g *grpcapi.StreamgRPCAPI, t *rabbit.StreamRabbit) *StreamUseCase {
 	uc := &StreamUseCase{
-		repo:   r,
-		rabbit: t,
+		repo:    r,
+		rabbit:  t,
+		grpcapi: g,
 	}
 
 	cfg, err := config.GetConfig()
@@ -156,4 +159,29 @@ func (uc *StreamUseCase) checkTradeSwitch() {
 			uc.tradeInSwitch = false
 		}
 	}
+}
+
+// GetTSESnapshot -.
+func (uc *StreamUseCase) GetTSESnapshot(ctx context.Context) (*entity.StockSnapShot, error) {
+	body, err := uc.grpcapi.GetStockSnapshotTSE()
+	if err != nil {
+		return nil, err
+	}
+	return &entity.StockSnapShot{
+		SnapTime:        time.Unix(0, body.GetTs()).Add(-8 * time.Hour),
+		Open:            body.GetOpen(),
+		High:            body.GetHigh(),
+		Low:             body.GetLow(),
+		Close:           body.GetClose(),
+		TickType:        body.GetTickType(),
+		PriceChg:        body.GetChangePrice(),
+		PctChg:          body.GetChangeRate(),
+		ChgType:         body.GetChangeType(),
+		Volume:          body.GetVolume(),
+		VolumeSum:       body.GetTotalVolume(),
+		Amount:          body.GetAmount(),
+		AmountSum:       body.GetTotalAmount(),
+		YesterdayVolume: body.GetYesterdayVolume(),
+		VolumeRatio:     body.GetVolumeRatio(),
+	}, nil
 }

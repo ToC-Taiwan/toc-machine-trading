@@ -200,51 +200,6 @@ func (mr *MockBasicgRPCAPIMockRecorder) GetAllStockDetail() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllStockDetail", reflect.TypeOf((*MockBasicgRPCAPI)(nil).GetAllStockDetail))
 }
 
-// GetAllStockSnapshot mocks base method.
-func (m *MockBasicgRPCAPI) GetAllStockSnapshot() ([]*pb.StockSnapshotMessage, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetAllStockSnapshot")
-	ret0, _ := ret[0].([]*pb.StockSnapshotMessage)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetAllStockSnapshot indicates an expected call of GetAllStockSnapshot.
-func (mr *MockBasicgRPCAPIMockRecorder) GetAllStockSnapshot() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllStockSnapshot", reflect.TypeOf((*MockBasicgRPCAPI)(nil).GetAllStockSnapshot))
-}
-
-// GetStockSnapshotByNumArr mocks base method.
-func (m *MockBasicgRPCAPI) GetStockSnapshotByNumArr(stockNumArr []string) ([]*pb.StockSnapshotMessage, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetStockSnapshotByNumArr", stockNumArr)
-	ret0, _ := ret[0].([]*pb.StockSnapshotMessage)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetStockSnapshotByNumArr indicates an expected call of GetStockSnapshotByNumArr.
-func (mr *MockBasicgRPCAPIMockRecorder) GetStockSnapshotByNumArr(stockNumArr interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStockSnapshotByNumArr", reflect.TypeOf((*MockBasicgRPCAPI)(nil).GetStockSnapshotByNumArr), stockNumArr)
-}
-
-// GetStockSnapshotTSE mocks base method.
-func (m *MockBasicgRPCAPI) GetStockSnapshotTSE() ([]*pb.StockSnapshotMessage, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetStockSnapshotTSE")
-	ret0, _ := ret[0].([]*pb.StockSnapshotMessage)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetStockSnapshotTSE indicates an expected call of GetStockSnapshotTSE.
-func (mr *MockBasicgRPCAPIMockRecorder) GetStockSnapshotTSE() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStockSnapshotTSE", reflect.TypeOf((*MockBasicgRPCAPI)(nil).GetStockSnapshotTSE))
-}
-
 // Heartbeat mocks base method.
 func (m *MockBasicgRPCAPI) Heartbeat() error {
 	m.ctrl.T.Helper()
@@ -873,6 +828,21 @@ func (m *MockStream) EXPECT() *MockStreamMockRecorder {
 	return m.recorder
 }
 
+// GetTSESnapshot mocks base method.
+func (m *MockStream) GetTSESnapshot(ctx context.Context) (*entity.StockSnapShot, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetTSESnapshot", ctx)
+	ret0, _ := ret[0].(*entity.StockSnapShot)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetTSESnapshot indicates an expected call of GetTSESnapshot.
+func (mr *MockStreamMockRecorder) GetTSESnapshot(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTSESnapshot", reflect.TypeOf((*MockStream)(nil).GetTSESnapshot), ctx)
+}
+
 // ReceiveEvent mocks base method.
 func (m *MockStream) ReceiveEvent(ctx context.Context) {
 	m.ctrl.T.Helper()
@@ -944,6 +914,74 @@ func (m *MockStreamRepo) InsertEvent(ctx context.Context, t *entity.SinopacEvent
 func (mr *MockStreamRepoMockRecorder) InsertEvent(ctx, t interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertEvent", reflect.TypeOf((*MockStreamRepo)(nil).InsertEvent), ctx, t)
+}
+
+// MockStreamgRPCAPI is a mock of StreamgRPCAPI interface.
+type MockStreamgRPCAPI struct {
+	ctrl     *gomock.Controller
+	recorder *MockStreamgRPCAPIMockRecorder
+}
+
+// MockStreamgRPCAPIMockRecorder is the mock recorder for MockStreamgRPCAPI.
+type MockStreamgRPCAPIMockRecorder struct {
+	mock *MockStreamgRPCAPI
+}
+
+// NewMockStreamgRPCAPI creates a new mock instance.
+func NewMockStreamgRPCAPI(ctrl *gomock.Controller) *MockStreamgRPCAPI {
+	mock := &MockStreamgRPCAPI{ctrl: ctrl}
+	mock.recorder = &MockStreamgRPCAPIMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockStreamgRPCAPI) EXPECT() *MockStreamgRPCAPIMockRecorder {
+	return m.recorder
+}
+
+// GetAllStockSnapshot mocks base method.
+func (m *MockStreamgRPCAPI) GetAllStockSnapshot() ([]*pb.StockSnapshotMessage, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAllStockSnapshot")
+	ret0, _ := ret[0].([]*pb.StockSnapshotMessage)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAllStockSnapshot indicates an expected call of GetAllStockSnapshot.
+func (mr *MockStreamgRPCAPIMockRecorder) GetAllStockSnapshot() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllStockSnapshot", reflect.TypeOf((*MockStreamgRPCAPI)(nil).GetAllStockSnapshot))
+}
+
+// GetStockSnapshotByNumArr mocks base method.
+func (m *MockStreamgRPCAPI) GetStockSnapshotByNumArr(stockNumArr []string) ([]*pb.StockSnapshotMessage, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetStockSnapshotByNumArr", stockNumArr)
+	ret0, _ := ret[0].([]*pb.StockSnapshotMessage)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetStockSnapshotByNumArr indicates an expected call of GetStockSnapshotByNumArr.
+func (mr *MockStreamgRPCAPIMockRecorder) GetStockSnapshotByNumArr(stockNumArr interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStockSnapshotByNumArr", reflect.TypeOf((*MockStreamgRPCAPI)(nil).GetStockSnapshotByNumArr), stockNumArr)
+}
+
+// GetStockSnapshotTSE mocks base method.
+func (m *MockStreamgRPCAPI) GetStockSnapshotTSE() (*pb.StockSnapshotMessage, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetStockSnapshotTSE")
+	ret0, _ := ret[0].(*pb.StockSnapshotMessage)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetStockSnapshotTSE indicates an expected call of GetStockSnapshotTSE.
+func (mr *MockStreamgRPCAPIMockRecorder) GetStockSnapshotTSE() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStockSnapshotTSE", reflect.TypeOf((*MockStreamgRPCAPI)(nil).GetStockSnapshotTSE))
 }
 
 // MockStreamRabbit is a mock of StreamRabbit interface.

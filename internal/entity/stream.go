@@ -80,3 +80,22 @@ type RealTimeTick struct {
 	Suspend         int64   `json:"suspend"`
 	Simtrade        int64   `json:"simtrade"`
 }
+
+// StockSnapShot -.
+type StockSnapShot struct {
+	SnapTime        time.Time `json:"snap_time"`
+	Open            float64   `json:"open"`
+	High            float64   `json:"high"`
+	Low             float64   `json:"low"`
+	Close           float64   `json:"close"`
+	TickType        string    `json:"tick_type"`
+	PriceChg        float64   `json:"price_chg"`
+	PctChg          float64   `json:"pct_chg"`
+	ChgType         string    `json:"chg_type"`
+	Volume          int64     `json:"volume"`
+	VolumeSum       int64     `json:"volume_sum"`
+	Amount          int64     `json:"amount"`
+	AmountSum       int64     `json:"amount_sum"`
+	YesterdayVolume float64   `json:"yesterday_volume"`
+	VolumeRatio     float64   `json:"volume_ratio"`
+}

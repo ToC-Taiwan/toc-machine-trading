@@ -7,15 +7,13 @@ import (
 	"toc-machine-trading/pkg/cache"
 )
 
-var cc = New()
-
 // GlobalCache -.
 type GlobalCache struct {
 	*cache.Cache
 }
 
-// New -.
-func New() *GlobalCache {
+// NewCache -.
+func NewCache() *GlobalCache {
 	return &GlobalCache{
 		Cache: cache.New(),
 	}

@@ -14,6 +14,7 @@ import (
 var (
 	log = logger.Get()
 	bus = eventbus.New()
+	cc  = NewCache()
 )
 
 //go:generate mockgen -source=interfaces.go -destination=./mocks_test.go -package=usecase_test
@@ -38,9 +39,6 @@ type (
 		Heartbeat() error
 		Terminate() error
 		GetAllStockDetail() ([]*pb.StockDetailMessage, error)
-		GetAllStockSnapshot() ([]*pb.StockSnapshotMessage, error)
-		GetStockSnapshotByNumArr(stockNumArr []string) ([]*pb.StockSnapshotMessage, error)
-		GetStockSnapshotTSE() ([]*pb.StockSnapshotMessage, error)
 	}
 )
 
@@ -108,11 +106,19 @@ type (
 		ReceiveEvent(ctx context.Context)
 		ReceiveOrderStatus(ctx context.Context)
 		ReceiveStreamData(ctx context.Context, targetArr []*entity.Target)
+		GetTSESnapshot(ctx context.Context) (*entity.StockSnapShot, error)
 	}
 
 	// StreamRepo -.
 	StreamRepo interface {
 		InsertEvent(ctx context.Context, t *entity.SinopacEvent) error
+	}
+
+	// StreamgRPCAPI -.
+	StreamgRPCAPI interface {
+		GetAllStockSnapshot() ([]*pb.StockSnapshotMessage, error)
+		GetStockSnapshotByNumArr(stockNumArr []string) ([]*pb.StockSnapshotMessage, error)
+		GetStockSnapshotTSE() (*pb.StockSnapshotMessage, error)
 	}
 
 	// StreamRabbit -.

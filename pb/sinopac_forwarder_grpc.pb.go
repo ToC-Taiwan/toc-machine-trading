@@ -184,7 +184,7 @@ type SinopacForwarderClient interface {
 	GetAllStockDetail(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*StockDetailResponse, error)
 	GetAllStockSnapshot(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*StockSnapshotResponse, error)
 	GetStockSnapshotByNumArr(ctx context.Context, in *StockNumArr, opts ...grpc.CallOption) (*StockSnapshotResponse, error)
-	GetStockSnapshotTSE(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*StockSnapshotResponse, error)
+	GetStockSnapshotTSE(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*StockSnapshotMessage, error)
 	// History
 	GetStockHistoryTick(ctx context.Context, in *StockNumArrWithDate, opts ...grpc.CallOption) (*StockHistoryTickResponse, error)
 	GetStockHistoryKbar(ctx context.Context, in *StockNumArrWithDate, opts ...grpc.CallOption) (*StockHistoryKbarResponse, error)
@@ -238,8 +238,8 @@ func (c *sinopacForwarderClient) GetStockSnapshotByNumArr(ctx context.Context, i
 	return out, nil
 }
 
-func (c *sinopacForwarderClient) GetStockSnapshotTSE(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*StockSnapshotResponse, error) {
-	out := new(StockSnapshotResponse)
+func (c *sinopacForwarderClient) GetStockSnapshotTSE(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*StockSnapshotMessage, error) {
+	out := new(StockSnapshotMessage)
 	err := c.cc.Invoke(ctx, "/sinopac_forwarder.SinopacForwarder/GetStockSnapshotTSE", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -381,7 +381,7 @@ type SinopacForwarderServer interface {
 	GetAllStockDetail(context.Context, *emptypb.Empty) (*StockDetailResponse, error)
 	GetAllStockSnapshot(context.Context, *emptypb.Empty) (*StockSnapshotResponse, error)
 	GetStockSnapshotByNumArr(context.Context, *StockNumArr) (*StockSnapshotResponse, error)
-	GetStockSnapshotTSE(context.Context, *emptypb.Empty) (*StockSnapshotResponse, error)
+	GetStockSnapshotTSE(context.Context, *emptypb.Empty) (*StockSnapshotMessage, error)
 	// History
 	GetStockHistoryTick(context.Context, *StockNumArrWithDate) (*StockHistoryTickResponse, error)
 	GetStockHistoryKbar(context.Context, *StockNumArrWithDate) (*StockHistoryKbarResponse, error)
@@ -414,7 +414,7 @@ func (UnimplementedSinopacForwarderServer) GetAllStockSnapshot(context.Context, 
 func (UnimplementedSinopacForwarderServer) GetStockSnapshotByNumArr(context.Context, *StockNumArr) (*StockSnapshotResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetStockSnapshotByNumArr not implemented")
 }
-func (UnimplementedSinopacForwarderServer) GetStockSnapshotTSE(context.Context, *emptypb.Empty) (*StockSnapshotResponse, error) {
+func (UnimplementedSinopacForwarderServer) GetStockSnapshotTSE(context.Context, *emptypb.Empty) (*StockSnapshotMessage, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetStockSnapshotTSE not implemented")
 }
 func (UnimplementedSinopacForwarderServer) GetStockHistoryTick(context.Context, *StockNumArrWithDate) (*StockHistoryTickResponse, error) {

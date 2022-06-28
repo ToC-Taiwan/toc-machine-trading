@@ -266,7 +266,20 @@ const docTemplate = `{
                 ],
                 "summary": "getTSESnapshot",
                 "operationId": "getTSESnapshot",
-                "responses": {}
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/entity.StockSnapShot"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/v1.response"
+                        }
+                    }
+                }
             }
         },
         "/targets": {
@@ -382,6 +395,56 @@ const docTemplate = `{
                 },
                 "number": {
                     "type": "string"
+                }
+            }
+        },
+        "entity.StockSnapShot": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "integer"
+                },
+                "amount_sum": {
+                    "type": "integer"
+                },
+                "chg_type": {
+                    "type": "string"
+                },
+                "close": {
+                    "type": "number"
+                },
+                "high": {
+                    "type": "number"
+                },
+                "low": {
+                    "type": "number"
+                },
+                "open": {
+                    "type": "number"
+                },
+                "pct_chg": {
+                    "type": "number"
+                },
+                "price_chg": {
+                    "type": "number"
+                },
+                "snap_time": {
+                    "type": "string"
+                },
+                "tick_type": {
+                    "type": "string"
+                },
+                "volume": {
+                    "type": "integer"
+                },
+                "volume_ratio": {
+                    "type": "number"
+                },
+                "volume_sum": {
+                    "type": "integer"
+                },
+                "yesterday_volume": {
+                    "type": "number"
                 }
             }
         },

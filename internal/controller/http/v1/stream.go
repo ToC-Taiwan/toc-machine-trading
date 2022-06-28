@@ -27,7 +27,15 @@ func newStreamRoutes(handler *gin.RouterGroup, t usecase.Stream) {
 // @Tags  	    stream
 // @Accept      json
 // @Produce     json
+// @Success     200 {object} entity.StockSnapShot
+// @Failure     500 {object} response
 // @Router      /stream/tse/snapshot [get]
 func (r *streamRoutes) getTSESnapshot(c *gin.Context) {
-	c.JSON(http.StatusOK, nil)
+	snapshot, err := r.t.GetTSESnapshot(c.Request.Context())
+	if err != nil {
+		log.Error(err)
+		errorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	c.JSON(http.StatusOK, snapshot)
 }
