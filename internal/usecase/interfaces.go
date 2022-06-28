@@ -137,7 +137,7 @@ type (
 		GetAllTradeBalance(ctx context.Context) ([]*entity.TradeBalance, error)
 		CalculateBuyCost(price float64, quantity int64) int64
 		CalculateSellCost(price float64, quantity int64) int64
-		CalculateTradeFee(price float64, quantity int64) int64
+		CalculateTradeDiscount(price float64, quantity int64) int64
 	}
 
 	// OrderRepo -.
@@ -166,6 +166,6 @@ type (
 type (
 	// Analyze -.
 	Analyze interface {
-		GetBelowQuaterMap(ctx context.Context) map[time.Time][]entity.Stock
+		GetRebornMap(ctx context.Context) map[time.Time][]entity.Stock
 	}
 )

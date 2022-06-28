@@ -146,11 +146,11 @@ func (uc *BasicUseCase) fillBasicInfo() error {
 	basic := &entity.BasicInfo{
 		TradeDay:          tradeDay,
 		LastTradeDay:      getLastNTradeDayByDate(1, tradeDay)[0],
-		OpenTime:          tradeDay.Add(openTime).Add(time.Duration(cfg.HoldTimeFromOpen) * time.Minute),
-		EndTime:           tradeDay.Add(openTime).Add(time.Duration(cfg.TotalOpenTime) * time.Hour),
-		HistoryCloseRange: getLastNTradeDayByDate(cfg.HistoryClosePeriod, tradeDay),
-		HistoryKbarRange:  getLastNTradeDayByDate(cfg.HistoryKbarPeriod, tradeDay),
-		HistoryTickRange:  getLastNTradeDayByDate(cfg.HistoryTickPeriod, tradeDay),
+		OpenTime:          tradeDay.Add(openTime).Add(time.Duration(cfg.TradeSwitch.HoldTimeFromOpen) * time.Minute),
+		EndTime:           tradeDay.Add(openTime).Add(time.Duration(cfg.TradeSwitch.TotalOpenTime) * time.Hour),
+		HistoryCloseRange: getLastNTradeDayByDate(cfg.History.HistoryClosePeriod, tradeDay),
+		HistoryKbarRange:  getLastNTradeDayByDate(cfg.History.HistoryKbarPeriod, tradeDay),
+		HistoryTickRange:  getLastNTradeDayByDate(cfg.History.HistoryTickPeriod, tradeDay),
 	}
 	cc.SetBasicInfo(basic)
 	return nil

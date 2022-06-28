@@ -1,101 +1,152 @@
 definitions:
+  config.Analyze:
+    properties:
+      close_change_ratio_high:
+        type: number
+      close_change_ratio_low:
+        type: number
+      in_out_ratio:
+        type: number
+      ma_period:
+        type: integer
+      max_loss:
+        type: number
+      open_close_change_ratio_high:
+        type: number
+      open_close_change_ratio_low:
+        type: number
+      out_in_ratio:
+        type: number
+      rsi_high:
+        type: number
+      rsi_low:
+        type: number
+      rsi_min_count:
+        type: integer
+      tick_analyze_max_period:
+        type: number
+      tick_analyze_min_period:
+        type: number
+      volume_pr_high:
+        type: number
+      volume_pr_low:
+        type: number
+    type: object
   config.Config:
+    properties:
+      analyze:
+        $ref: '#/definitions/config.Analyze'
+      deployment:
+        type: string
+      history:
+        $ref: '#/definitions/config.History'
+      http:
+        $ref: '#/definitions/config.HTTP'
+      postgres:
+        $ref: '#/definitions/config.Postgres'
+      quota:
+        $ref: '#/definitions/config.Quota'
+      rabbitmq:
+        $ref: '#/definitions/config.RabbitMQ'
+      sinopac:
+        $ref: '#/definitions/config.Sinopac'
+      target_cond:
+        $ref: '#/definitions/config.TargetCond'
+      trade_switch:
+        $ref: '#/definitions/config.TradeSwitch'
+    type: object
+  config.HTTP:
+    properties:
+      port:
+        type: string
+    type: object
+  config.History:
+    properties:
+      history_close_period:
+        type: integer
+      history_kbar_period:
+        type: integer
+      history_tick_period:
+        type: integer
+    type: object
+  config.Postgres:
+    properties:
+      db_name:
+        type: string
+      pool_max:
+        type: integer
+      url:
+        type: string
+    type: object
+  config.Quota:
+    properties:
+      fee_discount:
+        type: number
+      trade_fee_ratio:
+        type: number
+      trade_quota:
+        type: integer
+      trade_tax_ratio:
+        type: number
+    type: object
+  config.RabbitMQ:
     properties:
       attempts:
         type: integer
-      buy:
-        type: boolean
-      buyLater:
-        type: boolean
-      closeChangeRatioHigh:
-        type: number
-      closeChangeRatioLow:
-        type: number
-      dbname:
-        type: string
-      deployment:
-        type: string
       exchange:
         type: string
-      feeDiscount:
-        type: number
-      forwardMax:
-        type: integer
-      historyClosePeriod:
-        type: integer
-      historyKbarPeriod:
-        type: integer
-      historyTickPeriod:
-        type: integer
-      holdTimeFromOpen:
-        type: number
-      inOutRatio:
-        type: number
-      limitPriceHigh:
-        type: number
-      limitPriceLow:
-        type: number
-      limitVolume:
-        type: integer
-      maperiod:
-        type: integer
-      maxLoss:
-        type: number
-      meanTimeForward:
-        type: integer
-      meanTimeReverse:
-        type: integer
-      openCloseChangeRatioHigh:
-        type: number
-      openCloseChangeRatioLow:
-        type: number
-      outInRatio:
-        type: number
-      poolMax:
-        type: integer
-      port:
+      url:
         type: string
-      reverseMax:
+      wait_time:
         type: integer
-      rsihigh:
+    type: object
+  config.Sinopac:
+    properties:
+      pool_max:
+        type: integer
+      url:
+        type: string
+    type: object
+  config.TargetCond:
+    properties:
+      limit_price_high:
         type: number
-      rsilow:
+      limit_price_low:
         type: number
-      rsiminCount:
+      limit_volume:
+        type: integer
+    type: object
+  config.TradeSwitch:
+    properties:
+      buy:
+        type: boolean
+      buy_later:
+        type: boolean
+      forward_max:
+        type: integer
+      hold_time_from_open:
+        type: number
+      mean_time_forward:
+        type: integer
+      mean_time_reverse:
+        type: integer
+      reverse_max:
         type: integer
       sell:
         type: boolean
-      sellFirst:
+      sell_first:
         type: boolean
       simulation:
         type: boolean
-      tickAnalyzeMaxPeriod:
+      total_open_time:
         type: number
-      tickAnalyzeMinPeriod:
+      trade_in_end_time:
         type: number
-      totalOpenTime:
-        type: number
-      tradeFeeRatio:
-        type: number
-      tradeInEndTime:
-        type: number
-      tradeInWaitTime:
+      trade_in_wait_time:
         type: integer
-      tradeOutEndTime:
+      trade_out_end_time:
         type: number
-      tradeOutWaitTime:
-        type: integer
-      tradeQuota:
-        type: integer
-      tradeTaxRatio:
-        type: number
-      url:
-        type: string
-      volumePRHigh:
-        type: number
-      volumePRLow:
-        type: number
-      waitTime:
+      trade_out_wait_time:
         type: integer
     type: object
   entity.HistoryKbar:
@@ -226,7 +277,12 @@ definitions:
       trade_day:
         type: string
     type: object
-  v1.BelowQuaterMA:
+  v1.dayTradeResult:
+    properties:
+      balance:
+        type: integer
+    type: object
+  v1.reborn:
     properties:
       date:
         type: string
@@ -235,15 +291,9 @@ definitions:
           $ref: '#/definitions/entity.Stock'
         type: array
     type: object
-  v1.dayTradeResult:
-    properties:
-      balance:
-        type: integer
-    type: object
   v1.response:
     properties:
       error:
-        example: message
         type: string
     type: object
   v1.stockDetailResponse:
@@ -256,15 +306,18 @@ definitions:
 info:
   contact: {}
   description: Auto Trade
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
   title: TOC MACHINE TRADING
   version: 0.0.1
 paths:
-  /analyze/below-quater:
+  /analyze/reborn:
     get:
       consumes:
       - application/json
-      description: getQuaterTargets
-      operationId: getQuaterTargets
+      description: getRebornTargets
+      operationId: getRebornTargets
       produces:
       - application/json
       responses:
@@ -272,9 +325,9 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/v1.BelowQuaterMA'
+              $ref: '#/definitions/v1.reborn'
             type: array
-      summary: getQuaterTargets
+      summary: getRebornTargets
       tags:
       - analyze
   /basic/config:
@@ -297,7 +350,7 @@ paths:
       summary: getAllConfig
       tags:
       - system
-  /basic/stock/repo:
+  /basic/stock:
     get:
       consumes:
       - application/json
@@ -355,7 +408,7 @@ paths:
       summary: terminateSinopac
       tags:
       - system
-  /history/day_kbar/{stock}/{start_date}/{interval}:
+  /history/day-kbar/{stock}/{start_date}/{interval}:
     get:
       consumes:
       - application/json
@@ -441,8 +494,8 @@ paths:
     get:
       consumes:
       - application/json
-      description: calculateDayTradeBalance
-      operationId: calculateDayTradeBalance
+      description: calculateForwardDayTradeBalance
+      operationId: calculateForwardDayTradeBalance
       parameters:
       - description: buy_price
         in: header
@@ -475,7 +528,48 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/v1.response'
-      summary: calculateDayTradeBalance
+      summary: calculateForwardDayTradeBalance
+      tags:
+      - order
+  /order/day-trade/reverse:
+    get:
+      consumes:
+      - application/json
+      description: calculateReverseDayTradeBalance
+      operationId: calculateReverseDayTradeBalance
+      parameters:
+      - description: sell_first_price
+        in: header
+        name: sell_first_price
+        required: true
+        type: string
+      - description: sell_first_quantity
+        in: header
+        name: sell_first_quantity
+        required: true
+        type: string
+      - description: buy_later_price
+        in: header
+        name: buy_later_price
+        required: true
+        type: string
+      - description: buy_later_quantity
+        in: header
+        name: buy_later_quantity
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.dayTradeResult'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+      summary: calculateReverseDayTradeBalance
       tags:
       - order
   /stream/tse/snapshot:
@@ -515,5 +609,5 @@ paths:
             type: array
       summary: getTargets
       tags:
-      - target
+      - targets
 swagger: "2.0"

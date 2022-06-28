@@ -21,27 +21,26 @@ func newAnalyzeRoutes(handler *gin.RouterGroup, t usecase.Analyze) {
 
 	h := handler.Group("/analyze")
 	{
-		h.GET("/below-quater", r.getQuaterTargets)
+		h.GET("/reborn", r.getRebornTargets)
 	}
 }
 
-// BelowQuaterMA BelowQuaterMA
-type BelowQuaterMA struct {
+type reborn struct {
 	Date   string         `json:"date"`
 	Stocks []entity.Stock `json:"stocks"`
 }
 
-// @Summary     getQuaterTargets
-// @Description getQuaterTargets
-// @ID          getQuaterTargets
+// @Summary     getRebornTargets
+// @Description getRebornTargets
+// @ID          getRebornTargets
 // @Tags  	    analyze
 // @Accept      json
 // @Produce     json
-// @Success     200 {object} []BelowQuaterMA{}
-// @Router      /analyze/below-quater [get]
-func (r *analyzeRoutes) getQuaterTargets(c *gin.Context) {
-	mapData := r.t.GetBelowQuaterMap(c.Request.Context())
-	result := []BelowQuaterMA{}
+// @Success     200 {object} []reborn{}
+// @Router      /analyze/reborn [get]
+func (r *analyzeRoutes) getRebornTargets(c *gin.Context) {
+	mapData := r.t.GetRebornMap(c.Request.Context())
+	result := []reborn{}
 	dateArr := []time.Time{}
 	for date := range mapData {
 		dateArr = append(dateArr, date)
@@ -52,7 +51,7 @@ func (r *analyzeRoutes) getQuaterTargets(c *gin.Context) {
 	})
 
 	for _, date := range dateArr {
-		result = append(result, BelowQuaterMA{
+		result = append(result, reborn{
 			Date:   date.Format(global.ShortTimeLayout),
 			Stocks: mapData[date],
 		})

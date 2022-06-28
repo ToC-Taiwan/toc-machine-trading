@@ -19,15 +19,38 @@ func newBasicRoutes(handler *gin.RouterGroup, t usecase.Basic) {
 
 	h := handler.Group("/basic")
 	{
+		h.GET("/stock", r.getAllRepoStock)
 		h.GET("/stock/sinopac-to-repo", r.getAllSinopacStockAndUpdateRepo)
-		h.GET("/stock/repo", r.getAllRepoStock)
-		h.PUT("/system/terminate", r.terminateSinopac)
 		h.GET("/config", r.getAllConfig)
+
+		h.PUT("/system/terminate", r.terminateSinopac)
 	}
 }
 
 type stockDetailResponse struct {
 	StockDetail []*entity.Stock `json:"stock_detail"`
+}
+
+// @Summary     getAllRepoStock
+// @Description getAllRepoStock
+// @ID          getAllRepoStock
+// @Tags  	    basic
+// @Accept      json
+// @Produce     json
+// @Success     200 {object} stockDetailResponse
+// @Failure     500 {object} response
+// @Router      /basic/stock [get]
+func (r *basicRoutes) getAllRepoStock(c *gin.Context) {
+	stockDetail, err := r.t.GetAllRepoStock(c.Request.Context())
+	if err != nil {
+		log.Error(err)
+		errorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, stockDetailResponse{
+		StockDetail: stockDetail,
+	})
 }
 
 // @Summary     getAllSinopacStockAndUpdateRepo
@@ -52,26 +75,24 @@ func (r *basicRoutes) getAllSinopacStockAndUpdateRepo(c *gin.Context) {
 	})
 }
 
-// @Summary     getAllRepoStock
-// @Description getAllRepoStock
-// @ID          getAllRepoStock
-// @Tags  	    basic
+// @Summary     getAllConfig
+// @Description getAllConfig
+// @ID          getAllConfig
+// @Tags  	    system
 // @Accept      json
 // @Produce     json
-// @Success     200 {object} stockDetailResponse
+// @Success     200 {object} config.Config
 // @Failure     500 {object} response
-// @Router      /basic/stock/repo [get]
-func (r *basicRoutes) getAllRepoStock(c *gin.Context) {
-	stockDetail, err := r.t.GetAllRepoStock(c.Request.Context())
+// @Router      /basic/config [get]
+func (r *basicRoutes) getAllConfig(c *gin.Context) {
+	cfg, err := config.GetConfig()
 	if err != nil {
 		log.Error(err)
 		errorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, stockDetailResponse{
-		StockDetail: stockDetail,
-	})
+	c.JSON(http.StatusOK, cfg)
 }
 
 // @Summary     terminateSinopac
@@ -92,24 +113,4 @@ func (r *basicRoutes) terminateSinopac(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, nil)
-}
-
-// @Summary     getAllConfig
-// @Description getAllConfig
-// @ID          getAllConfig
-// @Tags  	    system
-// @Accept      json
-// @Produce     json
-// @Success     200 {object} config.Config
-// @Failure     500 {object} response
-// @Router      /basic/config [get]
-func (r *basicRoutes) getAllConfig(c *gin.Context) {
-	cfg, err := config.GetConfig()
-	if err != nil {
-		log.Error(err)
-		errorResponse(c, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	c.JSON(http.StatusOK, cfg)
 }

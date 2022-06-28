@@ -11,14 +11,18 @@ const docTemplate = `{
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
         "contact": {},
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        },
         "version": "{{.Version}}"
     },
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/analyze/below-quater": {
+        "/analyze/reborn": {
             "get": {
-                "description": "getQuaterTargets",
+                "description": "getRebornTargets",
                 "consumes": [
                     "application/json"
                 ],
@@ -28,15 +32,15 @@ const docTemplate = `{
                 "tags": [
                     "analyze"
                 ],
-                "summary": "getQuaterTargets",
-                "operationId": "getQuaterTargets",
+                "summary": "getRebornTargets",
+                "operationId": "getRebornTargets",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/v1.BelowQuaterMA"
+                                "$ref": "#/definitions/v1.reborn"
                             }
                         }
                     }
@@ -73,7 +77,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/basic/stock/repo": {
+        "/basic/stock": {
             "get": {
                 "description": "getAllRepoStock",
                 "consumes": [
@@ -160,7 +164,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/history/day_kbar/{stock}/{start_date}/{interval}": {
+        "/history/day-kbar/{stock}/{start_date}/{interval}": {
             "get": {
                 "description": "getKbarData",
                 "consumes": [
@@ -284,7 +288,7 @@ const docTemplate = `{
         },
         "/order/day-trade/forward": {
             "get": {
-                "description": "calculateDayTradeBalance",
+                "description": "calculateForwardDayTradeBalance",
                 "consumes": [
                     "application/json"
                 ],
@@ -294,8 +298,8 @@ const docTemplate = `{
                 "tags": [
                     "order"
                 ],
-                "summary": "calculateDayTradeBalance",
-                "operationId": "calculateDayTradeBalance",
+                "summary": "calculateForwardDayTradeBalance",
+                "operationId": "calculateForwardDayTradeBalance",
                 "parameters": [
                     {
                         "type": "string",
@@ -322,6 +326,66 @@ const docTemplate = `{
                         "type": "string",
                         "description": "sell_quantity",
                         "name": "sell_quantity",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v1.dayTradeResult"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/v1.response"
+                        }
+                    }
+                }
+            }
+        },
+        "/order/day-trade/reverse": {
+            "get": {
+                "description": "calculateReverseDayTradeBalance",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "order"
+                ],
+                "summary": "calculateReverseDayTradeBalance",
+                "operationId": "calculateReverseDayTradeBalance",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "sell_first_price",
+                        "name": "sell_first_price",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "sell_first_quantity",
+                        "name": "sell_first_quantity",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "buy_later_price",
+                        "name": "buy_later_price",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "buy_later_quantity",
+                        "name": "buy_later_quantity",
                         "in": "header",
                         "required": true
                     }
@@ -382,7 +446,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "target"
+                    "targets"
                 ],
                 "summary": "getTargets",
                 "operationId": "getTargets",
@@ -401,151 +465,232 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "config.Analyze": {
+            "type": "object",
+            "properties": {
+                "close_change_ratio_high": {
+                    "type": "number"
+                },
+                "close_change_ratio_low": {
+                    "type": "number"
+                },
+                "in_out_ratio": {
+                    "type": "number"
+                },
+                "ma_period": {
+                    "type": "integer"
+                },
+                "max_loss": {
+                    "type": "number"
+                },
+                "open_close_change_ratio_high": {
+                    "type": "number"
+                },
+                "open_close_change_ratio_low": {
+                    "type": "number"
+                },
+                "out_in_ratio": {
+                    "type": "number"
+                },
+                "rsi_high": {
+                    "type": "number"
+                },
+                "rsi_low": {
+                    "type": "number"
+                },
+                "rsi_min_count": {
+                    "type": "integer"
+                },
+                "tick_analyze_max_period": {
+                    "type": "number"
+                },
+                "tick_analyze_min_period": {
+                    "type": "number"
+                },
+                "volume_pr_high": {
+                    "type": "number"
+                },
+                "volume_pr_low": {
+                    "type": "number"
+                }
+            }
+        },
         "config.Config": {
+            "type": "object",
+            "properties": {
+                "analyze": {
+                    "$ref": "#/definitions/config.Analyze"
+                },
+                "deployment": {
+                    "type": "string"
+                },
+                "history": {
+                    "$ref": "#/definitions/config.History"
+                },
+                "http": {
+                    "$ref": "#/definitions/config.HTTP"
+                },
+                "postgres": {
+                    "$ref": "#/definitions/config.Postgres"
+                },
+                "quota": {
+                    "$ref": "#/definitions/config.Quota"
+                },
+                "rabbitmq": {
+                    "$ref": "#/definitions/config.RabbitMQ"
+                },
+                "sinopac": {
+                    "$ref": "#/definitions/config.Sinopac"
+                },
+                "target_cond": {
+                    "$ref": "#/definitions/config.TargetCond"
+                },
+                "trade_switch": {
+                    "$ref": "#/definitions/config.TradeSwitch"
+                }
+            }
+        },
+        "config.HTTP": {
+            "type": "object",
+            "properties": {
+                "port": {
+                    "type": "string"
+                }
+            }
+        },
+        "config.History": {
+            "type": "object",
+            "properties": {
+                "history_close_period": {
+                    "type": "integer"
+                },
+                "history_kbar_period": {
+                    "type": "integer"
+                },
+                "history_tick_period": {
+                    "type": "integer"
+                }
+            }
+        },
+        "config.Postgres": {
+            "type": "object",
+            "properties": {
+                "db_name": {
+                    "type": "string"
+                },
+                "pool_max": {
+                    "type": "integer"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
+        "config.Quota": {
+            "type": "object",
+            "properties": {
+                "fee_discount": {
+                    "type": "number"
+                },
+                "trade_fee_ratio": {
+                    "type": "number"
+                },
+                "trade_quota": {
+                    "type": "integer"
+                },
+                "trade_tax_ratio": {
+                    "type": "number"
+                }
+            }
+        },
+        "config.RabbitMQ": {
             "type": "object",
             "properties": {
                 "attempts": {
                     "type": "integer"
                 },
-                "buy": {
-                    "type": "boolean"
-                },
-                "buyLater": {
-                    "type": "boolean"
-                },
-                "closeChangeRatioHigh": {
-                    "type": "number"
-                },
-                "closeChangeRatioLow": {
-                    "type": "number"
-                },
-                "dbname": {
-                    "type": "string"
-                },
-                "deployment": {
-                    "type": "string"
-                },
                 "exchange": {
                     "type": "string"
                 },
-                "feeDiscount": {
-                    "type": "number"
-                },
-                "forwardMax": {
-                    "type": "integer"
-                },
-                "historyClosePeriod": {
-                    "type": "integer"
-                },
-                "historyKbarPeriod": {
-                    "type": "integer"
-                },
-                "historyTickPeriod": {
-                    "type": "integer"
-                },
-                "holdTimeFromOpen": {
-                    "type": "number"
-                },
-                "inOutRatio": {
-                    "type": "number"
-                },
-                "limitPriceHigh": {
-                    "type": "number"
-                },
-                "limitPriceLow": {
-                    "type": "number"
-                },
-                "limitVolume": {
-                    "type": "integer"
-                },
-                "maperiod": {
-                    "type": "integer"
-                },
-                "maxLoss": {
-                    "type": "number"
-                },
-                "meanTimeForward": {
-                    "type": "integer"
-                },
-                "meanTimeReverse": {
-                    "type": "integer"
-                },
-                "openCloseChangeRatioHigh": {
-                    "type": "number"
-                },
-                "openCloseChangeRatioLow": {
-                    "type": "number"
-                },
-                "outInRatio": {
-                    "type": "number"
-                },
-                "poolMax": {
-                    "type": "integer"
-                },
-                "port": {
+                "url": {
                     "type": "string"
                 },
-                "reverseMax": {
+                "wait_time": {
+                    "type": "integer"
+                }
+            }
+        },
+        "config.Sinopac": {
+            "type": "object",
+            "properties": {
+                "pool_max": {
                     "type": "integer"
                 },
-                "rsihigh": {
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
+        "config.TargetCond": {
+            "type": "object",
+            "properties": {
+                "limit_price_high": {
                     "type": "number"
                 },
-                "rsilow": {
+                "limit_price_low": {
                     "type": "number"
                 },
-                "rsiminCount": {
+                "limit_volume": {
+                    "type": "integer"
+                }
+            }
+        },
+        "config.TradeSwitch": {
+            "type": "object",
+            "properties": {
+                "buy": {
+                    "type": "boolean"
+                },
+                "buy_later": {
+                    "type": "boolean"
+                },
+                "forward_max": {
+                    "type": "integer"
+                },
+                "hold_time_from_open": {
+                    "type": "number"
+                },
+                "mean_time_forward": {
+                    "type": "integer"
+                },
+                "mean_time_reverse": {
+                    "type": "integer"
+                },
+                "reverse_max": {
                     "type": "integer"
                 },
                 "sell": {
                     "type": "boolean"
                 },
-                "sellFirst": {
+                "sell_first": {
                     "type": "boolean"
                 },
                 "simulation": {
                     "type": "boolean"
                 },
-                "tickAnalyzeMaxPeriod": {
+                "total_open_time": {
                     "type": "number"
                 },
-                "tickAnalyzeMinPeriod": {
+                "trade_in_end_time": {
                     "type": "number"
                 },
-                "totalOpenTime": {
-                    "type": "number"
-                },
-                "tradeFeeRatio": {
-                    "type": "number"
-                },
-                "tradeInEndTime": {
-                    "type": "number"
-                },
-                "tradeInWaitTime": {
+                "trade_in_wait_time": {
                     "type": "integer"
                 },
-                "tradeOutEndTime": {
+                "trade_out_end_time": {
                     "type": "number"
                 },
-                "tradeOutWaitTime": {
-                    "type": "integer"
-                },
-                "tradeQuota": {
-                    "type": "integer"
-                },
-                "tradeTaxRatio": {
-                    "type": "number"
-                },
-                "url": {
-                    "type": "string"
-                },
-                "volumePRHigh": {
-                    "type": "number"
-                },
-                "volumePRLow": {
-                    "type": "number"
-                },
-                "waitTime": {
+                "trade_out_wait_time": {
                     "type": "integer"
                 }
             }
@@ -745,7 +890,15 @@ const docTemplate = `{
                 }
             }
         },
-        "v1.BelowQuaterMA": {
+        "v1.dayTradeResult": {
+            "type": "object",
+            "properties": {
+                "balance": {
+                    "type": "integer"
+                }
+            }
+        },
+        "v1.reborn": {
             "type": "object",
             "properties": {
                 "date": {
@@ -759,20 +912,11 @@ const docTemplate = `{
                 }
             }
         },
-        "v1.dayTradeResult": {
-            "type": "object",
-            "properties": {
-                "balance": {
-                    "type": "integer"
-                }
-            }
-        },
         "v1.response": {
             "type": "object",
             "properties": {
                 "error": {
-                    "type": "string",
-                    "example": "message"
+                    "type": "string"
                 }
             }
         },

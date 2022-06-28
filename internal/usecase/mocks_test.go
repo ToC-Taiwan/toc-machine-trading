@@ -1106,18 +1106,18 @@ func (mr *MockOrderMockRecorder) CalculateSellCost(price, quantity interface{}) 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CalculateSellCost", reflect.TypeOf((*MockOrder)(nil).CalculateSellCost), price, quantity)
 }
 
-// CalculateTradeFee mocks base method.
-func (m *MockOrder) CalculateTradeFee(price float64, quantity int64) int64 {
+// CalculateTradeDiscount mocks base method.
+func (m *MockOrder) CalculateTradeDiscount(price float64, quantity int64) int64 {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CalculateTradeFee", price, quantity)
+	ret := m.ctrl.Call(m, "CalculateTradeDiscount", price, quantity)
 	ret0, _ := ret[0].(int64)
 	return ret0
 }
 
-// CalculateTradeFee indicates an expected call of CalculateTradeFee.
-func (mr *MockOrderMockRecorder) CalculateTradeFee(price, quantity interface{}) *gomock.Call {
+// CalculateTradeDiscount indicates an expected call of CalculateTradeDiscount.
+func (mr *MockOrderMockRecorder) CalculateTradeDiscount(price, quantity interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CalculateTradeFee", reflect.TypeOf((*MockOrder)(nil).CalculateTradeFee), price, quantity)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CalculateTradeDiscount", reflect.TypeOf((*MockOrder)(nil).CalculateTradeDiscount), price, quantity)
 }
 
 // GetAllOrder mocks base method.
@@ -1427,16 +1427,16 @@ func (m *MockAnalyze) EXPECT() *MockAnalyzeMockRecorder {
 	return m.recorder
 }
 
-// GetBelowQuaterMap mocks base method.
-func (m *MockAnalyze) GetBelowQuaterMap(ctx context.Context) map[time.Time][]entity.Stock {
+// GetRebornMap mocks base method.
+func (m *MockAnalyze) GetRebornMap(ctx context.Context) map[time.Time][]entity.Stock {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetBelowQuaterMap", ctx)
+	ret := m.ctrl.Call(m, "GetRebornMap", ctx)
 	ret0, _ := ret[0].(map[time.Time][]entity.Stock)
 	return ret0
 }
 
-// GetBelowQuaterMap indicates an expected call of GetBelowQuaterMap.
-func (mr *MockAnalyzeMockRecorder) GetBelowQuaterMap(ctx interface{}) *gomock.Call {
+// GetRebornMap indicates an expected call of GetRebornMap.
+func (mr *MockAnalyzeMockRecorder) GetRebornMap(ctx interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBelowQuaterMap", reflect.TypeOf((*MockAnalyze)(nil).GetBelowQuaterMap), ctx)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRebornMap", reflect.TypeOf((*MockAnalyze)(nil).GetRebornMap), ctx)
 }

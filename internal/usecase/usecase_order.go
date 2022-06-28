@@ -321,7 +321,7 @@ func (uc *OrderUseCase) CalculateSellCost(price float64, quantity int64) int64 {
 	return uc.quota.GetStockSellCost(price, quantity)
 }
 
-// CalculateTradeFee -.
-func (uc *OrderUseCase) CalculateTradeFee(price float64, quantity int64) int64 {
+// CalculateTradeDiscount -.
+func (uc *OrderUseCase) CalculateTradeDiscount(price float64, quantity int64) int64 {
 	return uc.quota.GetStockTradeFeeDiscount(price, quantity)
 }

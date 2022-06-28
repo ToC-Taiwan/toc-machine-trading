@@ -21,7 +21,7 @@ func newHistoryRoutes(handler *gin.RouterGroup, t usecase.History) {
 
 	h := handler.Group("/history")
 	{
-		h.GET("/day_kbar/:stock/:start_date/:interval", r.getKbarData)
+		h.GET("/day-kbar/:stock/:start_date/:interval", r.getKbarData)
 	}
 }
 
@@ -36,7 +36,7 @@ func newHistoryRoutes(handler *gin.RouterGroup, t usecase.History) {
 // @param interval path string true "interval"
 // @success 200 {object} []entity.HistoryKbar
 // @Failure     500 {object} response
-// @Router      /history/day_kbar/{stock}/{start_date}/{interval} [get]
+// @Router      /history/day-kbar/{stock}/{start_date}/{interval} [get]
 func (r *historyRoutes) getKbarData(c *gin.Context) {
 	stockNum := c.Param("stock")
 	interval, err := strconv.Atoi(c.Param("interval"))

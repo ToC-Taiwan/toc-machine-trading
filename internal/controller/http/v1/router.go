@@ -23,6 +23,8 @@ type RouterV1 struct {
 // @title       TOC MACHINE TRADING
 // @description Auto Trade
 // @version     0.0.1
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 func NewRouter(handler *gin.Engine) *RouterV1 {
 	apiVersion := "/v1"
 
