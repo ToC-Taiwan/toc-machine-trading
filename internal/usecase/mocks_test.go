@@ -1055,6 +1055,21 @@ func (mr *MockOrderMockRecorder) GetAllOrder(ctx interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllOrder", reflect.TypeOf((*MockOrder)(nil).GetAllOrder), ctx)
 }
 
+// GetAllTradeBalance mocks base method.
+func (m *MockOrder) GetAllTradeBalance(ctx context.Context) ([]*entity.TradeBalance, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAllTradeBalance", ctx)
+	ret0, _ := ret[0].([]*entity.TradeBalance)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAllTradeBalance indicates an expected call of GetAllTradeBalance.
+func (mr *MockOrderMockRecorder) GetAllTradeBalance(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllTradeBalance", reflect.TypeOf((*MockOrder)(nil).GetAllTradeBalance), ctx)
+}
+
 // MockOrderRepo is a mock of OrderRepo interface.
 type MockOrderRepo struct {
 	ctrl     *gomock.Controller
@@ -1134,6 +1149,21 @@ func (m *MockOrderRepo) QueryAllOrderByDate(ctx context.Context, date time.Time)
 func (mr *MockOrderRepoMockRecorder) QueryAllOrderByDate(ctx, date interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryAllOrderByDate", reflect.TypeOf((*MockOrderRepo)(nil).QueryAllOrderByDate), ctx, date)
+}
+
+// QueryAllTradeBalance mocks base method.
+func (m *MockOrderRepo) QueryAllTradeBalance(ctx context.Context) ([]*entity.TradeBalance, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "QueryAllTradeBalance", ctx)
+	ret0, _ := ret[0].([]*entity.TradeBalance)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// QueryAllTradeBalance indicates an expected call of QueryAllTradeBalance.
+func (mr *MockOrderRepoMockRecorder) QueryAllTradeBalance(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryAllTradeBalance", reflect.TypeOf((*MockOrderRepo)(nil).QueryAllTradeBalance), ctx)
 }
 
 // QueryOrderByID mocks base method.

@@ -17,7 +17,8 @@ func newOrderRoutes(handler *gin.RouterGroup, t usecase.Order) {
 
 	h := handler.Group("/order")
 	{
-		h.GET("/", r.getAllOrder)
+		h.GET("/all", r.getAllOrder)
+		h.GET("/balance", r.getAllTradeBalance)
 	}
 }
 
@@ -29,9 +30,28 @@ func newOrderRoutes(handler *gin.RouterGroup, t usecase.Order) {
 // @Produce     json
 // @Success     200 {object} []entity.Order
 // @Failure     500 {object} response
-// @Router      /order [get]
+// @Router      /order/all [get]
 func (r *orderRoutes) getAllOrder(c *gin.Context) {
 	orderArr, err := r.t.GetAllOrder(c.Request.Context())
+	if err != nil {
+		log.Error(err)
+		errorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	c.JSON(http.StatusOK, orderArr)
+}
+
+// @Summary     getAllTradeBalance
+// @Description getAllTradeBalance
+// @ID          getAllTradeBalance
+// @Tags  	    order
+// @Accept      json
+// @Produce     json
+// @Success     200 {object} []entity.TradeBalance
+// @Failure     500 {object} response
+// @Router      /order/balance [get]
+func (r *orderRoutes) getAllTradeBalance(c *gin.Context) {
+	orderArr, err := r.t.GetAllTradeBalance(c.Request.Context())
 	if err != nil {
 		log.Error(err)
 		errorResponse(c, http.StatusInternalServerError, err.Error())

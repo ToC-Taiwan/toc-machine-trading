@@ -75,6 +75,25 @@ definitions:
       volume:
         type: integer
     type: object
+  entity.TradeBalance:
+    properties:
+      discount:
+        type: integer
+      forward:
+        type: integer
+      id:
+        type: integer
+      original_balance:
+        type: integer
+      reverse:
+        type: integer
+      total:
+        type: integer
+      trade_count:
+        type: integer
+      trade_day:
+        type: string
+    type: object
   v1.BelowQuaterMA:
     properties:
       date:
@@ -217,7 +236,7 @@ paths:
       summary: getKbarData
       tags:
       - history
-  /order:
+  /order/all:
     get:
       consumes:
       - application/json
@@ -237,6 +256,28 @@ paths:
           schema:
             $ref: '#/definitions/v1.response'
       summary: getAllOrder
+      tags:
+      - order
+  /order/balance:
+    get:
+      consumes:
+      - application/json
+      description: getAllTradeBalance
+      operationId: getAllTradeBalance
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.TradeBalance'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+      summary: getAllTradeBalance
       tags:
       - order
   /stream/tse/snapshot:

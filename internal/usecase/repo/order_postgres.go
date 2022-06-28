@@ -107,6 +107,7 @@ func (r *OrderRepo) QueryAllOrderByDate(ctx context.Context, date time.Time) ([]
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 
 	var result []*entity.Order
 	for rows.Next() {
@@ -134,6 +135,7 @@ func (r *OrderRepo) QueryAllOrder(ctx context.Context) ([]*entity.Order, error) 
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 
 	var result []*entity.Order
 	for rows.Next() {
@@ -210,4 +212,34 @@ func (r *OrderRepo) QueryTradeBalanceByDate(ctx context.Context, date time.Time)
 		return nil, err
 	}
 	return &e, nil
+}
+
+// QueryAllTradeBalance -.
+func (r *OrderRepo) QueryAllTradeBalance(ctx context.Context) ([]*entity.TradeBalance, error) {
+	sql, _, err := r.Builder.
+		Select("trade_count, forward, reverse, original_balance, discount, total, trade_day").
+		From(tableNameTradeBalance).
+		ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	rows, err := r.Pool().Query(ctx, sql)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var result []*entity.TradeBalance
+	for rows.Next() {
+		e := entity.TradeBalance{}
+		if err := rows.Scan(&e.TradeCount, &e.Forward, &e.Reverse, &e.OriginalBalance, &e.Discount, &e.Total, &e.TradeDay); err != nil {
+			if errors.Is(err, pgx.ErrNoRows) {
+				return nil, nil
+			}
+			return nil, err
+		}
+		result = append(result, &e)
+	}
+	return result, nil
 }

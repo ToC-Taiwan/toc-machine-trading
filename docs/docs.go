@@ -186,7 +186,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/order": {
+        "/order/all": {
             "get": {
                 "description": "getAllOrder",
                 "consumes": [
@@ -207,6 +207,39 @@ const docTemplate = `{
                             "type": "array",
                             "items": {
                                 "$ref": "#/definitions/entity.Order"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/v1.response"
+                        }
+                    }
+                }
+            }
+        },
+        "/order/balance": {
+            "get": {
+                "description": "getAllTradeBalance",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "order"
+                ],
+                "summary": "getAllTradeBalance",
+                "operationId": "getAllTradeBalance",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entity.TradeBalance"
                             }
                         }
                     },
@@ -378,6 +411,35 @@ const docTemplate = `{
                 },
                 "volume": {
                     "type": "integer"
+                }
+            }
+        },
+        "entity.TradeBalance": {
+            "type": "object",
+            "properties": {
+                "discount": {
+                    "type": "integer"
+                },
+                "forward": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "original_balance": {
+                    "type": "integer"
+                },
+                "reverse": {
+                    "type": "integer"
+                },
+                "total": {
+                    "type": "integer"
+                },
+                "trade_count": {
+                    "type": "integer"
+                },
+                "trade_day": {
+                    "type": "string"
                 }
             }
         },

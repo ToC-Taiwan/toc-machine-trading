@@ -128,6 +128,7 @@ type (
 	// Order -.
 	Order interface {
 		GetAllOrder(ctx context.Context) ([]*entity.Order, error)
+		GetAllTradeBalance(ctx context.Context) ([]*entity.TradeBalance, error)
 	}
 
 	// OrderRepo -.
@@ -138,6 +139,7 @@ type (
 		QueryOrderByID(ctx context.Context, orderID string) (*entity.Order, error)
 		QueryAllOrderByDate(ctx context.Context, date time.Time) ([]*entity.Order, error)
 		QueryAllOrder(ctx context.Context) ([]*entity.Order, error)
+		QueryAllTradeBalance(ctx context.Context) ([]*entity.TradeBalance, error)
 	}
 
 	// OrdergRPCAPI -.

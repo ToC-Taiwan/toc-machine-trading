@@ -301,3 +301,12 @@ func (uc *OrderUseCase) GetAllOrder(ctx context.Context) ([]*entity.Order, error
 	}
 	return orderArr, nil
 }
+
+// GetAllTradeBalance -.
+func (uc *OrderUseCase) GetAllTradeBalance(ctx context.Context) ([]*entity.TradeBalance, error) {
+	tradeBalanceArr, err := uc.repo.QueryAllTradeBalance(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return tradeBalanceArr, nil
+}
