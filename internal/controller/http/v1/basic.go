@@ -5,6 +5,7 @@ import (
 
 	"toc-machine-trading/internal/entity"
 	"toc-machine-trading/internal/usecase"
+	"toc-machine-trading/pkg/config"
 
 	"github.com/gin-gonic/gin"
 )
@@ -21,6 +22,7 @@ func newBasicRoutes(handler *gin.RouterGroup, t usecase.Basic) {
 		h.GET("/stock/sinopac-to-repo", r.getAllSinopacStockAndUpdateRepo)
 		h.GET("/stock/repo", r.getAllRepoStock)
 		h.PUT("/system/terminate", r.terminateSinopac)
+		h.GET("/config", r.getAllConfig)
 	}
 }
 
@@ -90,4 +92,24 @@ func (r *basicRoutes) terminateSinopac(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, nil)
+}
+
+// @Summary     getAllConfig
+// @Description getAllConfig
+// @ID          getAllConfig
+// @Tags  	    system
+// @Accept      json
+// @Produce     json
+// @Success     200 {object} config.Config
+// @Failure     500 {object} response
+// @Router      /basic/config [get]
+func (r *basicRoutes) getAllConfig(c *gin.Context) {
+	cfg, err := config.GetConfig()
+	if err != nil {
+		log.Error(err)
+		errorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, cfg)
 }

@@ -43,6 +43,36 @@ const docTemplate = `{
                 }
             }
         },
+        "/basic/config": {
+            "get": {
+                "description": "getAllConfig",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "system"
+                ],
+                "summary": "getAllConfig",
+                "operationId": "getAllConfig",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/config.Config"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/v1.response"
+                        }
+                    }
+                }
+            }
+        },
         "/basic/stock/repo": {
             "get": {
                 "description": "getAllRepoStock",
@@ -252,6 +282,66 @@ const docTemplate = `{
                 }
             }
         },
+        "/order/day-trade/forward": {
+            "get": {
+                "description": "calculateDayTradeBalance",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "order"
+                ],
+                "summary": "calculateDayTradeBalance",
+                "operationId": "calculateDayTradeBalance",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "buy_price",
+                        "name": "buy_price",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "buy_quantity",
+                        "name": "buy_quantity",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "sell_price",
+                        "name": "sell_price",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "sell_quantity",
+                        "name": "sell_quantity",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v1.dayTradeResult"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/v1.response"
+                        }
+                    }
+                }
+            }
+        },
         "/stream/tse/snapshot": {
             "get": {
                 "description": "getTSESnapshot",
@@ -311,6 +401,155 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "config.Config": {
+            "type": "object",
+            "properties": {
+                "attempts": {
+                    "type": "integer"
+                },
+                "buy": {
+                    "type": "boolean"
+                },
+                "buyLater": {
+                    "type": "boolean"
+                },
+                "closeChangeRatioHigh": {
+                    "type": "number"
+                },
+                "closeChangeRatioLow": {
+                    "type": "number"
+                },
+                "dbname": {
+                    "type": "string"
+                },
+                "deployment": {
+                    "type": "string"
+                },
+                "exchange": {
+                    "type": "string"
+                },
+                "feeDiscount": {
+                    "type": "number"
+                },
+                "forwardMax": {
+                    "type": "integer"
+                },
+                "historyClosePeriod": {
+                    "type": "integer"
+                },
+                "historyKbarPeriod": {
+                    "type": "integer"
+                },
+                "historyTickPeriod": {
+                    "type": "integer"
+                },
+                "holdTimeFromOpen": {
+                    "type": "number"
+                },
+                "inOutRatio": {
+                    "type": "number"
+                },
+                "limitPriceHigh": {
+                    "type": "number"
+                },
+                "limitPriceLow": {
+                    "type": "number"
+                },
+                "limitVolume": {
+                    "type": "integer"
+                },
+                "maperiod": {
+                    "type": "integer"
+                },
+                "maxLoss": {
+                    "type": "number"
+                },
+                "meanTimeForward": {
+                    "type": "integer"
+                },
+                "meanTimeReverse": {
+                    "type": "integer"
+                },
+                "openCloseChangeRatioHigh": {
+                    "type": "number"
+                },
+                "openCloseChangeRatioLow": {
+                    "type": "number"
+                },
+                "outInRatio": {
+                    "type": "number"
+                },
+                "poolMax": {
+                    "type": "integer"
+                },
+                "port": {
+                    "type": "string"
+                },
+                "reverseMax": {
+                    "type": "integer"
+                },
+                "rsihigh": {
+                    "type": "number"
+                },
+                "rsilow": {
+                    "type": "number"
+                },
+                "rsiminCount": {
+                    "type": "integer"
+                },
+                "sell": {
+                    "type": "boolean"
+                },
+                "sellFirst": {
+                    "type": "boolean"
+                },
+                "simulation": {
+                    "type": "boolean"
+                },
+                "tickAnalyzeMaxPeriod": {
+                    "type": "number"
+                },
+                "tickAnalyzeMinPeriod": {
+                    "type": "number"
+                },
+                "totalOpenTime": {
+                    "type": "number"
+                },
+                "tradeFeeRatio": {
+                    "type": "number"
+                },
+                "tradeInEndTime": {
+                    "type": "number"
+                },
+                "tradeInWaitTime": {
+                    "type": "integer"
+                },
+                "tradeOutEndTime": {
+                    "type": "number"
+                },
+                "tradeOutWaitTime": {
+                    "type": "integer"
+                },
+                "tradeQuota": {
+                    "type": "integer"
+                },
+                "tradeTaxRatio": {
+                    "type": "number"
+                },
+                "url": {
+                    "type": "string"
+                },
+                "volumePRHigh": {
+                    "type": "number"
+                },
+                "volumePRLow": {
+                    "type": "number"
+                },
+                "waitTime": {
+                    "type": "integer"
+                }
+            }
+        },
         "entity.HistoryKbar": {
             "type": "object",
             "properties": {
@@ -517,6 +756,14 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/entity.Stock"
                     }
+                }
+            }
+        },
+        "v1.dayTradeResult": {
+            "type": "object",
+            "properties": {
+                "balance": {
+                    "type": "integer"
                 }
             }
         },

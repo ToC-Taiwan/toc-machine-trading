@@ -1,4 +1,103 @@
 definitions:
+  config.Config:
+    properties:
+      attempts:
+        type: integer
+      buy:
+        type: boolean
+      buyLater:
+        type: boolean
+      closeChangeRatioHigh:
+        type: number
+      closeChangeRatioLow:
+        type: number
+      dbname:
+        type: string
+      deployment:
+        type: string
+      exchange:
+        type: string
+      feeDiscount:
+        type: number
+      forwardMax:
+        type: integer
+      historyClosePeriod:
+        type: integer
+      historyKbarPeriod:
+        type: integer
+      historyTickPeriod:
+        type: integer
+      holdTimeFromOpen:
+        type: number
+      inOutRatio:
+        type: number
+      limitPriceHigh:
+        type: number
+      limitPriceLow:
+        type: number
+      limitVolume:
+        type: integer
+      maperiod:
+        type: integer
+      maxLoss:
+        type: number
+      meanTimeForward:
+        type: integer
+      meanTimeReverse:
+        type: integer
+      openCloseChangeRatioHigh:
+        type: number
+      openCloseChangeRatioLow:
+        type: number
+      outInRatio:
+        type: number
+      poolMax:
+        type: integer
+      port:
+        type: string
+      reverseMax:
+        type: integer
+      rsihigh:
+        type: number
+      rsilow:
+        type: number
+      rsiminCount:
+        type: integer
+      sell:
+        type: boolean
+      sellFirst:
+        type: boolean
+      simulation:
+        type: boolean
+      tickAnalyzeMaxPeriod:
+        type: number
+      tickAnalyzeMinPeriod:
+        type: number
+      totalOpenTime:
+        type: number
+      tradeFeeRatio:
+        type: number
+      tradeInEndTime:
+        type: number
+      tradeInWaitTime:
+        type: integer
+      tradeOutEndTime:
+        type: number
+      tradeOutWaitTime:
+        type: integer
+      tradeQuota:
+        type: integer
+      tradeTaxRatio:
+        type: number
+      url:
+        type: string
+      volumePRHigh:
+        type: number
+      volumePRLow:
+        type: number
+      waitTime:
+        type: integer
+    type: object
   entity.HistoryKbar:
     properties:
       close:
@@ -136,6 +235,11 @@ definitions:
           $ref: '#/definitions/entity.Stock'
         type: array
     type: object
+  v1.dayTradeResult:
+    properties:
+      balance:
+        type: integer
+    type: object
   v1.response:
     properties:
       error:
@@ -173,6 +277,26 @@ paths:
       summary: getQuaterTargets
       tags:
       - analyze
+  /basic/config:
+    get:
+      consumes:
+      - application/json
+      description: getAllConfig
+      operationId: getAllConfig
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/config.Config'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+      summary: getAllConfig
+      tags:
+      - system
   /basic/stock/repo:
     get:
       consumes:
@@ -311,6 +435,47 @@ paths:
           schema:
             $ref: '#/definitions/v1.response'
       summary: getAllTradeBalance
+      tags:
+      - order
+  /order/day-trade/forward:
+    get:
+      consumes:
+      - application/json
+      description: calculateDayTradeBalance
+      operationId: calculateDayTradeBalance
+      parameters:
+      - description: buy_price
+        in: header
+        name: buy_price
+        required: true
+        type: string
+      - description: buy_quantity
+        in: header
+        name: buy_quantity
+        required: true
+        type: string
+      - description: sell_price
+        in: header
+        name: sell_price
+        required: true
+        type: string
+      - description: sell_quantity
+        in: header
+        name: sell_quantity
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.dayTradeResult'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+      summary: calculateDayTradeBalance
       tags:
       - order
   /stream/tse/snapshot:

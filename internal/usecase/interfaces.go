@@ -135,6 +135,9 @@ type (
 	Order interface {
 		GetAllOrder(ctx context.Context) ([]*entity.Order, error)
 		GetAllTradeBalance(ctx context.Context) ([]*entity.TradeBalance, error)
+		CalculateBuyCost(price float64, quantity int64) int64
+		CalculateSellCost(price float64, quantity int64) int64
+		CalculateTradeFee(price float64, quantity int64) int64
 	}
 
 	// OrderRepo -.

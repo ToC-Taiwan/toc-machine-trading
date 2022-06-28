@@ -1078,6 +1078,48 @@ func (m *MockOrder) EXPECT() *MockOrderMockRecorder {
 	return m.recorder
 }
 
+// CalculateBuyCost mocks base method.
+func (m *MockOrder) CalculateBuyCost(price float64, quantity int64) int64 {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CalculateBuyCost", price, quantity)
+	ret0, _ := ret[0].(int64)
+	return ret0
+}
+
+// CalculateBuyCost indicates an expected call of CalculateBuyCost.
+func (mr *MockOrderMockRecorder) CalculateBuyCost(price, quantity interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CalculateBuyCost", reflect.TypeOf((*MockOrder)(nil).CalculateBuyCost), price, quantity)
+}
+
+// CalculateSellCost mocks base method.
+func (m *MockOrder) CalculateSellCost(price float64, quantity int64) int64 {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CalculateSellCost", price, quantity)
+	ret0, _ := ret[0].(int64)
+	return ret0
+}
+
+// CalculateSellCost indicates an expected call of CalculateSellCost.
+func (mr *MockOrderMockRecorder) CalculateSellCost(price, quantity interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CalculateSellCost", reflect.TypeOf((*MockOrder)(nil).CalculateSellCost), price, quantity)
+}
+
+// CalculateTradeFee mocks base method.
+func (m *MockOrder) CalculateTradeFee(price float64, quantity int64) int64 {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CalculateTradeFee", price, quantity)
+	ret0, _ := ret[0].(int64)
+	return ret0
+}
+
+// CalculateTradeFee indicates an expected call of CalculateTradeFee.
+func (mr *MockOrderMockRecorder) CalculateTradeFee(price, quantity interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CalculateTradeFee", reflect.TypeOf((*MockOrder)(nil).CalculateTradeFee), price, quantity)
+}
+
 // GetAllOrder mocks base method.
 func (m *MockOrder) GetAllOrder(ctx context.Context) ([]*entity.Order, error) {
 	m.ctrl.T.Helper()

@@ -310,3 +310,18 @@ func (uc *OrderUseCase) GetAllTradeBalance(ctx context.Context) ([]*entity.Trade
 	}
 	return tradeBalanceArr, nil
 }
+
+// CalculateBuyCost -.
+func (uc *OrderUseCase) CalculateBuyCost(price float64, quantity int64) int64 {
+	return uc.quota.GetStockBuyCost(price, quantity)
+}
+
+// CalculateSellCost -.
+func (uc *OrderUseCase) CalculateSellCost(price float64, quantity int64) int64 {
+	return uc.quota.GetStockSellCost(price, quantity)
+}
+
+// CalculateTradeFee -.
+func (uc *OrderUseCase) CalculateTradeFee(price float64, quantity int64) int64 {
+	return uc.quota.GetStockTradeFeeDiscount(price, quantity)
+}
