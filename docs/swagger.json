@@ -121,6 +121,96 @@
                 }
             }
         },
+        "/history/day_kbar/{stock}/{start_date}/{interval}": {
+            "get": {
+                "description": "getKbarData",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "history"
+                ],
+                "summary": "getKbarData",
+                "operationId": "getKbarData",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "stock",
+                        "name": "stock",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "start_date",
+                        "name": "start_date",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "interval",
+                        "name": "interval",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entity.HistoryKbar"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/v1.response"
+                        }
+                    }
+                }
+            }
+        },
+        "/order": {
+            "get": {
+                "description": "getAllOrder",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "order"
+                ],
+                "summary": "getAllOrder",
+                "operationId": "getAllOrder",
+                "responses": {}
+            }
+        },
+        "/stream": {
+            "get": {
+                "description": "getTSESnapshot",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "stream"
+                ],
+                "summary": "getTSESnapshot",
+                "operationId": "getTSESnapshot",
+                "responses": {}
+            }
+        },
         "/targets": {
             "get": {
                 "description": "getTargets",
@@ -150,6 +240,38 @@
         }
     },
     "definitions": {
+        "entity.HistoryKbar": {
+            "type": "object",
+            "properties": {
+                "close": {
+                    "type": "number"
+                },
+                "high": {
+                    "type": "number"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "kbar_time": {
+                    "type": "string"
+                },
+                "low": {
+                    "type": "number"
+                },
+                "open": {
+                    "type": "number"
+                },
+                "stock": {
+                    "$ref": "#/definitions/entity.Stock"
+                },
+                "stock_num": {
+                    "type": "string"
+                },
+                "volume": {
+                    "type": "integer"
+                }
+            }
+        },
         "entity.Stock": {
             "type": "object",
             "properties": {

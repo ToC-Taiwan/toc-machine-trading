@@ -17,6 +17,7 @@ const (
 	cacheCatagoryHistoryClose       cache.Category = "history_close"
 	cacheCatagoryHistoryTickAnalyze cache.Category = "history_tick_analyze"
 	cacheCatagoryBiasRate           cache.Category = "bias_rate"
+	cacheCatagoryDayKbar            cache.Category = "day_kbar"
 )
 
 const (
@@ -102,5 +103,12 @@ func (c *GlobalCache) historyTickAnalyzeKey(stockNum string) cache.Key {
 	return cache.Key{
 		Category: cacheCatagoryHistoryTickAnalyze,
 		ID:       c.generateID(cacheIDStockNum, stockNum),
+	}
+}
+
+func (c *GlobalCache) dayKbarKey(stockNum string, date time.Time) cache.Key {
+	return cache.Key{
+		Category: cacheCatagoryDayKbar,
+		ID:       c.generateID(cacheIDStockNum, stockNum, date.Format(global.ShortTimeLayout)),
 	}
 }

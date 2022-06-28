@@ -20,10 +20,11 @@ type HistoryUseCase struct {
 	grpcapi HistorygRPCAPI
 
 	analyzeCfg config.Analyze
+	basic      entity.BasicInfo
 }
 
 // NewHistory -.
-func NewHistory(r *repo.HistoryRepo, t *grpcapi.HistorygRPCAPI) {
+func NewHistory(r *repo.HistoryRepo, t *grpcapi.HistorygRPCAPI) *HistoryUseCase {
 	uc := &HistoryUseCase{
 		repo:    r,
 		grpcapi: t,
@@ -34,8 +35,21 @@ func NewHistory(r *repo.HistoryRepo, t *grpcapi.HistorygRPCAPI) {
 		log.Panic(err)
 	}
 	uc.analyzeCfg = cfg.Analyze
+	uc.basic = *cc.GetBasicInfo()
 
 	bus.SubscribeTopic(topicTargets, uc.FetchHistory)
+
+	return uc
+}
+
+// GetTradeDay -.
+func (uc *HistoryUseCase) GetTradeDay() time.Time {
+	return uc.basic.TradeDay
+}
+
+// GetDayKbarByStockNumDate -.
+func (uc *HistoryUseCase) GetDayKbarByStockNumDate(stockNum string, date time.Time) *entity.HistoryKbar {
+	return cc.GetDaykbar(stockNum, date)
 }
 
 // FetchHistory FetchHistory
@@ -412,4 +426,37 @@ func (uc *HistoryUseCase) processKbarArr(arr []*entity.HistoryKbar) {
 	})
 	firstKbar := arr[0]
 	cc.SetHistoryOpen(firstKbar.StockNum, firstKbar.KbarTime, firstKbar.Open)
+	var close, open, high, low float64
+	var volume int64
+	var lastKbarTime time.Time
+	for i, kbar := range arr {
+		if i == 0 {
+			open = kbar.Open
+		}
+		if i == len(arr)-1 {
+			close = kbar.Close
+			lastKbarTime = kbar.KbarTime
+		}
+		if high == 0 {
+			high = kbar.High
+		} else if kbar.High > high {
+			high = kbar.High
+		}
+		if low == 0 {
+			low = kbar.Low
+		} else if kbar.Low < low {
+			low = kbar.Low
+		}
+		volume += kbar.Volume
+	}
+	cc.SetDaykbar(firstKbar.StockNum, firstKbar.KbarTime, &entity.HistoryKbar{
+		StockNum: firstKbar.StockNum,
+		KbarTime: lastKbarTime,
+		Open:     open,
+		High:     high,
+		Low:      low,
+		Close:    close,
+		Volume:   volume,
+		Stock:    cc.GetStockDetail(firstKbar.StockNum),
+	})
 }

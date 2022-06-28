@@ -14,16 +14,21 @@ import (
 
 var log = logger.Get()
 
+// RouterV1 -.
+type RouterV1 struct {
+	g *gin.RouterGroup
+}
+
 // NewRouter -.
-// Swagger spec:
-// @title       TOC MACHINE TRADING API
-// @description Auto Trade on sinopac
-// @version     1.0.0
-func NewRouter(handler *gin.Engine, basic usecase.Basic, analyze usecase.Analyze, target *usecase.TargetUseCase) {
-	docs.SwaggerInfo.BasePath = "/v1"
+// @title       TOC MACHINE TRADING
+// @description Auto Trade
+// @version     0.0.1
+func NewRouter(handler *gin.Engine) *RouterV1 {
+	apiVersion := "v1"
+
+	docs.SwaggerInfo.BasePath = apiVersion
 	docs.SwaggerInfo.Host = "127.0.0.1:8080"
 
-	// Options
 	// handler.Use(gin.Logger())
 	handler.Use(gin.Recovery())
 
@@ -34,11 +39,35 @@ func NewRouter(handler *gin.Engine, basic usecase.Basic, analyze usecase.Analyze
 	// Prometheus metrics
 	handler.GET("/metrics", gin.WrapH(promhttp.Handler()))
 
-	// Routers
-	h := handler.Group("/v1")
-	{
-		newBasicRoutes(h, basic)
-		newAnalyzeRoutes(h, analyze)
-		newTargetRoutes(h, target)
-	}
+	return &RouterV1{handler.Group(apiVersion)}
+}
+
+// AddBasicRoutes -.
+func (r *RouterV1) AddBasicRoutes(handler *gin.Engine, basic usecase.Basic) {
+	newBasicRoutes(r.g, basic)
+}
+
+// AddAnalyzeRoutes -.
+func (r *RouterV1) AddAnalyzeRoutes(handler *gin.Engine, analyze usecase.Analyze) {
+	newAnalyzeRoutes(r.g, analyze)
+}
+
+// AddTargetRoutes -.
+func (r *RouterV1) AddTargetRoutes(handler *gin.Engine, target *usecase.TargetUseCase) {
+	newTargetRoutes(r.g, target)
+}
+
+// AddOrderRoutes -.
+func (r *RouterV1) AddOrderRoutes(handler *gin.Engine, order *usecase.OrderUseCase) {
+	newOrderRoutes(r.g, order)
+}
+
+// AddHistoryRoutes -.
+func (r *RouterV1) AddHistoryRoutes(handler *gin.Engine, history *usecase.HistoryUseCase) {
+	newHistoryRoutes(r.g, history)
+}
+
+// AddStreamRoutes -.
+func (r *RouterV1) AddStreamRoutes(handler *gin.Engine, stream *usecase.StreamUseCase) {
+	newStreamRoutes(r.g, stream)
 }

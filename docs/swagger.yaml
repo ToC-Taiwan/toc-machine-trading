@@ -1,4 +1,25 @@
 definitions:
+  entity.HistoryKbar:
+    properties:
+      close:
+        type: number
+      high:
+        type: number
+      id:
+        type: integer
+      kbar_time:
+        type: string
+      low:
+        type: number
+      open:
+        type: number
+      stock:
+        $ref: '#/definitions/entity.Stock'
+      stock_num:
+        type: string
+      volume:
+        type: integer
+    type: object
   entity.Stock:
     properties:
       category:
@@ -137,6 +158,68 @@ paths:
       summary: terminateSinopac
       tags:
       - system
+  /history/day_kbar/{stock}/{start_date}/{interval}:
+    get:
+      consumes:
+      - application/json
+      description: getKbarData
+      operationId: getKbarData
+      parameters:
+      - description: stock
+        in: path
+        name: stock
+        required: true
+        type: string
+      - description: start_date
+        in: path
+        name: start_date
+        required: true
+        type: string
+      - description: interval
+        in: path
+        name: interval
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.HistoryKbar'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+      summary: getKbarData
+      tags:
+      - history
+  /order:
+    get:
+      consumes:
+      - application/json
+      description: getAllOrder
+      operationId: getAllOrder
+      produces:
+      - application/json
+      responses: {}
+      summary: getAllOrder
+      tags:
+      - order
+  /stream:
+    get:
+      consumes:
+      - application/json
+      description: getTSESnapshot
+      operationId: getTSESnapshot
+      produces:
+      - application/json
+      responses: {}
+      summary: getTSESnapshot
+      tags:
+      - stream
   /targets:
     get:
       consumes:

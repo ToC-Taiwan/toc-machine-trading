@@ -25,7 +25,7 @@ type StreamUseCase struct {
 }
 
 // NewStream -.
-func NewStream(r *repo.StreamRepo, t *rabbit.StreamRabbit) {
+func NewStream(r *repo.StreamRepo, t *rabbit.StreamRabbit) *StreamUseCase {
 	uc := &StreamUseCase{
 		repo:   r,
 		rabbit: t,
@@ -53,6 +53,8 @@ func NewStream(r *repo.StreamRepo, t *rabbit.StreamRabbit) {
 
 	go uc.ReceiveEvent(context.Background())
 	go uc.ReceiveOrderStatus(context.Background())
+
+	return uc
 }
 
 // ReceiveEvent -.
@@ -101,7 +103,7 @@ func (uc *StreamUseCase) updateOrderSatusCache(ctx context.Context, order *entit
 }
 
 func (uc *StreamUseCase) sendAllOrders(ctx context.Context) {
-	allOrders, err := uc.repo.QueryAllOrderByDate(ctx, cc.GetBasicInfo().TradeDay)
+	allOrders, err := uc.repo.QueryAllOrderByDate(ctx, uc.basic.TradeDay)
 	if err != nil {
 		log.Panic(err)
 	}

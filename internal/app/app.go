@@ -42,32 +42,24 @@ func Run(cfg *config.Config) {
 		log.Panic(err)
 	}
 
-	// basic
 	basicUseCase := usecase.NewBasic(repo.NewBasic(pg), grpcapi.NewBasic(sc))
-
-	// order
-	usecase.NewOrder(grpcapi.NewOrder(sc), repo.NewOrder(pg))
-
-	// stream
-	usecase.NewStream(repo.NewStream(pg), rabbit.NewStream())
-
-	// analyze
+	orderUseCase := usecase.NewOrder(grpcapi.NewOrder(sc), repo.NewOrder(pg))
+	streamUseCase := usecase.NewStream(repo.NewStream(pg), rabbit.NewStream())
 	analyzeUseCase := usecase.NewAnalyze(repo.NewHistory(pg))
-
-	// history
-	usecase.NewHistory(repo.NewHistory(pg), grpcapi.NewHistory(sc))
-
-	// target
+	historyUseCase := usecase.NewHistory(repo.NewHistory(pg), grpcapi.NewHistory(sc))
 	targetUseCase := usecase.NewTarget(repo.NewTarget(pg), grpcapi.NewTarget(sc))
 
 	// HTTP Server
 	handler := gin.New()
-	v1.NewRouter(
-		handler,
-		basicUseCase,
-		analyzeUseCase,
-		targetUseCase,
-	)
+	r := v1.NewRouter(handler)
+	{
+		r.AddBasicRoutes(handler, basicUseCase)
+		r.AddOrderRoutes(handler, orderUseCase)
+		r.AddStreamRoutes(handler, streamUseCase)
+		r.AddAnalyzeRoutes(handler, analyzeUseCase)
+		r.AddHistoryRoutes(handler, historyUseCase)
+		r.AddTargetRoutes(handler, targetUseCase)
+	}
 	httpServer := httpserver.New(handler, httpserver.Port(cfg.HTTP.Port))
 
 	// Waiting signal

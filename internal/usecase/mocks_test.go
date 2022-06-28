@@ -513,6 +513,34 @@ func (m *MockHistory) EXPECT() *MockHistoryMockRecorder {
 	return m.recorder
 }
 
+// GetDayKbarByStockNumDate mocks base method.
+func (m *MockHistory) GetDayKbarByStockNumDate(stockNum string, date time.Time) *entity.HistoryKbar {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetDayKbarByStockNumDate", stockNum, date)
+	ret0, _ := ret[0].(*entity.HistoryKbar)
+	return ret0
+}
+
+// GetDayKbarByStockNumDate indicates an expected call of GetDayKbarByStockNumDate.
+func (mr *MockHistoryMockRecorder) GetDayKbarByStockNumDate(stockNum, date interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetDayKbarByStockNumDate", reflect.TypeOf((*MockHistory)(nil).GetDayKbarByStockNumDate), stockNum, date)
+}
+
+// GetTradeDay mocks base method.
+func (m *MockHistory) GetTradeDay() time.Time {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetTradeDay")
+	ret0, _ := ret[0].(time.Time)
+	return ret0
+}
+
+// GetTradeDay indicates an expected call of GetTradeDay.
+func (mr *MockHistoryMockRecorder) GetTradeDay() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTradeDay", reflect.TypeOf((*MockHistory)(nil).GetTradeDay))
+}
+
 // MockHistoryRepo is a mock of HistoryRepo interface.
 type MockHistoryRepo struct {
 	ctrl     *gomock.Controller
@@ -534,6 +562,48 @@ func NewMockHistoryRepo(ctrl *gomock.Controller) *MockHistoryRepo {
 // EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockHistoryRepo) EXPECT() *MockHistoryRepoMockRecorder {
 	return m.recorder
+}
+
+// DeleteHistoryCloseByStockAndDate mocks base method.
+func (m *MockHistoryRepo) DeleteHistoryCloseByStockAndDate(ctx context.Context, stockNumArr []string, date time.Time) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteHistoryCloseByStockAndDate", ctx, stockNumArr, date)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteHistoryCloseByStockAndDate indicates an expected call of DeleteHistoryCloseByStockAndDate.
+func (mr *MockHistoryRepoMockRecorder) DeleteHistoryCloseByStockAndDate(ctx, stockNumArr, date interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteHistoryCloseByStockAndDate", reflect.TypeOf((*MockHistoryRepo)(nil).DeleteHistoryCloseByStockAndDate), ctx, stockNumArr, date)
+}
+
+// DeleteHistoryKbarByStockAndDate mocks base method.
+func (m *MockHistoryRepo) DeleteHistoryKbarByStockAndDate(ctx context.Context, stockNumArr []string, date time.Time) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteHistoryKbarByStockAndDate", ctx, stockNumArr, date)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteHistoryKbarByStockAndDate indicates an expected call of DeleteHistoryKbarByStockAndDate.
+func (mr *MockHistoryRepoMockRecorder) DeleteHistoryKbarByStockAndDate(ctx, stockNumArr, date interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteHistoryKbarByStockAndDate", reflect.TypeOf((*MockHistoryRepo)(nil).DeleteHistoryKbarByStockAndDate), ctx, stockNumArr, date)
+}
+
+// DeleteHistoryTickByStockAndDate mocks base method.
+func (m *MockHistoryRepo) DeleteHistoryTickByStockAndDate(ctx context.Context, stockNumArr []string, date time.Time) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteHistoryTickByStockAndDate", ctx, stockNumArr, date)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteHistoryTickByStockAndDate indicates an expected call of DeleteHistoryTickByStockAndDate.
+func (mr *MockHistoryRepoMockRecorder) DeleteHistoryTickByStockAndDate(ctx, stockNumArr, date interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteHistoryTickByStockAndDate", reflect.TypeOf((*MockHistoryRepo)(nil).DeleteHistoryTickByStockAndDate), ctx, stockNumArr, date)
 }
 
 // InsertHistoryCloseArr mocks base method.
@@ -890,19 +960,19 @@ func (mr *MockStreamRepoMockRecorder) InsertEvent(ctx, t interface{}) *gomock.Ca
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertEvent", reflect.TypeOf((*MockStreamRepo)(nil).InsertEvent), ctx, t)
 }
 
-// QueryOrderByDate mocks base method.
-func (m *MockStreamRepo) QueryOrderByDate(ctx context.Context, date time.Time) ([]*entity.Order, error) {
+// QueryAllOrderByDate mocks base method.
+func (m *MockStreamRepo) QueryAllOrderByDate(ctx context.Context, date time.Time) ([]*entity.Order, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "QueryOrderByDate", ctx, date)
+	ret := m.ctrl.Call(m, "QueryAllOrderByDate", ctx, date)
 	ret0, _ := ret[0].([]*entity.Order)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// QueryOrderByDate indicates an expected call of QueryOrderByDate.
-func (mr *MockStreamRepoMockRecorder) QueryOrderByDate(ctx, date interface{}) *gomock.Call {
+// QueryAllOrderByDate indicates an expected call of QueryAllOrderByDate.
+func (mr *MockStreamRepoMockRecorder) QueryAllOrderByDate(ctx, date interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryOrderByDate", reflect.TypeOf((*MockStreamRepo)(nil).QueryOrderByDate), ctx, date)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryAllOrderByDate", reflect.TypeOf((*MockStreamRepo)(nil).QueryAllOrderByDate), ctx, date)
 }
 
 // QueryOrderByID mocks base method.

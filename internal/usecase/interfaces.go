@@ -70,7 +70,10 @@ type (
 
 type (
 	// History -.
-	History interface{}
+	History interface {
+		GetTradeDay() time.Time
+		GetDayKbarByStockNumDate(stockNum string, date time.Time) *entity.HistoryKbar
+	}
 
 	// HistoryRepo -.
 	HistoryRepo interface {

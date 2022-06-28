@@ -22,7 +22,7 @@ type OrderUseCase struct {
 }
 
 // NewOrder -.
-func NewOrder(t *grpcapi.OrdergRPCAPI, r *repo.OrderRepo) {
+func NewOrder(t *grpcapi.OrdergRPCAPI, r *repo.OrderRepo) *OrderUseCase {
 	cfg, err := config.GetConfig()
 	if err != nil {
 		log.Panic(err)
@@ -45,6 +45,8 @@ func NewOrder(t *grpcapi.OrdergRPCAPI, r *repo.OrderRepo) {
 			uc.updateOrderStatusCache()
 		}
 	}()
+
+	return uc
 }
 
 func (uc *OrderUseCase) placeOrder(order *entity.Order) {
