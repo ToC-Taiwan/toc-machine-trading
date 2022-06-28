@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"sort"
 	"sync"
 	"time"
 
@@ -15,15 +16,16 @@ type RealTimeData struct {
 	orderQuantity int64
 	tickArr       RealTimeTickArr
 
-	waitingOrder *entity.Order
-
 	bidAsk *entity.RealTimeBidAsk
 
 	orderMapLock sync.RWMutex
 	orderMap     map[entity.OrderAction][]*entity.Order
+	waitingOrder *entity.Order
 
 	tickChan   chan *entity.RealTimeTick
 	bidAskChan chan *entity.RealTimeBidAsk
+
+	historyTickAnalyze []int64
 }
 
 func (o *RealTimeData) generateOrder(cfg config.Analyze) *entity.Order {
@@ -60,16 +62,12 @@ func (o *RealTimeData) generateOrder(cfg config.Analyze) *entity.Order {
 
 	periodData := o.tickArr.getLastNSecondArr(cfg.TickAnalyzeMaxPeriod)
 	periodVolume := periodData.getTotalVolume()
-	// need to change to pr of history
-	if periodVolume < 100 {
+	if pr := o.getPRByVolume(periodVolume); pr < cfg.VolumePRLow || pr > cfg.VolumePRHigh {
 		return nil
 	}
 	periodOutInRation := periodData.getOutInRatio()
-	// need to compare with all and period
-	if periodOutInRation < cfg.OutInRatio && 100-periodOutInRation > cfg.InOutRatio {
-		return nil
-	}
 
+	// need to compare with all and period
 	order := &entity.Order{
 		StockNum:  o.stockNum,
 		Quantity:  o.orderQuantity,
@@ -79,7 +77,7 @@ func (o *RealTimeData) generateOrder(cfg config.Analyze) *entity.Order {
 	case periodOutInRation > cfg.OutInRatio:
 		order.Action = entity.ActionBuy
 		order.Price = o.bidAsk.BidPrice1
-	case periodOutInRation < cfg.InOutRatio:
+	case 100-periodOutInRation < cfg.InOutRatio:
 		order.Action = entity.ActionSellFirst
 		order.Price = o.bidAsk.AskPrice1
 	default:
@@ -133,6 +131,32 @@ func (o *RealTimeData) checkNeededPost() (entity.OrderAction, time.Time) {
 	}
 
 	return entity.ActionNone, time.Time{}
+}
+
+func (o *RealTimeData) setHistoryTickAnalyze(arr []int64) {
+	sort.Slice(arr, func(i, j int) bool {
+		return arr[i] > arr[j]
+	})
+	o.historyTickAnalyze = arr
+}
+
+func (o *RealTimeData) getPRByVolume(volume int64) float64 {
+	if len(o.historyTickAnalyze) < 2 {
+		return 0
+	}
+	total := len(o.historyTickAnalyze)
+
+	var position int
+	for i, v := range o.historyTickAnalyze {
+		if volume >= v {
+			position = i
+			break
+		}
+		if i == total-1 && position == 0 {
+			position = total
+		}
+	}
+	return 100 * float64(total-position) / float64(total)
 }
 
 // RealTimeTickArr -.

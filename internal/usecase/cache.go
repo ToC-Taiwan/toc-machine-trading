@@ -124,3 +124,22 @@ func (c *GlobalCache) GetTargets() []*entity.Target {
 	}
 	return []*entity.Target{}
 }
+
+// GetHistoryTickAnalyze -.
+func (c *GlobalCache) GetHistoryTickAnalyze(stockNum string) []int64 {
+	if value, ok := c.Get(c.historyTickAnalyzeKey(stockNum)); ok {
+		return value.([]int64)
+	}
+	return []int64{}
+}
+
+func (c *GlobalCache) setHistoryTickAnalyze(stockNum string, arr []int64) {
+	c.Set(c.historyTickAnalyzeKey(stockNum), arr)
+}
+
+// AppendHistoryTickAnalyze -.
+func (c *GlobalCache) AppendHistoryTickAnalyze(stockNum string, arr []int64) {
+	original := c.GetHistoryTickAnalyze(stockNum)
+	original = append(original, arr...)
+	c.setHistoryTickAnalyze(stockNum, original)
+}

@@ -366,9 +366,44 @@ func (uc *HistoryUseCase) processCloseArr(arr []*entity.HistoryClose) {
 }
 
 func (uc *HistoryUseCase) processTickArr(arr []*entity.HistoryTick) {
+	if len(arr) < 2 {
+		return
+	}
+
 	sort.Slice(arr, func(i, j int) bool {
 		return arr[i].TickTime.Before(arr[j].TickTime)
 	})
+	stockNum := arr[0].StockNum
+	minSec := uc.analyzeCfg.TickAnalyzeMinPeriod
+	maxSec := uc.analyzeCfg.TickAnalyzeMaxPeriod
+
+	var analyzeTickArr []*entity.HistoryTick
+	var volumeArr []int64
+	var startTime int64
+	for i, tick := range arr {
+		if i == 0 {
+			startTime = tick.TickTime.UnixNano()
+			continue
+		}
+		period := float64(tick.TickTime.UnixNano() - startTime)
+		analyzeTickArr = append(analyzeTickArr, tick)
+		switch {
+		case period < minSec*1000*1000*1000:
+			continue
+		case period >= minSec*1000*1000*1000 && period <= maxSec*1000*1000*1000:
+			var volumeSum int64
+			for _, k := range analyzeTickArr {
+				volumeSum += k.Volume
+			}
+			analyzeTickArr = []*entity.HistoryTick{}
+			volumeArr = append(volumeArr, volumeSum)
+		case period > maxSec*1000*1000*1000:
+			analyzeTickArr = []*entity.HistoryTick{tick}
+		}
+		startTime = tick.TickTime.UnixNano()
+	}
+
+	cc.AppendHistoryTickAnalyze(stockNum, volumeArr)
 }
 
 func (uc *HistoryUseCase) processKbarArr(arr []*entity.HistoryKbar) {

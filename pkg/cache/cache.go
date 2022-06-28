@@ -16,7 +16,7 @@ type Cache struct {
 // Category -.
 type Category string
 
-func (c Category) String() string {
+func (c Category) string() string {
 	return string(c)
 }
 
@@ -49,10 +49,10 @@ func (c *Cache) getOrNewCache(category string) *cache.Cache {
 
 // Set -.
 func (c *Cache) Set(k Key, x interface{}) {
-	c.getOrNewCache(k.Category.String()).Set(k.ID, x, 0)
+	c.getOrNewCache(k.Category.string()).Set(k.ID, x, 0)
 }
 
 // Get -.
 func (c *Cache) Get(k Key) (interface{}, bool) {
-	return c.getOrNewCache(k.Category.String()).Get(k.ID)
+	return c.getOrNewCache(k.Category.string()).Get(k.ID)
 }

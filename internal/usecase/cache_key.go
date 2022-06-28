@@ -11,11 +11,12 @@ import (
 const (
 	cacheCatagoryBasic cache.Category = "basic"
 
-	cacheCatagoryOrder        cache.Category = "order"
-	cacheCatagoryHistoryOpen  cache.Category = "history_open"
-	cacheCatagoryHistoryClose cache.Category = "history_close"
-	cacheCatagoryBiasRate     cache.Category = "bias_rate"
-	cacheCatagoryQuaterMA     cache.Category = "quater_ma"
+	cacheCatagoryOrder cache.Category = "order"
+
+	cacheCatagoryHistoryOpen        cache.Category = "history_open"
+	cacheCatagoryHistoryClose       cache.Category = "history_close"
+	cacheCatagoryHistoryTickAnalyze cache.Category = "history_tick_analyze"
+	cacheCatagoryBiasRate           cache.Category = "bias_rate"
 )
 
 const (
@@ -41,15 +42,6 @@ func (c *GlobalCache) generateID(opt ...any) string {
 	return fmt.Sprintf(format, opt...)
 }
 
-// Basic
-//
-func (c *GlobalCache) stockDetailKey(stockNum string) cache.Key {
-	return cache.Key{
-		Category: cacheCatagoryBasic,
-		ID:       c.generateID(cacheIDStockNum, stockNum),
-	}
-}
-
 func (c *GlobalCache) calendarKey() cache.Key {
 	return cache.Key{
 		Category: cacheCatagoryBasic,
@@ -71,8 +63,13 @@ func (c *GlobalCache) targetsKey() cache.Key {
 	}
 }
 
-// Order
-//
+func (c *GlobalCache) stockDetailKey(stockNum string) cache.Key {
+	return cache.Key{
+		Category: cacheCatagoryBasic,
+		ID:       c.generateID(cacheIDStockNum, stockNum),
+	}
+}
+
 func (c *GlobalCache) orderKey(orderID string) cache.Key {
 	return cache.Key{
 		Category: cacheCatagoryOrder,
@@ -80,8 +77,6 @@ func (c *GlobalCache) orderKey(orderID string) cache.Key {
 	}
 }
 
-// HistoryOpen
-//
 func (c *GlobalCache) historyOpenKey(stockNum string, date time.Time) cache.Key {
 	return cache.Key{
 		Category: cacheCatagoryHistoryOpen,
@@ -89,8 +84,6 @@ func (c *GlobalCache) historyOpenKey(stockNum string, date time.Time) cache.Key 
 	}
 }
 
-// HistoryClose
-//
 func (c *GlobalCache) historyCloseKey(stockNum string, date time.Time) cache.Key {
 	return cache.Key{
 		Category: cacheCatagoryHistoryClose,
@@ -98,11 +91,16 @@ func (c *GlobalCache) historyCloseKey(stockNum string, date time.Time) cache.Key
 	}
 }
 
-// BiasRate
-//
 func (c *GlobalCache) biasRateKey(stockNum string) cache.Key {
 	return cache.Key{
 		Category: cacheCatagoryBiasRate,
+		ID:       c.generateID(cacheIDStockNum, stockNum),
+	}
+}
+
+func (c *GlobalCache) historyTickAnalyzeKey(stockNum string) cache.Key {
+	return cache.Key{
+		Category: cacheCatagoryHistoryTickAnalyze,
 		ID:       c.generateID(cacheIDStockNum, stockNum),
 	}
 }

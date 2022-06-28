@@ -112,15 +112,16 @@ func (uc *StreamUseCase) sendAllOrders(ctx context.Context) {
 // ReceiveStreamData -.
 func (uc *StreamUseCase) ReceiveStreamData(ctx context.Context, targetArr []*entity.Target) {
 	for _, t := range targetArr {
-		target := t
 		data := &RealTimeData{
-			stockNum: target.StockNum,
+			stockNum: t.StockNum,
 			orderMap: make(map[entity.OrderAction][]*entity.Order),
 			// quantity should decide by bisrate
 			orderQuantity: 1,
 			tickChan:      make(chan *entity.RealTimeTick),
 			bidAskChan:    make(chan *entity.RealTimeBidAsk),
 		}
+		data.setHistoryTickAnalyze(cc.GetHistoryTickAnalyze(t.StockNum))
+
 		finishChan := make(chan struct{})
 		go uc.tradeAgent(data, finishChan)
 		for {
@@ -129,8 +130,8 @@ func (uc *StreamUseCase) ReceiveStreamData(ctx context.Context, targetArr []*ent
 				break
 			}
 		}
-		go uc.rabbit.TickConsumer(target.StockNum, data.tickChan)
-		go uc.rabbit.BidAskConsumer(target.StockNum, data.bidAskChan)
+		go uc.rabbit.TickConsumer(t.StockNum, data.tickChan)
+		go uc.rabbit.BidAskConsumer(t.StockNum, data.bidAskChan)
 	}
 	bus.PublishTopicEvent(topicSubscribeTickTargets, ctx, targetArr)
 }
