@@ -104,32 +104,32 @@ func (m *MockBasicRepo) EXPECT() *MockBasicRepoMockRecorder {
 	return m.recorder
 }
 
-// InserOrUpdatetCalendarDateArr mocks base method.
-func (m *MockBasicRepo) InserOrUpdatetCalendarDateArr(ctx context.Context, t []*entity.CalendarDate) error {
+// InsertOrUpdatetCalendarDateArr mocks base method.
+func (m *MockBasicRepo) InsertOrUpdatetCalendarDateArr(ctx context.Context, t []*entity.CalendarDate) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "InserOrUpdatetCalendarDateArr", ctx, t)
+	ret := m.ctrl.Call(m, "InsertOrUpdatetCalendarDateArr", ctx, t)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// InserOrUpdatetCalendarDateArr indicates an expected call of InserOrUpdatetCalendarDateArr.
-func (mr *MockBasicRepoMockRecorder) InserOrUpdatetCalendarDateArr(ctx, t interface{}) *gomock.Call {
+// InsertOrUpdatetCalendarDateArr indicates an expected call of InsertOrUpdatetCalendarDateArr.
+func (mr *MockBasicRepoMockRecorder) InsertOrUpdatetCalendarDateArr(ctx, t interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InserOrUpdatetCalendarDateArr", reflect.TypeOf((*MockBasicRepo)(nil).InserOrUpdatetCalendarDateArr), ctx, t)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertOrUpdatetCalendarDateArr", reflect.TypeOf((*MockBasicRepo)(nil).InsertOrUpdatetCalendarDateArr), ctx, t)
 }
 
-// InserOrUpdatetStockArr mocks base method.
-func (m *MockBasicRepo) InserOrUpdatetStockArr(ctx context.Context, t []*entity.Stock) error {
+// InsertOrUpdatetStockArr mocks base method.
+func (m *MockBasicRepo) InsertOrUpdatetStockArr(ctx context.Context, t []*entity.Stock) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "InserOrUpdatetStockArr", ctx, t)
+	ret := m.ctrl.Call(m, "InsertOrUpdatetStockArr", ctx, t)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// InserOrUpdatetStockArr indicates an expected call of InserOrUpdatetStockArr.
-func (mr *MockBasicRepoMockRecorder) InserOrUpdatetStockArr(ctx, t interface{}) *gomock.Call {
+// InsertOrUpdatetStockArr indicates an expected call of InsertOrUpdatetStockArr.
+func (mr *MockBasicRepoMockRecorder) InsertOrUpdatetStockArr(ctx, t interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InserOrUpdatetStockArr", reflect.TypeOf((*MockBasicRepo)(nil).InserOrUpdatetStockArr), ctx, t)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertOrUpdatetStockArr", reflect.TypeOf((*MockBasicRepo)(nil).InsertOrUpdatetStockArr), ctx, t)
 }
 
 // QueryAllCalendar mocks base method.
@@ -932,20 +932,6 @@ func (m *MockStreamRepo) EXPECT() *MockStreamRepoMockRecorder {
 	return m.recorder
 }
 
-// InserOrUpdatetOrder mocks base method.
-func (m *MockStreamRepo) InserOrUpdatetOrder(ctx context.Context, t *entity.Order) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "InserOrUpdatetOrder", ctx, t)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// InserOrUpdatetOrder indicates an expected call of InserOrUpdatetOrder.
-func (mr *MockStreamRepoMockRecorder) InserOrUpdatetOrder(ctx, t interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InserOrUpdatetOrder", reflect.TypeOf((*MockStreamRepo)(nil).InserOrUpdatetOrder), ctx, t)
-}
-
 // InsertEvent mocks base method.
 func (m *MockStreamRepo) InsertEvent(ctx context.Context, t *entity.SinopacEvent) error {
 	m.ctrl.T.Helper()
@@ -958,36 +944,6 @@ func (m *MockStreamRepo) InsertEvent(ctx context.Context, t *entity.SinopacEvent
 func (mr *MockStreamRepoMockRecorder) InsertEvent(ctx, t interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertEvent", reflect.TypeOf((*MockStreamRepo)(nil).InsertEvent), ctx, t)
-}
-
-// QueryAllOrderByDate mocks base method.
-func (m *MockStreamRepo) QueryAllOrderByDate(ctx context.Context, date time.Time) ([]*entity.Order, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "QueryAllOrderByDate", ctx, date)
-	ret0, _ := ret[0].([]*entity.Order)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// QueryAllOrderByDate indicates an expected call of QueryAllOrderByDate.
-func (mr *MockStreamRepoMockRecorder) QueryAllOrderByDate(ctx, date interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryAllOrderByDate", reflect.TypeOf((*MockStreamRepo)(nil).QueryAllOrderByDate), ctx, date)
-}
-
-// QueryOrderByID mocks base method.
-func (m *MockStreamRepo) QueryOrderByID(ctx context.Context, orderID string) (*entity.Order, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "QueryOrderByID", ctx, orderID)
-	ret0, _ := ret[0].(*entity.Order)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// QueryOrderByID indicates an expected call of QueryOrderByID.
-func (mr *MockStreamRepoMockRecorder) QueryOrderByID(ctx, orderID interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryOrderByID", reflect.TypeOf((*MockStreamRepo)(nil).QueryOrderByID), ctx, orderID)
 }
 
 // MockStreamRabbit is a mock of StreamRabbit interface.
@@ -1107,18 +1063,77 @@ func (m *MockOrderRepo) EXPECT() *MockOrderRepoMockRecorder {
 	return m.recorder
 }
 
-// InserOrUpdateTradeBalance mocks base method.
-func (m *MockOrderRepo) InserOrUpdateTradeBalance(ctx context.Context, t *entity.TradeBalance) error {
+// InsertOrUpdateOrder mocks base method.
+func (m *MockOrderRepo) InsertOrUpdateOrder(ctx context.Context, t *entity.Order) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "InserOrUpdateTradeBalance", ctx, t)
+	ret := m.ctrl.Call(m, "InsertOrUpdateOrder", ctx, t)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// InserOrUpdateTradeBalance indicates an expected call of InserOrUpdateTradeBalance.
-func (mr *MockOrderRepoMockRecorder) InserOrUpdateTradeBalance(ctx, t interface{}) *gomock.Call {
+// InsertOrUpdateOrder indicates an expected call of InsertOrUpdateOrder.
+func (mr *MockOrderRepoMockRecorder) InsertOrUpdateOrder(ctx, t interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InserOrUpdateTradeBalance", reflect.TypeOf((*MockOrderRepo)(nil).InserOrUpdateTradeBalance), ctx, t)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertOrUpdateOrder", reflect.TypeOf((*MockOrderRepo)(nil).InsertOrUpdateOrder), ctx, t)
+}
+
+// InsertOrUpdateTradeBalance mocks base method.
+func (m *MockOrderRepo) InsertOrUpdateTradeBalance(ctx context.Context, t *entity.TradeBalance) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "InsertOrUpdateTradeBalance", ctx, t)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// InsertOrUpdateTradeBalance indicates an expected call of InsertOrUpdateTradeBalance.
+func (mr *MockOrderRepoMockRecorder) InsertOrUpdateTradeBalance(ctx, t interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertOrUpdateTradeBalance", reflect.TypeOf((*MockOrderRepo)(nil).InsertOrUpdateTradeBalance), ctx, t)
+}
+
+// QueryAllOrderByDate mocks base method.
+func (m *MockOrderRepo) QueryAllOrderByDate(ctx context.Context, date time.Time) ([]*entity.Order, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "QueryAllOrderByDate", ctx, date)
+	ret0, _ := ret[0].([]*entity.Order)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// QueryAllOrderByDate indicates an expected call of QueryAllOrderByDate.
+func (mr *MockOrderRepoMockRecorder) QueryAllOrderByDate(ctx, date interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryAllOrderByDate", reflect.TypeOf((*MockOrderRepo)(nil).QueryAllOrderByDate), ctx, date)
+}
+
+// QueryOrderByID mocks base method.
+func (m *MockOrderRepo) QueryOrderByID(ctx context.Context, orderID string) (*entity.Order, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "QueryOrderByID", ctx, orderID)
+	ret0, _ := ret[0].(*entity.Order)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// QueryOrderByID indicates an expected call of QueryOrderByID.
+func (mr *MockOrderRepoMockRecorder) QueryOrderByID(ctx, orderID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryOrderByID", reflect.TypeOf((*MockOrderRepo)(nil).QueryOrderByID), ctx, orderID)
+}
+
+// QueryTradeBalanceByDate mocks base method.
+func (m *MockOrderRepo) QueryTradeBalanceByDate(ctx context.Context, date time.Time) (*entity.TradeBalance, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "QueryTradeBalanceByDate", ctx, date)
+	ret0, _ := ret[0].(*entity.TradeBalance)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// QueryTradeBalanceByDate indicates an expected call of QueryTradeBalanceByDate.
+func (mr *MockOrderRepoMockRecorder) QueryTradeBalanceByDate(ctx, date interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryTradeBalanceByDate", reflect.TypeOf((*MockOrderRepo)(nil).QueryTradeBalanceByDate), ctx, date)
 }
 
 // MockOrdergRPCAPI is a mock of OrdergRPCAPI interface.

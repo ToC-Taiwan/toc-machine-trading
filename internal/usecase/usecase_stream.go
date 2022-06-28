@@ -8,8 +8,6 @@ import (
 	"toc-machine-trading/internal/usecase/rabbit"
 	"toc-machine-trading/internal/usecase/repo"
 	"toc-machine-trading/pkg/config"
-
-	"github.com/google/go-cmp/cmp"
 )
 
 // StreamUseCase -.
@@ -40,16 +38,9 @@ func NewStream(r *repo.StreamRepo, t *rabbit.StreamRabbit) *StreamUseCase {
 	uc.analyzeCfg = cfg.Analyze
 	uc.basic = *cc.GetBasicInfo()
 
-	go func() {
-		for range time.Tick(time.Minute) {
-			uc.sendAllOrders(context.Background())
-		}
-	}()
-
 	go uc.checkTradeSwitch()
 
 	bus.SubscribeTopic(topicStreamTargets, uc.ReceiveStreamData)
-	bus.SubscribeTopic(topicUpdateOrderStatus, uc.updateOrderSatusCache)
 
 	go uc.ReceiveEvent(context.Background())
 	go uc.ReceiveOrderStatus(context.Background())
@@ -81,34 +72,10 @@ func (uc *StreamUseCase) ReceiveOrderStatus(ctx context.Context) {
 	go func() {
 		for {
 			order := <-orderStatusChan
-			uc.updateOrderSatusCache(ctx, order)
+			bus.PublishTopicEvent(topicInsertOrUpdateOrder, order)
 		}
 	}()
 	uc.rabbit.OrderStatusConsumer(orderStatusChan)
-}
-
-func (uc *StreamUseCase) updateOrderSatusCache(ctx context.Context, order *entity.Order) {
-	cacheOrder := cc.GetOrderByOrderID(order.OrderID)
-
-	order.TradeTime = cacheOrder.TradeTime
-	order.Action = cacheOrder.Action
-
-	if !cmp.Equal(order, cacheOrder) {
-		cc.SetOrderByOrderID(order)
-	}
-
-	if err := uc.repo.InserOrUpdatetOrder(ctx, order); err != nil {
-		log.Error(err)
-	}
-}
-
-func (uc *StreamUseCase) sendAllOrders(ctx context.Context) {
-	allOrders, err := uc.repo.QueryAllOrderByDate(ctx, uc.basic.TradeDay)
-	if err != nil {
-		log.Panic(err)
-	}
-
-	bus.PublishTopicEvent(topicAllOrders, allOrders)
 }
 
 // ReceiveStreamData -.

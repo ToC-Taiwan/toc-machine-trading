@@ -78,9 +78,9 @@ definitions:
     type: object
 info:
   contact: {}
-  description: Auto Trade on sinopac
-  title: TOC MACHINE TRADING API
-  version: 1.0.0
+  description: Auto Trade
+  title: TOC MACHINE TRADING
+  version: 0.0.1
 paths:
   /analyze/below-quater:
     get:

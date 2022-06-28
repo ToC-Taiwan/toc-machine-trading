@@ -372,12 +372,12 @@ const docTemplate = `{
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "1.0.0",
+	Version:          "0.0.1",
 	Host:             "",
 	BasePath:         "",
 	Schemes:          []string{},
-	Title:            "TOC MACHINE TRADING API",
-	Description:      "Auto Trade on sinopac",
+	Title:            "TOC MACHINE TRADING",
+	Description:      "Auto Trade",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 }

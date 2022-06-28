@@ -24,7 +24,7 @@ type RouterV1 struct {
 // @description Auto Trade
 // @version     0.0.1
 func NewRouter(handler *gin.Engine) *RouterV1 {
-	apiVersion := "v1"
+	apiVersion := "/v1"
 
 	docs.SwaggerInfo.BasePath = apiVersion
 	docs.SwaggerInfo.Host = "127.0.0.1:8080"

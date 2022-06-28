@@ -28,9 +28,9 @@ type (
 	// BasicRepo -.
 	BasicRepo interface {
 		QueryAllStock(ctx context.Context) (map[string]*entity.Stock, error)
-		InserOrUpdatetStockArr(ctx context.Context, t []*entity.Stock) error
+		InsertOrUpdatetStockArr(ctx context.Context, t []*entity.Stock) error
 		QueryAllCalendar(ctx context.Context) (map[time.Time]*entity.CalendarDate, error)
-		InserOrUpdatetCalendarDateArr(ctx context.Context, t []*entity.CalendarDate) error
+		InsertOrUpdatetCalendarDateArr(ctx context.Context, t []*entity.CalendarDate) error
 	}
 
 	// BasicgRPCAPI -.
@@ -113,9 +113,6 @@ type (
 	// StreamRepo -.
 	StreamRepo interface {
 		InsertEvent(ctx context.Context, t *entity.SinopacEvent) error
-		InserOrUpdatetOrder(ctx context.Context, t *entity.Order) error
-		QueryOrderByID(ctx context.Context, orderID string) (*entity.Order, error)
-		QueryAllOrderByDate(ctx context.Context, date time.Time) ([]*entity.Order, error)
 	}
 
 	// StreamRabbit -.
@@ -133,7 +130,11 @@ type (
 
 	// OrderRepo -.
 	OrderRepo interface {
-		InserOrUpdateTradeBalance(ctx context.Context, t *entity.TradeBalance) error
+		InsertOrUpdateTradeBalance(ctx context.Context, t *entity.TradeBalance) error
+		QueryTradeBalanceByDate(ctx context.Context, date time.Time) (*entity.TradeBalance, error)
+		InsertOrUpdateOrder(ctx context.Context, t *entity.Order) error
+		QueryOrderByID(ctx context.Context, orderID string) (*entity.Order, error)
+		QueryAllOrderByDate(ctx context.Context, date time.Time) ([]*entity.Order, error)
 	}
 
 	// OrdergRPCAPI -.

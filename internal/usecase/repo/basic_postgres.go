@@ -21,8 +21,8 @@ func NewBasic(pg *postgres.Postgres) *BasicRepo {
 	return &BasicRepo{pg}
 }
 
-// InserOrUpdatetStockArr -.
-func (r *BasicRepo) InserOrUpdatetStockArr(ctx context.Context, t []*entity.Stock) error {
+// InsertOrUpdatetStockArr -.
+func (r *BasicRepo) InsertOrUpdatetStockArr(ctx context.Context, t []*entity.Stock) error {
 	inDBStock, err := r.QueryAllStock(ctx)
 	if err != nil {
 		return err
@@ -68,7 +68,7 @@ func (r *BasicRepo) InserOrUpdatetStockArr(ctx context.Context, t []*entity.Stoc
 			return err
 		}
 	}
-	log.Infof("InserOrUpdatetStockArr -> Exist: %d, Insert: %d, Update: %d", len(t)-update-insert, insert, update)
+	log.Infof("InsertOrUpdatetStockArr -> Exist: %d, Insert: %d, Update: %d", len(t)-update-insert, insert, update)
 	return nil
 }
 
@@ -98,8 +98,8 @@ func (r *BasicRepo) QueryAllStock(ctx context.Context) (map[string]*entity.Stock
 	return entities, nil
 }
 
-// InserOrUpdatetCalendarDateArr -.
-func (r *BasicRepo) InserOrUpdatetCalendarDateArr(ctx context.Context, t []*entity.CalendarDate) error {
+// InsertOrUpdatetCalendarDateArr -.
+func (r *BasicRepo) InsertOrUpdatetCalendarDateArr(ctx context.Context, t []*entity.CalendarDate) error {
 	inDBCalendar, err := r.QueryAllCalendar(ctx)
 	if err != nil {
 		return err
@@ -141,7 +141,7 @@ func (r *BasicRepo) InserOrUpdatetCalendarDateArr(ctx context.Context, t []*enti
 			return err
 		}
 	}
-	log.Infof("InserOrUpdatetCalendarDateArr -> Exist: %d, Insert: %d, Update: %d", len(t)-update-insert, insert, update)
+	log.Infof("InsertOrUpdatetCalendarDateArr -> Exist: %d, Insert: %d, Update: %d", len(t)-update-insert, insert, update)
 	return nil
 }
 

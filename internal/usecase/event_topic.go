@@ -6,8 +6,7 @@ const (
 	topicStreamTargets        string = "stream_targets"
 	topicSubscribeTickTargets string = "subscribe_targets"
 
-	topicPlaceOrder        string = "place_order"
-	topicCancelOrder       string = "cancel_order"
-	topicUpdateOrderStatus string = "update_order_status"
-	topicAllOrders         string = "all_orders"
+	topicPlaceOrder          string = "place_order"
+	topicCancelOrder         string = "cancel_order"
+	topicInsertOrUpdateOrder string = "insert_or_update_order"
 )

@@ -72,7 +72,7 @@ func (uc *BasicUseCase) GetAllSinopacStockAndUpdateRepo(ctx context.Context) ([]
 		cc.SetStockDetail(stock)
 	}
 
-	err = uc.repo.InserOrUpdatetStockArr(context.Background(), stockDetail)
+	err = uc.repo.InsertOrUpdatetStockArr(context.Background(), stockDetail)
 	if err != nil {
 		return []*entity.Stock{}, err
 	}
@@ -129,7 +129,7 @@ func (uc *BasicUseCase) importCalendarDate(ctx context.Context) error {
 	}
 	cc.SetCalendar(tradeDayMap)
 
-	if err := uc.repo.InserOrUpdatetCalendarDateArr(ctx, tmp); err != nil {
+	if err := uc.repo.InsertOrUpdatetCalendarDateArr(ctx, tmp); err != nil {
 		return err
 	}
 	return nil

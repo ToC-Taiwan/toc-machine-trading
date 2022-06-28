@@ -10,6 +10,8 @@ import (
 	"toc-machine-trading/internal/usecase/repo"
 	"toc-machine-trading/pkg/config"
 	"toc-machine-trading/pkg/global"
+
+	"github.com/google/go-cmp/cmp"
 )
 
 // OrderUseCase -.
@@ -38,7 +40,17 @@ func NewOrder(t *grpcapi.OrdergRPCAPI, r *repo.OrderRepo) *OrderUseCase {
 
 	bus.SubscribeTopic(topicPlaceOrder, uc.placeOrder)
 	bus.SubscribeTopic(topicCancelOrder, uc.cancelOrder)
-	bus.SubscribeTopic(topicAllOrders, uc.CalculateTradeBalance)
+	bus.SubscribeTopic(topicInsertOrUpdateOrder, uc.InsertOrUpdateOrder)
+
+	go func() {
+		for range time.Tick(time.Minute) {
+			orders, err := uc.repo.QueryAllOrderByDate(context.Background(), cc.GetBasicInfo().TradeDay)
+			if err != nil {
+				log.Panic(err)
+			}
+			uc.CalculateTradeBalance(orders)
+		}
+	}()
 
 	go func() {
 		for range time.NewTicker(1500 * time.Millisecond).C {
@@ -206,7 +218,20 @@ func (uc *OrderUseCase) updateOrderStatusCache() {
 				Status:    statusMap[v.GetStatus()],
 				OrderTime: orderTime,
 			}
-			bus.PublishTopicEvent(topicUpdateOrderStatus, context.Background(), o)
+			uc.InsertOrUpdateOrder(o)
+		}
+	}
+}
+
+// InsertOrUpdateOrder -.
+func (uc *OrderUseCase) InsertOrUpdateOrder(order *entity.Order) {
+	cacheOrder := cc.GetOrderByOrderID(order.OrderID)
+	order.TradeTime = cacheOrder.TradeTime
+	order.Action = cacheOrder.Action
+	if !cmp.Equal(order, cacheOrder) {
+		cc.SetOrderByOrderID(order)
+		if err := uc.repo.InsertOrUpdateOrder(context.Background(), order); err != nil {
+			log.Panic(err)
 		}
 	}
 }
@@ -262,7 +287,7 @@ func (uc *OrderUseCase) CalculateTradeBalance(allOrders []*entity.Order) {
 		Total:           forwardBalance + revereBalance + discount,
 	}
 
-	err := uc.repo.InserOrUpdateTradeBalance(context.Background(), tmp)
+	err := uc.repo.InsertOrUpdateTradeBalance(context.Background(), tmp)
 	if err != nil {
 		log.Panic(err)
 	}

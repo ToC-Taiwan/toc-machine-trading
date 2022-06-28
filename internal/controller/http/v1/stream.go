@@ -17,7 +17,7 @@ func newStreamRoutes(handler *gin.RouterGroup, t usecase.Stream) {
 
 	h := handler.Group("/stream")
 	{
-		h.GET("/", r.getTSESnapshot)
+		h.GET("/tse/snapshot", r.getTSESnapshot)
 	}
 }
 
@@ -27,7 +27,7 @@ func newStreamRoutes(handler *gin.RouterGroup, t usecase.Stream) {
 // @Tags  	    stream
 // @Accept      json
 // @Produce     json
-// @Router      /stream [get]
+// @Router      /stream/tse/snapshot [get]
 func (r *streamRoutes) getTSESnapshot(c *gin.Context) {
 	c.JSON(http.StatusOK, nil)
 }
