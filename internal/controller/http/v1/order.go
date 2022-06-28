@@ -27,7 +27,15 @@ func newOrderRoutes(handler *gin.RouterGroup, t usecase.Order) {
 // @Tags  	    order
 // @Accept      json
 // @Produce     json
+// @Success     200 {object} []entity.Order
+// @Failure     500 {object} response
 // @Router      /order [get]
 func (r *orderRoutes) getAllOrder(c *gin.Context) {
-	c.JSON(http.StatusOK, nil)
+	orderArr, err := r.t.GetAllOrder(c.Request.Context())
+	if err != nil {
+		log.Error(err)
+		errorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	c.JSON(http.StatusOK, orderArr)
 }

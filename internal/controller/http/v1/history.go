@@ -42,14 +42,14 @@ func (r *historyRoutes) getKbarData(c *gin.Context) {
 	interval, err := strconv.Atoi(c.Param("interval"))
 	if err != nil {
 		log.Error(err)
-		errorResponse(c, http.StatusInternalServerError, "interval problems")
+		errorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 	startDate := c.Param("start_date")
 	startDateTime, err := time.Parse(global.ShortTimeLayout, startDate)
 	if err != nil {
 		log.Error(err)
-		errorResponse(c, http.StatusInternalServerError, "date problems")
+		errorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 

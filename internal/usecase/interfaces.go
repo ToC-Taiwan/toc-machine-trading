@@ -126,7 +126,9 @@ type (
 
 type (
 	// Order -.
-	Order interface{}
+	Order interface {
+		GetAllOrder(ctx context.Context) ([]*entity.Order, error)
+	}
 
 	// OrderRepo -.
 	OrderRepo interface {
@@ -135,6 +137,7 @@ type (
 		InsertOrUpdateOrder(ctx context.Context, t *entity.Order) error
 		QueryOrderByID(ctx context.Context, orderID string) (*entity.Order, error)
 		QueryAllOrderByDate(ctx context.Context, date time.Time) ([]*entity.Order, error)
+		QueryAllOrder(ctx context.Context) ([]*entity.Order, error)
 	}
 
 	// OrdergRPCAPI -.

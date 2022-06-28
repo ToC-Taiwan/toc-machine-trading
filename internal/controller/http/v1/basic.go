@@ -41,7 +41,7 @@ func (r *basicRoutes) getAllSinopacStockAndUpdateRepo(c *gin.Context) {
 	stockDetail, err := r.t.GetAllSinopacStockAndUpdateRepo(c.Request.Context())
 	if err != nil {
 		log.Error(err)
-		errorResponse(c, http.StatusInternalServerError, "sinopac problems")
+		errorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -63,7 +63,7 @@ func (r *basicRoutes) getAllRepoStock(c *gin.Context) {
 	stockDetail, err := r.t.GetAllRepoStock(c.Request.Context())
 	if err != nil {
 		log.Error(err)
-		errorResponse(c, http.StatusInternalServerError, "repo problems")
+		errorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -85,7 +85,7 @@ func (r *basicRoutes) terminateSinopac(c *gin.Context) {
 	err := r.t.TerminateSinopac(c.Request.Context())
 	if err != nil {
 		log.Error(err)
-		errorResponse(c, http.StatusInternalServerError, "terminate fail")
+		errorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 

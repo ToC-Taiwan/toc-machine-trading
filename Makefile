@@ -14,7 +14,7 @@ swag-v1: ### swag init
 .PHONY: swag-v1
 
 run: swag-v1 ### swag run
-	@go mod tidy && go mod download && \
+	@go mod tidy && go mod download && go generate ./... && \
 	CGO_ENABLED=0 go build -gcflags=all="-N -l" -o toc-machine-trading ./cmd/app && ./toc-machine-trading
 .PHONY: run
 

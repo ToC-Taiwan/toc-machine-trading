@@ -1040,6 +1040,21 @@ func (m *MockOrder) EXPECT() *MockOrderMockRecorder {
 	return m.recorder
 }
 
+// GetAllOrder mocks base method.
+func (m *MockOrder) GetAllOrder(ctx context.Context) ([]*entity.Order, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAllOrder", ctx)
+	ret0, _ := ret[0].([]*entity.Order)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAllOrder indicates an expected call of GetAllOrder.
+func (mr *MockOrderMockRecorder) GetAllOrder(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllOrder", reflect.TypeOf((*MockOrder)(nil).GetAllOrder), ctx)
+}
+
 // MockOrderRepo is a mock of OrderRepo interface.
 type MockOrderRepo struct {
 	ctrl     *gomock.Controller
@@ -1089,6 +1104,21 @@ func (m *MockOrderRepo) InsertOrUpdateTradeBalance(ctx context.Context, t *entit
 func (mr *MockOrderRepoMockRecorder) InsertOrUpdateTradeBalance(ctx, t interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertOrUpdateTradeBalance", reflect.TypeOf((*MockOrderRepo)(nil).InsertOrUpdateTradeBalance), ctx, t)
+}
+
+// QueryAllOrder mocks base method.
+func (m *MockOrderRepo) QueryAllOrder(ctx context.Context) ([]*entity.Order, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "QueryAllOrder", ctx)
+	ret0, _ := ret[0].([]*entity.Order)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// QueryAllOrder indicates an expected call of QueryAllOrder.
+func (mr *MockOrderRepoMockRecorder) QueryAllOrder(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryAllOrder", reflect.TypeOf((*MockOrderRepo)(nil).QueryAllOrder), ctx)
 }
 
 // QueryAllOrderByDate mocks base method.

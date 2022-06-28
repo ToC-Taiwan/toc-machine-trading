@@ -120,6 +120,33 @@ func (r *OrderRepo) QueryAllOrderByDate(ctx context.Context, date time.Time) ([]
 	return result, nil
 }
 
+// QueryAllOrder -.
+func (r *OrderRepo) QueryAllOrder(ctx context.Context) ([]*entity.Order, error) {
+	sql, _, err := r.Builder.
+		Select("order_id, status, order_time, stock_num, action, price, quantity, trade_time, number, name, exchange, category, day_trade, last_close").
+		From(tableNameTradeOrder).
+		Join("basic_stock ON trade_order.stock_num = basic_stock.number").ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	rows, err := r.Pool().Query(ctx, sql)
+	if err != nil {
+		return nil, err
+	}
+
+	var result []*entity.Order
+	for rows.Next() {
+		e := entity.Order{Stock: new(entity.Stock)}
+		if err := rows.Scan(&e.OrderID, &e.Status, &e.OrderTime, &e.StockNum, &e.Action, &e.Price, &e.Quantity, &e.TradeTime,
+			&e.Stock.Number, &e.Stock.Name, &e.Stock.Exchange, &e.Stock.Category, &e.Stock.DayTrade, &e.Stock.LastClose); err != nil {
+			return nil, err
+		}
+		result = append(result, &e)
+	}
+	return result, nil
+}
+
 // InsertOrUpdateTradeBalance -.
 func (r *OrderRepo) InsertOrUpdateTradeBalance(ctx context.Context, t *entity.TradeBalance) error {
 	dbTradeBalance, err := r.QueryTradeBalanceByDate(ctx, t.TradeDay)

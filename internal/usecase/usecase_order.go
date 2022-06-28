@@ -292,3 +292,12 @@ func (uc *OrderUseCase) CalculateTradeBalance(allOrders []*entity.Order) {
 		log.Panic(err)
 	}
 }
+
+// GetAllOrder -.
+func (uc *OrderUseCase) GetAllOrder(ctx context.Context) ([]*entity.Order, error) {
+	orderArr, err := uc.repo.QueryAllOrder(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return orderArr, nil
+}

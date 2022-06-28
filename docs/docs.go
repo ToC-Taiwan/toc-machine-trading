@@ -200,10 +200,26 @@ const docTemplate = `{
                 ],
                 "summary": "getAllOrder",
                 "operationId": "getAllOrder",
-                "responses": {}
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entity.Order"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/v1.response"
+                        }
+                    }
+                }
             }
         },
-        "/stream": {
+        "/stream/tse/snapshot": {
             "get": {
                 "description": "getTSESnapshot",
                 "consumes": [
@@ -278,6 +294,38 @@ const docTemplate = `{
                 },
                 "volume": {
                     "type": "integer"
+                }
+            }
+        },
+        "entity.Order": {
+            "type": "object",
+            "properties": {
+                "action": {
+                    "type": "integer"
+                },
+                "order_id": {
+                    "type": "string"
+                },
+                "order_time": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "number"
+                },
+                "quantity": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "integer"
+                },
+                "stock": {
+                    "$ref": "#/definitions/entity.Stock"
+                },
+                "stock_num": {
+                    "type": "string"
+                },
+                "trade_time": {
+                    "type": "string"
                 }
             }
         },
