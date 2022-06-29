@@ -543,7 +543,10 @@ const docTemplate = `{
                     "$ref": "#/definitions/config.Sinopac"
                 },
                 "target_cond": {
-                    "$ref": "#/definitions/config.TargetCond"
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/config.TargetCond"
+                    }
                 },
                 "trade_switch": {
                     "$ref": "#/definitions/config.TradeSwitch"

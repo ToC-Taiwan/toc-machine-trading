@@ -86,7 +86,7 @@ func (r *HistoryRepo) DeleteHistoryCloseByStockAndDate(ctx context.Context, stoc
 // QueryMutltiStockCloseByDate -.
 func (r *HistoryRepo) QueryMutltiStockCloseByDate(ctx context.Context, stockNumArr []string, date time.Time) (map[string]*entity.HistoryClose, error) {
 	sql, args, err := r.Builder.
-		Select("date, stock_num, close, number, name, exchange, category, day_trade, last_close").
+		Select("date, stock_num, close, number, name, exchange, category, day_trade, last_close, update_date").
 		From(tableNameHistoryClose).
 		Where(squirrel.Eq{"stock_num": stockNumArr}).
 		Where(squirrel.Eq{"date": date}).
@@ -106,7 +106,7 @@ func (r *HistoryRepo) QueryMutltiStockCloseByDate(ctx context.Context, stockNumA
 		e := entity.HistoryClose{Stock: new(entity.Stock)}
 		if err := rows.Scan(
 			&e.Date, &e.StockNum, &e.Close,
-			&e.Stock.Number, &e.Stock.Name, &e.Stock.Exchange, &e.Stock.Category, &e.Stock.DayTrade, &e.Stock.LastClose,
+			&e.Stock.Number, &e.Stock.Name, &e.Stock.Exchange, &e.Stock.Category, &e.Stock.DayTrade, &e.Stock.LastClose, &e.Stock.UpdateDate,
 		); err != nil {
 			return nil, err
 		}
@@ -182,7 +182,7 @@ func (r *HistoryRepo) DeleteHistoryTickByStockAndDate(ctx context.Context, stock
 // QueryMultiStockTickArrByDate -.
 func (r *HistoryRepo) QueryMultiStockTickArrByDate(ctx context.Context, stockNumArr []string, date time.Time) (map[string][]*entity.HistoryTick, error) {
 	sql, args, err := r.Builder.
-		Select("stock_num, tick_time, close, tick_type, volume, bid_price, bid_volume, ask_price, ask_volume, number, name, exchange, category, day_trade, last_close").
+		Select("stock_num, tick_time, close, tick_type, volume, bid_price, bid_volume, ask_price, ask_volume, number, name, exchange, category, day_trade, last_close, update_date").
 		From(tableNameHistoryTick).
 		Where(squirrel.GtOrEq{"tick_time": date}).
 		Where(squirrel.Lt{"tick_time": date.AddDate(0, 0, 1)}).
@@ -204,7 +204,7 @@ func (r *HistoryRepo) QueryMultiStockTickArrByDate(ctx context.Context, stockNum
 		e := entity.HistoryTick{Stock: new(entity.Stock)}
 		if err := rows.Scan(
 			&e.StockNum, &e.TickTime, &e.Close, &e.TickType, &e.Volume, &e.BidPrice, &e.BidVolume, &e.AskPrice, &e.AskVolume,
-			&e.Stock.Number, &e.Stock.Name, &e.Stock.Exchange, &e.Stock.Category, &e.Stock.DayTrade, &e.Stock.LastClose,
+			&e.Stock.Number, &e.Stock.Name, &e.Stock.Exchange, &e.Stock.Category, &e.Stock.DayTrade, &e.Stock.LastClose, &e.Stock.UpdateDate,
 		); err != nil {
 			return nil, err
 		}
@@ -280,7 +280,7 @@ func (r *HistoryRepo) DeleteHistoryKbarByStockAndDate(ctx context.Context, stock
 // QueryMultiStockKbarArrByDate -.
 func (r *HistoryRepo) QueryMultiStockKbarArrByDate(ctx context.Context, stockNumArr []string, date time.Time) (map[string][]*entity.HistoryKbar, error) {
 	sql, args, err := r.Builder.
-		Select("stock_num, kbar_time, open, high, low, close, volume, number, name, exchange, category, day_trade, last_close").
+		Select("stock_num, kbar_time, open, high, low, close, volume, number, name, exchange, category, day_trade, last_close, update_date").
 		From(tableNameHistoryKbar).
 		Where(squirrel.GtOrEq{"kbar_time": date}).
 		Where(squirrel.Lt{"kbar_time": date.AddDate(0, 0, 1)}).
@@ -302,7 +302,7 @@ func (r *HistoryRepo) QueryMultiStockKbarArrByDate(ctx context.Context, stockNum
 		e := entity.HistoryKbar{Stock: new(entity.Stock)}
 		if err := rows.Scan(
 			&e.StockNum, &e.KbarTime, &e.Open, &e.High, &e.Low, &e.Close, &e.Volume,
-			&e.Stock.Number, &e.Stock.Name, &e.Stock.Exchange, &e.Stock.Category, &e.Stock.DayTrade, &e.Stock.LastClose,
+			&e.Stock.Number, &e.Stock.Name, &e.Stock.Exchange, &e.Stock.Category, &e.Stock.DayTrade, &e.Stock.LastClose, &e.Stock.UpdateDate,
 		); err != nil {
 			return nil, err
 		}
@@ -340,7 +340,7 @@ func (r *HistoryRepo) InsertQuaterMA(ctx context.Context, t *entity.HistoryAnaly
 // QueryAllQuaterMAByStockNum -.
 func (r *HistoryRepo) QueryAllQuaterMAByStockNum(ctx context.Context, stockNum string) (map[time.Time]*entity.HistoryAnalyze, error) {
 	sql, args, err := r.Builder.
-		Select("date, stock_num, quater_ma, number, name, exchange, category, day_trade, last_close").
+		Select("date, stock_num, quater_ma, number, name, exchange, category, day_trade, last_close, update_date").
 		From(tableNameHistoryAnalyze).
 		Where(squirrel.Eq{"stock_num": stockNum}).
 		OrderBy("date ASC").
@@ -358,7 +358,7 @@ func (r *HistoryRepo) QueryAllQuaterMAByStockNum(ctx context.Context, stockNum s
 	result := make(map[time.Time]*entity.HistoryAnalyze)
 	for rows.Next() {
 		e := entity.HistoryAnalyze{Stock: new(entity.Stock)}
-		if err := rows.Scan(&e.Date, &e.StockNum, &e.QuaterMA, &e.Stock.Number, &e.Stock.Name, &e.Stock.Exchange, &e.Stock.Category, &e.Stock.DayTrade, &e.Stock.LastClose); err != nil {
+		if err := rows.Scan(&e.Date, &e.StockNum, &e.QuaterMA, &e.Stock.Number, &e.Stock.Name, &e.Stock.Exchange, &e.Stock.Category, &e.Stock.DayTrade, &e.Stock.LastClose, &e.Stock.UpdateDate); err != nil {
 			return nil, err
 		}
 		result[e.Date] = &e

@@ -51,7 +51,9 @@ definitions:
       sinopac:
         $ref: '#/definitions/config.Sinopac'
       target_cond:
-        $ref: '#/definitions/config.TargetCond'
+        items:
+          $ref: '#/definitions/config.TargetCond'
+        type: array
       trade_switch:
         $ref: '#/definitions/config.TradeSwitch'
     type: object

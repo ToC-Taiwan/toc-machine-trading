@@ -92,21 +92,23 @@ func (uc *TargetUseCase) SearchTradeDayTargets(ctx context.Context, tradeDay tim
 	condition := cfg.TargetCond
 
 	var result []*entity.Target
-	for _, v := range t {
-		if !targetFilter(v.GetClose(), v.GetTotalVolume(), condition, false) {
-			continue
-		}
+	for _, c := range condition {
+		for _, v := range t {
+			if !targetFilter(v.GetClose(), v.GetTotalVolume(), c, false) {
+				continue
+			}
 
-		if stock := cc.GetStockDetail(v.GetCode()); stock != nil {
-			result = append(result, &entity.Target{
-				Rank:        len(result) + 1,
-				StockNum:    v.GetCode(),
-				Volume:      v.GetTotalVolume(),
-				Subscribe:   true,
-				RealTimeAdd: false,
-				TradeDay:    tradeDay,
-				Stock:       stock,
-			})
+			if stock := cc.GetStockDetail(v.GetCode()); stock != nil {
+				result = append(result, &entity.Target{
+					Rank:        len(result) + 1,
+					StockNum:    v.GetCode(),
+					Volume:      v.GetTotalVolume(),
+					Subscribe:   true,
+					RealTimeAdd: false,
+					TradeDay:    tradeDay,
+					Stock:       stock,
+				})
+			}
 		}
 	}
 	return result, nil

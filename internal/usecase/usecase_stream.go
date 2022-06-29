@@ -21,7 +21,7 @@ type StreamUseCase struct {
 	tradeSwitchCfg config.TradeSwitch
 	analyzeCfg     config.Analyze
 	basic          entity.BasicInfo
-	targetCond     config.TargetCond
+	targetCond     []config.TargetCond
 
 	tradeInSwitch bool
 	clearAll      bool
@@ -236,18 +236,20 @@ func (uc *StreamUseCase) realTimeAddTargets(ctx context.Context) error {
 	}
 
 	var newTargets []*entity.Target
-	for i, d := range data {
-		if targetFilter(d.GetClose(), d.GetTotalVolume(), uc.targetCond, true) {
-			if stock := cc.GetStockDetail(d.GetCode()); stock != nil && targetsMap[d.GetCode()] == nil {
-				newTargets = append(newTargets, &entity.Target{
-					Rank:        100 + i + 1,
-					StockNum:    d.GetCode(),
-					Volume:      d.GetTotalVolume(),
-					Subscribe:   true,
-					RealTimeAdd: true,
-					TradeDay:    uc.basic.TradeDay,
-					Stock:       stock,
-				})
+	for _, c := range uc.targetCond {
+		for i, d := range data {
+			if targetFilter(d.GetClose(), d.GetTotalVolume(), c, true) {
+				if stock := cc.GetStockDetail(d.GetCode()); stock != nil && targetsMap[d.GetCode()] == nil {
+					newTargets = append(newTargets, &entity.Target{
+						Rank:        100 + i + 1,
+						StockNum:    d.GetCode(),
+						Volume:      d.GetTotalVolume(),
+						Subscribe:   true,
+						RealTimeAdd: true,
+						TradeDay:    uc.basic.TradeDay,
+						Stock:       stock,
+					})
+				}
 			}
 		}
 	}

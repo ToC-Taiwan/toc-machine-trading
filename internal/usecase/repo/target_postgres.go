@@ -44,7 +44,7 @@ func (r *TargetRepo) InsertTargetArr(ctx context.Context, t []*entity.Target) er
 // QueryTargetsByTradeDay -.
 func (r *TargetRepo) QueryTargetsByTradeDay(ctx context.Context, tradeDay time.Time) ([]*entity.Target, error) {
 	sql, args, err := r.Builder.
-		Select("id, rank, volume, subscribe, real_time_add, trade_day, stock_num, number, name, exchange, category, day_trade, last_close").
+		Select("id, rank, volume, subscribe, real_time_add, trade_day, stock_num, number, name, exchange, category, day_trade, last_close, update_date").
 		From(tableNameTarget).
 		Where("trade_day = ?", tradeDay).
 		Join("basic_stock ON basic_targets.stock_num = basic_stock.number").ToSql()
@@ -63,7 +63,7 @@ func (r *TargetRepo) QueryTargetsByTradeDay(ctx context.Context, tradeDay time.T
 		e := entity.Target{Stock: new(entity.Stock)}
 		if err := rows.Scan(
 			&e.ID, &e.Rank, &e.Volume, &e.Subscribe, &e.RealTimeAdd, &e.TradeDay,
-			&e.StockNum, &e.Stock.Number, &e.Stock.Name, &e.Stock.Exchange, &e.Stock.Category, &e.Stock.DayTrade, &e.Stock.LastClose,
+			&e.StockNum, &e.Stock.Number, &e.Stock.Name, &e.Stock.Exchange, &e.Stock.Category, &e.Stock.DayTrade, &e.Stock.LastClose, &e.Stock.UpdateDate,
 		); err != nil {
 			return nil, err
 		}

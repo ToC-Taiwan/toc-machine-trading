@@ -43,9 +43,12 @@ quota:
     fee_discount: 0.35
 
 target_cond:
-    limit_price_low: 100
-    limit_price_high: 125
-    limit_volume: 2000
+    - limit_price_low: 10
+      limit_price_high: 35
+      limit_volume: 10000
+    - limit_price_low: 100
+      limit_price_high: 125
+      limit_volume: 2000
 
 analyze:
     # unit: %
