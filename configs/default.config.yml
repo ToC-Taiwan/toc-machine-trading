@@ -29,13 +29,12 @@ trade_switch:
     reverse_max: 30
     # unit: minute
     hold_time_from_open: 5
-    # unit: hours
-    total_open_time: 4.5
+    total_open_time: 270
     # unit: seccond
     trade_in_wait_time: 45
     trade_out_wait_time: 90
     # unit: hour(s) from 9:00
-    trade_in_end_time: 1.75 # 10:45
+    trade_in_end_time: 2 # 11:00
     trade_out_end_time: 4 # 13:00
 
 quota:

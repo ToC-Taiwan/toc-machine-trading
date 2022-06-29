@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"sort"
 	"time"
 
 	"toc-machine-trading/internal/entity"
@@ -20,8 +21,10 @@ type StreamUseCase struct {
 	tradeSwitchCfg config.TradeSwitch
 	analyzeCfg     config.Analyze
 	basic          entity.BasicInfo
+	targetCond     config.TargetCond
 
 	tradeInSwitch bool
+	clearAll      bool
 }
 
 // NewStream -.
@@ -39,15 +42,24 @@ func NewStream(r *repo.StreamRepo, g *grpcapi.StreamgRPCAPI, t *rabbit.StreamRab
 
 	uc.tradeSwitchCfg = cfg.TradeSwitch
 	uc.analyzeCfg = cfg.Analyze
+	uc.targetCond = cfg.TargetCond
 	uc.basic = *cc.GetBasicInfo()
 
 	go uc.checkTradeSwitch()
-
-	bus.SubscribeTopic(topicStreamTargets, uc.ReceiveStreamData)
-
 	go uc.ReceiveEvent(context.Background())
 	go uc.ReceiveOrderStatus(context.Background())
 
+	go func() {
+		for range time.NewTicker(60 * time.Second).C {
+			if uc.tradeInSwitch {
+				if err := uc.realTimeAddTargets(context.Background()); err != nil {
+					log.Panic(err)
+				}
+			}
+		}
+	}()
+
+	bus.SubscribeTopic(topicStreamTargets, uc.ReceiveStreamData)
 	return uc
 }
 
@@ -117,7 +129,7 @@ func (uc *StreamUseCase) tradeAgent(data *RealTimeData, finishChan chan struct{}
 				continue
 			}
 
-			order := data.generateOrder(uc.analyzeCfg)
+			order := data.generateOrder(uc.analyzeCfg, uc.clearAll)
 			if order == nil {
 				continue
 			}
@@ -132,9 +144,9 @@ func (uc *StreamUseCase) tradeAgent(data *RealTimeData, finishChan chan struct{}
 					continue
 				}
 
-				timeout = time.Duration(uc.tradeSwitchCfg.TradeInEndTime) * time.Second
+				timeout = time.Duration(uc.tradeSwitchCfg.TradeInWaitTime) * time.Second
 			case entity.ActionSell, entity.ActionBuyLater:
-				timeout = time.Duration(uc.tradeSwitchCfg.TradeOutEndTime) * time.Second
+				timeout = time.Duration(uc.tradeSwitchCfg.TradeOutWaitTime) * time.Second
 			}
 			go data.checkOrderStatus(order, timeout)
 		}
@@ -151,12 +163,23 @@ func (uc *StreamUseCase) tradeAgent(data *RealTimeData, finishChan chan struct{}
 
 func (uc *StreamUseCase) checkTradeSwitch() {
 	openTime := uc.basic.OpenTime
+	endTime := uc.basic.EndTime
+
+	tradeInEndTime := openTime.Add(time.Duration(uc.tradeSwitchCfg.TradeInEndTime) * time.Hour)
+	tradeOutEndTime := openTime.Add(time.Duration(uc.tradeSwitchCfg.TradeOutEndTime) * time.Hour)
 
 	for range time.Tick(5 * time.Second) {
-		if uc.basic.TradeDay.After(openTime) && uc.basic.TradeDay.Before(openTime.Add(time.Duration(uc.tradeSwitchCfg.TradeInEndTime)*time.Hour)) {
-			uc.tradeInSwitch = true
-		} else {
+		now := time.Now()
+		switch {
+		case now.Before(openTime) || now.After(endTime) || (now.After(tradeInEndTime) && now.Before(tradeOutEndTime)):
 			uc.tradeInSwitch = false
+			uc.clearAll = false
+		case now.After(openTime) && now.Before(tradeInEndTime):
+			uc.tradeInSwitch = true
+			uc.clearAll = false
+		case now.After(tradeOutEndTime) && now.Before(endTime):
+			uc.tradeInSwitch = false
+			uc.clearAll = true
 		}
 	}
 }
@@ -184,4 +207,45 @@ func (uc *StreamUseCase) GetTSESnapshot(ctx context.Context) (*entity.StockSnapS
 		YesterdayVolume: body.GetYesterdayVolume(),
 		VolumeRatio:     body.GetVolumeRatio(),
 	}, nil
+}
+
+func (uc *StreamUseCase) realTimeAddTargets(ctx context.Context) error {
+	data, err := uc.grpcapi.GetAllStockSnapshot()
+	if err != nil {
+		return err
+	}
+	sort.Slice(data, func(i, j int) bool {
+		return data[i].GetTotalVolume() > data[j].GetTotalVolume()
+	})
+	data = data[:10]
+
+	currentTargets := cc.GetTargets()
+	targetsMap := make(map[string]*entity.Target)
+	for _, t := range currentTargets {
+		targetsMap[t.StockNum] = t
+	}
+
+	var newTargets []*entity.Target
+	for i, d := range data {
+		if targetFilter(d.GetClose(), d.GetTotalVolume(), uc.targetCond, true) {
+			if stock := cc.GetStockDetail(d.GetCode()); stock != nil && targetsMap[d.GetCode()] == nil {
+				newTargets = append(newTargets, &entity.Target{
+					Rank:        100 + i + 1,
+					StockNum:    d.GetCode(),
+					Volume:      d.GetTotalVolume(),
+					Subscribe:   true,
+					RealTimeAdd: true,
+					TradeDay:    uc.basic.TradeDay,
+					Stock:       stock,
+				})
+			}
+		}
+	}
+
+	if len(newTargets) != 0 {
+		cc.AppendTargets(newTargets)
+		bus.PublishTopicEvent(topicRealTimeTargets, ctx, newTargets)
+		bus.PublishTopicEvent(topicTargets, ctx, newTargets)
+	}
+	return nil
 }

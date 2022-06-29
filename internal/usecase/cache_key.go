@@ -31,7 +31,7 @@ const (
 	cacheIDOrderID  string = "order_id"
 )
 
-func (c *GlobalCache) generateID(opt ...any) string {
+func (c *Cache) generateID(opt ...any) string {
 	total := len(opt)
 	format := ""
 	for i := 0; i < total; i++ {
@@ -43,70 +43,70 @@ func (c *GlobalCache) generateID(opt ...any) string {
 	return fmt.Sprintf(format, opt...)
 }
 
-func (c *GlobalCache) calendarKey() cache.Key {
+func (c *Cache) calendarKey() cache.Key {
 	return cache.Key{
 		Category: cacheCatagoryBasic,
 		ID:       cacheIDCalendar,
 	}
 }
 
-func (c *GlobalCache) basicInfoKey() cache.Key {
+func (c *Cache) basicInfoKey() cache.Key {
 	return cache.Key{
 		Category: cacheCatagoryBasic,
 		ID:       cacheIDBasicInfo,
 	}
 }
 
-func (c *GlobalCache) targetsKey() cache.Key {
+func (c *Cache) targetsKey() cache.Key {
 	return cache.Key{
 		Category: cacheCatagoryBasic,
 		ID:       cacheIDTargets,
 	}
 }
 
-func (c *GlobalCache) stockDetailKey(stockNum string) cache.Key {
+func (c *Cache) stockDetailKey(stockNum string) cache.Key {
 	return cache.Key{
 		Category: cacheCatagoryBasic,
 		ID:       c.generateID(cacheIDStockNum, stockNum),
 	}
 }
 
-func (c *GlobalCache) orderKey(orderID string) cache.Key {
+func (c *Cache) orderKey(orderID string) cache.Key {
 	return cache.Key{
 		Category: cacheCatagoryOrder,
 		ID:       c.generateID(cacheIDOrderID, orderID),
 	}
 }
 
-func (c *GlobalCache) historyOpenKey(stockNum string, date time.Time) cache.Key {
+func (c *Cache) historyOpenKey(stockNum string, date time.Time) cache.Key {
 	return cache.Key{
 		Category: cacheCatagoryHistoryOpen,
 		ID:       c.generateID(cacheIDStockNum, stockNum, date.Format(global.ShortTimeLayout)),
 	}
 }
 
-func (c *GlobalCache) historyCloseKey(stockNum string, date time.Time) cache.Key {
+func (c *Cache) historyCloseKey(stockNum string, date time.Time) cache.Key {
 	return cache.Key{
 		Category: cacheCatagoryHistoryClose,
 		ID:       c.generateID(cacheIDStockNum, stockNum, date.Format(global.ShortTimeLayout)),
 	}
 }
 
-func (c *GlobalCache) biasRateKey(stockNum string) cache.Key {
+func (c *Cache) biasRateKey(stockNum string) cache.Key {
 	return cache.Key{
 		Category: cacheCatagoryBiasRate,
 		ID:       c.generateID(cacheIDStockNum, stockNum),
 	}
 }
 
-func (c *GlobalCache) historyTickAnalyzeKey(stockNum string) cache.Key {
+func (c *Cache) historyTickAnalyzeKey(stockNum string) cache.Key {
 	return cache.Key{
 		Category: cacheCatagoryHistoryTickAnalyze,
 		ID:       c.generateID(cacheIDStockNum, stockNum),
 	}
 }
 
-func (c *GlobalCache) dayKbarKey(stockNum string, date time.Time) cache.Key {
+func (c *Cache) dayKbarKey(stockNum string, date time.Time) cache.Key {
 	return cache.Key{
 		Category: cacheCatagoryDayKbar,
 		ID:       c.generateID(cacheIDStockNum, stockNum, date.Format(global.ShortTimeLayout)),

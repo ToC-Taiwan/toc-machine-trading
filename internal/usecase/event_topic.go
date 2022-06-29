@@ -1,7 +1,9 @@
 package usecase
 
 const (
-	topicTargets              string = "targets"
+	topicTargets         string = "targets"
+	topicRealTimeTargets string = "realtime_targets"
+
 	topicAnalyzeTargets       string = "analyze_targets"
 	topicStreamTargets        string = "stream_targets"
 	topicSubscribeTickTargets string = "subscribe_targets"

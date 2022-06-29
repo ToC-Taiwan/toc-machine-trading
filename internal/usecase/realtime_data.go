@@ -28,9 +28,13 @@ type RealTimeData struct {
 	historyTickAnalyze []int64
 }
 
-func (o *RealTimeData) generateOrder(cfg config.Analyze) *entity.Order {
+func (o *RealTimeData) generateOrder(cfg config.Analyze, needClear bool) *entity.Order {
 	if o.waitingOrder != nil {
 		return nil
+	}
+
+	if needClear {
+		return o.clearOrder()
 	}
 
 	postOrderAction, preTime := o.checkNeededPost()
@@ -86,6 +90,19 @@ func (o *RealTimeData) generateOrder(cfg config.Analyze) *entity.Order {
 	return order
 }
 
+func (o *RealTimeData) clearOrder() *entity.Order {
+	if action, _ := o.checkNeededPost(); action != entity.ActionNone {
+		return &entity.Order{
+			StockNum:  o.stockNum,
+			Action:    action,
+			Price:     o.tickArr.getLastClose(),
+			Quantity:  o.orderQuantity,
+			TradeTime: time.Now(),
+		}
+	}
+	return nil
+}
+
 func (o *RealTimeData) checkOrderStatus(order *entity.Order, timeout time.Duration) {
 	startTime := time.Now()
 	for {
@@ -119,8 +136,8 @@ func (o *RealTimeData) checkCancelStatus(orderID string) {
 }
 
 func (o *RealTimeData) checkNeededPost() (entity.OrderAction, time.Time) {
-	o.orderMapLock.RLock()
 	defer o.orderMapLock.RUnlock()
+	o.orderMapLock.RLock()
 
 	if len(o.orderMap[entity.ActionBuy]) > len(o.orderMap[entity.ActionSell]) {
 		return entity.ActionSell, o.orderMap[entity.ActionBuy][len(o.orderMap[entity.ActionSell])].TradeTime
@@ -238,4 +255,11 @@ func (c RealTimeTickArr) getRSIByTickTime(preTime time.Time, count int) float64 
 		return 0
 	}
 	return rsi
+}
+
+func (c RealTimeTickArr) getLastClose() float64 {
+	if len(c) == 0 {
+		return 0
+	}
+	return c[len(c)-1].Close
 }

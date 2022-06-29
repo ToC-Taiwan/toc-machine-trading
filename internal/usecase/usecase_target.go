@@ -49,25 +49,33 @@ func NewTarget(r *repo.TargetRepo, t *grpcapi.TargetgRPCAPI) *TargetUseCase {
 		}
 
 		if len(targetArr) != 0 {
-			if err = uc.repo.InsertTargetArr(ctx, targetArr); err != nil {
+			if err = uc.InsertTargets(ctx, targetArr); err != nil {
 				log.Panic(err)
 			}
 		}
 	}
 
 	// save to cache
-	cc.SetTargets(targetArr)
+	cc.AppendTargets(targetArr)
 	// sub events
 	bus.SubscribeTopic(topicSubscribeTickTargets, uc.SubscribeStockTick, uc.SubscribeStockBidAsk)
+	bus.SubscribeTopic(topicRealTimeTargets, uc.InsertTargets)
 	// pub events
 	bus.PublishTopicEvent(topicTargets, ctx, targetArr)
-
 	return uc
 }
 
 // GetTargets -.
 func (uc *TargetUseCase) GetTargets(ctx context.Context) []*entity.Target {
 	return cc.GetTargets()
+}
+
+// InsertTargets -.
+func (uc *TargetUseCase) InsertTargets(ctx context.Context, targetArr []*entity.Target) error {
+	if err := uc.repo.InsertTargetArr(ctx, targetArr); err != nil {
+		return err
+	}
+	return nil
 }
 
 // SearchTradeDayTargets -.
@@ -84,7 +92,7 @@ func (uc *TargetUseCase) SearchTradeDayTargets(ctx context.Context, tradeDay tim
 	cond := cfg.TargetCond
 	var result []*entity.Target
 	for i, v := range t {
-		if v.GetClose() < cond.LimitPriceLow || v.GetClose() > cond.LimitPriceHigh || v.GetTotalAmount() < cond.LimitVolume {
+		if !targetFilter(v.GetClose(), v.GetTotalAmount(), cond, false) {
 			continue
 		}
 		if stock := cc.GetStockDetail(v.GetCode()); stock != nil {
@@ -129,7 +137,9 @@ func (uc *TargetUseCase) UnSubscribeAll(ctx context.Context) error {
 func (uc *TargetUseCase) SubscribeStockTick(ctx context.Context, targetArr []*entity.Target) error {
 	var subArr []string
 	for _, v := range targetArr {
-		subArr = append(subArr, v.StockNum)
+		if v.Subscribe {
+			subArr = append(subArr, v.StockNum)
+		}
 	}
 
 	fail, err := uc.gRPCAPI.SubscribeStockTick(subArr)
@@ -148,7 +158,9 @@ func (uc *TargetUseCase) SubscribeStockTick(ctx context.Context, targetArr []*en
 func (uc *TargetUseCase) SubscribeStockBidAsk(ctx context.Context, targetArr []*entity.Target) error {
 	var subArr []string
 	for _, v := range targetArr {
-		subArr = append(subArr, v.StockNum)
+		if v.Subscribe {
+			subArr = append(subArr, v.StockNum)
+		}
 	}
 
 	fail, err := uc.gRPCAPI.SubscribeStockBidAsk(subArr)
