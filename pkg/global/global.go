@@ -2,10 +2,12 @@
 package global
 
 const (
-	// LongTimeLayout LongTimeLayout
+	// LongTimeLayout -.
 	LongTimeLayout string = "2006-01-02 15:04:05"
-	// ShortTimeLayout ShortTimeLayout
+	// ShortTimeLayout -.
 	ShortTimeLayout string = "2006-01-02"
+	// ShortSlashTimeLayout -.
+	ShortSlashTimeLayout string = "2006/01/02"
 )
 
 const (

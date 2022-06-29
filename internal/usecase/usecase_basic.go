@@ -60,13 +60,19 @@ func (uc *BasicUseCase) GetAllSinopacStockAndUpdateRepo(ctx context.Context) ([]
 		if v.GetReference() == 0 {
 			continue
 		}
+		updateTime, pErr := time.ParseInLocation(global.ShortSlashTimeLayout, v.GetUpdateDate(), time.Local)
+		if err != nil {
+			return []*entity.Stock{}, pErr
+		}
+
 		stock := &entity.Stock{
-			Number:    v.GetCode(),
-			Name:      v.GetName(),
-			Exchange:  v.GetExchange(),
-			Category:  v.GetCategory(),
-			DayTrade:  v.GetDayTrade() == "Yes",
-			LastClose: v.GetReference(),
+			Number:     v.GetCode(),
+			Name:       v.GetName(),
+			Exchange:   v.GetExchange(),
+			Category:   v.GetCategory(),
+			DayTrade:   v.GetDayTrade() == "Yes",
+			LastClose:  v.GetReference(),
+			UpdateDate: updateTime,
 		}
 		stockDetail = append(stockDetail, stock)
 		cc.SetStockDetail(stock)
@@ -144,10 +150,14 @@ func (uc *BasicUseCase) fillBasicInfo() error {
 
 	openTime := 9 * time.Hour
 	basic := &entity.BasicInfo{
-		TradeDay:          tradeDay,
-		LastTradeDay:      getLastNTradeDayByDate(1, tradeDay)[0],
-		OpenTime:          tradeDay.Add(openTime).Add(time.Duration(cfg.TradeSwitch.HoldTimeFromOpen) * time.Minute),
-		EndTime:           tradeDay.Add(openTime).Add(time.Duration(cfg.TradeSwitch.TotalOpenTime) * time.Minute),
+		TradeDay:     tradeDay,
+		LastTradeDay: getLastNTradeDayByDate(1, tradeDay)[0],
+
+		OpenTime:        tradeDay.Add(openTime).Add(time.Duration(cfg.TradeSwitch.HoldTimeFromOpen) * time.Minute),
+		EndTime:         tradeDay.Add(openTime).Add(time.Duration(cfg.TradeSwitch.TotalOpenTime) * time.Minute),
+		TradeInEndTime:  tradeDay.Add(openTime).Add(time.Duration(cfg.TradeSwitch.TradeInEndTime) * time.Minute),
+		TradeOutEndTime: tradeDay.Add(openTime).Add(time.Duration(cfg.TradeSwitch.TradeOutEndTime) * time.Minute),
+
 		HistoryCloseRange: getLastNTradeDayByDate(cfg.History.HistoryClosePeriod, tradeDay),
 		HistoryKbarRange:  getLastNTradeDayByDate(cfg.History.HistoryKbarPeriod, tradeDay),
 		HistoryTickRange:  getLastNTradeDayByDate(cfg.History.HistoryTickPeriod, tradeDay),

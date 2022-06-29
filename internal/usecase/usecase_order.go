@@ -40,21 +40,21 @@ func NewOrder(t *grpcapi.OrdergRPCAPI, r *repo.OrderRepo) *OrderUseCase {
 
 	bus.SubscribeTopic(topicPlaceOrder, uc.placeOrder)
 	bus.SubscribeTopic(topicCancelOrder, uc.cancelOrder)
-	bus.SubscribeTopic(topicInsertOrUpdateOrder, uc.InsertOrUpdateOrder)
+	bus.SubscribeTopic(topicInsertOrUpdateOrder, uc.updateCacheAndInsertDB)
 
 	go func() {
-		for range time.Tick(time.Minute) {
+		for range time.NewTicker(time.Minute).C {
 			orders, err := uc.repo.QueryAllOrderByDate(context.Background(), cc.GetBasicInfo().TradeDay)
 			if err != nil {
 				log.Panic(err)
 			}
-			uc.CalculateTradeBalance(orders)
+			uc.calculateTradeBalance(orders)
 		}
 	}()
 
 	go func() {
 		for range time.NewTicker(1500 * time.Millisecond).C {
-			uc.updateOrderStatusCache()
+			uc.askOrderUpdate()
 		}
 	}()
 
@@ -83,7 +83,7 @@ func (uc *OrderUseCase) placeOrder(order *entity.Order) {
 		return
 	}
 
-	if status == entity.StatusFailed {
+	if status == entity.StatusFailed || orderID == "" {
 		return
 	}
 
@@ -186,7 +186,7 @@ func (uc *OrderUseCase) CancelOrderID(orderID string) (string, entity.OrderStatu
 	return result.GetOrderId(), statusMap[result.GetStatus()], nil
 }
 
-func (uc *OrderUseCase) updateOrderStatusCache() {
+func (uc *OrderUseCase) askOrderUpdate() {
 	if !uc.simTrade {
 		msg, err := uc.gRPCAPI.GetNonBlockOrderStatusArr()
 		if err != nil {
@@ -218,18 +218,24 @@ func (uc *OrderUseCase) updateOrderStatusCache() {
 				Status:    statusMap[v.GetStatus()],
 				OrderTime: orderTime,
 			}
-			uc.InsertOrUpdateOrder(o)
+			uc.updateCacheAndInsertDB(o)
 		}
 	}
 }
 
-// InsertOrUpdateOrder -.
-func (uc *OrderUseCase) InsertOrUpdateOrder(order *entity.Order) {
+func (uc *OrderUseCase) updateCacheAndInsertDB(order *entity.Order) {
+	// get order from cache
 	cacheOrder := cc.GetOrderByOrderID(order.OrderID)
+
+	// let action, trade time be the same from cache
 	order.TradeTime = cacheOrder.TradeTime
 	order.Action = cacheOrder.Action
+
 	if !cmp.Equal(order, cacheOrder) {
+		// if different, update cache
 		cc.SetOrderByOrderID(order)
+
+		// insert or update order to db
 		if err := uc.repo.InsertOrUpdateOrder(context.Background(), order); err != nil {
 			log.Panic(err)
 		}
@@ -237,7 +243,7 @@ func (uc *OrderUseCase) InsertOrUpdateOrder(order *entity.Order) {
 }
 
 // CalculateTradeBalance -.
-func (uc *OrderUseCase) CalculateTradeBalance(allOrders []*entity.Order) {
+func (uc *OrderUseCase) calculateTradeBalance(allOrders []*entity.Order) {
 	var forwardOrder, reverseOrder []*entity.Order
 	for _, v := range allOrders {
 		if v.Status != entity.StatusFilled {
@@ -252,14 +258,15 @@ func (uc *OrderUseCase) CalculateTradeBalance(allOrders []*entity.Order) {
 		}
 	}
 
-	if len(forwardOrder)/2 == 0 && len(reverseOrder)/2 == 0 {
+	if len(forwardOrder) == 0 && len(reverseOrder) == 0 {
 		return
 	}
 
-	var forwardBalance, revereBalance, discount int64
+	var forwardBalance, revereBalance, discount, tradeCount int64
 	for _, v := range forwardOrder {
 		switch v.Action {
 		case entity.ActionBuy:
+			tradeCount++
 			forwardBalance -= uc.quota.GetStockBuyCost(v.Price, v.Quantity)
 		case entity.ActionSell:
 			forwardBalance += uc.quota.GetStockSellCost(v.Price, v.Quantity)
@@ -270,6 +277,7 @@ func (uc *OrderUseCase) CalculateTradeBalance(allOrders []*entity.Order) {
 	for _, v := range reverseOrder {
 		switch v.Action {
 		case entity.ActionSellFirst:
+			tradeCount++
 			revereBalance += uc.quota.GetStockSellCost(v.Price, v.Quantity)
 		case entity.ActionBuyLater:
 			revereBalance -= uc.quota.GetStockBuyCost(v.Price, v.Quantity)
@@ -279,7 +287,7 @@ func (uc *OrderUseCase) CalculateTradeBalance(allOrders []*entity.Order) {
 
 	tmp := &entity.TradeBalance{
 		TradeDay:        cc.GetBasicInfo().TradeDay,
-		TradeCount:      int64(len(forwardOrder)/2 + len(reverseOrder)/2),
+		TradeCount:      tradeCount,
 		Forward:         forwardBalance,
 		Reverse:         revereBalance,
 		OriginalBalance: forwardBalance + revereBalance,

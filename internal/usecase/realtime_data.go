@@ -29,39 +29,13 @@ type RealTimeData struct {
 }
 
 func (o *RealTimeData) generateOrder(cfg config.Analyze, needClear bool) *entity.Order {
-	if o.waitingOrder != nil {
+	if o.waitingOrder != nil || needClear {
 		return nil
 	}
 
-	if needClear {
-		return o.clearOrder()
-	}
-
 	postOrderAction, preTime := o.checkNeededPost()
-	rsi := o.tickArr.getRSIByTickTime(preTime, cfg.RSIMinCount)
-	if rsi != 0 && postOrderAction != entity.ActionNone {
-		switch postOrderAction {
-		case entity.ActionSell:
-			if rsi > cfg.RSIHigh {
-				return &entity.Order{
-					StockNum:  o.stockNum,
-					Action:    postOrderAction,
-					Price:     o.bidAsk.BidPrice1,
-					Quantity:  o.orderQuantity,
-					TradeTime: time.Now(),
-				}
-			}
-		case entity.ActionBuyLater:
-			if rsi < cfg.RSILow {
-				return &entity.Order{
-					StockNum:  o.stockNum,
-					Action:    postOrderAction,
-					Price:     o.bidAsk.AskPrice1,
-					Quantity:  o.orderQuantity,
-					TradeTime: time.Now(),
-				}
-			}
-		}
+	if postOrderAction != entity.ActionNone {
+		return o.generateTradeOutOrder(cfg, postOrderAction, preTime)
 	}
 
 	periodData := o.tickArr.getLastNSecondArr(cfg.TickAnalyzeMaxPeriod)
@@ -77,11 +51,12 @@ func (o *RealTimeData) generateOrder(cfg config.Analyze, needClear bool) *entity
 		Quantity:  o.orderQuantity,
 		TradeTime: time.Now(),
 	}
+
 	switch {
-	case periodOutInRation > cfg.OutInRatio:
+	case periodOutInRation > cfg.OutInRatio && o.bidAsk != nil:
 		order.Action = entity.ActionBuy
 		order.Price = o.bidAsk.BidPrice1
-	case 100-periodOutInRation < cfg.InOutRatio:
+	case 100-periodOutInRation < cfg.InOutRatio && o.bidAsk != nil:
 		order.Action = entity.ActionSellFirst
 		order.Price = o.bidAsk.AskPrice1
 	default:
@@ -90,7 +65,40 @@ func (o *RealTimeData) generateOrder(cfg config.Analyze, needClear bool) *entity
 	return order
 }
 
-func (o *RealTimeData) clearOrder() *entity.Order {
+func (o *RealTimeData) generateTradeOutOrder(cfg config.Analyze, postOrderAction entity.OrderAction, preTime time.Time) *entity.Order {
+	rsi := o.tickArr.getRSIByTickTime(preTime, cfg.RSIMinCount)
+	if rsi != 0 {
+		switch postOrderAction {
+		case entity.ActionSell:
+			if rsi >= cfg.RSIHigh {
+				return &entity.Order{
+					StockNum:  o.stockNum,
+					Action:    postOrderAction,
+					Price:     o.bidAsk.BidPrice1,
+					Quantity:  o.orderQuantity,
+					TradeTime: time.Now(),
+				}
+			}
+		case entity.ActionBuyLater:
+			if rsi <= cfg.RSILow {
+				return &entity.Order{
+					StockNum:  o.stockNum,
+					Action:    postOrderAction,
+					Price:     o.bidAsk.AskPrice1,
+					Quantity:  o.orderQuantity,
+					TradeTime: time.Now(),
+				}
+			}
+		}
+	}
+	return nil
+}
+
+func (o *RealTimeData) clearUnfinishedOrder() *entity.Order {
+	if o.waitingOrder != nil {
+		return nil
+	}
+
 	if action, _ := o.checkNeededPost(); action != entity.ActionNone {
 		return &entity.Order{
 			StockNum:  o.stockNum,
@@ -103,10 +111,9 @@ func (o *RealTimeData) clearOrder() *entity.Order {
 	return nil
 }
 
-func (o *RealTimeData) checkOrderStatus(order *entity.Order, timeout time.Duration) {
-	startTime := time.Now()
+func (o *RealTimeData) checkPlaceOrderStatus(order *entity.Order, timeout time.Duration) {
 	for {
-		if order.OrderID != "" && order.Status == entity.StatusFilled {
+		if order.Status == entity.StatusFilled {
 			o.orderMapLock.Lock()
 			o.orderMap[order.Action] = append(o.orderMap[order.Action], order)
 			o.orderMapLock.Unlock()
@@ -114,10 +121,10 @@ func (o *RealTimeData) checkOrderStatus(order *entity.Order, timeout time.Durati
 			break
 		}
 
-		if startTime.Add(timeout).Before(time.Now()) {
-			if id := order.OrderID; id != "" && order.Status != entity.StatusCancelled {
-				bus.PublishTopicEvent(topicCancelOrder, id)
-				go o.checkCancelStatus(id)
+		if order.TradeTime.Add(timeout).Before(time.Now()) {
+			if order.OrderID != "" && order.Status != entity.StatusCancelled && order.Status != entity.StatusFilled {
+				bus.PublishTopicEvent(topicCancelOrder, order.OrderID)
+				go o.checkCancelStatus(order.OrderID)
 				break
 			}
 		}

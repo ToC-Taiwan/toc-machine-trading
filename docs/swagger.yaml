@@ -205,6 +205,8 @@ definitions:
         type: string
       number:
         type: string
+      update_date:
+        type: string
     type: object
   entity.StockSnapShot:
     properties:

@@ -11,7 +11,8 @@ CREATE TABLE basic_stock (
     "exchange" VARCHAR NOT NULL,
     "category" VARCHAR NOT NULL,
     "day_trade" BOOLEAN NOT NULL,
-    "last_close" DECIMAL NOT NULL
+    "last_close" DECIMAL NOT NULL,
+    "update_date" TIMESTAMPTZ NOT NULL
 );
 
 CREATE TABLE basic_targets (

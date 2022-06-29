@@ -97,14 +97,16 @@ func (uc *StreamUseCase) ReceiveOrderStatus(ctx context.Context) {
 func (uc *StreamUseCase) ReceiveStreamData(ctx context.Context, targetArr []*entity.Target) {
 	for _, t := range targetArr {
 		data := &RealTimeData{
-			stockNum: t.StockNum,
-			orderMap: make(map[entity.OrderAction][]*entity.Order),
-			// quantity should decide by bisrate
+			stockNum:      t.StockNum,
+			orderMap:      make(map[entity.OrderAction][]*entity.Order),
 			orderQuantity: 1,
 			tickChan:      make(chan *entity.RealTimeTick),
 			bidAskChan:    make(chan *entity.RealTimeBidAsk),
 		}
 		data.setHistoryTickAnalyze(cc.GetHistoryTickAnalyze(t.StockNum))
+		if biasRate := cc.GetBiasRate(t.StockNum); biasRate > 4 || biasRate < -4 {
+			data.orderQuantity = 2
+		}
 
 		finishChan := make(chan struct{})
 		go uc.tradeAgent(data, finishChan)
@@ -117,7 +119,7 @@ func (uc *StreamUseCase) ReceiveStreamData(ctx context.Context, targetArr []*ent
 		go uc.rabbit.TickConsumer(t.StockNum, data.tickChan)
 		go uc.rabbit.BidAskConsumer(t.StockNum, data.bidAskChan)
 	}
-	bus.PublishTopicEvent(topicSubscribeTickTargets, ctx, targetArr)
+	bus.PublishTopicEvent(topicSubscribeTickTargets, targetArr)
 }
 
 func (uc *StreamUseCase) tradeAgent(data *RealTimeData, finishChan chan struct{}) {
@@ -125,32 +127,14 @@ func (uc *StreamUseCase) tradeAgent(data *RealTimeData, finishChan chan struct{}
 		for {
 			tick := <-data.tickChan
 			data.tickArr = append(data.tickArr, tick)
-			if data.bidAsk == nil {
-				continue
-			}
-
 			order := data.generateOrder(uc.analyzeCfg, uc.clearAll)
 			if order == nil {
 				continue
 			}
-
-			bus.PublishTopicEvent(topicPlaceOrder, order)
-			data.waitingOrder = order
-
-			var timeout time.Duration
-			switch order.Action {
-			case entity.ActionBuy, entity.ActionSellFirst:
-				if !uc.tradeInSwitch {
-					continue
-				}
-
-				timeout = time.Duration(uc.tradeSwitchCfg.TradeInWaitTime) * time.Second
-			case entity.ActionSell, entity.ActionBuyLater:
-				timeout = time.Duration(uc.tradeSwitchCfg.TradeOutWaitTime) * time.Second
-			}
-			go data.checkOrderStatus(order, timeout)
+			uc.placeOrder(data, order)
 		}
 	}()
+
 	go func() {
 		for {
 			data.bidAsk = <-data.bidAskChan
@@ -159,16 +143,42 @@ func (uc *StreamUseCase) tradeAgent(data *RealTimeData, finishChan chan struct{}
 
 	// close channel to start receive data from rabbitmq
 	close(finishChan)
+
+	for {
+		time.Sleep(10 * time.Second)
+		if uc.clearAll {
+			order := data.clearUnfinishedOrder()
+			if order != nil {
+				uc.placeOrder(data, order)
+			}
+		}
+	}
+}
+
+func (uc *StreamUseCase) placeOrder(data *RealTimeData, order *entity.Order) {
+	bus.PublishTopicEvent(topicPlaceOrder, order)
+	data.waitingOrder = order
+
+	var timeout time.Duration
+	switch order.Action {
+	case entity.ActionBuy, entity.ActionSellFirst:
+		if !uc.tradeInSwitch {
+			return
+		}
+		timeout = time.Duration(uc.tradeSwitchCfg.TradeInWaitTime) * time.Second
+	case entity.ActionSell, entity.ActionBuyLater:
+		timeout = time.Duration(uc.tradeSwitchCfg.TradeOutWaitTime) * time.Second
+	}
+	go data.checkPlaceOrderStatus(order, timeout)
 }
 
 func (uc *StreamUseCase) checkTradeSwitch() {
 	openTime := uc.basic.OpenTime
 	endTime := uc.basic.EndTime
+	tradeInEndTime := uc.basic.TradeInEndTime
+	tradeOutEndTime := uc.basic.TradeOutEndTime
 
-	tradeInEndTime := openTime.Add(time.Duration(uc.tradeSwitchCfg.TradeInEndTime) * time.Hour)
-	tradeOutEndTime := openTime.Add(time.Duration(uc.tradeSwitchCfg.TradeOutEndTime) * time.Hour)
-
-	for range time.Tick(5 * time.Second) {
+	for range time.NewTicker(5 * time.Second).C {
 		now := time.Now()
 		switch {
 		case now.Before(openTime) || now.After(endTime) || (now.After(tradeInEndTime) && now.Before(tradeOutEndTime)):

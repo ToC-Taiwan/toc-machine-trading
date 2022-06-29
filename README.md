@@ -59,13 +59,13 @@ go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@$ve
 ### env file example
 
 ```sh
-echo 'DEPLOYMENT=prod
-DISABLE_SWAGGER_HTTP_HANDLER=true
-GIN_MODE=release
-SINOPAC_URL=127.0.0.1:56666
-PG_URL=postgres://user:password@localhost:5432/
-RABBITMQ_URL=amqp://guest:guest@localhost:5672/%2f
-RABBITMQ_EXCHANGE=exchange
+echo 'DEPLOYMENT=dev
+DISABLE_SWAGGER_HTTP_HANDLER=
+GIN_MODE=debug
+SINOPAC_URL=172.20.10.96:56666
+PG_URL=postgres://postgres:asdf0000@127.0.0.1:5432/
+RABBITMQ_URL=amqp://admin:password@172.20.10.96:5672/%2f
+RABBITMQ_EXCHANGE=toc
 DB_NAME=trade' > .env
 ```
 

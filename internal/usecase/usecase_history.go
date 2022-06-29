@@ -34,6 +34,7 @@ func NewHistory(r *repo.HistoryRepo, t *grpcapi.HistorygRPCAPI) *HistoryUseCase 
 	if err != nil {
 		log.Panic(err)
 	}
+
 	uc.analyzeCfg = cfg.Analyze
 	uc.basic = *cc.GetBasicInfo()
 

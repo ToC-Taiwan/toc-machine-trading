@@ -779,6 +779,9 @@ const docTemplate = `{
                 },
                 "number": {
                     "type": "string"
+                },
+                "update_date": {
+                    "type": "string"
                 }
             }
         },
