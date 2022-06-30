@@ -26,6 +26,8 @@ type RealTimeData struct {
 	bidAskChan chan *entity.RealTimeBidAsk
 
 	historyTickAnalyze []int64
+
+	analyzeTickTime time.Time
 }
 
 func (o *RealTimeData) generateOrder(cfg config.Analyze, needClear bool) *entity.Order {
@@ -38,7 +40,12 @@ func (o *RealTimeData) generateOrder(cfg config.Analyze, needClear bool) *entity
 		return o.generateTradeOutOrder(cfg, postOrderAction, preTime)
 	}
 
-	periodData := o.tickArr.getLastNSecondArr(cfg.TickAnalyzeMaxPeriod)
+	if o.tickArr.getLastTickTime().Before(o.analyzeTickTime.Add(time.Duration(cfg.TickAnalyzeMaxPeriod) * time.Millisecond)) {
+		return nil
+	}
+	o.analyzeTickTime = o.tickArr.getLastTickTime()
+	periodData := o.tickArr.getLastNMilliSecondArr(cfg.TickAnalyzeMinPeriod)
+
 	periodVolume := periodData.getTotalVolume()
 	if pr := o.getPRByVolume(periodVolume); pr < cfg.VolumePRLow || pr > cfg.VolumePRHigh {
 		return nil
@@ -118,12 +125,19 @@ func (o *RealTimeData) checkPlaceOrderStatus(order *entity.Order, timeout time.D
 			o.orderMap[order.Action] = append(o.orderMap[order.Action], order)
 			o.orderMapLock.Unlock()
 			o.waitingOrder = nil
+			log.Warnf("Order Filled -> Stock: %s, Action: %d, Price: %.2f, Qty: %d", order.StockNum, order.Action, order.Price, order.Quantity)
+			break
+		}
+
+		if order.Status == entity.StatusAborted {
+			o.waitingOrder = nil
 			break
 		}
 
 		if order.TradeTime.Add(timeout).Before(time.Now()) {
 			if order.OrderID != "" && order.Status != entity.StatusCancelled && order.Status != entity.StatusFilled {
 				bus.PublishTopicEvent(topicCancelOrder, order.OrderID)
+				log.Warnf("Place Cance Order -> Stock: %s, Action: %d, Price: %.2f, Qty: %d", order.StockNum, order.Action, order.Price, order.Quantity)
 				go o.checkCancelStatus(order.OrderID)
 				break
 			}
@@ -136,6 +150,8 @@ func (o *RealTimeData) checkCancelStatus(orderID string) {
 	for {
 		order := cc.GetOrderByOrderID(orderID)
 		if order.Status == entity.StatusCancelled {
+			log.Warnf("Order Canceled -> Stock: %s, Action: %d, Price: %.2f, Qty: %d", order.StockNum, order.Action, order.Price, order.Quantity)
+			o.waitingOrder = nil
 			break
 		}
 		time.Sleep(time.Second)
@@ -164,6 +180,18 @@ func (o *RealTimeData) setHistoryTickAnalyze(arr []int64) {
 	o.historyTickAnalyze = arr
 }
 
+func (o *RealTimeData) checkFirstTickArrive() {
+	tradeDay := cc.GetBasicInfo().TradeDay
+	for {
+		if len(o.tickArr) != 0 {
+			cc.SetHistoryOpen(o.stockNum, tradeDay, o.tickArr[0].Close)
+			o.analyzeTickTime = o.tickArr[0].TickTime
+			break
+		}
+		time.Sleep(time.Second * 5)
+	}
+}
+
 func (o *RealTimeData) getPRByVolume(volume int64) float64 {
 	if len(o.historyTickAnalyze) < 2 {
 		return 0
@@ -186,17 +214,18 @@ func (o *RealTimeData) getPRByVolume(volume int64) float64 {
 // RealTimeTickArr -.
 type RealTimeTickArr []*entity.RealTimeTick
 
-func (c RealTimeTickArr) getLastNSecondArr(n float64) RealTimeTickArr {
+func (c RealTimeTickArr) getLastNMilliSecondArr(n float64) RealTimeTickArr {
 	if len(c) < 2 {
 		return RealTimeTickArr{}
 	}
 
-	startTime := c[len(c)-1].TickTime.UnixNano()
+	startTime := c[len(c)-1].TickTime
 
 	// skip if i == 0, the volume will be too large
+	// skip the first tick of the day
 	var cut int
 	for i := len(c) - 1; i > 0; i-- {
-		if float64(startTime-c[i].TickTime.UnixNano()) < n*1000*1000*1000 {
+		if startTime.Sub(c[i].TickTime) < time.Duration(n)*time.Millisecond {
 			continue
 		} else {
 			cut = i - 1
@@ -259,6 +288,7 @@ func (c RealTimeTickArr) getRSIByTickTime(preTime time.Time, count int) float64 
 
 	rsi, err := utils.GenerateRSI(tmp)
 	if err != nil {
+		log.Error(err)
 		return 0
 	}
 	return rsi
@@ -269,4 +299,11 @@ func (c RealTimeTickArr) getLastClose() float64 {
 		return 0
 	}
 	return c[len(c)-1].Close
+}
+
+func (c RealTimeTickArr) getLastTickTime() time.Time {
+	if len(c) == 0 {
+		return time.Time{}
+	}
+	return c[len(c)-1].TickTime
 }

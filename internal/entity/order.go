@@ -42,6 +42,8 @@ const (
 	StatusFilled
 	// StatusFilling -.
 	StatusFilling
+	// StatusAborted -.
+	StatusAborted
 )
 
 // ActionListMap ActionListMap

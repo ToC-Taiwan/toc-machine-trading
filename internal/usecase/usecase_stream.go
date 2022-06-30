@@ -107,6 +107,7 @@ func (uc *StreamUseCase) ReceiveStreamData(ctx context.Context, targetArr []*ent
 		if biasRate := cc.GetBiasRate(t.StockNum); biasRate > 4 || biasRate < -4 {
 			data.orderQuantity = 2
 		}
+		go data.checkFirstTickArrive()
 
 		finishChan := make(chan struct{})
 		go uc.tradeAgent(data, finishChan)
@@ -169,6 +170,7 @@ func (uc *StreamUseCase) placeOrder(data *RealTimeData, order *entity.Order) {
 
 	bus.PublishTopicEvent(topicPlaceOrder, order)
 	data.waitingOrder = order
+	log.Warnf("Place Order -> Stock: %s, Action: %d, Price: %.2f, Qty: %d", order.StockNum, order.Action, order.Price, order.Quantity)
 
 	go data.checkPlaceOrderStatus(order, timeout)
 }

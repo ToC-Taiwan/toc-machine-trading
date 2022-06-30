@@ -388,34 +388,36 @@ func (uc *HistoryUseCase) processTickArr(arr []*entity.HistoryTick) {
 	sort.Slice(arr, func(i, j int) bool {
 		return arr[i].TickTime.Before(arr[j].TickTime)
 	})
+
 	stockNum := arr[0].StockNum
-	minSec := uc.analyzeCfg.TickAnalyzeMinPeriod
-	maxSec := uc.analyzeCfg.TickAnalyzeMaxPeriod
+	minPeriod := time.Duration(uc.analyzeCfg.TickAnalyzeMinPeriod) * time.Millisecond
+	maxPeriod := time.Duration(uc.analyzeCfg.TickAnalyzeMaxPeriod) * time.Millisecond
 
 	var analyzeTickArr []*entity.HistoryTick
 	var volumeArr []int64
-	var startTime int64
+	var startTime time.Time
 	for i, tick := range arr {
 		if i == 0 {
-			startTime = tick.TickTime.UnixNano()
+			startTime = tick.TickTime
 			continue
 		}
-		period := float64(tick.TickTime.UnixNano() - startTime)
+
+		period := tick.TickTime.Sub(startTime)
 		analyzeTickArr = append(analyzeTickArr, tick)
 		switch {
-		case period < minSec*1000*1000*1000:
+		case period < minPeriod:
 			continue
-		case period >= minSec*1000*1000*1000 && period <= maxSec*1000*1000*1000:
+		case period >= minPeriod && period <= maxPeriod:
 			var volumeSum int64
 			for _, k := range analyzeTickArr {
 				volumeSum += k.Volume
 			}
 			analyzeTickArr = []*entity.HistoryTick{}
 			volumeArr = append(volumeArr, volumeSum)
-		case period > maxSec*1000*1000*1000:
+		case period > maxPeriod:
 			analyzeTickArr = []*entity.HistoryTick{tick}
 		}
-		startTime = tick.TickTime.UnixNano()
+		startTime = tick.TickTime
 	}
 
 	cc.AppendHistoryTickAnalyze(stockNum, volumeArr)

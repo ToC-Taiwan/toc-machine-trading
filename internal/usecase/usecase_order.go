@@ -67,6 +67,7 @@ func (uc *OrderUseCase) placeOrder(order *entity.Order) {
 	var err error
 
 	if uc.quota.quota < uc.quota.CalculateOrderCost(order) {
+		order.Status = entity.StatusAborted
 		return
 	}
 
@@ -226,6 +227,9 @@ func (uc *OrderUseCase) askOrderUpdate() {
 func (uc *OrderUseCase) updateCacheAndInsertDB(order *entity.Order) {
 	// get order from cache
 	cacheOrder := cc.GetOrderByOrderID(order.OrderID)
+	if cacheOrder == nil {
+		return
+	}
 
 	// let action, trade time be the same from cache
 	order.TradeTime = cacheOrder.TradeTime

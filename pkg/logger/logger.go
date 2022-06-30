@@ -66,8 +66,9 @@ func initLogger() {
 		})
 	} else {
 		globalLogger.SetFormatter(&logrus.JSONFormatter{
-			TimestampFormat: global.LongTimeLayout,
-			PrettyPrint:     false,
+			DisableHTMLEscape: true,
+			TimestampFormat:   global.LongTimeLayout,
+			PrettyPrint:       false,
 			CallerPrettyfier: func(frame *runtime.Frame) (function string, file string) {
 				fileName := strings.ReplaceAll(frame.File, fmt.Sprintf("%s/", basePath), "")
 				return fmt.Sprintf("%s:%d", fileName, frame.Line), ""
@@ -97,8 +98,9 @@ func fileHook(basePath string) *lfshook.LfsHook {
 	return lfshook.NewHook(
 		pathMap,
 		&logrus.JSONFormatter{
-			TimestampFormat: global.LongTimeLayout,
-			PrettyPrint:     false,
+			DisableHTMLEscape: true,
+			TimestampFormat:   global.LongTimeLayout,
+			PrettyPrint:       false,
 			CallerPrettyfier: func(frame *runtime.Frame) (function string, file string) {
 				fileName := strings.ReplaceAll(frame.File, fmt.Sprintf("%s/", basePath), "")
 				return fmt.Sprintf("%s:%d", fileName, frame.Line), ""

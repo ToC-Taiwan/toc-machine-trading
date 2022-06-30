@@ -153,7 +153,7 @@ func (uc *BasicUseCase) fillBasicInfo() error {
 		TradeDay:     tradeDay,
 		LastTradeDay: getLastNTradeDayByDate(1, tradeDay)[0],
 
-		OpenTime:        tradeDay.Add(openTime).Add(time.Duration(cfg.TradeSwitch.HoldTimeFromOpen) * time.Minute),
+		OpenTime:        tradeDay.Add(openTime).Add(time.Duration(cfg.TradeSwitch.HoldTimeFromOpen) * time.Second),
 		EndTime:         tradeDay.Add(openTime).Add(time.Duration(cfg.TradeSwitch.TotalOpenTime) * time.Minute),
 		TradeInEndTime:  tradeDay.Add(openTime).Add(time.Duration(cfg.TradeSwitch.TradeInEndTime) * time.Minute),
 		TradeOutEndTime: tradeDay.Add(openTime).Add(time.Duration(cfg.TradeSwitch.TradeOutEndTime) * time.Minute),
