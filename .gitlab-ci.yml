@@ -1,0 +1,125 @@
+include:
+    - local: SAST.gitlab-ci.yml
+    - local: Secret-Detection.gitlab-ci.yml
+
+variables:
+    DOCKER_DRIVER: overlay2
+    IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
+    LATEST_TAG: $CI_REGISTRY_IMAGE:latest
+
+stages:
+    - lint
+    - test
+    - build
+    - deployment
+
+go-lint:
+    image: golangci/golangci-lint
+    only:
+        - main
+    stage: lint
+    before_script:
+        - apt update && apt install -y jq
+    script:
+        - "[ -e .golangci.yml ] || cp /golangci/.golangci.yml ."
+        - golangci-lint run --issues-exit-code 0 --out-format code-climate | tee gl-code-quality-report.json | jq -r '.[] | "\(.location.path):\(.location.lines.begin) \(.description)"'
+    artifacts:
+        reports:
+            codequality: gl-code-quality-report.json
+
+go-build-test:
+    image: golang:1.18.3-bullseye
+    only:
+        - main
+    stage: test
+    script:
+        - go build -o toc-machine-trading ./cmd/app
+
+go-test:
+    image: golang:1.18.3-bullseye
+    only:
+        - main
+    stage: test
+    allow_failure: true
+    script:
+        - go install gotest.tools/gotestsum@latest
+        - gotestsum --junitfile report.xml --format testname
+        - go test -race $(go list ./... | grep -v /vendor/) -v -coverprofile=coverage.out -covermode=atomic
+        - go tool cover -func=coverage.out
+    artifacts:
+        when: always
+        reports:
+            junit: report.xml
+
+docker_build:
+    image: docker:latest
+    only:
+        - main
+    stage: build
+    before_script:
+        - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    script:
+        - docker build -t $IMAGE_TAG -t $LATEST_TAG .
+        - docker push --all-tags $CI_REGISTRY_IMAGE
+        - docker rmi $IMAGE_TAG $LATEST_TAG
+        - docker system prune --volumes -f
+
+docker-deploy:
+    image: alpine:latest
+    only:
+        - main
+    stage: deployment
+    script:
+        - chmod og= $ID_ED25519
+        - apk update && apk add openssh-client
+        - echo $ENV_FILE && echo $CONFIG_FILE
+        - ssh -i $ID_ED25519 -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "mkdir -p /$SERVER_USER/toc-machine-trading-env"
+        - scp -i $ID_ED25519 -o StrictHostKeyChecking=no $ENV_FILE $SERVER_USER@$SERVER_IP:/$SERVER_USER/toc-machine-trading-env/.env
+
+        - ssh -i $ID_ED25519 -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "mkdir -p /$SERVER_USER/toc-machine-trading-configs"
+        - scp -i $ID_ED25519 -o StrictHostKeyChecking=no $CONFIG_FILE $SERVER_USER@$SERVER_IP:/$SERVER_USER/toc-machine-trading-configs/config.yml
+
+        - ssh -i $ID_ED25519 -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY"
+        - ssh -i $ID_ED25519 -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker pull $IMAGE_TAG"
+        - ssh -i $ID_ED25519 -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker kill toc-machine-trading || true"
+        - ssh -i $ID_ED25519 -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker system prune --volumes -f"
+
+        - |
+            ssh -i $ID_ED25519 -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker run --name toc-machine-trading \
+            --network tocvlan \
+            --ip=172.20.10.228 \
+            --restart always \
+            -e TZ="Asia/Taipei" \
+            -v /$SERVER_USER/toc-machine-trading-logs:/toc-machine-trading/logs \
+            -v /$SERVER_USER/toc-machine-trading-env/.env:/toc-machine-trading/.env \
+            -v /$SERVER_USER/toc-machine-trading-configs/config.yml:/toc-machine-trading/configs/config.yml \
+            -dt $IMAGE_TAG"
+
+    when: manual
+    environment:
+        name: review/$CI_COMMIT_REF_NAME
+        on_stop: stop_production
+
+stop_production:
+    image: alpine:latest
+    only:
+        - main
+    stage: deployment
+    script:
+        - chmod og= $ID_ED25519
+        - apk update && apk add openssh-client
+        - ssh -i $ID_ED25519 -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "cd /$SERVER_USER/toc-machine-trading-logs && tar -czvPf /toc-machine-trading-logs-$CI_COMMIT_SHORT_SHA.tgz ./*"
+        - ssh -i $ID_ED25519 -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "rm -rf /$SERVER_USER/toc-machine-trading-logs || true"
+        - scp -i $ID_ED25519 -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP:/toc-machine-trading-logs-$CI_COMMIT_SHORT_SHA.tgz toc-machine-trading-logs-$CI_COMMIT_SHORT_SHA.tgz
+        - ssh -i $ID_ED25519 -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "rm -rf /toc-machine-trading-logs-$CI_COMMIT_SHORT_SHA.tgz || true"
+        - ssh -i $ID_ED25519 -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker kill toc-machine-trading"
+        - ssh -i $ID_ED25519 -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker system prune --volumes -f"
+        - ssh -i $ID_ED25519 -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker rmi $IMAGE_TAG"
+    when: manual
+    environment:
+        name: review/$CI_COMMIT_REF_NAME
+        action: stop
+    artifacts:
+        paths:
+            - toc-machine-trading-logs-$CI_COMMIT_SHORT_SHA.tgz
+        expire_in: 2 week

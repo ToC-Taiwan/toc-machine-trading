@@ -62,11 +62,12 @@ go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@$ve
 echo 'DEPLOYMENT=dev
 DISABLE_SWAGGER_HTTP_HANDLER=
 GIN_MODE=debug
-SINOPAC_URL=172.20.10.96:56666
+SINOPAC_URL=172.20.10.227:56666
 PG_URL=postgres://postgres:asdf0000@127.0.0.1:5432/
-RABBITMQ_URL=amqp://admin:password@172.20.10.96:5672/%2f
+RABBITMQ_URL=amqp://admin:password@172.20.10.226:5672/%2f
 RABBITMQ_EXCHANGE=toc
-DB_NAME=trade' > .env
+DB_NAME=trade
+' > .env
 ```
 
 ### VSCode Debug Setting

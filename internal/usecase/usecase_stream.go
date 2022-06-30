@@ -156,9 +156,6 @@ func (uc *StreamUseCase) tradeAgent(data *RealTimeData, finishChan chan struct{}
 }
 
 func (uc *StreamUseCase) placeOrder(data *RealTimeData, order *entity.Order) {
-	bus.PublishTopicEvent(topicPlaceOrder, order)
-	data.waitingOrder = order
-
 	var timeout time.Duration
 	switch order.Action {
 	case entity.ActionBuy, entity.ActionSellFirst:
@@ -169,6 +166,10 @@ func (uc *StreamUseCase) placeOrder(data *RealTimeData, order *entity.Order) {
 	case entity.ActionSell, entity.ActionBuyLater:
 		timeout = time.Duration(uc.tradeSwitchCfg.TradeOutWaitTime) * time.Second
 	}
+
+	bus.PublishTopicEvent(topicPlaceOrder, order)
+	data.waitingOrder = order
+
 	go data.checkPlaceOrderStatus(order, timeout)
 }
 
