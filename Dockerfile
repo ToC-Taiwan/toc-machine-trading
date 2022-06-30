@@ -33,7 +33,7 @@ WORKDIR /toc-machine-trading
 
 COPY --from=build-stage /build_space/toc-machine-trading ./toc-machine-trading
 COPY --from=build-stage /build_space/data/holidays.json ./data/holidays.json
-COPY --from=build-stage /build_space/migrations ./migrations
+COPY --from=build-stage /build_space/migrations ./migrations/
 COPY --from=build-stage /build_space/scripts/docker-entrypoint.sh ./scripts/docker-entrypoint.sh
 
 ENTRYPOINT ["/toc-machine-trading/scripts/docker-entrypoint.sh"]

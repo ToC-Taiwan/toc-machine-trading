@@ -1,5 +1,5 @@
 #!/bin/bash
 
-source /toc-machine-trading/.env
+export $(cat /toc-machine-trading/.env | xargs)
 
 /toc-machine-trading/toc-machine-trading
