@@ -103,7 +103,7 @@ func (uc *TargetUseCase) SearchTradeDayTargets(ctx context.Context, tradeDay tim
 					Rank:        len(result) + 1,
 					StockNum:    v.GetCode(),
 					Volume:      v.GetTotalVolume(),
-					Subscribe:   true,
+					Subscribe:   c.Subscribe,
 					RealTimeAdd: false,
 					TradeDay:    tradeDay,
 					Stock:       stock,

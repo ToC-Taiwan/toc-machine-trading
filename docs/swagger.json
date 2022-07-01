@@ -636,6 +636,9 @@
                 },
                 "limit_volume": {
                     "type": "integer"
+                },
+                "subscribe": {
+                    "type": "boolean"
                 }
             }
         },

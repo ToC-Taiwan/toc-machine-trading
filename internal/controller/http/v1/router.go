@@ -26,9 +26,9 @@ type RouterV1 struct {
 // @license.name Apache 2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 func NewRouter(handler *gin.Engine) *RouterV1 {
-	apiVersion := "/v1"
+	prefix := "/tmt/v1"
 
-	docs.SwaggerInfo.BasePath = apiVersion
+	docs.SwaggerInfo.BasePath = prefix
 	docs.SwaggerInfo.Host = "127.0.0.1:8080"
 
 	// handler.Use(gin.Logger())
@@ -41,7 +41,7 @@ func NewRouter(handler *gin.Engine) *RouterV1 {
 	// Prometheus metrics
 	handler.GET("/metrics", gin.WrapH(promhttp.Handler()))
 
-	return &RouterV1{handler.Group(apiVersion)}
+	return &RouterV1{handler.Group(prefix)}
 }
 
 // AddBasicRoutes -.

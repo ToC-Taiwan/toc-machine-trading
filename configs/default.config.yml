@@ -47,9 +47,19 @@ target_cond:
     - limit_price_low: 10
       limit_price_high: 35
       limit_volume: 10000
+      subscribe: true
+    - limit_price_low: 35
+      limit_price_high: 100
+      limit_volume: 8000
+      subscribe: false
     - limit_price_low: 100
       limit_price_high: 125
       limit_volume: 2000
+      subscribe: true
+    - limit_price_low: 125
+      limit_price_high: 200
+      limit_volume: 2000
+      subscribe: false
 
 analyze:
     # unit: %

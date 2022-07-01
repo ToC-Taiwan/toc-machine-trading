@@ -645,6 +645,9 @@ const docTemplate = `{
                 },
                 "limit_volume": {
                     "type": "integer"
+                },
+                "subscribe": {
+                    "type": "boolean"
                 }
             }
         },

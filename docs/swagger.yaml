@@ -117,6 +117,8 @@ definitions:
         type: number
       limit_volume:
         type: integer
+      subscribe:
+        type: boolean
     type: object
   config.TradeSwitch:
     properties:
