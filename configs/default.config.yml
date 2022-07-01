@@ -1,5 +1,5 @@
 http:
-    port: 8080
+    port: 26670
 
 postgres:
     pool_max: 80
