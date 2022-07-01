@@ -70,7 +70,7 @@ func (uc *BasicUseCase) GetAllSinopacStockAndUpdateRepo(ctx context.Context) ([]
 			Name:       v.GetName(),
 			Exchange:   v.GetExchange(),
 			Category:   v.GetCategory(),
-			DayTrade:   v.GetDayTrade() == "Yes",
+			DayTrade:   v.GetDayTrade() == entity.DayTradeYes,
 			LastClose:  v.GetReference(),
 			UpdateDate: updateTime,
 		}

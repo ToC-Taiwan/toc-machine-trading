@@ -49,16 +49,20 @@ func NewTarget(r *repo.TargetRepo, t *grpcapi.TargetgRPCAPI) *TargetUseCase {
 			if err = uc.InsertTargets(context.Background(), targetArr); err != nil {
 				log.Panic(err)
 			}
+		} else {
+			stuck := make(chan struct{})
+			log.Error("no targets")
+			<-stuck
 		}
 	}
-
-	// save to cache
-	cc.AppendTargets(targetArr)
 
 	// sub events
 	bus.SubscribeTopic(topicRealTimeTargets, uc.InsertTargets)
 	bus.SubscribeTopic(topicSubscribeTickTargets, uc.SubscribeStockTick, uc.SubscribeStockBidAsk)
+	bus.SubscribeTopic(topicUnSubscribeTickTargets, uc.UnSubscribeStockTick, uc.UnSubscribeStockBidAsk)
 
+	// save to cache
+	cc.AppendTargets(targetArr)
 	// pub events
 	bus.PublishTopicEvent(topicTargets, context.Background(), targetArr)
 	return uc
@@ -174,6 +178,34 @@ func (uc *TargetUseCase) SubscribeStockBidAsk(targetArr []*entity.Target) error 
 
 	if len(failSubNumArr) != 0 {
 		return fmt.Errorf("subscribe fail %v", failSubNumArr)
+	}
+
+	return nil
+}
+
+// UnSubscribeStockTick -.
+func (uc *TargetUseCase) UnSubscribeStockTick(target *entity.Target) error {
+	failUnSubNumArr, err := uc.gRPCAPI.UnSubscribeStockTick([]string{target.StockNum})
+	if err != nil {
+		return err
+	}
+
+	if len(failUnSubNumArr) != 0 {
+		return fmt.Errorf("unsubscribe fail %v", failUnSubNumArr)
+	}
+
+	return nil
+}
+
+// UnSubscribeStockBidAsk -.
+func (uc *TargetUseCase) UnSubscribeStockBidAsk(target *entity.Target) error {
+	failUnSubNumArr, err := uc.gRPCAPI.UnSubscribeStockBidAsk([]string{target.StockNum})
+	if err != nil {
+		return err
+	}
+
+	if len(failUnSubNumArr) != 0 {
+		return fmt.Errorf("unsubscribe fail %v", failUnSubNumArr)
 	}
 
 	return nil

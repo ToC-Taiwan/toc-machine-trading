@@ -120,6 +120,9 @@ func (uc *StreamUseCase) tradeAgent(data *RealTimeData) {
 	go func() {
 		for {
 			tick := <-data.tickChan
+			if tick.PctChg < uc.analyzeCfg.CloseChangeRatioLow || tick.PctChg > uc.analyzeCfg.CloseChangeRatioHigh {
+				continue
+			}
 			data.tickArr = append(data.tickArr, tick)
 			order := data.generateOrder(uc.analyzeCfg, uc.clearAll)
 			if order == nil {
@@ -136,7 +139,7 @@ func (uc *StreamUseCase) tradeAgent(data *RealTimeData) {
 	}()
 
 	for {
-		time.Sleep(10 * time.Second)
+		time.Sleep(15 * time.Second)
 		if uc.clearAll {
 			order := data.clearUnfinishedOrder()
 			if order != nil {
@@ -213,6 +216,10 @@ func (uc *StreamUseCase) GetTSESnapshot(ctx context.Context) (*entity.StockSnapS
 }
 
 func (uc *StreamUseCase) realTimeAddTargets(ctx context.Context) error {
+	if !uc.tradeInSwitch {
+		return nil
+	}
+
 	data, err := uc.grpcapi.GetAllStockSnapshot()
 	if err != nil {
 		return err
@@ -237,7 +244,7 @@ func (uc *StreamUseCase) realTimeAddTargets(ctx context.Context) error {
 						Rank:        100 + i + 1,
 						StockNum:    d.GetCode(),
 						Volume:      d.GetTotalVolume(),
-						Subscribe:   true,
+						Subscribe:   c.Subscribe,
 						RealTimeAdd: true,
 						TradeDay:    uc.basic.TradeDay,
 						Stock:       stock,

@@ -16,8 +16,6 @@ type RealTimeData struct {
 	orderQuantity int64
 	tickArr       RealTimeTickArr
 
-	bidAsk *entity.RealTimeBidAsk
-
 	orderMapLock sync.RWMutex
 	orderMap     map[entity.OrderAction][]*entity.Order
 	waitingOrder *entity.Order
@@ -28,6 +26,7 @@ type RealTimeData struct {
 	historyTickAnalyze []int64
 
 	analyzeTickTime time.Time
+	bidAsk          *entity.RealTimeBidAsk
 }
 
 func (o *RealTimeData) generateOrder(cfg config.Analyze, needClear bool) *entity.Order {
@@ -73,6 +72,8 @@ func (o *RealTimeData) generateOrder(cfg config.Analyze, needClear bool) *entity
 }
 
 func (o *RealTimeData) generateTradeOutOrder(cfg config.Analyze, postOrderAction entity.OrderAction, preTime time.Time) *entity.Order {
+	// calculate max loss here
+	//
 	rsi := o.tickArr.getRSIByTickTime(preTime, cfg.RSIMinCount)
 	if rsi != 0 {
 		switch postOrderAction {
@@ -139,7 +140,7 @@ func (o *RealTimeData) checkPlaceOrderStatus(order *entity.Order, timeout time.D
 				bus.PublishTopicEvent(topicCancelOrder, order.OrderID)
 
 				log.Warnf("Place Cancel Order -> Stock: %s, Action: %d, Price: %.2f, Qty: %d", order.StockNum, order.Action, order.Price, order.Quantity)
-				go o.checkCancelStatus(order.OrderID)
+				go o.checkCancelOrder(order.OrderID)
 				break
 			}
 		}
@@ -147,7 +148,9 @@ func (o *RealTimeData) checkPlaceOrderStatus(order *entity.Order, timeout time.D
 	}
 }
 
-func (o *RealTimeData) checkCancelStatus(orderID string) {
+func (o *RealTimeData) checkCancelOrder(orderID string) {
+	// calculate open change rate here
+	//
 	for {
 		order := cc.GetOrderByOrderID(orderID)
 		if order.Status == entity.StatusCancelled {

@@ -21,7 +21,7 @@ type RouterV1 struct {
 
 // NewRouter -.
 // @title       TOC MACHINE TRADING
-// @description Auto Trade
+// @description API docs for Auto Trade
 // @version     0.0.1
 // @license.name Apache 2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html

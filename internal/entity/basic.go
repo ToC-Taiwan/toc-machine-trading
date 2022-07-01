@@ -22,6 +22,15 @@ type Stock struct {
 	UpdateDate time.Time `json:"update_date"`
 }
 
+const (
+	// DayTradeYes -.
+	DayTradeYes string = "Yes"
+	// DayTradeNo -.
+	DayTradeNo string = "No"
+	// DayTradeOnlyBuy -.
+	DayTradeOnlyBuy string = "OnlyBuy"
+)
+
 // BasicInfo -.
 type BasicInfo struct {
 	TradeDay     time.Time
