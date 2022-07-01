@@ -109,21 +109,14 @@ func (uc *StreamUseCase) ReceiveStreamData(ctx context.Context, targetArr []*ent
 		}
 		go data.checkFirstTickArrive()
 
-		finishChan := make(chan struct{})
-		go uc.tradeAgent(data, finishChan)
-		for {
-			_, ok := <-finishChan
-			if !ok {
-				break
-			}
-		}
+		go uc.tradeAgent(data)
 		go uc.rabbit.TickConsumer(t.StockNum, data.tickChan)
 		go uc.rabbit.BidAskConsumer(t.StockNum, data.bidAskChan)
 	}
 	bus.PublishTopicEvent(topicSubscribeTickTargets, targetArr)
 }
 
-func (uc *StreamUseCase) tradeAgent(data *RealTimeData, finishChan chan struct{}) {
+func (uc *StreamUseCase) tradeAgent(data *RealTimeData) {
 	go func() {
 		for {
 			tick := <-data.tickChan
@@ -141,9 +134,6 @@ func (uc *StreamUseCase) tradeAgent(data *RealTimeData, finishChan chan struct{}
 			data.bidAsk = <-data.bidAskChan
 		}
 	}()
-
-	// close channel to start receive data from rabbitmq
-	close(finishChan)
 
 	for {
 		time.Sleep(10 * time.Second)
@@ -170,8 +160,8 @@ func (uc *StreamUseCase) placeOrder(data *RealTimeData, order *entity.Order) {
 
 	bus.PublishTopicEvent(topicPlaceOrder, order)
 	data.waitingOrder = order
-	log.Warnf("Place Order -> Stock: %s, Action: %d, Price: %.2f, Qty: %d", order.StockNum, order.Action, order.Price, order.Quantity)
 
+	log.Warnf("Place Order -> Stock: %s, Action: %d, Price: %.2f, Qty: %d", order.StockNum, order.Action, order.Price, order.Quantity)
 	go data.checkPlaceOrderStatus(order, timeout)
 }
 

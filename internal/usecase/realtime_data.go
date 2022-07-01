@@ -129,15 +129,16 @@ func (o *RealTimeData) checkPlaceOrderStatus(order *entity.Order, timeout time.D
 			break
 		}
 
-		if order.Status == entity.StatusAborted {
+		if order.Status == entity.StatusAborted || order.Status == entity.StatusFailed {
 			o.waitingOrder = nil
 			break
 		}
 
 		if order.TradeTime.Add(timeout).Before(time.Now()) {
-			if order.OrderID != "" && order.Status != entity.StatusCancelled && order.Status != entity.StatusFilled {
+			if order.OrderID != "" && order.Status != entity.StatusCancelled {
 				bus.PublishTopicEvent(topicCancelOrder, order.OrderID)
-				log.Warnf("Place Cance Order -> Stock: %s, Action: %d, Price: %.2f, Qty: %d", order.StockNum, order.Action, order.Price, order.Quantity)
+
+				log.Warnf("Place Cancel Order -> Stock: %s, Action: %d, Price: %.2f, Qty: %d", order.StockNum, order.Action, order.Price, order.Quantity)
 				go o.checkCancelStatus(order.OrderID)
 				break
 			}

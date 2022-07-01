@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"errors"
+	"sync"
 	"time"
 
 	"toc-machine-trading/internal/entity"
@@ -19,8 +20,9 @@ type OrderUseCase struct {
 	gRPCAPI OrdergRPCAPI
 	repo    OrderRepo
 
-	quota    *Quota
-	simTrade bool
+	quota          *Quota
+	simTrade       bool
+	placeOrderLock sync.Mutex
 }
 
 // NewOrder -.
@@ -62,15 +64,16 @@ func NewOrder(t *grpcapi.OrdergRPCAPI, r *repo.OrderRepo) *OrderUseCase {
 }
 
 func (uc *OrderUseCase) placeOrder(order *entity.Order) {
-	var orderID string
-	var status entity.OrderStatus
-	var err error
-
-	if uc.quota.quota < uc.quota.CalculateOrderCost(order) {
+	defer uc.placeOrderLock.Unlock()
+	uc.placeOrderLock.Lock()
+	if (order.Action == entity.ActionBuy || order.Action == entity.ActionSellFirst) && uc.quota.quota-uc.quota.calculateOriginalOrderCost(order) < 0 {
 		order.Status = entity.StatusAborted
 		return
 	}
 
+	var orderID string
+	var status entity.OrderStatus
+	var err error
 	switch order.Action {
 	case entity.ActionBuy, entity.ActionBuyLater:
 		orderID, status, err = uc.BuyStock(order)
@@ -88,7 +91,10 @@ func (uc *OrderUseCase) placeOrder(order *entity.Order) {
 		return
 	}
 
-	uc.quota.quota -= uc.quota.CalculateOrderCost(order)
+	// count quota
+	uc.quota.quota -= uc.quota.calculateOriginalOrderCost(order)
+
+	// modify order and save to cache
 	order.OrderID = orderID
 	order.Status = status
 	cc.SetOrderByOrderID(order)
@@ -107,7 +113,9 @@ func (uc *OrderUseCase) cancelOrder(orderID string) {
 		return
 	}
 
-	uc.quota.quota += uc.quota.CalculateOrderCost(order)
+	if order.Action == entity.ActionBuy || order.Action == entity.ActionSellFirst {
+		uc.quota.quota += uc.quota.calculateOriginalOrderCost(order)
+	}
 	order.Status = status
 	cc.SetOrderByOrderID(order)
 }

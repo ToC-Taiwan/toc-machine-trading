@@ -25,14 +25,8 @@ func NewQuota(cfg config.Quota) *Quota {
 	}
 }
 
-// CalculateOrderCost -.
-func (q *Quota) CalculateOrderCost(order *entity.Order) int64 {
-	switch order.Action {
-	case entity.ActionBuy, entity.ActionSellFirst:
-		return order.Quantity * int64(order.Price) * 1000
-	default:
-		return 0
-	}
+func (q *Quota) calculateOriginalOrderCost(order *entity.Order) int64 {
+	return order.Quantity * int64(order.Price) * 1000
 }
 
 // GetStockBuyCost -.
