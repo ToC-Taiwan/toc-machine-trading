@@ -264,10 +264,20 @@ func (uc *StreamUseCase) realTimeAddTargets(ctx context.Context) error {
 
 // GetStockSnapshotByNumArr -.
 func (uc *StreamUseCase) GetStockSnapshotByNumArr(stockNumArr []string) ([]*entity.StockSnapShot, error) {
-	snapshot, err := uc.grpcapi.GetStockSnapshotByNumArr(stockNumArr)
+	var fetchArr, stockNotExist []string
+	for _, s := range stockNumArr {
+		if cc.GetStockDetail(s) == nil {
+			stockNotExist = append(stockNotExist, s)
+		} else {
+			fetchArr = append(fetchArr, s)
+		}
+	}
+
+	snapshot, err := uc.grpcapi.GetStockSnapshotByNumArr(fetchArr)
 	if err != nil {
 		return nil, err
 	}
+
 	var result []*entity.StockSnapShot
 	for _, body := range snapshot {
 		stockNum := body.GetCode()
@@ -291,5 +301,12 @@ func (uc *StreamUseCase) GetStockSnapshotByNumArr(stockNumArr []string) ([]*enti
 			VolumeRatio:     body.GetVolumeRatio(),
 		})
 	}
+
+	for _, v := range stockNotExist {
+		result = append(result, &entity.StockSnapShot{
+			StockNum: v,
+		})
+	}
+
 	return result, nil
 }

@@ -47,6 +47,7 @@ func (r *TargetRepo) QueryTargetsByTradeDay(ctx context.Context, tradeDay time.T
 		Select("id, rank, volume, subscribe, real_time_add, trade_day, stock_num, number, name, exchange, category, day_trade, last_close, update_date").
 		From(tableNameTarget).
 		Where("trade_day = ?", tradeDay).
+		OrderBy("rank ASC").
 		Join("basic_stock ON basic_targets.stock_num = basic_stock.number").ToSql()
 	if err != nil {
 		return nil, err

@@ -40,14 +40,21 @@ func (w *WSRouter) sendSnapShotArr(ctx context.Context) {
 
 			data := []SocketPickStock{}
 			for _, s := range snapShot {
-				data = append(data, SocketPickStock{
-					StockNum:        s.StockNum,
-					StockName:       s.StockName,
-					IsTarget:        false,
-					PriceChange:     s.PriceChg,
-					PriceChangeRate: s.PctChg,
-					Price:           s.Close,
-				})
+				if s.StockName != "" {
+					data = append(data, SocketPickStock{
+						StockNum:        s.StockNum,
+						StockName:       s.StockName,
+						IsTarget:        false,
+						PriceChange:     s.PriceChg,
+						PriceChangeRate: s.PctChg,
+						Price:           s.Close,
+					})
+				} else {
+					data = append(data, SocketPickStock{
+						StockNum: s.StockNum,
+						Wrong:    true,
+					})
+				}
 			}
 
 			w.msgChan <- data
