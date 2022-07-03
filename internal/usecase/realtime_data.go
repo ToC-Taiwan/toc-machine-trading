@@ -30,7 +30,7 @@ type RealTimeData struct {
 }
 
 func (o *RealTimeData) generateOrder(cfg config.Analyze, needClear bool) *entity.Order {
-	if o.waitingOrder != nil || needClear {
+	if o.waitingOrder != nil || needClear || o.analyzeTickTime.IsZero() {
 		return nil
 	}
 
@@ -39,17 +39,18 @@ func (o *RealTimeData) generateOrder(cfg config.Analyze, needClear bool) *entity
 		return o.generateTradeOutOrder(cfg, postOrderAction, preTime)
 	}
 
-	if o.tickArr.getLastTickTime().Before(o.analyzeTickTime.Add(time.Duration(cfg.TickAnalyzeMaxPeriod) * time.Millisecond)) {
+	lastTickTime := o.tickArr.getLastTickTime()
+	if lastTickTime.Before(o.analyzeTickTime.Add(time.Duration(cfg.TickAnalyzeMinPeriod) * time.Millisecond)) {
 		return nil
 	}
-	o.analyzeTickTime = o.tickArr.getLastTickTime()
-	periodData := o.tickArr.getLastNMilliSecondArr(cfg.TickAnalyzeMinPeriod)
+	o.analyzeTickTime = lastTickTime
+	period := o.tickArr.getLastNMilliSecondArr(cfg.TickAnalyzeMinPeriod)
 
-	periodVolume := periodData.getTotalVolume()
+	periodVolume := period.getTotalVolume()
 	if pr := o.getPRByVolume(periodVolume); pr < cfg.VolumePRLow || pr > cfg.VolumePRHigh {
 		return nil
 	}
-	periodOutInRation := periodData.getOutInRatio()
+	periodOutInRation := period.getOutInRatio()
 
 	// need to compare with all and period
 	order := &entity.Order{
@@ -135,22 +136,18 @@ func (o *RealTimeData) checkPlaceOrderStatus(order *entity.Order, timeout time.D
 			break
 		}
 
-		if order.TradeTime.Add(timeout).Before(time.Now()) {
-			if order.OrderID != "" && order.Status != entity.StatusCancelled {
-				bus.PublishTopicEvent(topicCancelOrder, order.OrderID)
+		if order.TradeTime.Add(timeout).Before(time.Now()) && order.Status != entity.StatusCancelled && order.OrderID != "" {
+			bus.PublishTopicEvent(topicCancelOrder, order.OrderID)
 
-				log.Warnf("Place Cancel Order -> Stock: %s, Action: %d, Price: %.2f, Qty: %d", order.StockNum, order.Action, order.Price, order.Quantity)
-				go o.checkCancelOrder(order.OrderID)
-				break
-			}
+			log.Warnf("Place Cancel Order -> Stock: %s, Action: %d, Price: %.2f, Qty: %d", order.StockNum, order.Action, order.Price, order.Quantity)
+			go o.checkCancelOrder(order.OrderID)
+			break
 		}
 		time.Sleep(time.Second)
 	}
 }
 
 func (o *RealTimeData) checkCancelOrder(orderID string) {
-	// calculate open change rate here
-	//
 	for {
 		order := cc.GetOrderByOrderID(orderID)
 		if order.Status == entity.StatusCancelled {
@@ -185,6 +182,8 @@ func (o *RealTimeData) setHistoryTickAnalyze(arr []int64) {
 }
 
 func (o *RealTimeData) checkFirstTickArrive() {
+	// calculate open change rate here
+	//
 	tradeDay := cc.GetBasicInfo().TradeDay
 	for {
 		if len(o.tickArr) != 0 {
@@ -192,7 +191,7 @@ func (o *RealTimeData) checkFirstTickArrive() {
 			o.analyzeTickTime = o.tickArr[0].TickTime
 			break
 		}
-		time.Sleep(time.Second * 5)
+		time.Sleep(200 * time.Millisecond)
 	}
 }
 

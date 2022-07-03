@@ -95,6 +95,7 @@ func (uc *StreamUseCase) ReceiveOrderStatus(ctx context.Context) {
 
 // ReceiveStreamData -.
 func (uc *StreamUseCase) ReceiveStreamData(ctx context.Context, targetArr []*entity.Target) {
+	// receive target data, start goroutine to trade
 	for _, t := range targetArr {
 		data := &RealTimeData{
 			stockNum:      t.StockNum,
@@ -109,7 +110,10 @@ func (uc *StreamUseCase) ReceiveStreamData(ctx context.Context, targetArr []*ent
 		}
 		go data.checkFirstTickArrive()
 
+		// main trade method
 		go uc.tradeAgent(data)
+
+		// send tick, bidask to trade agent's channel
 		go uc.rabbit.TickConsumer(t.StockNum, data.tickChan)
 		go uc.rabbit.BidAskConsumer(t.StockNum, data.bidAskChan)
 	}
@@ -121,6 +125,7 @@ func (uc *StreamUseCase) tradeAgent(data *RealTimeData) {
 		for {
 			tick := <-data.tickChan
 			if tick.PctChg < uc.analyzeCfg.CloseChangeRatioLow || tick.PctChg > uc.analyzeCfg.CloseChangeRatioHigh {
+				// no unsubscribe here because it may in the range on the day
 				continue
 			}
 			data.tickArr = append(data.tickArr, tick)

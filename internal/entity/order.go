@@ -21,8 +21,6 @@ const (
 	ActionSellFirst
 	// ActionBuyLater -.
 	ActionBuyLater
-	// ActionWait -.
-	ActionWait
 )
 
 const (

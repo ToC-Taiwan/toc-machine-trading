@@ -65,7 +65,7 @@ func (c *StreamRabbit) EventConsumer(eventChan chan *entity.SinopacEvent) {
 	for {
 		d, opened := <-delivery
 		if !opened {
-			log.Error("RabbitMQ is closed")
+			log.Error("EventConsumer rabbitMQ is closed")
 			return
 		}
 
@@ -97,7 +97,7 @@ func (c *StreamRabbit) OrderStatusConsumer(orderStatusChan chan *entity.Order) {
 	for {
 		d, opened := <-delivery
 		if !opened {
-			log.Error("RabbitMQ is closed")
+			log.Error("OrderStatusConsumer rabbitMQ is closed")
 			return
 		}
 
@@ -132,7 +132,7 @@ func (c *StreamRabbit) TickConsumer(stockNum string, tickChan chan *entity.RealT
 	for {
 		d, opened := <-delivery
 		if !opened {
-			log.Error("RabbitMQ is closed")
+			log.Errorf("TickConsumer:%s rabbitMQ is closed", stockNum)
 			return
 		}
 
@@ -184,7 +184,7 @@ func (c *StreamRabbit) BidAskConsumer(stockNum string, bidAskChan chan *entity.R
 	for {
 		d, opened := <-delivery
 		if !opened {
-			log.Error("RabbitMQ is closed")
+			log.Errorf("BidAskConsumer:%s rabbitMQ is closed", stockNum)
 			return
 		}
 

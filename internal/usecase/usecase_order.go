@@ -107,17 +107,18 @@ func (uc *OrderUseCase) cancelOrder(orderID string) {
 		return
 	}
 
-	order := cc.GetOrderByOrderID(orderID)
-	if order == nil {
+	cacheOrder := cc.GetOrderByOrderID(orderID)
+	if cacheOrder == nil {
 		log.Error("Order not found")
 		return
 	}
 
-	if order.Action == entity.ActionBuy || order.Action == entity.ActionSellFirst {
-		uc.quota.quota += uc.quota.calculateOriginalOrderCost(order)
+	if cacheOrder.Action == entity.ActionBuy || cacheOrder.Action == entity.ActionSellFirst {
+		uc.quota.quota += uc.quota.calculateOriginalOrderCost(cacheOrder)
 	}
-	order.Status = status
-	cc.SetOrderByOrderID(order)
+
+	cacheOrder.Status = status
+	cc.SetOrderByOrderID(cacheOrder)
 }
 
 // BuyStock -.

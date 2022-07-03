@@ -26,7 +26,7 @@ func NewQuota(cfg config.Quota) *Quota {
 }
 
 func (q *Quota) calculateOriginalOrderCost(order *entity.Order) int64 {
-	return order.Quantity * int64(order.Price) * 1000
+	return int64(math.Ceil(order.Price * float64(order.Quantity) * 1000))
 }
 
 // GetStockBuyCost -.
