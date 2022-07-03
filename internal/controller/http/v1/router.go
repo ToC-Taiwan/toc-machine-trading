@@ -29,7 +29,7 @@ func NewRouter(handler *gin.Engine) *RouterV1 {
 	prefix := "/tmt/v1"
 
 	docs.SwaggerInfo.BasePath = prefix
-	docs.SwaggerInfo.Host = "127.0.0.1:8080"
+	docs.SwaggerInfo.Host = "127.0.0.1:26670"
 
 	// handler.Use(gin.Logger())
 	handler.Use(gin.Recovery())

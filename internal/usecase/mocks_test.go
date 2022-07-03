@@ -828,6 +828,21 @@ func (m *MockStream) EXPECT() *MockStreamMockRecorder {
 	return m.recorder
 }
 
+// GetStockSnapshotByNumArr mocks base method.
+func (m *MockStream) GetStockSnapshotByNumArr(stockNumArr []string) ([]*entity.StockSnapShot, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetStockSnapshotByNumArr", stockNumArr)
+	ret0, _ := ret[0].([]*entity.StockSnapShot)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetStockSnapshotByNumArr indicates an expected call of GetStockSnapshotByNumArr.
+func (mr *MockStreamMockRecorder) GetStockSnapshotByNumArr(stockNumArr interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStockSnapshotByNumArr", reflect.TypeOf((*MockStream)(nil).GetStockSnapshotByNumArr), stockNumArr)
+}
+
 // GetTSESnapshot mocks base method.
 func (m *MockStream) GetTSESnapshot(ctx context.Context) (*entity.StockSnapShot, error) {
 	m.ctrl.T.Helper()

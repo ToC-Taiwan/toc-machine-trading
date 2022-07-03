@@ -234,6 +234,10 @@ definitions:
         type: number
       snap_time:
         type: string
+      stock_name:
+        type: string
+      stock_num:
+        type: string
       tick_type:
         type: string
       volume:
@@ -311,7 +315,7 @@ definitions:
     type: object
 info:
   contact: {}
-  description: Auto Trade
+  description: API docs for Auto Trade
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html

@@ -3,6 +3,7 @@ package v1
 import (
 	"net/http"
 
+	"toc-machine-trading/internal/controller/http/websocket"
 	"toc-machine-trading/internal/usecase"
 
 	"github.com/gin-gonic/gin"
@@ -18,6 +19,7 @@ func newStreamRoutes(handler *gin.RouterGroup, t usecase.Stream) {
 	h := handler.Group("/stream")
 	{
 		h.GET("/tse/snapshot", r.getTSESnapshot)
+		h.GET("/ws/pick-stock", r.serveWS)
 	}
 }
 
@@ -38,4 +40,9 @@ func (r *streamRoutes) getTSESnapshot(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, snapshot)
+}
+
+func (r *streamRoutes) serveWS(c *gin.Context) {
+	wsRouter := websocket.NewWSRouter(r.t)
+	wsRouter.Run(c)
 }

@@ -1,7 +1,7 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "Auto Trade",
+        "description": "API docs for Auto Trade",
         "title": "TOC MACHINE TRADING",
         "contact": {},
         "license": {
@@ -813,6 +813,12 @@
                     "type": "number"
                 },
                 "snap_time": {
+                    "type": "string"
+                },
+                "stock_name": {
+                    "type": "string"
+                },
+                "stock_num": {
                     "type": "string"
                 },
                 "tick_type": {

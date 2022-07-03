@@ -261,3 +261,35 @@ func (uc *StreamUseCase) realTimeAddTargets(ctx context.Context) error {
 	}
 	return nil
 }
+
+// GetStockSnapshotByNumArr -.
+func (uc *StreamUseCase) GetStockSnapshotByNumArr(stockNumArr []string) ([]*entity.StockSnapShot, error) {
+	snapshot, err := uc.grpcapi.GetStockSnapshotByNumArr(stockNumArr)
+	if err != nil {
+		return nil, err
+	}
+	var result []*entity.StockSnapShot
+	for _, body := range snapshot {
+		stockNum := body.GetCode()
+		result = append(result, &entity.StockSnapShot{
+			StockNum:        stockNum,
+			StockName:       cc.GetStockDetail(stockNum).Name,
+			SnapTime:        time.Unix(0, body.GetTs()).Add(-8 * time.Hour),
+			Open:            body.GetOpen(),
+			High:            body.GetHigh(),
+			Low:             body.GetLow(),
+			Close:           body.GetClose(),
+			TickType:        body.GetTickType(),
+			PriceChg:        body.GetChangePrice(),
+			PctChg:          body.GetChangeRate(),
+			ChgType:         body.GetChangeType(),
+			Volume:          body.GetVolume(),
+			VolumeSum:       body.GetTotalVolume(),
+			Amount:          body.GetAmount(),
+			AmountSum:       body.GetTotalAmount(),
+			YesterdayVolume: body.GetYesterdayVolume(),
+			VolumeRatio:     body.GetVolumeRatio(),
+		})
+	}
+	return result, nil
+}

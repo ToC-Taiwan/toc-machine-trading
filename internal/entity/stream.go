@@ -83,6 +83,8 @@ type RealTimeTick struct {
 
 // StockSnapShot -.
 type StockSnapShot struct {
+	StockNum        string    `json:"stock_num"`
+	StockName       string    `json:"stock_name"`
 	SnapTime        time.Time `json:"snap_time"`
 	Open            float64   `json:"open"`
 	High            float64   `json:"high"`

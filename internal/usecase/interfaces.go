@@ -107,6 +107,7 @@ type (
 		ReceiveOrderStatus(ctx context.Context)
 		ReceiveStreamData(ctx context.Context, targetArr []*entity.Target)
 		GetTSESnapshot(ctx context.Context) (*entity.StockSnapShot, error)
+		GetStockSnapshotByNumArr(stockNumArr []string) ([]*entity.StockSnapShot, error)
 	}
 
 	// StreamRepo -.

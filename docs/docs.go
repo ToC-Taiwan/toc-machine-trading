@@ -824,6 +824,12 @@ const docTemplate = `{
                 "snap_time": {
                     "type": "string"
                 },
+                "stock_name": {
+                    "type": "string"
+                },
+                "stock_num": {
+                    "type": "string"
+                },
                 "tick_type": {
                     "type": "string"
                 },
@@ -950,7 +956,7 @@ var SwaggerInfo = &swag.Spec{
 	BasePath:         "",
 	Schemes:          []string{},
 	Title:            "TOC MACHINE TRADING",
-	Description:      "Auto Trade",
+	Description:      "API docs for Auto Trade",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 }
