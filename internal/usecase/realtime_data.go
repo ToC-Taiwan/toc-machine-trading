@@ -128,23 +128,27 @@ func (o *RealTimeData) checkPlaceOrderStatus(order *entity.Order, timeout time.D
 			o.orderMapLock.Unlock()
 			o.waitingOrder = nil
 			log.Warnf("Order Filled -> Stock: %s, Action: %d, Price: %.2f, Qty: %d", order.StockNum, order.Action, order.Price, order.Quantity)
-			break
-		}
-
-		if order.Status == entity.StatusAborted || order.Status == entity.StatusFailed {
-			o.waitingOrder = nil
-			break
-		}
-
-		if order.TradeTime.Add(timeout).Before(time.Now()) && order.Status != entity.StatusCancelled && order.OrderID != "" {
-			bus.PublishTopicEvent(topicCancelOrder, order.OrderID)
-
-			log.Warnf("Place Cancel Order -> Stock: %s, Action: %d, Price: %.2f, Qty: %d", order.StockNum, order.Action, order.Price, order.Quantity)
-			go o.checkCancelOrder(order.OrderID)
+			return
+		} else if order.TradeTime.Add(timeout).Before(time.Now()) {
 			break
 		}
 		time.Sleep(time.Second)
 	}
+
+	if order.Status == entity.StatusAborted || order.Status == entity.StatusFailed {
+		o.waitingOrder = nil
+		return
+	}
+
+	if order.OrderID != "" && order.Status != entity.StatusCancelled && order.Status != entity.StatusFilled {
+		bus.PublishTopicEvent(topicCancelOrder, order.OrderID)
+
+		log.Warnf("Place Cancel Order -> Stock: %s, Action: %d, Price: %.2f, Qty: %d", order.StockNum, order.Action, order.Price, order.Quantity)
+		go o.checkCancelOrder(order.OrderID)
+		return
+	}
+
+	log.Error("checkPlaceOrderStatus error")
 }
 
 func (o *RealTimeData) checkCancelOrder(orderID string) {
