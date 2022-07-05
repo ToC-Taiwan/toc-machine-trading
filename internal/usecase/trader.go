@@ -10,8 +10,8 @@ import (
 	"toc-machine-trading/pkg/utils"
 )
 
-// RealTimeData -.
-type RealTimeData struct {
+// Trader -.
+type Trader struct {
 	stockNum      string
 	orderQuantity int64
 	tickArr       RealTimeTickArr
@@ -29,7 +29,7 @@ type RealTimeData struct {
 	bidAsk          *entity.RealTimeBidAsk
 }
 
-func (o *RealTimeData) generateOrder(cfg config.Analyze, needClear bool) *entity.Order {
+func (o *Trader) generateOrder(cfg config.Analyze, needClear bool) *entity.Order {
 	if o.waitingOrder != nil || needClear || o.analyzeTickTime.IsZero() {
 		return nil
 	}
@@ -72,7 +72,7 @@ func (o *RealTimeData) generateOrder(cfg config.Analyze, needClear bool) *entity
 	return order
 }
 
-func (o *RealTimeData) generateTradeOutOrder(cfg config.Analyze, postOrderAction entity.OrderAction, preTime time.Time) *entity.Order {
+func (o *Trader) generateTradeOutOrder(cfg config.Analyze, postOrderAction entity.OrderAction, preTime time.Time) *entity.Order {
 	// calculate max loss here
 	//
 	rsi := o.tickArr.getRSIByTickTime(preTime, cfg.RSIMinCount)
@@ -103,7 +103,7 @@ func (o *RealTimeData) generateTradeOutOrder(cfg config.Analyze, postOrderAction
 	return nil
 }
 
-func (o *RealTimeData) clearUnfinishedOrder() *entity.Order {
+func (o *Trader) clearUnfinishedOrder() *entity.Order {
 	if o.waitingOrder != nil {
 		return nil
 	}
@@ -120,7 +120,7 @@ func (o *RealTimeData) clearUnfinishedOrder() *entity.Order {
 	return nil
 }
 
-func (o *RealTimeData) checkPlaceOrderStatus(order *entity.Order, timeout time.Duration) {
+func (o *Trader) checkPlaceOrderStatus(order *entity.Order, timeout time.Duration) {
 	for {
 		if order.Status == entity.StatusFilled {
 			o.orderMapLock.Lock()
@@ -151,7 +151,7 @@ func (o *RealTimeData) checkPlaceOrderStatus(order *entity.Order, timeout time.D
 	log.Error("checkPlaceOrderStatus error")
 }
 
-func (o *RealTimeData) checkCancelOrder(orderID string) {
+func (o *Trader) checkCancelOrder(orderID string) {
 	for {
 		order := cc.GetOrderByOrderID(orderID)
 		if order.Status == entity.StatusCancelled {
@@ -163,7 +163,7 @@ func (o *RealTimeData) checkCancelOrder(orderID string) {
 	}
 }
 
-func (o *RealTimeData) checkNeededPost() (entity.OrderAction, time.Time) {
+func (o *Trader) checkNeededPost() (entity.OrderAction, time.Time) {
 	defer o.orderMapLock.RUnlock()
 	o.orderMapLock.RLock()
 
@@ -178,14 +178,14 @@ func (o *RealTimeData) checkNeededPost() (entity.OrderAction, time.Time) {
 	return entity.ActionNone, time.Time{}
 }
 
-func (o *RealTimeData) setHistoryTickAnalyze(arr []int64) {
+func (o *Trader) setHistoryTickAnalyze(arr []int64) {
 	sort.Slice(arr, func(i, j int) bool {
 		return arr[i] > arr[j]
 	})
 	o.historyTickAnalyze = arr
 }
 
-func (o *RealTimeData) checkFirstTickArrive() {
+func (o *Trader) checkFirstTickArrive() {
 	// calculate open change rate here
 	//
 	tradeDay := cc.GetBasicInfo().TradeDay
@@ -199,7 +199,7 @@ func (o *RealTimeData) checkFirstTickArrive() {
 	}
 }
 
-func (o *RealTimeData) getPRByVolume(volume int64) float64 {
+func (o *Trader) getPRByVolume(volume int64) float64 {
 	if len(o.historyTickAnalyze) < 2 {
 		return 0
 	}

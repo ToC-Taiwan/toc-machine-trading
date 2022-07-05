@@ -97,7 +97,7 @@ func (uc *StreamUseCase) ReceiveOrderStatus(ctx context.Context) {
 func (uc *StreamUseCase) ReceiveStreamData(ctx context.Context, targetArr []*entity.Target) {
 	// receive target data, start goroutine to trade
 	for _, t := range targetArr {
-		data := &RealTimeData{
+		data := &Trader{
 			stockNum:      t.StockNum,
 			orderMap:      make(map[entity.OrderAction][]*entity.Order),
 			orderQuantity: 1,
@@ -120,7 +120,7 @@ func (uc *StreamUseCase) ReceiveStreamData(ctx context.Context, targetArr []*ent
 	bus.PublishTopicEvent(topicSubscribeTickTargets, targetArr)
 }
 
-func (uc *StreamUseCase) tradeAgent(data *RealTimeData) {
+func (uc *StreamUseCase) tradeAgent(data *Trader) {
 	go func() {
 		for {
 			tick := <-data.tickChan
@@ -154,7 +154,7 @@ func (uc *StreamUseCase) tradeAgent(data *RealTimeData) {
 	}
 }
 
-func (uc *StreamUseCase) placeOrder(data *RealTimeData, order *entity.Order) {
+func (uc *StreamUseCase) placeOrder(data *Trader, order *entity.Order) {
 	var timeout time.Duration
 	switch order.Action {
 	case entity.ActionBuy, entity.ActionSellFirst:
