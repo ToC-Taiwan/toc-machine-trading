@@ -2,6 +2,8 @@ package entity
 
 import (
 	"time"
+
+	"github.com/google/uuid"
 )
 
 // OrderAction -.
@@ -63,6 +65,8 @@ var StatusListMap = map[string]OrderStatus{
 
 // Order -.
 type Order struct {
+	UUID uuid.UUID `json:"uuid"`
+
 	OrderID   string      `json:"order_id"`
 	Status    OrderStatus `json:"status"`
 	OrderTime time.Time   `json:"order_time"`

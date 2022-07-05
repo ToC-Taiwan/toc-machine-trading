@@ -194,6 +194,8 @@ definitions:
         type: string
       trade_time:
         type: string
+      uuid:
+        type: string
     type: object
   entity.Stock:
     properties:

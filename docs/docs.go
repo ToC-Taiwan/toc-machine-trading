@@ -762,6 +762,9 @@ const docTemplate = `{
                 },
                 "trade_time": {
                     "type": "string"
+                },
+                "uuid": {
+                    "type": "string"
                 }
             }
         },

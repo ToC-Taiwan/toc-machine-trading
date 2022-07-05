@@ -33,12 +33,12 @@ func NewOrder(t *grpcapi.OrdergRPCAPI, r *repo.OrderRepo) *OrderUseCase {
 	}
 
 	uc := &OrderUseCase{
-		gRPCAPI: t,
-		repo:    r,
-		quota:   NewQuota(cfg.Quota),
+		gRPCAPI:        t,
+		repo:           r,
+		quota:          NewQuota(cfg.Quota),
+		simTrade:       cfg.TradeSwitch.Simulation,
+		placeOrderLock: sync.Mutex{},
 	}
-
-	uc.simTrade = cfg.TradeSwitch.Simulation
 
 	bus.SubscribeTopic(topicPlaceOrder, uc.placeOrder)
 	bus.SubscribeTopic(topicCancelOrder, uc.cancelOrder)
