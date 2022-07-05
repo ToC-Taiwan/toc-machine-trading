@@ -133,7 +133,9 @@ func (uc *StreamUseCase) tradeAgent(data *Trader) {
 			if order == nil {
 				continue
 			}
-			uc.placeOrder(data, order)
+
+			data.waitingOrder = order
+			go uc.placeOrder(data, order)
 		}
 	}()
 
@@ -147,9 +149,11 @@ func (uc *StreamUseCase) tradeAgent(data *Trader) {
 		time.Sleep(15 * time.Second)
 		if uc.clearAll {
 			order := data.clearUnfinishedOrder()
-			if order != nil {
-				uc.placeOrder(data, order)
+			if order == nil {
+				continue
 			}
+			data.waitingOrder = order
+			go uc.placeOrder(data, order)
 		}
 	}
 }
@@ -159,6 +163,7 @@ func (uc *StreamUseCase) placeOrder(data *Trader, order *entity.Order) {
 	switch order.Action {
 	case entity.ActionBuy, entity.ActionSellFirst:
 		if !uc.tradeInSwitch {
+			data.waitingOrder = nil
 			return
 		}
 		timeout = time.Duration(uc.tradeSwitchCfg.TradeInWaitTime) * time.Second
@@ -167,7 +172,6 @@ func (uc *StreamUseCase) placeOrder(data *Trader, order *entity.Order) {
 	}
 
 	bus.PublishTopicEvent(topicPlaceOrder, order)
-	data.waitingOrder = order
 
 	log.Warnf("Place Order -> Stock: %s, Action: %d, Price: %.2f, Qty: %d", order.StockNum, order.Action, order.Price, order.Quantity)
 	go data.checkPlaceOrderStatus(order, timeout)

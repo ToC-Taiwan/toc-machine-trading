@@ -66,6 +66,7 @@ func NewOrder(t *grpcapi.OrdergRPCAPI, r *repo.OrderRepo) *OrderUseCase {
 func (uc *OrderUseCase) placeOrder(order *entity.Order) {
 	defer uc.placeOrderLock.Unlock()
 	uc.placeOrderLock.Lock()
+
 	if (order.Action == entity.ActionBuy || order.Action == entity.ActionSellFirst) && uc.quota.quota-uc.quota.calculateOriginalOrderCost(order) < 0 {
 		order.Status = entity.StatusAborted
 		return
@@ -84,10 +85,12 @@ func (uc *OrderUseCase) placeOrder(order *entity.Order) {
 	}
 	if err != nil {
 		log.Error(err)
+		order.Status = entity.StatusFailed
 		return
 	}
 
 	if status == entity.StatusFailed || orderID == "" {
+		order.Status = entity.StatusFailed
 		return
 	}
 

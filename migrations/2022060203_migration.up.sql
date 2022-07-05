@@ -64,8 +64,7 @@ CREATE TABLE history_tick (
 );
 
 CREATE TABLE trade_order (
-    "uuid" VARCHAR PRIMARY KEY,
-    "order_id" VARCHAR NOT NULL,
+    "order_id" VARCHAR PRIMARY KEY,
     "status" INT NOT NULL,
     "order_time" TIMESTAMPTZ NOT NULL,
     "stock_num" VARCHAR NOT NULL,
