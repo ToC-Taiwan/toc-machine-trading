@@ -68,10 +68,10 @@ analyze:
     open_close_change_ratio_low: -5
     open_close_change_ratio_high: 5
     # unit: %
-    out_in_ratio: 85
-    in_out_ratio: 15
+    out_in_ratio: 80
+    in_out_ratio: 20
     # unit: %
-    volume_pr_low: 75
+    volume_pr_low: 85
     volume_pr_high: 95
     # unit: millisecond
     tick_analyze_min_period: 5000
