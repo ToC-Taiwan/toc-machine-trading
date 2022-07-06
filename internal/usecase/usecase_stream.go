@@ -50,7 +50,7 @@ func NewStream(r *repo.StreamRepo, g *grpcapi.StreamgRPCAPI, t *rabbit.StreamRab
 	go uc.ReceiveOrderStatus(context.Background())
 
 	go func() {
-		for range time.NewTicker(60 * time.Second).C {
+		for range time.NewTicker(time.Minute).C {
 			if uc.tradeInSwitch {
 				if err := uc.realTimeAddTargets(context.Background()); err != nil {
 					log.Panic(err)
@@ -93,80 +93,67 @@ func (uc *StreamUseCase) ReceiveOrderStatus(ctx context.Context) {
 	uc.rabbit.OrderStatusConsumer(orderStatusChan)
 }
 
-// ReceiveStreamData -.
+// ReceiveStreamData - receive target data, start goroutine to trade
 func (uc *StreamUseCase) ReceiveStreamData(ctx context.Context, targetArr []*entity.Target) {
-	// receive target data, start goroutine to trade
 	for _, t := range targetArr {
-		data := &Trader{
-			stockNum:      t.StockNum,
-			orderMap:      make(map[entity.OrderAction][]*entity.Order),
-			orderQuantity: 1,
-			tickChan:      make(chan *entity.RealTimeTick),
-			bidAskChan:    make(chan *entity.RealTimeBidAsk),
-		}
-		data.setHistoryTickAnalyze(cc.GetHistoryTickAnalyze(t.StockNum))
-		if biasRate := cc.GetBiasRate(t.StockNum); biasRate > 4 || biasRate < -4 {
-			data.orderQuantity = 2
-		}
-		go data.checkFirstTickArrive()
-
 		// main trade method
-		go uc.tradeAgent(data)
+		agent := NewAgent(t.StockNum)
+		go uc.tradingRoom(agent)
 
-		// send tick, bidask to trade agent's channel
-		go uc.rabbit.TickConsumer(t.StockNum, data.tickChan)
-		go uc.rabbit.BidAskConsumer(t.StockNum, data.bidAskChan)
+		// send tick, bidask to trade room's channel
+		go uc.rabbit.TickConsumer(t.StockNum, agent.tickChan)
+		go uc.rabbit.BidAskConsumer(t.StockNum, agent.bidAskChan)
 	}
 	bus.PublishTopicEvent(topicSubscribeTickTargets, targetArr)
 }
 
-func (uc *StreamUseCase) tradeAgent(data *Trader) {
+func (uc *StreamUseCase) tradingRoom(agent *TradeAgent) {
 	go func() {
 		for {
-			tick := <-data.tickChan
-			data.lastTick = tick
-			data.tickArr = append(data.tickArr, tick)
+			tick := <-agent.tickChan
+			agent.lastTick = tick
+			agent.tickArr = append(agent.tickArr, tick)
 
 			// if tick.PctChg < uc.analyzeCfg.CloseChangeRatioLow || tick.PctChg > uc.analyzeCfg.CloseChangeRatioHigh {
 			// 	// no unsubscribe here because it may in the range on the day
 			// 	continue
 			// }
 
-			order := data.generateOrder(uc.analyzeCfg, uc.clearAll)
+			order := agent.generateOrder(uc.analyzeCfg, uc.clearAll)
 			if order == nil {
 				continue
 			}
 
-			uc.placeOrder(data, order)
+			uc.placeOrder(agent, order)
 		}
 	}()
 
 	go func() {
 		for {
-			data.lastBidAsk = <-data.bidAskChan
+			agent.lastBidAsk = <-agent.bidAskChan
 		}
 	}()
 
 	for {
 		time.Sleep(15 * time.Second)
 		if uc.clearAll {
-			order := data.clearUnfinishedOrder()
+			order := agent.clearUnfinishedOrder()
 			if order == nil {
 				continue
 			}
-			data.waitingOrder = order
-			uc.placeOrder(data, order)
+			agent.waitingOrder = order
+			uc.placeOrder(agent, order)
 		}
 	}
 }
 
-func (uc *StreamUseCase) placeOrder(data *Trader, order *entity.Order) {
+func (uc *StreamUseCase) placeOrder(agent *TradeAgent, order *entity.Order) {
 	if order.Price == 0 {
 		log.Errorf("%s Order price is 0", order.StockNum)
 		return
 	}
 
-	data.waitingOrder = order
+	agent.waitingOrder = order
 
 	// decide timeout to place order, if out of trade in time, return
 	var timeout time.Duration
@@ -174,7 +161,7 @@ func (uc *StreamUseCase) placeOrder(data *Trader, order *entity.Order) {
 	case entity.ActionBuy, entity.ActionSellFirst:
 		if !uc.tradeInSwitch {
 			// avoid stuck in the market
-			data.waitingOrder = nil
+			agent.waitingOrder = nil
 			return
 		}
 		timeout = time.Duration(uc.tradeSwitchCfg.TradeInWaitTime) * time.Second
@@ -185,7 +172,7 @@ func (uc *StreamUseCase) placeOrder(data *Trader, order *entity.Order) {
 
 	log.Warnf("Place Order -> Stock: %s, Action: %d, Price: %.2f, Qty: %d", order.StockNum, order.Action, order.Price, order.Quantity)
 	bus.PublishTopicEvent(topicPlaceOrder, order)
-	go data.checkPlaceOrderStatus(order, timeout)
+	go agent.checkPlaceOrderStatus(order, timeout)
 }
 
 func (uc *StreamUseCase) checkTradeSwitch() {

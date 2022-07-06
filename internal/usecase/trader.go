@@ -10,8 +10,8 @@ import (
 	"toc-machine-trading/pkg/utils"
 )
 
-// Trader -.
-type Trader struct {
+// TradeAgent -.
+type TradeAgent struct {
 	stockNum      string
 	orderQuantity int64
 	tickArr       RealTimeTickArr
@@ -29,7 +29,33 @@ type Trader struct {
 	lastBidAsk         *entity.RealTimeBidAsk
 }
 
-func (o *Trader) generateOrder(cfg config.Analyze, needClear bool) *entity.Order {
+// NewAgent -.
+func NewAgent(stockNum string) *TradeAgent {
+	var quantity int64 = 1
+	if biasRate := cc.GetBiasRate(stockNum); biasRate > 4 || biasRate < -4 {
+		quantity = 2
+	}
+
+	arr := cc.GetHistoryTickAnalyze(stockNum)
+	sort.Slice(arr, func(i, j int) bool {
+		return arr[i] > arr[j]
+	})
+
+	new := &TradeAgent{
+		stockNum:           stockNum,
+		orderQuantity:      quantity,
+		orderMap:           make(map[entity.OrderAction][]*entity.Order),
+		tickChan:           make(chan *entity.RealTimeTick),
+		bidAskChan:         make(chan *entity.RealTimeBidAsk),
+		historyTickAnalyze: arr,
+	}
+
+	go new.checkFirstTickArrive()
+
+	return new
+}
+
+func (o *TradeAgent) generateOrder(cfg config.Analyze, needClear bool) *entity.Order {
 	if needClear || o.waitingOrder != nil || o.analyzeTickTime.IsZero() {
 		return nil
 	}
@@ -71,7 +97,7 @@ func (o *Trader) generateOrder(cfg config.Analyze, needClear bool) *entity.Order
 	return order
 }
 
-func (o *Trader) generateTradeOutOrder(cfg config.Analyze, postOrderAction entity.OrderAction, preTime time.Time) *entity.Order {
+func (o *TradeAgent) generateTradeOutOrder(cfg config.Analyze, postOrderAction entity.OrderAction, preTime time.Time) *entity.Order {
 	// calculate max loss here
 	//
 	rsi := o.tickArr.getRSIByTickTime(preTime, cfg.RSIMinCount)
@@ -102,7 +128,7 @@ func (o *Trader) generateTradeOutOrder(cfg config.Analyze, postOrderAction entit
 	return nil
 }
 
-func (o *Trader) clearUnfinishedOrder() *entity.Order {
+func (o *TradeAgent) clearUnfinishedOrder() *entity.Order {
 	if o.waitingOrder != nil {
 		return nil
 	}
@@ -119,7 +145,7 @@ func (o *Trader) clearUnfinishedOrder() *entity.Order {
 	return nil
 }
 
-func (o *Trader) checkPlaceOrderStatus(order *entity.Order, timeout time.Duration) {
+func (o *TradeAgent) checkPlaceOrderStatus(order *entity.Order, timeout time.Duration) {
 	for {
 		if order.Status == entity.StatusFilled {
 			o.orderMapLock.Lock()
@@ -150,7 +176,7 @@ func (o *Trader) checkPlaceOrderStatus(order *entity.Order, timeout time.Duratio
 	log.Error("check place order status raise unknown error")
 }
 
-func (o *Trader) checkCancelOrder(orderID string, timeout time.Duration) {
+func (o *TradeAgent) checkCancelOrder(orderID string, timeout time.Duration) {
 	for {
 		order := cc.GetOrderByOrderID(orderID)
 		if order.Status == entity.StatusCancelled {
@@ -166,7 +192,7 @@ func (o *Trader) checkCancelOrder(orderID string, timeout time.Duration) {
 	}
 }
 
-func (o *Trader) checkNeededPost() (entity.OrderAction, time.Time) {
+func (o *TradeAgent) checkNeededPost() (entity.OrderAction, time.Time) {
 	defer o.orderMapLock.RUnlock()
 	o.orderMapLock.RLock()
 
@@ -181,14 +207,7 @@ func (o *Trader) checkNeededPost() (entity.OrderAction, time.Time) {
 	return entity.ActionNone, time.Time{}
 }
 
-func (o *Trader) setHistoryTickAnalyze(arr []int64) {
-	sort.Slice(arr, func(i, j int) bool {
-		return arr[i] > arr[j]
-	})
-	o.historyTickAnalyze = arr
-}
-
-func (o *Trader) checkFirstTickArrive() {
+func (o *TradeAgent) checkFirstTickArrive() {
 	// calculate open change rate here
 	//
 	tradeDay := cc.GetBasicInfo().TradeDay
@@ -202,7 +221,7 @@ func (o *Trader) checkFirstTickArrive() {
 	}
 }
 
-func (o *Trader) getPRByVolume(volume int64) float64 {
+func (o *TradeAgent) getPRByVolume(volume int64) float64 {
 	if len(o.historyTickAnalyze) < 2 {
 		return 0
 	}
