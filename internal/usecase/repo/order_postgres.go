@@ -24,8 +24,8 @@ func NewOrder(pg *postgres.Postgres) *OrderRepo {
 	return &OrderRepo{pg}
 }
 
-// InsertOrUpdateOrder -.
-func (r *OrderRepo) InsertOrUpdateOrder(ctx context.Context, t *entity.Order) error {
+// InsertOrUpdateOrderByOrderID -.
+func (r *OrderRepo) InsertOrUpdateOrderByOrderID(ctx context.Context, t *entity.Order) error {
 	dbOrder, err := r.QueryOrderByID(ctx, t.OrderID)
 	if err != nil {
 		return err

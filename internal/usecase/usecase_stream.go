@@ -124,24 +124,26 @@ func (uc *StreamUseCase) tradeAgent(data *Trader) {
 	go func() {
 		for {
 			tick := <-data.tickChan
-			if tick.PctChg < uc.analyzeCfg.CloseChangeRatioLow || tick.PctChg > uc.analyzeCfg.CloseChangeRatioHigh {
-				// no unsubscribe here because it may in the range on the day
-				continue
-			}
+			data.lastTick = tick
 			data.tickArr = append(data.tickArr, tick)
+
+			// if tick.PctChg < uc.analyzeCfg.CloseChangeRatioLow || tick.PctChg > uc.analyzeCfg.CloseChangeRatioHigh {
+			// 	// no unsubscribe here because it may in the range on the day
+			// 	continue
+			// }
+
 			order := data.generateOrder(uc.analyzeCfg, uc.clearAll)
 			if order == nil {
 				continue
 			}
 
-			data.waitingOrder = order
-			go uc.placeOrder(data, order)
+			uc.placeOrder(data, order)
 		}
 	}()
 
 	go func() {
 		for {
-			data.bidAsk = <-data.bidAskChan
+			data.lastBidAsk = <-data.bidAskChan
 		}
 	}()
 
@@ -153,27 +155,36 @@ func (uc *StreamUseCase) tradeAgent(data *Trader) {
 				continue
 			}
 			data.waitingOrder = order
-			go uc.placeOrder(data, order)
+			uc.placeOrder(data, order)
 		}
 	}
 }
 
 func (uc *StreamUseCase) placeOrder(data *Trader, order *entity.Order) {
+	if order.Price == 0 {
+		log.Errorf("%s Order price is 0", order.StockNum)
+		return
+	}
+
+	data.waitingOrder = order
+
+	// decide timeout to place order, if out of trade in time, return
 	var timeout time.Duration
 	switch order.Action {
 	case entity.ActionBuy, entity.ActionSellFirst:
 		if !uc.tradeInSwitch {
+			// avoid stuck in the market
 			data.waitingOrder = nil
 			return
 		}
 		timeout = time.Duration(uc.tradeSwitchCfg.TradeInWaitTime) * time.Second
+
 	case entity.ActionSell, entity.ActionBuyLater:
 		timeout = time.Duration(uc.tradeSwitchCfg.TradeOutWaitTime) * time.Second
 	}
 
-	bus.PublishTopicEvent(topicPlaceOrder, order)
-
 	log.Warnf("Place Order -> Stock: %s, Action: %d, Price: %.2f, Qty: %d", order.StockNum, order.Action, order.Price, order.Quantity)
+	bus.PublishTopicEvent(topicPlaceOrder, order)
 	go data.checkPlaceOrderStatus(order, timeout)
 }
 

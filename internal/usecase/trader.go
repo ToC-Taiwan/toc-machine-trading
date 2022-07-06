@@ -24,28 +24,26 @@ type Trader struct {
 	bidAskChan chan *entity.RealTimeBidAsk
 
 	historyTickAnalyze []int64
-
-	analyzeTickTime time.Time
-	bidAsk          *entity.RealTimeBidAsk
+	analyzeTickTime    time.Time
+	lastTick           *entity.RealTimeTick
+	lastBidAsk         *entity.RealTimeBidAsk
 }
 
 func (o *Trader) generateOrder(cfg config.Analyze, needClear bool) *entity.Order {
-	if o.waitingOrder != nil || needClear || o.analyzeTickTime.IsZero() {
+	if needClear || o.waitingOrder != nil || o.analyzeTickTime.IsZero() {
 		return nil
 	}
 
-	postOrderAction, preTime := o.checkNeededPost()
-	if postOrderAction != entity.ActionNone {
+	if postOrderAction, preTime := o.checkNeededPost(); postOrderAction != entity.ActionNone {
 		return o.generateTradeOutOrder(cfg, postOrderAction, preTime)
 	}
 
-	lastTickTime := o.tickArr.getLastTickTime()
-	if lastTickTime.Before(o.analyzeTickTime.Add(time.Duration(cfg.TickAnalyzeMinPeriod) * time.Millisecond)) {
+	if o.lastTick.TickTime.Before(o.analyzeTickTime.Add(time.Duration(cfg.TickAnalyzeMinPeriod) * time.Millisecond)) {
 		return nil
 	}
-	o.analyzeTickTime = lastTickTime
-	period := o.tickArr.getLastNMilliSecondArr(cfg.TickAnalyzeMinPeriod)
+	o.analyzeTickTime = o.lastTick.TickTime
 
+	period := o.tickArr.getLastNMilliSecondArr(cfg.TickAnalyzeMinPeriod)
 	periodVolume := period.getTotalVolume()
 	if pr := o.getPRByVolume(periodVolume); pr < cfg.VolumePRLow || pr > cfg.VolumePRHigh {
 		return nil
@@ -60,15 +58,16 @@ func (o *Trader) generateOrder(cfg config.Analyze, needClear bool) *entity.Order
 	}
 
 	switch {
-	case periodOutInRation > cfg.OutInRatio && o.bidAsk != nil:
+	case periodOutInRation > cfg.OutInRatio && o.lastBidAsk != nil:
 		order.Action = entity.ActionBuy
-		order.Price = o.bidAsk.BidPrice1
-	case 100-periodOutInRation < cfg.InOutRatio && o.bidAsk != nil:
+		order.Price = o.lastBidAsk.BidPrice1
+	case 100-periodOutInRation < cfg.InOutRatio && o.lastBidAsk != nil:
 		order.Action = entity.ActionSellFirst
-		order.Price = o.bidAsk.AskPrice1
+		order.Price = o.lastBidAsk.AskPrice1
 	default:
 		return nil
 	}
+
 	return order
 }
 
@@ -83,7 +82,7 @@ func (o *Trader) generateTradeOutOrder(cfg config.Analyze, postOrderAction entit
 				return &entity.Order{
 					StockNum:  o.stockNum,
 					Action:    postOrderAction,
-					Price:     o.bidAsk.BidPrice1,
+					Price:     o.lastBidAsk.BidPrice1,
 					Quantity:  o.orderQuantity,
 					TradeTime: time.Now(),
 				}
@@ -93,7 +92,7 @@ func (o *Trader) generateTradeOutOrder(cfg config.Analyze, postOrderAction entit
 				return &entity.Order{
 					StockNum:  o.stockNum,
 					Action:    postOrderAction,
-					Price:     o.bidAsk.AskPrice1,
+					Price:     o.lastBidAsk.AskPrice1,
 					Quantity:  o.orderQuantity,
 					TradeTime: time.Now(),
 				}
@@ -112,7 +111,7 @@ func (o *Trader) clearUnfinishedOrder() *entity.Order {
 		return &entity.Order{
 			StockNum:  o.stockNum,
 			Action:    action,
-			Price:     o.tickArr.getLastClose(),
+			Price:     o.lastTick.Close,
 			Quantity:  o.orderQuantity,
 			TradeTime: time.Now(),
 		}
@@ -126,6 +125,7 @@ func (o *Trader) checkPlaceOrderStatus(order *entity.Order, timeout time.Duratio
 			o.orderMapLock.Lock()
 			o.orderMap[order.Action] = append(o.orderMap[order.Action], order)
 			o.orderMapLock.Unlock()
+
 			o.waitingOrder = nil
 			log.Warnf("Order Filled -> Stock: %s, Action: %d, Price: %.2f, Qty: %d", order.StockNum, order.Action, order.Price, order.Quantity)
 			return
@@ -141,25 +141,28 @@ func (o *Trader) checkPlaceOrderStatus(order *entity.Order, timeout time.Duratio
 	}
 
 	if order.OrderID != "" && order.Status != entity.StatusCancelled && order.Status != entity.StatusFilled {
-		bus.PublishTopicEvent(topicCancelOrder, order.OrderID)
-
 		log.Warnf("Place Cancel Order -> Stock: %s, Action: %d, Price: %.2f, Qty: %d", order.StockNum, order.Action, order.Price, order.Quantity)
-		go o.checkCancelOrder(order.OrderID)
+		bus.PublishTopicEvent(topicCancelOrder, order.OrderID)
+		go o.checkCancelOrder(order.OrderID, timeout)
 		return
 	}
 
-	log.Error("checkPlaceOrderStatus error")
+	log.Error("check place order status raise unknown error")
 }
 
-func (o *Trader) checkCancelOrder(orderID string) {
+func (o *Trader) checkCancelOrder(orderID string, timeout time.Duration) {
 	for {
 		order := cc.GetOrderByOrderID(orderID)
 		if order.Status == entity.StatusCancelled {
 			log.Warnf("Order Canceled -> Stock: %s, Action: %d, Price: %.2f, Qty: %d", order.StockNum, order.Action, order.Price, order.Quantity)
 			o.waitingOrder = nil
 			break
+		} else if order.TradeTime.Add(timeout).Before(time.Now()) {
+			log.Errorf("Cancel Order Timeout -> Stock: %s, Action: %d, Price: %.2f, Qty: %d", order.StockNum, order.Action, order.Price, order.Quantity)
+			go o.checkCancelOrder(orderID, timeout)
+			return
 		}
-		time.Sleep(time.Second)
+		time.Sleep(3 * time.Second)
 	}
 }
 
@@ -299,18 +302,4 @@ func (c RealTimeTickArr) getRSIByTickTime(preTime time.Time, count int) float64 
 		return 0
 	}
 	return rsi
-}
-
-func (c RealTimeTickArr) getLastClose() float64 {
-	if len(c) == 0 {
-		return 0
-	}
-	return c[len(c)-1].Close
-}
-
-func (c RealTimeTickArr) getLastTickTime() time.Time {
-	if len(c) == 0 {
-		return time.Time{}
-	}
-	return c[len(c)-1].TickTime
 }

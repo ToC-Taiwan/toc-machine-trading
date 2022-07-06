@@ -1188,18 +1188,18 @@ func (m *MockOrderRepo) EXPECT() *MockOrderRepoMockRecorder {
 	return m.recorder
 }
 
-// InsertOrUpdateOrder mocks base method.
-func (m *MockOrderRepo) InsertOrUpdateOrder(ctx context.Context, t *entity.Order) error {
+// InsertOrUpdateOrderByOrderID mocks base method.
+func (m *MockOrderRepo) InsertOrUpdateOrderByOrderID(ctx context.Context, t *entity.Order) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "InsertOrUpdateOrder", ctx, t)
+	ret := m.ctrl.Call(m, "InsertOrUpdateOrderByOrderID", ctx, t)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// InsertOrUpdateOrder indicates an expected call of InsertOrUpdateOrder.
-func (mr *MockOrderRepoMockRecorder) InsertOrUpdateOrder(ctx, t interface{}) *gomock.Call {
+// InsertOrUpdateOrderByOrderID indicates an expected call of InsertOrUpdateOrderByOrderID.
+func (mr *MockOrderRepoMockRecorder) InsertOrUpdateOrderByOrderID(ctx, t interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertOrUpdateOrder", reflect.TypeOf((*MockOrderRepo)(nil).InsertOrUpdateOrder), ctx, t)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertOrUpdateOrderByOrderID", reflect.TypeOf((*MockOrderRepo)(nil).InsertOrUpdateOrderByOrderID), ctx, t)
 }
 
 // InsertOrUpdateTradeBalance mocks base method.

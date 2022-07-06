@@ -11,8 +11,6 @@ import (
 	"toc-machine-trading/internal/usecase/repo"
 	"toc-machine-trading/pkg/config"
 	"toc-machine-trading/pkg/global"
-
-	"github.com/google/go-cmp/cmp"
 )
 
 // OrderUseCase -.
@@ -96,6 +94,7 @@ func (uc *OrderUseCase) placeOrder(order *entity.Order) {
 
 	// count quota
 	uc.quota.quota -= uc.quota.calculateOriginalOrderCost(order)
+	log.Infof("Current quota: %d", uc.quota.quota)
 
 	// modify order and save to cache
 	order.OrderID = orderID
@@ -104,6 +103,9 @@ func (uc *OrderUseCase) placeOrder(order *entity.Order) {
 }
 
 func (uc *OrderUseCase) cancelOrder(orderID string) {
+	defer uc.placeOrderLock.Unlock()
+	uc.placeOrderLock.Lock()
+
 	orderID, status, err := uc.CancelOrderID(orderID)
 	if err != nil {
 		log.Error(err)
@@ -118,6 +120,7 @@ func (uc *OrderUseCase) cancelOrder(orderID string) {
 
 	if cacheOrder.Action == entity.ActionBuy || cacheOrder.Action == entity.ActionSellFirst {
 		uc.quota.quota += uc.quota.calculateOriginalOrderCost(cacheOrder)
+		log.Infof("Current quota: %d", uc.quota.quota)
 	}
 
 	cacheOrder.Status = status
@@ -243,16 +246,12 @@ func (uc *OrderUseCase) updateCacheAndInsertDB(order *entity.Order) {
 		return
 	}
 
-	// let action, trade time be the same from cache
-	order.TradeTime = cacheOrder.TradeTime
-	order.Action = cacheOrder.Action
-
-	if !cmp.Equal(order, cacheOrder) {
-		// if different, update cache
-		cc.SetOrderByOrderID(order)
+	if cacheOrder.Status != order.Status {
+		cacheOrder.Status = order.Status
+		cc.SetOrderByOrderID(cacheOrder)
 
 		// insert or update order to db
-		if err := uc.repo.InsertOrUpdateOrder(context.Background(), order); err != nil {
+		if err := uc.repo.InsertOrUpdateOrderByOrderID(context.Background(), cacheOrder); err != nil {
 			log.Panic(err)
 		}
 	}

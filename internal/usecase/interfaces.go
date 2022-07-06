@@ -145,7 +145,7 @@ type (
 	OrderRepo interface {
 		InsertOrUpdateTradeBalance(ctx context.Context, t *entity.TradeBalance) error
 		QueryTradeBalanceByDate(ctx context.Context, date time.Time) (*entity.TradeBalance, error)
-		InsertOrUpdateOrder(ctx context.Context, t *entity.Order) error
+		InsertOrUpdateOrderByOrderID(ctx context.Context, t *entity.Order) error
 		QueryOrderByID(ctx context.Context, orderID string) (*entity.Order, error)
 		QueryAllOrderByDate(ctx context.Context, date time.Time) ([]*entity.Order, error)
 		QueryAllOrder(ctx context.Context) ([]*entity.Order, error)
