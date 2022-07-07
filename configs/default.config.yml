@@ -74,8 +74,7 @@ analyze:
     volume_pr_low: 85
     volume_pr_high: 95
     # unit: millisecond
-    tick_analyze_min_period: 5000
-    tick_analyze_max_period: 5500
+    tick_analyze_period: 7500
     # unit: times
     rsi_min_count: 500
     # rsi range: 0~1

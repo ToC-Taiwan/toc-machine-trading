@@ -100,6 +100,7 @@ func (uc *OrderUseCase) placeOrder(order *entity.Order) {
 	// modify order and save to cache
 	order.OrderID = orderID
 	order.Status = status
+	order.TradeTime = time.Now()
 	cc.SetOrderByOrderID(order)
 }
 

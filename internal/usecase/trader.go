@@ -15,6 +15,7 @@ type TradeAgent struct {
 	stockNum      string
 	orderQuantity int64
 	tickArr       RealTimeTickArr
+	periodTickArr RealTimeTickArr
 
 	orderMapLock sync.RWMutex
 	orderMap     map[entity.OrderAction][]*entity.Order
@@ -56,31 +57,36 @@ func NewAgent(stockNum string) *TradeAgent {
 }
 
 func (o *TradeAgent) generateOrder(cfg config.Analyze, needClear bool) *entity.Order {
-	if needClear || o.waitingOrder != nil || o.analyzeTickTime.IsZero() {
+	if o.waitingOrder != nil || needClear || o.analyzeTickTime.IsZero() {
 		return nil
 	}
+
+	if o.lastTick.TickTime.Sub(o.analyzeTickTime) < time.Duration(cfg.TickAnalyzePeriod)*time.Millisecond {
+		o.periodTickArr = append(o.periodTickArr, o.lastTick)
+		return nil
+	}
+	// copy new arr before reset
+	analyzeArr := o.periodTickArr
+	// reset analyze tick time and arr
+	o.analyzeTickTime = o.lastTick.TickTime
+	o.periodTickArr = RealTimeTickArr{o.lastTick}
 
 	if postOrderAction, preTime := o.checkNeededPost(); postOrderAction != entity.ActionNone {
 		return o.generateTradeOutOrder(cfg, postOrderAction, preTime)
 	}
 
-	if o.lastTick.TickTime.Before(o.analyzeTickTime.Add(time.Duration(cfg.TickAnalyzeMinPeriod) * time.Millisecond)) {
-		return nil
-	}
-	o.analyzeTickTime = o.lastTick.TickTime
-
-	period := o.tickArr.getLastNMilliSecondArr(cfg.TickAnalyzeMinPeriod)
-	periodVolume := period.getTotalVolume()
+	periodVolume := analyzeArr.getTotalVolume()
 	if pr := o.getPRByVolume(periodVolume); pr < cfg.VolumePRLow || pr > cfg.VolumePRHigh {
 		return nil
 	}
-	periodOutInRation := period.getOutInRatio()
+
+	// get out in ration in this period
+	periodOutInRation := analyzeArr.getOutInRatio()
 
 	// need to compare with all and period
 	order := &entity.Order{
-		StockNum:  o.stockNum,
-		Quantity:  o.orderQuantity,
-		TradeTime: time.Now(),
+		StockNum: o.stockNum,
+		Quantity: o.orderQuantity,
 	}
 
 	switch {
@@ -106,21 +112,19 @@ func (o *TradeAgent) generateTradeOutOrder(cfg config.Analyze, postOrderAction e
 		case entity.ActionSell:
 			if rsi >= cfg.RSIHigh {
 				return &entity.Order{
-					StockNum:  o.stockNum,
-					Action:    postOrderAction,
-					Price:     o.lastBidAsk.BidPrice1,
-					Quantity:  o.orderQuantity,
-					TradeTime: time.Now(),
+					StockNum: o.stockNum,
+					Action:   postOrderAction,
+					Price:    o.lastBidAsk.BidPrice1,
+					Quantity: o.orderQuantity,
 				}
 			}
 		case entity.ActionBuyLater:
 			if rsi <= cfg.RSILow {
 				return &entity.Order{
-					StockNum:  o.stockNum,
-					Action:    postOrderAction,
-					Price:     o.lastBidAsk.AskPrice1,
-					Quantity:  o.orderQuantity,
-					TradeTime: time.Now(),
+					StockNum: o.stockNum,
+					Action:   postOrderAction,
+					Price:    o.lastBidAsk.AskPrice1,
+					Quantity: o.orderQuantity,
 				}
 			}
 		}
@@ -135,11 +139,10 @@ func (o *TradeAgent) clearUnfinishedOrder() *entity.Order {
 
 	if action, _ := o.checkNeededPost(); action != entity.ActionNone {
 		return &entity.Order{
-			StockNum:  o.stockNum,
-			Action:    action,
-			Price:     o.lastTick.Close,
-			Quantity:  o.orderQuantity,
-			TradeTime: time.Now(),
+			StockNum: o.stockNum,
+			Action:   action,
+			Price:    o.lastTick.Close,
+			Quantity: o.orderQuantity,
 		}
 	}
 	return nil
@@ -147,6 +150,10 @@ func (o *TradeAgent) clearUnfinishedOrder() *entity.Order {
 
 func (o *TradeAgent) checkPlaceOrderStatus(order *entity.Order, timeout time.Duration) {
 	for {
+		if order.TradeTime.IsZero() {
+			continue
+		}
+
 		if order.Status == entity.StatusFilled {
 			o.orderMapLock.Lock()
 			o.orderMap[order.Action] = append(o.orderMap[order.Action], order)
@@ -158,6 +165,7 @@ func (o *TradeAgent) checkPlaceOrderStatus(order *entity.Order, timeout time.Dur
 		} else if order.TradeTime.Add(timeout).Before(time.Now()) {
 			break
 		}
+
 		time.Sleep(time.Second)
 	}
 
@@ -212,12 +220,11 @@ func (o *TradeAgent) checkFirstTickArrive() {
 	//
 	tradeDay := cc.GetBasicInfo().TradeDay
 	for {
-		if len(o.tickArr) != 0 {
+		if len(o.tickArr) > 1 {
 			cc.SetHistoryOpen(o.stockNum, tradeDay, o.tickArr[0].Close)
-			o.analyzeTickTime = o.tickArr[0].TickTime
+			o.analyzeTickTime = o.tickArr[1].TickTime
 			break
 		}
-		time.Sleep(200 * time.Millisecond)
 	}
 }
 
@@ -243,41 +250,11 @@ func (o *TradeAgent) getPRByVolume(volume int64) float64 {
 // RealTimeTickArr -.
 type RealTimeTickArr []*entity.RealTimeTick
 
-func (c RealTimeTickArr) getLastNMilliSecondArr(n float64) RealTimeTickArr {
-	if len(c) < 2 {
-		return RealTimeTickArr{}
-	}
-
-	startTime := c[len(c)-1].TickTime
-
-	// skip if i == 0, the volume will be too large
-	// skip the first tick of the day
-	var cut int
-	for i := len(c) - 1; i > 0; i-- {
-		if startTime.Sub(c[i].TickTime) < time.Duration(n)*time.Millisecond {
-			continue
-		} else {
-			cut = i - 1
-			break
-		}
-	}
-
-	if cut == 0 {
-		return RealTimeTickArr{}
-	}
-	return c[cut:]
-}
-
 func (c RealTimeTickArr) getTotalVolume() int64 {
-	if len(c) == 0 {
-		return 0
-	}
-
 	var volume int64
 	for _, v := range c {
 		volume += v.Volume
 	}
-
 	return volume
 }
 

@@ -110,9 +110,8 @@ func (uc *StreamUseCase) ReceiveStreamData(ctx context.Context, targetArr []*ent
 func (uc *StreamUseCase) tradingRoom(agent *TradeAgent) {
 	go func() {
 		for {
-			tick := <-agent.tickChan
-			agent.lastTick = tick
-			agent.tickArr = append(agent.tickArr, tick)
+			agent.lastTick = <-agent.tickChan
+			agent.tickArr = append(agent.tickArr, agent.lastTick)
 
 			// if tick.PctChg < uc.analyzeCfg.CloseChangeRatioLow || tick.PctChg > uc.analyzeCfg.CloseChangeRatioHigh {
 			// 	// no unsubscribe here because it may in the range on the day
@@ -164,10 +163,10 @@ func (uc *StreamUseCase) placeOrder(agent *TradeAgent, order *entity.Order) {
 			agent.waitingOrder = nil
 			return
 		}
-		timeout = time.Duration(uc.tradeSwitchCfg.TradeInWaitTime) * time.Second * 2
+		timeout = time.Duration(uc.tradeSwitchCfg.TradeInWaitTime) * time.Second
 
 	case entity.ActionSell, entity.ActionBuyLater:
-		timeout = time.Duration(uc.tradeSwitchCfg.TradeOutWaitTime) * time.Second * 2
+		timeout = time.Duration(uc.tradeSwitchCfg.TradeOutWaitTime) * time.Second
 	}
 
 	bus.PublishTopicEvent(topicPlaceOrder, order)

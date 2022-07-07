@@ -139,8 +139,7 @@ type Analyze struct {
 	InOutRatio               float64 `json:"in_out_ratio"                 env-required:"true" yaml:"in_out_ratio"`
 	VolumePRLow              float64 `json:"volume_pr_low"                env-required:"true" yaml:"volume_pr_low"`
 	VolumePRHigh             float64 `json:"volume_pr_high"               env-required:"true" yaml:"volume_pr_high"`
-	TickAnalyzeMinPeriod     float64 `json:"tick_analyze_min_period"      env-required:"true" yaml:"tick_analyze_min_period"`
-	TickAnalyzeMaxPeriod     float64 `json:"tick_analyze_max_period"      env-required:"true" yaml:"tick_analyze_max_period"`
+	TickAnalyzePeriod        float64 `json:"tick_analyze_period"          env-required:"true" yaml:"tick_analyze_period"`
 	RSIMinCount              int     `json:"rsi_min_count"                env-required:"true" yaml:"rsi_min_count"`
 	RSIHigh                  float64 `json:"rsi_high"                     env-required:"true" yaml:"rsi_high"`
 	RSILow                   float64 `json:"rsi_low"                      env-required:"true" yaml:"rsi_low"`

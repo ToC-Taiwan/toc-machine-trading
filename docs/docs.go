@@ -501,10 +501,7 @@ const docTemplate = `{
                 "rsi_min_count": {
                     "type": "integer"
                 },
-                "tick_analyze_max_period": {
-                    "type": "number"
-                },
-                "tick_analyze_min_period": {
+                "tick_analyze_period": {
                     "type": "number"
                 },
                 "volume_pr_high": {
@@ -761,9 +758,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "trade_time": {
-                    "type": "string"
-                },
-                "uuid": {
                     "type": "string"
                 }
             }
