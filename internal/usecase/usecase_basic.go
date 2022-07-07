@@ -57,9 +57,10 @@ func (uc *BasicUseCase) GetAllSinopacStockAndUpdateRepo(ctx context.Context) ([]
 
 	var stockDetail []*entity.Stock
 	for _, v := range stockArr {
-		if v.GetReference() == 0 {
+		if v.GetReference() == 0 || v.GetCategory() == "00" {
 			continue
 		}
+
 		updateTime, pErr := time.ParseInLocation(global.ShortSlashTimeLayout, v.GetUpdateDate(), time.Local)
 		if err != nil {
 			return []*entity.Stock{}, pErr
@@ -75,6 +76,8 @@ func (uc *BasicUseCase) GetAllSinopacStockAndUpdateRepo(ctx context.Context) ([]
 			UpdateDate: updateTime,
 		}
 		stockDetail = append(stockDetail, stock)
+
+		// save stock in cache
 		cc.SetStockDetail(stock)
 	}
 
