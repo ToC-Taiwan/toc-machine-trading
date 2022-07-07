@@ -150,6 +150,7 @@ func (o *TradeAgent) clearUnfinishedOrder() *entity.Order {
 
 func (o *TradeAgent) checkPlaceOrderStatus(order *entity.Order, timeout time.Duration) {
 	for {
+		time.Sleep(time.Second)
 		if order.TradeTime.IsZero() {
 			continue
 		}
@@ -165,8 +166,6 @@ func (o *TradeAgent) checkPlaceOrderStatus(order *entity.Order, timeout time.Dur
 		} else if order.TradeTime.Add(timeout).Before(time.Now()) {
 			break
 		}
-
-		time.Sleep(time.Second)
 	}
 
 	if order.Status == entity.StatusAborted || order.Status == entity.StatusFailed {
@@ -225,6 +224,7 @@ func (o *TradeAgent) checkFirstTickArrive() {
 			o.analyzeTickTime = o.tickArr[1].TickTime
 			break
 		}
+		time.Sleep(100 * time.Millisecond)
 	}
 }
 

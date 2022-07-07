@@ -96,8 +96,9 @@ func (uc *StreamUseCase) ReceiveOrderStatus(ctx context.Context) {
 // ReceiveStreamData - receive target data, start goroutine to trade
 func (uc *StreamUseCase) ReceiveStreamData(ctx context.Context, targetArr []*entity.Target) {
 	for _, t := range targetArr {
-		// main trade method
 		agent := NewAgent(t.StockNum)
+
+		// main trade method
 		go uc.tradingRoom(agent)
 
 		// send tick, bidask to trade room's channel
