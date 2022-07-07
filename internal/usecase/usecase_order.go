@@ -70,6 +70,7 @@ func (uc *OrderUseCase) placeOrder(order *entity.Order) {
 		return
 	}
 
+	log.Warnf("Place Order -> Stock: %s, Action: %d, Price: %.2f, Qty: %d", order.StockNum, order.Action, order.Price, order.Quantity)
 	var orderID string
 	var status entity.OrderStatus
 	var err error
@@ -246,8 +247,11 @@ func (uc *OrderUseCase) updateCacheAndInsertDB(order *entity.Order) {
 		return
 	}
 
-	if cacheOrder.Status != order.Status {
+	if cacheOrder.Status != order.Status || !cacheOrder.OrderTime.Equal(order.OrderTime) {
 		cacheOrder.Status = order.Status
+		cacheOrder.OrderTime = order.OrderTime
+
+		// update cache
 		cc.SetOrderByOrderID(cacheOrder)
 
 		// insert or update order to db

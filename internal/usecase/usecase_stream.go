@@ -164,13 +164,12 @@ func (uc *StreamUseCase) placeOrder(agent *TradeAgent, order *entity.Order) {
 			agent.waitingOrder = nil
 			return
 		}
-		timeout = time.Duration(uc.tradeSwitchCfg.TradeInWaitTime) * time.Second
+		timeout = time.Duration(uc.tradeSwitchCfg.TradeInWaitTime) * time.Second * 2
 
 	case entity.ActionSell, entity.ActionBuyLater:
-		timeout = time.Duration(uc.tradeSwitchCfg.TradeOutWaitTime) * time.Second
+		timeout = time.Duration(uc.tradeSwitchCfg.TradeOutWaitTime) * time.Second * 2
 	}
 
-	log.Warnf("Place Order -> Stock: %s, Action: %d, Price: %.2f, Qty: %d", order.StockNum, order.Action, order.Price, order.Quantity)
 	bus.PublishTopicEvent(topicPlaceOrder, order)
 	go agent.checkPlaceOrderStatus(order, timeout)
 }
