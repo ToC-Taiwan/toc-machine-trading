@@ -55,7 +55,6 @@ func (uc *AnalyzeUseCase) GetRebornMap(ctx context.Context) map[time.Time][]enti
 }
 
 func (uc *AnalyzeUseCase) findBelowQuaterMATargets(ctx context.Context, targetArr []*entity.Target) {
-	log.Info("findBelowQuaterMATargets")
 	defer uc.rebornLock.Unlock()
 	uc.rebornLock.Lock()
 	for _, t := range targetArr {
@@ -77,4 +76,5 @@ func (uc *AnalyzeUseCase) findBelowQuaterMATargets(ctx context.Context, targetAr
 			}
 		}
 	}
+	log.Info("FindBelowQuaterMATargets Done")
 }

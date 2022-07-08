@@ -80,11 +80,12 @@ func (uc *HistoryUseCase) fetchHistoryClose(targetArr []*entity.Target) error {
 		stockNumArr = append(stockNumArr, target.StockNum)
 	}
 
-	stockNumArrInDayMap, err := uc.findExistHistoryClose(fetchTradeDayArr, stockNumArr)
+	stockNumArrInDayMap, total, err := uc.findExistHistoryClose(fetchTradeDayArr, stockNumArr)
 	if err != nil {
 		return err
 	}
 	defer log.Info("Fetching History Close Done")
+	log.Infof("Fetching History Close -> Count: %d", total)
 	result := make(map[string][]*entity.HistoryClose)
 	dataChan := make(chan *entity.HistoryClose)
 	wait := make(chan struct{})
@@ -104,7 +105,6 @@ func (uc *HistoryUseCase) fetchHistoryClose(targetArr []*entity.Target) error {
 		}
 		stockArr := s
 		date := d
-		log.Infof("Fetching History Close -> StockCount: %d, Date: %s", len(stockArr), date.Format(global.ShortTimeLayout))
 		closeArr, err := uc.grpcapi.GetStockHistoryClose(stockArr, date.Format(global.ShortTimeLayout))
 		if err != nil {
 			log.Error(err)
@@ -131,13 +131,15 @@ func (uc *HistoryUseCase) fetchHistoryClose(targetArr []*entity.Target) error {
 	return nil
 }
 
-func (uc *HistoryUseCase) findExistHistoryClose(fetchTradeDayArr []time.Time, stockNumArr []string) (map[time.Time][]string, error) {
+func (uc *HistoryUseCase) findExistHistoryClose(fetchTradeDayArr []time.Time, stockNumArr []string) (map[time.Time][]string, int64, error) {
+	log.Info("Query Exist History Close")
 	result := make(map[time.Time][]string)
 	dbCloseMap := make(map[string][]*entity.HistoryClose)
+	var total int64
 	for _, d := range fetchTradeDayArr {
 		closeMap, err := uc.repo.QueryMutltiStockCloseByDate(context.Background(), stockNumArr, d)
 		if err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 
 		var stockNumArrInDay []string
@@ -146,6 +148,7 @@ func (uc *HistoryUseCase) findExistHistoryClose(fetchTradeDayArr []time.Time, st
 				dbCloseMap[s] = append(dbCloseMap[s], c)
 				continue
 			}
+			total++
 			stockNumArrInDay = append(stockNumArrInDay, s)
 		}
 
@@ -161,7 +164,7 @@ func (uc *HistoryUseCase) findExistHistoryClose(fetchTradeDayArr []time.Time, st
 	for _, v := range dbCloseMap {
 		uc.processCloseArr(v)
 	}
-	return result, nil
+	return result, total, nil
 }
 
 func (uc *HistoryUseCase) fetchHistoryTick(targetArr []*entity.Target) error {
@@ -171,11 +174,12 @@ func (uc *HistoryUseCase) fetchHistoryTick(targetArr []*entity.Target) error {
 		stockNumArr = append(stockNumArr, target.StockNum)
 	}
 
-	stockNumArrInDayMap, err := uc.findExistHistoryTick(fetchTradeDayArr, stockNumArr)
+	stockNumArrInDayMap, total, err := uc.findExistHistoryTick(fetchTradeDayArr, stockNumArr)
 	if err != nil {
 		return err
 	}
 	defer log.Info("Fetching History Tick Done")
+	log.Infof("Fetching History Tick -> Count: %d", total)
 	result := make(map[string][]*entity.HistoryTick)
 	dataChan := make(chan *entity.HistoryTick)
 	wait := make(chan struct{})
@@ -196,7 +200,6 @@ func (uc *HistoryUseCase) fetchHistoryTick(targetArr []*entity.Target) error {
 		}
 		stockArr := s
 		date := d
-		log.Infof("Fetching History Tick -> StockCount: %d, Date: %s", len(stockArr), date.Format(global.ShortTimeLayout))
 		tickArr, err := uc.grpcapi.GetStockHistoryTick(stockArr, date.Format(global.ShortTimeLayout))
 		if err != nil {
 			log.Error(err)
@@ -225,17 +228,20 @@ func (uc *HistoryUseCase) fetchHistoryTick(targetArr []*entity.Target) error {
 	return nil
 }
 
-func (uc *HistoryUseCase) findExistHistoryTick(fetchTradeDayArr []time.Time, stockNumArr []string) (map[time.Time][]string, error) {
+func (uc *HistoryUseCase) findExistHistoryTick(fetchTradeDayArr []time.Time, stockNumArr []string) (map[time.Time][]string, int64, error) {
+	log.Info("Query Exist History Tick")
 	result := make(map[time.Time][]string)
+	var total int64
 	for _, d := range fetchTradeDayArr {
 		tickArrMap, err := uc.repo.QueryMultiStockTickArrByDate(context.Background(), stockNumArr, d)
 		if err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 
 		var stockNumArrInDay []string
 		for _, s := range stockNumArr {
 			if _, ok := tickArrMap[s]; !ok {
+				total++
 				stockNumArrInDay = append(stockNumArrInDay, s)
 			} else {
 				uc.processTickArr(tickArrMap[s])
@@ -250,7 +256,7 @@ func (uc *HistoryUseCase) findExistHistoryTick(fetchTradeDayArr []time.Time, sto
 			result[d] = stockNumArrInDay
 		}
 	}
-	return result, nil
+	return result, total, nil
 }
 
 func (uc *HistoryUseCase) fetchHistoryKbar(targetArr []*entity.Target) error {
@@ -260,11 +266,12 @@ func (uc *HistoryUseCase) fetchHistoryKbar(targetArr []*entity.Target) error {
 		stockNumArr = append(stockNumArr, target.StockNum)
 	}
 
-	stockNumArrInDayMap, err := uc.findExistHistoryKbar(fetchTradeDayArr, stockNumArr)
+	stockNumArrInDayMap, total, err := uc.findExistHistoryKbar(fetchTradeDayArr, stockNumArr)
 	if err != nil {
 		return err
 	}
 	defer log.Info("Fetching History Kbar Done")
+	log.Infof("Fetching History Kbar -> Count: %d", total)
 	result := make(map[string][]*entity.HistoryKbar)
 	dataChan := make(chan *entity.HistoryKbar)
 	wait := make(chan struct{})
@@ -285,7 +292,6 @@ func (uc *HistoryUseCase) fetchHistoryKbar(targetArr []*entity.Target) error {
 		}
 		stockArr := s
 		date := d
-		log.Infof("Fetching History Kbar -> StockCount: %d, Date: %s", len(stockArr), date.Format(global.ShortTimeLayout))
 		tickArr, err := uc.grpcapi.GetStockHistoryKbar(stockArr, date.Format(global.ShortTimeLayout))
 		if err != nil {
 			log.Error(err)
@@ -316,17 +322,20 @@ func (uc *HistoryUseCase) fetchHistoryKbar(targetArr []*entity.Target) error {
 	return nil
 }
 
-func (uc *HistoryUseCase) findExistHistoryKbar(fetchTradeDayArr []time.Time, stockNumArr []string) (map[time.Time][]string, error) {
+func (uc *HistoryUseCase) findExistHistoryKbar(fetchTradeDayArr []time.Time, stockNumArr []string) (map[time.Time][]string, int64, error) {
+	log.Info("Query Exist History Kbar")
 	result := make(map[time.Time][]string)
+	var total int64
 	for _, d := range fetchTradeDayArr {
 		kbarArrMap, err := uc.repo.QueryMultiStockKbarArrByDate(context.Background(), stockNumArr, d)
 		if err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 
 		var stockNumArrInDay []string
 		for _, s := range stockNumArr {
 			if _, ok := kbarArrMap[s]; !ok {
+				total++
 				stockNumArrInDay = append(stockNumArrInDay, s)
 			} else {
 				uc.processKbarArr(kbarArrMap[s])
@@ -341,7 +350,7 @@ func (uc *HistoryUseCase) findExistHistoryKbar(fetchTradeDayArr []time.Time, sto
 			result[d] = stockNumArrInDay
 		}
 	}
-	return result, nil
+	return result, total, nil
 }
 
 func (uc *HistoryUseCase) processCloseArr(arr []*entity.HistoryClose) {
@@ -372,7 +381,7 @@ func (uc *HistoryUseCase) processCloseArr(arr []*entity.HistoryClose) {
 		if err := uc.repo.InsertQuaterMA(context.Background(), &entity.HistoryAnalyze{
 			Date:     arr[i].Date,
 			StockNum: stockNum,
-			QuaterMA: ma,
+			QuaterMA: utils.Round(ma, 2),
 		}); err != nil {
 			log.Error(err)
 		}
