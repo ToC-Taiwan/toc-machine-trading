@@ -174,29 +174,40 @@ func (o *TradeAgent) checkPlaceOrderStatus(order *entity.Order, timeout time.Dur
 	}
 
 	if order.OrderID != "" && order.Status != entity.StatusCancelled && order.Status != entity.StatusFilled {
-		log.Warnf("Place Cancel Order -> Stock: %s, Action: %d, Price: %.2f, Qty: %d", order.StockNum, order.Action, order.Price, order.Quantity)
-		bus.PublishTopicEvent(topicCancelOrder, order.OrderID)
-		go o.checkCancelOrder(order.OrderID, timeout)
+		o.cancelOrder(order.OrderID, timeout)
 		return
 	}
 
 	log.Error("check place order status raise unknown error")
 }
 
-func (o *TradeAgent) checkCancelOrder(orderID string, timeout time.Duration) {
-	for {
-		order := cc.GetOrderByOrderID(orderID)
-		if order.Status == entity.StatusCancelled {
-			log.Warnf("Order Canceled -> Stock: %s, Action: %d, Price: %.2f, Qty: %d", order.StockNum, order.Action, order.Price, order.Quantity)
-			o.waitingOrder = nil
-			break
-		} else if order.TradeTime.Add(timeout).Before(time.Now()) {
-			log.Errorf("Cancel Order Timeout -> Stock: %s, Action: %d, Price: %.2f, Qty: %d", order.StockNum, order.Action, order.Price, order.Quantity)
-			go o.checkCancelOrder(orderID, timeout)
-			return
-		}
-		time.Sleep(3 * time.Second)
+func (o *TradeAgent) cancelOrder(orderID string, timeout time.Duration) {
+	order := cc.GetOrderByOrderID(orderID)
+	if order == nil {
+		log.Error("Order not found")
+		return
 	}
+	order.TradeTime = time.Time{}
+	bus.PublishTopicEvent(topicCancelOrder, order.OrderID)
+
+	go func() {
+		for {
+			time.Sleep(time.Second)
+			if order.TradeTime.IsZero() {
+				continue
+			}
+
+			if order.Status == entity.StatusCancelled {
+				log.Warnf("Order Canceled -> Stock: %s, Action: %d, Price: %.2f, Qty: %d", order.StockNum, order.Action, order.Price, order.Quantity)
+				o.waitingOrder = nil
+				return
+			} else if order.TradeTime.Add(timeout).Before(time.Now()) {
+				log.Errorf("Cancel Order Timeout -> Stock: %s, Action: %d, Price: %.2f, Qty: %d", order.StockNum, order.Action, order.Price, order.Quantity)
+				return
+			}
+			time.Sleep(1500 * time.Millisecond)
+		}
+	}()
 }
 
 func (o *TradeAgent) checkNeededPost() (entity.OrderAction, time.Time) {

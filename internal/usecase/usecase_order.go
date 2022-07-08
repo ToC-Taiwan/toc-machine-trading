@@ -65,12 +65,12 @@ func (uc *OrderUseCase) placeOrder(order *entity.Order) {
 	defer uc.placeOrderLock.Unlock()
 	uc.placeOrderLock.Lock()
 
-	if (order.Action == entity.ActionBuy || order.Action == entity.ActionSellFirst) && uc.quota.quota-uc.quota.calculateOriginalOrderCost(order) < 0 {
+	cosumeQuota := uc.quota.calculateOriginalOrderCost(order)
+	if cosumeQuota != 0 && uc.quota.quota-cosumeQuota < 0 {
 		order.Status = entity.StatusAborted
 		return
 	}
 
-	log.Warnf("Place Order -> Stock: %s, Action: %d, Price: %.2f, Qty: %d", order.StockNum, order.Action, order.Price, order.Quantity)
 	var orderID string
 	var status entity.OrderStatus
 	var err error
@@ -94,35 +94,40 @@ func (uc *OrderUseCase) placeOrder(order *entity.Order) {
 	}
 
 	// count quota
-	uc.quota.quota -= uc.quota.calculateOriginalOrderCost(order)
-	log.Infof("Current quota: %d", uc.quota.quota)
+	uc.quota.quota -= cosumeQuota
 
 	// modify order and save to cache
 	order.OrderID = orderID
 	order.Status = status
 	order.TradeTime = time.Now()
 	cc.SetOrderByOrderID(order)
+
+	log.Warnf("Place Order -> Stock: %s, Action: %d, Price: %.2f, Qty: %d, Quota: %d", order.StockNum, order.Action, order.Price, order.Quantity, uc.quota.quota)
 }
 
 func (uc *OrderUseCase) cancelOrder(orderID string) {
 	defer uc.placeOrderLock.Unlock()
 	uc.placeOrderLock.Lock()
 
-	orderID, status, err := uc.CancelOrderID(orderID)
+	cacheOrder := cc.GetOrderByOrderID(orderID)
+	cacheOrder.TradeTime = time.Now()
+	log.Warnf("Cancel Order -> Stock: %s, Action: %d, Price: %.2f, Qty: %d", cacheOrder.StockNum, cacheOrder.Action, cacheOrder.Price, cacheOrder.Quantity)
+
+	// result will return instantly
+	resOrderID, status, err := uc.CancelOrderID(orderID)
 	if err != nil {
 		log.Error(err)
 		return
 	}
 
-	cacheOrder := cc.GetOrderByOrderID(orderID)
-	if cacheOrder == nil {
-		log.Error("Order not found")
+	if resOrderID != orderID {
+		log.Error("OrderID not match")
 		return
 	}
 
-	if cacheOrder.Action == entity.ActionBuy || cacheOrder.Action == entity.ActionSellFirst {
-		uc.quota.quota += uc.quota.calculateOriginalOrderCost(cacheOrder)
-		log.Infof("Current quota: %d", uc.quota.quota)
+	if cosumeQuota := uc.quota.calculateOriginalOrderCost(cacheOrder); cosumeQuota > 0 {
+		uc.quota.quota += cosumeQuota
+		log.Warnf("Quota Back: %d", uc.quota.quota)
 	}
 
 	cacheOrder.Status = status
