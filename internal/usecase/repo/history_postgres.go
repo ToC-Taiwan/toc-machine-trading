@@ -50,11 +50,6 @@ func (r *HistoryRepo) InsertHistoryCloseArr(ctx context.Context, t []*entity.His
 	for _, s := range split {
 		builder := r.Builder.Insert(tableNameHistoryClose).Columns("date, stock_num, close")
 		for _, d := range s {
-			// skip close is 0
-			if d.Close == 0 {
-				continue
-			}
-
 			builder = builder.Values(d.Date, d.StockNum, d.Close)
 		}
 		if sql, args, err = builder.ToSql(); err != nil {
