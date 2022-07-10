@@ -66,14 +66,13 @@ type Order struct {
 	OrderID   string      `json:"order_id"`
 	Status    OrderStatus `json:"status"`
 	OrderTime time.Time   `json:"order_time"`
-
-	StockNum  string      `json:"stock_num"`
 	Action    OrderAction `json:"action"`
 	Price     float64     `json:"price"`
 	Quantity  int64       `json:"quantity"`
 	TradeTime time.Time   `json:"trade_time"`
 
-	Stock *Stock `json:"stock"`
+	StockNum string `json:"stock_num"`
+	Stock    *Stock `json:"stock"`
 }
 
 // TradeBalance -.

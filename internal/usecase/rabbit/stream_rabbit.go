@@ -205,9 +205,9 @@ func (c *StreamRabbit) BidAskConsumer(stockNum string, bidAskChan chan *entity.R
 		}
 
 		bidAskChan <- &entity.RealTimeBidAsk{
-			StockNum:  body.GetCode(),
-			TickTime:  dataTime,
-			BidPrice1: body.GetBidPrice()[0], BidVolume1: body.GetBidVolume()[0], DiffBidVol1: body.GetDiffBidVol()[0],
+			StockNum:   body.GetCode(),
+			BidAskTime: dataTime,
+			BidPrice1:  body.GetBidPrice()[0], BidVolume1: body.GetBidVolume()[0], DiffBidVol1: body.GetDiffBidVol()[0],
 			BidPrice2: body.GetBidPrice()[1], BidVolume2: body.GetBidVolume()[1], DiffBidVol2: body.GetDiffBidVol()[1],
 			BidPrice3: body.GetBidPrice()[2], BidVolume3: body.GetBidVolume()[2], DiffBidVol3: body.GetDiffBidVol()[2],
 			BidPrice4: body.GetBidPrice()[3], BidVolume4: body.GetBidVolume()[3], DiffBidVol4: body.GetDiffBidVol()[3],
