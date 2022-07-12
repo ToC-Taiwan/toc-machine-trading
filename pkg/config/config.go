@@ -84,7 +84,7 @@ type RabbitMQ struct {
 
 // TradeSwitch -.
 type TradeSwitch struct {
-	Simulation bool `json:"simulation" env-required:"true" yaml:"simulation"`
+	Simulation bool `json:"simulation" yaml:"simulation"`
 
 	Buy       bool `json:"buy"        env-required:"true" yaml:"buy"`
 	Sell      bool `json:"sell"       env-required:"true" yaml:"sell"`
