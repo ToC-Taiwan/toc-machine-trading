@@ -50,7 +50,7 @@ func NewStream(r *repo.StreamRepo, g *grpcapi.StreamgRPCAPI, t *rabbit.StreamRab
 	go uc.ReceiveOrderStatus(context.Background())
 
 	go func() {
-		for range time.NewTicker(time.Minute).C {
+		for range time.NewTicker(time.Second * 30).C {
 			if uc.tradeInSwitch {
 				if err := uc.realTimeAddTargets(context.Background()); err != nil {
 					log.Panic(err)
@@ -222,14 +222,16 @@ func (uc *StreamUseCase) GetTSESnapshot(ctx context.Context) (*entity.StockSnapS
 }
 
 func (uc *StreamUseCase) realTimeAddTargets(ctx context.Context) error {
-	if !uc.tradeInSwitch {
-		return nil
-	}
-
 	data, err := uc.grpcapi.GetAllStockSnapshot()
 	if err != nil {
 		return err
 	}
+
+	// at least 200 snapshot to rank volume
+	if len(data) < 200 {
+		return nil
+	}
+
 	sort.Slice(data, func(i, j int) bool {
 		return data[i].GetTotalVolume() > data[j].GetTotalVolume()
 	})

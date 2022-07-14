@@ -57,7 +57,7 @@ func (uc *BasicUseCase) GetAllSinopacStockAndUpdateRepo(ctx context.Context) ([]
 
 	var stockDetail []*entity.Stock
 	for _, v := range stockArr {
-		if v.GetReference() == 0 || v.GetCategory() == "00" {
+		if v.GetReference() == 0 {
 			continue
 		}
 
