@@ -399,6 +399,12 @@ func (uc *HistoryUseCase) processTickArr(arr []*entity.HistoryTick) {
 	})
 
 	stockNum := arr[0].StockNum
+	firsTickTime := arr[0].TickTime
+	tickTradeDay := time.Date(firsTickTime.Year(), firsTickTime.Month(), firsTickTime.Day(), 0, 0, 0, 0, time.Local)
+	if uc.basic.LastTradeDay.Equal(tickTradeDay) {
+		cc.SetHistoryTickArr(stockNum, tickTradeDay, arr)
+	}
+
 	minPeriod := time.Duration(uc.analyzeCfg.TickAnalyzePeriod) * time.Millisecond
 
 	var volumeArr []int64

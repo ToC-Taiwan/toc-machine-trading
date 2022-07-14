@@ -28,7 +28,7 @@ go-lint:
             codequality: gl-code-quality-report.json
 
 go-build-test:
-    image: golang:1.18.3-bullseye
+    image: golang:1.18.4-bullseye
     only:
         - main
     stage: test
@@ -36,7 +36,7 @@ go-build-test:
         - go build -o toc-machine-trading ./cmd/app
 
 go-test:
-    image: golang:1.18.3-bullseye
+    image: golang:1.18.4-bullseye
     only:
         - main
     stage: test

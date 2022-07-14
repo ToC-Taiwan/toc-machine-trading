@@ -160,3 +160,16 @@ func (c *Cache) GetDaykbar(stockNum string, date time.Time) *entity.HistoryKbar 
 	}
 	return nil
 }
+
+// SetHistoryTickArr -.
+func (c *Cache) SetHistoryTickArr(stockNum string, date time.Time, tickArr []*entity.HistoryTick) {
+	c.Set(c.historyTickArrKey(stockNum, date), tickArr)
+}
+
+// GetHistoryTickArr -.
+func (c *Cache) GetHistoryTickArr(stockNum string, date time.Time) []*entity.HistoryTick {
+	if value, ok := c.Get(c.historyTickArrKey(stockNum, date)); ok {
+		return value.([]*entity.HistoryTick)
+	}
+	return nil
+}

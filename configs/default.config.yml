@@ -28,7 +28,7 @@ trade_switch:
     forward_max: 30
     reverse_max: 30
     # unit: second
-    hold_time_from_open: 90
+    hold_time_from_open: 5
     # unit: minute
     total_open_time: 270
     trade_in_end_time: 90
@@ -68,10 +68,10 @@ analyze:
     open_close_change_ratio_low: -5
     open_close_change_ratio_high: 5
     # unit: %
-    out_in_ratio: 80
-    in_out_ratio: 20
+    out_in_ratio: 90
+    in_out_ratio: 35
     # unit: %
-    volume_pr_low: 85
+    volume_pr_low: 90
     volume_pr_high: 95
     # unit: millisecond
     tick_analyze_period: 7500
