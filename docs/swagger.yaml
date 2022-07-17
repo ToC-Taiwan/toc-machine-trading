@@ -338,6 +338,20 @@ paths:
       summary: getRebornTargets
       tags:
       - analyze
+  /analyze/simulate-historytick:
+    get:
+      consumes:
+      - application/json
+      description: startSimulateHistoryTick
+      operationId: startSimulateHistoryTick
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+      summary: startSimulateHistoryTick
+      tags:
+      - analyze
   /basic/config:
     get:
       consumes:

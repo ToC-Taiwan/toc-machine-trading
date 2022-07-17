@@ -57,7 +57,7 @@ func NewAgent(stockNum string) *TradeAgent {
 }
 
 func (o *TradeAgent) generateOrder(cfg config.Analyze, needClear bool) *entity.Order {
-	if o.waitingOrder != nil || needClear || o.analyzeTickTime.IsZero() {
+	if o.waitingOrder != nil || needClear || o.alreadyTrade() || o.analyzeTickTime.IsZero() {
 		return nil
 	}
 
@@ -256,6 +256,12 @@ func (o *TradeAgent) getPRByVolume(volume int64) float64 {
 		}
 	}
 	return 100 * float64(total-position) / float64(total)
+}
+
+func (o *TradeAgent) alreadyTrade() bool {
+	defer o.orderMapLock.RUnlock()
+	o.orderMapLock.RLock()
+	return len(o.orderMap) != 0 && len(o.orderMap)%2 == 0
 }
 
 // RealTimeTickArr -.

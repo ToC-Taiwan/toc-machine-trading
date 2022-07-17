@@ -28,7 +28,7 @@ trade_switch:
     forward_max: 30
     reverse_max: 30
     # unit: second
-    hold_time_from_open: 5
+    hold_time_from_open: 45
     # unit: minute
     total_open_time: 270
     trade_in_end_time: 90
@@ -69,17 +69,17 @@ analyze:
     open_close_change_ratio_high: 5
     # unit: %
     out_in_ratio: 90
-    in_out_ratio: 35
+    in_out_ratio: 95
     # unit: %
     volume_pr_low: 90
     volume_pr_high: 95
     # unit: millisecond
     tick_analyze_period: 7500
     # unit: times
-    rsi_min_count: 500
+    rsi_min_count: 1000
     # rsi range: 0~1
-    rsi_high: 0.7
-    rsi_low: 0.3
+    rsi_high: 51
+    rsi_low: 49
     # unit: %
     max_loss: 2
     # unit: day

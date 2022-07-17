@@ -22,6 +22,7 @@ func newAnalyzeRoutes(handler *gin.RouterGroup, t usecase.Analyze) {
 	h := handler.Group("/analyze")
 	{
 		h.GET("/reborn", r.getRebornTargets)
+		h.GET("/simulate-historytick", r.startSimulateHistoryTick)
 	}
 }
 
@@ -57,4 +58,17 @@ func (r *analyzeRoutes) getRebornTargets(c *gin.Context) {
 		})
 	}
 	c.JSON(http.StatusOK, result)
+}
+
+// @Summary     startSimulateHistoryTick
+// @Description startSimulateHistoryTick
+// @ID          startSimulateHistoryTick
+// @Tags  	    analyze
+// @Accept      json
+// @Produce     json
+// @Success     200
+// @Router      /analyze/simulate-historytick [get]
+func (r *analyzeRoutes) startSimulateHistoryTick(c *gin.Context) {
+	go r.t.SimulateOnHistoryTick(c.Request.Context())
+	c.JSON(http.StatusOK, nil)
 }

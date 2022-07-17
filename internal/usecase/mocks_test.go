@@ -1455,3 +1455,15 @@ func (mr *MockAnalyzeMockRecorder) GetRebornMap(ctx interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRebornMap", reflect.TypeOf((*MockAnalyze)(nil).GetRebornMap), ctx)
 }
+
+// SimulateOnHistoryTick mocks base method.
+func (m *MockAnalyze) SimulateOnHistoryTick(ctx context.Context) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "SimulateOnHistoryTick", ctx)
+}
+
+// SimulateOnHistoryTick indicates an expected call of SimulateOnHistoryTick.
+func (mr *MockAnalyzeMockRecorder) SimulateOnHistoryTick(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SimulateOnHistoryTick", reflect.TypeOf((*MockAnalyze)(nil).SimulateOnHistoryTick), ctx)
+}

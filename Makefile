@@ -13,9 +13,14 @@ swag-v1: ### swag init
 	echo "" >> ./docs/swagger.json
 .PHONY: swag-v1
 
-run: swag-v1 ### swag run
+run-dev: swag-v1 ### swag run
 	@go mod tidy && go mod download && go generate ./... && \
 	CGO_ENABLED=0 go build -gcflags=all="-N -l" -o toc-machine-trading ./cmd/app && ./toc-machine-trading
+.PHONY: run-dev
+
+run: swag-v1 ### swag run
+	@go mod tidy && go mod download && go generate ./... && \
+	go build -o toc-machine-trading ./cmd/app && ./toc-machine-trading
 .PHONY: run
 
 lint: ### check by golangci linter

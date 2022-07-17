@@ -47,6 +47,27 @@ const docTemplate = `{
                 }
             }
         },
+        "/analyze/simulate-historytick": {
+            "get": {
+                "description": "startSimulateHistoryTick",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "analyze"
+                ],
+                "summary": "startSimulateHistoryTick",
+                "operationId": "startSimulateHistoryTick",
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/basic/config": {
             "get": {
                 "description": "getAllConfig",
