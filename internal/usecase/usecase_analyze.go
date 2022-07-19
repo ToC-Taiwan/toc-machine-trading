@@ -19,7 +19,7 @@ type AnalyzeUseCase struct {
 	tradeSwitch config.TradeSwitch
 	quotaCfg    config.Quota
 
-	historyTick     map[string][]*entity.HistoryTick
+	historyTick     map[string]*[]*entity.HistoryTick
 	historyTickLock sync.RWMutex
 
 	lastBelowMAStock map[string]*entity.HistoryAnalyze
@@ -63,11 +63,11 @@ func (uc *AnalyzeUseCase) AnalyzeAll(ctx context.Context, targetArr []*entity.Ta
 
 // FillHistoryTick -.
 func (uc *AnalyzeUseCase) FillHistoryTick(targetArr []*entity.Target) {
-	uc.historyTick = make(map[string][]*entity.HistoryTick)
+	uc.historyTick = make(map[string]*[]*entity.HistoryTick)
 	for _, t := range targetArr {
 		tickArr := cc.GetHistoryTickArr(t.StockNum, uc.basic.LastTradeDay)[1:]
 		uc.historyTickLock.Lock()
-		uc.historyTick[t.StockNum] = tickArr
+		uc.historyTick[t.StockNum] = &tickArr
 		uc.historyTickLock.Unlock()
 	}
 }
@@ -174,7 +174,7 @@ func (uc *AnalyzeUseCase) getSimulateCond(targetArr []*entity.Target, analyzeCfg
 		go func() {
 			defer wg.Done()
 			uc.historyTickLock.RLock()
-			tickArr := uc.historyTick[stock.StockNum]
+			tickArr := *uc.historyTick[stock.StockNum]
 			uc.historyTickLock.RUnlock()
 
 			simulateAgent := NewSimulateAgent(stock.StockNum)
@@ -185,7 +185,7 @@ func (uc *AnalyzeUseCase) getSimulateCond(targetArr []*entity.Target, analyzeCfg
 			agentArr = append(agentArr, simulateAgent)
 			agentLock.Unlock()
 
-			simulateAgent.searchOrder(analyzeCfg, tickArr)
+			simulateAgent.searchOrder(analyzeCfg, &tickArr)
 		}()
 	}
 	wg.Wait()

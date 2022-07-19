@@ -68,10 +68,10 @@ analyze:
     open_close_change_ratio_low: -5
     open_close_change_ratio_high: 5
     # unit: %
-    out_in_ratio: 90
+    out_in_ratio: 75
     in_out_ratio: 95
     # unit: %
-    volume_pr_low: 90
+    volume_pr_low: 80
     volume_pr_high: 95
     # unit: millisecond
     tick_analyze_period: 7500
@@ -79,7 +79,7 @@ analyze:
     rsi_min_count: 1000
     # rsi range: 0~1
     rsi_high: 51
-    rsi_low: 49
+    rsi_low: 50
     # unit: %
     max_loss: 2
     # unit: day

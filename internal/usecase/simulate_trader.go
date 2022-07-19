@@ -65,7 +65,7 @@ func (o *SimulateTradeAgent) ResetAgent(stockNum string) {
 	o.tradeSwitch = config.TradeSwitch{}
 }
 
-func (o *SimulateTradeAgent) searchOrder(cfg config.Analyze, tickArr []*entity.HistoryTick) {
+func (o *SimulateTradeAgent) searchOrder(cfg config.Analyze, tickArr *[]*entity.HistoryTick) {
 	var finish bool
 	go func() {
 		for {
@@ -92,7 +92,7 @@ func (o *SimulateTradeAgent) searchOrder(cfg config.Analyze, tickArr []*entity.H
 		}
 	}()
 
-	for _, tick := range tickArr {
+	for _, tick := range *tickArr {
 		if !finish {
 			o.tickChan <- &entity.RealTimeTick{
 				StockNum: tick.StockNum,
