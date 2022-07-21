@@ -18,6 +18,7 @@ type OrderUseCase struct {
 	gRPCAPI OrdergRPCAPI
 	repo    OrderRepo
 
+	basicInfo      entity.BasicInfo
 	quota          *Quota
 	simTrade       bool
 	placeOrderLock sync.Mutex
@@ -36,6 +37,7 @@ func NewOrder(t *grpcapi.OrdergRPCAPI, r *repo.OrderRepo) *OrderUseCase {
 		quota:          NewQuota(cfg.Quota),
 		simTrade:       cfg.TradeSwitch.Simulation,
 		placeOrderLock: sync.Mutex{},
+		basicInfo:      *cc.GetBasicInfo(),
 	}
 
 	bus.SubscribeTopic(topicPlaceOrder, uc.placeOrder)
@@ -54,7 +56,9 @@ func NewOrder(t *grpcapi.OrdergRPCAPI, r *repo.OrderRepo) *OrderUseCase {
 
 	go func() {
 		for range time.NewTicker(1500 * time.Millisecond).C {
-			uc.askOrderUpdate()
+			if time.Now().After(uc.basicInfo.OpenTime) && time.Now().Before(uc.basicInfo.EndTime) {
+				uc.askOrderUpdate()
+			}
 		}
 	}()
 
