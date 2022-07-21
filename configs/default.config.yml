@@ -36,6 +36,7 @@ trade_switch:
     # unit: seccond
     trade_in_wait_time: 45
     trade_out_wait_time: 90
+    cancel_wait_time: 20
 
 quota:
     trade_quota: 1000000
@@ -68,17 +69,17 @@ analyze:
     open_close_change_ratio_low: -5
     open_close_change_ratio_high: 5
     # unit: %
-    out_in_ratio: 75
+    out_in_ratio: 90
     in_out_ratio: 95
     # unit: %
-    volume_pr_low: 80
-    volume_pr_high: 95
+    volume_pr_low: 85
+    volume_pr_high: 90
     # unit: millisecond
     tick_analyze_period: 7500
     # unit: times
     rsi_min_count: 1000
     # rsi range: 0~1
-    rsi_high: 51
+    rsi_high: 50
     rsi_low: 50
     # unit: %
     max_loss: 2

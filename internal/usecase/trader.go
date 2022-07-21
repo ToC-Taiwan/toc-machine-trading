@@ -28,10 +28,14 @@ type TradeAgent struct {
 	analyzeTickTime    time.Time
 	lastTick           *entity.RealTimeTick
 	lastBidAsk         *entity.RealTimeBidAsk
+
+	tradeInWaitTime  time.Duration
+	tradeOutWaitTime time.Duration
+	cancelWaitTime   time.Duration
 }
 
 // NewAgent -.
-func NewAgent(stockNum string) *TradeAgent {
+func NewAgent(stockNum string, tradeSwitch config.TradeSwitch) *TradeAgent {
 	var quantity int64 = 1
 	if biasRate := cc.GetBiasRate(stockNum); biasRate > 4 || biasRate < -4 {
 		quantity = 2
@@ -49,6 +53,9 @@ func NewAgent(stockNum string) *TradeAgent {
 		tickChan:           make(chan *entity.RealTimeTick),
 		bidAskChan:         make(chan *entity.RealTimeBidAsk),
 		historyTickAnalyze: arr,
+		tradeInWaitTime:    time.Duration(tradeSwitch.TradeInWaitTime) * time.Second,
+		tradeOutWaitTime:   time.Duration(tradeSwitch.TradeOutWaitTime) * time.Second,
+		cancelWaitTime:     time.Duration(tradeSwitch.CancelWaitTime) * time.Second,
 	}
 
 	go new.checkFirstTickArrive()
@@ -148,7 +155,15 @@ func (o *TradeAgent) clearUnfinishedOrder() *entity.Order {
 	return nil
 }
 
-func (o *TradeAgent) checkPlaceOrderStatus(order *entity.Order, timeout time.Duration) {
+func (o *TradeAgent) checkPlaceOrderStatus(order *entity.Order) {
+	var timeout time.Duration
+	switch order.Action {
+	case entity.ActionBuy, entity.ActionSellFirst:
+		timeout = o.tradeInWaitTime
+	case entity.ActionSell, entity.ActionBuyLater:
+		timeout = o.tradeOutWaitTime
+	}
+
 	for {
 		time.Sleep(time.Second)
 		if order.TradeTime.IsZero() {
@@ -174,21 +189,16 @@ func (o *TradeAgent) checkPlaceOrderStatus(order *entity.Order, timeout time.Dur
 	}
 
 	if order.OrderID != "" && order.Status != entity.StatusCancelled && order.Status != entity.StatusFilled {
-		o.cancelOrder(order.OrderID, timeout)
+		o.cancelOrder(order)
 		return
 	}
 
 	log.Error("check place order status raise unknown error")
 }
 
-func (o *TradeAgent) cancelOrder(orderID string, timeout time.Duration) {
-	order := cc.GetOrderByOrderID(orderID)
-	if order == nil {
-		log.Error("Order not found")
-		return
-	}
+func (o *TradeAgent) cancelOrder(order *entity.Order) {
 	order.TradeTime = time.Time{}
-	bus.PublishTopicEvent(topicCancelOrder, order.OrderID)
+	bus.PublishTopicEvent(topicCancelOrder, order)
 
 	go func() {
 		for {
@@ -201,11 +211,11 @@ func (o *TradeAgent) cancelOrder(orderID string, timeout time.Duration) {
 				log.Warnf("Order Canceled -> Stock: %s, Action: %d, Price: %.2f, Qty: %d", order.StockNum, order.Action, order.Price, order.Quantity)
 				o.waitingOrder = nil
 				return
-			} else if order.TradeTime.Add(timeout).Before(time.Now()) {
+			} else if order.TradeTime.Add(o.cancelWaitTime).Before(time.Now()) {
 				log.Errorf("Cancel Order Timeout -> Stock: %s, Action: %d, Price: %.2f, Qty: %d", order.StockNum, order.Action, order.Price, order.Quantity)
+				go o.checkPlaceOrderStatus(order)
 				return
 			}
-			time.Sleep(1500 * time.Millisecond)
 		}
 	}()
 }

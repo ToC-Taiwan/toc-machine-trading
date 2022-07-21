@@ -105,33 +105,24 @@ func (uc *OrderUseCase) placeOrder(order *entity.Order) {
 	log.Warnf("Place Order -> Stock: %s, Action: %d, Price: %.2f, Qty: %d, Quota: %d", order.StockNum, order.Action, order.Price, order.Quantity, uc.quota.quota)
 }
 
-func (uc *OrderUseCase) cancelOrder(orderID string) {
+func (uc *OrderUseCase) cancelOrder(order *entity.Order) {
 	defer uc.placeOrderLock.Unlock()
 	uc.placeOrderLock.Lock()
 
-	cacheOrder := cc.GetOrderByOrderID(orderID)
-	cacheOrder.TradeTime = time.Now()
-	log.Warnf("Cancel Order -> Stock: %s, Action: %d, Price: %.2f, Qty: %d", cacheOrder.StockNum, cacheOrder.Action, cacheOrder.Price, cacheOrder.Quantity)
+	order.TradeTime = time.Now()
+	log.Warnf("Cancel Order -> Stock: %s, Action: %d, Price: %.2f, Qty: %d", order.StockNum, order.Action, order.Price, order.Quantity)
 
 	// result will return instantly
-	resOrderID, status, err := uc.CancelOrderID(orderID)
+	_, _, err := uc.CancelOrderID(order.OrderID)
 	if err != nil {
 		log.Error(err)
 		return
 	}
 
-	if resOrderID != orderID {
-		log.Error("OrderID not match")
-		return
-	}
-
-	if cosumeQuota := uc.quota.calculateOriginalOrderCost(cacheOrder); cosumeQuota > 0 {
+	if cosumeQuota := uc.quota.calculateOriginalOrderCost(order); cosumeQuota > 0 {
 		uc.quota.quota += cosumeQuota
 		log.Warnf("Quota Back: %d", uc.quota.quota)
 	}
-
-	cacheOrder.Status = status
-	cc.SetOrderByOrderID(cacheOrder)
 }
 
 // BuyStock -.
@@ -250,6 +241,7 @@ func (uc *OrderUseCase) updateCacheAndInsertDB(order *entity.Order) {
 	// get order from cache
 	cacheOrder := cc.GetOrderByOrderID(order.OrderID)
 	if cacheOrder == nil {
+		log.Error("Order not found in cache: %s", order.StockNum)
 		return
 	}
 

@@ -96,7 +96,7 @@ func (uc *StreamUseCase) ReceiveOrderStatus(ctx context.Context) {
 // ReceiveStreamData - receive target data, start goroutine to trade
 func (uc *StreamUseCase) ReceiveStreamData(ctx context.Context, targetArr []*entity.Target) {
 	for _, t := range targetArr {
-		agent := NewAgent(t.StockNum)
+		agent := NewAgent(t.StockNum, uc.tradeSwitchCfg)
 
 		// main trade method
 		go uc.tradingRoom(agent)
@@ -155,23 +155,15 @@ func (uc *StreamUseCase) placeOrder(agent *TradeAgent, order *entity.Order) {
 
 	agent.waitingOrder = order
 
-	// decide timeout to place order, if out of trade in time, return
-	var timeout time.Duration
-	switch order.Action {
-	case entity.ActionBuy, entity.ActionSellFirst:
-		if !uc.tradeInSwitch {
-			// avoid stuck in the market
-			agent.waitingOrder = nil
-			return
-		}
-		timeout = time.Duration(uc.tradeSwitchCfg.TradeInWaitTime) * time.Second
-
-	case entity.ActionSell, entity.ActionBuyLater:
-		timeout = time.Duration(uc.tradeSwitchCfg.TradeOutWaitTime) * time.Second
+	// if out of trade in time, return
+	if !uc.tradeInSwitch && (order.Action == entity.ActionBuy || order.Action == entity.ActionSellFirst) {
+		// avoid stuck in the market
+		agent.waitingOrder = nil
+		return
 	}
 
 	bus.PublishTopicEvent(topicPlaceOrder, order)
-	go agent.checkPlaceOrderStatus(order, timeout)
+	go agent.checkPlaceOrderStatus(order)
 }
 
 func (uc *StreamUseCase) checkTradeSwitch() {
