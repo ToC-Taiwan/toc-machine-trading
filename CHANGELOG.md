@@ -1,6 +1,29 @@
-# [](https://gitlab.tocraw.com/root/toc-machine-trading/compare/v0.0.1...v) (2022-07-07)
+# [](https://gitlab.tocraw.com/root/toc-machine-trading/compare/v0.0.2...v) (2022-07-22)
 
 ## CHANGELOG
+
+## [0.0.2](https://gitlab.tocraw.com/root/toc-machine-trading/compare/v0.0.1...v0.0.2) (2022-07-21)
+
+### Bug Fixes
+
+* **cancel:** fix cancel fail casue filled order not append to order map, add cancel wait time ([f32a553](https://gitlab.tocraw.com/root/toc-machine-trading/commit/f32a5534566fc436c3e513dec4fc0a37307b16fe))
+* **config:** fix simulate must be true ([1aaccb6](https://gitlab.tocraw.com/root/toc-machine-trading/commit/1aaccb6236cfc86523bb51746be91fb4d85d4b28))
+* **cpu:** fix checkFirstTickArrive cause cpu 100% ([0f43f43](https://gitlab.tocraw.com/root/toc-machine-trading/commit/0f43f435e663e154947c548ca5d6b442ed54b956))
+* **history:** fix skip close is 0 in insert db panic ([b31a256](https://gitlab.tocraw.com/root/toc-machine-trading/commit/b31a256682fdab589c1e1fa2008f993cd046bf99))
+* **logger:** fix wrong use format in log error ([70bc20d](https://gitlab.tocraw.com/root/toc-machine-trading/commit/70bc20dfaf90ba12274080e87f1150539e7b3b13))
+* **quota:** fix wrong quota when sell or buylater, fix check cancel order wrong tarde time ([40d12fa](https://gitlab.tocraw.com/root/toc-machine-trading/commit/40d12fa27513dd6f9530409e4c5d6a6726adb5e7))
+* **snapshot:** fix all snapshot return empty panic, insert all stock from sinopac ([9da88f4](https://gitlab.tocraw.com/root/toc-machine-trading/commit/9da88f4008a848231b0bb2609b2ee55ca43586ec))
+* **tradeagent:** fix wrong in out ratio compare ([a48a2e7](https://gitlab.tocraw.com/root/toc-machine-trading/commit/a48a2e755fae16bcc2971a573a367fb91c8aaeac))
+
+### Features
+
+* **analyze:** add last trade day all ticks cahce, upgrade go to 1.18.4 ([d1bc929](https://gitlab.tocraw.com/root/toc-machine-trading/commit/d1bc929a63494c4d2bc29950d8c3b5f332b3ba36))
+* **analyze:** same way to analyze realtime tick,history tick, order trade time assign in place ([b5c8a4e](https://gitlab.tocraw.com/root/toc-machine-trading/commit/b5c8a4e028047abd558cc3bb666ba5251c6b9441))
+* **basic:** skip add category is 00 to stock list ([b3c847d](https://gitlab.tocraw.com/root/toc-machine-trading/commit/b3c847df328cc1169edd30f7fb85ffd05ed03df6))
+* **repo:** add postgres index, relation, modify fetching history log, skip close is 0 in fetch ([e03e2cd](https://gitlab.tocraw.com/root/toc-machine-trading/commit/e03e2cd6733819666932924fe79a8830eb4419b7))
+* **simulate:** add simulate api, add one trade per stock a day ([3653954](https://gitlab.tocraw.com/root/toc-machine-trading/commit/3653954c8199bf8e323c367eb270916bd7cddd90))
+* **simulate:** replace tickarr to pointer to reduce simulate memory cost ([5964c11](https://gitlab.tocraw.com/root/toc-machine-trading/commit/5964c1114b32b645d8ca959d468fb6987d41e291))
+* **status:** add check if in trade time for update order status ([4b92d61](https://gitlab.tocraw.com/root/toc-machine-trading/commit/4b92d61b503215e99f9c05377318316a8c290672))
 
 ## [0.0.1](https://gitlab.tocraw.com/root/toc-machine-trading/compare/94fd4a56259d9ca8e7c99417195165358148b2f8...v0.0.1) (2022-07-07)
 

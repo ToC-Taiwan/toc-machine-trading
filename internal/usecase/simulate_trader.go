@@ -128,7 +128,7 @@ func (o *SimulateTradeAgent) generateSimulateOrder(cfg config.Analyze) *entity.O
 	}
 
 	periodVolume := analyzeArr.getTotalVolume()
-	if pr := o.getPRByVolume(periodVolume); pr < cfg.VolumePRLow || pr > cfg.VolumePRHigh {
+	if pr := o.getPRByVolume(periodVolume); pr < cfg.VolumePRLimit {
 		return nil
 	}
 

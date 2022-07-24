@@ -18,6 +18,7 @@ type AnalyzeUseCase struct {
 	basic       entity.BasicInfo
 	tradeSwitch config.TradeSwitch
 	quotaCfg    config.Quota
+	analyzeCfg  config.Analyze
 
 	historyTick     map[string]*[]*entity.HistoryTick
 	historyTickLock sync.RWMutex
@@ -41,6 +42,7 @@ func NewAnalyze(r *repo.HistoryRepo) *AnalyzeUseCase {
 	uc.basic = *cc.GetBasicInfo()
 	uc.tradeSwitch = cfg.TradeSwitch
 	uc.quotaCfg = cfg.Quota
+	uc.analyzeCfg = cfg.Analyze
 
 	uc.lastBelowMAStock = make(map[string]*entity.HistoryAnalyze)
 	uc.rebornMap = make(map[time.Time][]entity.Stock)
@@ -73,7 +75,7 @@ func (uc *AnalyzeUseCase) FillHistoryTick(targetArr []*entity.Target) {
 }
 
 // SimulateOnHistoryTick -.
-func (uc *AnalyzeUseCase) SimulateOnHistoryTick(ctx context.Context) {
+func (uc *AnalyzeUseCase) SimulateOnHistoryTick(ctx context.Context, useDefault bool) {
 	if len(uc.targetArr) == 0 {
 		return
 	}
@@ -95,8 +97,7 @@ func (uc *AnalyzeUseCase) SimulateOnHistoryTick(ctx context.Context) {
 				log.Infof("TradeCount: %d, Forward: %d, Reverse: %d, Discount: %d, Total: %d", bestBalance.TradeCount, bestBalance.Forward, bestBalance.Reverse, bestBalance.Discount, bestBalance.Total)
 				log.Warnf("OutInRatio %.0f", bestCfg.OutInRatio)
 				log.Warnf("InOutRatio: %.0f", bestCfg.InOutRatio)
-				log.Warnf("VolumePRLow: %.0f", bestCfg.VolumePRLow)
-				log.Warnf("VolumePRHigh: %.0f", bestCfg.VolumePRHigh)
+				log.Warnf("VolumePRLimit: %.0f", bestCfg.VolumePRLimit)
 				log.Warnf("TickAnalyzePeriod: %.0f", bestCfg.TickAnalyzePeriod)
 				log.Warnf("RSIMinCount: %d", bestCfg.RSIMinCount)
 				log.Warnf("RSIHigh: %.1f", bestCfg.RSIHigh)
@@ -105,7 +106,13 @@ func (uc *AnalyzeUseCase) SimulateOnHistoryTick(ctx context.Context) {
 		}
 	}()
 
-	analyzeCfgArr := generateAnalyzeCfg()
+	var analyzeCfgArr []config.Analyze
+	if !useDefault {
+		analyzeCfgArr = generateAnalyzeCfg()
+	} else {
+		analyzeCfgArr = append(analyzeCfgArr, uc.analyzeCfg)
+	}
+
 	for _, cfg := range analyzeCfgArr {
 		analyzeCfg := cfg
 		cfg, balance := uc.getSimulateCond(uc.targetArr, analyzeCfg)
@@ -311,116 +318,105 @@ func (uc *SimulateBalance) splitOrdersByAction(allOrders []*entity.Order) ([]*en
 }
 
 func generateAnalyzeCfg() []config.Analyze {
+	cfg, err := config.GetConfig()
+	if err != nil {
+		log.Panic(err)
+	}
+
 	base := []config.Analyze{
 		{
-			OutInRatio:        75,
-			InOutRatio:        75,
-			VolumePRLow:       90,
-			VolumePRHigh:      95,
-			TickAnalyzePeriod: 7500,
-			RSIMinCount:       1000,
-			RSIHigh:           50,
-			RSILow:            50,
+			OutInRatio:        95,
+			InOutRatio:        95,
+			VolumePRLimit:     99,
+			TickAnalyzePeriod: cfg.Analyze.TickAnalyzePeriod,
+			RSIMinCount:       150,
+			RSIHigh:           cfg.Analyze.RSIHigh,
+			RSILow:            cfg.Analyze.RSILow,
 		},
 	}
 
-	appendOutInRatioVar(&base)
-	appendInOutRatioVar(&base)
-	appendVolumePRLowVar(&base)
-	appendVolumePRHighVar(&base)
-	appendRSICountVar(&base)
-	appendRSIHighVar(&base)
-	appendRSILowVar(&base)
+	AppendOutInRatioVar(&base)
+	AppendInOutRatioVar(&base)
+	AppendVolumePRLimitVar(&base)
+	AppendRSICountVar(&base)
+	AppendRSIHighVar(&base)
+	AppendRSILowVar(&base)
 
 	log.Warnf("Total analyze times: %d", len(base))
 
 	return base
 }
 
-func appendOutInRatioVar(cfgArr *[]config.Analyze) {
+// AppendOutInRatioVar -.
+func AppendOutInRatioVar(cfgArr *[]config.Analyze) {
 	var appendCfg []config.Analyze
 	for _, v := range *cfgArr {
 		for {
-			if v.OutInRatio >= 95 {
+			if v.OutInRatio <= 75 {
 				break
 			}
-			v.OutInRatio += 5
+			v.OutInRatio -= 5
 			appendCfg = append(appendCfg, v)
 		}
 	}
 	*cfgArr = append(*cfgArr, appendCfg...)
 }
 
-func appendInOutRatioVar(cfgArr *[]config.Analyze) {
+// AppendInOutRatioVar -.
+func AppendInOutRatioVar(cfgArr *[]config.Analyze) {
 	var appendCfg []config.Analyze
 	for _, v := range *cfgArr {
 		for {
-			if v.InOutRatio >= 95 {
+			if v.InOutRatio <= 95 {
 				break
 			}
-			v.InOutRatio += 5
+			v.InOutRatio -= 5
 			appendCfg = append(appendCfg, v)
 		}
 	}
 	*cfgArr = append(*cfgArr, appendCfg...)
 }
 
-func appendVolumePRLowVar(cfgArr *[]config.Analyze) {
+// AppendVolumePRLimitVar -.
+func AppendVolumePRLimitVar(cfgArr *[]config.Analyze) {
 	var appendCfg []config.Analyze
 	for _, v := range *cfgArr {
 		for {
-			if v.VolumePRLow <= 75 {
+			if v.VolumePRLimit <= 85 {
 				break
 			}
-			v.VolumePRLow -= 5
+			v.VolumePRLimit--
 
-			if v.VolumePRHigh > v.VolumePRLow {
-				appendCfg = append(appendCfg, v)
-			}
-		}
-	}
-	*cfgArr = append(*cfgArr, appendCfg...)
-}
-
-func appendVolumePRHighVar(cfgArr *[]config.Analyze) {
-	var appendCfg []config.Analyze
-	for _, v := range *cfgArr {
-		for {
-			if v.VolumePRHigh <= 80 {
-				break
-			}
-			v.VolumePRHigh -= 5
-
-			if v.VolumePRHigh > v.VolumePRLow {
-				appendCfg = append(appendCfg, v)
-			}
-		}
-	}
-	*cfgArr = append(*cfgArr, appendCfg...)
-}
-
-func appendRSICountVar(cfgArr *[]config.Analyze) {
-	var appendCfg []config.Analyze
-	for _, v := range *cfgArr {
-		for {
-			if v.RSIMinCount <= 600 {
-				break
-			}
-			v.RSIMinCount -= 200
 			appendCfg = append(appendCfg, v)
 		}
 	}
 	*cfgArr = append(*cfgArr, appendCfg...)
 }
 
-func appendRSIHighVar(cfgArr *[]config.Analyze) {
+// AppendRSICountVar -.
+func AppendRSICountVar(cfgArr *[]config.Analyze) {
 	var appendCfg []config.Analyze
 	for _, v := range *cfgArr {
 		for {
-			if v.RSIHigh >= 55 {
+			if v.RSIMinCount >= 1200 {
 				break
 			}
-			v.RSIHigh++
+			v.RSIMinCount += 150
+			appendCfg = append(appendCfg, v)
+		}
+	}
+	*cfgArr = append(*cfgArr, appendCfg...)
+}
+
+// AppendRSIHighVar -.
+func AppendRSIHighVar(cfgArr *[]config.Analyze) {
+	var appendCfg []config.Analyze
+	for _, v := range *cfgArr {
+		for {
+			if v.RSIHigh >= 50.5 {
+				break
+			}
+			v.RSIHigh += 0.1
 			if v.RSIHigh >= v.RSILow {
 				appendCfg = append(appendCfg, v)
 			}
@@ -429,14 +425,15 @@ func appendRSIHighVar(cfgArr *[]config.Analyze) {
 	*cfgArr = append(*cfgArr, appendCfg...)
 }
 
-func appendRSILowVar(cfgArr *[]config.Analyze) {
+// AppendRSILowVar -.
+func AppendRSILowVar(cfgArr *[]config.Analyze) {
 	var appendCfg []config.Analyze
 	for _, v := range *cfgArr {
 		for {
-			if v.RSILow <= 45 {
+			if v.RSILow <= 49.5 {
 				break
 			}
-			v.RSILow--
+			v.RSILow -= 0.1
 			if v.RSIHigh >= v.RSILow {
 				appendCfg = append(appendCfg, v)
 			}

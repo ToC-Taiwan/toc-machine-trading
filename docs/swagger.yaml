@@ -25,9 +25,7 @@ definitions:
         type: integer
       tick_analyze_period:
         type: number
-      volume_pr_high:
-        type: number
-      volume_pr_low:
+      volume_pr_limit:
         type: number
     type: object
   config.Config:
@@ -124,6 +122,8 @@ definitions:
         type: boolean
       buy_later:
         type: boolean
+      cancel_wait_time:
+        type: integer
       forward_max:
         type: integer
       hold_time_from_open:
@@ -344,11 +344,17 @@ paths:
       - application/json
       description: startSimulateHistoryTick
       operationId: startSimulateHistoryTick
+      parameters:
+      - description: use_default
+        in: header
+        name: use_default
+        required: true
+        type: boolean
       produces:
       - application/json
       responses:
         "200":
-          description: ""
+          description: OK
       summary: startSimulateHistoryTick
       tags:
       - analyze
@@ -422,7 +428,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: ""
+          description: OK
         "500":
           description: Internal Server Error
           schema:

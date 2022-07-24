@@ -168,6 +168,6 @@ type (
 	// Analyze -.
 	Analyze interface {
 		GetRebornMap(ctx context.Context) map[time.Time][]entity.Stock
-		SimulateOnHistoryTick(ctx context.Context)
+		SimulateOnHistoryTick(ctx context.Context, useDefault bool)
 	}
 )

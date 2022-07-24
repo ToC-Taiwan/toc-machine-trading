@@ -61,9 +61,18 @@ const docTemplate = `{
                 ],
                 "summary": "startSimulateHistoryTick",
                 "operationId": "startSimulateHistoryTick",
+                "parameters": [
+                    {
+                        "type": "boolean",
+                        "description": "use_default",
+                        "name": "use_default",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
-                        "description": ""
+                        "description": "OK"
                     }
                 }
             }
@@ -174,7 +183,7 @@ const docTemplate = `{
                 "operationId": "terminateSinopac",
                 "responses": {
                     "200": {
-                        "description": ""
+                        "description": "OK"
                     },
                     "500": {
                         "description": "Internal Server Error",
@@ -525,10 +534,7 @@ const docTemplate = `{
                 "tick_analyze_period": {
                     "type": "number"
                 },
-                "volume_pr_high": {
-                    "type": "number"
-                },
-                "volume_pr_low": {
+                "volume_pr_limit": {
                     "type": "number"
                 }
             }
@@ -677,6 +683,9 @@ const docTemplate = `{
                 },
                 "buy_later": {
                     "type": "boolean"
+                },
+                "cancel_wait_time": {
+                    "type": "integer"
                 },
                 "forward_max": {
                     "type": "integer"

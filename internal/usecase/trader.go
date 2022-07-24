@@ -83,7 +83,7 @@ func (o *TradeAgent) generateOrder(cfg config.Analyze, needClear bool) *entity.O
 	}
 
 	periodVolume := analyzeArr.getTotalVolume()
-	if pr := o.getPRByVolume(periodVolume); pr < cfg.VolumePRLow || pr > cfg.VolumePRHigh {
+	if pr := o.getPRByVolume(periodVolume); pr < cfg.VolumePRLimit {
 		return nil
 	}
 

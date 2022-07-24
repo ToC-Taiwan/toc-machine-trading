@@ -65,10 +65,14 @@ func (r *analyzeRoutes) getRebornTargets(c *gin.Context) {
 // @ID          startSimulateHistoryTick
 // @Tags  	    analyze
 // @Accept      json
+// @param use_default header bool true "use_default"
 // @Produce     json
 // @Success     200
 // @Router      /analyze/simulate-historytick [get]
 func (r *analyzeRoutes) startSimulateHistoryTick(c *gin.Context) {
-	go r.t.SimulateOnHistoryTick(c.Request.Context())
-	c.JSON(http.StatusOK, nil)
+	useDefaultString := c.Request.Header.Get("use_default")
+	go r.t.SimulateOnHistoryTick(c.Request.Context(), useDefaultString == "true")
+	c.JSON(http.StatusOK, gin.H{
+		"message": "start simulate history tick, check result in logs",
+	})
 }

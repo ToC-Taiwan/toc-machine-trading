@@ -138,8 +138,7 @@ type Analyze struct {
 	OpenCloseChangeRatioHigh float64 `json:"open_close_change_ratio_high" env-required:"true" yaml:"open_close_change_ratio_high"`
 	OutInRatio               float64 `json:"out_in_ratio"                 env-required:"true" yaml:"out_in_ratio"`
 	InOutRatio               float64 `json:"in_out_ratio"                 env-required:"true" yaml:"in_out_ratio"`
-	VolumePRLow              float64 `json:"volume_pr_low"                env-required:"true" yaml:"volume_pr_low"`
-	VolumePRHigh             float64 `json:"volume_pr_high"               env-required:"true" yaml:"volume_pr_high"`
+	VolumePRLimit            float64 `json:"volume_pr_limit"              env-required:"true" yaml:"volume_pr_limit"`
 	TickAnalyzePeriod        float64 `json:"tick_analyze_period"          env-required:"true" yaml:"tick_analyze_period"`
 	RSIMinCount              int     `json:"rsi_min_count"                env-required:"true" yaml:"rsi_min_count"`
 	RSIHigh                  float64 `json:"rsi_high"                     env-required:"true" yaml:"rsi_high"`

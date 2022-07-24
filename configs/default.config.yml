@@ -54,10 +54,10 @@ target_cond:
       limit_volume: 8000
       subscribe: false
     - limit_price_low: 100
-      limit_price_high: 125
+      limit_price_high: 135
       limit_volume: 2000
       subscribe: true
-    - limit_price_low: 125
+    - limit_price_low: 135
       limit_price_high: 200
       limit_volume: 2000
       subscribe: false
@@ -72,14 +72,13 @@ analyze:
     out_in_ratio: 90
     in_out_ratio: 95
     # unit: %
-    volume_pr_low: 85
-    volume_pr_high: 90
+    volume_pr_limit: 99
     # unit: millisecond
-    tick_analyze_period: 7500
+    tick_analyze_period: 5000
     # unit: times
-    rsi_min_count: 1000
+    rsi_min_count: 1200
     # rsi range: 0~1
-    rsi_high: 50
+    rsi_high: 50.5
     rsi_low: 50
     # unit: %
     max_loss: 2
