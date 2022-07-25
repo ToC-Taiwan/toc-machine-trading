@@ -65,7 +65,7 @@ func (o *SimulateTradeAgent) ResetAgent(stockNum string) {
 	o.tradeSwitch = config.TradeSwitch{}
 }
 
-func (o *SimulateTradeAgent) searchOrder(cfg config.Analyze, tickArr *[]*entity.HistoryTick) {
+func (o *SimulateTradeAgent) searchOrder(cfg config.Analyze, tickArr *[]*entity.HistoryTick, beforeLastTradeDayClose float64) {
 	var finish bool
 	go func() {
 		for {
@@ -100,6 +100,7 @@ func (o *SimulateTradeAgent) searchOrder(cfg config.Analyze, tickArr *[]*entity.
 				Close:    tick.Close,
 				Volume:   tick.Volume,
 				TickType: tick.TickType,
+				PctChg:   100 * (tick.Close - beforeLastTradeDayClose) / beforeLastTradeDayClose,
 			}
 		} else {
 			close(o.tickChan)
@@ -125,6 +126,10 @@ func (o *SimulateTradeAgent) generateSimulateOrder(cfg config.Analyze) *entity.O
 
 	if postOrderAction, qty, preTime := o.checkNeededPost(); postOrderAction != entity.ActionNone {
 		return o.generateSimulateTradeOutOrder(cfg, postOrderAction, qty, preTime)
+	}
+
+	if o.lastTick.PctChg < cfg.CloseChangeRatioLow || o.lastTick.PctChg > cfg.CloseChangeRatioHigh {
+		return nil
 	}
 
 	periodVolume := analyzeArr.getTotalVolume()
@@ -182,27 +187,6 @@ func (o *SimulateTradeAgent) generateSimulateTradeOutOrder(cfg config.Analyze, p
 			}
 		}
 	}
-
-	// if o.lastTick.TickTime.After(cc.GetBasicInfo().LastTradeDay.Add(9 * time.Hour).Add(time.Duration(o.tradeSwitch.TradeOutWaitTime) * time.Minute)) {
-	// 	switch postOrderAction {
-	// 	case entity.ActionSell:
-	// 		return &entity.Order{
-	// 			StockNum:  o.stockNum,
-	// 			Action:    postOrderAction,
-	// 			Price:     o.lastTick.Close,
-	// 			Quantity:  o.orderQuantity,
-	// 			TradeTime: o.lastTick.TickTime,
-	// 		}
-	// 	case entity.ActionBuyLater:
-	// 		return &entity.Order{
-	// 			StockNum:  o.stockNum,
-	// 			Action:    postOrderAction,
-	// 			Price:     o.lastTick.Close,
-	// 			Quantity:  o.orderQuantity,
-	// 			TradeTime: o.lastTick.TickTime,
-	// 		}
-	// 	}
-	// }
 	return nil
 }
 

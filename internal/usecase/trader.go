@@ -32,6 +32,10 @@ type TradeAgent struct {
 	tradeInWaitTime  time.Duration
 	tradeOutWaitTime time.Duration
 	cancelWaitTime   time.Duration
+
+	openChangeRatioLow  float64
+	openChangeRatioHigh float64
+	openPass            bool
 }
 
 // NewAgent -.
@@ -47,15 +51,17 @@ func NewAgent(stockNum string, tradeSwitch config.TradeSwitch) *TradeAgent {
 	})
 
 	new := &TradeAgent{
-		stockNum:           stockNum,
-		orderQuantity:      quantity,
-		orderMap:           make(map[entity.OrderAction][]*entity.Order),
-		tickChan:           make(chan *entity.RealTimeTick),
-		bidAskChan:         make(chan *entity.RealTimeBidAsk),
-		historyTickAnalyze: arr,
-		tradeInWaitTime:    time.Duration(tradeSwitch.TradeInWaitTime) * time.Second,
-		tradeOutWaitTime:   time.Duration(tradeSwitch.TradeOutWaitTime) * time.Second,
-		cancelWaitTime:     time.Duration(tradeSwitch.CancelWaitTime) * time.Second,
+		stockNum:            stockNum,
+		orderQuantity:       quantity,
+		orderMap:            make(map[entity.OrderAction][]*entity.Order),
+		tickChan:            make(chan *entity.RealTimeTick),
+		bidAskChan:          make(chan *entity.RealTimeBidAsk),
+		historyTickAnalyze:  arr,
+		tradeInWaitTime:     time.Duration(tradeSwitch.TradeInWaitTime) * time.Second,
+		tradeOutWaitTime:    time.Duration(tradeSwitch.TradeOutWaitTime) * time.Second,
+		cancelWaitTime:      time.Duration(tradeSwitch.CancelWaitTime) * time.Second,
+		openChangeRatioLow:  tradeSwitch.OpenCloseChangeRatioLow,
+		openChangeRatioHigh: tradeSwitch.OpenCloseChangeRatioHigh,
 	}
 
 	go new.checkFirstTickArrive()
@@ -64,7 +70,7 @@ func NewAgent(stockNum string, tradeSwitch config.TradeSwitch) *TradeAgent {
 }
 
 func (o *TradeAgent) generateOrder(cfg config.Analyze, needClear bool) *entity.Order {
-	if o.waitingOrder != nil || needClear || o.alreadyTrade() || o.analyzeTickTime.IsZero() {
+	if o.waitingOrder != nil || needClear || o.alreadyTrade() || o.analyzeTickTime.IsZero() || !o.openPass {
 		return nil
 	}
 
@@ -80,6 +86,10 @@ func (o *TradeAgent) generateOrder(cfg config.Analyze, needClear bool) *entity.O
 
 	if postOrderAction, qty, preTime := o.checkNeededPost(); postOrderAction != entity.ActionNone {
 		return o.generateTradeOutOrder(cfg, postOrderAction, qty, preTime)
+	}
+
+	if o.lastTick.PctChg < cfg.CloseChangeRatioLow || o.lastTick.PctChg > cfg.CloseChangeRatioHigh {
+		return nil
 	}
 
 	periodVolume := analyzeArr.getTotalVolume()
@@ -247,8 +257,16 @@ func (o *TradeAgent) checkFirstTickArrive() {
 	tradeDay := cc.GetBasicInfo().TradeDay
 	for {
 		if len(o.tickArr) > 1 {
-			cc.SetHistoryOpen(o.stockNum, tradeDay, o.tickArr[0].Close)
+			firstTick := o.tickArr[0]
+			cc.SetHistoryOpen(o.stockNum, tradeDay, firstTick.Close)
+
+			if firstTick.PctChg < o.openChangeRatioLow || firstTick.PctChg > o.openChangeRatioHigh {
+				bus.PublishTopicEvent(topicUnSubscribeTickTargets, o.stockNum)
+				break
+			}
+
 			o.analyzeTickTime = o.tickArr[1].TickTime
+			o.openPass = true
 			break
 		}
 		time.Sleep(100 * time.Millisecond)

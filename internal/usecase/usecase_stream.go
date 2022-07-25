@@ -114,11 +114,6 @@ func (uc *StreamUseCase) tradingRoom(agent *TradeAgent) {
 			agent.lastTick = <-agent.tickChan
 			agent.tickArr = append(agent.tickArr, agent.lastTick)
 
-			// if tick.PctChg < uc.analyzeCfg.CloseChangeRatioLow || tick.PctChg > uc.analyzeCfg.CloseChangeRatioHigh {
-			// 	// no unsubscribe here because it may in the range on the day
-			// 	continue
-			// }
-
 			order := agent.generateOrder(uc.analyzeCfg, uc.clearAll)
 			if order == nil {
 				continue

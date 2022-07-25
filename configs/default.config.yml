@@ -14,7 +14,7 @@ sinopac:
 history:
     # unit: day
     history_close_period: 120
-    history_tick_period: 7
+    history_tick_period: 14
     history_kbar_period: 120
 
 trade_switch:
@@ -37,6 +37,9 @@ trade_switch:
     trade_in_wait_time: 45
     trade_out_wait_time: 90
     cancel_wait_time: 20
+    # open change ratio limit
+    open_close_change_ratio_low: -2.5
+    open_close_change_ratio_high: 2.5
 
 quota:
     trade_quota: 1000000
@@ -64,22 +67,20 @@ target_cond:
 
 analyze:
     # unit: %
-    close_change_ratio_low: -2
-    close_change_ratio_high: 7
-    open_close_change_ratio_low: -5
-    open_close_change_ratio_high: 5
+    close_change_ratio_low: -1.5
+    close_change_ratio_high: 1.5
     # unit: %
-    out_in_ratio: 90
-    in_out_ratio: 95
+    out_in_ratio: 80
+    in_out_ratio: 99
     # unit: %
-    volume_pr_limit: 99
+    volume_pr_limit: 95
     # unit: millisecond
-    tick_analyze_period: 5000
+    tick_analyze_period: 7500
     # unit: times
-    rsi_min_count: 1200
+    rsi_min_count: 600
     # rsi range: 0~1
-    rsi_high: 50.5
-    rsi_low: 50
+    rsi_high: 50.2
+    rsi_low: 49.8
     # unit: %
     max_loss: 2
     # unit: day

@@ -20,8 +20,9 @@ type AnalyzeUseCase struct {
 	quotaCfg    config.Quota
 	analyzeCfg  config.Analyze
 
-	historyTick     map[string]*[]*entity.HistoryTick
-	historyTickLock sync.RWMutex
+	beforeHistoryClose map[string]float64
+	historyTick        map[string]*[]*entity.HistoryTick
+	historyTickLock    sync.RWMutex
 
 	lastBelowMAStock map[string]*entity.HistoryAnalyze
 	rebornMap        map[time.Time][]entity.Stock
@@ -66,10 +67,13 @@ func (uc *AnalyzeUseCase) AnalyzeAll(ctx context.Context, targetArr []*entity.Ta
 // FillHistoryTick -.
 func (uc *AnalyzeUseCase) FillHistoryTick(targetArr []*entity.Target) {
 	uc.historyTick = make(map[string]*[]*entity.HistoryTick)
+	uc.beforeHistoryClose = make(map[string]float64)
 	for _, t := range targetArr {
 		tickArr := cc.GetHistoryTickArr(t.StockNum, uc.basic.LastTradeDay)[1:]
+		beforeLastTradeDayClose := cc.GetHistoryClose(t.StockNum, uc.basic.BefroeLastTradeDay)
 		uc.historyTickLock.Lock()
 		uc.historyTick[t.StockNum] = &tickArr
+		uc.beforeHistoryClose[t.StockNum] = beforeLastTradeDayClose
 		uc.historyTickLock.Unlock()
 	}
 }
@@ -106,14 +110,7 @@ func (uc *AnalyzeUseCase) SimulateOnHistoryTick(ctx context.Context, useDefault 
 		}
 	}()
 
-	var analyzeCfgArr []config.Analyze
-	if !useDefault {
-		analyzeCfgArr = generateAnalyzeCfg()
-	} else {
-		analyzeCfgArr = append(analyzeCfgArr, uc.analyzeCfg)
-	}
-
-	for _, cfg := range analyzeCfgArr {
+	for _, cfg := range generateAnalyzeCfg(useDefault) {
 		analyzeCfg := cfg
 		cfg, balance := uc.getSimulateCond(uc.targetArr, analyzeCfg)
 		resultChan <- simulateResult{cfg: cfg, balance: balance}
@@ -182,7 +179,13 @@ func (uc *AnalyzeUseCase) getSimulateCond(targetArr []*entity.Target, analyzeCfg
 			defer wg.Done()
 			uc.historyTickLock.RLock()
 			tickArr := *uc.historyTick[stock.StockNum]
+			beforeLastTradeDayClose := uc.beforeHistoryClose[stock.StockNum]
 			uc.historyTickLock.RUnlock()
+
+			openChangeRatio := 100 * (tickArr[0].Close - beforeLastTradeDayClose) / beforeLastTradeDayClose
+			if openChangeRatio < uc.tradeSwitch.OpenCloseChangeRatioLow || openChangeRatio > uc.tradeSwitch.OpenCloseChangeRatioHigh {
+				return
+			}
 
 			simulateAgent := NewSimulateAgent(stock.StockNum)
 			simulateAgent.analyzeTickTime = tickArr[0].TickTime
@@ -192,7 +195,7 @@ func (uc *AnalyzeUseCase) getSimulateCond(targetArr []*entity.Target, analyzeCfg
 			agentArr = append(agentArr, simulateAgent)
 			agentLock.Unlock()
 
-			simulateAgent.searchOrder(analyzeCfg, &tickArr)
+			simulateAgent.searchOrder(analyzeCfg, &tickArr, beforeLastTradeDayClose)
 		}()
 	}
 	wg.Wait()
@@ -317,10 +320,26 @@ func (uc *SimulateBalance) splitOrdersByAction(allOrders []*entity.Order) ([]*en
 	return forwardOrder, reverseOrder
 }
 
-func generateAnalyzeCfg() []config.Analyze {
+func generateAnalyzeCfg(useDefault bool) []config.Analyze {
 	cfg, err := config.GetConfig()
 	if err != nil {
 		log.Panic(err)
+	}
+
+	if useDefault {
+		return []config.Analyze{{
+			CloseChangeRatioLow:  cfg.Analyze.CloseChangeRatioLow,
+			CloseChangeRatioHigh: cfg.Analyze.CloseChangeRatioHigh,
+			OutInRatio:           cfg.Analyze.OutInRatio,
+			InOutRatio:           cfg.Analyze.InOutRatio,
+			VolumePRLimit:        cfg.Analyze.VolumePRLimit,
+			TickAnalyzePeriod:    cfg.Analyze.TickAnalyzePeriod,
+			RSIMinCount:          cfg.Analyze.RSIMinCount,
+			RSIHigh:              cfg.Analyze.RSIHigh,
+			RSILow:               cfg.Analyze.RSILow,
+			MAPeriod:             cfg.Analyze.MAPeriod,
+			MaxLoss:              cfg.Analyze.MaxLoss,
+		}}
 	}
 
 	base := []config.Analyze{
@@ -330,17 +349,17 @@ func generateAnalyzeCfg() []config.Analyze {
 			VolumePRLimit:     99,
 			TickAnalyzePeriod: cfg.Analyze.TickAnalyzePeriod,
 			RSIMinCount:       150,
-			RSIHigh:           cfg.Analyze.RSIHigh,
-			RSILow:            cfg.Analyze.RSILow,
+			RSIHigh:           50,
+			RSILow:            50,
 		},
 	}
 
-	AppendOutInRatioVar(&base)
-	AppendInOutRatioVar(&base)
-	AppendVolumePRLimitVar(&base)
 	AppendRSICountVar(&base)
 	AppendRSIHighVar(&base)
 	AppendRSILowVar(&base)
+	AppendVolumePRLimitVar(&base)
+	AppendOutInRatioVar(&base)
+	AppendInOutRatioVar(&base)
 
 	log.Warnf("Total analyze times: %d", len(base))
 

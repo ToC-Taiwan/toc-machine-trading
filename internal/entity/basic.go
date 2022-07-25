@@ -33,8 +33,9 @@ const (
 
 // BasicInfo -.
 type BasicInfo struct {
-	TradeDay     time.Time
-	LastTradeDay time.Time
+	TradeDay           time.Time
+	LastTradeDay       time.Time
+	BefroeLastTradeDay time.Time
 
 	OpenTime        time.Time
 	EndTime         time.Time

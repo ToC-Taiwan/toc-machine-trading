@@ -513,12 +513,6 @@ const docTemplate = `{
                 "max_loss": {
                     "type": "number"
                 },
-                "open_close_change_ratio_high": {
-                    "type": "number"
-                },
-                "open_close_change_ratio_low": {
-                    "type": "number"
-                },
                 "out_in_ratio": {
                     "type": "number"
                 },
@@ -687,20 +681,14 @@ const docTemplate = `{
                 "cancel_wait_time": {
                     "type": "integer"
                 },
-                "forward_max": {
-                    "type": "integer"
-                },
                 "hold_time_from_open": {
                     "type": "number"
                 },
-                "mean_time_forward": {
-                    "type": "integer"
+                "open_close_change_ratio_high": {
+                    "type": "number"
                 },
-                "mean_time_reverse": {
-                    "type": "integer"
-                },
-                "reverse_max": {
-                    "type": "integer"
+                "open_close_change_ratio_low": {
+                    "type": "number"
                 },
                 "sell": {
                     "type": "boolean"

@@ -152,9 +152,11 @@ func (uc *BasicUseCase) fillBasicInfo() error {
 	}
 
 	openTime := 9 * time.Hour
+	lastTradeDayArr := getLastNTradeDayByDate(2, tradeDay)
 	basic := &entity.BasicInfo{
-		TradeDay:     tradeDay,
-		LastTradeDay: getLastNTradeDayByDate(1, tradeDay)[0],
+		TradeDay:           tradeDay,
+		LastTradeDay:       lastTradeDayArr[0],
+		BefroeLastTradeDay: lastTradeDayArr[1],
 
 		OpenTime:        tradeDay.Add(openTime).Add(time.Duration(cfg.TradeSwitch.HoldTimeFromOpen) * time.Second),
 		EndTime:         tradeDay.Add(openTime).Add(time.Duration(cfg.TradeSwitch.TotalOpenTime) * time.Minute),
