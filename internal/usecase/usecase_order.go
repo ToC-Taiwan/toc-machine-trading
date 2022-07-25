@@ -249,9 +249,12 @@ func (uc *OrderUseCase) updateCacheAndInsertDB(order *entity.Order) {
 		return
 	}
 
-	if cacheOrder.Status != order.Status || !cacheOrder.OrderTime.Equal(order.OrderTime) {
+	if cacheOrder.Status != order.Status || !cacheOrder.OrderTime.Equal(order.OrderTime) || cacheOrder.Quantity != order.Quantity {
 		cacheOrder.Status = order.Status
 		cacheOrder.OrderTime = order.OrderTime
+
+		// qty may not filled with original order, change it by return quantity
+		cacheOrder.Quantity = order.Quantity
 
 		// update cache
 		cc.SetOrderByOrderID(cacheOrder)

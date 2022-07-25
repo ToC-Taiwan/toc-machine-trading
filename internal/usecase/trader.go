@@ -78,8 +78,8 @@ func (o *TradeAgent) generateOrder(cfg config.Analyze, needClear bool) *entity.O
 	o.analyzeTickTime = o.lastTick.TickTime
 	o.periodTickArr = RealTimeTickArr{o.lastTick}
 
-	if postOrderAction, preTime := o.checkNeededPost(); postOrderAction != entity.ActionNone {
-		return o.generateTradeOutOrder(cfg, postOrderAction, preTime)
+	if postOrderAction, qty, preTime := o.checkNeededPost(); postOrderAction != entity.ActionNone {
+		return o.generateTradeOutOrder(cfg, postOrderAction, qty, preTime)
 	}
 
 	periodVolume := analyzeArr.getTotalVolume()
@@ -110,7 +110,7 @@ func (o *TradeAgent) generateOrder(cfg config.Analyze, needClear bool) *entity.O
 	return order
 }
 
-func (o *TradeAgent) generateTradeOutOrder(cfg config.Analyze, postOrderAction entity.OrderAction, preTime time.Time) *entity.Order {
+func (o *TradeAgent) generateTradeOutOrder(cfg config.Analyze, postOrderAction entity.OrderAction, qty int64, preTime time.Time) *entity.Order {
 	// calculate max loss here
 	//
 	rsi := o.tickArr.getRSIByTickTime(preTime, cfg.RSIMinCount)
@@ -122,7 +122,7 @@ func (o *TradeAgent) generateTradeOutOrder(cfg config.Analyze, postOrderAction e
 					StockNum: o.stockNum,
 					Action:   postOrderAction,
 					Price:    o.lastBidAsk.BidPrice1,
-					Quantity: o.orderQuantity,
+					Quantity: qty,
 				}
 			}
 		case entity.ActionBuyLater:
@@ -131,7 +131,7 @@ func (o *TradeAgent) generateTradeOutOrder(cfg config.Analyze, postOrderAction e
 					StockNum: o.stockNum,
 					Action:   postOrderAction,
 					Price:    o.lastBidAsk.AskPrice1,
-					Quantity: o.orderQuantity,
+					Quantity: qty,
 				}
 			}
 		}
@@ -144,12 +144,12 @@ func (o *TradeAgent) clearUnfinishedOrder() *entity.Order {
 		return nil
 	}
 
-	if action, _ := o.checkNeededPost(); action != entity.ActionNone {
+	if action, qty, _ := o.checkNeededPost(); action != entity.ActionNone {
 		return &entity.Order{
 			StockNum: o.stockNum,
 			Action:   action,
 			Price:    o.lastTick.Close,
-			Quantity: o.orderQuantity,
+			Quantity: qty,
 		}
 	}
 	return nil
@@ -224,19 +224,21 @@ func (o *TradeAgent) cancelOrder(order *entity.Order) {
 	}()
 }
 
-func (o *TradeAgent) checkNeededPost() (entity.OrderAction, time.Time) {
+func (o *TradeAgent) checkNeededPost() (entity.OrderAction, int64, time.Time) {
 	defer o.orderMapLock.RUnlock()
 	o.orderMapLock.RLock()
 
 	if len(o.orderMap[entity.ActionBuy]) > len(o.orderMap[entity.ActionSell]) {
-		return entity.ActionSell, o.orderMap[entity.ActionBuy][len(o.orderMap[entity.ActionSell])].TradeTime
+		order := o.orderMap[entity.ActionBuy][len(o.orderMap[entity.ActionSell])]
+		return entity.ActionSell, order.Quantity, order.TradeTime
 	}
 
 	if len(o.orderMap[entity.ActionSellFirst]) > len(o.orderMap[entity.ActionBuyLater]) {
-		return entity.ActionBuyLater, o.orderMap[entity.ActionSellFirst][len(o.orderMap[entity.ActionBuyLater])].TradeTime
+		order := o.orderMap[entity.ActionSellFirst][len(o.orderMap[entity.ActionBuyLater])]
+		return entity.ActionBuyLater, order.Quantity, order.TradeTime
 	}
 
-	return entity.ActionNone, time.Time{}
+	return entity.ActionNone, 0, time.Time{}
 }
 
 func (o *TradeAgent) checkFirstTickArrive() {

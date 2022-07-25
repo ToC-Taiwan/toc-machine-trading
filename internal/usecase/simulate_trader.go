@@ -123,8 +123,8 @@ func (o *SimulateTradeAgent) generateSimulateOrder(cfg config.Analyze) *entity.O
 		return nil
 	}
 
-	if postOrderAction, preTime := o.checkNeededPost(); postOrderAction != entity.ActionNone {
-		return o.generateSimulateTradeOutOrder(cfg, postOrderAction, preTime)
+	if postOrderAction, qty, preTime := o.checkNeededPost(); postOrderAction != entity.ActionNone {
+		return o.generateSimulateTradeOutOrder(cfg, postOrderAction, qty, preTime)
 	}
 
 	periodVolume := analyzeArr.getTotalVolume()
@@ -156,7 +156,7 @@ func (o *SimulateTradeAgent) generateSimulateOrder(cfg config.Analyze) *entity.O
 	return order
 }
 
-func (o *SimulateTradeAgent) generateSimulateTradeOutOrder(cfg config.Analyze, postOrderAction entity.OrderAction, preTime time.Time) *entity.Order {
+func (o *SimulateTradeAgent) generateSimulateTradeOutOrder(cfg config.Analyze, postOrderAction entity.OrderAction, qty int64, preTime time.Time) *entity.Order {
 	rsi := o.tickArr.getRSIByTickTime(preTime, cfg.RSIMinCount)
 	if rsi != 0 {
 		switch postOrderAction {
@@ -166,7 +166,7 @@ func (o *SimulateTradeAgent) generateSimulateTradeOutOrder(cfg config.Analyze, p
 					StockNum:  o.stockNum,
 					Action:    postOrderAction,
 					Price:     o.lastTick.Close,
-					Quantity:  o.orderQuantity,
+					Quantity:  qty,
 					TradeTime: o.lastTick.TickTime,
 				}
 			}
@@ -176,7 +176,7 @@ func (o *SimulateTradeAgent) generateSimulateTradeOutOrder(cfg config.Analyze, p
 					StockNum:  o.stockNum,
 					Action:    postOrderAction,
 					Price:     o.lastTick.Close,
-					Quantity:  o.orderQuantity,
+					Quantity:  qty,
 					TradeTime: o.lastTick.TickTime,
 				}
 			}
@@ -225,19 +225,21 @@ func (o *SimulateTradeAgent) getPRByVolume(volume int64) float64 {
 	return 100 * float64(total-position) / float64(total)
 }
 
-func (o *SimulateTradeAgent) checkNeededPost() (entity.OrderAction, time.Time) {
+func (o *SimulateTradeAgent) checkNeededPost() (entity.OrderAction, int64, time.Time) {
 	defer o.orderMapLock.RUnlock()
 	o.orderMapLock.RLock()
 
 	if len(o.orderMap[entity.ActionBuy]) > len(o.orderMap[entity.ActionSell]) {
-		return entity.ActionSell, o.orderMap[entity.ActionBuy][len(o.orderMap[entity.ActionSell])].TradeTime
+		order := o.orderMap[entity.ActionBuy][len(o.orderMap[entity.ActionSell])]
+		return entity.ActionSell, order.Quantity, order.TradeTime
 	}
 
 	if len(o.orderMap[entity.ActionSellFirst]) > len(o.orderMap[entity.ActionBuyLater]) {
-		return entity.ActionBuyLater, o.orderMap[entity.ActionSellFirst][len(o.orderMap[entity.ActionBuyLater])].TradeTime
+		order := o.orderMap[entity.ActionSellFirst][len(o.orderMap[entity.ActionBuyLater])]
+		return entity.ActionBuyLater, order.Quantity, order.TradeTime
 	}
 
-	return entity.ActionNone, time.Time{}
+	return entity.ActionNone, 0, time.Time{}
 }
 
 func (o *SimulateTradeAgent) getAllOrders() []*entity.Order {
