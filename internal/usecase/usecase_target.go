@@ -184,8 +184,8 @@ func (uc *TargetUseCase) SubscribeStockBidAsk(targetArr []*entity.Target) error 
 }
 
 // UnSubscribeStockTick -.
-func (uc *TargetUseCase) UnSubscribeStockTick(target *entity.Target) error {
-	failUnSubNumArr, err := uc.gRPCAPI.UnSubscribeStockTick([]string{target.StockNum})
+func (uc *TargetUseCase) UnSubscribeStockTick(stockNum string) error {
+	failUnSubNumArr, err := uc.gRPCAPI.UnSubscribeStockTick([]string{stockNum})
 	if err != nil {
 		return err
 	}
@@ -198,8 +198,8 @@ func (uc *TargetUseCase) UnSubscribeStockTick(target *entity.Target) error {
 }
 
 // UnSubscribeStockBidAsk -.
-func (uc *TargetUseCase) UnSubscribeStockBidAsk(target *entity.Target) error {
-	failUnSubNumArr, err := uc.gRPCAPI.UnSubscribeStockBidAsk([]string{target.StockNum})
+func (uc *TargetUseCase) UnSubscribeStockBidAsk(stockNum string) error {
+	failUnSubNumArr, err := uc.gRPCAPI.UnSubscribeStockBidAsk([]string{stockNum})
 	if err != nil {
 		return err
 	}
