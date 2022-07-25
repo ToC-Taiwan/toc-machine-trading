@@ -55,7 +55,7 @@ func NewOrder(t *grpcapi.OrdergRPCAPI, r *repo.OrderRepo) *OrderUseCase {
 	}()
 
 	go func() {
-		for range time.NewTicker(1500 * time.Millisecond).C {
+		for range time.NewTicker(2500 * time.Millisecond).C {
 			if time.Now().After(uc.basicInfo.OpenTime) && time.Now().Before(uc.basicInfo.EndTime) {
 				uc.askOrderUpdate()
 			}
@@ -249,20 +249,18 @@ func (uc *OrderUseCase) updateCacheAndInsertDB(order *entity.Order) {
 		return
 	}
 
-	if cacheOrder.Status != order.Status || !cacheOrder.OrderTime.Equal(order.OrderTime) || cacheOrder.Quantity != order.Quantity {
-		cacheOrder.Status = order.Status
-		cacheOrder.OrderTime = order.OrderTime
+	cacheOrder.Status = order.Status
+	cacheOrder.OrderTime = order.OrderTime
 
-		// qty may not filled with original order, change it by return quantity
-		cacheOrder.Quantity = order.Quantity
+	// qty may not filled with original order, change it by return quantity
+	cacheOrder.Quantity = order.Quantity
 
-		// update cache
-		cc.SetOrderByOrderID(cacheOrder)
+	// update cache
+	cc.SetOrderByOrderID(cacheOrder)
 
-		// insert or update order to db
-		if err := uc.repo.InsertOrUpdateOrderByOrderID(context.Background(), cacheOrder); err != nil {
-			log.Panic(err)
-		}
+	// insert or update order to db
+	if err := uc.repo.InsertOrUpdateOrderByOrderID(context.Background(), cacheOrder); err != nil {
+		log.Panic(err)
 	}
 }
 
