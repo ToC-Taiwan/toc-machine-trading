@@ -51,20 +51,6 @@ func NewSimulateAgent(stockNum string) *SimulateTradeAgent {
 	return new
 }
 
-// ResetAgent -.
-func (o *SimulateTradeAgent) ResetAgent(stockNum string) {
-	o.stockNum = stockNum
-	o.orderQuantity = 1
-	o.tickArr = []*entity.RealTimeTick{}
-	o.periodTickArr = []*entity.RealTimeTick{}
-	o.orderMap = make(map[entity.OrderAction][]*entity.Order)
-	o.tickChan = make(chan *entity.RealTimeTick)
-	o.historyTickAnalyze = []int64{}
-	o.analyzeTickTime = time.Time{}
-	o.lastTick = &entity.RealTimeTick{}
-	o.tradeSwitch = config.TradeSwitch{}
-}
-
 func (o *SimulateTradeAgent) searchOrder(cfg config.Analyze, tickArr *[]*entity.HistoryTick, beforeLastTradeDayClose float64) {
 	var finish bool
 	go func() {

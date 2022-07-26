@@ -13,7 +13,8 @@ import (
 
 // AnalyzeUseCase -.
 type AnalyzeUseCase struct {
-	repo HistoryRepo
+	repo      HistoryRepo
+	targetArr []*entity.Target
 
 	basic       entity.BasicInfo
 	tradeSwitch config.TradeSwitch
@@ -22,31 +23,31 @@ type AnalyzeUseCase struct {
 
 	beforeHistoryClose map[string]float64
 	historyTick        map[string]*[]*entity.HistoryTick
-	historyTickLock    sync.RWMutex
+	historyDataLock    sync.RWMutex
 
 	lastBelowMAStock map[string]*entity.HistoryAnalyze
 	rebornMap        map[time.Time][]entity.Stock
 	rebornLock       sync.Mutex
-
-	targetArr []*entity.Target
 }
 
 // NewAnalyze -.
 func NewAnalyze(r *repo.HistoryRepo) *AnalyzeUseCase {
-	uc := &AnalyzeUseCase{repo: r}
-
 	cfg, err := config.GetConfig()
 	if err != nil {
 		log.Panic(err)
 	}
 
-	uc.basic = *cc.GetBasicInfo()
-	uc.tradeSwitch = cfg.TradeSwitch
-	uc.quotaCfg = cfg.Quota
-	uc.analyzeCfg = cfg.Analyze
-
-	uc.lastBelowMAStock = make(map[string]*entity.HistoryAnalyze)
-	uc.rebornMap = make(map[time.Time][]entity.Stock)
+	uc := &AnalyzeUseCase{
+		repo:               r,
+		basic:              *cc.GetBasicInfo(),
+		tradeSwitch:        cfg.TradeSwitch,
+		quotaCfg:           cfg.Quota,
+		analyzeCfg:         cfg.Analyze,
+		beforeHistoryClose: make(map[string]float64),
+		historyTick:        make(map[string]*[]*entity.HistoryTick),
+		lastBelowMAStock:   make(map[string]*entity.HistoryAnalyze),
+		rebornMap:          make(map[time.Time][]entity.Stock),
+	}
 
 	bus.SubscribeTopic(topicAnalyzeTargets, uc.AnalyzeAll)
 	return uc
@@ -64,17 +65,61 @@ func (uc *AnalyzeUseCase) AnalyzeAll(ctx context.Context, targetArr []*entity.Ta
 	bus.PublishTopicEvent(topicStreamTargets, ctx, targetArr)
 }
 
+func (uc *AnalyzeUseCase) findBelowQuaterMATargets(ctx context.Context, targetArr []*entity.Target) {
+	defer uc.rebornLock.Unlock()
+	uc.rebornLock.Lock()
+	uc.targetArr = append(uc.targetArr, targetArr...)
+
+	for _, t := range targetArr {
+		maMap, err := uc.repo.QueryAllQuaterMAByStockNum(ctx, t.StockNum)
+		if err != nil {
+			log.Panic(err)
+		}
+
+		basicInfo := cc.GetBasicInfo()
+		for _, ma := range maMap {
+			tmp := ma
+			if close := cc.GetHistoryClose(ma.StockNum, ma.Date); close != 0 && close-ma.QuaterMA > 0 {
+				continue
+			}
+			if nextTradeDay := getAbsNextTradeDayTime(ma.Date); nextTradeDay.Equal(basicInfo.TradeDay) {
+				uc.lastBelowMAStock[tmp.StockNum] = tmp
+			} else if nextOpen := cc.GetHistoryOpen(ma.StockNum, nextTradeDay); nextOpen != 0 && nextOpen-ma.QuaterMA > 0 {
+				uc.rebornMap[ma.Date] = append(uc.rebornMap[ma.Date], *tmp.Stock)
+			}
+		}
+	}
+	log.Info("FindBelowQuaterMATargets Done")
+}
+
+// GetRebornMap -.
+func (uc *AnalyzeUseCase) GetRebornMap(ctx context.Context) map[time.Time][]entity.Stock {
+	uc.rebornLock.Lock()
+	basicInfo := cc.GetBasicInfo()
+	if len(uc.lastBelowMAStock) != 0 {
+		for _, s := range uc.lastBelowMAStock {
+			if open := cc.GetHistoryOpen(s.Stock.Number, basicInfo.TradeDay); open != 0 {
+				if open > s.QuaterMA {
+					uc.rebornMap[s.Date] = append(uc.rebornMap[s.Date], *s.Stock)
+				}
+				delete(uc.lastBelowMAStock, s.Stock.Number)
+			}
+		}
+	}
+	uc.rebornLock.Unlock()
+	return uc.rebornMap
+}
+
 // FillHistoryTick -.
 func (uc *AnalyzeUseCase) FillHistoryTick(targetArr []*entity.Target) {
-	uc.historyTick = make(map[string]*[]*entity.HistoryTick)
-	uc.beforeHistoryClose = make(map[string]float64)
 	for _, t := range targetArr {
 		tickArr := cc.GetHistoryTickArr(t.StockNum, uc.basic.LastTradeDay)[1:]
 		beforeLastTradeDayClose := cc.GetHistoryClose(t.StockNum, uc.basic.BefroeLastTradeDay)
-		uc.historyTickLock.Lock()
+
+		uc.historyDataLock.Lock()
 		uc.historyTick[t.StockNum] = &tickArr
 		uc.beforeHistoryClose[t.StockNum] = beforeLastTradeDayClose
-		uc.historyTickLock.Unlock()
+		uc.historyDataLock.Unlock()
 	}
 }
 
@@ -111,57 +156,14 @@ func (uc *AnalyzeUseCase) SimulateOnHistoryTick(ctx context.Context, useDefault 
 	}()
 
 	for _, cfg := range generateAnalyzeCfg(useDefault) {
-		analyzeCfg := cfg
-		cfg, balance := uc.getSimulateCond(uc.targetArr, analyzeCfg)
-		resultChan <- simulateResult{cfg: cfg, balance: balance}
+		simCfg, balance := uc.getSimulateCond(uc.targetArr, cfg)
+		resultChan <- simulateResult{
+			cfg:     simCfg,
+			balance: balance,
+		}
 	}
 	close(resultChan)
 	log.Info("Simulate Done")
-}
-
-// GetRebornMap -.
-func (uc *AnalyzeUseCase) GetRebornMap(ctx context.Context) map[time.Time][]entity.Stock {
-	uc.rebornLock.Lock()
-	basicInfo := cc.GetBasicInfo()
-	if len(uc.lastBelowMAStock) != 0 {
-		for _, s := range uc.lastBelowMAStock {
-			if open := cc.GetHistoryOpen(s.Stock.Number, basicInfo.TradeDay); open != 0 {
-				if open > s.QuaterMA {
-					uc.rebornMap[s.Date] = append(uc.rebornMap[s.Date], *s.Stock)
-				}
-				delete(uc.lastBelowMAStock, s.Stock.Number)
-			}
-		}
-	}
-	uc.rebornLock.Unlock()
-	return uc.rebornMap
-}
-
-func (uc *AnalyzeUseCase) findBelowQuaterMATargets(ctx context.Context, targetArr []*entity.Target) {
-	defer uc.rebornLock.Unlock()
-	uc.rebornLock.Lock()
-	uc.targetArr = append(uc.targetArr, targetArr...)
-
-	for _, t := range targetArr {
-		maMap, err := uc.repo.QueryAllQuaterMAByStockNum(ctx, t.StockNum)
-		if err != nil {
-			log.Panic(err)
-		}
-
-		basicInfo := cc.GetBasicInfo()
-		for _, ma := range maMap {
-			tmp := ma
-			if close := cc.GetHistoryClose(ma.StockNum, ma.Date); close != 0 && close-ma.QuaterMA > 0 {
-				continue
-			}
-			if nextTradeDay := getAbsNextTradeDayTime(ma.Date); nextTradeDay.Equal(basicInfo.TradeDay) {
-				uc.lastBelowMAStock[tmp.StockNum] = tmp
-			} else if nextOpen := cc.GetHistoryOpen(ma.StockNum, nextTradeDay); nextOpen != 0 && nextOpen-ma.QuaterMA > 0 {
-				uc.rebornMap[ma.Date] = append(uc.rebornMap[ma.Date], *tmp.Stock)
-			}
-		}
-	}
-	log.Info("FindBelowQuaterMATargets Done")
 }
 
 func (uc *AnalyzeUseCase) getSimulateCond(targetArr []*entity.Target, analyzeCfg config.Analyze) (config.Analyze, *entity.TradeBalance) {
@@ -177,10 +179,10 @@ func (uc *AnalyzeUseCase) getSimulateCond(targetArr []*entity.Target, analyzeCfg
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			uc.historyTickLock.RLock()
+			uc.historyDataLock.RLock()
 			tickArr := *uc.historyTick[stock.StockNum]
 			beforeLastTradeDayClose := uc.beforeHistoryClose[stock.StockNum]
-			uc.historyTickLock.RUnlock()
+			uc.historyDataLock.RUnlock()
 
 			openChangeRatio := 100 * (tickArr[0].Close - beforeLastTradeDayClose) / beforeLastTradeDayClose
 			if openChangeRatio < uc.tradeSwitch.OpenCloseChangeRatioLow || openChangeRatio > uc.tradeSwitch.OpenCloseChangeRatioHigh {
@@ -205,7 +207,6 @@ func (uc *AnalyzeUseCase) getSimulateCond(targetArr []*entity.Target, analyzeCfg
 		orders := agentArr[i].getAllOrders()
 		if len(orders) != 0 {
 			allOrders = append(allOrders, orders...)
-			agentArr[i].ResetAgent(agentArr[i].stockNum)
 		}
 	}
 
@@ -401,7 +402,7 @@ func AppendVolumePRLimitVar(cfgArr *[]config.Analyze) {
 	var appendCfg []config.Analyze
 	for _, v := range *cfgArr {
 		for {
-			if v.VolumePRLimit <= 85 {
+			if v.VolumePRLimit <= 90 {
 				break
 			}
 			v.VolumePRLimit--
@@ -417,7 +418,7 @@ func AppendRSICountVar(cfgArr *[]config.Analyze) {
 	var appendCfg []config.Analyze
 	for _, v := range *cfgArr {
 		for {
-			if v.RSIMinCount >= 1200 {
+			if v.RSIMinCount >= 600 {
 				break
 			}
 			v.RSIMinCount += 150
@@ -432,7 +433,7 @@ func AppendRSIHighVar(cfgArr *[]config.Analyze) {
 	var appendCfg []config.Analyze
 	for _, v := range *cfgArr {
 		for {
-			if v.RSIHigh >= 50.5 {
+			if v.RSIHigh >= 50.1 {
 				break
 			}
 			v.RSIHigh += 0.1
@@ -449,7 +450,7 @@ func AppendRSILowVar(cfgArr *[]config.Analyze) {
 	var appendCfg []config.Analyze
 	for _, v := range *cfgArr {
 		for {
-			if v.RSILow <= 49.5 {
+			if v.RSILow <= 49.9 {
 				break
 			}
 			v.RSILow -= 0.1
