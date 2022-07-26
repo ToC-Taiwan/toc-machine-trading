@@ -45,27 +45,34 @@ func NewTarget(r *repo.TargetRepo, t *grpcapi.TargetgRPCAPI) *TargetUseCase {
 			log.Panic(err)
 		}
 
-		if len(targetArr) != 0 {
-			if err = uc.InsertTargets(context.Background(), targetArr); err != nil {
-				log.Panic(err)
-			}
-		} else {
+		if len(targetArr) == 0 {
 			stuck := make(chan struct{})
 			log.Error("no targets")
 			<-stuck
 		}
 	}
 
+	uc.publishNewTargets(targetArr, false)
+
 	// sub events
-	bus.SubscribeTopic(topicRealTimeTargets, uc.InsertTargets)
+	bus.SubscribeTopic(topicRealTimeTargets, uc.publishNewTargets)
 	bus.SubscribeTopic(topicSubscribeTickTargets, uc.SubscribeStockTick, uc.SubscribeStockBidAsk)
 	bus.SubscribeTopic(topicUnSubscribeTickTargets, uc.UnSubscribeStockTick, uc.UnSubscribeStockBidAsk)
 
-	// save to cache
-	cc.AppendTargets(targetArr)
-	// pub events
-	bus.PublishTopicEvent(topicTargets, context.Background(), targetArr)
 	return uc
+}
+
+func (uc *TargetUseCase) publishNewTargets(targetArr []*entity.Target, subscribe bool) {
+	err := uc.repo.InsertOrUpdateTargetArr(context.Background(), targetArr)
+	if err != nil {
+		log.Panic(err)
+	}
+
+	bus.PublishTopicEvent(topicTargets, context.Background(), targetArr)
+
+	if subscribe {
+		bus.PublishTopicEvent(topicStreamTargets, context.Background(), targetArr)
+	}
 }
 
 // GetTargets - get targets from cache

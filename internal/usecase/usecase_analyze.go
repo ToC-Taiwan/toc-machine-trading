@@ -61,8 +61,6 @@ type simulateResult struct {
 // AnalyzeAll -.
 func (uc *AnalyzeUseCase) AnalyzeAll(ctx context.Context, targetArr []*entity.Target) {
 	uc.findBelowQuaterMATargets(ctx, targetArr)
-
-	bus.PublishTopicEvent(topicStreamTargets, ctx, targetArr)
 }
 
 func (uc *AnalyzeUseCase) findBelowQuaterMATargets(ctx context.Context, targetArr []*entity.Target) {

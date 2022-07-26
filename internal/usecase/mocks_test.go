@@ -288,6 +288,20 @@ func (m *MockTargetRepo) EXPECT() *MockTargetRepoMockRecorder {
 	return m.recorder
 }
 
+// InsertOrUpdateTargetArr mocks base method.
+func (m *MockTargetRepo) InsertOrUpdateTargetArr(ctx context.Context, t []*entity.Target) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "InsertOrUpdateTargetArr", ctx, t)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// InsertOrUpdateTargetArr indicates an expected call of InsertOrUpdateTargetArr.
+func (mr *MockTargetRepoMockRecorder) InsertOrUpdateTargetArr(ctx, t interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertOrUpdateTargetArr", reflect.TypeOf((*MockTargetRepo)(nil).InsertOrUpdateTargetArr), ctx, t)
+}
+
 // InsertTargetArr mocks base method.
 func (m *MockTargetRepo) InsertTargetArr(ctx context.Context, t []*entity.Target) error {
 	m.ctrl.T.Helper()

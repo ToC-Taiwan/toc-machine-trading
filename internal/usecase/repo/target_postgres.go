@@ -6,6 +6,8 @@ import (
 
 	"toc-machine-trading/internal/entity"
 	"toc-machine-trading/pkg/postgres"
+
+	"github.com/google/go-cmp/cmp"
 )
 
 // TargetRepo -.
@@ -16,6 +18,61 @@ type TargetRepo struct {
 // NewTarget -.
 func NewTarget(pg *postgres.Postgres) *TargetRepo {
 	return &TargetRepo{pg}
+}
+
+// InsertOrUpdateTargetArr -.
+func (r *TargetRepo) InsertOrUpdateTargetArr(ctx context.Context, t []*entity.Target) error {
+	inDBTargets, err := r.QueryTargetsByTradeDay(ctx, t[0].TradeDay)
+	if err != nil {
+		return err
+	}
+
+	inDBTargetsMap := make(map[string]*entity.Target)
+	for _, v := range inDBTargets {
+		inDBTargetsMap[v.StockNum] = v
+	}
+
+	tx, err := r.BeginTransaction()
+	if err != nil {
+		return err
+	}
+	defer r.EndTransaction(tx, err)
+	var sql string
+	var args []interface{}
+
+	var insert int
+	builder := r.Builder.Insert(tableNameTarget).Columns("stock_num, trade_day, rank, volume, subscribe, real_time_add")
+	for _, v := range t {
+		if _, ok := inDBTargetsMap[v.StockNum]; !ok {
+			insert++
+			builder = builder.Values(v.StockNum, v.TradeDay, v.Rank, v.Volume, v.Subscribe, v.RealTimeAdd)
+		} else if !cmp.Equal(v, inDBTargetsMap[v.StockNum]) {
+			b := r.Builder.
+				Update(tableNameStock).
+				Set("stock_num", v.StockNum).
+				Set("trade_day", v.TradeDay).
+				Set("rank", v.Rank).
+				Set("volume", v.Volume).
+				Set("subscribe", v.Subscribe).
+				Set("real_time_add", v.RealTimeAdd).
+				Where("stock_num = ?", v.StockNum).
+				Where("trade_day = ?", v.TradeDay)
+			if sql, args, err = b.ToSql(); err != nil {
+				return err
+			} else if _, err = tx.Exec(ctx, sql, args...); err != nil {
+				return err
+			}
+		}
+	}
+
+	if insert != 0 {
+		if sql, args, err = builder.ToSql(); err != nil {
+			return err
+		} else if _, err = tx.Exec(ctx, sql, args...); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // InsertTargetArr -.

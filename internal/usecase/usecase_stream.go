@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"sort"
+	"sync"
 	"time"
 
 	"toc-machine-trading/internal/entity"
@@ -95,17 +96,49 @@ func (uc *StreamUseCase) ReceiveOrderStatus(ctx context.Context) {
 
 // ReceiveStreamData - receive target data, start goroutine to trade
 func (uc *StreamUseCase) ReceiveStreamData(ctx context.Context, targetArr []*entity.Target) {
+	stuck := make(chan struct{})
+	agentChan := make(chan *TradeAgent)
+	targetMap := make(map[string]*entity.Target)
+	mutex := sync.RWMutex{}
+
+	go func() {
+		for {
+			agent, ok := <-agentChan
+			if !ok {
+				close(stuck)
+				break
+			}
+			go uc.tradingRoom(agent)
+
+			// send tick, bidask to trade room's channel
+			go uc.rabbit.TickConsumer(agent.stockNum, agent.tickChan)
+			go uc.rabbit.BidAskConsumer(agent.stockNum, agent.bidAskChan)
+
+			mutex.RLock()
+			target := targetMap[agent.stockNum]
+			mutex.RUnlock()
+
+			bus.PublishTopicEvent(topicSubscribeTickTargets, []*entity.Target{target})
+		}
+	}()
+
+	var wg sync.WaitGroup
 	for _, t := range targetArr {
-		agent := NewAgent(t.StockNum, uc.tradeSwitchCfg)
+		target := t
+		mutex.Lock()
+		targetMap[target.StockNum] = target
+		mutex.Unlock()
 
-		// main trade method
-		go uc.tradingRoom(agent)
-
-		// send tick, bidask to trade room's channel
-		go uc.rabbit.TickConsumer(t.StockNum, agent.tickChan)
-		go uc.rabbit.BidAskConsumer(t.StockNum, agent.bidAskChan)
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			agent := NewAgent(target.StockNum, uc.tradeSwitchCfg)
+			agentChan <- agent
+		}()
 	}
-	bus.PublishTopicEvent(topicSubscribeTickTargets, targetArr)
+	wg.Wait()
+	close(agentChan)
+	<-stuck
 }
 
 func (uc *StreamUseCase) tradingRoom(agent *TradeAgent) {
@@ -222,7 +255,7 @@ func (uc *StreamUseCase) realTimeAddTargets(ctx context.Context) error {
 	sort.Slice(data, func(i, j int) bool {
 		return data[i].GetTotalVolume() > data[j].GetTotalVolume()
 	})
-	data = data[:10]
+	data = data[:20]
 
 	currentTargets := cc.GetTargets()
 	targetsMap := make(map[string]*entity.Target)
@@ -251,8 +284,7 @@ func (uc *StreamUseCase) realTimeAddTargets(ctx context.Context) error {
 
 	if len(newTargets) != 0 {
 		cc.AppendTargets(newTargets)
-		bus.PublishTopicEvent(topicRealTimeTargets, ctx, newTargets)
-		bus.PublishTopicEvent(topicTargets, ctx, newTargets)
+		bus.PublishTopicEvent(topicRealTimeTargets, newTargets, true)
 	}
 	return nil
 }

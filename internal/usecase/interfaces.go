@@ -51,6 +51,7 @@ type (
 	// TargetRepo -.
 	TargetRepo interface {
 		InsertTargetArr(ctx context.Context, t []*entity.Target) error
+		InsertOrUpdateTargetArr(ctx context.Context, t []*entity.Target) error
 		QueryTargetsByTradeDay(ctx context.Context, tradeDay time.Time) ([]*entity.Target, error)
 	}
 

@@ -41,8 +41,17 @@ type TradeAgent struct {
 // NewAgent -.
 func NewAgent(stockNum string, tradeSwitch config.TradeSwitch) *TradeAgent {
 	var quantity int64 = 1
-	if biasRate := cc.GetBiasRate(stockNum); biasRate > 4 || biasRate < -4 {
-		quantity = 2
+	for {
+		time.Sleep(time.Second)
+		biasRate := cc.GetBiasRate(stockNum)
+		if biasRate == 0 {
+			continue
+		}
+
+		if biasRate > 4 || biasRate < -4 {
+			quantity = 2
+		}
+		break
 	}
 
 	arr := cc.GetHistoryTickAnalyze(stockNum)
