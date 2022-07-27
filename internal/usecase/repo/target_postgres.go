@@ -48,7 +48,7 @@ func (r *TargetRepo) InsertOrUpdateTargetArr(ctx context.Context, t []*entity.Ta
 			builder = builder.Values(v.StockNum, v.TradeDay, v.Rank, v.Volume, v.Subscribe, v.RealTimeAdd)
 		} else if !cmp.Equal(v, inDBTargetsMap[v.StockNum]) {
 			b := r.Builder.
-				Update(tableNameStock).
+				Update(tableNameTarget).
 				Set("stock_num", v.StockNum).
 				Set("trade_day", v.TradeDay).
 				Set("rank", v.Rank).
