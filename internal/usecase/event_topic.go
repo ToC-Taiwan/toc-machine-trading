@@ -1,13 +1,13 @@
 package usecase
 
 const (
-	topicTargets         string = "targets"
-	topicRealTimeTargets string = "realtime_targets"
-
-	topicAnalyzeTargets         string = "analyze_targets"
+	topicRealTimeTargets        string = "realtime_targets"
 	topicStreamTargets          string = "stream_targets"
 	topicSubscribeTickTargets   string = "subscribe_targets"
 	topicUnSubscribeTickTargets string = "unsubscribe_targets"
+
+	topicFetchHistory   string = "fetch_history"
+	topicAnalyzeTargets string = "analyze_targets"
 
 	topicPlaceOrder          string = "place_order"
 	topicCancelOrder         string = "cancel_order"

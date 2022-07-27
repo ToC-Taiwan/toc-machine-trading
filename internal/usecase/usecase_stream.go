@@ -96,7 +96,6 @@ func (uc *StreamUseCase) ReceiveOrderStatus(ctx context.Context) {
 
 // ReceiveStreamData - receive target data, start goroutine to trade
 func (uc *StreamUseCase) ReceiveStreamData(ctx context.Context, targetArr []*entity.Target) {
-	stuck := make(chan struct{})
 	agentChan := make(chan *TradeAgent)
 	targetMap := make(map[string]*entity.Target)
 	mutex := sync.RWMutex{}
@@ -105,7 +104,6 @@ func (uc *StreamUseCase) ReceiveStreamData(ctx context.Context, targetArr []*ent
 		for {
 			agent, ok := <-agentChan
 			if !ok {
-				close(stuck)
 				break
 			}
 			go uc.tradingRoom(agent)
@@ -132,13 +130,11 @@ func (uc *StreamUseCase) ReceiveStreamData(ctx context.Context, targetArr []*ent
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			agent := NewAgent(target.StockNum, uc.tradeSwitchCfg)
-			agentChan <- agent
+			agentChan <- NewAgent(target.StockNum, uc.tradeSwitchCfg)
 		}()
 	}
 	wg.Wait()
 	close(agentChan)
-	<-stuck
 }
 
 func (uc *StreamUseCase) tradingRoom(agent *TradeAgent) {

@@ -38,7 +38,7 @@ func NewHistory(r *repo.HistoryRepo, t *grpcapi.HistorygRPCAPI) *HistoryUseCase 
 	uc.analyzeCfg = cfg.Analyze
 	uc.basic = *cc.GetBasicInfo()
 
-	bus.SubscribeTopic(topicTargets, uc.FetchHistory)
+	bus.SubscribeTopic(topicFetchHistory, uc.FetchHistory)
 
 	return uc
 }

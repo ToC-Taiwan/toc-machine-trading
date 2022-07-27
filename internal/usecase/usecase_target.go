@@ -68,8 +68,7 @@ func (uc *TargetUseCase) publishNewTargets(targetArr []*entity.Target, subscribe
 		log.Panic(err)
 	}
 
-	bus.PublishTopicEvent(topicTargets, context.Background(), targetArr)
-
+	bus.PublishTopicEvent(topicFetchHistory, context.Background(), targetArr)
 	if subscribe {
 		bus.PublishTopicEvent(topicStreamTargets, context.Background(), targetArr)
 	}
