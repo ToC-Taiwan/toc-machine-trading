@@ -131,14 +131,20 @@ type TargetCond struct {
 type Analyze struct {
 	CloseChangeRatioLow  float64 `json:"close_change_ratio_low"  env-required:"true" yaml:"close_change_ratio_low"`
 	CloseChangeRatioHigh float64 `json:"close_change_ratio_high" env-required:"true" yaml:"close_change_ratio_high"`
-	OutInRatio           float64 `json:"out_in_ratio"            env-required:"true" yaml:"out_in_ratio"`
-	InOutRatio           float64 `json:"in_out_ratio"            env-required:"true" yaml:"in_out_ratio"`
-	VolumePRLimit        float64 `json:"volume_pr_limit"         env-required:"true" yaml:"volume_pr_limit"`
-	TickAnalyzePeriod    float64 `json:"tick_analyze_period"     env-required:"true" yaml:"tick_analyze_period"`
-	RSIMinCount          int     `json:"rsi_min_count"           env-required:"true" yaml:"rsi_min_count"`
-	RSIHigh              float64 `json:"rsi_high"                env-required:"true" yaml:"rsi_high"`
-	RSILow               float64 `json:"rsi_low"                 env-required:"true" yaml:"rsi_low"`
-	MAPeriod             int64   `json:"ma_period"               env-required:"true" yaml:"ma_period"`
+
+	OutInRatio float64 `json:"out_in_ratio" env-required:"true" yaml:"out_in_ratio"`
+	InOutRatio float64 `json:"in_out_ratio" env-required:"true" yaml:"in_out_ratio"`
+
+	VolumePRLimit float64 `json:"volume_pr_limit" env-required:"true" yaml:"volume_pr_limit"`
+
+	TickAnalyzePeriod float64 `json:"tick_analyze_period" env-required:"true" yaml:"tick_analyze_period"`
+
+	RSIMinCount int `json:"rsi_min_count" env-required:"true" yaml:"rsi_min_count"`
+
+	RSIHigh float64 `json:"rsi_high" env-required:"true" yaml:"rsi_high"`
+	RSILow  float64 `json:"rsi_low"  env-required:"true" yaml:"rsi_low"`
+
+	MAPeriod int64 `json:"ma_period" env-required:"true" yaml:"ma_period"`
 
 	MaxLoss float64 `json:"max_loss" env-required:"true" yaml:"max_loss"`
 }

@@ -263,13 +263,16 @@ func (o *TradeAgent) checkNeededPost() (entity.OrderAction, int64, time.Time) {
 func (o *TradeAgent) checkFirstTickArrive() {
 	// calculate open change rate here
 	//
-	tradeDay := cc.GetBasicInfo().TradeDay
+	basic := cc.GetBasicInfo()
+	tradeDay := basic.TradeDay
+	lastClose := cc.GetHistoryClose(o.stockNum, basic.LastTradeDay)
 	for {
 		if len(o.tickArr) > 1 {
 			firstTick := o.tickArr[0]
-			cc.SetHistoryOpen(o.stockNum, tradeDay, firstTick.Close)
+			cc.SetHistoryOpen(o.stockNum, tradeDay, firstTick.Open)
 
-			if firstTick.PctChg < o.openChangeRatioLow || firstTick.PctChg > o.openChangeRatioHigh {
+			openChangeRatio := 100 * (firstTick.Open - lastClose) / lastClose
+			if openChangeRatio < o.openChangeRatioLow || openChangeRatio > o.openChangeRatioHigh {
 				bus.PublishTopicEvent(topicUnSubscribeTickTargets, o.stockNum)
 				break
 			}

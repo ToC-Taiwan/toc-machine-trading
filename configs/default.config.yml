@@ -14,29 +14,29 @@ sinopac:
 history:
     # unit: day
     history_close_period: 120
-    history_tick_period: 14
+    history_tick_period: 10
     history_kbar_period: 120
 
 trade_switch:
     simulation: true
+
     buy: true
     sell: true
     sell_first: true
     buy_later: true
-    mean_time_forward: 5
-    mean_time_reverse: 5
-    forward_max: 30
-    reverse_max: 30
+
     # unit: second
     hold_time_from_open: 45
     # unit: minute
     total_open_time: 270
+
     trade_in_end_time: 90
     trade_out_end_time: 150
     # unit: seccond
     trade_in_wait_time: 45
     trade_out_wait_time: 90
     cancel_wait_time: 20
+
     # open change ratio limit
     open_close_change_ratio_low: -2.5
     open_close_change_ratio_high: 2.5
