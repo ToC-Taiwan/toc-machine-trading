@@ -130,7 +130,8 @@ func (uc *StreamUseCase) ReceiveStreamData(ctx context.Context, targetArr []*ent
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			agentChan <- NewAgent(target.StockNum, uc.tradeSwitchCfg)
+			agent := NewAgent(target.StockNum, uc.tradeSwitchCfg)
+			agentChan <- agent
 		}()
 	}
 	wg.Wait()
@@ -142,6 +143,8 @@ func (uc *StreamUseCase) tradingRoom(agent *TradeAgent) {
 		for {
 			agent.lastTick = <-agent.tickChan
 			agent.tickArr = append(agent.tickArr, agent.lastTick)
+
+			// log.Warnf("%s: %s", agent.stockNum, time.Since(agent.lastTick.TickTime).String())
 
 			order := agent.generateOrder(uc.analyzeCfg, uc.clearAll)
 			if order == nil {
@@ -251,7 +254,7 @@ func (uc *StreamUseCase) realTimeAddTargets(ctx context.Context) error {
 	sort.Slice(data, func(i, j int) bool {
 		return data[i].GetTotalVolume() > data[j].GetTotalVolume()
 	})
-	data = data[:20]
+	data = data[:30]
 
 	currentTargets := cc.GetTargets()
 	targetsMap := make(map[string]*entity.Target)

@@ -6,8 +6,6 @@ import (
 
 	"toc-machine-trading/internal/entity"
 	"toc-machine-trading/pkg/postgres"
-
-	"github.com/google/go-cmp/cmp"
 )
 
 // TargetRepo -.
@@ -46,7 +44,7 @@ func (r *TargetRepo) InsertOrUpdateTargetArr(ctx context.Context, t []*entity.Ta
 		if _, ok := inDBTargetsMap[v.StockNum]; !ok {
 			insert++
 			builder = builder.Values(v.StockNum, v.TradeDay, v.Rank, v.Volume, v.Subscribe, v.RealTimeAdd)
-		} else if !cmp.Equal(v, inDBTargetsMap[v.StockNum]) {
+		} else {
 			b := r.Builder.
 				Update(tableNameTarget).
 				Set("stock_num", v.StockNum).

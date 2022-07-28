@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"sort"
+	"sync"
 	"time"
 
 	"toc-machine-trading/internal/entity"
@@ -21,13 +22,17 @@ type HistoryUseCase struct {
 
 	analyzeCfg config.Analyze
 	basic      entity.BasicInfo
+
+	fetchList map[string]*entity.Target
+	mutex     sync.Mutex
 }
 
 // NewHistory -.
 func NewHistory(r *repo.HistoryRepo, t *grpcapi.HistorygRPCAPI) *HistoryUseCase {
 	uc := &HistoryUseCase{
-		repo:    r,
-		grpcapi: t,
+		repo:      r,
+		grpcapi:   t,
+		fetchList: make(map[string]*entity.Target),
 	}
 
 	cfg, err := config.GetConfig()
@@ -55,17 +60,32 @@ func (uc *HistoryUseCase) GetDayKbarByStockNumDate(stockNum string, date time.Ti
 
 // FetchHistory FetchHistory
 func (uc *HistoryUseCase) FetchHistory(ctx context.Context, targetArr []*entity.Target) {
-	err := uc.fetchHistoryKbar(targetArr)
+	var fetchArr []*entity.Target
+	uc.mutex.Lock()
+	for _, v := range targetArr {
+		if _, ok := uc.fetchList[v.StockNum]; ok {
+			continue
+		}
+		uc.fetchList[v.StockNum] = v
+		fetchArr = append(fetchArr, v)
+	}
+	uc.mutex.Unlock()
+
+	if len(fetchArr) == 0 {
+		return
+	}
+
+	err := uc.fetchHistoryKbar(fetchArr)
 	if err != nil {
 		log.Panic(err)
 	}
 
-	err = uc.fetchHistoryTick(targetArr)
+	err = uc.fetchHistoryTick(fetchArr)
 	if err != nil {
 		log.Panic(err)
 	}
 
-	err = uc.fetchHistoryClose(targetArr)
+	err = uc.fetchHistoryClose(fetchArr)
 	if err != nil {
 		log.Panic(err)
 	}
