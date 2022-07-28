@@ -51,9 +51,21 @@ func NewStream(r *repo.StreamRepo, g *grpcapi.StreamgRPCAPI, t *rabbit.StreamRab
 	go uc.ReceiveOrderStatus(context.Background())
 
 	go func() {
-		for range time.NewTicker(time.Second * 30).C {
+		time.Sleep(time.Until(cc.GetBasicInfo().TradeDay.Add(time.Hour * 9)))
+		for range time.NewTicker(time.Second * 20).C {
 			if uc.tradeInSwitch {
 				if err := uc.realTimeAddTargets(context.Background()); err != nil {
+					log.Panic(err)
+				}
+			}
+		}
+	}()
+
+	go func() {
+		for range time.NewTicker(time.Minute).C {
+			if !uc.tradeInSwitch && !uc.clearAll {
+				_, err := uc.grpcapi.GetStockSnapshotTSE()
+				if err != nil {
 					log.Panic(err)
 				}
 			}

@@ -74,8 +74,8 @@ analyze:
     close_change_ratio_high: 1.5
 
     # unit: %
-    out_in_ratio: 80
-    in_out_ratio: 99
+    out_in_ratio: 85
+    in_out_ratio: 95
 
     # unit: %
     volume_pr_limit: 95
@@ -87,8 +87,8 @@ analyze:
     rsi_min_count: 600
 
     # rsi range: 0~1
-    rsi_high: 50.2
-    rsi_low: 49.8
+    rsi_high: 50.1
+    rsi_low: 49.9
 
     # unit: %
     max_loss: 2
