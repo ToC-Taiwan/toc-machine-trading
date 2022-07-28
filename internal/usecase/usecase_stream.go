@@ -61,17 +61,6 @@ func NewStream(r *repo.StreamRepo, g *grpcapi.StreamgRPCAPI, t *rabbit.StreamRab
 		}
 	}()
 
-	go func() {
-		for range time.NewTicker(time.Minute).C {
-			if !uc.tradeInSwitch && !uc.clearAll {
-				_, err := uc.grpcapi.GetStockSnapshotTSE()
-				if err != nil {
-					log.Panic(err)
-				}
-			}
-		}
-	}()
-
 	bus.SubscribeTopic(topicStreamTargets, uc.ReceiveStreamData)
 	return uc
 }
