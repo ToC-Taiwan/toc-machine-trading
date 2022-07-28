@@ -561,10 +561,7 @@ const docTemplate = `{
                     "$ref": "#/definitions/config.Sinopac"
                 },
                 "target_cond": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/config.TargetCond"
-                    }
+                    "$ref": "#/definitions/config.TargetCond"
                 },
                 "trade_switch": {
                     "$ref": "#/definitions/config.TradeSwitch"
@@ -604,6 +601,23 @@ const docTemplate = `{
                 },
                 "url": {
                     "type": "string"
+                }
+            }
+        },
+        "config.PriceVolumeLimit": {
+            "type": "object",
+            "properties": {
+                "limit_price_high": {
+                    "type": "number"
+                },
+                "limit_price_low": {
+                    "type": "number"
+                },
+                "limit_volume": {
+                    "type": "integer"
+                },
+                "subscribe": {
+                    "type": "boolean"
                 }
             }
         },
@@ -655,17 +669,14 @@ const docTemplate = `{
         "config.TargetCond": {
             "type": "object",
             "properties": {
-                "limit_price_high": {
-                    "type": "number"
+                "price_volume_limit": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/config.PriceVolumeLimit"
+                    }
                 },
-                "limit_price_low": {
-                    "type": "number"
-                },
-                "limit_volume": {
+                "real_time_rank": {
                     "type": "integer"
-                },
-                "subscribe": {
-                    "type": "boolean"
                 }
             }
         },

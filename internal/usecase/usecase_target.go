@@ -102,7 +102,7 @@ func (uc *TargetUseCase) SearchTradeDayTargets(ctx context.Context, tradeDay tim
 	condition := cfg.TargetCond
 
 	var result []*entity.Target
-	for _, c := range condition {
+	for _, c := range condition.PriceVolumeLimit {
 		for _, v := range t {
 			if !targetFilter(v.GetClose(), v.GetTotalVolume(), c, false) {
 				continue

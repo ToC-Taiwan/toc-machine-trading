@@ -22,7 +22,7 @@ type StreamUseCase struct {
 	tradeSwitchCfg config.TradeSwitch
 	analyzeCfg     config.Analyze
 	basic          entity.BasicInfo
-	targetCond     []config.TargetCond
+	targetCond     config.TargetCond
 
 	tradeInSwitch bool
 	clearAll      bool
@@ -144,7 +144,7 @@ func (uc *StreamUseCase) tradingRoom(agent *TradeAgent) {
 			agent.lastTick = <-agent.tickChan
 			agent.tickArr = append(agent.tickArr, agent.lastTick)
 
-			// log.Warnf("%s: %s", agent.stockNum, time.Since(agent.lastTick.TickTime).String())
+			log.Debugf("%s tick time delay: %s", agent.stockNum, time.Since(agent.lastTick.TickTime).String())
 
 			order := agent.generateOrder(uc.analyzeCfg, uc.clearAll)
 			if order == nil {
@@ -158,6 +158,7 @@ func (uc *StreamUseCase) tradingRoom(agent *TradeAgent) {
 	go func() {
 		for {
 			agent.lastBidAsk = <-agent.bidAskChan
+			log.Debugf("%s bidask time delay: %s", agent.stockNum, time.Since(agent.lastBidAsk.BidAskTime).String())
 		}
 	}()
 
@@ -254,7 +255,7 @@ func (uc *StreamUseCase) realTimeAddTargets(ctx context.Context) error {
 	sort.Slice(data, func(i, j int) bool {
 		return data[i].GetTotalVolume() > data[j].GetTotalVolume()
 	})
-	data = data[:30]
+	data = data[:uc.targetCond.RealTimeRank]
 
 	currentTargets := cc.GetTargets()
 	targetsMap := make(map[string]*entity.Target)
@@ -263,7 +264,7 @@ func (uc *StreamUseCase) realTimeAddTargets(ctx context.Context) error {
 	}
 
 	var newTargets []*entity.Target
-	for _, c := range uc.targetCond {
+	for _, c := range uc.targetCond.PriceVolumeLimit {
 		for i, d := range data {
 			if targetFilter(d.GetClose(), d.GetTotalVolume(), c, true) {
 				if stock := cc.GetStockDetail(d.GetCode()); stock != nil && targetsMap[d.GetCode()] == nil {

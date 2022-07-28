@@ -43,15 +43,15 @@ func parseConfigFile() {
 
 // Config -.
 type Config struct {
-	HTTP        HTTP         `json:"http"         env-required:"true" yaml:"http"`
-	Postgres    Postgres     `json:"postgres"     env-required:"true" yaml:"postgres"`
-	Sinopac     Sinopac      `json:"sinopac"      env-required:"true" yaml:"sinopac"`
-	RabbitMQ    RabbitMQ     `json:"rabbitmq"     env-required:"true" yaml:"rabbitmq"`
-	TradeSwitch TradeSwitch  `json:"trade_switch" env-required:"true" yaml:"trade_switch"`
-	History     History      `json:"history"      env-required:"true" yaml:"history"`
-	Quota       Quota        `json:"quota"        env-required:"true" yaml:"quota"`
-	TargetCond  []TargetCond `json:"target_cond"  env-required:"true" yaml:"target_cond"`
-	Analyze     Analyze      `json:"analyze"      env-required:"true" yaml:"analyze"`
+	HTTP        HTTP        `json:"http"         env-required:"true" yaml:"http"`
+	Postgres    Postgres    `json:"postgres"     env-required:"true" yaml:"postgres"`
+	Sinopac     Sinopac     `json:"sinopac"      env-required:"true" yaml:"sinopac"`
+	RabbitMQ    RabbitMQ    `json:"rabbitmq"     env-required:"true" yaml:"rabbitmq"`
+	TradeSwitch TradeSwitch `json:"trade_switch" env-required:"true" yaml:"trade_switch"`
+	History     History     `json:"history"      env-required:"true" yaml:"history"`
+	Quota       Quota       `json:"quota"        env-required:"true" yaml:"quota"`
+	TargetCond  TargetCond  `json:"target_cond"  env-required:"true" yaml:"target_cond"`
+	Analyze     Analyze     `json:"analyze"      env-required:"true" yaml:"analyze"`
 
 	Deployment string `json:"deployment" env-required:"true" env:"DEPLOYMENT"`
 }
@@ -121,6 +121,12 @@ type Quota struct {
 
 // TargetCond -.
 type TargetCond struct {
+	RealTimeRank     int64              `json:"real_time_rank"     env-required:"true" yaml:"real_time_rank"`
+	PriceVolumeLimit []PriceVolumeLimit `json:"price_volume_limit" env-required:"true" yaml:"price_volume_limit"`
+}
+
+// PriceVolumeLimit -.
+type PriceVolumeLimit struct {
 	LimitPriceLow  float64 `json:"limit_price_low"  env-required:"true" yaml:"limit_price_low"`
 	LimitPriceHigh float64 `json:"limit_price_high" env-required:"true" yaml:"limit_price_high"`
 	LimitVolume    int64   `json:"limit_volume"     env-required:"true" yaml:"limit_volume"`

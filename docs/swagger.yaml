@@ -43,9 +43,7 @@ definitions:
       sinopac:
         $ref: '#/definitions/config.Sinopac'
       target_cond:
-        items:
-          $ref: '#/definitions/config.TargetCond'
-        type: array
+        $ref: '#/definitions/config.TargetCond'
       trade_switch:
         $ref: '#/definitions/config.TradeSwitch'
     type: object
@@ -71,6 +69,17 @@ definitions:
         type: integer
       url:
         type: string
+    type: object
+  config.PriceVolumeLimit:
+    properties:
+      limit_price_high:
+        type: number
+      limit_price_low:
+        type: number
+      limit_volume:
+        type: integer
+      subscribe:
+        type: boolean
     type: object
   config.Quota:
     properties:
@@ -103,14 +112,12 @@ definitions:
     type: object
   config.TargetCond:
     properties:
-      limit_price_high:
-        type: number
-      limit_price_low:
-        type: number
-      limit_volume:
+      price_volume_limit:
+        items:
+          $ref: '#/definitions/config.PriceVolumeLimit'
+        type: array
+      real_time_rank:
         type: integer
-      subscribe:
-        type: boolean
     type: object
   config.TradeSwitch:
     properties:

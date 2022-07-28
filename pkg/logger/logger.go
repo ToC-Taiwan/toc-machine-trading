@@ -76,7 +76,10 @@ func initLogger() {
 		})
 	}
 
-	globalLogger.SetLevel(logrus.TraceLevel)
+	globalLogger.SetLevel(logrus.InfoLevel)
+	if dev {
+		globalLogger.SetLevel(logrus.TraceLevel)
+	}
 	globalLogger.SetOutput(os.Stdout)
 	globalLogger.Hooks.Add(fileHook(basePath))
 }
