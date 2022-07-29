@@ -114,6 +114,8 @@ type Quota struct {
 
 // TargetCond -.
 type TargetCond struct {
+	BlackStock       []string           `json:"black_stock"        env-required:"true" yaml:"black_stock"`
+	BlackCategory    []string           `json:"black_category"     env-required:"true" yaml:"black_category"`
 	RealTimeRank     int64              `json:"real_time_rank"     env-required:"true" yaml:"real_time_rank"`
 	PriceVolumeLimit []PriceVolumeLimit `json:"price_volume_limit" env-required:"true" yaml:"price_volume_limit"`
 }

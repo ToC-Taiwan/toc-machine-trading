@@ -267,18 +267,30 @@ func (uc *StreamUseCase) realTimeAddTargets(ctx context.Context) error {
 	var newTargets []*entity.Target
 	for _, c := range uc.targetCond.PriceVolumeLimit {
 		for i, d := range data {
-			if targetFilter(d.GetClose(), d.GetTotalVolume(), c, true) {
-				if stock := cc.GetStockDetail(d.GetCode()); stock != nil && targetsMap[d.GetCode()] == nil {
-					newTargets = append(newTargets, &entity.Target{
-						Rank:        100 + i + 1,
-						StockNum:    d.GetCode(),
-						Volume:      d.GetTotalVolume(),
-						Subscribe:   c.Subscribe,
-						RealTimeAdd: true,
-						TradeDay:    uc.basic.TradeDay,
-						Stock:       stock,
-					})
-				}
+			stock := cc.GetStockDetail(d.GetCode())
+			if stock == nil {
+				log.Errorf("%s stock not found in cache", d.GetCode())
+				continue
+			}
+
+			if !blackStockFilter(stock.Number, uc.targetCond) || !blackCatagoryFilter(stock.Category, uc.targetCond) {
+				continue
+			}
+
+			if !targetFilter(d.GetClose(), d.GetTotalVolume(), c, true) {
+				continue
+			}
+
+			if targetsMap[d.GetCode()] == nil {
+				newTargets = append(newTargets, &entity.Target{
+					Rank:        100 + i + 1,
+					StockNum:    d.GetCode(),
+					Volume:      d.GetTotalVolume(),
+					Subscribe:   c.Subscribe,
+					RealTimeAdd: true,
+					TradeDay:    uc.basic.TradeDay,
+					Stock:       stock,
+				})
 			}
 		}
 	}

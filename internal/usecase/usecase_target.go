@@ -104,21 +104,29 @@ func (uc *TargetUseCase) SearchTradeDayTargets(ctx context.Context, tradeDay tim
 	var result []*entity.Target
 	for _, c := range condition.PriceVolumeLimit {
 		for _, v := range t {
+			stock := cc.GetStockDetail(v.GetCode())
+			if stock == nil {
+				log.Errorf("%s stock not found in cache", v.GetCode())
+				continue
+			}
+
+			if !blackStockFilter(stock.Number, condition) || !blackCatagoryFilter(stock.Category, condition) {
+				continue
+			}
+
 			if !targetFilter(v.GetClose(), v.GetTotalVolume(), c, false) {
 				continue
 			}
 
-			if stock := cc.GetStockDetail(v.GetCode()); stock != nil {
-				result = append(result, &entity.Target{
-					Rank:        len(result) + 1,
-					StockNum:    v.GetCode(),
-					Volume:      v.GetTotalVolume(),
-					Subscribe:   c.Subscribe,
-					RealTimeAdd: false,
-					TradeDay:    tradeDay,
-					Stock:       stock,
-				})
-			}
+			result = append(result, &entity.Target{
+				Rank:        len(result) + 1,
+				StockNum:    v.GetCode(),
+				Volume:      v.GetTotalVolume(),
+				Subscribe:   c.Subscribe,
+				RealTimeAdd: false,
+				TradeDay:    tradeDay,
+				Stock:       stock,
+			})
 		}
 	}
 	return result, nil
