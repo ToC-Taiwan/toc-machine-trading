@@ -47,6 +47,12 @@ conventional-changelog -p angular -i CHANGELOG.md -s -r 0
 conventional-changelog -p angular -i CHANGELOG.md -s
 ```
 
+### Find ignored files
+
+```sh
+find . -type f  | git check-ignore --stdin
+```
+
 ### Migrate Tool
 
 - install
