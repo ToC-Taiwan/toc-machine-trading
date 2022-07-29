@@ -269,7 +269,6 @@ func (uc *StreamUseCase) realTimeAddTargets(ctx context.Context) error {
 		for i, d := range data {
 			stock := cc.GetStockDetail(d.GetCode())
 			if stock == nil {
-				log.Errorf("%s stock not found in cache", d.GetCode())
 				continue
 			}
 
@@ -283,13 +282,13 @@ func (uc *StreamUseCase) realTimeAddTargets(ctx context.Context) error {
 
 			if targetsMap[d.GetCode()] == nil {
 				newTargets = append(newTargets, &entity.Target{
-					Rank:        100 + i + 1,
-					StockNum:    d.GetCode(),
-					Volume:      d.GetTotalVolume(),
-					Subscribe:   c.Subscribe,
-					RealTimeAdd: true,
-					TradeDay:    uc.basic.TradeDay,
-					Stock:       stock,
+					Rank:     100 + i + 1,
+					StockNum: d.GetCode(),
+					Volume:   d.GetTotalVolume(),
+					PreFetch: c.PreFetch,
+					RealTime: true,
+					TradeDay: uc.basic.TradeDay,
+					Stock:    stock,
 				})
 			}
 		}

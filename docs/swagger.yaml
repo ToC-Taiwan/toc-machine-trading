@@ -9,8 +9,6 @@ definitions:
         type: number
       ma_period:
         type: integer
-      max_loss:
-        type: number
       out_in_ratio:
         type: number
       rsi_high:
@@ -28,8 +26,6 @@ definitions:
     properties:
       analyze:
         $ref: '#/definitions/config.Analyze'
-      deployment:
-        type: string
       history:
         $ref: '#/definitions/config.History'
       http:
@@ -78,7 +74,7 @@ definitions:
         type: number
       limit_volume:
         type: integer
-      subscribe:
+      pre_fetch:
         type: boolean
     type: object
   config.Quota:
@@ -112,6 +108,14 @@ definitions:
     type: object
   config.TargetCond:
     properties:
+      black_category:
+        items:
+          type: string
+        type: array
+      black_stock:
+        items:
+          type: string
+        type: array
       price_volume_limit:
         items:
           $ref: '#/definitions/config.PriceVolumeLimit'
@@ -121,10 +125,6 @@ definitions:
     type: object
   config.TradeSwitch:
     properties:
-      buy:
-        type: boolean
-      buy_later:
-        type: boolean
       cancel_wait_time:
         type: integer
       hold_time_from_open:
@@ -133,10 +133,6 @@ definitions:
         type: number
       open_close_change_ratio_low:
         type: number
-      sell:
-        type: boolean
-      sell_first:
-        type: boolean
       simulation:
         type: boolean
       total_open_time:
@@ -250,16 +246,16 @@ definitions:
     properties:
       id:
         type: integer
+      pre_fetch:
+        type: boolean
       rank:
         type: integer
-      real_time_add:
+      real_time:
         type: boolean
       stock:
         $ref: '#/definitions/entity.Stock'
       stock_num:
         type: string
-      subscribe:
-        type: boolean
       trade_day:
         type: string
       volume:

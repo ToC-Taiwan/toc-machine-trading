@@ -169,7 +169,7 @@ func (uc *AnalyzeUseCase) getSimulateCond(targetArr []*entity.Target, analyzeCfg
 	var agentArr []*SimulateTradeAgent
 	var agentLock sync.Mutex
 	for _, t := range targetArr {
-		if !t.Subscribe {
+		if !t.PreFetch {
 			continue
 		}
 		stock := t

@@ -510,9 +510,6 @@ const docTemplate = `{
                 "ma_period": {
                     "type": "integer"
                 },
-                "max_loss": {
-                    "type": "number"
-                },
                 "out_in_ratio": {
                     "type": "number"
                 },
@@ -538,9 +535,6 @@ const docTemplate = `{
             "properties": {
                 "analyze": {
                     "$ref": "#/definitions/config.Analyze"
-                },
-                "deployment": {
-                    "type": "string"
                 },
                 "history": {
                     "$ref": "#/definitions/config.History"
@@ -616,7 +610,7 @@ const docTemplate = `{
                 "limit_volume": {
                     "type": "integer"
                 },
-                "subscribe": {
+                "pre_fetch": {
                     "type": "boolean"
                 }
             }
@@ -669,6 +663,18 @@ const docTemplate = `{
         "config.TargetCond": {
             "type": "object",
             "properties": {
+                "black_category": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "black_stock": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
                 "price_volume_limit": {
                     "type": "array",
                     "items": {
@@ -683,12 +689,6 @@ const docTemplate = `{
         "config.TradeSwitch": {
             "type": "object",
             "properties": {
-                "buy": {
-                    "type": "boolean"
-                },
-                "buy_later": {
-                    "type": "boolean"
-                },
                 "cancel_wait_time": {
                     "type": "integer"
                 },
@@ -700,12 +700,6 @@ const docTemplate = `{
                 },
                 "open_close_change_ratio_low": {
                     "type": "number"
-                },
-                "sell": {
-                    "type": "boolean"
-                },
-                "sell_first": {
-                    "type": "boolean"
                 },
                 "simulation": {
                     "type": "boolean"
@@ -879,10 +873,13 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
+                "pre_fetch": {
+                    "type": "boolean"
+                },
                 "rank": {
                     "type": "integer"
                 },
-                "real_time_add": {
+                "real_time": {
                     "type": "boolean"
                 },
                 "stock": {
@@ -890,9 +887,6 @@ const docTemplate = `{
                 },
                 "stock_num": {
                     "type": "string"
-                },
-                "subscribe": {
-                    "type": "boolean"
                 },
                 "trade_day": {
                     "type": "string"

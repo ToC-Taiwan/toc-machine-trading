@@ -45,23 +45,28 @@ quota:
 
 target_cond:
     real_time_rank: 30
+    black_stock:
+        - 2317
+        - 1314
+    black_category:
+        - 17
     price_volume_limit:
         - limit_price_low: 10
           limit_price_high: 35
           limit_volume: 10000
-          subscribe: true
+          pre_fetch: true
         - limit_price_low: 35
           limit_price_high: 100
           limit_volume: 8000
-          subscribe: false
+          pre_fetch: false
         - limit_price_low: 100
           limit_price_high: 125
           limit_volume: 2000
-          subscribe: true
+          pre_fetch: true
         - limit_price_low: 125
           limit_price_high: 200
           limit_volume: 2000
-          subscribe: false
+          pre_fetch: false
 
 analyze:
     # unit: %

@@ -20,8 +20,8 @@ CREATE TABLE basic_targets (
     "rank" INT NOT NULL,
     "stock_num" VARCHAR NOT NULL,
     "volume" INT NOT NULL,
-    "subscribe" BOOLEAN NOT NULL,
-    "real_time_add" BOOLEAN NOT NULL,
+    "pre_fetch" BOOLEAN NOT NULL,
+    "real_time" BOOLEAN NOT NULL,
     "trade_day" TIMESTAMPTZ
 );
 

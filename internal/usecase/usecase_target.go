@@ -106,7 +106,6 @@ func (uc *TargetUseCase) SearchTradeDayTargets(ctx context.Context, tradeDay tim
 		for _, v := range t {
 			stock := cc.GetStockDetail(v.GetCode())
 			if stock == nil {
-				log.Errorf("%s stock not found in cache", v.GetCode())
 				continue
 			}
 
@@ -119,13 +118,13 @@ func (uc *TargetUseCase) SearchTradeDayTargets(ctx context.Context, tradeDay tim
 			}
 
 			result = append(result, &entity.Target{
-				Rank:        len(result) + 1,
-				StockNum:    v.GetCode(),
-				Volume:      v.GetTotalVolume(),
-				Subscribe:   c.Subscribe,
-				RealTimeAdd: false,
-				TradeDay:    tradeDay,
-				Stock:       stock,
+				Rank:     len(result) + 1,
+				StockNum: v.GetCode(),
+				Volume:   v.GetTotalVolume(),
+				PreFetch: c.PreFetch,
+				RealTime: false,
+				TradeDay: tradeDay,
+				Stock:    stock,
 			})
 		}
 	}
@@ -159,7 +158,7 @@ func (uc *TargetUseCase) UnSubscribeAll(ctx context.Context) error {
 func (uc *TargetUseCase) SubscribeStockTick(targetArr []*entity.Target) error {
 	var subArr []string
 	for _, v := range targetArr {
-		if v.Subscribe {
+		if v.RealTime {
 			subArr = append(subArr, v.StockNum)
 		}
 	}
@@ -180,7 +179,7 @@ func (uc *TargetUseCase) SubscribeStockTick(targetArr []*entity.Target) error {
 func (uc *TargetUseCase) SubscribeStockBidAsk(targetArr []*entity.Target) error {
 	var subArr []string
 	for _, v := range targetArr {
-		if v.Subscribe {
+		if v.RealTime {
 			subArr = append(subArr, v.StockNum)
 		}
 	}

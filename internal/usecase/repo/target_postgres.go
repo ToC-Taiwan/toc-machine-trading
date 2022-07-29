@@ -39,11 +39,11 @@ func (r *TargetRepo) InsertOrUpdateTargetArr(ctx context.Context, t []*entity.Ta
 	var args []interface{}
 
 	var insert int
-	builder := r.Builder.Insert(tableNameTarget).Columns("stock_num, trade_day, rank, volume, subscribe, real_time_add")
+	builder := r.Builder.Insert(tableNameTarget).Columns("stock_num, trade_day, rank, volume, pre_fetch, real_time")
 	for _, v := range t {
 		if _, ok := inDBTargetsMap[v.StockNum]; !ok {
 			insert++
-			builder = builder.Values(v.StockNum, v.TradeDay, v.Rank, v.Volume, v.Subscribe, v.RealTimeAdd)
+			builder = builder.Values(v.StockNum, v.TradeDay, v.Rank, v.Volume, v.PreFetch, v.RealTime)
 		} else {
 			b := r.Builder.
 				Update(tableNameTarget).
@@ -51,8 +51,8 @@ func (r *TargetRepo) InsertOrUpdateTargetArr(ctx context.Context, t []*entity.Ta
 				Set("trade_day", v.TradeDay).
 				Set("rank", v.Rank).
 				Set("volume", v.Volume).
-				Set("subscribe", v.Subscribe).
-				Set("real_time_add", v.RealTimeAdd).
+				Set("pre_fetch", v.PreFetch).
+				Set("real_time", v.RealTime).
 				Where("stock_num = ?", v.StockNum).
 				Where("trade_day = ?", v.TradeDay)
 			if sql, args, err = b.ToSql(); err != nil {
@@ -75,9 +75,9 @@ func (r *TargetRepo) InsertOrUpdateTargetArr(ctx context.Context, t []*entity.Ta
 
 // InsertTargetArr -.
 func (r *TargetRepo) InsertTargetArr(ctx context.Context, t []*entity.Target) error {
-	builder := r.Builder.Insert(tableNameTarget).Columns("stock_num, trade_day, rank, volume, subscribe, real_time_add")
+	builder := r.Builder.Insert(tableNameTarget).Columns("stock_num, trade_day, rank, volume, pre_fetch, real_time")
 	for _, v := range t {
-		builder = builder.Values(v.StockNum, v.TradeDay, v.Rank, v.Volume, v.Subscribe, v.RealTimeAdd)
+		builder = builder.Values(v.StockNum, v.TradeDay, v.Rank, v.Volume, v.PreFetch, v.RealTime)
 	}
 
 	tx, err := r.BeginTransaction()
@@ -99,7 +99,7 @@ func (r *TargetRepo) InsertTargetArr(ctx context.Context, t []*entity.Target) er
 // QueryTargetsByTradeDay -.
 func (r *TargetRepo) QueryTargetsByTradeDay(ctx context.Context, tradeDay time.Time) ([]*entity.Target, error) {
 	sql, args, err := r.Builder.
-		Select("id, rank, volume, subscribe, real_time_add, trade_day, stock_num, number, name, exchange, category, day_trade, last_close, update_date").
+		Select("id, rank, volume, pre_fetch, real_time, trade_day, stock_num, number, name, exchange, category, day_trade, last_close, update_date").
 		From(tableNameTarget).
 		Where("trade_day = ?", tradeDay).
 		OrderBy("rank ASC").
@@ -118,7 +118,7 @@ func (r *TargetRepo) QueryTargetsByTradeDay(ctx context.Context, tradeDay time.T
 	for rows.Next() {
 		e := entity.Target{Stock: new(entity.Stock)}
 		if err := rows.Scan(
-			&e.ID, &e.Rank, &e.Volume, &e.Subscribe, &e.RealTimeAdd, &e.TradeDay,
+			&e.ID, &e.Rank, &e.Volume, &e.PreFetch, &e.RealTime, &e.TradeDay,
 			&e.StockNum, &e.Stock.Number, &e.Stock.Name, &e.Stock.Exchange, &e.Stock.Category, &e.Stock.DayTrade, &e.Stock.LastClose, &e.Stock.UpdateDate,
 		); err != nil {
 			return nil, err

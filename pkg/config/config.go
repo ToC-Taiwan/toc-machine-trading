@@ -125,7 +125,7 @@ type PriceVolumeLimit struct {
 	LimitPriceLow  float64 `json:"limit_price_low"  env-required:"true" yaml:"limit_price_low"`
 	LimitPriceHigh float64 `json:"limit_price_high" env-required:"true" yaml:"limit_price_high"`
 	LimitVolume    int64   `json:"limit_volume"     env-required:"true" yaml:"limit_volume"`
-	Subscribe      bool    `json:"subscribe"        env-required:"true" yaml:"subscribe"`
+	PreFetch       bool    `json:"pre_fetch"        env-required:"true" yaml:"pre_fetch"`
 }
 
 // Analyze -.
