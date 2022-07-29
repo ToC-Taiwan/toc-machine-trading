@@ -1,6 +1,14 @@
-# [](https://gitlab.tocraw.com/root/toc-machine-trading/compare/v0.0.3...v) (2022-07-29)
+# [](https://gitlab.tocraw.com/root/toc-machine-trading/compare/v0.0.4...v) (2022-07-29)
 
 ## CHANGELOG
+
+## [0.0.4](https://gitlab.tocraw.com/root/toc-machine-trading/compare/v0.0.3...v0.0.4) (2022-07-29)
+
+### Features
+
+* **config:** remove redundant config, change default config trade fee discount ratio ([600ac2b](https://gitlab.tocraw.com/root/toc-machine-trading/commit/600ac2bf2174b06932d927237a9d00bcda175bb7))
+* **stock:** every time launch, update stock day trade to no, update by latest data ([dd1c076](https://gitlab.tocraw.com/root/toc-machine-trading/commit/dd1c076eed2d526908ad2ad3c6160542102cc3ae))
+* **target:** add black stock, black catagory ([26c6e41](https://gitlab.tocraw.com/root/toc-machine-trading/commit/26c6e412d972066f6b7afe9867391a1db9b26ff4))
 
 ## [0.0.3](https://gitlab.tocraw.com/root/toc-machine-trading/compare/v0.0.2...v0.0.3) (2022-07-28)
 
