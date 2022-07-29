@@ -337,7 +337,6 @@ func generateAnalyzeCfg(useDefault bool) []config.Analyze {
 			RSIHigh:              cfg.Analyze.RSIHigh,
 			RSILow:               cfg.Analyze.RSILow,
 			MAPeriod:             cfg.Analyze.MAPeriod,
-			MaxLoss:              cfg.Analyze.MaxLoss,
 		}}
 	}
 

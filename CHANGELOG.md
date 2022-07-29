@@ -1,6 +1,25 @@
-# [](https://gitlab.tocraw.com/root/toc-machine-trading/compare/v0.0.2...v) (2022-07-22)
+# [](https://gitlab.tocraw.com/root/toc-machine-trading/compare/v0.0.3...v) (2022-07-29)
 
 ## CHANGELOG
+
+## [0.0.3](https://gitlab.tocraw.com/root/toc-machine-trading/compare/v0.0.2...v0.0.3) (2022-07-28)
+
+### Bug Fixes
+
+* **open:** fix wrong open change ratio in trade ([4d98dad](https://gitlab.tocraw.com/root/toc-machine-trading/commit/4d98dad3b555d7ec0d001f05abce8aad14f5baf8))
+* **order:** update order in every order status return, no compare ([ecc786b](https://gitlab.tocraw.com/root/toc-machine-trading/commit/ecc786b58819697f93f16eaefc087032a415727c))
+* **target:** fix stuck by non async event, add fetch list in history usecase ([12907d0](https://gitlab.tocraw.com/root/toc-machine-trading/commit/12907d0286828741b593e416df4925cfc3fd4677))
+* **target:** fix wrong repo table name when update target ([06798f2](https://gitlab.tocraw.com/root/toc-machine-trading/commit/06798f270a71e6706bd12d4a07a30dc5200c268c))
+
+### Features
+
+* **change-ratio:** consider open change ratio to unsubscribe, and change ratio in stream ([46d9cbd](https://gitlab.tocraw.com/root/toc-machine-trading/commit/46d9cbdfe9fec702055de47da14d34d526ea71a2))
+* **qty:** add modify order qty by return order, trade out order qty will depend on it ([a158be9](https://gitlab.tocraw.com/root/toc-machine-trading/commit/a158be9e475588de389655dd307cc806a361c651))
+* **target:** add realtime rank to config, add debug log in development ([78eec9a](https://gitlab.tocraw.com/root/toc-machine-trading/commit/78eec9a77b57bb9a4a0cca2961deb34397998995))
+* **target:** only add target in realtime, last trade day target only use for fetch data ([d884a21](https://gitlab.tocraw.com/root/toc-machine-trading/commit/d884a214530c1d73dd8a81db1d0e601d2b06814f))
+* **target:** timer of add realtime target start from 9:00 ([385d2a9](https://gitlab.tocraw.com/root/toc-machine-trading/commit/385d2a949b1162a2bc89a4b172db39e79de3348b))
+* **trade:** change method to analyze volume pr, add use default config to simulate header ([d0a5883](https://gitlab.tocraw.com/root/toc-machine-trading/commit/d0a5883008455ad3b36be3ffc2c65660ccbb820f))
+* **unsubscribe:** add if order canceled, then unsubscribe tick and bidask ([b09d65a](https://gitlab.tocraw.com/root/toc-machine-trading/commit/b09d65a88b273fb39cb98d07b81c1f02ffa5de21))
 
 ## [0.0.2](https://gitlab.tocraw.com/root/toc-machine-trading/compare/v0.0.1...v0.0.2) (2022-07-21)
 

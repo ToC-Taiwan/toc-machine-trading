@@ -52,8 +52,6 @@ type Config struct {
 	Quota       Quota       `json:"quota"        env-required:"true" yaml:"quota"`
 	TargetCond  TargetCond  `json:"target_cond"  env-required:"true" yaml:"target_cond"`
 	Analyze     Analyze     `json:"analyze"      env-required:"true" yaml:"analyze"`
-
-	Deployment string `json:"deployment" env-required:"true" env:"DEPLOYMENT"`
 }
 
 // HTTP -.
@@ -85,11 +83,6 @@ type RabbitMQ struct {
 // TradeSwitch -.
 type TradeSwitch struct {
 	Simulation bool `json:"simulation" yaml:"simulation"`
-
-	Buy       bool `json:"buy"        env-required:"true" yaml:"buy"`
-	Sell      bool `json:"sell"       env-required:"true" yaml:"sell"`
-	SellFirst bool `json:"sell_first" env-required:"true" yaml:"sell_first"`
-	BuyLater  bool `json:"buy_later"  env-required:"true" yaml:"buy_later"`
 
 	HoldTimeFromOpen float64 `json:"hold_time_from_open" env-required:"true" yaml:"hold_time_from_open"`
 	TotalOpenTime    float64 `json:"total_open_time"     env-required:"true" yaml:"total_open_time"`
@@ -151,6 +144,4 @@ type Analyze struct {
 	RSILow  float64 `json:"rsi_low"  env-required:"true" yaml:"rsi_low"`
 
 	MAPeriod int64 `json:"ma_period" env-required:"true" yaml:"ma_period"`
-
-	MaxLoss float64 `json:"max_loss" env-required:"true" yaml:"max_loss"`
 }

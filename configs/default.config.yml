@@ -20,11 +20,6 @@ history:
 trade_switch:
     simulation: true
 
-    buy: true
-    sell: true
-    sell_first: true
-    buy_later: true
-
     # unit: second
     hold_time_from_open: 45
 
@@ -46,7 +41,7 @@ quota:
     trade_quota: 1000000
     trade_tax_ratio: 0.0015
     trade_fee_ratio: 0.001425
-    fee_discount: 0.35
+    fee_discount: 0.28
 
 target_cond:
     real_time_rank: 30
@@ -87,11 +82,8 @@ analyze:
     rsi_min_count: 600
 
     # rsi range: 0~1
-    rsi_high: 50.1
-    rsi_low: 49.9
-
-    # unit: %
-    max_loss: 2
+    rsi_high: 50.2
+    rsi_low: 49.8
 
     # unit: day
     ma_period: 60
