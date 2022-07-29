@@ -81,6 +81,11 @@ func (uc *BasicUseCase) GetAllSinopacStockAndUpdateRepo(ctx context.Context) ([]
 		cc.SetStockDetail(stock)
 	}
 
+	err = uc.repo.UpdateAllStockDayTradeToNo(context.Background())
+	if err != nil {
+		return []*entity.Stock{}, err
+	}
+
 	err = uc.repo.InsertOrUpdatetStockArr(context.Background(), stockDetail)
 	if err != nil {
 		return []*entity.Stock{}, err

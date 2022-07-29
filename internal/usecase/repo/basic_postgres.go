@@ -73,6 +73,28 @@ func (r *BasicRepo) InsertOrUpdatetStockArr(ctx context.Context, t []*entity.Sto
 	return nil
 }
 
+// UpdateAllStockDayTradeToNo -.
+func (r *BasicRepo) UpdateAllStockDayTradeToNo(ctx context.Context) error {
+	tx, err := r.BeginTransaction()
+	if err != nil {
+		return err
+	}
+	defer r.EndTransaction(tx, err)
+	var sql string
+	var args []interface{}
+
+	builder := r.Builder.
+		Update(tableNameStock).
+		Set("day_trade", false)
+
+	if sql, args, err = builder.ToSql(); err != nil {
+		return err
+	} else if _, err = tx.Exec(ctx, sql, args...); err != nil {
+		return err
+	}
+	return nil
+}
+
 // QueryAllStock -.
 func (r *BasicRepo) QueryAllStock(ctx context.Context) (map[string]*entity.Stock, error) {
 	sql, _, err := r.Builder.

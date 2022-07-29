@@ -32,6 +32,7 @@ type (
 		InsertOrUpdatetStockArr(ctx context.Context, t []*entity.Stock) error
 		QueryAllCalendar(ctx context.Context) (map[time.Time]*entity.CalendarDate, error)
 		InsertOrUpdatetCalendarDateArr(ctx context.Context, t []*entity.CalendarDate) error
+		UpdateAllStockDayTradeToNo(ctx context.Context) error
 	}
 
 	// BasicgRPCAPI -.

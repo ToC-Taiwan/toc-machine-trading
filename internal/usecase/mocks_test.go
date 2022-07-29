@@ -162,6 +162,20 @@ func (mr *MockBasicRepoMockRecorder) QueryAllStock(ctx interface{}) *gomock.Call
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryAllStock", reflect.TypeOf((*MockBasicRepo)(nil).QueryAllStock), ctx)
 }
 
+// UpdateAllStockDayTradeToNo mocks base method.
+func (m *MockBasicRepo) UpdateAllStockDayTradeToNo(ctx context.Context) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateAllStockDayTradeToNo", ctx)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateAllStockDayTradeToNo indicates an expected call of UpdateAllStockDayTradeToNo.
+func (mr *MockBasicRepoMockRecorder) UpdateAllStockDayTradeToNo(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateAllStockDayTradeToNo", reflect.TypeOf((*MockBasicRepo)(nil).UpdateAllStockDayTradeToNo), ctx)
+}
+
 // MockBasicgRPCAPI is a mock of BasicgRPCAPI interface.
 type MockBasicgRPCAPI struct {
 	ctrl     *gomock.Controller
