@@ -7,9 +7,6 @@ import (
 	"time"
 
 	"toc-machine-trading/internal/entity"
-	"toc-machine-trading/internal/usecase/grpcapi"
-	"toc-machine-trading/internal/usecase/rabbit"
-	"toc-machine-trading/internal/usecase/repo"
 	"toc-machine-trading/pkg/config"
 )
 
@@ -29,7 +26,7 @@ type StreamUseCase struct {
 }
 
 // NewStream -.
-func NewStream(r *repo.StreamRepo, g *grpcapi.StreamgRPCAPI, t *rabbit.StreamRabbit) *StreamUseCase {
+func NewStream(r StreamRepo, g StreamgRPCAPI, t StreamRabbit) *StreamUseCase {
 	uc := &StreamUseCase{
 		repo:    r,
 		rabbit:  t,
@@ -54,7 +51,7 @@ func NewStream(r *repo.StreamRepo, g *grpcapi.StreamgRPCAPI, t *rabbit.StreamRab
 		time.Sleep(time.Until(cc.GetBasicInfo().TradeDay.Add(time.Hour * 9)))
 		for range time.NewTicker(time.Second * 20).C {
 			if uc.tradeInSwitch {
-				if err := uc.realTimeAddTargets(context.Background()); err != nil {
+				if err := uc.realTimeAddTargets(); err != nil {
 					log.Panic(err)
 				}
 			}
@@ -242,7 +239,7 @@ func (uc *StreamUseCase) GetTSESnapshot(ctx context.Context) (*entity.StockSnapS
 	}, nil
 }
 
-func (uc *StreamUseCase) realTimeAddTargets(ctx context.Context) error {
+func (uc *StreamUseCase) realTimeAddTargets() error {
 	data, err := uc.grpcapi.GetAllStockSnapshot()
 	if err != nil {
 		return err

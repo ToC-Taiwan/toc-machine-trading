@@ -84,7 +84,7 @@ analyze:
     tick_analyze_period: 7500
 
     # unit: times
-    rsi_min_count: 600
+    rsi_min_count: 500
 
     # rsi range: 0~1
     rsi_high: 50.2

@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"toc-machine-trading/internal/entity"
-	"toc-machine-trading/internal/usecase/repo"
 	"toc-machine-trading/pkg/config"
+	"toc-machine-trading/pkg/global"
 )
 
 // AnalyzeUseCase -.
@@ -31,7 +31,7 @@ type AnalyzeUseCase struct {
 }
 
 // NewAnalyze -.
-func NewAnalyze(r *repo.HistoryRepo) *AnalyzeUseCase {
+func NewAnalyze(r HistoryRepo) *AnalyzeUseCase {
 	cfg, err := config.GetConfig()
 	if err != nil {
 		log.Panic(err)
@@ -56,6 +56,7 @@ func NewAnalyze(r *repo.HistoryRepo) *AnalyzeUseCase {
 type simulateResult struct {
 	cfg     config.Analyze
 	balance *entity.TradeBalance
+	orders  []*entity.Order
 }
 
 // AnalyzeAll -.
@@ -128,16 +129,17 @@ func (uc *AnalyzeUseCase) SimulateOnHistoryTick(ctx context.Context, useDefault 
 	}
 
 	uc.FillHistoryTick(uc.targetArr)
-
 	resultChan := make(chan simulateResult)
-	var bestCfg config.Analyze
-	var bestBalance entity.TradeBalance
+
 	go func() {
+		var bestCfg config.Analyze
+		var bestBalance entity.TradeBalance
 		for {
 			res, ok := <-resultChan
 			if !ok {
 				break
 			}
+
 			if res.balance.Total > bestBalance.Total {
 				bestBalance = *res.balance
 				bestCfg = res.cfg
@@ -149,22 +151,26 @@ func (uc *AnalyzeUseCase) SimulateOnHistoryTick(ctx context.Context, useDefault 
 				log.Warnf("RSIMinCount: %d", bestCfg.RSIMinCount)
 				log.Warnf("RSIHigh: %.1f", bestCfg.RSIHigh)
 				log.Warnf("RSILow: %.1f", bestCfg.RSILow)
+				for _, o := range res.orders {
+					log.Warnf("TradeTime: %s, Stock: %s, Action: %d, Qty: %d, Price: %.2f", o.TradeTime.Format(global.LongTimeLayout), o.StockNum, o.Action, o.Quantity, o.Price)
+				}
 			}
 		}
 	}()
 
 	for _, cfg := range generateAnalyzeCfg(useDefault) {
-		simCfg, balance := uc.getSimulateCond(uc.targetArr, cfg)
+		simCfg, balance, orders := uc.getSimulateCond(uc.targetArr, cfg)
 		resultChan <- simulateResult{
 			cfg:     simCfg,
 			balance: balance,
+			orders:  orders,
 		}
 	}
 	close(resultChan)
 	log.Info("Simulate Done")
 }
 
-func (uc *AnalyzeUseCase) getSimulateCond(targetArr []*entity.Target, analyzeCfg config.Analyze) (config.Analyze, *entity.TradeBalance) {
+func (uc *AnalyzeUseCase) getSimulateCond(targetArr []*entity.Target, analyzeCfg config.Analyze) (config.Analyze, *entity.TradeBalance, []*entity.Order) {
 	var wg sync.WaitGroup
 	var agentArr []*SimulateTradeAgent
 	var agentLock sync.Mutex
@@ -209,12 +215,12 @@ func (uc *AnalyzeUseCase) getSimulateCond(targetArr []*entity.Target, analyzeCfg
 	}
 
 	if len(allOrders) == 0 {
-		return config.Analyze{}, &entity.TradeBalance{}
+		return config.Analyze{}, &entity.TradeBalance{}, []*entity.Order{}
 	}
 
 	balancer := NewSimulateBalance(uc.quotaCfg, allOrders)
-	tmp := balancer.calculateBalance(allOrders)
-	return analyzeCfg, tmp
+	tmp, orders := balancer.calculateBalance(allOrders)
+	return analyzeCfg, tmp, orders
 }
 
 // SimulateBalance -.
@@ -231,7 +237,7 @@ func NewSimulateBalance(quotaCfg config.Quota, allOrders []*entity.Order) *Simul
 	}
 }
 
-func (uc *SimulateBalance) calculateBalance(allOrders []*entity.Order) *entity.TradeBalance {
+func (uc *SimulateBalance) calculateBalance(allOrders []*entity.Order) (*entity.TradeBalance, []*entity.Order) {
 	forwardOrder, reverseOrder := uc.splitOrdersByAction(allOrders)
 	var forwardBalance, revereBalance, discount, tradeCount int64
 	for _, v := range forwardOrder {
@@ -268,7 +274,7 @@ func (uc *SimulateBalance) calculateBalance(allOrders []*entity.Order) *entity.T
 		Total:           forwardBalance + revereBalance + discount,
 	}
 
-	return tmp
+	return tmp, allOrders
 }
 
 func (uc *SimulateBalance) splitOrdersByQuota(allOrders []*entity.Order) ([]*entity.Order, []*entity.Order) {

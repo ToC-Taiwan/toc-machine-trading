@@ -85,14 +85,14 @@ func (r *orderRoutes) calculateForwardDayTradeBalance(c *gin.Context) {
 	buyPrice, err := strconv.ParseFloat(buyPriceString, 64)
 	if err != nil {
 		log.Error(err)
-		errorResponse(c, http.StatusInternalServerError, err.Error())
+		errorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 	buyQuantityString := c.Request.Header.Get("buy_quantity")
 	buyQuantity, err := strconv.ParseInt(buyQuantityString, 10, 64)
 	if err != nil {
 		log.Error(err)
-		errorResponse(c, http.StatusInternalServerError, err.Error())
+		errorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -100,7 +100,7 @@ func (r *orderRoutes) calculateForwardDayTradeBalance(c *gin.Context) {
 	sellPrice, err := strconv.ParseFloat(sellPriceString, 64)
 	if err != nil {
 		log.Error(err)
-		errorResponse(c, http.StatusInternalServerError, err.Error())
+		errorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -108,7 +108,7 @@ func (r *orderRoutes) calculateForwardDayTradeBalance(c *gin.Context) {
 	sellQuantity, err := strconv.ParseInt(sellQuantityString, 10, 64)
 	if err != nil {
 		log.Error(err)
-		errorResponse(c, http.StatusInternalServerError, err.Error())
+		errorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -140,7 +140,7 @@ func (r *orderRoutes) calculateReverseDayTradeBalance(c *gin.Context) {
 	sellFirstPrice, err := strconv.ParseFloat(sellFirstPriceString, 64)
 	if err != nil {
 		log.Error(err)
-		errorResponse(c, http.StatusInternalServerError, err.Error())
+		errorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -148,7 +148,7 @@ func (r *orderRoutes) calculateReverseDayTradeBalance(c *gin.Context) {
 	sellFirstQuantity, err := strconv.ParseInt(sellFirstQuantityString, 10, 64)
 	if err != nil {
 		log.Error(err)
-		errorResponse(c, http.StatusInternalServerError, err.Error())
+		errorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -156,14 +156,14 @@ func (r *orderRoutes) calculateReverseDayTradeBalance(c *gin.Context) {
 	buyLaterPrice, err := strconv.ParseFloat(buyLaterPriceString, 64)
 	if err != nil {
 		log.Error(err)
-		errorResponse(c, http.StatusInternalServerError, err.Error())
+		errorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 	buyLaterQuantityString := c.Request.Header.Get("buy_later_quantity")
 	buyLaterQuantity, err := strconv.ParseInt(buyLaterQuantityString, 10, 64)
 	if err != nil {
 		log.Error(err)
-		errorResponse(c, http.StatusInternalServerError, err.Error())
+		errorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 

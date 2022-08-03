@@ -8,8 +8,6 @@ import (
 	"time"
 
 	"toc-machine-trading/internal/entity"
-	"toc-machine-trading/internal/usecase/grpcapi"
-	"toc-machine-trading/internal/usecase/repo"
 	"toc-machine-trading/pkg/config"
 	"toc-machine-trading/pkg/global"
 	"toc-machine-trading/pkg/utils"
@@ -28,7 +26,7 @@ type HistoryUseCase struct {
 }
 
 // NewHistory -.
-func NewHistory(r *repo.HistoryRepo, t *grpcapi.HistorygRPCAPI) *HistoryUseCase {
+func NewHistory(r HistoryRepo, t HistorygRPCAPI) *HistoryUseCase {
 	uc := &HistoryUseCase{
 		repo:      r,
 		grpcapi:   t,

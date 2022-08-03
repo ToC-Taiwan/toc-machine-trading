@@ -56,8 +56,8 @@ type (
 		QueryTargetsByTradeDay(ctx context.Context, tradeDay time.Time) ([]*entity.Target, error)
 	}
 
-	// TargetRPCAPI -.
-	TargetRPCAPI interface {
+	// TargetgRPCAPI -.
+	TargetgRPCAPI interface {
 		GetStockVolumeRank(date string) ([]*pb.StockVolumeRankMessage, error)
 		SubscribeStockTick(stockNumArr []string) ([]string, error)
 		UnSubscribeStockTick(stockNumArr []string) ([]string, error)

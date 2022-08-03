@@ -7,8 +7,6 @@ import (
 	"time"
 
 	"toc-machine-trading/internal/entity"
-	"toc-machine-trading/internal/usecase/grpcapi"
-	"toc-machine-trading/internal/usecase/repo"
 	"toc-machine-trading/pkg/config"
 	"toc-machine-trading/pkg/global"
 )
@@ -25,7 +23,7 @@ type OrderUseCase struct {
 }
 
 // NewOrder -.
-func NewOrder(t *grpcapi.OrdergRPCAPI, r *repo.OrderRepo) *OrderUseCase {
+func NewOrder(t OrdergRPCAPI, r OrderRepo) *OrderUseCase {
 	cfg, err := config.GetConfig()
 	if err != nil {
 		log.Panic(err)

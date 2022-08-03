@@ -3,12 +3,10 @@ package usecase
 import (
 	"context"
 	"encoding/json"
-	"io/ioutil"
+	"os"
 	"time"
 
 	"toc-machine-trading/internal/entity"
-	"toc-machine-trading/internal/usecase/grpcapi"
-	"toc-machine-trading/internal/usecase/repo"
 	"toc-machine-trading/pkg/config"
 	"toc-machine-trading/pkg/global"
 )
@@ -20,7 +18,7 @@ type BasicUseCase struct {
 }
 
 // NewBasic -.
-func NewBasic(r *repo.BasicRepo, t *grpcapi.BasicgRPCAPI) *BasicUseCase {
+func NewBasic(r BasicRepo, t BasicgRPCAPI) *BasicUseCase {
 	uc := &BasicUseCase{repo: r, gRPCAPI: t}
 	go func() {
 		err := uc.gRPCAPI.Heartbeat()
@@ -181,7 +179,7 @@ func parseHolidayFile() ([]string, error) {
 		DateArr []string `json:"date_arr"`
 	}
 
-	holidayFile, err := ioutil.ReadFile("./data/holidays.json")
+	holidayFile, err := os.ReadFile("./data/holidays.json")
 	if err != nil {
 		return []string{}, err
 	}

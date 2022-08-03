@@ -7,8 +7,6 @@ import (
 	"time"
 
 	"toc-machine-trading/internal/entity"
-	"toc-machine-trading/internal/usecase/grpcapi"
-	"toc-machine-trading/internal/usecase/repo"
 	"toc-machine-trading/pkg/config"
 	"toc-machine-trading/pkg/global"
 )
@@ -16,11 +14,11 @@ import (
 // TargetUseCase -.
 type TargetUseCase struct {
 	repo    TargetRepo
-	gRPCAPI TargetRPCAPI
+	gRPCAPI TargetgRPCAPI
 }
 
 // NewTarget -.
-func NewTarget(r *repo.TargetRepo, t *grpcapi.TargetgRPCAPI) *TargetUseCase {
+func NewTarget(r TargetRepo, t TargetgRPCAPI) *TargetUseCase {
 	uc := &TargetUseCase{
 		repo:    r,
 		gRPCAPI: t,
