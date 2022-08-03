@@ -58,8 +58,10 @@ func (uc *HistoryUseCase) GetDayKbarByStockNumDate(stockNum string, date time.Ti
 
 // FetchHistory FetchHistory
 func (uc *HistoryUseCase) FetchHistory(ctx context.Context, targetArr []*entity.Target) {
-	var fetchArr []*entity.Target
+	defer uc.mutex.Unlock()
 	uc.mutex.Lock()
+
+	var fetchArr []*entity.Target
 	for _, v := range targetArr {
 		if _, ok := uc.fetchList[v.StockNum]; ok {
 			continue
@@ -67,7 +69,6 @@ func (uc *HistoryUseCase) FetchHistory(ctx context.Context, targetArr []*entity.
 		uc.fetchList[v.StockNum] = v
 		fetchArr = append(fetchArr, v)
 	}
-	uc.mutex.Unlock()
 
 	if len(fetchArr) == 0 {
 		return
