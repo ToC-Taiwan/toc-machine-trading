@@ -58,7 +58,10 @@ func (uc *HistoryUseCase) GetDayKbarByStockNumDate(stockNum string, date time.Ti
 
 // FetchHistory FetchHistory
 func (uc *HistoryUseCase) FetchHistory(ctx context.Context, targetArr []*entity.Target) {
-	defer uc.mutex.Unlock()
+	defer func() {
+		bus.PublishTopicEvent(topicFetchHistoryDone)
+		uc.mutex.Unlock()
+	}()
 	uc.mutex.Lock()
 
 	var fetchArr []*entity.Target

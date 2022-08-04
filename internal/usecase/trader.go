@@ -229,7 +229,7 @@ func (o *TradeAgent) cancelOrder(order *entity.Order) {
 				o.waitingOrder = nil
 				return
 			} else if order.TradeTime.Add(o.cancelWaitTime).Before(time.Now()) {
-				log.Errorf("Cancel Order Timeout -> Stock: %s, Action: %d, Price: %.2f, Qty: %d", order.StockNum, order.Action, order.Price, order.Quantity)
+				log.Warnf("Try Cancel Order Again -> Stock: %s, Action: %d, Price: %.2f, Qty: %d", order.StockNum, order.Action, order.Price, order.Quantity)
 				go o.checkPlaceOrderStatus(order)
 				return
 			}

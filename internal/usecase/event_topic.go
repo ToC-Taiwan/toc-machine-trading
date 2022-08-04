@@ -6,7 +6,9 @@ const (
 	topicSubscribeTickTargets   string = "subscribe_targets"
 	topicUnSubscribeTickTargets string = "unsubscribe_targets"
 
-	topicFetchHistory   string = "fetch_history"
+	topicFetchHistory     string = "fetch_history"
+	topicFetchHistoryDone string = "fetch_history_done"
+
 	topicAnalyzeTargets string = "analyze_targets"
 
 	topicPlaceOrder          string = "place_order"
