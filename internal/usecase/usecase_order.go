@@ -366,6 +366,6 @@ func (uc *OrderUseCase) keepUpdateOrder() {
 	uc.needUpdateAskOrder = true
 }
 
-func (uc *OrderUseCase) abortUpdateOrder() {
+func (uc *OrderUseCase) abortUpdateOrder(ctx context.Context, targetArr []*entity.Target) {
 	uc.needUpdateAskOrder = false
 }
