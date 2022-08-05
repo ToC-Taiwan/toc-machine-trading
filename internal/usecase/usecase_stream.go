@@ -269,15 +269,13 @@ func (uc *StreamUseCase) realTimeAddTargets() error {
 				continue
 			}
 
-			if !blackStockFilter(stock.Number, uc.targetCond) || !blackCatagoryFilter(stock.Category, uc.targetCond) {
+			if !blackStockFilter(stock.Number, uc.targetCond) ||
+				!blackCatagoryFilter(stock.Category, uc.targetCond) ||
+				!targetFilter(d.GetClose(), d.GetTotalVolume(), c, true) {
 				continue
 			}
 
-			if !targetFilter(d.GetClose(), d.GetTotalVolume(), c, true) {
-				continue
-			}
-
-			if targetsMap[d.GetCode()] == nil {
+			if targetsMap[d.GetCode()] == nil && c.PreFetch {
 				newTargets = append(newTargets, &entity.Target{
 					Rank:     100 + i + 1,
 					StockNum: d.GetCode(),

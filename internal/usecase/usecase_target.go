@@ -107,11 +107,9 @@ func (uc *TargetUseCase) SearchTradeDayTargets(ctx context.Context, tradeDay tim
 				continue
 			}
 
-			if !blackStockFilter(stock.Number, condition) || !blackCatagoryFilter(stock.Category, condition) {
-				continue
-			}
-
-			if !targetFilter(v.GetClose(), v.GetTotalVolume(), c, false) {
+			if !blackStockFilter(stock.Number, condition) ||
+				!blackCatagoryFilter(stock.Category, condition) ||
+				!targetFilter(v.GetClose(), v.GetTotalVolume(), c, false) {
 				continue
 			}
 

@@ -20,8 +20,6 @@ type OrderUseCase struct {
 	quota          *Quota
 	simTrade       bool
 	placeOrderLock sync.Mutex
-
-	needUpdateAskOrder bool
 }
 
 // NewOrder -.
@@ -43,8 +41,6 @@ func NewOrder(t OrdergRPCAPI, r OrderRepo) *OrderUseCase {
 	bus.SubscribeTopic(topicPlaceOrder, uc.placeOrder)
 	bus.SubscribeTopic(topicCancelOrder, uc.cancelOrder)
 	bus.SubscribeTopic(topicInsertOrUpdateOrder, uc.updateCacheAndInsertDB)
-	bus.SubscribeTopic(topicFetchHistory, uc.abortUpdateOrder)
-	bus.SubscribeTopic(topicFetchHistoryDone, uc.keepUpdateOrder)
 
 	go func() {
 		for range time.NewTicker(time.Minute).C {
@@ -58,10 +54,6 @@ func NewOrder(t OrdergRPCAPI, r OrderRepo) *OrderUseCase {
 
 	go func() {
 		for range time.NewTicker(2500 * time.Millisecond).C {
-			if !uc.needUpdateAskOrder {
-				continue
-			}
-
 			if time.Now().After(uc.basicInfo.OpenTime) && time.Now().Before(uc.basicInfo.EndTime) {
 				uc.askOrderUpdate()
 			}
@@ -360,12 +352,4 @@ func (uc *OrderUseCase) CalculateSellCost(price float64, quantity int64) int64 {
 // CalculateTradeDiscount -.
 func (uc *OrderUseCase) CalculateTradeDiscount(price float64, quantity int64) int64 {
 	return uc.quota.GetStockTradeFeeDiscount(price, quantity)
-}
-
-func (uc *OrderUseCase) keepUpdateOrder() {
-	uc.needUpdateAskOrder = true
-}
-
-func (uc *OrderUseCase) abortUpdateOrder(ctx context.Context, targetArr []*entity.Target) {
-	uc.needUpdateAskOrder = false
 }
