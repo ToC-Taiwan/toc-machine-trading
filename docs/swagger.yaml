@@ -74,8 +74,6 @@ definitions:
         type: number
       limit_volume:
         type: integer
-      pre_fetch:
-        type: boolean
     type: object
   config.Quota:
     properties:
@@ -246,8 +244,6 @@ definitions:
     properties:
       id:
         type: integer
-      pre_fetch:
-        type: boolean
       rank:
         type: integer
       real_time:
@@ -593,6 +589,24 @@ paths:
           schema:
             $ref: '#/definitions/v1.response'
       summary: calculateReverseDayTradeBalance
+      tags:
+      - order
+  /order/status/update:
+    put:
+      consumes:
+      - application/json
+      description: askOrderUpdate
+      operationId: askOrderUpdate
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+      summary: askOrderUpdate
       tags:
       - order
   /stream/tse/snapshot:

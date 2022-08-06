@@ -15,6 +15,8 @@ import (
 type TargetUseCase struct {
 	repo    TargetRepo
 	gRPCAPI TargetgRPCAPI
+
+	targetCond config.TargetCond
 }
 
 // NewTarget -.
@@ -24,8 +26,14 @@ func NewTarget(r TargetRepo, t TargetgRPCAPI) *TargetUseCase {
 		gRPCAPI: t,
 	}
 
+	cfg, err := config.GetConfig()
+	if err != nil {
+		log.Panic(err)
+	}
+	uc.targetCond = cfg.TargetCond
+
 	// unsubscriba all first
-	if err := uc.UnSubscribeAll(context.Background()); err != nil {
+	if err = uc.UnSubscribeAll(context.Background()); err != nil {
 		log.Panic("unsubscribe all fail")
 	}
 
@@ -77,14 +85,6 @@ func (uc *TargetUseCase) GetTargets(ctx context.Context) []*entity.Target {
 	return cc.GetTargets()
 }
 
-// InsertTargets - insert targets to db
-func (uc *TargetUseCase) InsertTargets(ctx context.Context, targetArr []*entity.Target) error {
-	if err := uc.repo.InsertTargetArr(ctx, targetArr); err != nil {
-		return err
-	}
-	return nil
-}
-
 // SearchTradeDayTargets - search targets by trade day
 func (uc *TargetUseCase) SearchTradeDayTargets(ctx context.Context, tradeDay time.Time) ([]*entity.Target, error) {
 	lastTradeDay := cc.GetBasicInfo().LastTradeDay
@@ -93,12 +93,7 @@ func (uc *TargetUseCase) SearchTradeDayTargets(ctx context.Context, tradeDay tim
 		return nil, err
 	}
 
-	cfg, err := config.GetConfig()
-	if err != nil {
-		return nil, err
-	}
-	condition := cfg.TargetCond
-
+	condition := uc.targetCond
 	var result []*entity.Target
 	for _, c := range condition.PriceVolumeLimit {
 		for _, v := range t {
@@ -117,7 +112,6 @@ func (uc *TargetUseCase) SearchTradeDayTargets(ctx context.Context, tradeDay tim
 				Rank:     len(result) + 1,
 				StockNum: v.GetCode(),
 				Volume:   v.GetTotalVolume(),
-				PreFetch: c.PreFetch,
 				RealTime: false,
 				TradeDay: tradeDay,
 				Stock:    stock,

@@ -436,6 +436,33 @@ const docTemplate = `{
                 }
             }
         },
+        "/order/status/update": {
+            "put": {
+                "description": "askOrderUpdate",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "order"
+                ],
+                "summary": "askOrderUpdate",
+                "operationId": "askOrderUpdate",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/v1.response"
+                        }
+                    }
+                }
+            }
+        },
         "/stream/tse/snapshot": {
             "get": {
                 "description": "getTSESnapshot",
@@ -609,9 +636,6 @@ const docTemplate = `{
                 },
                 "limit_volume": {
                     "type": "integer"
-                },
-                "pre_fetch": {
-                    "type": "boolean"
                 }
             }
         },
@@ -872,9 +896,6 @@ const docTemplate = `{
             "properties": {
                 "id": {
                     "type": "integer"
-                },
-                "pre_fetch": {
-                    "type": "boolean"
                 },
                 "rank": {
                     "type": "integer"

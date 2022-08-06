@@ -275,12 +275,11 @@ func (uc *StreamUseCase) realTimeAddTargets() error {
 				continue
 			}
 
-			if targetsMap[d.GetCode()] == nil && c.PreFetch {
+			if targetsMap[d.GetCode()] == nil {
 				newTargets = append(newTargets, &entity.Target{
 					Rank:     100 + i + 1,
 					StockNum: d.GetCode(),
 					Volume:   d.GetTotalVolume(),
-					PreFetch: c.PreFetch,
 					RealTime: true,
 					TradeDay: uc.basic.TradeDay,
 					Stock:    stock,

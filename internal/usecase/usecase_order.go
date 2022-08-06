@@ -53,9 +53,13 @@ func NewOrder(t OrdergRPCAPI, r OrderRepo) *OrderUseCase {
 	}()
 
 	go func() {
-		for range time.NewTicker(2500 * time.Millisecond).C {
+		time.Sleep(time.Until(uc.basicInfo.OpenTime))
+		for range time.NewTicker(5 * time.Second).C {
 			if time.Now().After(uc.basicInfo.OpenTime) && time.Now().Before(uc.basicInfo.EndTime) {
-				uc.askOrderUpdate()
+				err := uc.AskOrderUpdate()
+				if err != nil {
+					log.Error(err)
+				}
 			}
 		}
 	}()
@@ -202,28 +206,28 @@ func (uc *OrderUseCase) CancelOrderID(orderID string) (string, entity.OrderStatu
 	return result.GetOrderId(), statusMap[result.GetStatus()], nil
 }
 
-func (uc *OrderUseCase) askOrderUpdate() {
+// AskOrderUpdate -.
+func (uc *OrderUseCase) AskOrderUpdate() error {
 	if !uc.simTrade {
 		msg, err := uc.gRPCAPI.GetNonBlockOrderStatusArr()
 		if err != nil {
-			log.Panic(err)
+			return err
 		}
 
 		if errMsg := msg.GetErr(); errMsg != "" {
-			log.Panic(errMsg)
+			return errors.New(errMsg)
 		}
 	} else {
 		orders, err := uc.gRPCAPI.GetOrderStatusArr()
 		if err != nil {
-			log.Panic(err)
+			return err
 		}
 		actionMap := entity.ActionListMap
 		statusMap := entity.StatusListMap
 		for _, v := range orders {
 			orderTime, err := time.ParseInLocation(global.LongTimeLayout, v.GetOrderTime(), time.Local)
 			if err != nil {
-				log.Error(err)
-				continue
+				return err
 			}
 			o := &entity.Order{
 				StockNum:  v.GetCode(),
@@ -237,6 +241,7 @@ func (uc *OrderUseCase) askOrderUpdate() {
 			uc.updateCacheAndInsertDB(o)
 		}
 	}
+	return nil
 }
 
 func (uc *OrderUseCase) updateCacheAndInsertDB(order *entity.Order) {

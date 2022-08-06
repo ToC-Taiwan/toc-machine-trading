@@ -51,7 +51,6 @@ type (
 
 	// TargetRepo -.
 	TargetRepo interface {
-		InsertTargetArr(ctx context.Context, t []*entity.Target) error
 		InsertOrUpdateTargetArr(ctx context.Context, t []*entity.Target) error
 		QueryTargetsByTradeDay(ctx context.Context, tradeDay time.Time) ([]*entity.Target, error)
 	}
@@ -141,6 +140,8 @@ type (
 		CalculateBuyCost(price float64, quantity int64) int64
 		CalculateSellCost(price float64, quantity int64) int64
 		CalculateTradeDiscount(price float64, quantity int64) int64
+
+		AskOrderUpdate() error
 	}
 
 	// OrderRepo -.

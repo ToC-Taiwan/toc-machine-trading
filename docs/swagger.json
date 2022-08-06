@@ -427,6 +427,33 @@
                 }
             }
         },
+        "/order/status/update": {
+            "put": {
+                "description": "askOrderUpdate",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "order"
+                ],
+                "summary": "askOrderUpdate",
+                "operationId": "askOrderUpdate",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/v1.response"
+                        }
+                    }
+                }
+            }
+        },
         "/stream/tse/snapshot": {
             "get": {
                 "description": "getTSESnapshot",
@@ -600,9 +627,6 @@
                 },
                 "limit_volume": {
                     "type": "integer"
-                },
-                "pre_fetch": {
-                    "type": "boolean"
                 }
             }
         },
@@ -863,9 +887,6 @@
             "properties": {
                 "id": {
                     "type": "integer"
-                },
-                "pre_fetch": {
-                    "type": "boolean"
                 },
                 "rank": {
                     "type": "integer"

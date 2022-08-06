@@ -89,7 +89,7 @@ func (uc *HistoryUseCase) FetchHistory(ctx context.Context, targetArr []*entity.
 		log.Panic(err)
 	}
 
-	bus.PublishTopicEvent(topicAnalyzeTargets, ctx, targetArr)
+	bus.PublishTopicEvent(topicAnalyzeTargets, ctx, fetchArr)
 }
 
 func (uc *HistoryUseCase) fetchHistoryClose(targetArr []*entity.Target) error {

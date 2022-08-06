@@ -316,20 +316,6 @@ func (mr *MockTargetRepoMockRecorder) InsertOrUpdateTargetArr(ctx, t interface{}
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertOrUpdateTargetArr", reflect.TypeOf((*MockTargetRepo)(nil).InsertOrUpdateTargetArr), ctx, t)
 }
 
-// InsertTargetArr mocks base method.
-func (m *MockTargetRepo) InsertTargetArr(ctx context.Context, t []*entity.Target) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "InsertTargetArr", ctx, t)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// InsertTargetArr indicates an expected call of InsertTargetArr.
-func (mr *MockTargetRepoMockRecorder) InsertTargetArr(ctx, t interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertTargetArr", reflect.TypeOf((*MockTargetRepo)(nil).InsertTargetArr), ctx, t)
-}
-
 // QueryTargetsByTradeDay mocks base method.
 func (m *MockTargetRepo) QueryTargetsByTradeDay(ctx context.Context, tradeDay time.Time) ([]*entity.Target, error) {
 	m.ctrl.T.Helper()
@@ -1119,6 +1105,20 @@ func NewMockOrder(ctrl *gomock.Controller) *MockOrder {
 // EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockOrder) EXPECT() *MockOrderMockRecorder {
 	return m.recorder
+}
+
+// AskOrderUpdate mocks base method.
+func (m *MockOrder) AskOrderUpdate() error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AskOrderUpdate")
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// AskOrderUpdate indicates an expected call of AskOrderUpdate.
+func (mr *MockOrderMockRecorder) AskOrderUpdate() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AskOrderUpdate", reflect.TypeOf((*MockOrder)(nil).AskOrderUpdate))
 }
 
 // CalculateBuyCost mocks base method.

@@ -54,19 +54,12 @@ target_cond:
         - limit_price_low: 10
           limit_price_high: 35
           limit_volume: 10000
-          pre_fetch: true
-        - limit_price_low: 35
-          limit_price_high: 100
-          limit_volume: 8000
-          pre_fetch: false
+        - limit_price_low: 50
+          limit_price_high: 75
+          limit_volume: 5000
         - limit_price_low: 100
           limit_price_high: 125
           limit_volume: 2000
-          pre_fetch: true
-        - limit_price_low: 125
-          limit_price_high: 200
-          limit_volume: 2000
-          pre_fetch: false
 
 analyze:
     # unit: %
