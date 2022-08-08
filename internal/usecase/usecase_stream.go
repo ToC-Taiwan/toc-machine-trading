@@ -49,7 +49,7 @@ func NewStream(r StreamRepo, g StreamgRPCAPI, t StreamRabbit) *StreamUseCase {
 
 	go func() {
 		time.Sleep(time.Until(cc.GetBasicInfo().TradeDay.Add(time.Hour * 9)))
-		for range time.NewTicker(time.Second * 20).C {
+		for range time.NewTicker(time.Second * 30).C {
 			if uc.tradeInSwitch {
 				if err := uc.realTimeAddTargets(); err != nil {
 					log.Panic(err)

@@ -261,6 +261,10 @@ func (uc *SimulateBalance) calculateBalance(allOrders []*entity.Order) (*entity.
 		// log.Warnf("TradeTime: %s, Stock: %s, Action: %d, Qty: %d, Price: %.2f", v.TradeTime.Format(global.LongTimeLayout), v.StockNum, v.Action, v.Quantity, v.Price)
 	}
 
+	var orders []*entity.Order
+	orders = append(orders, forwardOrder...)
+	orders = append(orders, reverseOrder...)
+
 	tmp := &entity.TradeBalance{
 		TradeDay:        cc.GetBasicInfo().TradeDay,
 		TradeCount:      tradeCount,
@@ -271,7 +275,7 @@ func (uc *SimulateBalance) calculateBalance(allOrders []*entity.Order) (*entity.
 		Total:           forwardBalance + revereBalance + discount,
 	}
 
-	return tmp, allOrders
+	return tmp, orders
 }
 
 func (uc *SimulateBalance) splitOrdersByQuota(allOrders []*entity.Order) ([]*entity.Order, []*entity.Order) {

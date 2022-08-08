@@ -1,6 +1,19 @@
-# [](https://gitlab.tocraw.com/root/toc-machine-trading/compare/v0.0.4...v) (2022-07-29)
+# [](https://gitlab.tocraw.com/root/toc-machine-trading/compare/v0.0.5...v) (2022-08-08)
 
 ## CHANGELOG
+
+## [0.0.5](https://gitlab.tocraw.com/root/toc-machine-trading/compare/v0.0.4...v0.0.5) (2022-08-06)
+
+### Bug Fixes
+
+* **status:** fix fetch history done event wrong input function ([01f980a](https://gitlab.tocraw.com/root/toc-machine-trading/commit/01f980aac99975489d794ee268334e94a7881e99))
+
+### Features
+
+* **event:** remove fetch_history_done event ([b459003](https://gitlab.tocraw.com/root/toc-machine-trading/commit/b459003cbc4fe7dc896b474dd7e698b54ab0ffe7))
+* **history:** add fetch history event lock ([4545426](https://gitlab.tocraw.com/root/toc-machine-trading/commit/4545426be2d948e98e3859b17f27dad66fb7541e))
+* **status:** add fetch history done event to control update order status or not ([649d848](https://gitlab.tocraw.com/root/toc-machine-trading/commit/649d848b6e55ac8fc1ea1f1ac39808be5a273c0a))
+* **target:** remove pre-fetch in target cond, fix wrong target send to analyze ([5ccac3e](https://gitlab.tocraw.com/root/toc-machine-trading/commit/5ccac3ec93314683554454e3e77980c3d7f8301b))
 
 ## [0.0.4](https://gitlab.tocraw.com/root/toc-machine-trading/compare/v0.0.3...v0.0.4) (2022-07-29)
 
