@@ -69,10 +69,6 @@ func initLogger() {
 			DisableHTMLEscape: true,
 			TimestampFormat:   global.LongTimeLayout,
 			PrettyPrint:       false,
-			CallerPrettyfier: func(frame *runtime.Frame) (function string, file string) {
-				fileName := strings.ReplaceAll(frame.File, fmt.Sprintf("%s/", basePath), "")
-				return fmt.Sprintf("%s:%d", fileName, frame.Line), ""
-			},
 		})
 	}
 
@@ -85,17 +81,17 @@ func initLogger() {
 }
 
 func fileHook(basePath string) *lfshook.LfsHook {
-	folderName := time.Now().Format("20060102")
-	folderName = strings.ReplaceAll(folderName, ":", "")
+	date := time.Now().Format("20060102")
+	date = strings.ReplaceAll(date, ":", "")
 
 	pathMap := lfshook.PathMap{
-		logrus.PanicLevel: filepath.Join(basePath, "/logs/", folderName, "/panic.json"),
-		logrus.FatalLevel: filepath.Join(basePath, "/logs/", folderName, "/fetal.json"),
-		logrus.ErrorLevel: filepath.Join(basePath, "/logs/", folderName, "/error.json"),
-		logrus.WarnLevel:  filepath.Join(basePath, "/logs/", folderName, "/warn.json"),
-		logrus.InfoLevel:  filepath.Join(basePath, "/logs/", folderName, "/info.json"),
-		logrus.DebugLevel: filepath.Join(basePath, "/logs/", folderName, "/debug.json"),
-		logrus.TraceLevel: filepath.Join(basePath, "/logs/", folderName, "/error.json"),
+		logrus.PanicLevel: filepath.Join(basePath, fmt.Sprintf("/logs/tmt-%s.log", date)),
+		logrus.FatalLevel: filepath.Join(basePath, fmt.Sprintf("/logs/tmt-%s.log", date)),
+		logrus.ErrorLevel: filepath.Join(basePath, fmt.Sprintf("/logs/tmt-%s.log", date)),
+		logrus.WarnLevel:  filepath.Join(basePath, fmt.Sprintf("/logs/tmt-%s.log", date)),
+		logrus.InfoLevel:  filepath.Join(basePath, fmt.Sprintf("/logs/tmt-%s.log", date)),
+		logrus.DebugLevel: filepath.Join(basePath, fmt.Sprintf("/logs/tmt-%s.log", date)),
+		logrus.TraceLevel: filepath.Join(basePath, fmt.Sprintf("/logs/tmt-%s.log", date)),
 	}
 
 	return lfshook.NewHook(
@@ -103,7 +99,7 @@ func fileHook(basePath string) *lfshook.LfsHook {
 		&logrus.JSONFormatter{
 			DisableHTMLEscape: true,
 			TimestampFormat:   global.LongTimeLayout,
-			PrettyPrint:       false,
+			PrettyPrint:       true,
 			CallerPrettyfier: func(frame *runtime.Frame) (function string, file string) {
 				fileName := strings.ReplaceAll(frame.File, fmt.Sprintf("%s/", basePath), "")
 				return fmt.Sprintf("%s:%d", fileName, frame.Line), ""
