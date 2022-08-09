@@ -349,26 +349,77 @@ func generateAnalyzeCfg(useDefault bool) []config.Analyze {
 
 	base := []config.Analyze{
 		{
+			RSIMinCount: 250,
+			RSIHigh:     95,
+			RSILow:      5,
+
 			OutInRatio:        95,
 			InOutRatio:        95,
 			VolumePRLimit:     99,
 			TickAnalyzePeriod: cfg.Analyze.TickAnalyzePeriod,
-			RSIMinCount:       150,
-			RSIHigh:           50,
-			RSILow:            50,
 		},
 	}
 
 	AppendRSICountVar(&base)
 	AppendRSIHighVar(&base)
 	AppendRSILowVar(&base)
-	AppendVolumePRLimitVar(&base)
-	AppendOutInRatioVar(&base)
-	AppendInOutRatioVar(&base)
+
+	// AppendVolumePRLimitVar(&base)
+	// AppendOutInRatioVar(&base)
+	// AppendInOutRatioVar(&base)
 
 	log.Warnf("Total analyze times: %d", len(base))
 
 	return base
+}
+
+// AppendRSICountVar -.
+func AppendRSICountVar(cfgArr *[]config.Analyze) {
+	var appendCfg []config.Analyze
+	for _, v := range *cfgArr {
+		for {
+			if v.RSIMinCount <= 50 {
+				break
+			}
+			v.RSIMinCount -= 10
+			appendCfg = append(appendCfg, v)
+		}
+	}
+	*cfgArr = append(*cfgArr, appendCfg...)
+}
+
+// AppendRSIHighVar -.
+func AppendRSIHighVar(cfgArr *[]config.Analyze) {
+	var appendCfg []config.Analyze
+	for _, v := range *cfgArr {
+		for {
+			if v.RSIHigh <= 50 {
+				break
+			}
+			v.RSIHigh -= 5
+			if v.RSIHigh >= v.RSILow {
+				appendCfg = append(appendCfg, v)
+			}
+		}
+	}
+	*cfgArr = append(*cfgArr, appendCfg...)
+}
+
+// AppendRSILowVar -.
+func AppendRSILowVar(cfgArr *[]config.Analyze) {
+	var appendCfg []config.Analyze
+	for _, v := range *cfgArr {
+		for {
+			if v.RSILow >= 50 {
+				break
+			}
+			v.RSILow += 5
+			if v.RSIHigh >= v.RSILow {
+				appendCfg = append(appendCfg, v)
+			}
+		}
+	}
+	*cfgArr = append(*cfgArr, appendCfg...)
 }
 
 // AppendOutInRatioVar -.
@@ -412,55 +463,6 @@ func AppendVolumePRLimitVar(cfgArr *[]config.Analyze) {
 			v.VolumePRLimit--
 
 			appendCfg = append(appendCfg, v)
-		}
-	}
-	*cfgArr = append(*cfgArr, appendCfg...)
-}
-
-// AppendRSICountVar -.
-func AppendRSICountVar(cfgArr *[]config.Analyze) {
-	var appendCfg []config.Analyze
-	for _, v := range *cfgArr {
-		for {
-			if v.RSIMinCount >= 600 {
-				break
-			}
-			v.RSIMinCount += 150
-			appendCfg = append(appendCfg, v)
-		}
-	}
-	*cfgArr = append(*cfgArr, appendCfg...)
-}
-
-// AppendRSIHighVar -.
-func AppendRSIHighVar(cfgArr *[]config.Analyze) {
-	var appendCfg []config.Analyze
-	for _, v := range *cfgArr {
-		for {
-			if v.RSIHigh >= 50.1 {
-				break
-			}
-			v.RSIHigh += 0.1
-			if v.RSIHigh >= v.RSILow {
-				appendCfg = append(appendCfg, v)
-			}
-		}
-	}
-	*cfgArr = append(*cfgArr, appendCfg...)
-}
-
-// AppendRSILowVar -.
-func AppendRSILowVar(cfgArr *[]config.Analyze) {
-	var appendCfg []config.Analyze
-	for _, v := range *cfgArr {
-		for {
-			if v.RSILow <= 49.9 {
-				break
-			}
-			v.RSILow -= 0.1
-			if v.RSIHigh >= v.RSILow {
-				appendCfg = append(appendCfg, v)
-			}
 		}
 	}
 	*cfgArr = append(*cfgArr, appendCfg...)

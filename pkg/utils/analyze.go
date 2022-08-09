@@ -3,6 +3,7 @@ package utils
 
 import (
 	"errors"
+	"math"
 
 	"github.com/markcheno/go-talib"
 )
@@ -26,10 +27,25 @@ func GetBiasRateByCloseArr(closeArr []float64) (biasRate float64, err error) {
 }
 
 // GenerateRSI -.
-func GenerateRSI(input []float64) (rsi float64, err error) {
-	rsiArr := talib.Rsi(input, len(input)-1)
-	if len(rsiArr) == 0 {
-		return 0, errors.New("no rsi")
+func GenerateRSI(input []float64, effTimes int) float64 {
+	baseClose := input[0]
+	diff := GetStockDiffByClose(baseClose)
+
+	var positive, negative float64
+	for _, v := range input[1:] {
+		gap := v - baseClose
+		time := math.Abs(Round(gap/diff, 0))
+		switch {
+		case gap > 0:
+			positive += time
+		case gap < 0:
+			negative += time
+		}
 	}
-	return Round(rsiArr[len(rsiArr)-1], 2), err
+
+	if totalEff := positive + negative; totalEff < float64(effTimes) {
+		return 0
+	}
+
+	return Round(100*positive/(positive+negative), 2)
 }

@@ -345,14 +345,5 @@ func (c RealTimeTickArr) getRSIByTickTime(preTime time.Time, count int) float64 
 		}
 	}
 
-	if len(tmp) < count {
-		return 0
-	}
-
-	rsi, err := utils.GenerateRSI(tmp)
-	if err != nil {
-		log.Error(err)
-		return 0
-	}
-	return rsi
+	return utils.GenerateRSI(tmp, count)
 }

@@ -68,21 +68,21 @@ analyze:
     close_change_ratio_high: 1.5
 
     # unit: %
-    out_in_ratio: 80
+    out_in_ratio: 95
     in_out_ratio: 95
 
     # unit: %
-    volume_pr_limit: 95
+    volume_pr_limit: 99
 
     # unit: millisecond
     tick_analyze_period: 7500
 
     # unit: times
-    rsi_min_count: 300
+    rsi_min_count: 150
 
-    # rsi range: 0~1
-    rsi_high: 50.1
-    rsi_low: 50
+    # rsi range: 0~100
+    rsi_high: 75
+    rsi_low: 25
 
     # unit: day
     ma_period: 60

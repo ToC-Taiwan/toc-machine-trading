@@ -10,7 +10,7 @@ func GetNewClose(close float64, unit int64) float64 {
 		if unit == 0 {
 			return Round(close, 2)
 		}
-		diff := GetDiff(close)
+		diff := GetStockDiffByClose(close)
 		if unit > 0 {
 			close += diff
 			unit--
@@ -29,7 +29,7 @@ func GetMaxByOpen(open float64) float64 {
 	tmpClose := open
 	var changeRate, diff float64
 	for {
-		diff = GetDiff(tmpClose)
+		diff = GetStockDiffByClose(tmpClose)
 		tmpClose += diff
 		tmpClose = Round(tmpClose, 2)
 		changeRate = 100 * (tmpClose - open) / open
@@ -47,7 +47,7 @@ func GetMinByOpen(open float64) float64 {
 	tmpClose := open
 	var changeRate, diff float64
 	for {
-		diff = GetDiff(tmpClose)
+		diff = GetStockDiffByClose(tmpClose)
 		tmpClose -= diff
 		tmpClose = Round(tmpClose, 2)
 		changeRate = 100 * (tmpClose - open) / open
@@ -57,8 +57,8 @@ func GetMinByOpen(open float64) float64 {
 	}
 }
 
-// GetDiff GetDiff
-func GetDiff(close float64) float64 {
+// GetStockDiffByClose -.
+func GetStockDiffByClose(close float64) float64 {
 	switch {
 	case close > 0 && close < 10:
 		return 0.01
