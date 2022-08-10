@@ -43,7 +43,6 @@ func initLogger() {
 	// Get current path
 	basePath := global.GetBasePath()
 	globalLogger = logrus.New()
-	globalLogger.SetReportCaller(true)
 
 	var dev bool
 	mode, ok := os.LookupEnv("DEPLOYMENT")
@@ -52,6 +51,7 @@ func initLogger() {
 	}
 
 	if dev {
+		globalLogger.SetReportCaller(true)
 		globalLogger.SetFormatter(&logrus.TextFormatter{
 			TimestampFormat:  "2006/01/02 15:04:05",
 			FullTimestamp:    true,
@@ -100,10 +100,10 @@ func fileHook(basePath string) *lfshook.LfsHook {
 			DisableHTMLEscape: true,
 			TimestampFormat:   global.LongTimeLayout,
 			PrettyPrint:       true,
-			CallerPrettyfier: func(frame *runtime.Frame) (function string, file string) {
-				fileName := strings.ReplaceAll(frame.File, fmt.Sprintf("%s/", basePath), "")
-				return fmt.Sprintf("%s:%d", fileName, frame.Line), ""
-			},
+			// CallerPrettyfier: func(frame *runtime.Frame) (function string, file string) {
+			// 	fileName := strings.ReplaceAll(frame.File, fmt.Sprintf("%s/", basePath), "")
+			// 	return fmt.Sprintf("%s:%d", fileName, frame.Line), ""
+			// },
 		},
 	)
 }
