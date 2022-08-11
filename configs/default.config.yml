@@ -72,17 +72,17 @@ analyze:
     in_out_ratio: 95
 
     # unit: %
-    volume_pr_limit: 99
+    volume_pr_limit: 97.5
 
     # unit: millisecond
-    tick_analyze_period: 7500
+    tick_analyze_period: 5000
 
     # unit: times
-    rsi_min_count: 150
+    rsi_min_count: 450
 
     # rsi range: 0~100
-    rsi_high: 75
-    rsi_low: 25
+    rsi_high: 60
+    rsi_low: 40
 
     # unit: day
     ma_period: 60

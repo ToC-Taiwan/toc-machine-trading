@@ -144,9 +144,9 @@ func (uc *AnalyzeUseCase) SimulateOnHistoryTick(ctx context.Context, useDefault 
 				bestBalance = *res.balance
 				bestCfg = res.cfg
 				log.Infof("TradeCount: %d, Forward: %d, Reverse: %d, Discount: %d, Total: %d", bestBalance.TradeCount, bestBalance.Forward, bestBalance.Reverse, bestBalance.Discount, bestBalance.Total)
-				log.Warnf("OutInRatio %.0f", bestCfg.OutInRatio)
-				log.Warnf("InOutRatio: %.0f", bestCfg.InOutRatio)
-				log.Warnf("VolumePRLimit: %.0f", bestCfg.VolumePRLimit)
+				log.Warnf("OutInRatio %.1f", bestCfg.OutInRatio)
+				log.Warnf("InOutRatio: %.1f", bestCfg.InOutRatio)
+				log.Warnf("VolumePRLimit: %.1f", bestCfg.VolumePRLimit)
 				log.Warnf("TickAnalyzePeriod: %.0f", bestCfg.TickAnalyzePeriod)
 				log.Warnf("RSIMinCount: %d", bestCfg.RSIMinCount)
 				log.Warnf("RSIHigh: %.1f", bestCfg.RSIHigh)
