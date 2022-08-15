@@ -8,7 +8,6 @@ import (
 
 	"toc-machine-trading/internal/entity"
 	"toc-machine-trading/pkg/config"
-	"toc-machine-trading/pkg/global"
 )
 
 // AnalyzeUseCase -.
@@ -133,15 +132,15 @@ func (uc *AnalyzeUseCase) SimulateOnHistoryTick(ctx context.Context, useDefault 
 
 	go func() {
 		var bestCfg config.Analyze
-		var bestBalance entity.TradeBalance
+		var bestBalance *entity.TradeBalance
 		for {
 			res, ok := <-resultChan
 			if !ok {
 				break
 			}
 
-			if res.balance.Total > bestBalance.Total {
-				bestBalance = *res.balance
+			if bestBalance == nil || res.balance.Total > bestBalance.Total {
+				bestBalance = res.balance
 				bestCfg = res.cfg
 				log.Infof("TradeCount: %d, Forward: %d, Reverse: %d, Discount: %d, Total: %d", bestBalance.TradeCount, bestBalance.Forward, bestBalance.Reverse, bestBalance.Discount, bestBalance.Total)
 				log.Warnf("OutInRatio %.1f", bestCfg.OutInRatio)
@@ -151,9 +150,9 @@ func (uc *AnalyzeUseCase) SimulateOnHistoryTick(ctx context.Context, useDefault 
 				log.Warnf("RSIMinCount: %d", bestCfg.RSIMinCount)
 				log.Warnf("RSIHigh: %.1f", bestCfg.RSIHigh)
 				log.Warnf("RSILow: %.1f", bestCfg.RSILow)
-				for _, o := range res.orders {
-					log.Warnf("TradeTime: %s, Stock: %s, Action: %d, Qty: %d, Price: %.2f", o.TradeTime.Format(global.LongTimeLayout), o.StockNum, o.Action, o.Quantity, o.Price)
-				}
+				// for _, o := range res.orders {
+				// 	log.Warnf("TradeTime: %s, Stock: %s, Action: %d, Qty: %d, Price: %.2f", o.TradeTime.Format(global.LongTimeLayout), o.StockNum, o.Action, o.Quantity, o.Price)
+				// }
 			}
 		}
 	}()
@@ -235,6 +234,10 @@ func NewSimulateBalance(quotaCfg config.Quota, allOrders []*entity.Order) *Simul
 }
 
 func (uc *SimulateBalance) calculateBalance(allOrders []*entity.Order) (*entity.TradeBalance, []*entity.Order) {
+	sort.Slice(allOrders, func(i, j int) bool {
+		return allOrders[i].TradeTime.Before(allOrders[j].TradeTime)
+	})
+
 	forwardOrder, reverseOrder := uc.splitOrdersByAction(allOrders)
 	var forwardBalance, revereBalance, discount, tradeCount int64
 	for _, v := range forwardOrder {
@@ -278,51 +281,34 @@ func (uc *SimulateBalance) calculateBalance(allOrders []*entity.Order) (*entity.
 	return tmp, orders
 }
 
-func (uc *SimulateBalance) splitOrdersByQuota(allOrders []*entity.Order) ([]*entity.Order, []*entity.Order) {
+// func (uc *SimulateBalance) splitOrdersByQuota(allOrders []*entity.Order) ([]*entity.Order, []*entity.Order) {
+// 	var forwardOrder, reverseOrder []*entity.Order
+// 	for _, v := range allOrders {
+// 		consumeQuota := uc.quota.calculateOriginalOrderCost(v)
+// 		if uc.quota.quota-consumeQuota < 0 {
+// 			break
+// 		}
+// 		uc.quota.quota -= consumeQuota
+// 		switch v.Action {
+// 		case entity.ActionBuy:
+// 			forwardOrder = append(forwardOrder, v)
+// 		case entity.ActionSellFirst:
+// 			reverseOrder = append(reverseOrder, v)
+// 		}
+// 	}
+// 	return forwardOrder, reverseOrder
+// }
+
+func (uc *SimulateBalance) splitOrdersByAction(allOrders []*entity.Order) ([]*entity.Order, []*entity.Order) {
 	var forwardOrder, reverseOrder []*entity.Order
-
-	sort.Slice(allOrders, func(i, j int) bool {
-		return allOrders[i].TradeTime.Before(allOrders[j].TradeTime)
-	})
-
 	for _, v := range allOrders {
-		consumeQuota := uc.quota.calculateOriginalOrderCost(v)
-		if uc.quota.quota-consumeQuota < 0 {
-			break
-		}
-		uc.quota.quota -= consumeQuota
 		switch v.Action {
-		case entity.ActionBuy:
+		case entity.ActionBuy, entity.ActionSell:
 			forwardOrder = append(forwardOrder, v)
-		case entity.ActionSellFirst:
+		case entity.ActionSellFirst, entity.ActionBuyLater:
 			reverseOrder = append(reverseOrder, v)
 		}
 	}
-
-	return forwardOrder, reverseOrder
-}
-
-func (uc *SimulateBalance) splitOrdersByAction(allOrders []*entity.Order) ([]*entity.Order, []*entity.Order) {
-	forwardOrder, reverseOrder := uc.splitOrdersByQuota(allOrders)
-	var tempForwardOrder []*entity.Order
-	for _, v := range forwardOrder {
-		for _, a := range allOrders {
-			if a.Action == entity.ActionSell && a.StockNum == v.StockNum {
-				tempForwardOrder = append(tempForwardOrder, a)
-			}
-		}
-	}
-	forwardOrder = append(forwardOrder, tempForwardOrder...)
-
-	var tempReverseOrder []*entity.Order
-	for _, v := range reverseOrder {
-		for _, a := range allOrders {
-			if a.Action == entity.ActionBuyLater && a.StockNum == v.StockNum {
-				tempReverseOrder = append(tempReverseOrder, a)
-			}
-		}
-	}
-	reverseOrder = append(reverseOrder, tempReverseOrder...)
 	return forwardOrder, reverseOrder
 }
 
@@ -343,20 +329,20 @@ func generateAnalyzeCfg(useDefault bool) []config.Analyze {
 			RSIMinCount:          cfg.Analyze.RSIMinCount,
 			RSIHigh:              cfg.Analyze.RSIHigh,
 			RSILow:               cfg.Analyze.RSILow,
-			MAPeriod:             cfg.Analyze.MAPeriod,
 		}}
 	}
 
 	base := []config.Analyze{
 		{
-			RSIMinCount: 250,
-			RSIHigh:     95,
-			RSILow:      5,
-
-			OutInRatio:        95,
-			InOutRatio:        95,
-			VolumePRLimit:     99,
-			TickAnalyzePeriod: cfg.Analyze.TickAnalyzePeriod,
+			RSIMinCount:          50,
+			RSIHigh:              50,
+			RSILow:               50,
+			OutInRatio:           95,
+			InOutRatio:           95,
+			VolumePRLimit:        97.5,
+			TickAnalyzePeriod:    cfg.Analyze.TickAnalyzePeriod,
+			CloseChangeRatioLow:  cfg.Analyze.CloseChangeRatioLow,
+			CloseChangeRatioHigh: cfg.Analyze.CloseChangeRatioHigh,
 		},
 	}
 
@@ -378,10 +364,10 @@ func AppendRSICountVar(cfgArr *[]config.Analyze) {
 	var appendCfg []config.Analyze
 	for _, v := range *cfgArr {
 		for {
-			if v.RSIMinCount <= 50 {
+			if v.RSIMinCount >= 500 {
 				break
 			}
-			v.RSIMinCount -= 10
+			v.RSIMinCount += 50
 			appendCfg = append(appendCfg, v)
 		}
 	}
@@ -393,10 +379,10 @@ func AppendRSIHighVar(cfgArr *[]config.Analyze) {
 	var appendCfg []config.Analyze
 	for _, v := range *cfgArr {
 		for {
-			if v.RSIHigh <= 50 {
+			if v.RSIHigh >= 95 {
 				break
 			}
-			v.RSIHigh -= 5
+			v.RSIHigh += 5
 			if v.RSIHigh >= v.RSILow {
 				appendCfg = append(appendCfg, v)
 			}
@@ -410,10 +396,10 @@ func AppendRSILowVar(cfgArr *[]config.Analyze) {
 	var appendCfg []config.Analyze
 	for _, v := range *cfgArr {
 		for {
-			if v.RSILow >= 50 {
+			if v.RSILow <= 5 {
 				break
 			}
-			v.RSILow += 5
+			v.RSILow -= 5
 			if v.RSIHigh >= v.RSILow {
 				appendCfg = append(appendCfg, v)
 			}

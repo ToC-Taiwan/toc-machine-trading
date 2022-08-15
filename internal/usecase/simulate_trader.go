@@ -64,17 +64,18 @@ func (o *SimulateTradeAgent) searchOrder(cfg config.Analyze, tickArr *[]*entity.
 			o.tickArr = append(o.tickArr, o.lastTick)
 
 			order := o.generateSimulateOrder(cfg)
-			if order == nil || finish {
+			if order == nil {
+				continue
+			}
+
+			if (order.Action == entity.ActionBuy || order.Action == entity.ActionSellFirst) && o.lastTick.TickTime.After(cc.GetBasicInfo().LastTradeDay.Add(9*time.Hour).Add(time.Duration(o.tradeSwitch.TradeInEndTime)*time.Minute)) {
+				finish = true
 				continue
 			}
 
 			o.orderMapLock.Lock()
 			o.orderMap[order.Action] = append(o.orderMap[order.Action], order)
 			o.orderMapLock.Unlock()
-
-			if order.Action == entity.ActionSell || order.Action == entity.ActionBuyLater {
-				finish = true
-			}
 		}
 	}()
 
@@ -173,6 +174,17 @@ func (o *SimulateTradeAgent) generateSimulateTradeOutOrder(cfg config.Analyze, p
 			}
 		}
 	}
+
+	if o.lastTick.TickTime.After(cc.GetBasicInfo().LastTradeDay.Add(9 * time.Hour).Add(time.Duration(o.tradeSwitch.TradeOutEndTime) * time.Minute)) {
+		return &entity.Order{
+			StockNum:  o.stockNum,
+			Action:    postOrderAction,
+			Price:     o.lastTick.Close,
+			Quantity:  qty,
+			TradeTime: o.lastTick.TickTime,
+		}
+	}
+
 	return nil
 }
 
@@ -222,6 +234,7 @@ func (o *SimulateTradeAgent) getAllOrders() []*entity.Order {
 	}
 
 	if len(orders)%2 != 0 {
+		log.Warnf("Orders are not enough %s", o.stockNum)
 		return []*entity.Order{}
 	}
 
