@@ -65,8 +65,8 @@ target_cond:
 
 analyze:
     # unit: %
-    close_change_ratio_low: -1.5
-    close_change_ratio_high: 1.5
+    close_change_ratio_low: -0.5
+    close_change_ratio_high: 0.5
 
     # unit: %
     out_in_ratio: 95
@@ -79,7 +79,7 @@ analyze:
     tick_analyze_period: 15000
 
     # unit: times
-    rsi_min_count: 440
+    rsi_min_count: 430
 
     # unit: day
     ma_period: 60

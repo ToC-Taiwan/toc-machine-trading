@@ -75,7 +75,7 @@ func NewAgent(stockNum string, tradeSwitch config.TradeSwitch) *TradeAgent {
 }
 
 func (o *TradeAgent) generateOrder(cfg config.Analyze, needClear bool) *entity.Order {
-	if o.waitingOrder != nil || needClear || o.alreadyTrade() || o.analyzeTickTime.IsZero() || !o.openPass {
+	if o.waitingOrder != nil || needClear || o.analyzeTickTime.IsZero() || !o.openPass {
 		return nil
 	}
 
@@ -298,11 +298,11 @@ func (o *TradeAgent) getPRByVolume(volume int64) float64 {
 	return 100 * float64(total-position) / float64(total)
 }
 
-func (o *TradeAgent) alreadyTrade() bool {
-	defer o.orderMapLock.RUnlock()
-	o.orderMapLock.RLock()
-	return len(o.orderMap) != 0 && len(o.orderMap)%2 == 0
-}
+// func (o *TradeAgent) alreadyTrade() bool {
+// 	defer o.orderMapLock.RUnlock()
+// 	o.orderMapLock.RLock()
+// 	return len(o.orderMap) != 0 && len(o.orderMap)%2 == 0
+// }
 
 // RealTimeTickArr -.
 type RealTimeTickArr []*entity.RealTimeTick

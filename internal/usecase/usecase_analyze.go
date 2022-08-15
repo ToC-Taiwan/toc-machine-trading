@@ -134,24 +134,26 @@ func (uc *AnalyzeUseCase) SimulateOnHistoryTick(ctx context.Context, useDefault 
 	go func() {
 		var bestCfg config.Analyze
 		var bestBalance *entity.TradeBalance
+		var orders *[]*entity.Order
 		for {
 			res, ok := <-resultChan
 			if !ok {
+				for _, o := range *orders {
+					log.Warnf("TradeTime: %s, Stock: %s, Action: %d, Qty: %d, Price: %.2f", o.TradeTime.Format(global.LongTimeLayout), o.StockNum, o.Action, o.Quantity, o.Price)
+				}
 				break
 			}
 
 			if bestBalance == nil || res.balance.Total > bestBalance.Total {
 				bestBalance = res.balance
 				bestCfg = res.cfg
+				orders = &res.orders
 				log.Infof("TradeCount: %d, Forward: %d, Reverse: %d, Discount: %d, Total: %d", bestBalance.TradeCount, bestBalance.Forward, bestBalance.Reverse, bestBalance.Discount, bestBalance.Total)
 				log.Warnf("OutInRatio %.1f", bestCfg.OutInRatio)
 				log.Warnf("InOutRatio: %.1f", bestCfg.InOutRatio)
 				log.Warnf("VolumePRLimit: %.1f", bestCfg.VolumePRLimit)
 				log.Warnf("TickAnalyzePeriod: %.0f", bestCfg.TickAnalyzePeriod)
 				log.Warnf("RSIMinCount: %d", bestCfg.RSIMinCount)
-				for _, o := range res.orders {
-					log.Warnf("GroupID: %s, TradeTime: %s, Stock: %s, Action: %d, Qty: %d, Price: %.2f", o.GroupID, o.TradeTime.Format(global.LongTimeLayout), o.StockNum, o.Action, o.Quantity, o.Price)
-				}
 			}
 		}
 	}()
@@ -307,17 +309,14 @@ func (uc *SimulateBalance) splitOrdersByAction(allOrders []*entity.Order) ([]*en
 	var tempForwardOrder, tempReverseOrder []*entity.Order
 	forwardOrder, reverseOrder := uc.splitOrdersByQuota(allOrders)
 	for _, v := range forwardOrder {
-		tempForwardOrder = append(tempForwardOrder, orderMap[v.GroupID][1])
+		tempForwardOrder = append(tempForwardOrder, orderMap[v.GroupID]...)
 	}
 
 	for _, v := range reverseOrder {
-		tempReverseOrder = append(tempReverseOrder, orderMap[v.GroupID][1])
+		tempReverseOrder = append(tempReverseOrder, orderMap[v.GroupID]...)
 	}
 
-	forwardOrder = append(forwardOrder, tempForwardOrder...)
-	reverseOrder = append(reverseOrder, tempReverseOrder...)
-
-	return forwardOrder, reverseOrder
+	return tempForwardOrder, tempReverseOrder
 }
 
 func generateAnalyzeCfg(useDefault bool) []config.Analyze {
