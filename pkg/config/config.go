@@ -141,8 +141,5 @@ type Analyze struct {
 
 	RSIMinCount int `json:"rsi_min_count" env-required:"true" yaml:"rsi_min_count"`
 
-	RSIHigh float64 `json:"rsi_high" env-required:"true" yaml:"rsi_high"`
-	RSILow  float64 `json:"rsi_low"  env-required:"true" yaml:"rsi_low"`
-
 	MAPeriod int64 `json:"ma_period" env-required:"true" yaml:"ma_period"`
 }

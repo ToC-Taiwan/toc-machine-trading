@@ -89,6 +89,7 @@ ADD CONSTRAINT "fk_history_tick_stock" FOREIGN KEY ("stock_num") REFERENCES basi
 
 CREATE TABLE trade_order (
     "order_id" VARCHAR PRIMARY KEY,
+    "group_id" VARCHAR NOT NULL,
     "status" INT NOT NULL,
     "order_time" TIMESTAMPTZ NOT NULL,
     "stock_num" VARCHAR NOT NULL,

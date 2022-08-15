@@ -7,6 +7,8 @@ import (
 
 	"toc-machine-trading/internal/entity"
 	"toc-machine-trading/pkg/config"
+
+	"github.com/google/uuid"
 )
 
 // SimulateTradeAgent -.
@@ -111,8 +113,8 @@ func (o *SimulateTradeAgent) generateSimulateOrder(cfg config.Analyze) *entity.O
 		return nil
 	}
 
-	if postOrderAction, qty, preTime := o.checkNeededPost(); postOrderAction != entity.ActionNone {
-		return o.generateSimulateTradeOutOrder(cfg, postOrderAction, qty, preTime)
+	if postOrderAction, preOrder := o.checkNeededPost(); postOrderAction != entity.ActionNone {
+		return o.generateSimulateTradeOutOrder(cfg, postOrderAction, preOrder)
 	}
 
 	if o.lastTick.PctChg < cfg.CloseChangeRatioLow || o.lastTick.PctChg > cfg.CloseChangeRatioHigh {
@@ -132,6 +134,7 @@ func (o *SimulateTradeAgent) generateSimulateOrder(cfg config.Analyze) *entity.O
 		StockNum:  o.stockNum,
 		Quantity:  o.orderQuantity,
 		TradeTime: o.lastTick.TickTime,
+		GroupID:   uuid.New().String(),
 	}
 
 	switch {
@@ -148,30 +151,16 @@ func (o *SimulateTradeAgent) generateSimulateOrder(cfg config.Analyze) *entity.O
 	return order
 }
 
-func (o *SimulateTradeAgent) generateSimulateTradeOutOrder(cfg config.Analyze, postOrderAction entity.OrderAction, qty int64, preTime time.Time) *entity.Order {
-	rsi := o.tickArr.getRSIByTickTime(preTime, cfg.RSIMinCount)
+func (o *SimulateTradeAgent) generateSimulateTradeOutOrder(cfg config.Analyze, postOrderAction entity.OrderAction, preOrder *entity.Order) *entity.Order {
+	rsi := o.tickArr.getRSIByTickTime(preOrder.TradeTime, cfg.RSIMinCount)
 	if rsi != 0 {
-		switch postOrderAction {
-		case entity.ActionSell:
-			if rsi >= cfg.RSIHigh {
-				return &entity.Order{
-					StockNum:  o.stockNum,
-					Action:    postOrderAction,
-					Price:     o.lastTick.Close,
-					Quantity:  qty,
-					TradeTime: o.lastTick.TickTime,
-				}
-			}
-		case entity.ActionBuyLater:
-			if rsi <= cfg.RSILow {
-				return &entity.Order{
-					StockNum:  o.stockNum,
-					Action:    postOrderAction,
-					Price:     o.lastTick.Close,
-					Quantity:  qty,
-					TradeTime: o.lastTick.TickTime,
-				}
-			}
+		return &entity.Order{
+			StockNum:  o.stockNum,
+			Action:    postOrderAction,
+			Price:     o.lastTick.Close,
+			Quantity:  preOrder.Quantity,
+			TradeTime: o.lastTick.TickTime,
+			GroupID:   preOrder.GroupID,
 		}
 	}
 
@@ -180,8 +169,9 @@ func (o *SimulateTradeAgent) generateSimulateTradeOutOrder(cfg config.Analyze, p
 			StockNum:  o.stockNum,
 			Action:    postOrderAction,
 			Price:     o.lastTick.Close,
-			Quantity:  qty,
+			Quantity:  preOrder.Quantity,
 			TradeTime: o.lastTick.TickTime,
+			GroupID:   preOrder.GroupID,
 		}
 	}
 
@@ -207,21 +197,19 @@ func (o *SimulateTradeAgent) getPRByVolume(volume int64) float64 {
 	return 100 * float64(total-position) / float64(total)
 }
 
-func (o *SimulateTradeAgent) checkNeededPost() (entity.OrderAction, int64, time.Time) {
+func (o *SimulateTradeAgent) checkNeededPost() (entity.OrderAction, *entity.Order) {
 	defer o.orderMapLock.RUnlock()
 	o.orderMapLock.RLock()
 
 	if len(o.orderMap[entity.ActionBuy]) > len(o.orderMap[entity.ActionSell]) {
-		order := o.orderMap[entity.ActionBuy][len(o.orderMap[entity.ActionSell])]
-		return entity.ActionSell, order.Quantity, order.TradeTime
+		return entity.ActionSell, o.orderMap[entity.ActionBuy][len(o.orderMap[entity.ActionSell])]
 	}
 
 	if len(o.orderMap[entity.ActionSellFirst]) > len(o.orderMap[entity.ActionBuyLater]) {
-		order := o.orderMap[entity.ActionSellFirst][len(o.orderMap[entity.ActionBuyLater])]
-		return entity.ActionBuyLater, order.Quantity, order.TradeTime
+		return entity.ActionBuyLater, o.orderMap[entity.ActionSellFirst][len(o.orderMap[entity.ActionBuyLater])]
 	}
 
-	return entity.ActionNone, 0, time.Time{}
+	return entity.ActionNone, nil
 }
 
 func (o *SimulateTradeAgent) getAllOrders() []*entity.Order {

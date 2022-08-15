@@ -540,12 +540,6 @@ const docTemplate = `{
                 "out_in_ratio": {
                     "type": "number"
                 },
-                "rsi_high": {
-                    "type": "number"
-                },
-                "rsi_low": {
-                    "type": "number"
-                },
                 "rsi_min_count": {
                     "type": "integer"
                 },
@@ -782,6 +776,9 @@ const docTemplate = `{
             "properties": {
                 "action": {
                     "type": "integer"
+                },
+                "group_id": {
+                    "type": "string"
                 },
                 "order_id": {
                     "type": "string"

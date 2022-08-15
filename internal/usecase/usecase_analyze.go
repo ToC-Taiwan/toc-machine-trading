@@ -8,6 +8,7 @@ import (
 
 	"toc-machine-trading/internal/entity"
 	"toc-machine-trading/pkg/config"
+	"toc-machine-trading/pkg/global"
 )
 
 // AnalyzeUseCase -.
@@ -148,11 +149,9 @@ func (uc *AnalyzeUseCase) SimulateOnHistoryTick(ctx context.Context, useDefault 
 				log.Warnf("VolumePRLimit: %.1f", bestCfg.VolumePRLimit)
 				log.Warnf("TickAnalyzePeriod: %.0f", bestCfg.TickAnalyzePeriod)
 				log.Warnf("RSIMinCount: %d", bestCfg.RSIMinCount)
-				log.Warnf("RSIHigh: %.1f", bestCfg.RSIHigh)
-				log.Warnf("RSILow: %.1f", bestCfg.RSILow)
-				// for _, o := range res.orders {
-				// 	log.Warnf("TradeTime: %s, Stock: %s, Action: %d, Qty: %d, Price: %.2f", o.TradeTime.Format(global.LongTimeLayout), o.StockNum, o.Action, o.Quantity, o.Price)
-				// }
+				for _, o := range res.orders {
+					log.Warnf("GroupID: %s, TradeTime: %s, Stock: %s, Action: %d, Qty: %d, Price: %.2f", o.GroupID, o.TradeTime.Format(global.LongTimeLayout), o.StockNum, o.Action, o.Quantity, o.Price)
+				}
 			}
 		}
 	}()
@@ -281,34 +280,43 @@ func (uc *SimulateBalance) calculateBalance(allOrders []*entity.Order) (*entity.
 	return tmp, orders
 }
 
-// func (uc *SimulateBalance) splitOrdersByQuota(allOrders []*entity.Order) ([]*entity.Order, []*entity.Order) {
-// 	var forwardOrder, reverseOrder []*entity.Order
-// 	for _, v := range allOrders {
-// 		consumeQuota := uc.quota.calculateOriginalOrderCost(v)
-// 		if uc.quota.quota-consumeQuota < 0 {
-// 			break
-// 		}
-// 		uc.quota.quota -= consumeQuota
-// 		switch v.Action {
-// 		case entity.ActionBuy:
-// 			forwardOrder = append(forwardOrder, v)
-// 		case entity.ActionSellFirst:
-// 			reverseOrder = append(reverseOrder, v)
-// 		}
-// 	}
-// 	return forwardOrder, reverseOrder
-// }
-
-func (uc *SimulateBalance) splitOrdersByAction(allOrders []*entity.Order) ([]*entity.Order, []*entity.Order) {
+func (uc *SimulateBalance) splitOrdersByQuota(allOrders []*entity.Order) ([]*entity.Order, []*entity.Order) {
 	var forwardOrder, reverseOrder []*entity.Order
 	for _, v := range allOrders {
+		consumeQuota := uc.quota.calculateOriginalOrderCost(v)
+		if uc.quota.quota-consumeQuota < 0 {
+			break
+		}
+		uc.quota.quota -= consumeQuota
 		switch v.Action {
-		case entity.ActionBuy, entity.ActionSell:
+		case entity.ActionBuy:
 			forwardOrder = append(forwardOrder, v)
-		case entity.ActionSellFirst, entity.ActionBuyLater:
+		case entity.ActionSellFirst:
 			reverseOrder = append(reverseOrder, v)
 		}
 	}
+	return forwardOrder, reverseOrder
+}
+
+func (uc *SimulateBalance) splitOrdersByAction(allOrders []*entity.Order) ([]*entity.Order, []*entity.Order) {
+	orderMap := make(map[string][]*entity.Order)
+	for _, v := range allOrders {
+		orderMap[v.GroupID] = append(orderMap[v.GroupID], v)
+	}
+
+	var tempForwardOrder, tempReverseOrder []*entity.Order
+	forwardOrder, reverseOrder := uc.splitOrdersByQuota(allOrders)
+	for _, v := range forwardOrder {
+		tempForwardOrder = append(tempForwardOrder, orderMap[v.GroupID][1])
+	}
+
+	for _, v := range reverseOrder {
+		tempReverseOrder = append(tempReverseOrder, orderMap[v.GroupID][1])
+	}
+
+	forwardOrder = append(forwardOrder, tempForwardOrder...)
+	reverseOrder = append(reverseOrder, tempReverseOrder...)
+
 	return forwardOrder, reverseOrder
 }
 
@@ -327,19 +335,16 @@ func generateAnalyzeCfg(useDefault bool) []config.Analyze {
 			VolumePRLimit:        cfg.Analyze.VolumePRLimit,
 			TickAnalyzePeriod:    cfg.Analyze.TickAnalyzePeriod,
 			RSIMinCount:          cfg.Analyze.RSIMinCount,
-			RSIHigh:              cfg.Analyze.RSIHigh,
-			RSILow:               cfg.Analyze.RSILow,
 		}}
 	}
 
 	base := []config.Analyze{
 		{
-			RSIMinCount:          50,
-			RSIHigh:              50,
-			RSILow:               50,
+			RSIMinCount:   10,
+			VolumePRLimit: 99,
+
 			OutInRatio:           95,
 			InOutRatio:           95,
-			VolumePRLimit:        97.5,
 			TickAnalyzePeriod:    cfg.Analyze.TickAnalyzePeriod,
 			CloseChangeRatioLow:  cfg.Analyze.CloseChangeRatioLow,
 			CloseChangeRatioHigh: cfg.Analyze.CloseChangeRatioHigh,
@@ -347,10 +352,8 @@ func generateAnalyzeCfg(useDefault bool) []config.Analyze {
 	}
 
 	AppendRSICountVar(&base)
-	AppendRSIHighVar(&base)
-	AppendRSILowVar(&base)
+	AppendVolumePRLimitVar(&base)
 
-	// AppendVolumePRLimitVar(&base)
 	// AppendOutInRatioVar(&base)
 	// AppendInOutRatioVar(&base)
 
@@ -367,42 +370,8 @@ func AppendRSICountVar(cfgArr *[]config.Analyze) {
 			if v.RSIMinCount >= 500 {
 				break
 			}
-			v.RSIMinCount += 50
+			v.RSIMinCount += 10
 			appendCfg = append(appendCfg, v)
-		}
-	}
-	*cfgArr = append(*cfgArr, appendCfg...)
-}
-
-// AppendRSIHighVar -.
-func AppendRSIHighVar(cfgArr *[]config.Analyze) {
-	var appendCfg []config.Analyze
-	for _, v := range *cfgArr {
-		for {
-			if v.RSIHigh >= 95 {
-				break
-			}
-			v.RSIHigh += 5
-			if v.RSIHigh >= v.RSILow {
-				appendCfg = append(appendCfg, v)
-			}
-		}
-	}
-	*cfgArr = append(*cfgArr, appendCfg...)
-}
-
-// AppendRSILowVar -.
-func AppendRSILowVar(cfgArr *[]config.Analyze) {
-	var appendCfg []config.Analyze
-	for _, v := range *cfgArr {
-		for {
-			if v.RSILow <= 5 {
-				break
-			}
-			v.RSILow -= 5
-			if v.RSIHigh >= v.RSILow {
-				appendCfg = append(appendCfg, v)
-			}
 		}
 	}
 	*cfgArr = append(*cfgArr, appendCfg...)

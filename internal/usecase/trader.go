@@ -8,6 +8,8 @@ import (
 	"toc-machine-trading/internal/entity"
 	"toc-machine-trading/pkg/config"
 	"toc-machine-trading/pkg/utils"
+
+	"github.com/google/uuid"
 )
 
 // TradeAgent -.
@@ -87,8 +89,8 @@ func (o *TradeAgent) generateOrder(cfg config.Analyze, needClear bool) *entity.O
 	o.analyzeTickTime = o.lastTick.TickTime
 	o.periodTickArr = RealTimeTickArr{o.lastTick}
 
-	if postOrderAction, qty, preTime := o.checkNeededPost(); postOrderAction != entity.ActionNone {
-		return o.generateTradeOutOrder(cfg, postOrderAction, qty, preTime)
+	if postOrderAction, preOrder := o.checkNeededPost(); postOrderAction != entity.ActionNone {
+		return o.generateTradeOutOrder(cfg, postOrderAction, preOrder)
 	}
 
 	if o.lastTick.PctChg < cfg.CloseChangeRatioLow || o.lastTick.PctChg > cfg.CloseChangeRatioHigh {
@@ -107,6 +109,7 @@ func (o *TradeAgent) generateOrder(cfg config.Analyze, needClear bool) *entity.O
 	order := &entity.Order{
 		StockNum: o.stockNum,
 		Quantity: o.orderQuantity,
+		GroupID:  uuid.New().String(),
 	}
 
 	switch {
@@ -123,29 +126,27 @@ func (o *TradeAgent) generateOrder(cfg config.Analyze, needClear bool) *entity.O
 	return order
 }
 
-func (o *TradeAgent) generateTradeOutOrder(cfg config.Analyze, postOrderAction entity.OrderAction, qty int64, preTime time.Time) *entity.Order {
+func (o *TradeAgent) generateTradeOutOrder(cfg config.Analyze, postOrderAction entity.OrderAction, preOrder *entity.Order) *entity.Order {
 	// calculate max loss here
 	//
-	rsi := o.tickArr.getRSIByTickTime(preTime, cfg.RSIMinCount)
+	rsi := o.tickArr.getRSIByTickTime(preOrder.TradeTime, cfg.RSIMinCount)
 	if rsi != 0 {
 		switch postOrderAction {
 		case entity.ActionSell:
-			if rsi >= cfg.RSIHigh {
-				return &entity.Order{
-					StockNum: o.stockNum,
-					Action:   postOrderAction,
-					Price:    o.lastBidAsk.BidPrice1,
-					Quantity: qty,
-				}
+			return &entity.Order{
+				StockNum: o.stockNum,
+				Action:   postOrderAction,
+				Price:    o.lastBidAsk.BidPrice1,
+				Quantity: preOrder.Quantity,
+				GroupID:  preOrder.GroupID,
 			}
 		case entity.ActionBuyLater:
-			if rsi <= cfg.RSILow {
-				return &entity.Order{
-					StockNum: o.stockNum,
-					Action:   postOrderAction,
-					Price:    o.lastBidAsk.AskPrice1,
-					Quantity: qty,
-				}
+			return &entity.Order{
+				StockNum: o.stockNum,
+				Action:   postOrderAction,
+				Price:    o.lastBidAsk.AskPrice1,
+				Quantity: preOrder.Quantity,
+				GroupID:  preOrder.GroupID,
 			}
 		}
 	}
@@ -157,12 +158,13 @@ func (o *TradeAgent) clearUnfinishedOrder() *entity.Order {
 		return nil
 	}
 
-	if action, qty, _ := o.checkNeededPost(); action != entity.ActionNone {
+	if action, preOrder := o.checkNeededPost(); action != entity.ActionNone {
 		return &entity.Order{
 			StockNum: o.stockNum,
 			Action:   action,
 			Price:    o.lastTick.Close,
-			Quantity: qty,
+			Quantity: preOrder.Quantity,
+			GroupID:  preOrder.GroupID,
 		}
 	}
 	return nil
@@ -237,21 +239,19 @@ func (o *TradeAgent) cancelOrder(order *entity.Order) {
 	}()
 }
 
-func (o *TradeAgent) checkNeededPost() (entity.OrderAction, int64, time.Time) {
+func (o *TradeAgent) checkNeededPost() (entity.OrderAction, *entity.Order) {
 	defer o.orderMapLock.RUnlock()
 	o.orderMapLock.RLock()
 
 	if len(o.orderMap[entity.ActionBuy]) > len(o.orderMap[entity.ActionSell]) {
-		order := o.orderMap[entity.ActionBuy][len(o.orderMap[entity.ActionSell])]
-		return entity.ActionSell, order.Quantity, order.TradeTime
+		return entity.ActionSell, o.orderMap[entity.ActionBuy][len(o.orderMap[entity.ActionSell])]
 	}
 
 	if len(o.orderMap[entity.ActionSellFirst]) > len(o.orderMap[entity.ActionBuyLater]) {
-		order := o.orderMap[entity.ActionSellFirst][len(o.orderMap[entity.ActionBuyLater])]
-		return entity.ActionBuyLater, order.Quantity, order.TradeTime
+		return entity.ActionBuyLater, o.orderMap[entity.ActionSellFirst][len(o.orderMap[entity.ActionBuyLater])]
 	}
 
-	return entity.ActionNone, 0, time.Time{}
+	return entity.ActionNone, nil
 }
 
 func (o *TradeAgent) checkFirstTickArrive() {

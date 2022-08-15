@@ -70,6 +70,7 @@ type Order struct {
 	Price     float64     `json:"price"`
 	Quantity  int64       `json:"quantity"`
 	TradeTime time.Time   `json:"trade_time"`
+	GroupID   string      `json:"group_id"`
 
 	StockNum string `json:"stock_num"`
 	Stock    *Stock `json:"stock"`
