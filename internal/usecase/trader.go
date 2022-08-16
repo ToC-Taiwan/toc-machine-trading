@@ -102,8 +102,13 @@ func (o *TradeAgent) generateOrder(cfg config.Analyze, needClear bool) *entity.O
 		return nil
 	}
 
+	if o.lastBidAsk == nil {
+		return nil
+	}
+
 	// get out in ration in this period
 	periodOutInRation := analyzeArr.getOutInRatio()
+	allOutInRation := o.tickArr.getOutInRatio()
 
 	// need to compare with all and period
 	order := &entity.Order{
@@ -113,10 +118,10 @@ func (o *TradeAgent) generateOrder(cfg config.Analyze, needClear bool) *entity.O
 	}
 
 	switch {
-	case periodOutInRation > cfg.OutInRatio && o.lastBidAsk != nil:
+	case periodOutInRation > cfg.OutInRatio && allOutInRation > cfg.AllOutInRatio:
 		order.Action = entity.ActionBuy
 		order.Price = o.lastBidAsk.BidPrice1
-	case 100-periodOutInRation > cfg.InOutRatio && o.lastBidAsk != nil:
+	case 100-periodOutInRation > cfg.InOutRatio && allOutInRation < cfg.AllInOutRatio:
 		order.Action = entity.ActionSellFirst
 		order.Price = o.lastBidAsk.AskPrice1
 	default:

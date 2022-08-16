@@ -29,9 +29,9 @@ trade_switch:
     trade_out_end_time: 150
 
     # unit: seccond
-    trade_in_wait_time: 25
-    trade_out_wait_time: 30
-    cancel_wait_time: 15
+    trade_in_wait_time: 45
+    trade_out_wait_time: 60
+    cancel_wait_time: 30
 
     # open change ratio limit
     open_close_change_ratio_low: -2.5
@@ -71,15 +71,17 @@ analyze:
     # unit: %
     out_in_ratio: 95
     in_out_ratio: 95
+    all_out_in_ratio: 55
+    all_in_out_ratio: 45
 
     # unit: %
-    volume_pr_limit: 98
+    volume_pr_limit: 97
 
     # unit: millisecond
     tick_analyze_period: 15000
 
     # unit: times
-    rsi_min_count: 430
+    rsi_min_count: 150
 
     # unit: day
     ma_period: 60

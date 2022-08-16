@@ -128,6 +128,7 @@ func (o *SimulateTradeAgent) generateSimulateOrder(cfg config.Analyze) *entity.O
 
 	// get out in ration in this period
 	periodOutInRation := analyzeArr.getOutInRatio()
+	allOutInRation := o.tickArr.getOutInRatio()
 
 	// need to compare with all and period
 	order := &entity.Order{
@@ -138,10 +139,10 @@ func (o *SimulateTradeAgent) generateSimulateOrder(cfg config.Analyze) *entity.O
 	}
 
 	switch {
-	case periodOutInRation > cfg.OutInRatio:
+	case periodOutInRation > cfg.OutInRatio && allOutInRation > cfg.AllOutInRatio:
 		order.Action = entity.ActionBuy
 		order.Price = o.lastTick.Close
-	case 100-periodOutInRation > cfg.InOutRatio:
+	case 100-periodOutInRation > cfg.InOutRatio && allOutInRation < cfg.AllInOutRatio:
 		order.Action = entity.ActionSellFirst
 		order.Price = o.lastTick.Close
 	default:

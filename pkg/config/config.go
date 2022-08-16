@@ -135,6 +135,9 @@ type Analyze struct {
 	OutInRatio float64 `json:"out_in_ratio" env-required:"true" yaml:"out_in_ratio"`
 	InOutRatio float64 `json:"in_out_ratio" env-required:"true" yaml:"in_out_ratio"`
 
+	AllOutInRatio float64 `json:"all_out_in_ratio" env-required:"true" yaml:"all_out_in_ratio"`
+	AllInOutRatio float64 `json:"all_in_out_ratio" env-required:"true" yaml:"all_in_out_ratio"`
+
 	VolumePRLimit float64 `json:"volume_pr_limit" env-required:"true" yaml:"volume_pr_limit"`
 
 	TickAnalyzePeriod float64 `json:"tick_analyze_period" env-required:"true" yaml:"tick_analyze_period"`

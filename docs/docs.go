@@ -525,6 +525,12 @@ const docTemplate = `{
         "config.Analyze": {
             "type": "object",
             "properties": {
+                "all_in_out_ratio": {
+                    "type": "number"
+                },
+                "all_out_in_ratio": {
+                    "type": "number"
+                },
                 "close_change_ratio_high": {
                     "type": "number"
                 },

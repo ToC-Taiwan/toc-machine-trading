@@ -151,6 +151,8 @@ func (uc *AnalyzeUseCase) SimulateOnHistoryTick(ctx context.Context, useDefault 
 				log.Infof("TradeCount: %d, Forward: %d, Reverse: %d, Discount: %d, Total: %d", bestBalance.TradeCount, bestBalance.Forward, bestBalance.Reverse, bestBalance.Discount, bestBalance.Total)
 				log.Warnf("OutInRatio %.1f", bestCfg.OutInRatio)
 				log.Warnf("InOutRatio: %.1f", bestCfg.InOutRatio)
+				log.Warnf("AllOutInRatio %.1f", bestCfg.AllOutInRatio)
+				log.Warnf("AllInOutRatio: %.1f", bestCfg.AllInOutRatio)
 				log.Warnf("VolumePRLimit: %.1f", bestCfg.VolumePRLimit)
 				log.Warnf("TickAnalyzePeriod: %.0f", bestCfg.TickAnalyzePeriod)
 				log.Warnf("RSIMinCount: %d", bestCfg.RSIMinCount)
@@ -334,16 +336,20 @@ func generateAnalyzeCfg(useDefault bool) []config.Analyze {
 			VolumePRLimit:        cfg.Analyze.VolumePRLimit,
 			TickAnalyzePeriod:    cfg.Analyze.TickAnalyzePeriod,
 			RSIMinCount:          cfg.Analyze.RSIMinCount,
+			AllOutInRatio:        cfg.Analyze.AllOutInRatio,
+			AllInOutRatio:        cfg.Analyze.AllInOutRatio,
 		}}
 	}
 
 	base := []config.Analyze{
 		{
-			RSIMinCount:   10,
+			RSIMinCount:   100,
 			VolumePRLimit: 99,
+			AllOutInRatio: 50,
+			AllInOutRatio: 50,
 
-			OutInRatio:           95,
-			InOutRatio:           95,
+			OutInRatio:           cfg.Analyze.OutInRatio,
+			InOutRatio:           cfg.Analyze.InOutRatio,
 			TickAnalyzePeriod:    cfg.Analyze.TickAnalyzePeriod,
 			CloseChangeRatioLow:  cfg.Analyze.CloseChangeRatioLow,
 			CloseChangeRatioHigh: cfg.Analyze.CloseChangeRatioHigh,
@@ -352,7 +358,8 @@ func generateAnalyzeCfg(useDefault bool) []config.Analyze {
 
 	AppendRSICountVar(&base)
 	AppendVolumePRLimitVar(&base)
-
+	AppendAllOutInRatioVar(&base)
+	AppendAllInOutRatioVar(&base)
 	// AppendOutInRatioVar(&base)
 	// AppendInOutRatioVar(&base)
 
@@ -366,10 +373,10 @@ func AppendRSICountVar(cfgArr *[]config.Analyze) {
 	var appendCfg []config.Analyze
 	for _, v := range *cfgArr {
 		for {
-			if v.RSIMinCount >= 500 {
+			if v.RSIMinCount >= 200 {
 				break
 			}
-			v.RSIMinCount += 10
+			v.RSIMinCount += 50
 			appendCfg = append(appendCfg, v)
 		}
 	}
@@ -377,45 +384,74 @@ func AppendRSICountVar(cfgArr *[]config.Analyze) {
 }
 
 // AppendOutInRatioVar -.
-func AppendOutInRatioVar(cfgArr *[]config.Analyze) {
-	var appendCfg []config.Analyze
-	for _, v := range *cfgArr {
-		for {
-			if v.OutInRatio <= 75 {
-				break
-			}
-			v.OutInRatio -= 5
-			appendCfg = append(appendCfg, v)
-		}
-	}
-	*cfgArr = append(*cfgArr, appendCfg...)
-}
+// func AppendOutInRatioVar(cfgArr *[]config.Analyze) {
+// 	var appendCfg []config.Analyze
+// 	for _, v := range *cfgArr {
+// 		for {
+// 			if v.OutInRatio <= 75 {
+// 				break
+// 			}
+// 			v.OutInRatio -= 5
+// 			appendCfg = append(appendCfg, v)
+// 		}
+// 	}
+// 	*cfgArr = append(*cfgArr, appendCfg...)
+// }
 
 // AppendInOutRatioVar -.
-func AppendInOutRatioVar(cfgArr *[]config.Analyze) {
-	var appendCfg []config.Analyze
-	for _, v := range *cfgArr {
-		for {
-			if v.InOutRatio <= 95 {
-				break
-			}
-			v.InOutRatio -= 5
-			appendCfg = append(appendCfg, v)
-		}
-	}
-	*cfgArr = append(*cfgArr, appendCfg...)
-}
+// func AppendInOutRatioVar(cfgArr *[]config.Analyze) {
+// 	var appendCfg []config.Analyze
+// 	for _, v := range *cfgArr {
+// 		for {
+// 			if v.InOutRatio <= 95 {
+// 				break
+// 			}
+// 			v.InOutRatio -= 5
+// 			appendCfg = append(appendCfg, v)
+// 		}
+// 	}
+// 	*cfgArr = append(*cfgArr, appendCfg...)
+// }
 
 // AppendVolumePRLimitVar -.
 func AppendVolumePRLimitVar(cfgArr *[]config.Analyze) {
 	var appendCfg []config.Analyze
 	for _, v := range *cfgArr {
 		for {
-			if v.VolumePRLimit <= 90 {
+			if v.VolumePRLimit <= 97 {
 				break
 			}
 			v.VolumePRLimit--
+			appendCfg = append(appendCfg, v)
+		}
+	}
+	*cfgArr = append(*cfgArr, appendCfg...)
+}
 
+// AppendAllOutInRatioVar -.
+func AppendAllOutInRatioVar(cfgArr *[]config.Analyze) {
+	var appendCfg []config.Analyze
+	for _, v := range *cfgArr {
+		for {
+			if v.AllOutInRatio >= 55 {
+				break
+			}
+			v.AllOutInRatio++
+			appendCfg = append(appendCfg, v)
+		}
+	}
+	*cfgArr = append(*cfgArr, appendCfg...)
+}
+
+// AppendAllInOutRatioVar -.
+func AppendAllInOutRatioVar(cfgArr *[]config.Analyze) {
+	var appendCfg []config.Analyze
+	for _, v := range *cfgArr {
+		for {
+			if v.AllInOutRatio <= 45 {
+				break
+			}
+			v.AllInOutRatio--
 			appendCfg = append(appendCfg, v)
 		}
 	}
