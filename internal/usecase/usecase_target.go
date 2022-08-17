@@ -58,26 +58,26 @@ func NewTarget(r TargetRepo, t TargetgRPCAPI) *TargetUseCase {
 		}
 	}
 
-	uc.publishNewTargets(targetArr, false)
+	uc.publishNewTargets(targetArr)
 
 	// sub events
-	bus.SubscribeTopic(topicRealTimeTargets, uc.publishNewTargets)
+	bus.SubscribeTopic(topicNewTargets, uc.publishNewTargets)
 	bus.SubscribeTopic(topicSubscribeTickTargets, uc.SubscribeStockTick, uc.SubscribeStockBidAsk)
 	bus.SubscribeTopic(topicUnSubscribeTickTargets, uc.UnSubscribeStockTick, uc.UnSubscribeStockBidAsk)
 
 	return uc
 }
 
-func (uc *TargetUseCase) publishNewTargets(targetArr []*entity.Target, subscribe bool) {
+func (uc *TargetUseCase) publishNewTargets(targetArr []*entity.Target) {
 	err := uc.repo.InsertOrUpdateTargetArr(context.Background(), targetArr)
 	if err != nil {
 		log.Panic(err)
 	}
 
+	cc.AppendTargets(targetArr)
+
 	bus.PublishTopicEvent(topicFetchHistory, context.Background(), targetArr)
-	if subscribe {
-		bus.PublishTopicEvent(topicStreamTargets, context.Background(), targetArr)
-	}
+	bus.PublishTopicEvent(topicStreamTargets, context.Background(), targetArr)
 }
 
 // GetTargets - get targets from cache
@@ -112,7 +112,6 @@ func (uc *TargetUseCase) SearchTradeDayTargets(ctx context.Context, tradeDay tim
 				Rank:     len(result) + 1,
 				StockNum: v.GetCode(),
 				Volume:   v.GetTotalVolume(),
-				RealTime: false,
 				TradeDay: tradeDay,
 				Stock:    stock,
 			})
@@ -148,9 +147,7 @@ func (uc *TargetUseCase) UnSubscribeAll(ctx context.Context) error {
 func (uc *TargetUseCase) SubscribeStockTick(targetArr []*entity.Target) error {
 	var subArr []string
 	for _, v := range targetArr {
-		if v.RealTime {
-			subArr = append(subArr, v.StockNum)
-		}
+		subArr = append(subArr, v.StockNum)
 	}
 
 	failSubNumArr, err := uc.gRPCAPI.SubscribeStockTick(subArr)
@@ -169,9 +166,7 @@ func (uc *TargetUseCase) SubscribeStockTick(targetArr []*entity.Target) error {
 func (uc *TargetUseCase) SubscribeStockBidAsk(targetArr []*entity.Target) error {
 	var subArr []string
 	for _, v := range targetArr {
-		if v.RealTime {
-			subArr = append(subArr, v.StockNum)
-		}
+		subArr = append(subArr, v.StockNum)
 	}
 
 	failSubNumArr, err := uc.gRPCAPI.SubscribeStockBidAsk(subArr)

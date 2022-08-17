@@ -49,7 +49,7 @@ func NewStream(r StreamRepo, g StreamgRPCAPI, t StreamRabbit) *StreamUseCase {
 
 	go func() {
 		time.Sleep(time.Until(cc.GetBasicInfo().TradeDay.Add(time.Hour * 9)))
-		for range time.NewTicker(time.Second * 30).C {
+		for range time.NewTicker(time.Second * 60).C {
 			if uc.tradeInSwitch {
 				if err := uc.realTimeAddTargets(); err != nil {
 					log.Panic(err)
@@ -280,7 +280,6 @@ func (uc *StreamUseCase) realTimeAddTargets() error {
 					Rank:     100 + i + 1,
 					StockNum: d.GetCode(),
 					Volume:   d.GetTotalVolume(),
-					RealTime: true,
 					TradeDay: uc.basic.TradeDay,
 					Stock:    stock,
 				})
@@ -289,8 +288,7 @@ func (uc *StreamUseCase) realTimeAddTargets() error {
 	}
 
 	if len(newTargets) != 0 {
-		cc.AppendTargets(newTargets)
-		bus.PublishTopicEvent(topicRealTimeTargets, newTargets, true)
+		bus.PublishTopicEvent(topicNewTargets, newTargets)
 	}
 	return nil
 }

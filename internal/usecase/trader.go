@@ -118,10 +118,10 @@ func (o *TradeAgent) generateOrder(cfg config.Analyze, needClear bool) *entity.O
 	}
 
 	switch {
-	case periodOutInRation > cfg.OutInRatio && allOutInRation > cfg.AllOutInRatio:
+	case periodOutInRation > allOutInRation && allOutInRation > cfg.AllOutInRatio:
 		order.Action = entity.ActionBuy
 		order.Price = o.lastBidAsk.BidPrice1
-	case 100-periodOutInRation > cfg.InOutRatio && allOutInRation < cfg.AllInOutRatio:
+	case periodOutInRation < allOutInRation && 100-allOutInRation > cfg.AllInOutRatio:
 		order.Action = entity.ActionSellFirst
 		order.Price = o.lastBidAsk.AskPrice1
 	default:

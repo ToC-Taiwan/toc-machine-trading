@@ -537,14 +537,8 @@ const docTemplate = `{
                 "close_change_ratio_low": {
                     "type": "number"
                 },
-                "in_out_ratio": {
-                    "type": "number"
-                },
                 "ma_period": {
                     "type": "integer"
-                },
-                "out_in_ratio": {
-                    "type": "number"
                 },
                 "rsi_min_count": {
                     "type": "integer"
@@ -902,9 +896,6 @@ const docTemplate = `{
                 },
                 "rank": {
                     "type": "integer"
-                },
-                "real_time": {
-                    "type": "boolean"
                 },
                 "stock": {
                     "$ref": "#/definitions/entity.Stock"

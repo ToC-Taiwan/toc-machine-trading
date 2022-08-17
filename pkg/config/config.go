@@ -132,9 +132,6 @@ type Analyze struct {
 	CloseChangeRatioLow  float64 `json:"close_change_ratio_low"  env-required:"true" yaml:"close_change_ratio_low"`
 	CloseChangeRatioHigh float64 `json:"close_change_ratio_high" env-required:"true" yaml:"close_change_ratio_high"`
 
-	OutInRatio float64 `json:"out_in_ratio" env-required:"true" yaml:"out_in_ratio"`
-	InOutRatio float64 `json:"in_out_ratio" env-required:"true" yaml:"in_out_ratio"`
-
 	AllOutInRatio float64 `json:"all_out_in_ratio" env-required:"true" yaml:"all_out_in_ratio"`
 	AllInOutRatio float64 `json:"all_in_out_ratio" env-required:"true" yaml:"all_in_out_ratio"`
 

@@ -39,11 +39,11 @@ func (r *TargetRepo) InsertOrUpdateTargetArr(ctx context.Context, t []*entity.Ta
 	var args []interface{}
 
 	var insert int
-	builder := r.Builder.Insert(tableNameTarget).Columns("stock_num, trade_day, rank, volume, real_time")
+	builder := r.Builder.Insert(tableNameTarget).Columns("stock_num, trade_day, rank, volume")
 	for _, v := range t {
 		if _, ok := inDBTargetsMap[v.StockNum]; !ok {
 			insert++
-			builder = builder.Values(v.StockNum, v.TradeDay, v.Rank, v.Volume, v.RealTime)
+			builder = builder.Values(v.StockNum, v.TradeDay, v.Rank, v.Volume)
 		} else {
 			b := r.Builder.
 				Update(tableNameTarget).
@@ -51,7 +51,6 @@ func (r *TargetRepo) InsertOrUpdateTargetArr(ctx context.Context, t []*entity.Ta
 				Set("trade_day", v.TradeDay).
 				Set("rank", v.Rank).
 				Set("volume", v.Volume).
-				Set("real_time", v.RealTime).
 				Where("stock_num = ?", v.StockNum).
 				Where("trade_day = ?", v.TradeDay)
 			if sql, args, err = b.ToSql(); err != nil {
@@ -75,7 +74,7 @@ func (r *TargetRepo) InsertOrUpdateTargetArr(ctx context.Context, t []*entity.Ta
 // QueryTargetsByTradeDay -.
 func (r *TargetRepo) QueryTargetsByTradeDay(ctx context.Context, tradeDay time.Time) ([]*entity.Target, error) {
 	sql, args, err := r.Builder.
-		Select("id, rank, volume, real_time, trade_day, stock_num, number, name, exchange, category, day_trade, last_close, update_date").
+		Select("id, rank, volume, trade_day, stock_num, number, name, exchange, category, day_trade, last_close, update_date").
 		From(tableNameTarget).
 		Where("trade_day = ?", tradeDay).
 		OrderBy("rank ASC").
@@ -94,7 +93,7 @@ func (r *TargetRepo) QueryTargetsByTradeDay(ctx context.Context, tradeDay time.T
 	for rows.Next() {
 		e := entity.Target{Stock: new(entity.Stock)}
 		if err := rows.Scan(
-			&e.ID, &e.Rank, &e.Volume, &e.RealTime, &e.TradeDay,
+			&e.ID, &e.Rank, &e.Volume, &e.TradeDay,
 			&e.StockNum, &e.Stock.Number, &e.Stock.Name, &e.Stock.Exchange, &e.Stock.Category, &e.Stock.DayTrade, &e.Stock.LastClose, &e.Stock.UpdateDate,
 		); err != nil {
 			return nil, err

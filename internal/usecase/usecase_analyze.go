@@ -149,13 +149,11 @@ func (uc *AnalyzeUseCase) SimulateOnHistoryTick(ctx context.Context, useDefault 
 				bestCfg = res.cfg
 				orders = &res.orders
 				log.Infof("TradeCount: %d, Forward: %d, Reverse: %d, Discount: %d, Total: %d", bestBalance.TradeCount, bestBalance.Forward, bestBalance.Reverse, bestBalance.Discount, bestBalance.Total)
-				log.Warnf("OutInRatio %.1f", bestCfg.OutInRatio)
-				log.Warnf("InOutRatio: %.1f", bestCfg.InOutRatio)
+				log.Warnf("RSIMinCount: %d", bestCfg.RSIMinCount)
+				log.Warnf("VolumePRLimit: %.1f", bestCfg.VolumePRLimit)
 				log.Warnf("AllOutInRatio %.1f", bestCfg.AllOutInRatio)
 				log.Warnf("AllInOutRatio: %.1f", bestCfg.AllInOutRatio)
-				log.Warnf("VolumePRLimit: %.1f", bestCfg.VolumePRLimit)
 				log.Warnf("TickAnalyzePeriod: %.0f", bestCfg.TickAnalyzePeriod)
-				log.Warnf("RSIMinCount: %d", bestCfg.RSIMinCount)
 			}
 		}
 	}()
@@ -331,8 +329,6 @@ func generateAnalyzeCfg(useDefault bool) []config.Analyze {
 		return []config.Analyze{{
 			CloseChangeRatioLow:  cfg.Analyze.CloseChangeRatioLow,
 			CloseChangeRatioHigh: cfg.Analyze.CloseChangeRatioHigh,
-			OutInRatio:           cfg.Analyze.OutInRatio,
-			InOutRatio:           cfg.Analyze.InOutRatio,
 			VolumePRLimit:        cfg.Analyze.VolumePRLimit,
 			TickAnalyzePeriod:    cfg.Analyze.TickAnalyzePeriod,
 			RSIMinCount:          cfg.Analyze.RSIMinCount,
@@ -348,8 +344,6 @@ func generateAnalyzeCfg(useDefault bool) []config.Analyze {
 			AllOutInRatio: 50,
 			AllInOutRatio: 50,
 
-			OutInRatio:           cfg.Analyze.OutInRatio,
-			InOutRatio:           cfg.Analyze.InOutRatio,
 			TickAnalyzePeriod:    cfg.Analyze.TickAnalyzePeriod,
 			CloseChangeRatioLow:  cfg.Analyze.CloseChangeRatioLow,
 			CloseChangeRatioHigh: cfg.Analyze.CloseChangeRatioHigh,
@@ -360,8 +354,6 @@ func generateAnalyzeCfg(useDefault bool) []config.Analyze {
 	AppendVolumePRLimitVar(&base)
 	AppendAllOutInRatioVar(&base)
 	AppendAllInOutRatioVar(&base)
-	// AppendOutInRatioVar(&base)
-	// AppendInOutRatioVar(&base)
 
 	log.Warnf("Total analyze times: %d", len(base))
 
@@ -373,45 +365,15 @@ func AppendRSICountVar(cfgArr *[]config.Analyze) {
 	var appendCfg []config.Analyze
 	for _, v := range *cfgArr {
 		for {
-			if v.RSIMinCount >= 200 {
+			if v.RSIMinCount >= 1100 {
 				break
 			}
-			v.RSIMinCount += 50
+			v.RSIMinCount += 200
 			appendCfg = append(appendCfg, v)
 		}
 	}
 	*cfgArr = append(*cfgArr, appendCfg...)
 }
-
-// AppendOutInRatioVar -.
-// func AppendOutInRatioVar(cfgArr *[]config.Analyze) {
-// 	var appendCfg []config.Analyze
-// 	for _, v := range *cfgArr {
-// 		for {
-// 			if v.OutInRatio <= 75 {
-// 				break
-// 			}
-// 			v.OutInRatio -= 5
-// 			appendCfg = append(appendCfg, v)
-// 		}
-// 	}
-// 	*cfgArr = append(*cfgArr, appendCfg...)
-// }
-
-// AppendInOutRatioVar -.
-// func AppendInOutRatioVar(cfgArr *[]config.Analyze) {
-// 	var appendCfg []config.Analyze
-// 	for _, v := range *cfgArr {
-// 		for {
-// 			if v.InOutRatio <= 95 {
-// 				break
-// 			}
-// 			v.InOutRatio -= 5
-// 			appendCfg = append(appendCfg, v)
-// 		}
-// 	}
-// 	*cfgArr = append(*cfgArr, appendCfg...)
-// }
 
 // AppendVolumePRLimitVar -.
 func AppendVolumePRLimitVar(cfgArr *[]config.Analyze) {
@@ -433,10 +395,10 @@ func AppendAllOutInRatioVar(cfgArr *[]config.Analyze) {
 	var appendCfg []config.Analyze
 	for _, v := range *cfgArr {
 		for {
-			if v.AllOutInRatio >= 55 {
+			if v.AllOutInRatio >= 90 {
 				break
 			}
-			v.AllOutInRatio++
+			v.AllOutInRatio += 5
 			appendCfg = append(appendCfg, v)
 		}
 	}
@@ -448,10 +410,10 @@ func AppendAllInOutRatioVar(cfgArr *[]config.Analyze) {
 	var appendCfg []config.Analyze
 	for _, v := range *cfgArr {
 		for {
-			if v.AllInOutRatio <= 45 {
+			if v.AllInOutRatio >= 90 {
 				break
 			}
-			v.AllInOutRatio--
+			v.AllInOutRatio += 5
 			appendCfg = append(appendCfg, v)
 		}
 	}

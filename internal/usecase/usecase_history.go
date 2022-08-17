@@ -63,11 +63,10 @@ func (uc *HistoryUseCase) FetchHistory(ctx context.Context, targetArr []*entity.
 
 	var fetchArr []*entity.Target
 	for _, v := range targetArr {
-		if _, ok := uc.fetchList[v.StockNum]; ok {
-			continue
+		if _, ok := uc.fetchList[v.StockNum]; !ok {
+			uc.fetchList[v.StockNum] = v
+			fetchArr = append(fetchArr, v)
 		}
-		uc.fetchList[v.StockNum] = v
-		fetchArr = append(fetchArr, v)
 	}
 
 	if len(fetchArr) == 0 {
