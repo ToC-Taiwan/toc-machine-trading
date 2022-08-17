@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"sort"
 	"time"
 
 	"toc-machine-trading/internal/entity"
@@ -13,17 +14,19 @@ import (
 
 // TargetUseCase -.
 type TargetUseCase struct {
-	repo    TargetRepo
-	gRPCAPI TargetgRPCAPI
+	repo          TargetRepo
+	gRPCAPI       TargetgRPCAPI
+	streamgRPCAPI StreamgRPCAPI
 
 	targetCond config.TargetCond
 }
 
 // NewTarget -.
-func NewTarget(r TargetRepo, t TargetgRPCAPI) *TargetUseCase {
+func NewTarget(r TargetRepo, t TargetgRPCAPI, s StreamgRPCAPI) *TargetUseCase {
 	uc := &TargetUseCase{
-		repo:    r,
-		gRPCAPI: t,
+		repo:          r,
+		gRPCAPI:       t,
+		streamgRPCAPI: s,
 	}
 
 	cfg, err := config.GetConfig()
@@ -93,10 +96,56 @@ func (uc *TargetUseCase) SearchTradeDayTargets(ctx context.Context, tradeDay tim
 		return nil, err
 	}
 
+	if len(t) == 0 && time.Now().Before(cc.GetBasicInfo().OpenTime.Add(-30*time.Minute)) {
+		return uc.SearchTradeDayTargetsFromAllSnapshot(tradeDay)
+	}
+
 	condition := uc.targetCond
 	var result []*entity.Target
 	for _, c := range condition.PriceVolumeLimit {
 		for _, v := range t {
+			stock := cc.GetStockDetail(v.GetCode())
+			if stock == nil {
+				continue
+			}
+
+			if !blackStockFilter(stock.Number, condition) ||
+				!blackCatagoryFilter(stock.Category, condition) ||
+				!targetFilter(v.GetClose(), v.GetTotalVolume(), c, false) {
+				continue
+			}
+
+			result = append(result, &entity.Target{
+				Rank:     len(result) + 1,
+				StockNum: v.GetCode(),
+				Volume:   v.GetTotalVolume(),
+				TradeDay: tradeDay,
+				Stock:    stock,
+			})
+		}
+	}
+	return result, nil
+}
+
+// SearchTradeDayTargetsFromAllSnapshot -.
+func (uc *TargetUseCase) SearchTradeDayTargetsFromAllSnapshot(tradeDay time.Time) ([]*entity.Target, error) {
+	data, err := uc.streamgRPCAPI.GetAllStockSnapshot()
+	if err != nil {
+		return []*entity.Target{}, err
+	}
+
+	if len(data) < 200 {
+		return []*entity.Target{}, errors.New("no all snapshots")
+	}
+
+	sort.Slice(data, func(i, j int) bool {
+		return data[i].GetTotalVolume() > data[j].GetTotalVolume()
+	})
+
+	condition := uc.targetCond
+	var result []*entity.Target
+	for _, c := range condition.PriceVolumeLimit {
+		for _, v := range data[:200] {
 			stock := cc.GetStockDetail(v.GetCode())
 			if stock == nil {
 				continue

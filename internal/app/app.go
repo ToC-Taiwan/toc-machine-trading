@@ -47,7 +47,7 @@ func Run(cfg *config.Config) {
 	streamUseCase := usecase.NewStream(repo.NewStream(pg), grpcapi.NewStream(sc), rabbit.NewStream())
 	analyzeUseCase := usecase.NewAnalyze(repo.NewHistory(pg))
 	historyUseCase := usecase.NewHistory(repo.NewHistory(pg), grpcapi.NewHistory(sc))
-	targetUseCase := usecase.NewTarget(repo.NewTarget(pg), grpcapi.NewTarget(sc))
+	targetUseCase := usecase.NewTarget(repo.NewTarget(pg), grpcapi.NewTarget(sc), grpcapi.NewStream(sc))
 
 	// HTTP Server
 	handler := gin.New()
