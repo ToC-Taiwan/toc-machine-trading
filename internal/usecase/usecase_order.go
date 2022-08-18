@@ -248,7 +248,7 @@ func (uc *OrderUseCase) updateCacheAndInsertDB(order *entity.Order) {
 	// get order from cache
 	cacheOrder := cc.GetOrderByOrderID(order.OrderID)
 	if cacheOrder == nil {
-		log.Debug("Order not found in cache: %s", order.StockNum)
+		log.Debugf("Order not found in cache: %s", order.StockNum)
 		return
 	}
 
