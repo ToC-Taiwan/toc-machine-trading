@@ -141,10 +141,13 @@ func (uc *StreamUseCase) tradingRoom(agent *TradeAgent) {
 		for {
 			agent.lastTick = <-agent.tickChan
 			agent.tickArr = append(agent.tickArr, agent.lastTick)
-
 			log.Debugf("%s tick time delay: %s", agent.stockNum, time.Since(agent.lastTick.TickTime).String())
 
-			order := agent.generateOrder(uc.analyzeCfg, uc.clearAll)
+			if agent.waitingOrder != nil || uc.clearAll || agent.analyzeTickTime.IsZero() || !agent.openPass {
+				continue
+			}
+
+			order := agent.generateOrder(uc.analyzeCfg)
 			if order == nil {
 				continue
 			}

@@ -74,11 +74,7 @@ func NewAgent(stockNum string, tradeSwitch config.TradeSwitch) *TradeAgent {
 	return new
 }
 
-func (o *TradeAgent) generateOrder(cfg config.Analyze, needClear bool) *entity.Order {
-	if o.waitingOrder != nil || needClear || o.analyzeTickTime.IsZero() || !o.openPass {
-		return nil
-	}
-
+func (o *TradeAgent) generateOrder(cfg config.Analyze) *entity.Order {
 	if o.lastTick.TickTime.Sub(o.analyzeTickTime) < time.Duration(cfg.TickAnalyzePeriod)*time.Millisecond {
 		o.periodTickArr = append(o.periodTickArr, o.lastTick)
 		return nil
@@ -118,10 +114,10 @@ func (o *TradeAgent) generateOrder(cfg config.Analyze, needClear bool) *entity.O
 	}
 
 	switch {
-	case periodOutInRation > allOutInRation && allOutInRation > cfg.AllOutInRatio:
+	case periodOutInRation-allOutInRation > cfg.AllOutInRatio*0.1 && allOutInRation > cfg.AllOutInRatio:
 		order.Action = entity.ActionBuy
 		order.Price = o.lastBidAsk.BidPrice1
-	case periodOutInRation < allOutInRation && 100-allOutInRation > cfg.AllInOutRatio:
+	case allOutInRation-periodOutInRation > cfg.AllInOutRatio*0.1 && 100-allOutInRation > cfg.AllInOutRatio:
 		order.Action = entity.ActionSellFirst
 		order.Price = o.lastBidAsk.AskPrice1
 	default:

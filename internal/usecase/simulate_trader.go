@@ -139,10 +139,10 @@ func (o *SimulateTradeAgent) generateSimulateOrder(cfg config.Analyze) *entity.O
 	}
 
 	switch {
-	case periodOutInRation > allOutInRation && allOutInRation > cfg.AllOutInRatio:
+	case periodOutInRation-allOutInRation > cfg.AllOutInRatio*0.1 && allOutInRation > cfg.AllOutInRatio:
 		order.Action = entity.ActionBuy
 		order.Price = o.lastTick.Close
-	case periodOutInRation < allOutInRation && 100-allOutInRation > cfg.AllInOutRatio:
+	case allOutInRation-periodOutInRation > cfg.AllInOutRatio*0.1 && 100-allOutInRation > cfg.AllInOutRatio:
 		order.Action = entity.ActionSellFirst
 		order.Price = o.lastTick.Close
 	default:

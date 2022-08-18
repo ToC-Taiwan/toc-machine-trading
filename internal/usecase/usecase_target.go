@@ -96,7 +96,8 @@ func (uc *TargetUseCase) SearchTradeDayTargets(ctx context.Context, tradeDay tim
 		return nil, err
 	}
 
-	if len(t) == 0 && time.Now().Before(cc.GetBasicInfo().OpenTime.Add(-30*time.Minute)) {
+	if len(t) == 0 && time.Now().Before(cc.GetBasicInfo().TradeDay.Add(8*time.Hour)) {
+		log.Warn("VolumeRank is empty, search from all snapshot")
 		return uc.SearchTradeDayTargetsFromAllSnapshot(tradeDay)
 	}
 

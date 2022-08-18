@@ -65,18 +65,18 @@ target_cond:
 
 analyze:
     # unit: %
-    close_change_ratio_low: -0.5
-    close_change_ratio_high: 0.5
+    close_change_ratio_low: -2
+    close_change_ratio_high: 2
 
     # unit: millisecond
     tick_analyze_period: 15000
 
     # unit: %
-    all_out_in_ratio: 65
-    all_in_out_ratio: 65
+    all_out_in_ratio: 70
+    all_in_out_ratio: 75
 
     # unit: %
-    volume_pr_limit: 98
+    volume_pr_limit: 99
 
     # unit: times
     rsi_min_count: 700
