@@ -41,6 +41,11 @@ func GenerateRSI(input []float64, effTimes int) float64 {
 		case gap < 0:
 			negative += time
 		}
+
+		if gap != 0 {
+			baseClose = v
+			diff = GetStockDiffByClose(baseClose)
+		}
 	}
 
 	if totalEff := positive + negative; totalEff < float64(effTimes) {

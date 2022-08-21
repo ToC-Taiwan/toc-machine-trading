@@ -1181,3 +1181,89 @@ var TradeService_ServiceDesc = grpc.ServiceDesc{
 	Streams:  []grpc.StreamDesc{},
 	Metadata: "src/sinopac_forwarder.proto",
 }
+
+// FutureForwarderClient is the client API for FutureForwarder service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+type FutureForwarderClient interface {
+	GetFIMTXSnapshot(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*StockSnapshotMessage, error)
+}
+
+type futureForwarderClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewFutureForwarderClient(cc grpc.ClientConnInterface) FutureForwarderClient {
+	return &futureForwarderClient{cc}
+}
+
+func (c *futureForwarderClient) GetFIMTXSnapshot(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*StockSnapshotMessage, error) {
+	out := new(StockSnapshotMessage)
+	err := c.cc.Invoke(ctx, "/sinopac_forwarder.FutureForwarder/GetFIMTXSnapshot", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// FutureForwarderServer is the server API for FutureForwarder service.
+// All implementations must embed UnimplementedFutureForwarderServer
+// for forward compatibility
+type FutureForwarderServer interface {
+	GetFIMTXSnapshot(context.Context, *emptypb.Empty) (*StockSnapshotMessage, error)
+	mustEmbedUnimplementedFutureForwarderServer()
+}
+
+// UnimplementedFutureForwarderServer must be embedded to have forward compatible implementations.
+type UnimplementedFutureForwarderServer struct {
+}
+
+func (UnimplementedFutureForwarderServer) GetFIMTXSnapshot(context.Context, *emptypb.Empty) (*StockSnapshotMessage, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetFIMTXSnapshot not implemented")
+}
+func (UnimplementedFutureForwarderServer) mustEmbedUnimplementedFutureForwarderServer() {}
+
+// UnsafeFutureForwarderServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to FutureForwarderServer will
+// result in compilation errors.
+type UnsafeFutureForwarderServer interface {
+	mustEmbedUnimplementedFutureForwarderServer()
+}
+
+func RegisterFutureForwarderServer(s grpc.ServiceRegistrar, srv FutureForwarderServer) {
+	s.RegisterService(&FutureForwarder_ServiceDesc, srv)
+}
+
+func _FutureForwarder_GetFIMTXSnapshot_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FutureForwarderServer).GetFIMTXSnapshot(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/sinopac_forwarder.FutureForwarder/GetFIMTXSnapshot",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FutureForwarderServer).GetFIMTXSnapshot(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+// FutureForwarder_ServiceDesc is the grpc.ServiceDesc for FutureForwarder service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var FutureForwarder_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "sinopac_forwarder.FutureForwarder",
+	HandlerType: (*FutureForwarderServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "GetFIMTXSnapshot",
+			Handler:    _FutureForwarder_GetFIMTXSnapshot_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "src/sinopac_forwarder.proto",
+}

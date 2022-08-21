@@ -91,6 +91,7 @@ CREATE TABLE trade_order (
     "group_id" VARCHAR NOT NULL,
     "status" INT NOT NULL,
     "order_time" TIMESTAMPTZ NOT NULL,
+    "tick_time" TIMESTAMPTZ NOT NULL,
     "stock_num" VARCHAR NOT NULL,
     "action" INT NOT NULL,
     "price" DECIMAL NOT NULL,

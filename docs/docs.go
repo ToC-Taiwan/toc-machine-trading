@@ -801,6 +801,9 @@ const docTemplate = `{
                 "stock_num": {
                     "type": "string"
                 },
+                "tick_time": {
+                    "type": "string"
+                },
                 "trade_time": {
                     "type": "string"
                 }

@@ -132,10 +132,12 @@ func (o *SimulateTradeAgent) generateSimulateOrder(cfg config.Analyze) *entity.O
 
 	// need to compare with all and period
 	order := &entity.Order{
-		StockNum:  o.stockNum,
-		Quantity:  o.orderQuantity,
+		StockNum: o.stockNum,
+		TickTime: o.lastTick.TickTime,
+		Quantity: o.orderQuantity,
+		GroupID:  uuid.New().String(),
+
 		TradeTime: o.lastTick.TickTime,
-		GroupID:   uuid.New().String(),
 	}
 
 	switch {
@@ -153,8 +155,7 @@ func (o *SimulateTradeAgent) generateSimulateOrder(cfg config.Analyze) *entity.O
 }
 
 func (o *SimulateTradeAgent) generateSimulateTradeOutOrder(cfg config.Analyze, postOrderAction entity.OrderAction, preOrder *entity.Order) *entity.Order {
-	rsi := o.tickArr.getRSIByTickTime(preOrder.TradeTime, cfg.RSIMinCount)
-	if rsi != 0 {
+	if o.lastTick.TickTime.After(cc.GetBasicInfo().LastTradeDay.Add(9 * time.Hour).Add(time.Duration(o.tradeSwitch.TradeOutEndTime) * time.Minute)) {
 		return &entity.Order{
 			StockNum:  o.stockNum,
 			Action:    postOrderAction,
@@ -165,14 +166,35 @@ func (o *SimulateTradeAgent) generateSimulateTradeOutOrder(cfg config.Analyze, p
 		}
 	}
 
-	if o.lastTick.TickTime.After(cc.GetBasicInfo().LastTradeDay.Add(9 * time.Hour).Add(time.Duration(o.tradeSwitch.TradeOutEndTime) * time.Minute)) {
-		return &entity.Order{
-			StockNum:  o.stockNum,
-			Action:    postOrderAction,
-			Price:     o.lastTick.Close,
-			Quantity:  preOrder.Quantity,
-			TradeTime: o.lastTick.TickTime,
-			GroupID:   preOrder.GroupID,
+	rsi := o.tickArr.getRSIByTickTime(preOrder.TickTime, cfg.RSIMinCount)
+	if rsi == 0 {
+		return nil
+	}
+
+	switch postOrderAction {
+	case entity.ActionSell:
+		if rsi > 50 {
+			return &entity.Order{
+				StockNum:  o.stockNum,
+				Action:    postOrderAction,
+				Price:     o.lastTick.Close,
+				Quantity:  preOrder.Quantity,
+				TradeTime: o.lastTick.TickTime,
+				TickTime:  o.lastTick.TickTime,
+				GroupID:   preOrder.GroupID,
+			}
+		}
+	case entity.ActionBuyLater:
+		if rsi < 50 {
+			return &entity.Order{
+				StockNum:  o.stockNum,
+				Action:    postOrderAction,
+				Price:     o.lastTick.Close,
+				Quantity:  preOrder.Quantity,
+				TradeTime: o.lastTick.TickTime,
+				TickTime:  o.lastTick.TickTime,
+				GroupID:   preOrder.GroupID,
+			}
 		}
 	}
 

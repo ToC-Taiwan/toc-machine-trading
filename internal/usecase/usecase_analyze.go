@@ -365,10 +365,10 @@ func AppendRSICountVar(cfgArr *[]config.Analyze) {
 	var appendCfg []config.Analyze
 	for _, v := range *cfgArr {
 		for {
-			if v.RSIMinCount >= 1100 {
+			if v.RSIMinCount >= 300 {
 				break
 			}
-			v.RSIMinCount += 200
+			v.RSIMinCount += 50
 			appendCfg = append(appendCfg, v)
 		}
 	}

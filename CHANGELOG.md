@@ -1,6 +1,27 @@
-# [](https://gitlab.tocraw.com/root/toc-machine-trading/compare/v0.0.5...v) (2022-08-08)
+# [](https://gitlab.tocraw.com/root/toc-machine-trading/compare/v0.0.6...v) (2022-08-19)
 
 ## CHANGELOG
+
+## [0.0.6](https://gitlab.tocraw.com/root/toc-machine-trading/compare/v0.0.5...v0.0.6) (2022-08-18)
+
+### Bug Fixes
+
+* **logger:** fix debug missing format function ([a9b5bba](https://gitlab.tocraw.com/root/toc-machine-trading/commit/a9b5bba9d4b17e25ac5482fc35cd37fdd3ebd38e))
+* **simulate:** fix wrong orders return, modify default config, add realtime target to 30 secs ([8623d30](https://gitlab.tocraw.com/root/toc-machine-trading/commit/8623d30288aa44892ebb756461df32cdee552157))
+
+### Features
+
+* **logger:** add report logger in dev mode ([ae2a7ab](https://gitlab.tocraw.com/root/toc-machine-trading/commit/ae2a7ab59455cd0cc504e16410db83946a002664))
+* **log:** merge all log into one file, and pretty json ([4e85e2a](https://gitlab.tocraw.com/root/toc-machine-trading/commit/4e85e2a498a20e5a941d2e0f93322f43ef0d312d))
+* **order:** add group id to recognize parent, remove rsi high low to trade out ([9b1d6a0](https://gitlab.tocraw.com/root/toc-machine-trading/commit/9b1d6a0451a8abe3e5bf5812a4acab8c5bfe9638))
+* **rsi:** change method calculate rsi, rsi mininum count use as effective count ([7a3c1eb](https://gitlab.tocraw.com/root/toc-machine-trading/commit/7a3c1eb281d5c48d7dd98e951d373d7daef847f7))
+* **simulate:** modifiy condition log, default config ([b4ba3e4](https://gitlab.tocraw.com/root/toc-machine-trading/commit/b4ba3e4ed5a9b0f899b478add7ebab6679a32251))
+* **simulate:** temp remove one stock trade once limit and quota, fix simulate difference ([edc2383](https://gitlab.tocraw.com/root/toc-machine-trading/commit/edc2383db31fbf5072679f18625fb41f9ff6c6d6))
+* **target:** add alternative choice to find target when volume rank is empty ([5c318df](https://gitlab.tocraw.com/root/toc-machine-trading/commit/5c318dfaef9044b2604dee03079ac5fd9d28d914))
+* **target:** remove realtime target tag, subscribe first, modify trade in method ([6290020](https://gitlab.tocraw.com/root/toc-machine-trading/commit/6290020f1ead9d44fb756d87bac84f4c08f3aa38))
+* **tradeagent:** add compare with all and period's out in ratio ([3813b0f](https://gitlab.tocraw.com/root/toc-machine-trading/commit/3813b0f59704332862350e34e9a66cd12f940bb6))
+* **tradein:** add 0.1 all outinratio or inoutratio ([413617c](https://gitlab.tocraw.com/root/toc-machine-trading/commit/413617c83e87ab993d034969a2f8bfd750084b1b))
+* **trade:** remove trade once limit ([aa2292f](https://gitlab.tocraw.com/root/toc-machine-trading/commit/aa2292fb2ab7022bcce6a1ffea9e183c7a355ef5))
 
 ## [0.0.5](https://gitlab.tocraw.com/root/toc-machine-trading/compare/v0.0.4...v0.0.5) (2022-08-06)
 

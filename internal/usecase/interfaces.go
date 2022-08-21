@@ -121,6 +121,7 @@ type (
 		GetAllStockSnapshot() ([]*pb.StockSnapshotMessage, error)
 		GetStockSnapshotByNumArr(stockNumArr []string) ([]*pb.StockSnapshotMessage, error)
 		GetStockSnapshotTSE() (*pb.StockSnapshotMessage, error)
+		GetFutureSnapshotFIMTX() (*pb.StockSnapshotMessage, error)
 	}
 
 	// StreamRabbit -.

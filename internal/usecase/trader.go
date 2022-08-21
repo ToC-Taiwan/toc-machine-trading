@@ -110,6 +110,7 @@ func (o *TradeAgent) generateOrder(cfg config.Analyze) *entity.Order {
 	order := &entity.Order{
 		StockNum: o.stockNum,
 		Quantity: o.orderQuantity,
+		TickTime: o.lastTick.TickTime,
 		GroupID:  uuid.New().String(),
 	}
 
@@ -130,23 +131,31 @@ func (o *TradeAgent) generateOrder(cfg config.Analyze) *entity.Order {
 func (o *TradeAgent) generateTradeOutOrder(cfg config.Analyze, postOrderAction entity.OrderAction, preOrder *entity.Order) *entity.Order {
 	// calculate max loss here
 	//
-	rsi := o.tickArr.getRSIByTickTime(preOrder.TradeTime, cfg.RSIMinCount)
-	if rsi != 0 {
-		switch postOrderAction {
-		case entity.ActionSell:
-			return &entity.Order{
-				StockNum: o.stockNum,
-				Action:   postOrderAction,
-				Price:    o.lastBidAsk.BidPrice1,
-				Quantity: preOrder.Quantity,
-				GroupID:  preOrder.GroupID,
-			}
-		case entity.ActionBuyLater:
+	rsi := o.tickArr.getRSIByTickTime(preOrder.TickTime, cfg.RSIMinCount)
+	if rsi == 0 {
+		return nil
+	}
+
+	switch postOrderAction {
+	case entity.ActionSell:
+		if rsi > 50 {
 			return &entity.Order{
 				StockNum: o.stockNum,
 				Action:   postOrderAction,
 				Price:    o.lastBidAsk.AskPrice1,
 				Quantity: preOrder.Quantity,
+				TickTime: o.lastTick.TickTime,
+				GroupID:  preOrder.GroupID,
+			}
+		}
+	case entity.ActionBuyLater:
+		if rsi < 50 {
+			return &entity.Order{
+				StockNum: o.stockNum,
+				Action:   postOrderAction,
+				Price:    o.lastBidAsk.BidPrice1,
+				Quantity: preOrder.Quantity,
+				TickTime: o.lastTick.TickTime,
 				GroupID:  preOrder.GroupID,
 			}
 		}
@@ -225,10 +234,10 @@ func (o *TradeAgent) cancelOrder(order *entity.Order) {
 
 			if order.Status == entity.StatusCancelled {
 				log.Warnf("Order Canceled -> Stock: %s, Action: %d, Price: %.2f, Qty: %d", order.StockNum, order.Action, order.Price, order.Quantity)
-				if order.Action == entity.ActionBuy || order.Action == entity.ActionSellFirst {
-					bus.PublishTopicEvent(topicUnSubscribeTickTargets, order.StockNum)
-					return
-				}
+				// if order.Action == entity.ActionBuy || order.Action == entity.ActionSellFirst {
+				// 	bus.PublishTopicEvent(topicUnSubscribeTickTargets, order.StockNum)
+				// 	return
+				// }
 				o.waitingOrder = nil
 				return
 			} else if order.TradeTime.Add(o.cancelWaitTime).Before(time.Now()) {

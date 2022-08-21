@@ -983,6 +983,21 @@ func (mr *MockStreamgRPCAPIMockRecorder) GetAllStockSnapshot() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllStockSnapshot", reflect.TypeOf((*MockStreamgRPCAPI)(nil).GetAllStockSnapshot))
 }
 
+// GetFutureSnapshotFIMTX mocks base method.
+func (m *MockStreamgRPCAPI) GetFutureSnapshotFIMTX() (*pb.StockSnapshotMessage, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetFutureSnapshotFIMTX")
+	ret0, _ := ret[0].(*pb.StockSnapshotMessage)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetFutureSnapshotFIMTX indicates an expected call of GetFutureSnapshotFIMTX.
+func (mr *MockStreamgRPCAPIMockRecorder) GetFutureSnapshotFIMTX() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFutureSnapshotFIMTX", reflect.TypeOf((*MockStreamgRPCAPI)(nil).GetFutureSnapshotFIMTX))
+}
+
 // GetStockSnapshotByNumArr mocks base method.
 func (m *MockStreamgRPCAPI) GetStockSnapshotByNumArr(stockNumArr []string) ([]*pb.StockSnapshotMessage, error) {
 	m.ctrl.T.Helper()

@@ -72,14 +72,14 @@ analyze:
     tick_analyze_period: 15000
 
     # unit: %
-    all_out_in_ratio: 70
-    all_in_out_ratio: 75
+    all_out_in_ratio: 65
+    all_in_out_ratio: 65
 
     # unit: %
-    volume_pr_limit: 99
+    volume_pr_limit: 98
 
     # unit: times
-    rsi_min_count: 700
+    rsi_min_count: 150
 
     # unit: day
     ma_period: 60
