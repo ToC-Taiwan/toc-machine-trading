@@ -51,7 +51,7 @@ func initLogger() {
 	}
 
 	if dev {
-		globalLogger.SetReportCaller(true)
+		// globalLogger.SetReportCaller(true)
 		globalLogger.SetFormatter(&logrus.TextFormatter{
 			TimestampFormat:  "2006/01/02 15:04:05",
 			FullTimestamp:    true,
