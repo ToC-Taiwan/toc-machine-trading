@@ -13,9 +13,9 @@ sinopac:
 
 history:
     # unit: day
-    history_close_period: 70
-    history_tick_period: 10
-    history_kbar_period: 70
+    history_close_period: 65
+    history_tick_period: 12
+    history_kbar_period: 65
 
 trade_switch:
     simulation: false
@@ -26,7 +26,6 @@ trade_switch:
     # unit: minute
     total_open_time: 270
     trade_in_end_time: 90
-    trade_out_end_time: 150
 
     # unit: seccond
     trade_in_wait_time: 45
@@ -64,6 +63,9 @@ target_cond:
           limit_volume: 2000
 
 analyze:
+    # unit: minute
+    max_hold_time: 60
+
     # unit: %
     close_change_ratio_low: -2
     close_change_ratio_high: 2
@@ -72,14 +74,14 @@ analyze:
     tick_analyze_period: 15000
 
     # unit: %
-    all_out_in_ratio: 65
-    all_in_out_ratio: 65
-
-    # unit: %
     volume_pr_limit: 98
 
+    # unit: %
+    all_out_in_ratio: 75
+    all_in_out_ratio: 70
+
     # unit: times
-    rsi_min_count: 150
+    rsi_min_count: 80
 
     # unit: day
     ma_period: 60

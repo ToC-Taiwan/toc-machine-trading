@@ -155,7 +155,7 @@ func (o *SimulateTradeAgent) generateSimulateOrder(cfg config.Analyze) *entity.O
 }
 
 func (o *SimulateTradeAgent) generateSimulateTradeOutOrder(cfg config.Analyze, postOrderAction entity.OrderAction, preOrder *entity.Order) *entity.Order {
-	if o.lastTick.TickTime.After(cc.GetBasicInfo().LastTradeDay.Add(9 * time.Hour).Add(time.Duration(o.tradeSwitch.TradeOutEndTime) * time.Minute)) {
+	if o.lastTick.TickTime.After(preOrder.TradeTime.Add(time.Duration(cfg.MaxHoldTime) * time.Minute)) {
 		return &entity.Order{
 			StockNum:  o.stockNum,
 			Action:    postOrderAction,
@@ -171,30 +171,15 @@ func (o *SimulateTradeAgent) generateSimulateTradeOutOrder(cfg config.Analyze, p
 		return nil
 	}
 
-	switch postOrderAction {
-	case entity.ActionSell:
-		if rsi > 50 {
-			return &entity.Order{
-				StockNum:  o.stockNum,
-				Action:    postOrderAction,
-				Price:     o.lastTick.Close,
-				Quantity:  preOrder.Quantity,
-				TradeTime: o.lastTick.TickTime,
-				TickTime:  o.lastTick.TickTime,
-				GroupID:   preOrder.GroupID,
-			}
-		}
-	case entity.ActionBuyLater:
-		if rsi < 50 {
-			return &entity.Order{
-				StockNum:  o.stockNum,
-				Action:    postOrderAction,
-				Price:     o.lastTick.Close,
-				Quantity:  preOrder.Quantity,
-				TradeTime: o.lastTick.TickTime,
-				TickTime:  o.lastTick.TickTime,
-				GroupID:   preOrder.GroupID,
-			}
+	if rsi <= 49 || rsi >= 51 {
+		return &entity.Order{
+			StockNum:  o.stockNum,
+			Action:    postOrderAction,
+			Price:     o.lastTick.Close,
+			Quantity:  preOrder.Quantity,
+			TradeTime: o.lastTick.TickTime,
+			TickTime:  o.lastTick.TickTime,
+			GroupID:   preOrder.GroupID,
 		}
 	}
 

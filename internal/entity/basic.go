@@ -37,10 +37,9 @@ type BasicInfo struct {
 	LastTradeDay       time.Time
 	BefroeLastTradeDay time.Time
 
-	OpenTime        time.Time
-	EndTime         time.Time
-	TradeInEndTime  time.Time
-	TradeOutEndTime time.Time
+	OpenTime       time.Time
+	EndTime        time.Time
+	TradeInEndTime time.Time
 
 	HistoryCloseRange []time.Time
 	HistoryKbarRange  []time.Time

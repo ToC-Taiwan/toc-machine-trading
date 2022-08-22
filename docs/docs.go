@@ -540,6 +540,9 @@ const docTemplate = `{
                 "ma_period": {
                     "type": "integer"
                 },
+                "max_hold_time": {
+                    "type": "number"
+                },
                 "rsi_min_count": {
                     "type": "integer"
                 },
@@ -730,9 +733,6 @@ const docTemplate = `{
                 },
                 "trade_in_wait_time": {
                     "type": "integer"
-                },
-                "trade_out_end_time": {
-                    "type": "number"
                 },
                 "trade_out_wait_time": {
                     "type": "integer"

@@ -327,6 +327,7 @@ func generateAnalyzeCfg(useDefault bool) []config.Analyze {
 
 	if useDefault {
 		return []config.Analyze{{
+			MaxHoldTime:          cfg.Analyze.MaxHoldTime,
 			CloseChangeRatioLow:  cfg.Analyze.CloseChangeRatioLow,
 			CloseChangeRatioHigh: cfg.Analyze.CloseChangeRatioHigh,
 			VolumePRLimit:        cfg.Analyze.VolumePRLimit,
@@ -339,11 +340,12 @@ func generateAnalyzeCfg(useDefault bool) []config.Analyze {
 
 	base := []config.Analyze{
 		{
-			RSIMinCount:   100,
+			RSIMinCount:   10,
 			VolumePRLimit: 99,
 			AllOutInRatio: 50,
 			AllInOutRatio: 50,
 
+			MaxHoldTime:          cfg.Analyze.MaxHoldTime,
 			TickAnalyzePeriod:    cfg.Analyze.TickAnalyzePeriod,
 			CloseChangeRatioLow:  cfg.Analyze.CloseChangeRatioLow,
 			CloseChangeRatioHigh: cfg.Analyze.CloseChangeRatioHigh,
@@ -365,10 +367,10 @@ func AppendRSICountVar(cfgArr *[]config.Analyze) {
 	var appendCfg []config.Analyze
 	for _, v := range *cfgArr {
 		for {
-			if v.RSIMinCount >= 300 {
+			if v.RSIMinCount >= 100 {
 				break
 			}
-			v.RSIMinCount += 50
+			v.RSIMinCount += 10
 			appendCfg = append(appendCfg, v)
 		}
 	}
@@ -380,7 +382,7 @@ func AppendVolumePRLimitVar(cfgArr *[]config.Analyze) {
 	var appendCfg []config.Analyze
 	for _, v := range *cfgArr {
 		for {
-			if v.VolumePRLimit <= 97 {
+			if v.VolumePRLimit <= 98 {
 				break
 			}
 			v.VolumePRLimit--
@@ -395,7 +397,7 @@ func AppendAllOutInRatioVar(cfgArr *[]config.Analyze) {
 	var appendCfg []config.Analyze
 	for _, v := range *cfgArr {
 		for {
-			if v.AllOutInRatio >= 90 {
+			if v.AllOutInRatio >= 75 {
 				break
 			}
 			v.AllOutInRatio += 5
@@ -410,7 +412,7 @@ func AppendAllInOutRatioVar(cfgArr *[]config.Analyze) {
 	var appendCfg []config.Analyze
 	for _, v := range *cfgArr {
 		for {
-			if v.AllInOutRatio >= 90 {
+			if v.AllInOutRatio >= 75 {
 				break
 			}
 			v.AllInOutRatio += 5

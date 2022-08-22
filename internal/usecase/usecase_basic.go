@@ -161,10 +161,9 @@ func (uc *BasicUseCase) fillBasicInfo() error {
 		LastTradeDay:       lastTradeDayArr[0],
 		BefroeLastTradeDay: lastTradeDayArr[1],
 
-		OpenTime:        tradeDay.Add(openTime).Add(time.Duration(cfg.TradeSwitch.HoldTimeFromOpen) * time.Second),
-		EndTime:         tradeDay.Add(openTime).Add(time.Duration(cfg.TradeSwitch.TotalOpenTime) * time.Minute),
-		TradeInEndTime:  tradeDay.Add(openTime).Add(time.Duration(cfg.TradeSwitch.TradeInEndTime) * time.Minute),
-		TradeOutEndTime: tradeDay.Add(openTime).Add(time.Duration(cfg.TradeSwitch.TradeOutEndTime) * time.Minute),
+		OpenTime:       tradeDay.Add(openTime).Add(time.Duration(cfg.TradeSwitch.HoldTimeFromOpen) * time.Second),
+		TradeInEndTime: tradeDay.Add(openTime).Add(time.Duration(cfg.TradeSwitch.TradeInEndTime) * time.Minute),
+		EndTime:        tradeDay.Add(openTime).Add(time.Duration(cfg.TradeSwitch.TotalOpenTime) * time.Minute),
 
 		HistoryCloseRange: getLastNTradeDayByDate(cfg.History.HistoryClosePeriod, tradeDay),
 		HistoryKbarRange:  getLastNTradeDayByDate(cfg.History.HistoryKbarPeriod, tradeDay),

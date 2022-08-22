@@ -22,7 +22,6 @@ type StreamUseCase struct {
 	targetCond     config.TargetCond
 
 	tradeInSwitch bool
-	clearAll      bool
 }
 
 // NewStream -.
@@ -143,7 +142,7 @@ func (uc *StreamUseCase) tradingRoom(agent *TradeAgent) {
 			agent.tickArr = append(agent.tickArr, agent.lastTick)
 			log.Debugf("%s tick time delay: %s", agent.stockNum, time.Since(agent.lastTick.TickTime).String())
 
-			if agent.waitingOrder != nil || uc.clearAll || agent.analyzeTickTime.IsZero() || !agent.openPass {
+			if agent.waitingOrder != nil || agent.analyzeTickTime.IsZero() || !agent.openPass {
 				continue
 			}
 
@@ -162,18 +161,6 @@ func (uc *StreamUseCase) tradingRoom(agent *TradeAgent) {
 			log.Debugf("%s bidask time delay: %s", agent.stockNum, time.Since(agent.lastBidAsk.BidAskTime).String())
 		}
 	}()
-
-	for {
-		time.Sleep(15 * time.Second)
-		if uc.clearAll {
-			order := agent.clearUnfinishedOrder()
-			if order == nil {
-				continue
-			}
-			agent.waitingOrder = order
-			uc.placeOrder(agent, order)
-		}
-	}
 }
 
 func (uc *StreamUseCase) placeOrder(agent *TradeAgent, order *entity.Order) {
@@ -197,22 +184,15 @@ func (uc *StreamUseCase) placeOrder(agent *TradeAgent, order *entity.Order) {
 
 func (uc *StreamUseCase) checkTradeSwitch() {
 	openTime := uc.basic.OpenTime
-	endTime := uc.basic.EndTime
 	tradeInEndTime := uc.basic.TradeInEndTime
-	tradeOutEndTime := uc.basic.TradeOutEndTime
 
-	for range time.NewTicker(5 * time.Second).C {
+	for range time.NewTicker(2500 * time.Millisecond).C {
 		now := time.Now()
 		switch {
-		case now.Before(openTime) || now.After(endTime) || (now.After(tradeInEndTime) && now.Before(tradeOutEndTime)):
+		case now.Before(openTime) || now.After(tradeInEndTime):
 			uc.tradeInSwitch = false
-			uc.clearAll = false
 		case now.After(openTime) && now.Before(tradeInEndTime):
 			uc.tradeInSwitch = true
-			uc.clearAll = false
-		case now.After(tradeOutEndTime) && now.Before(endTime):
-			uc.tradeInSwitch = false
-			uc.clearAll = true
 		}
 	}
 }

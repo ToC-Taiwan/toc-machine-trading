@@ -117,10 +117,10 @@ func (o *TradeAgent) generateOrder(cfg config.Analyze) *entity.Order {
 	switch {
 	case periodOutInRation-allOutInRation > cfg.AllOutInRatio*0.1 && allOutInRation > cfg.AllOutInRatio:
 		order.Action = entity.ActionBuy
-		order.Price = o.lastBidAsk.BidPrice1
+		order.Price = o.lastBidAsk.AskPrice1
 	case allOutInRation-periodOutInRation > cfg.AllInOutRatio*0.1 && 100-allOutInRation > cfg.AllInOutRatio:
 		order.Action = entity.ActionSellFirst
-		order.Price = o.lastBidAsk.AskPrice1
+		order.Price = o.lastBidAsk.BidPrice1
 	default:
 		return nil
 	}
@@ -129,54 +129,35 @@ func (o *TradeAgent) generateOrder(cfg config.Analyze) *entity.Order {
 }
 
 func (o *TradeAgent) generateTradeOutOrder(cfg config.Analyze, postOrderAction entity.OrderAction, preOrder *entity.Order) *entity.Order {
-	// calculate max loss here
-	//
+	if o.lastTick.TickTime.After(preOrder.TradeTime.Add(time.Duration(cfg.MaxHoldTime) * time.Minute)) {
+		return &entity.Order{
+			StockNum:  o.stockNum,
+			Action:    postOrderAction,
+			Price:     o.lastTick.Close,
+			Quantity:  preOrder.Quantity,
+			TradeTime: o.lastTick.TickTime,
+			TickTime:  o.lastTick.TickTime,
+			GroupID:   preOrder.GroupID,
+		}
+	}
+
 	rsi := o.tickArr.getRSIByTickTime(preOrder.TickTime, cfg.RSIMinCount)
 	if rsi == 0 {
 		return nil
 	}
 
-	switch postOrderAction {
-	case entity.ActionSell:
-		if rsi > 50 {
-			return &entity.Order{
-				StockNum: o.stockNum,
-				Action:   postOrderAction,
-				Price:    o.lastBidAsk.AskPrice1,
-				Quantity: preOrder.Quantity,
-				TickTime: o.lastTick.TickTime,
-				GroupID:  preOrder.GroupID,
-			}
-		}
-	case entity.ActionBuyLater:
-		if rsi < 50 {
-			return &entity.Order{
-				StockNum: o.stockNum,
-				Action:   postOrderAction,
-				Price:    o.lastBidAsk.BidPrice1,
-				Quantity: preOrder.Quantity,
-				TickTime: o.lastTick.TickTime,
-				GroupID:  preOrder.GroupID,
-			}
-		}
-	}
-	return nil
-}
-
-func (o *TradeAgent) clearUnfinishedOrder() *entity.Order {
-	if o.waitingOrder != nil {
-		return nil
-	}
-
-	if action, preOrder := o.checkNeededPost(); action != entity.ActionNone {
+	if rsi <= 49 || rsi >= 51 {
 		return &entity.Order{
-			StockNum: o.stockNum,
-			Action:   action,
-			Price:    o.lastTick.Close,
-			Quantity: preOrder.Quantity,
-			GroupID:  preOrder.GroupID,
+			StockNum:  o.stockNum,
+			Action:    postOrderAction,
+			Price:     o.lastTick.Close,
+			Quantity:  preOrder.Quantity,
+			TradeTime: o.lastTick.TickTime,
+			TickTime:  o.lastTick.TickTime,
+			GroupID:   preOrder.GroupID,
 		}
 	}
+
 	return nil
 }
 

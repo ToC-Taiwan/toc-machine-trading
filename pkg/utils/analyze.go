@@ -52,5 +52,5 @@ func GenerateRSI(input []float64, effTimes int) float64 {
 		return 0
 	}
 
-	return Round(100*positive/(positive+negative), 2)
+	return Round(100*positive/(positive+negative), 1)
 }
