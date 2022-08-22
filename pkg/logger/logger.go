@@ -45,8 +45,8 @@ func initLogger() {
 	globalLogger = logrus.New()
 
 	var dev bool
-	mode, ok := os.LookupEnv("DEPLOYMENT")
-	if !ok || mode != "prod" {
+	mode, ok := os.LookupEnv("LOG_FORMAT")
+	if !ok || mode != "json" {
 		dev = true
 	}
 
