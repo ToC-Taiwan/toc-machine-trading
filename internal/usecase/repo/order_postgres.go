@@ -5,9 +5,8 @@ import (
 	"context"
 	"errors"
 	"time"
-
-	"toc-machine-trading/internal/entity"
-	"toc-machine-trading/pkg/postgres"
+	"tmt/internal/entity"
+	"tmt/pkg/postgres"
 
 	"github.com/Masterminds/squirrel"
 	"github.com/google/go-cmp/cmp"

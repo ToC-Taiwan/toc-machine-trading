@@ -2,10 +2,9 @@ package grpcapi
 
 import (
 	"context"
-
-	"toc-machine-trading/internal/entity"
-	"toc-machine-trading/pb"
-	"toc-machine-trading/pkg/sinopac"
+	"tmt/internal/entity"
+	"tmt/pb"
+	"tmt/pkg/sinopac"
 
 	"google.golang.org/protobuf/types/known/emptypb"
 )

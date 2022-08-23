@@ -2,9 +2,8 @@ package repo
 
 import (
 	"context"
-
-	"toc-machine-trading/internal/entity"
-	"toc-machine-trading/pkg/postgres"
+	"tmt/internal/entity"
+	"tmt/pkg/postgres"
 )
 
 // StreamRepo -.

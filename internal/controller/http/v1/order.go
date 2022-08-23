@@ -3,8 +3,7 @@ package v1
 import (
 	"net/http"
 	"strconv"
-
-	"toc-machine-trading/internal/usecase"
+	"tmt/internal/usecase"
 
 	"github.com/gin-gonic/gin"
 )

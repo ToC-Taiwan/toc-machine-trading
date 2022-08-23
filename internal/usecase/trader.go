@@ -4,10 +4,9 @@ import (
 	"sort"
 	"sync"
 	"time"
-
-	"toc-machine-trading/internal/entity"
-	"toc-machine-trading/pkg/config"
-	"toc-machine-trading/pkg/utils"
+	"tmt/internal/entity"
+	"tmt/pkg/config"
+	"tmt/pkg/utils"
 
 	"github.com/google/uuid"
 )

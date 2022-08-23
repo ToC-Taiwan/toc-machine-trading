@@ -6,10 +6,9 @@ import (
 	"fmt"
 	"sort"
 	"time"
-
-	"toc-machine-trading/internal/entity"
-	"toc-machine-trading/pkg/config"
-	"toc-machine-trading/pkg/global"
+	"tmt/internal/entity"
+	"tmt/pkg/config"
+	"tmt/pkg/global"
 )
 
 // TargetUseCase -.

@@ -2,9 +2,8 @@ package usecase
 
 import (
 	"math"
-
-	"toc-machine-trading/internal/entity"
-	"toc-machine-trading/pkg/config"
+	"tmt/internal/entity"
+	"tmt/pkg/config"
 )
 
 // Quota -.

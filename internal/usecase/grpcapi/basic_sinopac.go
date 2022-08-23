@@ -7,9 +7,8 @@ import (
 	"io"
 	"os"
 	"time"
-
-	"toc-machine-trading/pb"
-	"toc-machine-trading/pkg/sinopac"
+	"tmt/pb"
+	"tmt/pkg/sinopac"
 
 	"google.golang.org/protobuf/types/known/emptypb"
 )

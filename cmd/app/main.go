@@ -1,8 +1,8 @@
 package main
 
 import (
-	"toc-machine-trading/internal/app"
-	"toc-machine-trading/pkg/config"
+	"tmt/internal/app"
+	"tmt/pkg/config"
 )
 
 func main() {

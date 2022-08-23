@@ -2,7 +2,7 @@
 package eventbus
 
 import (
-	"toc-machine-trading/pkg/logger"
+	"tmt/pkg/logger"
 
 	"github.com/asaskevich/EventBus"
 )

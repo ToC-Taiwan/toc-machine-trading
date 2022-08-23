@@ -1,6 +1,6 @@
 package repo
 
-import "toc-machine-trading/pkg/logger"
+import "tmt/pkg/logger"
 
 var (
 	log           = logger.Get()

@@ -4,13 +4,12 @@ package rabbit
 import (
 	"fmt"
 	"time"
-
-	"toc-machine-trading/internal/entity"
-	"toc-machine-trading/pb"
-	"toc-machine-trading/pkg/config"
-	"toc-machine-trading/pkg/global"
-	"toc-machine-trading/pkg/logger"
-	"toc-machine-trading/pkg/rabbitmq"
+	"tmt/internal/entity"
+	"tmt/pb"
+	"tmt/pkg/config"
+	"tmt/pkg/global"
+	"tmt/pkg/logger"
+	"tmt/pkg/rabbitmq"
 
 	"github.com/streadway/amqp"
 	"google.golang.org/protobuf/proto"

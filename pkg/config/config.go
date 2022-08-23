@@ -3,8 +3,7 @@ package config
 
 import (
 	"sync"
-
-	"toc-machine-trading/pkg/logger"
+	"tmt/pkg/logger"
 
 	"github.com/ilyakaznacheev/cleanenv"
 )

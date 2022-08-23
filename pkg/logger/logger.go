@@ -9,8 +9,7 @@ import (
 	"strings"
 	"sync"
 	"time"
-
-	"toc-machine-trading/pkg/global"
+	"tmt/pkg/global"
 
 	"github.com/rifflock/lfshook"
 	"github.com/sirupsen/logrus"

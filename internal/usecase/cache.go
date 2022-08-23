@@ -2,9 +2,8 @@ package usecase
 
 import (
 	"time"
-
-	"toc-machine-trading/internal/entity"
-	"toc-machine-trading/pkg/cache"
+	"tmt/internal/entity"
+	"tmt/pkg/cache"
 )
 
 // Cache -.

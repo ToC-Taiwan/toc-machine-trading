@@ -5,9 +5,8 @@ import (
 	"sort"
 	"sync"
 	"time"
-
-	"toc-machine-trading/internal/entity"
-	"toc-machine-trading/pkg/config"
+	"tmt/internal/entity"
+	"tmt/pkg/config"
 )
 
 // StreamUseCase -.

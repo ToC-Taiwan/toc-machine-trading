@@ -5,9 +5,8 @@ import (
 	"encoding/json"
 	"net/http"
 	"sync"
-
-	"toc-machine-trading/internal/usecase"
-	"toc-machine-trading/pkg/logger"
+	"tmt/internal/usecase"
+	"tmt/pkg/logger"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"

@@ -3,8 +3,7 @@ package rabbitmq
 
 import (
 	"time"
-
-	"toc-machine-trading/pkg/logger"
+	"tmt/pkg/logger"
 
 	"github.com/streadway/amqp"
 )

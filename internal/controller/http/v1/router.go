@@ -2,9 +2,9 @@
 package v1
 
 import (
-	"toc-machine-trading/docs"
-	"toc-machine-trading/internal/usecase"
-	"toc-machine-trading/pkg/logger"
+	"tmt/docs"
+	"tmt/internal/usecase"
+	"tmt/pkg/logger"
 
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"

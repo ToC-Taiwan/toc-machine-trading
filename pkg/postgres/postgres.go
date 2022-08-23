@@ -5,8 +5,7 @@ import (
 	"context"
 	"fmt"
 	"time"
-
-	"toc-machine-trading/pkg/logger"
+	"tmt/pkg/logger"
 
 	"github.com/Masterminds/squirrel"
 	"github.com/jackc/pgx/v4"

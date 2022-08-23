@@ -5,9 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"time"
-
-	"toc-machine-trading/pkg/config"
-	"toc-machine-trading/pkg/postgres"
+	"tmt/pkg/config"
+	"tmt/pkg/postgres"
 
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/jackc/pgx/v4"

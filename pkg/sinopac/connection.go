@@ -3,8 +3,7 @@ package sinopac
 
 import (
 	"time"
-
-	"toc-machine-trading/pkg/logger"
+	"tmt/pkg/logger"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"

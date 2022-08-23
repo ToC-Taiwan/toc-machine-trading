@@ -2,8 +2,7 @@ package v1
 
 import (
 	"net/http"
-
-	"toc-machine-trading/internal/usecase"
+	"tmt/internal/usecase"
 
 	"github.com/gin-gonic/gin"
 )

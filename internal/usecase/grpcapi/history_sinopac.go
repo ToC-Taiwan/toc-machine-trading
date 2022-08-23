@@ -2,9 +2,8 @@ package grpcapi
 
 import (
 	"context"
-
-	"toc-machine-trading/pb"
-	"toc-machine-trading/pkg/sinopac"
+	"tmt/pb"
+	"tmt/pkg/sinopac"
 )
 
 // HistorygRPCAPI -.

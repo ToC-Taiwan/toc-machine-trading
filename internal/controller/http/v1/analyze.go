@@ -4,10 +4,9 @@ import (
 	"net/http"
 	"sort"
 	"time"
-
-	"toc-machine-trading/internal/entity"
-	"toc-machine-trading/internal/usecase"
-	"toc-machine-trading/pkg/global"
+	"tmt/internal/entity"
+	"tmt/internal/usecase"
+	"tmt/pkg/global"
 
 	"github.com/gin-gonic/gin"
 )

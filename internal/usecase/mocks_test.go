@@ -8,8 +8,8 @@ import (
 	context "context"
 	reflect "reflect"
 	time "time"
-	entity "toc-machine-trading/internal/entity"
-	pb "toc-machine-trading/pb"
+	entity "tmt/internal/entity"
+	pb "tmt/pb"
 
 	gomock "github.com/golang/mock/gomock"
 )

@@ -4,11 +4,10 @@ package usecase
 import (
 	"context"
 	"time"
-
-	"toc-machine-trading/internal/entity"
-	"toc-machine-trading/pb"
-	"toc-machine-trading/pkg/eventbus"
-	"toc-machine-trading/pkg/logger"
+	"tmt/internal/entity"
+	"tmt/pb"
+	"tmt/pkg/eventbus"
+	"tmt/pkg/logger"
 )
 
 var (

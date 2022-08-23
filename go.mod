@@ -1,4 +1,4 @@
-module toc-machine-trading
+module tmt
 
 go 1.19
 

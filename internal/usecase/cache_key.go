@@ -3,9 +3,8 @@ package usecase
 import (
 	"fmt"
 	"time"
-
-	"toc-machine-trading/pkg/cache"
-	"toc-machine-trading/pkg/global"
+	"tmt/pkg/cache"
+	"tmt/pkg/global"
 )
 
 const (

@@ -2,9 +2,8 @@ package v1
 
 import (
 	"net/http"
-
-	"toc-machine-trading/internal/controller/http/websocket"
-	"toc-machine-trading/internal/usecase"
+	"tmt/internal/controller/http/websocket"
+	"tmt/internal/usecase"
 
 	"github.com/gin-gonic/gin"
 )

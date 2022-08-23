@@ -2,10 +2,9 @@ package v1
 
 import (
 	"net/http"
-
-	"toc-machine-trading/internal/entity"
-	"toc-machine-trading/internal/usecase"
-	"toc-machine-trading/pkg/config"
+	"tmt/internal/entity"
+	"tmt/internal/usecase"
+	"tmt/pkg/config"
 
 	"github.com/gin-gonic/gin"
 )
