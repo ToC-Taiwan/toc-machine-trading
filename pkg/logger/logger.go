@@ -9,6 +9,7 @@ import (
 	"strings"
 	"sync"
 	"time"
+
 	"tmt/pkg/global"
 
 	"github.com/rifflock/lfshook"
@@ -34,6 +35,7 @@ func Get() *logrus.Logger {
 	if globalLogger != nil {
 		return globalLogger
 	}
+
 	once.Do(initLogger)
 	return globalLogger
 }
@@ -89,7 +91,7 @@ func initLogger() {
 }
 
 func fileHook(basePath string) *lfshook.LfsHook {
-	date := time.Now().Format("20060102")
+	date := time.Now().Format(global.ShortTimeLayoutNoDash)
 	date = strings.ReplaceAll(date, ":", "")
 
 	pathMap := lfshook.PathMap{

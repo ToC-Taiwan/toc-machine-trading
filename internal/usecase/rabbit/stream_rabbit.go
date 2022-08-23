@@ -4,6 +4,7 @@ package rabbit
 import (
 	"fmt"
 	"time"
+
 	"tmt/internal/entity"
 	"tmt/pb"
 	"tmt/pkg/config"

@@ -3,6 +3,7 @@ package config
 
 import (
 	"sync"
+
 	"tmt/pkg/logger"
 
 	"github.com/ilyakaznacheev/cleanenv"

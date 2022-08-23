@@ -3,6 +3,7 @@ package rabbitmq
 
 import (
 	"time"
+
 	"tmt/pkg/logger"
 
 	"github.com/streadway/amqp"

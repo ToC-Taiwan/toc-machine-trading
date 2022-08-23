@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+
 	"tmt/internal/usecase"
 	"tmt/internal/usecase/grpcapi"
 	"tmt/internal/usecase/rabbit"
