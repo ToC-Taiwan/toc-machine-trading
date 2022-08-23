@@ -100,6 +100,20 @@ func (c *Cache) biasRateKey(stockNum string) cache.Key {
 	}
 }
 
+func (c *Cache) highBiasRateKey() cache.Key {
+	return cache.Key{
+		Category: cacheCatagoryBiasRate,
+		ID:       "high",
+	}
+}
+
+func (c *Cache) lowBiasRateKey() cache.Key {
+	return cache.Key{
+		Category: cacheCatagoryBiasRate,
+		ID:       "low",
+	}
+}
+
 func (c *Cache) historyTickAnalyzeKey(stockNum string) cache.Key {
 	return cache.Key{
 		Category: cacheCatagoryHistoryTickAnalyze,

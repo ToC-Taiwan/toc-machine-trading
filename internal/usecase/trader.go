@@ -41,7 +41,7 @@ type TradeAgent struct {
 // NewAgent -.
 func NewAgent(stockNum string, tradeSwitch config.TradeSwitch) *TradeAgent {
 	var quantity int64 = 1
-	if biasRate := cc.GetBiasRate(stockNum); biasRate > 4 || biasRate < -4 {
+	if biasRate := cc.GetBiasRate(stockNum); biasRate > cc.GetHighBiasRate() || biasRate < cc.GetLowBiasRate() {
 		quantity = 2
 	} else if biasRate == 0 {
 		time.Sleep(time.Second)
@@ -89,12 +89,7 @@ func (o *TradeAgent) generateOrder(cfg config.Analyze) *entity.Order {
 		return nil
 	}
 
-	periodVolume := analyzeArr.getTotalVolume()
-	if pr := o.getPRByVolume(periodVolume); pr < cfg.VolumePRLimit {
-		return nil
-	}
-
-	if o.lastBidAsk == nil {
+	if pr := o.getPRByVolume(analyzeArr.getTotalVolume()); pr < cfg.VolumePRLimit {
 		return nil
 	}
 
@@ -125,16 +120,18 @@ func (o *TradeAgent) generateOrder(cfg config.Analyze) *entity.Order {
 }
 
 func (o *TradeAgent) generateTradeOutOrder(cfg config.Analyze, postOrderAction entity.OrderAction, preOrder *entity.Order) *entity.Order {
+	order := &entity.Order{
+		StockNum:  o.stockNum,
+		Action:    postOrderAction,
+		Price:     o.lastTick.Close,
+		Quantity:  preOrder.Quantity,
+		TradeTime: o.lastTick.TickTime,
+		TickTime:  o.lastTick.TickTime,
+		GroupID:   preOrder.GroupID,
+	}
+
 	if o.lastTick.TickTime.After(preOrder.TradeTime.Add(time.Duration(cfg.MaxHoldTime) * time.Minute)) {
-		return &entity.Order{
-			StockNum:  o.stockNum,
-			Action:    postOrderAction,
-			Price:     o.lastTick.Close,
-			Quantity:  preOrder.Quantity,
-			TradeTime: o.lastTick.TickTime,
-			TickTime:  o.lastTick.TickTime,
-			GroupID:   preOrder.GroupID,
-		}
+		return order
 	}
 
 	rsi := o.tickArr.getRSIByTickTime(preOrder.TickTime, cfg.RSIMinCount)
@@ -143,15 +140,13 @@ func (o *TradeAgent) generateTradeOutOrder(cfg config.Analyze, postOrderAction e
 	}
 
 	if rsi <= 49 || rsi >= 51 {
-		return &entity.Order{
-			StockNum:  o.stockNum,
-			Action:    postOrderAction,
-			Price:     o.lastTick.Close,
-			Quantity:  preOrder.Quantity,
-			TradeTime: o.lastTick.TickTime,
-			TickTime:  o.lastTick.TickTime,
-			GroupID:   preOrder.GroupID,
+		switch postOrderAction {
+		case entity.ActionSell:
+			order.Price = o.lastBidAsk.AskPrice1
+		case entity.ActionBuyLater:
+			order.Price = o.lastBidAsk.BidPrice1
 		}
+		return order
 	}
 
 	return nil
@@ -248,12 +243,13 @@ func (o *TradeAgent) checkFirstTickArrive() {
 	tradeDay := basic.TradeDay
 	lastClose := cc.GetHistoryClose(o.stockNum, basic.LastTradeDay)
 	for {
-		if len(o.tickArr) > 1 {
+		if len(o.tickArr) > 1 && o.lastBidAsk != nil {
 			firstTick := o.tickArr[0]
 			cc.SetHistoryOpen(o.stockNum, tradeDay, firstTick.Open)
 
 			if firstTick.Open != lastClose {
 				bus.PublishTopicEvent(topicUnSubscribeTickTargets, o.stockNum)
+				log.Warnf("Not open from last close, unsubscribe %s", o.stockNum)
 				break
 			}
 

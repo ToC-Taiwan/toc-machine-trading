@@ -23,6 +23,8 @@ type HistoryUseCase struct {
 
 	fetchList map[string]*entity.Target
 	mutex     sync.Mutex
+
+	biasRateArr []float64
 }
 
 // NewHistory -.
@@ -146,6 +148,7 @@ func (uc *HistoryUseCase) fetchHistoryClose(targetArr []*entity.Target) error {
 			}
 		}
 	}
+	uc.processBiasRate()
 	return nil
 }
 
@@ -387,7 +390,11 @@ func (uc *HistoryUseCase) processCloseArr(arr []*entity.HistoryClose) {
 	if err != nil {
 		return
 	}
-	cc.SetBiasRate(stockNum, biasRate)
+
+	if biasRate != 0 {
+		uc.biasRateArr = append(uc.biasRateArr, biasRate)
+		cc.SetBiasRate(stockNum, biasRate)
+	}
 
 	i := 0
 	for {
@@ -405,6 +412,16 @@ func (uc *HistoryUseCase) processCloseArr(arr []*entity.HistoryClose) {
 		}
 		i++
 	}
+}
+
+func (uc *HistoryUseCase) processBiasRate() {
+	sort.Slice(uc.biasRateArr, func(i, j int) bool {
+		return uc.biasRateArr[i] > uc.biasRateArr[j]
+	})
+
+	total := len(uc.biasRateArr)
+	cc.SetHighBiasRate(uc.biasRateArr[total/4])
+	cc.SetLowBiasRate(uc.biasRateArr[3*total/4])
 }
 
 func (uc *HistoryUseCase) processTickArr(arr []*entity.HistoryTick) {

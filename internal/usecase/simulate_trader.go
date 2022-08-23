@@ -33,9 +33,11 @@ type SimulateTradeAgent struct {
 
 // NewSimulateAgent -.
 func NewSimulateAgent(stockNum string) *SimulateTradeAgent {
-	var quantity int64 = 1
-	if biasRate := cc.GetBiasRate(stockNum); biasRate > 4 || biasRate < -4 {
-		quantity = 2
+	var quantity int64 = 2
+	if biasRate := cc.GetBiasRate(stockNum); biasRate > cc.GetHighBiasRate() || biasRate < cc.GetLowBiasRate() {
+		quantity = 1
+	} else if biasRate == 0 {
+		log.Errorf("%s BiasRate is 0", stockNum)
 	}
 
 	arr := cc.GetHistoryTickAnalyze(stockNum)
@@ -165,15 +167,17 @@ func (o *SimulateTradeAgent) generateSimulateOrder(cfg config.Analyze) *entity.O
 }
 
 func (o *SimulateTradeAgent) generateSimulateTradeOutOrder(cfg config.Analyze, postOrderAction entity.OrderAction, preOrder *entity.Order) *entity.Order {
+	order := &entity.Order{
+		StockNum:  o.stockNum,
+		Action:    postOrderAction,
+		Price:     o.lastTick.Close,
+		Quantity:  preOrder.Quantity,
+		TradeTime: o.lastTick.TickTime,
+		GroupID:   preOrder.GroupID,
+	}
+
 	if o.lastTick.TickTime.After(preOrder.TradeTime.Add(time.Duration(cfg.MaxHoldTime) * time.Minute)) {
-		return &entity.Order{
-			StockNum:  o.stockNum,
-			Action:    postOrderAction,
-			Price:     o.lastTick.Close,
-			Quantity:  preOrder.Quantity,
-			TradeTime: o.lastTick.TickTime,
-			GroupID:   preOrder.GroupID,
-		}
+		return order
 	}
 
 	rsi := o.tickArr.getRSIByTickTime(preOrder.TickTime, cfg.RSIMinCount)
@@ -182,15 +186,7 @@ func (o *SimulateTradeAgent) generateSimulateTradeOutOrder(cfg config.Analyze, p
 	}
 
 	if rsi <= 49 || rsi >= 51 {
-		return &entity.Order{
-			StockNum:  o.stockNum,
-			Action:    postOrderAction,
-			Price:     o.lastTick.Close,
-			Quantity:  preOrder.Quantity,
-			TradeTime: o.lastTick.TickTime,
-			TickTime:  o.lastTick.TickTime,
-			GroupID:   preOrder.GroupID,
-		}
+		return order
 	}
 
 	return nil
