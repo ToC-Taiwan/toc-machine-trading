@@ -35,9 +35,7 @@ type TradeAgent struct {
 	tradeOutWaitTime time.Duration
 	cancelWaitTime   time.Duration
 
-	openChangeRatioLow  float64
-	openChangeRatioHigh float64
-	openPass            bool
+	openPass bool
 }
 
 // NewAgent -.
@@ -56,17 +54,15 @@ func NewAgent(stockNum string, tradeSwitch config.TradeSwitch) *TradeAgent {
 	})
 
 	new := &TradeAgent{
-		stockNum:            stockNum,
-		orderQuantity:       quantity,
-		orderMap:            make(map[entity.OrderAction][]*entity.Order),
-		tickChan:            make(chan *entity.RealTimeTick),
-		bidAskChan:          make(chan *entity.RealTimeBidAsk),
-		historyTickAnalyze:  arr,
-		tradeInWaitTime:     time.Duration(tradeSwitch.TradeInWaitTime) * time.Second,
-		tradeOutWaitTime:    time.Duration(tradeSwitch.TradeOutWaitTime) * time.Second,
-		cancelWaitTime:      time.Duration(tradeSwitch.CancelWaitTime) * time.Second,
-		openChangeRatioLow:  tradeSwitch.OpenCloseChangeRatioLow,
-		openChangeRatioHigh: tradeSwitch.OpenCloseChangeRatioHigh,
+		stockNum:           stockNum,
+		orderQuantity:      quantity,
+		orderMap:           make(map[entity.OrderAction][]*entity.Order),
+		tickChan:           make(chan *entity.RealTimeTick),
+		bidAskChan:         make(chan *entity.RealTimeBidAsk),
+		historyTickAnalyze: arr,
+		tradeInWaitTime:    time.Duration(tradeSwitch.TradeInWaitTime) * time.Second,
+		tradeOutWaitTime:   time.Duration(tradeSwitch.TradeOutWaitTime) * time.Second,
+		cancelWaitTime:     time.Duration(tradeSwitch.CancelWaitTime) * time.Second,
 	}
 
 	go new.checkFirstTickArrive()
@@ -256,8 +252,7 @@ func (o *TradeAgent) checkFirstTickArrive() {
 			firstTick := o.tickArr[0]
 			cc.SetHistoryOpen(o.stockNum, tradeDay, firstTick.Open)
 
-			openChangeRatio := 100 * (firstTick.Open - lastClose) / lastClose
-			if openChangeRatio < o.openChangeRatioLow || openChangeRatio > o.openChangeRatioHigh {
+			if firstTick.Open != lastClose {
 				bus.PublishTopicEvent(topicUnSubscribeTickTargets, o.stockNum)
 				break
 			}

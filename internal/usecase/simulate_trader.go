@@ -27,7 +27,8 @@ type SimulateTradeAgent struct {
 	analyzeTickTime    time.Time
 	lastTick           *entity.RealTimeTick
 
-	tradeSwitch config.TradeSwitch
+	tradeSwitch  config.TradeSwitch
+	simulateDone bool
 }
 
 // NewSimulateAgent -.
@@ -54,7 +55,6 @@ func NewSimulateAgent(stockNum string) *SimulateTradeAgent {
 }
 
 func (o *SimulateTradeAgent) searchOrder(cfg config.Analyze, tickArr *[]*entity.HistoryTick, beforeLastTradeDayClose float64) {
-	var finish bool
 	go func() {
 		for {
 			tick, ok := <-o.tickChan
@@ -71,7 +71,7 @@ func (o *SimulateTradeAgent) searchOrder(cfg config.Analyze, tickArr *[]*entity.
 			}
 
 			if (order.Action == entity.ActionBuy || order.Action == entity.ActionSellFirst) && o.lastTick.TickTime.After(cc.GetBasicInfo().LastTradeDay.Add(9*time.Hour).Add(time.Duration(o.tradeSwitch.TradeInEndTime)*time.Minute)) {
-				finish = true
+				o.simulateDone = true
 				continue
 			}
 
@@ -81,16 +81,26 @@ func (o *SimulateTradeAgent) searchOrder(cfg config.Analyze, tickArr *[]*entity.
 		}
 	}()
 
-	for _, tick := range *tickArr {
-		if !finish {
-			o.tickChan <- &entity.RealTimeTick{
-				StockNum: tick.StockNum,
-				TickTime: tick.TickTime,
-				Close:    tick.Close,
-				Volume:   tick.Volume,
-				TickType: tick.TickType,
-				PctChg:   100 * (tick.Close - beforeLastTradeDayClose) / beforeLastTradeDayClose,
-			}
+	o.convertToRealTimeTick(tickArr, beforeLastTradeDayClose)
+}
+
+func (o *SimulateTradeAgent) convertToRealTimeTick(tickArr *[]*entity.HistoryTick, beforeLastTradeDayClose float64) {
+	for i, tick := range *tickArr {
+		realTimeTick := &entity.RealTimeTick{
+			StockNum: tick.StockNum,
+			TickTime: tick.TickTime,
+			Close:    tick.Close,
+			Volume:   tick.Volume,
+			TickType: tick.TickType,
+			PctChg:   100 * (tick.Close - beforeLastTradeDayClose) / beforeLastTradeDayClose,
+		}
+
+		if i == 0 && realTimeTick.Close != beforeLastTradeDayClose {
+			o.simulateDone = true
+		}
+
+		if !o.simulateDone {
+			o.tickChan <- realTimeTick
 		} else {
 			close(o.tickChan)
 			break

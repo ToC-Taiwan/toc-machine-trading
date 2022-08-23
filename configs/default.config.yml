@@ -32,10 +32,6 @@ trade_switch:
     trade_out_wait_time: 60
     cancel_wait_time: 30
 
-    # open change ratio limit
-    open_close_change_ratio_low: -2.5
-    open_close_change_ratio_high: 2.5
-
 quota:
     trade_quota: 1000000
     trade_tax_ratio: 0.0015
@@ -54,13 +50,13 @@ target_cond:
     price_volume_limit:
         - limit_price_low: 10
           limit_price_high: 35
-          limit_volume: 10000
+          limit_volume: 1000
         - limit_price_low: 50
           limit_price_high: 75
-          limit_volume: 5000
+          limit_volume: 1000
         - limit_price_low: 100
           limit_price_high: 125
-          limit_volume: 2000
+          limit_volume: 1000
 
 analyze:
     # unit: minute
@@ -74,11 +70,11 @@ analyze:
     tick_analyze_period: 15000
 
     # unit: %
-    volume_pr_limit: 98
+    volume_pr_limit: 99
 
     # unit: %
-    all_out_in_ratio: 75
-    all_in_out_ratio: 70
+    all_out_in_ratio: 50
+    all_in_out_ratio: 50
 
     # unit: times
     rsi_min_count: 80

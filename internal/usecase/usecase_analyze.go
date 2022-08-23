@@ -185,11 +185,6 @@ func (uc *AnalyzeUseCase) getSimulateCond(targetArr []*entity.Target, analyzeCfg
 			beforeLastTradeDayClose := uc.beforeHistoryClose[stock.StockNum]
 			uc.historyDataLock.RUnlock()
 
-			openChangeRatio := 100 * (tickArr[0].Close - beforeLastTradeDayClose) / beforeLastTradeDayClose
-			if openChangeRatio < uc.tradeSwitch.OpenCloseChangeRatioLow || openChangeRatio > uc.tradeSwitch.OpenCloseChangeRatioHigh {
-				return
-			}
-
 			simulateAgent := NewSimulateAgent(stock.StockNum)
 			simulateAgent.analyzeTickTime = tickArr[0].TickTime
 			simulateAgent.tradeSwitch = uc.tradeSwitch
@@ -340,7 +335,7 @@ func generateAnalyzeCfg(useDefault bool) []config.Analyze {
 
 	base := []config.Analyze{
 		{
-			RSIMinCount:   10,
+			RSIMinCount:   50,
 			VolumePRLimit: 99,
 			AllOutInRatio: 50,
 			AllInOutRatio: 50,
@@ -367,10 +362,10 @@ func AppendRSICountVar(cfgArr *[]config.Analyze) {
 	var appendCfg []config.Analyze
 	for _, v := range *cfgArr {
 		for {
-			if v.RSIMinCount >= 100 {
+			if v.RSIMinCount >= 300 {
 				break
 			}
-			v.RSIMinCount += 10
+			v.RSIMinCount += 50
 			appendCfg = append(appendCfg, v)
 		}
 	}
@@ -397,7 +392,7 @@ func AppendAllOutInRatioVar(cfgArr *[]config.Analyze) {
 	var appendCfg []config.Analyze
 	for _, v := range *cfgArr {
 		for {
-			if v.AllOutInRatio >= 75 {
+			if v.AllOutInRatio >= 70 {
 				break
 			}
 			v.AllOutInRatio += 5
@@ -412,7 +407,7 @@ func AppendAllInOutRatioVar(cfgArr *[]config.Analyze) {
 	var appendCfg []config.Analyze
 	for _, v := range *cfgArr {
 		for {
-			if v.AllInOutRatio >= 75 {
+			if v.AllInOutRatio >= 70 {
 				break
 			}
 			v.AllInOutRatio += 5

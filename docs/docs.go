@@ -716,12 +716,6 @@ const docTemplate = `{
                 "hold_time_from_open": {
                     "type": "number"
                 },
-                "open_close_change_ratio_high": {
-                    "type": "number"
-                },
-                "open_close_change_ratio_low": {
-                    "type": "number"
-                },
                 "simulation": {
                     "type": "boolean"
                 },

@@ -91,9 +91,6 @@ type TradeSwitch struct {
 	TradeOutWaitTime int64   `json:"trade_out_wait_time" env-required:"true" yaml:"trade_out_wait_time"`
 	CancelWaitTime   int64   `json:"cancel_wait_time"    env-required:"true" yaml:"cancel_wait_time"`
 	TradeInEndTime   float64 `json:"trade_in_end_time"   env-required:"true" yaml:"trade_in_end_time"`
-
-	OpenCloseChangeRatioLow  float64 `json:"open_close_change_ratio_low"  env-required:"true" yaml:"open_close_change_ratio_low"`
-	OpenCloseChangeRatioHigh float64 `json:"open_close_change_ratio_high" env-required:"true" yaml:"open_close_change_ratio_high"`
 }
 
 // History -.
