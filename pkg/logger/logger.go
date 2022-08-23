@@ -44,15 +44,26 @@ func initLogger() {
 	basePath := global.GetBasePath()
 	globalLogger = logrus.New()
 
-	var dev bool
+	var jsonFormat, prodMode bool
 	mode, ok := os.LookupEnv("LOG_FORMAT")
-	if !ok || mode != "json" {
-		dev = true
+	if !ok || mode == "json" {
+		jsonFormat = true
 	}
 
-	if dev {
-		// globalLogger.SetReportCaller(true)
-		globalLogger.SetFormatter(&logrus.TextFormatter{
+	deployment, ok := os.LookupEnv("DEPLOYMENT")
+	if !ok || deployment == "prod" {
+		prodMode = true
+	}
+
+	var formatter logrus.Formatter
+	if jsonFormat {
+		formatter = &logrus.JSONFormatter{
+			DisableHTMLEscape: true,
+			TimestampFormat:   global.LongTimeLayout,
+			PrettyPrint:       false,
+		}
+	} else {
+		formatter = &logrus.TextFormatter{
 			TimestampFormat:  "2006/01/02 15:04:05",
 			FullTimestamp:    true,
 			QuoteEmptyFields: true,
@@ -63,19 +74,17 @@ func initLogger() {
 				fileName := strings.ReplaceAll(frame.File, fmt.Sprintf("%s/", basePath), "")
 				return fmt.Sprintf("[%s:%d]", fileName, frame.Line), ""
 			},
-		})
-	} else {
-		globalLogger.SetFormatter(&logrus.JSONFormatter{
-			DisableHTMLEscape: true,
-			TimestampFormat:   global.LongTimeLayout,
-			PrettyPrint:       false,
-		})
+		}
 	}
 
+	globalLogger.SetFormatter(formatter)
 	globalLogger.SetLevel(logrus.InfoLevel)
-	if dev {
+
+	if !prodMode {
+		globalLogger.SetReportCaller(true)
 		globalLogger.SetLevel(logrus.TraceLevel)
 	}
+
 	globalLogger.SetOutput(os.Stdout)
 	globalLogger.Hooks.Add(fileHook(basePath))
 }
@@ -100,10 +109,14 @@ func fileHook(basePath string) *lfshook.LfsHook {
 			DisableHTMLEscape: true,
 			TimestampFormat:   global.LongTimeLayout,
 			PrettyPrint:       true,
-			// CallerPrettyfier: func(frame *runtime.Frame) (function string, file string) {
-			// 	fileName := strings.ReplaceAll(frame.File, fmt.Sprintf("%s/", basePath), "")
-			// 	return fmt.Sprintf("%s:%d", fileName, frame.Line), ""
-			// },
 		},
 	)
+}
+
+// NewCallerPrettyfier -.
+func NewCallerPrettyfier(basePath string) func(*runtime.Frame) (function string, file string) {
+	return func(frame *runtime.Frame) (function string, file string) {
+		fileName := strings.ReplaceAll(frame.File, fmt.Sprintf("%s/", basePath), "")
+		return fmt.Sprintf("[%s:%d]", fileName, frame.Line), ""
+	}
 }
