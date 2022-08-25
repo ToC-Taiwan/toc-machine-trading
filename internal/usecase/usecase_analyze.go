@@ -362,7 +362,7 @@ func AppendRSICountVar(cfgArr *[]config.Analyze) {
 	var appendCfg []config.Analyze
 	for _, v := range *cfgArr {
 		for {
-			if v.RSIMinCount >= 300 {
+			if v.RSIMinCount >= 200 {
 				break
 			}
 			v.RSIMinCount += 50
@@ -377,7 +377,7 @@ func AppendVolumePRLimitVar(cfgArr *[]config.Analyze) {
 	var appendCfg []config.Analyze
 	for _, v := range *cfgArr {
 		for {
-			if v.VolumePRLimit <= 98 {
+			if v.VolumePRLimit <= 95 {
 				break
 			}
 			v.VolumePRLimit--
@@ -392,10 +392,10 @@ func AppendAllOutInRatioVar(cfgArr *[]config.Analyze) {
 	var appendCfg []config.Analyze
 	for _, v := range *cfgArr {
 		for {
-			if v.AllOutInRatio >= 70 {
+			if v.AllOutInRatio >= 90 {
 				break
 			}
-			v.AllOutInRatio += 5
+			v.AllOutInRatio += 10
 			appendCfg = append(appendCfg, v)
 		}
 	}
@@ -407,10 +407,10 @@ func AppendAllInOutRatioVar(cfgArr *[]config.Analyze) {
 	var appendCfg []config.Analyze
 	for _, v := range *cfgArr {
 		for {
-			if v.AllInOutRatio >= 70 {
+			if v.AllInOutRatio >= 90 {
 				break
 			}
-			v.AllInOutRatio += 5
+			v.AllInOutRatio += 10
 			appendCfg = append(appendCfg, v)
 		}
 	}

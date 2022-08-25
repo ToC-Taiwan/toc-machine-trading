@@ -441,12 +441,19 @@ func (uc *HistoryUseCase) processTickArr(arr []*entity.HistoryTick) {
 	}
 
 	minPeriod := time.Duration(uc.analyzeCfg.TickAnalyzePeriod) * time.Millisecond
+	maxPeriod := time.Duration(uc.analyzeCfg.TickAnalyzePeriod*1.1) * time.Millisecond
 
 	var volumeArr []int64
 	var periodVolume int64
 
 	startTime := arr[1].TickTime
 	for _, tick := range arr[1:] {
+		if tick.TickTime.Sub(startTime) > maxPeriod {
+			periodVolume = tick.Volume
+			startTime = tick.TickTime
+			continue
+		}
+
 		if tick.TickTime.Sub(startTime) < minPeriod {
 			periodVolume += tick.Volume
 		} else {

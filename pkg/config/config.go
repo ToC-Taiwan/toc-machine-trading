@@ -82,11 +82,9 @@ type RabbitMQ struct {
 
 // TradeSwitch -.
 type TradeSwitch struct {
-	Simulation bool `json:"simulation" yaml:"simulation"`
-
+	Simulation       bool    `json:"simulation"          yaml:"simulation"`
 	HoldTimeFromOpen float64 `json:"hold_time_from_open" env-required:"true" yaml:"hold_time_from_open"`
 	TotalOpenTime    float64 `json:"total_open_time"     env-required:"true" yaml:"total_open_time"`
-
 	TradeInWaitTime  int64   `json:"trade_in_wait_time"  env-required:"true" yaml:"trade_in_wait_time"`
 	TradeOutWaitTime int64   `json:"trade_out_wait_time" env-required:"true" yaml:"trade_out_wait_time"`
 	CancelWaitTime   int64   `json:"cancel_wait_time"    env-required:"true" yaml:"cancel_wait_time"`
@@ -125,19 +123,13 @@ type PriceLimit struct {
 
 // Analyze -.
 type Analyze struct {
-	MaxHoldTime float64 `json:"max_hold_time" env-required:"true" yaml:"max_hold_time"`
-
+	MaxHoldTime          float64 `json:"max_hold_time"           env-required:"true" yaml:"max_hold_time"`
 	CloseChangeRatioLow  float64 `json:"close_change_ratio_low"  env-required:"true" yaml:"close_change_ratio_low"`
 	CloseChangeRatioHigh float64 `json:"close_change_ratio_high" env-required:"true" yaml:"close_change_ratio_high"`
-
-	AllOutInRatio float64 `json:"all_out_in_ratio" env-required:"true" yaml:"all_out_in_ratio"`
-	AllInOutRatio float64 `json:"all_in_out_ratio" env-required:"true" yaml:"all_in_out_ratio"`
-
-	VolumePRLimit float64 `json:"volume_pr_limit" env-required:"true" yaml:"volume_pr_limit"`
-
-	TickAnalyzePeriod float64 `json:"tick_analyze_period" env-required:"true" yaml:"tick_analyze_period"`
-
-	RSIMinCount int `json:"rsi_min_count" env-required:"true" yaml:"rsi_min_count"`
-
-	MAPeriod int64 `json:"ma_period" env-required:"true" yaml:"ma_period"`
+	AllOutInRatio        float64 `json:"all_out_in_ratio"        env-required:"true" yaml:"all_out_in_ratio"`
+	AllInOutRatio        float64 `json:"all_in_out_ratio"        env-required:"true" yaml:"all_in_out_ratio"`
+	VolumePRLimit        float64 `json:"volume_pr_limit"         env-required:"true" yaml:"volume_pr_limit"`
+	TickAnalyzePeriod    float64 `json:"tick_analyze_period"     env-required:"true" yaml:"tick_analyze_period"`
+	RSIMinCount          int     `json:"rsi_min_count"           env-required:"true" yaml:"rsi_min_count"`
+	MAPeriod             int64   `json:"ma_period"               env-required:"true" yaml:"ma_period"`
 }

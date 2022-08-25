@@ -48,6 +48,7 @@ target_cond:
         - 3481
         - 2412
         - 2002
+        - 1102
     limit_volume: 1000
     price_limit:
         - low: 10
@@ -68,11 +69,11 @@ analyze:
     volume_pr_limit: 99
 
     # unit: %
-    all_out_in_ratio: 50
-    all_in_out_ratio: 50
+    all_out_in_ratio: 65
+    all_in_out_ratio: 65
 
     # unit: times
-    rsi_min_count: 80
+    rsi_min_count: 100
 
     # unit: day
     ma_period: 60

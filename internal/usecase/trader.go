@@ -71,6 +71,12 @@ func NewAgent(stockNum string, tradeSwitch config.TradeSwitch) *TradeAgent {
 }
 
 func (o *TradeAgent) generateOrder(cfg config.Analyze) *entity.Order {
+	if o.lastTick.TickTime.Sub(o.analyzeTickTime) > time.Duration(cfg.TickAnalyzePeriod*1.1)*time.Millisecond {
+		o.analyzeTickTime = o.lastTick.TickTime
+		o.periodTickArr = RealTimeTickArr{o.lastTick}
+		return nil
+	}
+
 	if o.lastTick.TickTime.Sub(o.analyzeTickTime) < time.Duration(cfg.TickAnalyzePeriod)*time.Millisecond {
 		o.periodTickArr = append(o.periodTickArr, o.lastTick)
 		return nil
@@ -93,8 +99,7 @@ func (o *TradeAgent) generateOrder(cfg config.Analyze) *entity.Order {
 		return nil
 	}
 
-	// get out in ration in this period
-	periodOutInRation := analyzeArr.getOutInRatio()
+	// get out in ration in all tick
 	allOutInRation := o.tickArr.getOutInRatio()
 
 	// need to compare with all and period
@@ -106,17 +111,17 @@ func (o *TradeAgent) generateOrder(cfg config.Analyze) *entity.Order {
 	}
 
 	switch {
-	case periodOutInRation-allOutInRation > cfg.AllOutInRatio*0.1 && allOutInRation > cfg.AllOutInRatio:
+	case allOutInRation > cfg.AllOutInRatio && o.lastTick.Low < o.lastTick.Close:
 		order.Action = entity.ActionBuy
 		order.Price = o.lastBidAsk.AskPrice1
-	case allOutInRation-periodOutInRation > cfg.AllInOutRatio*0.1 && 100-allOutInRation > cfg.AllInOutRatio:
+		return order
+	case 100-allOutInRation > cfg.AllInOutRatio && o.lastTick.High > o.lastTick.Close:
 		order.Action = entity.ActionSellFirst
 		order.Price = o.lastBidAsk.BidPrice1
+		return order
 	default:
 		return nil
 	}
-
-	return order
 }
 
 func (o *TradeAgent) generateTradeOutOrder(cfg config.Analyze, postOrderAction entity.OrderAction, preOrder *entity.Order) *entity.Order {
@@ -206,10 +211,10 @@ func (o *TradeAgent) cancelOrder(order *entity.Order) {
 
 			if order.Status == entity.StatusCancelled {
 				log.Warnf("Order Canceled -> Stock: %s, Action: %d, Price: %.2f, Qty: %d", order.StockNum, order.Action, order.Price, order.Quantity)
-				// if order.Action == entity.ActionBuy || order.Action == entity.ActionSellFirst {
-				// 	bus.PublishTopicEvent(topicUnSubscribeTickTargets, order.StockNum)
-				// 	return
-				// }
+				if order.Action == entity.ActionBuy || order.Action == entity.ActionSellFirst {
+					bus.PublishTopicEvent(topicUnSubscribeTickTargets, order.StockNum)
+					return
+				}
 				o.waitingOrder = nil
 				return
 			} else if order.TradeTime.Add(o.cancelWaitTime).Before(time.Now()) {
@@ -239,19 +244,19 @@ func (o *TradeAgent) checkNeededPost() (entity.OrderAction, *entity.Order) {
 func (o *TradeAgent) checkFirstTickArrive() {
 	// calculate open change rate here
 	//
+	// lastClose := cc.GetHistoryClose(o.stockNum, basic.LastTradeDay)
 	basic := cc.GetBasicInfo()
 	tradeDay := basic.TradeDay
-	lastClose := cc.GetHistoryClose(o.stockNum, basic.LastTradeDay)
 	for {
 		if len(o.tickArr) > 1 && o.lastBidAsk != nil {
 			firstTick := o.tickArr[0]
 			cc.SetHistoryOpen(o.stockNum, tradeDay, firstTick.Open)
 
-			if firstTick.Open != lastClose {
-				bus.PublishTopicEvent(topicUnSubscribeTickTargets, o.stockNum)
-				log.Warnf("Not open from last close, unsubscribe %s", o.stockNum)
-				break
-			}
+			// if firstTick.Open != lastClose {
+			// 	bus.PublishTopicEvent(topicUnSubscribeTickTargets, o.stockNum)
+			// 	log.Warnf("Not open from last close, unsubscribe %s", o.stockNum)
+			// 	break
+			// }
 
 			o.analyzeTickTime = o.tickArr[1].TickTime
 			o.openPass = true
@@ -274,7 +279,7 @@ func (o *TradeAgent) getPRByVolume(volume int64) float64 {
 			break
 		}
 		if i == total-1 && position == 0 {
-			position = total
+			position = total - 1
 		}
 	}
 	return 100 * float64(total-position) / float64(total)
@@ -309,6 +314,8 @@ func (c RealTimeTickArr) getOutInRatio() float64 {
 			outVolume += v.Volume
 		case 2:
 			inVolume += v.Volume
+		default:
+			continue
 		}
 	}
 
