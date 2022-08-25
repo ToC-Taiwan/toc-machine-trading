@@ -110,17 +110,17 @@ type Quota struct {
 
 // TargetCond -.
 type TargetCond struct {
-	BlackStock       []string           `json:"black_stock"        env-required:"true" yaml:"black_stock"`
-	BlackCategory    []string           `json:"black_category"     env-required:"true" yaml:"black_category"`
-	RealTimeRank     int64              `json:"real_time_rank"     env-required:"true" yaml:"real_time_rank"`
-	PriceVolumeLimit []PriceVolumeLimit `json:"price_volume_limit" env-required:"true" yaml:"price_volume_limit"`
+	BlackStock    []string     `json:"black_stock"    env-required:"true" yaml:"black_stock"`
+	BlackCategory []string     `json:"black_category" env-required:"true" yaml:"black_category"`
+	RealTimeRank  int64        `json:"real_time_rank" env-required:"true" yaml:"real_time_rank"`
+	LimitVolume   int64        `json:"limit_volume"   env-required:"true" yaml:"limit_volume"`
+	PriceLimit    []PriceLimit `json:"price_limit"    env-required:"true" yaml:"price_limit"`
 }
 
-// PriceVolumeLimit -.
-type PriceVolumeLimit struct {
-	LimitPriceLow  float64 `json:"limit_price_low"  env-required:"true" yaml:"limit_price_low"`
-	LimitPriceHigh float64 `json:"limit_price_high" env-required:"true" yaml:"limit_price_high"`
-	LimitVolume    int64   `json:"limit_volume"     env-required:"true" yaml:"limit_volume"`
+// PriceLimit -.
+type PriceLimit struct {
+	Low  float64 `json:"low"  env-required:"true" yaml:"low"`
+	High float64 `json:"high" env-required:"true" yaml:"high"`
 }
 
 // Analyze -.

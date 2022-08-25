@@ -18,22 +18,22 @@ type TargetUseCase struct {
 	gRPCAPI       TargetgRPCAPI
 	streamgRPCAPI StreamgRPCAPI
 
-	targetCond config.TargetCond
+	targetFilter *TargetFilter
 }
 
 // NewTarget -.
 func NewTarget(r TargetRepo, t TargetgRPCAPI, s StreamgRPCAPI) *TargetUseCase {
-	uc := &TargetUseCase{
-		repo:          r,
-		gRPCAPI:       t,
-		streamgRPCAPI: s,
-	}
-
 	cfg, err := config.GetConfig()
 	if err != nil {
 		log.Panic(err)
 	}
-	uc.targetCond = cfg.TargetCond
+
+	uc := &TargetUseCase{
+		repo:          r,
+		gRPCAPI:       t,
+		streamgRPCAPI: s,
+		targetFilter:  NewTargetFilter(cfg.TargetCond),
+	}
 
 	// unsubscriba all first
 	if err = uc.UnSubscribeAll(context.Background()); err != nil {
@@ -101,29 +101,24 @@ func (uc *TargetUseCase) SearchTradeDayTargets(ctx context.Context, tradeDay tim
 		return uc.SearchTradeDayTargetsFromAllSnapshot(tradeDay)
 	}
 
-	condition := uc.targetCond
 	var result []*entity.Target
-	for _, c := range condition.PriceVolumeLimit {
-		for _, v := range t {
-			stock := cc.GetStockDetail(v.GetCode())
-			if stock == nil {
-				continue
-			}
-
-			if !blackStockFilter(stock.Number, condition) ||
-				!blackCatagoryFilter(stock.Category, condition) ||
-				!targetFilter(v.GetClose(), v.GetTotalVolume(), c, false) {
-				continue
-			}
-
-			result = append(result, &entity.Target{
-				Rank:     len(result) + 1,
-				StockNum: v.GetCode(),
-				Volume:   v.GetTotalVolume(),
-				TradeDay: tradeDay,
-				Stock:    stock,
-			})
+	for _, v := range t {
+		stock := cc.GetStockDetail(v.GetCode())
+		if stock == nil {
+			continue
 		}
+
+		if !uc.targetFilter.checkVolume(v.GetTotalVolume()) || !uc.targetFilter.isTarget(stock, v.GetClose()) {
+			continue
+		}
+
+		result = append(result, &entity.Target{
+			Rank:     len(result) + 1,
+			StockNum: v.GetCode(),
+			Volume:   v.GetTotalVolume(),
+			TradeDay: tradeDay,
+			Stock:    stock,
+		})
 	}
 	return result, nil
 }
@@ -143,29 +138,24 @@ func (uc *TargetUseCase) SearchTradeDayTargetsFromAllSnapshot(tradeDay time.Time
 		return data[i].GetTotalVolume() > data[j].GetTotalVolume()
 	})
 
-	condition := uc.targetCond
 	var result []*entity.Target
-	for _, c := range condition.PriceVolumeLimit {
-		for _, v := range data[:200] {
-			stock := cc.GetStockDetail(v.GetCode())
-			if stock == nil {
-				continue
-			}
-
-			if !blackStockFilter(stock.Number, condition) ||
-				!blackCatagoryFilter(stock.Category, condition) ||
-				!targetFilter(v.GetClose(), v.GetTotalVolume(), c, false) {
-				continue
-			}
-
-			result = append(result, &entity.Target{
-				Rank:     len(result) + 1,
-				StockNum: v.GetCode(),
-				Volume:   v.GetTotalVolume(),
-				TradeDay: tradeDay,
-				Stock:    stock,
-			})
+	for _, v := range data[:200] {
+		stock := cc.GetStockDetail(v.GetCode())
+		if stock == nil {
+			continue
 		}
+
+		if !uc.targetFilter.checkVolume(v.GetTotalVolume()) || !uc.targetFilter.isTarget(stock, v.GetClose()) {
+			continue
+		}
+
+		result = append(result, &entity.Target{
+			Rank:     len(result) + 1,
+			StockNum: v.GetCode(),
+			Volume:   v.GetTotalVolume(),
+			TradeDay: tradeDay,
+			Stock:    stock,
+		})
 	}
 	return result, nil
 }

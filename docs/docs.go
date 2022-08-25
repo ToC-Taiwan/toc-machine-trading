@@ -622,17 +622,14 @@ const docTemplate = `{
                 }
             }
         },
-        "config.PriceVolumeLimit": {
+        "config.PriceLimit": {
             "type": "object",
             "properties": {
-                "limit_price_high": {
+                "high": {
                     "type": "number"
                 },
-                "limit_price_low": {
+                "low": {
                     "type": "number"
-                },
-                "limit_volume": {
-                    "type": "integer"
                 }
             }
         },
@@ -696,10 +693,13 @@ const docTemplate = `{
                         "type": "string"
                     }
                 },
-                "price_volume_limit": {
+                "limit_volume": {
+                    "type": "integer"
+                },
+                "price_limit": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/config.PriceVolumeLimit"
+                        "$ref": "#/definitions/config.PriceLimit"
                     }
                 },
                 "real_time_rank": {

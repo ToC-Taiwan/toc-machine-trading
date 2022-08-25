@@ -40,23 +40,18 @@ quota:
 
 target_cond:
     real_time_rank: 20
+    black_category:
+        - 17
     black_stock:
         - 2317
         - 1314
         - 3481
         - 2412
-    black_category:
-        - 17
-    price_volume_limit:
-        - limit_price_low: 10
-          limit_price_high: 35
-          limit_volume: 1000
-        - limit_price_low: 50
-          limit_price_high: 75
-          limit_volume: 1000
-        - limit_price_low: 100
-          limit_price_high: 125
-          limit_volume: 1000
+        - 2002
+    limit_volume: 1000
+    price_limit:
+        - low: 10
+          high: 150
 
 analyze:
     # unit: minute

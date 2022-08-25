@@ -64,14 +64,12 @@ definitions:
       url:
         type: string
     type: object
-  config.PriceVolumeLimit:
+  config.PriceLimit:
     properties:
-      limit_price_high:
+      high:
         type: number
-      limit_price_low:
+      low:
         type: number
-      limit_volume:
-        type: integer
     type: object
   config.Quota:
     properties:
@@ -112,9 +110,11 @@ definitions:
         items:
           type: string
         type: array
-      price_volume_limit:
+      limit_volume:
+        type: integer
+      price_limit:
         items:
-          $ref: '#/definitions/config.PriceVolumeLimit'
+          $ref: '#/definitions/config.PriceLimit'
         type: array
       real_time_rank:
         type: integer

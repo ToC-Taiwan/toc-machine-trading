@@ -19,27 +19,28 @@ type StreamUseCase struct {
 	tradeSwitchCfg config.TradeSwitch
 	analyzeCfg     config.Analyze
 	basic          entity.BasicInfo
-	targetCond     config.TargetCond
+
+	targetFilter *TargetFilter
 
 	tradeInSwitch bool
 }
 
 // NewStream -.
 func NewStream(r StreamRepo, g StreamgRPCAPI, t StreamRabbit) *StreamUseCase {
-	uc := &StreamUseCase{
-		repo:    r,
-		rabbit:  t,
-		grpcapi: g,
-	}
-
 	cfg, err := config.GetConfig()
 	if err != nil {
 		log.Panic(err)
 	}
 
+	uc := &StreamUseCase{
+		repo:         r,
+		rabbit:       t,
+		grpcapi:      g,
+		targetFilter: NewTargetFilter(cfg.TargetCond),
+	}
+
 	uc.tradeSwitchCfg = cfg.TradeSwitch
 	uc.analyzeCfg = cfg.Analyze
-	uc.targetCond = cfg.TargetCond
 	uc.basic = *cc.GetBasicInfo()
 
 	go uc.checkTradeSwitch()
@@ -236,7 +237,7 @@ func (uc *StreamUseCase) realTimeAddTargets() error {
 	sort.Slice(data, func(i, j int) bool {
 		return data[i].GetTotalVolume() > data[j].GetTotalVolume()
 	})
-	data = data[:uc.targetCond.RealTimeRank]
+	data = data[:uc.targetFilter.realTimeRank]
 
 	currentTargets := cc.GetTargets()
 	targetsMap := make(map[string]*entity.Target)
@@ -245,28 +246,24 @@ func (uc *StreamUseCase) realTimeAddTargets() error {
 	}
 
 	var newTargets []*entity.Target
-	for _, c := range uc.targetCond.PriceVolumeLimit {
-		for i, d := range data {
-			stock := cc.GetStockDetail(d.GetCode())
-			if stock == nil {
-				continue
-			}
+	for i, d := range data {
+		stock := cc.GetStockDetail(d.GetCode())
+		if stock == nil {
+			continue
+		}
 
-			if !blackStockFilter(stock.Number, uc.targetCond) ||
-				!blackCatagoryFilter(stock.Category, uc.targetCond) ||
-				!targetFilter(d.GetClose(), d.GetTotalVolume(), c, true) {
-				continue
-			}
+		if !uc.targetFilter.isTarget(stock, d.GetClose()) {
+			continue
+		}
 
-			if targetsMap[d.GetCode()] == nil {
-				newTargets = append(newTargets, &entity.Target{
-					Rank:     100 + i + 1,
-					StockNum: d.GetCode(),
-					Volume:   d.GetTotalVolume(),
-					TradeDay: uc.basic.TradeDay,
-					Stock:    stock,
-				})
-			}
+		if targetsMap[d.GetCode()] == nil {
+			newTargets = append(newTargets, &entity.Target{
+				Rank:     100 + i + 1,
+				StockNum: d.GetCode(),
+				Volume:   d.GetTotalVolume(),
+				TradeDay: uc.basic.TradeDay,
+				Stock:    stock,
+			})
 		}
 	}
 
