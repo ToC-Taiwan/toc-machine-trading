@@ -194,3 +194,86 @@ func (r *BasicRepo) QueryAllCalendar(ctx context.Context) (map[time.Time]*entity
 	}
 	return entities, nil
 }
+
+// InsertOrUpdatetFutureArr -.
+func (r *BasicRepo) InsertOrUpdatetFutureArr(ctx context.Context, t []*entity.Future) error {
+	inDBFuture, err := r.QueryAllFuture(ctx)
+	if err != nil {
+		return err
+	}
+
+	tx, err := r.BeginTransaction()
+	if err != nil {
+		return err
+	}
+	defer r.EndTransaction(tx, err)
+	var sql string
+	var args []interface{}
+
+	var insert, update int
+	builder := r.Builder.Insert(tableNameFuture).Columns("code, symbol, name, category, delivery_month, delivery_date, underlying_kind, unit, limit_up, limit_down, reference, update_date")
+	for _, v := range t {
+		if _, ok := inDBFuture[v.Symbol]; !ok {
+			insert++
+			builder = builder.Values(v.Code, v.Symbol, v.Name, v.Category, v.DeliveryMonth, v.DeliveryDate, v.UnderlyingKind, v.Unit, v.LimitUp, v.LimitDown, v.Reference, v.UpdateDate)
+		} else if !cmp.Equal(v, inDBFuture[v.Symbol]) {
+			update++
+			b := r.Builder.
+				Update(tableNameFuture).
+				Set("code", v.Code).
+				Set("symbol", v.Symbol).
+				Set("name", v.Name).
+				Set("category", v.Category).
+				Set("delivery_month", v.DeliveryMonth).
+				Set("delivery_date", v.DeliveryDate).
+				Set("underlying_kind", v.UnderlyingKind).
+				Set("unit", v.Unit).
+				Set("limit_up", v.LimitUp).
+				Set("limit_down", v.LimitDown).
+				Set("reference", v.Reference).
+				Set("update_date", v.UpdateDate).
+				Where("code = ?", v.Code)
+			if sql, args, err = b.ToSql(); err != nil {
+				return err
+			} else if _, err = tx.Exec(ctx, sql, args...); err != nil {
+				return err
+			}
+		}
+	}
+
+	if insert != 0 {
+		if sql, args, err = builder.ToSql(); err != nil {
+			return err
+		} else if _, err = tx.Exec(ctx, sql, args...); err != nil {
+			return err
+		}
+	}
+	log.Infof("InsertOrUpdatetFutureArr -> Exist: %d, Insert: %d, Update: %d", len(t)-update-insert, insert, update)
+	return nil
+}
+
+// QueryAllFuture -.
+func (r *BasicRepo) QueryAllFuture(ctx context.Context) (map[string]*entity.Future, error) {
+	sql, _, err := r.Builder.
+		Select("code, symbol, name, category, delivery_month, delivery_date, underlying_kind, unit, limit_up, limit_down, reference, update_date").
+		From(tableNameFuture).ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	rows, err := r.Pool().Query(ctx, sql)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	entities := make(map[string]*entity.Future)
+	for rows.Next() {
+		e := entity.Future{}
+		if err = rows.Scan(&e.Code, &e.Symbol, &e.Name, &e.Category, &e.DeliveryMonth, &e.DeliveryDate, &e.UnderlyingKind, &e.Unit, &e.LimitUp, &e.LimitDown, &e.Reference, &e.UpdateDate); err != nil {
+			return nil, err
+		}
+		entities[e.Symbol] = &e
+	}
+	return entities, nil
+}

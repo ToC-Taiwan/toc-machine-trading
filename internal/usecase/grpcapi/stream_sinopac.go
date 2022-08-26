@@ -57,14 +57,16 @@ func (t *StreamgRPCAPI) GetStockSnapshotTSE() (*pb.StockSnapshotMessage, error) 
 	return r, nil
 }
 
-// GetFutureSnapshotFIMTX -.
-func (t *StreamgRPCAPI) GetFutureSnapshotFIMTX() (*pb.StockSnapshotMessage, error) {
+// GetFutureSnapshotByCodeArr -.
+func (t *StreamgRPCAPI) GetFutureSnapshotByCodeArr(codeArr []string) (*pb.StockSnapshotResponse, error) {
 	conn := t.conn.GetReadyConn()
 	defer t.conn.PutReadyConn(conn)
 	c := pb.NewFutureForwarderClient(conn)
-	r, err := c.GetFIMTXSnapshot(context.Background(), &emptypb.Empty{})
+	r, err := c.GetFutureSnapshotByCodeArr(context.Background(), &pb.FutureCodeArr{
+		FutureCodeArr: codeArr,
+	})
 	if err != nil {
-		return &pb.StockSnapshotMessage{}, err
+		return &pb.StockSnapshotResponse{}, err
 	}
 	return r, nil
 }

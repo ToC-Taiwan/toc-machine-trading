@@ -59,6 +59,7 @@ func NewStream(r StreamRepo, g StreamgRPCAPI, t StreamRabbit) *StreamUseCase {
 	}()
 
 	bus.SubscribeTopic(topicStreamTargets, uc.ReceiveStreamData)
+	bus.SubscribeTopic(topicStreamFutureTargets, uc.ReceiveFutureStreamData)
 	return uc
 }
 
@@ -320,4 +321,22 @@ func (uc *StreamUseCase) GetStockSnapshotByNumArr(stockNumArr []string) ([]*enti
 	}
 
 	return result, nil
+}
+
+// ReceiveFutureStreamData -.
+func (uc *StreamUseCase) ReceiveFutureStreamData(ctx context.Context, targetArr []string) {
+	for _, t := range targetArr {
+		tickChan := make(chan *entity.RealTimeFutureTick)
+		go func() {
+			for {
+				tick := <-tickChan
+				// fmt.Printf("TickTime: %s, Code: %s, Close: %.0f, Volume: %3d, PriceChg: %.0f\n", tick.Code, tick.TickTime.Format(global.LongTimeLayout), tick.Close, tick.Volume, tick.PriceChg)
+				cc.SetRealTimeFutureTick(tick)
+			}
+		}()
+
+		go uc.rabbit.FutureTickConsumer(t, tickChan)
+	}
+
+	bus.PublishTopicEvent(topicSubscribeFutureTickTargets, targetArr)
 }

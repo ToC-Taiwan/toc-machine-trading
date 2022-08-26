@@ -38,6 +38,10 @@ func NewBasic(r BasicRepo, t BasicgRPCAPI) *BasicUseCase {
 	if _, err := uc.GetAllSinopacStockAndUpdateRepo(context.Background()); err != nil {
 		log.Panic(err)
 	}
+
+	if _, err := uc.GetAllSinopacFutureAndUpdateRepo(context.Background()); err != nil {
+		log.Panic(err)
+	}
 	return uc
 }
 
@@ -89,6 +93,55 @@ func (uc *BasicUseCase) GetAllSinopacStockAndUpdateRepo(ctx context.Context) ([]
 		return []*entity.Stock{}, err
 	}
 	return stockDetail, nil
+}
+
+// GetAllSinopacFutureAndUpdateRepo -.
+func (uc *BasicUseCase) GetAllSinopacFutureAndUpdateRepo(ctx context.Context) ([]*entity.Future, error) {
+	futureArr, err := uc.gRPCAPI.GetAllFutureDetail()
+	if err != nil {
+		return []*entity.Future{}, err
+	}
+
+	duplCodeMap := make(map[string]struct{})
+	var futureDetail []*entity.Future
+	for _, v := range futureArr {
+		if v.GetReference() == 0 {
+			continue
+		}
+
+		updateTime, pErr := time.ParseInLocation(global.ShortSlashTimeLayout, v.GetUpdateDate(), time.Local)
+		if err != nil {
+			return []*entity.Future{}, pErr
+		}
+
+		future := &entity.Future{
+			Code:           v.GetCode(),
+			Symbol:         v.GetSymbol(),
+			Name:           v.GetName(),
+			Category:       v.GetCategory(),
+			DeliveryMonth:  v.GetDeliveryMonth(),
+			DeliveryDate:   v.GetDeliveryDate(),
+			UnderlyingKind: v.GetUnderlyingKind(),
+			Unit:           v.GetUnit(),
+			LimitUp:        v.GetLimitUp(),
+			LimitDown:      v.GetLimitDown(),
+			Reference:      v.GetReference(),
+			UpdateDate:     updateTime,
+		}
+
+		if _, ok := duplCodeMap[future.Code]; !ok {
+			duplCodeMap[future.Code] = struct{}{}
+			futureDetail = append(futureDetail, future)
+		} else {
+			log.Warnf("Dupl future code: %s %s", v.Code, v.Name)
+		}
+	}
+
+	err = uc.repo.InsertOrUpdatetFutureArr(context.Background(), futureDetail)
+	if err != nil {
+		return []*entity.Future{}, err
+	}
+	return futureDetail, nil
 }
 
 // GetAllRepoStock -.

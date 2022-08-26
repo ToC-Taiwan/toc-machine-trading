@@ -19,10 +19,11 @@ import (
 var log = logger.Get()
 
 const (
-	routingKeyEvent  = "event"
-	routingKeyOrder  = "order"
-	routingKeyTick   = "tick"
-	routingKeyBidAsk = "bid_ask"
+	routingKeyEvent      = "event"
+	routingKeyOrder      = "order"
+	routingKeyTick       = "tick"
+	routingKeyFutureTick = "future_tick"
+	routingKeyBidAsk     = "bid_ask"
 )
 
 // StreamRabbit -.
@@ -173,6 +174,56 @@ func (c *StreamRabbit) TickConsumer(stockNum string, tickChan chan *entity.RealT
 			BidSideTotalCnt: body.GetBidSideTotalCnt(),
 			AskSideTotalCnt: body.GetAskSideTotalCnt(),
 			Suspend:         body.GetSuspend(),
+			Simtrade:        body.GetSimtrade(),
+		}
+	}
+}
+
+// FutureTickConsumer -.
+func (c *StreamRabbit) FutureTickConsumer(code string, tickChan chan *entity.RealTimeFutureTick) {
+	delivery := c.establishDelivery(fmt.Sprintf("%s:%s", routingKeyFutureTick, code))
+	for {
+		d, opened := <-delivery
+		if !opened {
+			log.Errorf("FutureTickConsumer:%s rabbitMQ is closed", code)
+			return
+		}
+
+		body := pb.FutureRealTimeTickResponse{}
+		if err := proto.Unmarshal(d.Body, &body); err != nil {
+			log.Error(err)
+			continue
+		}
+
+		dataTime, err := time.ParseInLocation(global.LongTimeLayout, body.GetDateTime(), time.Local)
+		if err != nil {
+			log.Error(err)
+			continue
+		}
+
+		if body.GetSimtrade() == 1 {
+			continue
+		}
+
+		tickChan <- &entity.RealTimeFutureTick{
+			Code:            body.GetCode(),
+			TickTime:        dataTime,
+			Open:            body.GetOpen(),
+			UnderlyingPrice: body.GetUnderlyingPrice(),
+			BidSideTotalVol: body.GetBidSideTotalVol(),
+			AskSideTotalVol: body.GetAskSideTotalVol(),
+			AvgPrice:        body.GetAvgPrice(),
+			Close:           body.GetClose(),
+			High:            body.GetHigh(),
+			Low:             body.GetLow(),
+			Amount:          body.GetAmount(),
+			TotalAmount:     body.GetTotalAmount(),
+			Volume:          body.GetVolume(),
+			TotalVolume:     body.GetTotalVolume(),
+			TickType:        body.GetTickType(),
+			ChgType:         body.GetChgType(),
+			PriceChg:        body.GetPriceChg(),
+			PctChg:          body.GetPctChg(),
 			Simtrade:        body.GetSimtrade(),
 		}
 	}

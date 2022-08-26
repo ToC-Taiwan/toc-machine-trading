@@ -39,6 +39,9 @@ quota:
     fee_discount: 0.28
 
 target_cond:
+    monitor_future_code:
+        - MXFI2
+        - TXFI2
     real_time_rank: 20
     black_category:
         - 17
@@ -52,7 +55,7 @@ target_cond:
     limit_volume: 1000
     price_limit:
         - low: 10
-          high: 150
+          high: 35
 
 analyze:
     # unit: minute

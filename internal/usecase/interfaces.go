@@ -33,6 +33,9 @@ type (
 		QueryAllCalendar(ctx context.Context) (map[time.Time]*entity.CalendarDate, error)
 		InsertOrUpdatetCalendarDateArr(ctx context.Context, t []*entity.CalendarDate) error
 		UpdateAllStockDayTradeToNo(ctx context.Context) error
+
+		InsertOrUpdatetFutureArr(ctx context.Context, t []*entity.Future) error
+		QueryAllFuture(ctx context.Context) (map[string]*entity.Future, error)
 	}
 
 	// BasicgRPCAPI -.
@@ -40,6 +43,7 @@ type (
 		Heartbeat() error
 		Terminate() error
 		GetAllStockDetail() ([]*pb.StockDetailMessage, error)
+		GetAllFutureDetail() ([]*pb.FutureDetailMessage, error)
 	}
 )
 
@@ -64,6 +68,9 @@ type (
 		SubscribeStockBidAsk(stockNumArr []string) ([]string, error)
 		UnSubscribeStockBidAsk(stockNumArr []string) ([]string, error)
 		UnSubscribeStockAllBidAsk() (*pb.FunctionErr, error)
+
+		SubscribeFutureTick(codeArr []string) ([]string, error)
+		UnSubscribeFutureTick(codeArr []string) ([]string, error)
 	}
 )
 
@@ -121,7 +128,8 @@ type (
 		GetAllStockSnapshot() ([]*pb.StockSnapshotMessage, error)
 		GetStockSnapshotByNumArr(stockNumArr []string) ([]*pb.StockSnapshotMessage, error)
 		GetStockSnapshotTSE() (*pb.StockSnapshotMessage, error)
-		GetFutureSnapshotFIMTX() (*pb.StockSnapshotMessage, error)
+
+		GetFutureSnapshotByCodeArr(codeArr []string) (*pb.StockSnapshotResponse, error)
 	}
 
 	// StreamRabbit -.
@@ -130,6 +138,8 @@ type (
 		OrderStatusConsumer(orderStatusChan chan *entity.Order)
 		TickConsumer(stockNum string, tickChan chan *entity.RealTimeTick)
 		BidAskConsumer(stockNum string, bidAskChan chan *entity.RealTimeBidAsk)
+
+		FutureTickConsumer(code string, tickChan chan *entity.RealTimeFutureTick)
 	}
 )
 

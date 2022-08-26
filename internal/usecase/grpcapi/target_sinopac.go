@@ -105,3 +105,27 @@ func (t *TargetgRPCAPI) UnSubscribeStockAllBidAsk() (*pb.FunctionErr, error) {
 	}
 	return r, nil
 }
+
+// SubscribeFutureTick return arry means fail to subscribe
+func (t *TargetgRPCAPI) SubscribeFutureTick(codeArr []string) ([]string, error) {
+	conn := t.conn.GetReadyConn()
+	defer t.conn.PutReadyConn(conn)
+	c := pb.NewSinopacForwarderClient(conn)
+	r, err := c.SubscribeFutureTick(context.Background(), &pb.FutureCodeArr{FutureCodeArr: codeArr})
+	if err != nil {
+		return []string{}, err
+	}
+	return r.GetFailArr(), nil
+}
+
+// UnSubscribeFutureTick return arry means fail to subscribe
+func (t *TargetgRPCAPI) UnSubscribeFutureTick(codeArr []string) ([]string, error) {
+	conn := t.conn.GetReadyConn()
+	defer t.conn.PutReadyConn(conn)
+	c := pb.NewSinopacForwarderClient(conn)
+	r, err := c.UnSubscribeFutureTick(context.Background(), &pb.FutureCodeArr{FutureCodeArr: codeArr})
+	if err != nil {
+		return []string{}, err
+	}
+	return r.GetFailArr(), nil
+}

@@ -10,6 +10,7 @@ var (
 const (
 	tableNameCalendar       string = "basic_calendar"
 	tableNameStock          string = "basic_stock"
+	tableNameFuture         string = "basic_future"
 	tableNameTarget         string = "basic_targets"
 	tableNameHistoryAnalyze string = "history_analyze"
 	tableNameHistoryClose   string = "history_close"

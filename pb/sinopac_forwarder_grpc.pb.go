@@ -193,13 +193,17 @@ type SinopacForwarderClient interface {
 	GetStockTSEHistoryTick(ctx context.Context, in *Date, opts ...grpc.CallOption) (*StockHistoryTickResponse, error)
 	GetStockTSEHistoryKbar(ctx context.Context, in *Date, opts ...grpc.CallOption) (*StockHistoryKbarResponse, error)
 	GetStockTSEHistoryClose(ctx context.Context, in *Date, opts ...grpc.CallOption) (*StockHistoryCloseResponse, error)
-	// Target
+	// Stock Target
 	GetStockVolumeRank(ctx context.Context, in *VolumeRankRequest, opts ...grpc.CallOption) (*StockVolumeRankResponse, error)
 	SubscribeStockTick(ctx context.Context, in *StockNumArr, opts ...grpc.CallOption) (*SubscribeResponse, error)
 	UnSubscribeStockTick(ctx context.Context, in *StockNumArr, opts ...grpc.CallOption) (*SubscribeResponse, error)
-	UnSubscribeStockAllTick(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*FunctionErr, error)
 	SubscribeStockBidAsk(ctx context.Context, in *StockNumArr, opts ...grpc.CallOption) (*SubscribeResponse, error)
 	UnSubscribeStockBidAsk(ctx context.Context, in *StockNumArr, opts ...grpc.CallOption) (*SubscribeResponse, error)
+	// Future Target
+	SubscribeFutureTick(ctx context.Context, in *FutureCodeArr, opts ...grpc.CallOption) (*SubscribeResponse, error)
+	UnSubscribeFutureTick(ctx context.Context, in *FutureCodeArr, opts ...grpc.CallOption) (*SubscribeResponse, error)
+	// Unsubscribe
+	UnSubscribeStockAllTick(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*FunctionErr, error)
 	UnSubscribeStockAllBidAsk(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*FunctionErr, error)
 }
 
@@ -337,15 +341,6 @@ func (c *sinopacForwarderClient) UnSubscribeStockTick(ctx context.Context, in *S
 	return out, nil
 }
 
-func (c *sinopacForwarderClient) UnSubscribeStockAllTick(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*FunctionErr, error) {
-	out := new(FunctionErr)
-	err := c.cc.Invoke(ctx, "/sinopac_forwarder.SinopacForwarder/UnSubscribeStockAllTick", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *sinopacForwarderClient) SubscribeStockBidAsk(ctx context.Context, in *StockNumArr, opts ...grpc.CallOption) (*SubscribeResponse, error) {
 	out := new(SubscribeResponse)
 	err := c.cc.Invoke(ctx, "/sinopac_forwarder.SinopacForwarder/SubscribeStockBidAsk", in, out, opts...)
@@ -358,6 +353,33 @@ func (c *sinopacForwarderClient) SubscribeStockBidAsk(ctx context.Context, in *S
 func (c *sinopacForwarderClient) UnSubscribeStockBidAsk(ctx context.Context, in *StockNumArr, opts ...grpc.CallOption) (*SubscribeResponse, error) {
 	out := new(SubscribeResponse)
 	err := c.cc.Invoke(ctx, "/sinopac_forwarder.SinopacForwarder/UnSubscribeStockBidAsk", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *sinopacForwarderClient) SubscribeFutureTick(ctx context.Context, in *FutureCodeArr, opts ...grpc.CallOption) (*SubscribeResponse, error) {
+	out := new(SubscribeResponse)
+	err := c.cc.Invoke(ctx, "/sinopac_forwarder.SinopacForwarder/SubscribeFutureTick", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *sinopacForwarderClient) UnSubscribeFutureTick(ctx context.Context, in *FutureCodeArr, opts ...grpc.CallOption) (*SubscribeResponse, error) {
+	out := new(SubscribeResponse)
+	err := c.cc.Invoke(ctx, "/sinopac_forwarder.SinopacForwarder/UnSubscribeFutureTick", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *sinopacForwarderClient) UnSubscribeStockAllTick(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*FunctionErr, error) {
+	out := new(FunctionErr)
+	err := c.cc.Invoke(ctx, "/sinopac_forwarder.SinopacForwarder/UnSubscribeStockAllTick", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -390,13 +412,17 @@ type SinopacForwarderServer interface {
 	GetStockTSEHistoryTick(context.Context, *Date) (*StockHistoryTickResponse, error)
 	GetStockTSEHistoryKbar(context.Context, *Date) (*StockHistoryKbarResponse, error)
 	GetStockTSEHistoryClose(context.Context, *Date) (*StockHistoryCloseResponse, error)
-	// Target
+	// Stock Target
 	GetStockVolumeRank(context.Context, *VolumeRankRequest) (*StockVolumeRankResponse, error)
 	SubscribeStockTick(context.Context, *StockNumArr) (*SubscribeResponse, error)
 	UnSubscribeStockTick(context.Context, *StockNumArr) (*SubscribeResponse, error)
-	UnSubscribeStockAllTick(context.Context, *emptypb.Empty) (*FunctionErr, error)
 	SubscribeStockBidAsk(context.Context, *StockNumArr) (*SubscribeResponse, error)
 	UnSubscribeStockBidAsk(context.Context, *StockNumArr) (*SubscribeResponse, error)
+	// Future Target
+	SubscribeFutureTick(context.Context, *FutureCodeArr) (*SubscribeResponse, error)
+	UnSubscribeFutureTick(context.Context, *FutureCodeArr) (*SubscribeResponse, error)
+	// Unsubscribe
+	UnSubscribeStockAllTick(context.Context, *emptypb.Empty) (*FunctionErr, error)
 	UnSubscribeStockAllBidAsk(context.Context, *emptypb.Empty) (*FunctionErr, error)
 	mustEmbedUnimplementedSinopacForwarderServer()
 }
@@ -447,14 +473,20 @@ func (UnimplementedSinopacForwarderServer) SubscribeStockTick(context.Context, *
 func (UnimplementedSinopacForwarderServer) UnSubscribeStockTick(context.Context, *StockNumArr) (*SubscribeResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UnSubscribeStockTick not implemented")
 }
-func (UnimplementedSinopacForwarderServer) UnSubscribeStockAllTick(context.Context, *emptypb.Empty) (*FunctionErr, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method UnSubscribeStockAllTick not implemented")
-}
 func (UnimplementedSinopacForwarderServer) SubscribeStockBidAsk(context.Context, *StockNumArr) (*SubscribeResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SubscribeStockBidAsk not implemented")
 }
 func (UnimplementedSinopacForwarderServer) UnSubscribeStockBidAsk(context.Context, *StockNumArr) (*SubscribeResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UnSubscribeStockBidAsk not implemented")
+}
+func (UnimplementedSinopacForwarderServer) SubscribeFutureTick(context.Context, *FutureCodeArr) (*SubscribeResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SubscribeFutureTick not implemented")
+}
+func (UnimplementedSinopacForwarderServer) UnSubscribeFutureTick(context.Context, *FutureCodeArr) (*SubscribeResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UnSubscribeFutureTick not implemented")
+}
+func (UnimplementedSinopacForwarderServer) UnSubscribeStockAllTick(context.Context, *emptypb.Empty) (*FunctionErr, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UnSubscribeStockAllTick not implemented")
 }
 func (UnimplementedSinopacForwarderServer) UnSubscribeStockAllBidAsk(context.Context, *emptypb.Empty) (*FunctionErr, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UnSubscribeStockAllBidAsk not implemented")
@@ -724,24 +756,6 @@ func _SinopacForwarder_UnSubscribeStockTick_Handler(srv interface{}, ctx context
 	return interceptor(ctx, in, info, handler)
 }
 
-func _SinopacForwarder_UnSubscribeStockAllTick_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(emptypb.Empty)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(SinopacForwarderServer).UnSubscribeStockAllTick(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/sinopac_forwarder.SinopacForwarder/UnSubscribeStockAllTick",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SinopacForwarderServer).UnSubscribeStockAllTick(ctx, req.(*emptypb.Empty))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _SinopacForwarder_SubscribeStockBidAsk_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(StockNumArr)
 	if err := dec(in); err != nil {
@@ -774,6 +788,60 @@ func _SinopacForwarder_UnSubscribeStockBidAsk_Handler(srv interface{}, ctx conte
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(SinopacForwarderServer).UnSubscribeStockBidAsk(ctx, req.(*StockNumArr))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SinopacForwarder_SubscribeFutureTick_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(FutureCodeArr)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SinopacForwarderServer).SubscribeFutureTick(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/sinopac_forwarder.SinopacForwarder/SubscribeFutureTick",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SinopacForwarderServer).SubscribeFutureTick(ctx, req.(*FutureCodeArr))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SinopacForwarder_UnSubscribeFutureTick_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(FutureCodeArr)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SinopacForwarderServer).UnSubscribeFutureTick(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/sinopac_forwarder.SinopacForwarder/UnSubscribeFutureTick",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SinopacForwarderServer).UnSubscribeFutureTick(ctx, req.(*FutureCodeArr))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SinopacForwarder_UnSubscribeStockAllTick_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SinopacForwarderServer).UnSubscribeStockAllTick(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/sinopac_forwarder.SinopacForwarder/UnSubscribeStockAllTick",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SinopacForwarderServer).UnSubscribeStockAllTick(ctx, req.(*emptypb.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -860,16 +928,24 @@ var SinopacForwarder_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _SinopacForwarder_UnSubscribeStockTick_Handler,
 		},
 		{
-			MethodName: "UnSubscribeStockAllTick",
-			Handler:    _SinopacForwarder_UnSubscribeStockAllTick_Handler,
-		},
-		{
 			MethodName: "SubscribeStockBidAsk",
 			Handler:    _SinopacForwarder_SubscribeStockBidAsk_Handler,
 		},
 		{
 			MethodName: "UnSubscribeStockBidAsk",
 			Handler:    _SinopacForwarder_UnSubscribeStockBidAsk_Handler,
+		},
+		{
+			MethodName: "SubscribeFutureTick",
+			Handler:    _SinopacForwarder_SubscribeFutureTick_Handler,
+		},
+		{
+			MethodName: "UnSubscribeFutureTick",
+			Handler:    _SinopacForwarder_UnSubscribeFutureTick_Handler,
+		},
+		{
+			MethodName: "UnSubscribeStockAllTick",
+			Handler:    _SinopacForwarder_UnSubscribeStockAllTick_Handler,
 		},
 		{
 			MethodName: "UnSubscribeStockAllBidAsk",
@@ -1186,7 +1262,8 @@ var TradeService_ServiceDesc = grpc.ServiceDesc{
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type FutureForwarderClient interface {
-	GetFIMTXSnapshot(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*StockSnapshotMessage, error)
+	GetAllFutureDetail(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*FutureDetailResponse, error)
+	GetFutureSnapshotByCodeArr(ctx context.Context, in *FutureCodeArr, opts ...grpc.CallOption) (*StockSnapshotResponse, error)
 }
 
 type futureForwarderClient struct {
@@ -1197,9 +1274,18 @@ func NewFutureForwarderClient(cc grpc.ClientConnInterface) FutureForwarderClient
 	return &futureForwarderClient{cc}
 }
 
-func (c *futureForwarderClient) GetFIMTXSnapshot(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*StockSnapshotMessage, error) {
-	out := new(StockSnapshotMessage)
-	err := c.cc.Invoke(ctx, "/sinopac_forwarder.FutureForwarder/GetFIMTXSnapshot", in, out, opts...)
+func (c *futureForwarderClient) GetAllFutureDetail(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*FutureDetailResponse, error) {
+	out := new(FutureDetailResponse)
+	err := c.cc.Invoke(ctx, "/sinopac_forwarder.FutureForwarder/GetAllFutureDetail", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *futureForwarderClient) GetFutureSnapshotByCodeArr(ctx context.Context, in *FutureCodeArr, opts ...grpc.CallOption) (*StockSnapshotResponse, error) {
+	out := new(StockSnapshotResponse)
+	err := c.cc.Invoke(ctx, "/sinopac_forwarder.FutureForwarder/GetFutureSnapshotByCodeArr", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1210,7 +1296,8 @@ func (c *futureForwarderClient) GetFIMTXSnapshot(ctx context.Context, in *emptyp
 // All implementations must embed UnimplementedFutureForwarderServer
 // for forward compatibility
 type FutureForwarderServer interface {
-	GetFIMTXSnapshot(context.Context, *emptypb.Empty) (*StockSnapshotMessage, error)
+	GetAllFutureDetail(context.Context, *emptypb.Empty) (*FutureDetailResponse, error)
+	GetFutureSnapshotByCodeArr(context.Context, *FutureCodeArr) (*StockSnapshotResponse, error)
 	mustEmbedUnimplementedFutureForwarderServer()
 }
 
@@ -1218,8 +1305,11 @@ type FutureForwarderServer interface {
 type UnimplementedFutureForwarderServer struct {
 }
 
-func (UnimplementedFutureForwarderServer) GetFIMTXSnapshot(context.Context, *emptypb.Empty) (*StockSnapshotMessage, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetFIMTXSnapshot not implemented")
+func (UnimplementedFutureForwarderServer) GetAllFutureDetail(context.Context, *emptypb.Empty) (*FutureDetailResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAllFutureDetail not implemented")
+}
+func (UnimplementedFutureForwarderServer) GetFutureSnapshotByCodeArr(context.Context, *FutureCodeArr) (*StockSnapshotResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetFutureSnapshotByCodeArr not implemented")
 }
 func (UnimplementedFutureForwarderServer) mustEmbedUnimplementedFutureForwarderServer() {}
 
@@ -1234,20 +1324,38 @@ func RegisterFutureForwarderServer(s grpc.ServiceRegistrar, srv FutureForwarderS
 	s.RegisterService(&FutureForwarder_ServiceDesc, srv)
 }
 
-func _FutureForwarder_GetFIMTXSnapshot_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _FutureForwarder_GetAllFutureDetail_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(emptypb.Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(FutureForwarderServer).GetFIMTXSnapshot(ctx, in)
+		return srv.(FutureForwarderServer).GetAllFutureDetail(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/sinopac_forwarder.FutureForwarder/GetFIMTXSnapshot",
+		FullMethod: "/sinopac_forwarder.FutureForwarder/GetAllFutureDetail",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(FutureForwarderServer).GetFIMTXSnapshot(ctx, req.(*emptypb.Empty))
+		return srv.(FutureForwarderServer).GetAllFutureDetail(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _FutureForwarder_GetFutureSnapshotByCodeArr_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(FutureCodeArr)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FutureForwarderServer).GetFutureSnapshotByCodeArr(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/sinopac_forwarder.FutureForwarder/GetFutureSnapshotByCodeArr",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FutureForwarderServer).GetFutureSnapshotByCodeArr(ctx, req.(*FutureCodeArr))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1260,8 +1368,12 @@ var FutureForwarder_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*FutureForwarderServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "GetFIMTXSnapshot",
-			Handler:    _FutureForwarder_GetFIMTXSnapshot_Handler,
+			MethodName: "GetAllFutureDetail",
+			Handler:    _FutureForwarder_GetAllFutureDetail_Handler,
+		},
+		{
+			MethodName: "GetFutureSnapshotByCodeArr",
+			Handler:    _FutureForwarder_GetFutureSnapshotByCodeArr_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

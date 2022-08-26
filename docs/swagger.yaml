@@ -112,6 +112,10 @@ definitions:
         type: array
       limit_volume:
         type: integer
+      monitor_future_code:
+        items:
+          type: string
+        type: array
       price_limit:
         items:
           $ref: '#/definitions/config.PriceLimit'

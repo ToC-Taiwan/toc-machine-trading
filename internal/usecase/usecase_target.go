@@ -18,7 +18,8 @@ type TargetUseCase struct {
 	gRPCAPI       TargetgRPCAPI
 	streamgRPCAPI StreamgRPCAPI
 
-	targetFilter *TargetFilter
+	targetFilter         *TargetFilter
+	monitorFutureCodeArr []string
 }
 
 // NewTarget -.
@@ -29,10 +30,11 @@ func NewTarget(r TargetRepo, t TargetgRPCAPI, s StreamgRPCAPI) *TargetUseCase {
 	}
 
 	uc := &TargetUseCase{
-		repo:          r,
-		gRPCAPI:       t,
-		streamgRPCAPI: s,
-		targetFilter:  NewTargetFilter(cfg.TargetCond),
+		repo:                 r,
+		gRPCAPI:              t,
+		streamgRPCAPI:        s,
+		monitorFutureCodeArr: cfg.TargetCond.MonitorFutureCodeArr,
+		targetFilter:         NewTargetFilter(cfg.TargetCond),
 	}
 
 	// unsubscriba all first
@@ -67,6 +69,7 @@ func NewTarget(r TargetRepo, t TargetgRPCAPI, s StreamgRPCAPI) *TargetUseCase {
 	bus.SubscribeTopic(topicNewTargets, uc.publishNewTargets)
 	bus.SubscribeTopic(topicSubscribeTickTargets, uc.SubscribeStockTick, uc.SubscribeStockBidAsk)
 	bus.SubscribeTopic(topicUnSubscribeTickTargets, uc.UnSubscribeStockTick, uc.UnSubscribeStockBidAsk)
+	bus.SubscribeTopic(topicSubscribeFutureTickTargets, uc.SubscribeFutureTick)
 
 	return uc
 }
@@ -81,6 +84,7 @@ func (uc *TargetUseCase) publishNewTargets(targetArr []*entity.Target) {
 
 	bus.PublishTopicEvent(topicFetchHistory, context.Background(), targetArr)
 	bus.PublishTopicEvent(topicStreamTargets, context.Background(), targetArr)
+	bus.PublishTopicEvent(topicStreamFutureTargets, context.Background(), uc.monitorFutureCodeArr)
 }
 
 // GetTargets - get targets from cache
@@ -244,6 +248,20 @@ func (uc *TargetUseCase) UnSubscribeStockBidAsk(stockNum string) error {
 
 	if len(failUnSubNumArr) != 0 {
 		return fmt.Errorf("unsubscribe fail %v", failUnSubNumArr)
+	}
+
+	return nil
+}
+
+// SubscribeFutureTick -.
+func (uc *TargetUseCase) SubscribeFutureTick(codeArr []string) error {
+	failSubNumArr, err := uc.gRPCAPI.SubscribeFutureTick(codeArr)
+	if err != nil {
+		return err
+	}
+
+	if len(failSubNumArr) != 0 {
+		return fmt.Errorf("subscribe future fail %v", failSubNumArr)
 	}
 
 	return nil

@@ -22,6 +22,22 @@ type Stock struct {
 	UpdateDate time.Time `json:"update_date"`
 }
 
+// Future -.
+type Future struct {
+	Code           string    `json:"code"`
+	Symbol         string    `json:"symbol"`
+	Name           string    `json:"name"`
+	Category       string    `json:"category"`
+	DeliveryMonth  string    `json:"delivery_month"`
+	DeliveryDate   string    `json:"delivery_date"`
+	UnderlyingKind string    `json:"underlying_kind"`
+	Unit           int64     `json:"unit"`
+	LimitUp        float64   `json:"limit_up"`
+	LimitDown      float64   `json:"limit_down"`
+	Reference      float64   `json:"reference"`
+	UpdateDate     time.Time `json:"update_date"`
+}
+
 const (
 	// DayTradeYes -.
 	DayTradeYes string = "Yes"

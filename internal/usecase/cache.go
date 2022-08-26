@@ -199,3 +199,16 @@ func (c *Cache) GetHistoryTickArr(stockNum string, date time.Time) []*entity.His
 	}
 	return nil
 }
+
+// SetRealTimeFutureTick -.
+func (c *Cache) SetRealTimeFutureTick(tick *entity.RealTimeFutureTick) {
+	c.Set(c.realTimeFutureTickKey(tick.Code), tick)
+}
+
+// GetRealTimeFutureTick -.
+func (c *Cache) GetRealTimeFutureTick(code string) *entity.RealTimeFutureTick {
+	if value, ok := c.Get(c.realTimeFutureTickKey(code)); ok {
+		return value.(*entity.RealTimeFutureTick)
+	}
+	return nil
+}

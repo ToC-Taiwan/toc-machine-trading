@@ -6,6 +6,9 @@ const (
 	topicSubscribeTickTargets   string = "subscribe_targets"
 	topicUnSubscribeTickTargets string = "unsubscribe_targets"
 
+	topicStreamFutureTargets        string = "stream_future_targets"
+	topicSubscribeFutureTickTargets string = "subscribe_future_targets"
+
 	topicFetchHistory   string = "fetch_history"
 	topicAnalyzeTargets string = "analyze_targets"
 

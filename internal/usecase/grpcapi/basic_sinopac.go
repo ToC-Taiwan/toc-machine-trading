@@ -88,3 +88,15 @@ func (t *BasicgRPCAPI) GetAllStockDetail() ([]*pb.StockDetailMessage, error) {
 	}
 	return r.GetStock(), nil
 }
+
+// GetAllFutureDetail -.
+func (t *BasicgRPCAPI) GetAllFutureDetail() ([]*pb.FutureDetailMessage, error) {
+	conn := t.conn.GetReadyConn()
+	defer t.conn.PutReadyConn(conn)
+	c := pb.NewFutureForwarderClient(conn)
+	r, err := c.GetAllFutureDetail(context.Background(), &emptypb.Empty{})
+	if err != nil {
+		return []*pb.FutureDetailMessage{}, err
+	}
+	return r.GetFuture(), nil
+}

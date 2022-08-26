@@ -13,6 +13,8 @@ const (
 
 	cacheCatagoryOrder cache.Category = "order"
 
+	cacheCatagoryRealTimeFutureTick cache.Category = "real_time_future_tick"
+
 	cacheCatagoryHistoryOpen        cache.Category = "history_open"
 	cacheCatagoryHistoryClose       cache.Category = "history_close"
 	cacheCatagoryHistoryTickAnalyze cache.Category = "history_tick_analyze"
@@ -28,8 +30,9 @@ const (
 	cacheIDTargets   string = "targets"
 
 	// with variable id
-	cacheIDStockNum string = "stock_num"
-	cacheIDOrderID  string = "order_id"
+	cacheIDStockNum   string = "stock_num"
+	cacheIDFutureCode string = "future_code"
+	cacheIDOrderID    string = "order_id"
 )
 
 func (c *Cache) generateID(opt ...any) string {
@@ -132,5 +135,12 @@ func (c *Cache) historyTickArrKey(stockNum string, date time.Time) cache.Key {
 	return cache.Key{
 		Category: cacheCatagoryHistoryTickArr,
 		ID:       c.generateID(cacheIDStockNum, stockNum, date.Format(global.ShortTimeLayout)),
+	}
+}
+
+func (c *Cache) realTimeFutureTickKey(code string) cache.Key {
+	return cache.Key{
+		Category: cacheCatagoryRealTimeFutureTick,
+		ID:       c.generateID(cacheIDFutureCode, code),
 	}
 }

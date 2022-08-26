@@ -42,6 +42,31 @@ type RealTimeTick struct {
 	Simtrade int64 `json:"simtrade"`
 }
 
+// RealTimeFutureTick -.
+type RealTimeFutureTick struct {
+	Code string `json:"code"`
+
+	TickTime        time.Time `json:"tick_time"`
+	Open            float64   `json:"open"`
+	UnderlyingPrice float64   `json:"underlying_price"`
+	BidSideTotalVol int64     `json:"bid_side_total_vol"`
+	AskSideTotalVol int64     `json:"ask_side_total_vol"`
+	AvgPrice        float64   `json:"avg_price"`
+	Close           float64   `json:"close"`
+	High            float64   `json:"high"`
+	Low             float64   `json:"low"`
+	Amount          float64   `json:"amount"`
+	TotalAmount     float64   `json:"total_amount"`
+	Volume          int64     `json:"volume"`
+	TotalVolume     int64     `json:"total_volume"`
+	TickType        int64     `json:"tick_type"`
+	ChgType         int64     `json:"chg_type"`
+	PriceChg        float64   `json:"price_chg"`
+	PctChg          float64   `json:"pct_chg"`
+
+	Simtrade int64 `json:"simtrade"`
+}
+
 // RealTimeBidAsk -.
 type RealTimeBidAsk struct {
 	Stock    *Stock `json:"stock"`
