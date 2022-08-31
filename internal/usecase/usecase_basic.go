@@ -2,8 +2,6 @@ package usecase
 
 import (
 	"context"
-	"encoding/json"
-	"os"
 	"time"
 
 	"tmt/internal/entity"
@@ -15,11 +13,26 @@ import (
 type BasicUseCase struct {
 	repo    BasicRepo
 	gRPCAPI BasicgRPCAPI
+
+	cfg      *config.Config
+	tradeDay *TradeDay
 }
 
 // NewBasic -.
 func NewBasic(r BasicRepo, t BasicgRPCAPI) *BasicUseCase {
-	uc := &BasicUseCase{repo: r, gRPCAPI: t}
+	cfg, err := config.GetConfig()
+	if err != nil {
+		log.Panic(err)
+	}
+
+	uc := &BasicUseCase{
+		repo:     r,
+		gRPCAPI:  t,
+		tradeDay: NewTradeDay(),
+		cfg:      cfg,
+	}
+	uc.fillBasicInfo()
+
 	go func() {
 		err := uc.gRPCAPI.Heartbeat()
 		if err != nil {
@@ -28,10 +41,6 @@ func NewBasic(r BasicRepo, t BasicgRPCAPI) *BasicUseCase {
 	}()
 
 	if err := uc.importCalendarDate(context.Background()); err != nil {
-		log.Panic(err)
-	}
-
-	if err := uc.fillBasicInfo(); err != nil {
 		log.Panic(err)
 	}
 
@@ -159,85 +168,29 @@ func (uc *BasicUseCase) GetAllRepoStock(ctx context.Context) ([]*entity.Stock, e
 }
 
 func (uc *BasicUseCase) importCalendarDate(ctx context.Context) error {
-	holidayArr, err := parseHolidayFile()
-	if err != nil {
-		return err
-	}
-
-	holidayTimeMap := make(map[string]bool)
-	for _, v := range holidayArr {
-		holidayTimeMap[v] = true
-	}
-
-	firstDay := time.Date(global.StartTradeYear, 1, 1, 0, 0, 0, 0, time.Local)
-	var tmp []*entity.CalendarDate
-	for {
-		var isTradeDay bool
-		if firstDay.Year() > global.EndTradeYear {
-			break
-		}
-		if firstDay.Weekday() != time.Saturday && firstDay.Weekday() != time.Sunday && !holidayTimeMap[firstDay.Format(global.ShortTimeLayout)] {
-			isTradeDay = true
-		}
-		tmp = append(tmp, &entity.CalendarDate{
-			Date:       firstDay,
-			IsTradeDay: isTradeDay,
-		})
-		firstDay = firstDay.AddDate(0, 0, 1)
-	}
-
-	tradeDayMap := make(map[time.Time]bool)
-	for _, v := range tmp {
-		if v.IsTradeDay {
-			tradeDayMap[v.Date] = true
-		}
-	}
-	cc.SetCalendar(tradeDayMap)
-
-	if err := uc.repo.InsertOrUpdatetCalendarDateArr(ctx, tmp); err != nil {
+	if err := uc.repo.InsertOrUpdatetCalendarDateArr(ctx, uc.tradeDay.getAllCalendar()); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (uc *BasicUseCase) fillBasicInfo() error {
-	tradeDay := decideTradeDay()
-	cfg, err := config.GetConfig()
-	if err != nil {
-		return err
-	}
-
+func (uc *BasicUseCase) fillBasicInfo() {
+	tradeDay := uc.tradeDay.decideStockTradeDay()
 	openTime := 9 * time.Hour
-	lastTradeDayArr := getLastNTradeDayByDate(2, tradeDay)
+	lastTradeDayArr := uc.tradeDay.getLastNTradeDayByDate(2, tradeDay)
+
 	basic := &entity.BasicInfo{
 		TradeDay:           tradeDay,
 		LastTradeDay:       lastTradeDayArr[0],
 		BefroeLastTradeDay: lastTradeDayArr[1],
 
-		OpenTime:       tradeDay.Add(openTime).Add(time.Duration(cfg.TradeSwitch.HoldTimeFromOpen) * time.Second),
-		TradeInEndTime: tradeDay.Add(openTime).Add(time.Duration(cfg.TradeSwitch.TradeInEndTime) * time.Minute),
-		EndTime:        tradeDay.Add(openTime).Add(time.Duration(cfg.TradeSwitch.TotalOpenTime) * time.Minute),
+		OpenTime:       tradeDay.Add(openTime).Add(time.Duration(uc.cfg.TradeSwitch.HoldTimeFromOpen) * time.Second),
+		TradeInEndTime: tradeDay.Add(openTime).Add(time.Duration(uc.cfg.TradeSwitch.TradeInEndTime) * time.Minute),
+		EndTime:        tradeDay.Add(openTime).Add(time.Duration(uc.cfg.TradeSwitch.TotalOpenTime) * time.Minute),
 
-		HistoryCloseRange: getLastNTradeDayByDate(cfg.History.HistoryClosePeriod, tradeDay),
-		HistoryKbarRange:  getLastNTradeDayByDate(cfg.History.HistoryKbarPeriod, tradeDay),
-		HistoryTickRange:  getLastNTradeDayByDate(cfg.History.HistoryTickPeriod, tradeDay),
+		HistoryCloseRange: uc.tradeDay.getLastNTradeDayByDate(uc.cfg.History.HistoryClosePeriod, tradeDay),
+		HistoryKbarRange:  uc.tradeDay.getLastNTradeDayByDate(uc.cfg.History.HistoryKbarPeriod, tradeDay),
+		HistoryTickRange:  uc.tradeDay.getLastNTradeDayByDate(uc.cfg.History.HistoryTickPeriod, tradeDay),
 	}
 	cc.SetBasicInfo(basic)
-	return nil
-}
-
-func parseHolidayFile() ([]string, error) {
-	var holidayArr struct {
-		DateArr []string `json:"date_arr"`
-	}
-
-	holidayFile, err := os.ReadFile("./data/holidays.json")
-	if err != nil {
-		return []string{}, err
-	}
-
-	if err := json.Unmarshal(holidayFile, &holidayArr); err != nil {
-		return []string{}, err
-	}
-	return holidayArr.DateArr, nil
 }

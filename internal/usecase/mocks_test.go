@@ -788,6 +788,51 @@ func (m *MockHistorygRPCAPI) EXPECT() *MockHistorygRPCAPIMockRecorder {
 	return m.recorder
 }
 
+// GetFutureHistoryClose mocks base method.
+func (m *MockHistorygRPCAPI) GetFutureHistoryClose(codeArr []string, date string) ([]*pb.StockHistoryCloseMessage, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetFutureHistoryClose", codeArr, date)
+	ret0, _ := ret[0].([]*pb.StockHistoryCloseMessage)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetFutureHistoryClose indicates an expected call of GetFutureHistoryClose.
+func (mr *MockHistorygRPCAPIMockRecorder) GetFutureHistoryClose(codeArr, date interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFutureHistoryClose", reflect.TypeOf((*MockHistorygRPCAPI)(nil).GetFutureHistoryClose), codeArr, date)
+}
+
+// GetFutureHistoryKbar mocks base method.
+func (m *MockHistorygRPCAPI) GetFutureHistoryKbar(codeArr []string, date string) ([]*pb.StockHistoryKbarMessage, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetFutureHistoryKbar", codeArr, date)
+	ret0, _ := ret[0].([]*pb.StockHistoryKbarMessage)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetFutureHistoryKbar indicates an expected call of GetFutureHistoryKbar.
+func (mr *MockHistorygRPCAPIMockRecorder) GetFutureHistoryKbar(codeArr, date interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFutureHistoryKbar", reflect.TypeOf((*MockHistorygRPCAPI)(nil).GetFutureHistoryKbar), codeArr, date)
+}
+
+// GetFutureHistoryTick mocks base method.
+func (m *MockHistorygRPCAPI) GetFutureHistoryTick(codeArr []string, date string) ([]*pb.StockHistoryTickMessage, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetFutureHistoryTick", codeArr, date)
+	ret0, _ := ret[0].([]*pb.StockHistoryTickMessage)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetFutureHistoryTick indicates an expected call of GetFutureHistoryTick.
+func (mr *MockHistorygRPCAPIMockRecorder) GetFutureHistoryTick(codeArr, date interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFutureHistoryTick", reflect.TypeOf((*MockHistorygRPCAPI)(nil).GetFutureHistoryTick), codeArr, date)
+}
+
 // GetStockHistoryClose mocks base method.
 func (m *MockHistorygRPCAPI) GetStockHistoryClose(stockNumArr []string, date string) ([]*pb.StockHistoryCloseMessage, error) {
 	m.ctrl.T.Helper()

@@ -118,3 +118,48 @@ func (t *HistorygRPCAPI) GetStockTSEHistoryClose(date string) ([]*pb.StockHistor
 	}
 	return r.GetData(), nil
 }
+
+// GetFutureHistoryTick -.
+func (t *HistorygRPCAPI) GetFutureHistoryTick(codeArr []string, date string) ([]*pb.StockHistoryTickMessage, error) {
+	conn := t.conn.GetReadyConn()
+	defer t.conn.PutReadyConn(conn)
+	c := pb.NewFutureForwarderClient(conn)
+	r, err := c.GetFutureHistoryTick(context.Background(), &pb.FutureCodeArrWithDate{
+		FutureCodeArr: codeArr,
+		Date:          date,
+	})
+	if err != nil {
+		return []*pb.StockHistoryTickMessage{}, err
+	}
+	return r.GetData(), nil
+}
+
+// GetFutureHistoryClose -.
+func (t *HistorygRPCAPI) GetFutureHistoryClose(codeArr []string, date string) ([]*pb.StockHistoryCloseMessage, error) {
+	conn := t.conn.GetReadyConn()
+	defer t.conn.PutReadyConn(conn)
+	c := pb.NewFutureForwarderClient(conn)
+	r, err := c.GetFutureHistoryClose(context.Background(), &pb.FutureCodeArrWithDate{
+		FutureCodeArr: codeArr,
+		Date:          date,
+	})
+	if err != nil {
+		return []*pb.StockHistoryCloseMessage{}, err
+	}
+	return r.GetData(), nil
+}
+
+// GetFutureHistoryKbar -.
+func (t *HistorygRPCAPI) GetFutureHistoryKbar(codeArr []string, date string) ([]*pb.StockHistoryKbarMessage, error) {
+	conn := t.conn.GetReadyConn()
+	defer t.conn.PutReadyConn(conn)
+	c := pb.NewFutureForwarderClient(conn)
+	r, err := c.GetFutureHistoryKbar(context.Background(), &pb.FutureCodeArrWithDate{
+		FutureCodeArr: codeArr,
+		Date:          date,
+	})
+	if err != nil {
+		return []*pb.StockHistoryKbarMessage{}, err
+	}
+	return r.GetData(), nil
+}

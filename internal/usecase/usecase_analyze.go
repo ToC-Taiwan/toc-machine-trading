@@ -28,6 +28,8 @@ type AnalyzeUseCase struct {
 	lastBelowMAStock map[string]*entity.HistoryAnalyze
 	rebornMap        map[time.Time][]entity.Stock
 	rebornLock       sync.Mutex
+
+	tradeDay *TradeDay
 }
 
 // NewAnalyze -.
@@ -47,6 +49,7 @@ func NewAnalyze(r HistoryRepo) *AnalyzeUseCase {
 		historyTick:        make(map[string]*[]*entity.HistoryTick),
 		lastBelowMAStock:   make(map[string]*entity.HistoryAnalyze),
 		rebornMap:          make(map[time.Time][]entity.Stock),
+		tradeDay:           NewTradeDay(),
 	}
 
 	bus.SubscribeTopic(topicAnalyzeTargets, uc.AnalyzeAll)
@@ -81,7 +84,7 @@ func (uc *AnalyzeUseCase) findBelowQuaterMATargets(ctx context.Context, targetAr
 			if close := cc.GetHistoryClose(ma.StockNum, ma.Date); close != 0 && close-ma.QuaterMA > 0 {
 				continue
 			}
-			if nextTradeDay := getAbsNextTradeDayTime(ma.Date); nextTradeDay.Equal(basicInfo.TradeDay) {
+			if nextTradeDay := uc.tradeDay.getAbsNextTradeDayTime(ma.Date); nextTradeDay.Equal(basicInfo.TradeDay) {
 				uc.lastBelowMAStock[tmp.StockNum] = tmp
 			} else if nextOpen := cc.GetHistoryOpen(ma.StockNum, nextTradeDay); nextOpen != 0 && nextOpen-ma.QuaterMA > 0 {
 				uc.rebornMap[ma.Date] = append(uc.rebornMap[ma.Date], *tmp.Stock)

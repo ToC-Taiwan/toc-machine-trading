@@ -29,6 +29,9 @@ type SimulateTradeAgent struct {
 
 	tradeSwitch  config.TradeSwitch
 	simulateDone bool
+
+	allowForward bool
+	allowReverse bool
 }
 
 // NewSimulateAgent -.
@@ -51,6 +54,12 @@ func NewSimulateAgent(stockNum string) *SimulateTradeAgent {
 		orderMap:           make(map[entity.OrderAction][]*entity.Order),
 		tickChan:           make(chan *entity.RealTimeTick),
 		historyTickAnalyze: arr,
+	}
+
+	if gap := cc.GetFutureGap(cc.GetBasicInfo().LastTradeDay); gap > 0 {
+		new.allowForward = true
+	} else if gap != 0 {
+		new.allowReverse = true
 	}
 
 	return new
@@ -172,11 +181,11 @@ func (o *SimulateTradeAgent) generateSimulateOrder(cfg config.Analyze) *entity.O
 	}
 
 	switch {
-	case allOutInRation > cfg.AllOutInRatio && o.lastTick.Low < o.lastTick.Close:
+	case allOutInRation > cfg.AllOutInRatio && o.lastTick.Low < o.lastTick.Close && o.allowForward:
 		order.Action = entity.ActionBuy
 		order.Price = o.lastTick.Close
 		return order
-	case 100-allOutInRation > cfg.AllInOutRatio && o.lastTick.High > o.lastTick.Close:
+	case 100-allOutInRation > cfg.AllInOutRatio && o.lastTick.High > o.lastTick.Close && o.allowReverse:
 		order.Action = entity.ActionSellFirst
 		order.Price = o.lastTick.Close
 		return order

@@ -40,7 +40,6 @@ quota:
 
 target_cond:
     monitor_future_code:
-        - MXFI2
         - TXFI2
     real_time_rank: 20
     black_category:
@@ -69,14 +68,14 @@ analyze:
     tick_analyze_period: 15000
 
     # unit: %
-    volume_pr_limit: 99
+    volume_pr_limit: 95
 
     # unit: %
-    all_out_in_ratio: 65
-    all_in_out_ratio: 65
+    all_out_in_ratio: 75
+    all_in_out_ratio: 75
 
     # unit: times
-    rsi_min_count: 100
+    rsi_min_count: 150
 
     # unit: day
     ma_period: 60

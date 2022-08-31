@@ -967,6 +967,10 @@ type TradeServiceClient interface {
 	GetOrderStatusByID(ctx context.Context, in *OrderID, opts ...grpc.CallOption) (*TradeResult, error)
 	GetOrderStatusArr(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*StockOrderStatusArr, error)
 	GetNonBlockOrderStatusArr(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*FunctionErr, error)
+	BuyFuture(ctx context.Context, in *FutureOrderDetail, opts ...grpc.CallOption) (*TradeResult, error)
+	SellFuture(ctx context.Context, in *FutureOrderDetail, opts ...grpc.CallOption) (*TradeResult, error)
+	SellFirstFuture(ctx context.Context, in *FutureOrderDetail, opts ...grpc.CallOption) (*TradeResult, error)
+	CancelFuture(ctx context.Context, in *FutureOrderID, opts ...grpc.CallOption) (*TradeResult, error)
 }
 
 type tradeServiceClient struct {
@@ -1040,6 +1044,42 @@ func (c *tradeServiceClient) GetNonBlockOrderStatusArr(ctx context.Context, in *
 	return out, nil
 }
 
+func (c *tradeServiceClient) BuyFuture(ctx context.Context, in *FutureOrderDetail, opts ...grpc.CallOption) (*TradeResult, error) {
+	out := new(TradeResult)
+	err := c.cc.Invoke(ctx, "/sinopac_forwarder.TradeService/BuyFuture", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *tradeServiceClient) SellFuture(ctx context.Context, in *FutureOrderDetail, opts ...grpc.CallOption) (*TradeResult, error) {
+	out := new(TradeResult)
+	err := c.cc.Invoke(ctx, "/sinopac_forwarder.TradeService/SellFuture", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *tradeServiceClient) SellFirstFuture(ctx context.Context, in *FutureOrderDetail, opts ...grpc.CallOption) (*TradeResult, error) {
+	out := new(TradeResult)
+	err := c.cc.Invoke(ctx, "/sinopac_forwarder.TradeService/SellFirstFuture", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *tradeServiceClient) CancelFuture(ctx context.Context, in *FutureOrderID, opts ...grpc.CallOption) (*TradeResult, error) {
+	out := new(TradeResult)
+	err := c.cc.Invoke(ctx, "/sinopac_forwarder.TradeService/CancelFuture", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // TradeServiceServer is the server API for TradeService service.
 // All implementations must embed UnimplementedTradeServiceServer
 // for forward compatibility
@@ -1051,6 +1091,10 @@ type TradeServiceServer interface {
 	GetOrderStatusByID(context.Context, *OrderID) (*TradeResult, error)
 	GetOrderStatusArr(context.Context, *emptypb.Empty) (*StockOrderStatusArr, error)
 	GetNonBlockOrderStatusArr(context.Context, *emptypb.Empty) (*FunctionErr, error)
+	BuyFuture(context.Context, *FutureOrderDetail) (*TradeResult, error)
+	SellFuture(context.Context, *FutureOrderDetail) (*TradeResult, error)
+	SellFirstFuture(context.Context, *FutureOrderDetail) (*TradeResult, error)
+	CancelFuture(context.Context, *FutureOrderID) (*TradeResult, error)
 	mustEmbedUnimplementedTradeServiceServer()
 }
 
@@ -1078,6 +1122,18 @@ func (UnimplementedTradeServiceServer) GetOrderStatusArr(context.Context, *empty
 }
 func (UnimplementedTradeServiceServer) GetNonBlockOrderStatusArr(context.Context, *emptypb.Empty) (*FunctionErr, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetNonBlockOrderStatusArr not implemented")
+}
+func (UnimplementedTradeServiceServer) BuyFuture(context.Context, *FutureOrderDetail) (*TradeResult, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method BuyFuture not implemented")
+}
+func (UnimplementedTradeServiceServer) SellFuture(context.Context, *FutureOrderDetail) (*TradeResult, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SellFuture not implemented")
+}
+func (UnimplementedTradeServiceServer) SellFirstFuture(context.Context, *FutureOrderDetail) (*TradeResult, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SellFirstFuture not implemented")
+}
+func (UnimplementedTradeServiceServer) CancelFuture(context.Context, *FutureOrderID) (*TradeResult, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CancelFuture not implemented")
 }
 func (UnimplementedTradeServiceServer) mustEmbedUnimplementedTradeServiceServer() {}
 
@@ -1218,6 +1274,78 @@ func _TradeService_GetNonBlockOrderStatusArr_Handler(srv interface{}, ctx contex
 	return interceptor(ctx, in, info, handler)
 }
 
+func _TradeService_BuyFuture_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(FutureOrderDetail)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TradeServiceServer).BuyFuture(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/sinopac_forwarder.TradeService/BuyFuture",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TradeServiceServer).BuyFuture(ctx, req.(*FutureOrderDetail))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TradeService_SellFuture_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(FutureOrderDetail)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TradeServiceServer).SellFuture(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/sinopac_forwarder.TradeService/SellFuture",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TradeServiceServer).SellFuture(ctx, req.(*FutureOrderDetail))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TradeService_SellFirstFuture_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(FutureOrderDetail)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TradeServiceServer).SellFirstFuture(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/sinopac_forwarder.TradeService/SellFirstFuture",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TradeServiceServer).SellFirstFuture(ctx, req.(*FutureOrderDetail))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TradeService_CancelFuture_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(FutureOrderID)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TradeServiceServer).CancelFuture(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/sinopac_forwarder.TradeService/CancelFuture",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TradeServiceServer).CancelFuture(ctx, req.(*FutureOrderID))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // TradeService_ServiceDesc is the grpc.ServiceDesc for TradeService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1253,6 +1381,22 @@ var TradeService_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "GetNonBlockOrderStatusArr",
 			Handler:    _TradeService_GetNonBlockOrderStatusArr_Handler,
 		},
+		{
+			MethodName: "BuyFuture",
+			Handler:    _TradeService_BuyFuture_Handler,
+		},
+		{
+			MethodName: "SellFuture",
+			Handler:    _TradeService_SellFuture_Handler,
+		},
+		{
+			MethodName: "SellFirstFuture",
+			Handler:    _TradeService_SellFirstFuture_Handler,
+		},
+		{
+			MethodName: "CancelFuture",
+			Handler:    _TradeService_CancelFuture_Handler,
+		},
 	},
 	Streams:  []grpc.StreamDesc{},
 	Metadata: "src/sinopac_forwarder.proto",
@@ -1264,6 +1408,9 @@ var TradeService_ServiceDesc = grpc.ServiceDesc{
 type FutureForwarderClient interface {
 	GetAllFutureDetail(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*FutureDetailResponse, error)
 	GetFutureSnapshotByCodeArr(ctx context.Context, in *FutureCodeArr, opts ...grpc.CallOption) (*StockSnapshotResponse, error)
+	GetFutureHistoryTick(ctx context.Context, in *FutureCodeArrWithDate, opts ...grpc.CallOption) (*StockHistoryTickResponse, error)
+	GetFutureHistoryClose(ctx context.Context, in *FutureCodeArrWithDate, opts ...grpc.CallOption) (*StockHistoryCloseResponse, error)
+	GetFutureHistoryKbar(ctx context.Context, in *FutureCodeArrWithDate, opts ...grpc.CallOption) (*StockHistoryKbarResponse, error)
 }
 
 type futureForwarderClient struct {
@@ -1292,12 +1439,42 @@ func (c *futureForwarderClient) GetFutureSnapshotByCodeArr(ctx context.Context, 
 	return out, nil
 }
 
+func (c *futureForwarderClient) GetFutureHistoryTick(ctx context.Context, in *FutureCodeArrWithDate, opts ...grpc.CallOption) (*StockHistoryTickResponse, error) {
+	out := new(StockHistoryTickResponse)
+	err := c.cc.Invoke(ctx, "/sinopac_forwarder.FutureForwarder/GetFutureHistoryTick", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *futureForwarderClient) GetFutureHistoryClose(ctx context.Context, in *FutureCodeArrWithDate, opts ...grpc.CallOption) (*StockHistoryCloseResponse, error) {
+	out := new(StockHistoryCloseResponse)
+	err := c.cc.Invoke(ctx, "/sinopac_forwarder.FutureForwarder/GetFutureHistoryClose", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *futureForwarderClient) GetFutureHistoryKbar(ctx context.Context, in *FutureCodeArrWithDate, opts ...grpc.CallOption) (*StockHistoryKbarResponse, error) {
+	out := new(StockHistoryKbarResponse)
+	err := c.cc.Invoke(ctx, "/sinopac_forwarder.FutureForwarder/GetFutureHistoryKbar", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // FutureForwarderServer is the server API for FutureForwarder service.
 // All implementations must embed UnimplementedFutureForwarderServer
 // for forward compatibility
 type FutureForwarderServer interface {
 	GetAllFutureDetail(context.Context, *emptypb.Empty) (*FutureDetailResponse, error)
 	GetFutureSnapshotByCodeArr(context.Context, *FutureCodeArr) (*StockSnapshotResponse, error)
+	GetFutureHistoryTick(context.Context, *FutureCodeArrWithDate) (*StockHistoryTickResponse, error)
+	GetFutureHistoryClose(context.Context, *FutureCodeArrWithDate) (*StockHistoryCloseResponse, error)
+	GetFutureHistoryKbar(context.Context, *FutureCodeArrWithDate) (*StockHistoryKbarResponse, error)
 	mustEmbedUnimplementedFutureForwarderServer()
 }
 
@@ -1310,6 +1487,15 @@ func (UnimplementedFutureForwarderServer) GetAllFutureDetail(context.Context, *e
 }
 func (UnimplementedFutureForwarderServer) GetFutureSnapshotByCodeArr(context.Context, *FutureCodeArr) (*StockSnapshotResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetFutureSnapshotByCodeArr not implemented")
+}
+func (UnimplementedFutureForwarderServer) GetFutureHistoryTick(context.Context, *FutureCodeArrWithDate) (*StockHistoryTickResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetFutureHistoryTick not implemented")
+}
+func (UnimplementedFutureForwarderServer) GetFutureHistoryClose(context.Context, *FutureCodeArrWithDate) (*StockHistoryCloseResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetFutureHistoryClose not implemented")
+}
+func (UnimplementedFutureForwarderServer) GetFutureHistoryKbar(context.Context, *FutureCodeArrWithDate) (*StockHistoryKbarResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetFutureHistoryKbar not implemented")
 }
 func (UnimplementedFutureForwarderServer) mustEmbedUnimplementedFutureForwarderServer() {}
 
@@ -1360,6 +1546,60 @@ func _FutureForwarder_GetFutureSnapshotByCodeArr_Handler(srv interface{}, ctx co
 	return interceptor(ctx, in, info, handler)
 }
 
+func _FutureForwarder_GetFutureHistoryTick_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(FutureCodeArrWithDate)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FutureForwarderServer).GetFutureHistoryTick(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/sinopac_forwarder.FutureForwarder/GetFutureHistoryTick",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FutureForwarderServer).GetFutureHistoryTick(ctx, req.(*FutureCodeArrWithDate))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _FutureForwarder_GetFutureHistoryClose_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(FutureCodeArrWithDate)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FutureForwarderServer).GetFutureHistoryClose(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/sinopac_forwarder.FutureForwarder/GetFutureHistoryClose",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FutureForwarderServer).GetFutureHistoryClose(ctx, req.(*FutureCodeArrWithDate))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _FutureForwarder_GetFutureHistoryKbar_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(FutureCodeArrWithDate)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FutureForwarderServer).GetFutureHistoryKbar(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/sinopac_forwarder.FutureForwarder/GetFutureHistoryKbar",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FutureForwarderServer).GetFutureHistoryKbar(ctx, req.(*FutureCodeArrWithDate))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // FutureForwarder_ServiceDesc is the grpc.ServiceDesc for FutureForwarder service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1374,6 +1614,18 @@ var FutureForwarder_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetFutureSnapshotByCodeArr",
 			Handler:    _FutureForwarder_GetFutureSnapshotByCodeArr_Handler,
+		},
+		{
+			MethodName: "GetFutureHistoryTick",
+			Handler:    _FutureForwarder_GetFutureHistoryTick_Handler,
+		},
+		{
+			MethodName: "GetFutureHistoryClose",
+			Handler:    _FutureForwarder_GetFutureHistoryClose_Handler,
+		},
+		{
+			MethodName: "GetFutureHistoryKbar",
+			Handler:    _FutureForwarder_GetFutureHistoryKbar_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

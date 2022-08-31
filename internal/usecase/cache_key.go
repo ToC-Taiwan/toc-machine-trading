@@ -14,6 +14,7 @@ const (
 	cacheCatagoryOrder cache.Category = "order"
 
 	cacheCatagoryRealTimeFutureTick cache.Category = "real_time_future_tick"
+	cacheCatagoryFutureGap          cache.Category = "future_gap"
 
 	cacheCatagoryHistoryOpen        cache.Category = "history_open"
 	cacheCatagoryHistoryClose       cache.Category = "history_close"
@@ -45,13 +46,6 @@ func (c *Cache) generateID(opt ...any) string {
 		}
 	}
 	return fmt.Sprintf(format, opt...)
-}
-
-func (c *Cache) calendarKey() cache.Key {
-	return cache.Key{
-		Category: cacheCatagoryBasic,
-		ID:       cacheIDCalendar,
-	}
 }
 
 func (c *Cache) basicInfoKey() cache.Key {
@@ -142,5 +136,12 @@ func (c *Cache) realTimeFutureTickKey(code string) cache.Key {
 	return cache.Key{
 		Category: cacheCatagoryRealTimeFutureTick,
 		ID:       c.generateID(cacheIDFutureCode, code),
+	}
+}
+
+func (c *Cache) futureGapKey(date time.Time) cache.Key {
+	return cache.Key{
+		Category: cacheCatagoryFutureGap,
+		ID:       date.Format(global.ShortTimeLayout),
 	}
 }

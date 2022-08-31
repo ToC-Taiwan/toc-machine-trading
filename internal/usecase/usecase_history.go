@@ -44,6 +44,8 @@ func NewHistory(r HistoryRepo, t HistorygRPCAPI) *HistoryUseCase {
 	uc.basic = *cc.GetBasicInfo()
 
 	bus.SubscribeTopic(topicFetchHistory, uc.FetchHistory)
+	uc.FetchFutureHistoryTick(cfg.TargetCond.MonitorFutureCodeArr, uc.basic.LastTradeDay)
+	uc.FetchFutureHistoryTick(cfg.TargetCond.MonitorFutureCodeArr, uc.basic.TradeDay)
 
 	return uc
 }
@@ -505,4 +507,135 @@ func (uc *HistoryUseCase) processKbarArr(arr []*entity.HistoryKbar) {
 		Volume:   volume,
 		Stock:    cc.GetStockDetail(firstKbar.StockNum),
 	})
+}
+
+// FetchFutureHistoryTick -.
+func (uc *HistoryUseCase) FetchFutureHistoryTick(codeArr []string, date time.Time) {
+	defer log.Info("Fetching Future History Tick Done")
+	log.Info("Fetching Future History Tick")
+	result := make(map[string][]*entity.HistoryTick)
+	dataChan := make(chan *entity.HistoryTick)
+	wait := make(chan struct{})
+	go func() {
+		for {
+			tick, ok := <-dataChan
+			if !ok {
+				break
+			}
+			result[tick.StockNum] = append(result[tick.StockNum], tick)
+		}
+		close(wait)
+	}()
+	tickArr, err := uc.grpcapi.GetFutureHistoryTick(codeArr, date.Format(global.ShortTimeLayout))
+	if err != nil {
+		log.Error(err)
+	}
+	for _, t := range tickArr {
+		dataChan <- &entity.HistoryTick{
+			StockNum: t.GetStockNum(),
+			TickTime: time.Unix(0, t.GetTs()).Add(-8 * time.Hour), Close: t.GetClose(),
+			TickType: t.GetTickType(), Volume: t.GetVolume(),
+			BidPrice: t.GetBidPrice(), BidVolume: t.GetBidVolume(),
+			AskPrice: t.GetAskPrice(), AskVolume: t.GetAskVolume(),
+		}
+	}
+	close(dataChan)
+	<-wait
+	if len(result) != 0 {
+		for _, v := range result {
+			var close float64
+			for _, tick := range v {
+				// log.Warnf("TickTime: %s", tick.TickTime.Format(global.LongTimeLayout))
+				if tick.TickTime.Hour() < 5 {
+					close = tick.Close
+				} else if close != 0 {
+					// log.Infof("Gap: %.0f", tick.Close-close)
+					cc.SetFutureGap(tick.Close-close, date)
+					break
+				}
+			}
+		}
+	}
+}
+
+// FetchFutureHistoryClose -.
+func (uc *HistoryUseCase) FetchFutureHistoryClose(codeArr []string, date time.Time) {
+	defer log.Info("Fetching Future History Close Done")
+	log.Info("Fetching Future History Close")
+	result := make(map[string][]*entity.HistoryClose)
+	dataChan := make(chan *entity.HistoryClose)
+	wait := make(chan struct{})
+	go func() {
+		for {
+			close, ok := <-dataChan
+			if !ok {
+				break
+			}
+			result[close.StockNum] = append(result[close.StockNum], close)
+		}
+		close(wait)
+	}()
+	closeArr, err := uc.grpcapi.GetFutureHistoryClose(codeArr, date.Format(global.ShortTimeLayout))
+	if err != nil {
+		log.Error(err)
+	}
+	for _, close := range closeArr {
+		dataChan <- &entity.HistoryClose{
+			Date:     date,
+			StockNum: close.GetCode(),
+			Close:    close.GetClose(),
+		}
+	}
+	close(dataChan)
+	<-wait
+	if len(result) != 0 {
+		log.Info("Inserting History Close")
+		for _, v := range result {
+			for _, close := range v {
+				log.Warnf("%s %s Close: %.0f", close.StockNum, close.Date.Format(global.ShortTimeLayout), close.Close)
+				cc.SetHistoryClose(close.StockNum, close.Date, close.Close)
+			}
+		}
+	}
+}
+
+// FetchFutureHistoryKbar -.
+func (uc *HistoryUseCase) FetchFutureHistoryKbar(codeArr []string, date time.Time) {
+	defer log.Info("Fetching Future History Kbar Done")
+	log.Info("Fetching Future History Kbar")
+	result := make(map[string][]*entity.HistoryKbar)
+	dataChan := make(chan *entity.HistoryKbar)
+	wait := make(chan struct{})
+	go func() {
+		for {
+			kbar, ok := <-dataChan
+			if !ok {
+				break
+			}
+			result[kbar.StockNum] = append(result[kbar.StockNum], kbar)
+		}
+		close(wait)
+	}()
+	tickArr, err := uc.grpcapi.GetFutureHistoryKbar(codeArr, date.Format(global.ShortTimeLayout))
+	if err != nil {
+		log.Error(err)
+	}
+	for _, t := range tickArr {
+		dataChan <- &entity.HistoryKbar{
+			StockNum: t.GetStockNum(),
+			KbarTime: time.Unix(0, t.GetTs()).Add(-8 * time.Hour),
+			Open:     t.GetOpen(),
+			High:     t.GetHigh(),
+			Low:      t.GetLow(),
+			Close:    t.GetClose(),
+			Volume:   t.GetVolume(),
+		}
+	}
+	close(dataChan)
+	<-wait
+	if len(result) != 0 {
+		for _, v := range result {
+			log.Info(*v[len(v)-1])
+		}
+	}
 }

@@ -102,9 +102,14 @@ type (
 		GetStockHistoryKbar(stockNumArr []string, date string) ([]*pb.StockHistoryKbarMessage, error)
 		GetStockHistoryClose(stockNumArr []string, date string) ([]*pb.StockHistoryCloseMessage, error)
 		GetStockHistoryCloseByDateArr(stockNumArr []string, date []string) ([]*pb.StockHistoryCloseMessage, error)
+
 		GetStockTSEHistoryTick(date string) ([]*pb.StockHistoryTickMessage, error)
 		GetStockTSEHistoryKbar(date string) ([]*pb.StockHistoryKbarMessage, error)
 		GetStockTSEHistoryClose(date string) ([]*pb.StockHistoryCloseMessage, error)
+
+		GetFutureHistoryTick(codeArr []string, date string) ([]*pb.StockHistoryTickMessage, error)
+		GetFutureHistoryKbar(codeArr []string, date string) ([]*pb.StockHistoryKbarMessage, error)
+		GetFutureHistoryClose(codeArr []string, date string) ([]*pb.StockHistoryCloseMessage, error)
 	}
 )
 

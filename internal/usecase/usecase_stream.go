@@ -23,6 +23,8 @@ type StreamUseCase struct {
 	targetFilter *TargetFilter
 
 	tradeInSwitch bool
+	allowForward  bool
+	allowReverse  bool
 }
 
 // NewStream -.
@@ -42,6 +44,12 @@ func NewStream(r StreamRepo, g StreamgRPCAPI, t StreamRabbit) *StreamUseCase {
 	uc.tradeSwitchCfg = cfg.TradeSwitch
 	uc.analyzeCfg = cfg.Analyze
 	uc.basic = *cc.GetBasicInfo()
+
+	if gap := cc.GetFutureGap(uc.basic.TradeDay); gap > 0 {
+		uc.allowForward = true
+	} else if gap != 0 {
+		uc.allowReverse = true
+	}
 
 	go uc.checkTradeSwitch()
 	go uc.ReceiveEvent(context.Background())
@@ -166,6 +174,17 @@ func (uc *StreamUseCase) tradingRoom(agent *TradeAgent) {
 }
 
 func (uc *StreamUseCase) placeOrder(agent *TradeAgent, order *entity.Order) {
+	switch order.Action {
+	case entity.ActionBuy:
+		if !uc.allowForward {
+			return
+		}
+	case entity.ActionSellFirst:
+		if !uc.allowReverse {
+			return
+		}
+	}
+
 	if order.Price == 0 {
 		log.Errorf("%s Order price is 0", order.StockNum)
 		return

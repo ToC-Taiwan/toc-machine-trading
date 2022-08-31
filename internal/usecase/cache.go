@@ -32,19 +32,6 @@ func (c *Cache) GetStockDetail(stockNum string) *entity.Stock {
 	return nil
 }
 
-// SetCalendar -.
-func (c *Cache) SetCalendar(calendar map[time.Time]bool) {
-	c.Set(c.calendarKey(), calendar)
-}
-
-// GetCalendar -.
-func (c *Cache) GetCalendar() map[time.Time]bool {
-	if value, ok := c.Get(c.calendarKey()); ok {
-		return value.(map[time.Time]bool)
-	}
-	return nil
-}
-
 // SetBasicInfo -.
 func (c *Cache) SetBasicInfo(info *entity.BasicInfo) {
 	c.Set(c.basicInfoKey(), info)
@@ -211,4 +198,17 @@ func (c *Cache) GetRealTimeFutureTick(code string) *entity.RealTimeFutureTick {
 		return value.(*entity.RealTimeFutureTick)
 	}
 	return nil
+}
+
+// SetFutureGap -.
+func (c *Cache) SetFutureGap(gap float64, date time.Time) {
+	c.Set(c.futureGapKey(date), gap)
+}
+
+// GetFutureGap -.
+func (c *Cache) GetFutureGap(date time.Time) float64 {
+	if value, ok := c.Get(c.futureGapKey(date)); ok {
+		return value.(float64)
+	}
+	return 0
 }
