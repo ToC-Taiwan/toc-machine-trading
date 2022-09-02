@@ -9,3 +9,5 @@ go install github.com/swaggo/swag/cmd/swag@latest
 
 go mod init tmt
 go mod tidy
+
+git add go.mod go.sum

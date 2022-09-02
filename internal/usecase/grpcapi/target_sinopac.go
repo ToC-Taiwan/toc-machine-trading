@@ -23,7 +23,7 @@ func NewTarget(client *sinopac.Connection) *TargetgRPCAPI {
 func (t *TargetgRPCAPI) GetStockVolumeRank(date string) ([]*pb.StockVolumeRankMessage, error) {
 	conn := t.conn.GetReadyConn()
 	defer t.conn.PutReadyConn(conn)
-	c := pb.NewSinopacForwarderClient(conn)
+	c := pb.NewStreamDataInterfaceClient(conn)
 	r, err := c.GetStockVolumeRank(context.Background(), &pb.VolumeRankRequest{
 		Count: 200,
 		Date:  date,
@@ -38,7 +38,7 @@ func (t *TargetgRPCAPI) GetStockVolumeRank(date string) ([]*pb.StockVolumeRankMe
 func (t *TargetgRPCAPI) SubscribeStockTick(stockNumArr []string) ([]string, error) {
 	conn := t.conn.GetReadyConn()
 	defer t.conn.PutReadyConn(conn)
-	c := pb.NewSinopacForwarderClient(conn)
+	c := pb.NewStreamDataInterfaceClient(conn)
 	r, err := c.SubscribeStockTick(context.Background(), &pb.StockNumArr{StockNumArr: stockNumArr})
 	if err != nil {
 		return []string{}, err
@@ -50,7 +50,7 @@ func (t *TargetgRPCAPI) SubscribeStockTick(stockNumArr []string) ([]string, erro
 func (t *TargetgRPCAPI) UnSubscribeStockTick(stockNumArr []string) ([]string, error) {
 	conn := t.conn.GetReadyConn()
 	defer t.conn.PutReadyConn(conn)
-	c := pb.NewSinopacForwarderClient(conn)
+	c := pb.NewStreamDataInterfaceClient(conn)
 	r, err := c.UnSubscribeStockTick(context.Background(), &pb.StockNumArr{StockNumArr: stockNumArr})
 	if err != nil {
 		return []string{}, err
@@ -59,10 +59,10 @@ func (t *TargetgRPCAPI) UnSubscribeStockTick(stockNumArr []string) ([]string, er
 }
 
 // UnSubscribeStockAllTick -.
-func (t *TargetgRPCAPI) UnSubscribeStockAllTick() (*pb.FunctionErr, error) {
+func (t *TargetgRPCAPI) UnSubscribeStockAllTick() (*pb.ErrorMessage, error) {
 	conn := t.conn.GetReadyConn()
 	defer t.conn.PutReadyConn(conn)
-	c := pb.NewSinopacForwarderClient(conn)
+	c := pb.NewStreamDataInterfaceClient(conn)
 	r, err := c.UnSubscribeStockAllTick(context.Background(), &emptypb.Empty{})
 	if err != nil {
 		return nil, err
@@ -74,7 +74,7 @@ func (t *TargetgRPCAPI) UnSubscribeStockAllTick() (*pb.FunctionErr, error) {
 func (t *TargetgRPCAPI) SubscribeStockBidAsk(stockNumArr []string) ([]string, error) {
 	conn := t.conn.GetReadyConn()
 	defer t.conn.PutReadyConn(conn)
-	c := pb.NewSinopacForwarderClient(conn)
+	c := pb.NewStreamDataInterfaceClient(conn)
 	r, err := c.SubscribeStockBidAsk(context.Background(), &pb.StockNumArr{StockNumArr: stockNumArr})
 	if err != nil {
 		return []string{}, err
@@ -86,7 +86,7 @@ func (t *TargetgRPCAPI) SubscribeStockBidAsk(stockNumArr []string) ([]string, er
 func (t *TargetgRPCAPI) UnSubscribeStockBidAsk(stockNumArr []string) ([]string, error) {
 	conn := t.conn.GetReadyConn()
 	defer t.conn.PutReadyConn(conn)
-	c := pb.NewSinopacForwarderClient(conn)
+	c := pb.NewStreamDataInterfaceClient(conn)
 	r, err := c.UnSubscribeStockBidAsk(context.Background(), &pb.StockNumArr{StockNumArr: stockNumArr})
 	if err != nil {
 		return []string{}, err
@@ -95,10 +95,10 @@ func (t *TargetgRPCAPI) UnSubscribeStockBidAsk(stockNumArr []string) ([]string, 
 }
 
 // UnSubscribeStockAllBidAsk -.
-func (t *TargetgRPCAPI) UnSubscribeStockAllBidAsk() (*pb.FunctionErr, error) {
+func (t *TargetgRPCAPI) UnSubscribeStockAllBidAsk() (*pb.ErrorMessage, error) {
 	conn := t.conn.GetReadyConn()
 	defer t.conn.PutReadyConn(conn)
-	c := pb.NewSinopacForwarderClient(conn)
+	c := pb.NewStreamDataInterfaceClient(conn)
 	r, err := c.UnSubscribeStockAllBidAsk(context.Background(), &emptypb.Empty{})
 	if err != nil {
 		return nil, err
@@ -110,7 +110,7 @@ func (t *TargetgRPCAPI) UnSubscribeStockAllBidAsk() (*pb.FunctionErr, error) {
 func (t *TargetgRPCAPI) SubscribeFutureTick(codeArr []string) ([]string, error) {
 	conn := t.conn.GetReadyConn()
 	defer t.conn.PutReadyConn(conn)
-	c := pb.NewSinopacForwarderClient(conn)
+	c := pb.NewStreamDataInterfaceClient(conn)
 	r, err := c.SubscribeFutureTick(context.Background(), &pb.FutureCodeArr{FutureCodeArr: codeArr})
 	if err != nil {
 		return []string{}, err
@@ -122,7 +122,7 @@ func (t *TargetgRPCAPI) SubscribeFutureTick(codeArr []string) ([]string, error) 
 func (t *TargetgRPCAPI) UnSubscribeFutureTick(codeArr []string) ([]string, error) {
 	conn := t.conn.GetReadyConn()
 	defer t.conn.PutReadyConn(conn)
-	c := pb.NewSinopacForwarderClient(conn)
+	c := pb.NewStreamDataInterfaceClient(conn)
 	r, err := c.UnSubscribeFutureTick(context.Background(), &pb.FutureCodeArr{FutureCodeArr: codeArr})
 	if err != nil {
 		return []string{}, err

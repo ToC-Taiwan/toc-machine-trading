@@ -45,7 +45,6 @@ func NewHistory(r HistoryRepo, t HistorygRPCAPI) *HistoryUseCase {
 
 	bus.SubscribeTopic(topicFetchHistory, uc.FetchHistory)
 	uc.FetchFutureHistoryTick(cfg.TargetCond.MonitorFutureCodeArr, uc.basic.LastTradeDay)
-	uc.FetchFutureHistoryTick(cfg.TargetCond.MonitorFutureCodeArr, uc.basic.TradeDay)
 
 	return uc
 }
@@ -229,7 +228,7 @@ func (uc *HistoryUseCase) fetchHistoryTick(targetArr []*entity.Target) error {
 		}
 		for _, t := range tickArr {
 			dataChan <- &entity.HistoryTick{
-				StockNum: t.GetStockNum(),
+				StockNum: t.GetCode(),
 				TickTime: time.Unix(0, t.GetTs()).Add(-8 * time.Hour), Close: t.GetClose(),
 				TickType: t.GetTickType(), Volume: t.GetVolume(),
 				BidPrice: t.GetBidPrice(), BidVolume: t.GetBidVolume(),
@@ -321,7 +320,7 @@ func (uc *HistoryUseCase) fetchHistoryKbar(targetArr []*entity.Target) error {
 		}
 		for _, t := range tickArr {
 			dataChan <- &entity.HistoryKbar{
-				StockNum: t.GetStockNum(),
+				StockNum: t.GetCode(),
 				KbarTime: time.Unix(0, t.GetTs()).Add(-8 * time.Hour),
 				Open:     t.GetOpen(),
 				High:     t.GetHigh(),
@@ -532,7 +531,7 @@ func (uc *HistoryUseCase) FetchFutureHistoryTick(codeArr []string, date time.Tim
 	}
 	for _, t := range tickArr {
 		dataChan <- &entity.HistoryTick{
-			StockNum: t.GetStockNum(),
+			StockNum: t.GetCode(),
 			TickTime: time.Unix(0, t.GetTs()).Add(-8 * time.Hour), Close: t.GetClose(),
 			TickType: t.GetTickType(), Volume: t.GetVolume(),
 			BidPrice: t.GetBidPrice(), BidVolume: t.GetBidVolume(),
@@ -542,17 +541,20 @@ func (uc *HistoryUseCase) FetchFutureHistoryTick(codeArr []string, date time.Tim
 	close(dataChan)
 	<-wait
 	if len(result) != 0 {
-		for _, v := range result {
-			var close float64
-			for _, tick := range v {
-				// log.Warnf("TickTime: %s", tick.TickTime.Format(global.LongTimeLayout))
-				if tick.TickTime.Hour() < 5 {
-					close = tick.Close
-				} else if close != 0 {
-					// log.Infof("Gap: %.0f", tick.Close-close)
-					cc.SetFutureGap(tick.Close-close, date)
+		for code, v := range result {
+			var nightMarketLastTick *entity.HistoryTick
+			for i, tick := range v {
+				if tick.TickTime.Hour() == 8 {
+					nightMarketLastTick = v[i-1]
+					cc.SetFutureHistoryTick(code, nightMarketLastTick)
+					cc.SetFutureGap(tick.Close-nightMarketLastTick.Close, date)
+					log.Infof("Future night market gap: %.0f", tick.Close-nightMarketLastTick.Close)
 					break
 				}
+			}
+
+			if nightMarketLastTick == nil {
+				cc.SetFutureHistoryTick(code, v[len(v)-1])
 			}
 		}
 	}
@@ -622,7 +624,7 @@ func (uc *HistoryUseCase) FetchFutureHistoryKbar(codeArr []string, date time.Tim
 	}
 	for _, t := range tickArr {
 		dataChan <- &entity.HistoryKbar{
-			StockNum: t.GetStockNum(),
+			StockNum: t.GetCode(),
 			KbarTime: time.Unix(0, t.GetTs()).Add(-8 * time.Hour),
 			Open:     t.GetOpen(),
 			High:     t.GetHigh(),

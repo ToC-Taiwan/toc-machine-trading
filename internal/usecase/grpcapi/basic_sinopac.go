@@ -38,13 +38,13 @@ func NewBasic(client *sinopac.Connection) *BasicgRPCAPI {
 func (t *BasicgRPCAPI) Heartbeat() error {
 	conn := t.conn.GetReadyConn()
 	defer t.conn.PutReadyConn(conn)
-	c := pb.NewHealthCheckClient(conn)
+	c := pb.NewHealthCheckInterfaceClient(conn)
 	stream, err := c.Heartbeat(context.Background())
 	if err != nil {
 		return err
 	}
 
-	err = stream.Send(&pb.Beat{Message: t.heartbeatMsg})
+	err = stream.Send(&pb.BeatMessage{Message: t.heartbeatMsg})
 	if err != nil {
 		return err
 	}
@@ -58,7 +58,7 @@ func (t *BasicgRPCAPI) Heartbeat() error {
 			continue
 		}
 		time.Sleep(3 * time.Second)
-		err = stream.Send(&pb.Beat{Message: response.GetMessage()})
+		err = stream.Send(&pb.BeatMessage{Message: response.GetMessage()})
 		if err != nil {
 			return err
 		}
@@ -69,7 +69,7 @@ func (t *BasicgRPCAPI) Heartbeat() error {
 func (t *BasicgRPCAPI) Terminate() error {
 	conn := t.conn.GetReadyConn()
 	defer t.conn.PutReadyConn(conn)
-	c := pb.NewHealthCheckClient(conn)
+	c := pb.NewHealthCheckInterfaceClient(conn)
 	_, err := c.Terminate(context.Background(), &emptypb.Empty{})
 	if err != nil {
 		return err
@@ -81,7 +81,7 @@ func (t *BasicgRPCAPI) Terminate() error {
 func (t *BasicgRPCAPI) GetAllStockDetail() ([]*pb.StockDetailMessage, error) {
 	conn := t.conn.GetReadyConn()
 	defer t.conn.PutReadyConn(conn)
-	c := pb.NewSinopacForwarderClient(conn)
+	c := pb.NewBasicDataInterfaceClient(conn)
 	r, err := c.GetAllStockDetail(context.Background(), &emptypb.Empty{})
 	if err != nil {
 		return []*pb.StockDetailMessage{}, err
@@ -93,7 +93,7 @@ func (t *BasicgRPCAPI) GetAllStockDetail() ([]*pb.StockDetailMessage, error) {
 func (t *BasicgRPCAPI) GetAllFutureDetail() ([]*pb.FutureDetailMessage, error) {
 	conn := t.conn.GetReadyConn()
 	defer t.conn.PutReadyConn(conn)
-	c := pb.NewFutureForwarderClient(conn)
+	c := pb.NewBasicDataInterfaceClient(conn)
 	r, err := c.GetAllFutureDetail(context.Background(), &emptypb.Empty{})
 	if err != nil {
 		return []*pb.FutureDetailMessage{}, err

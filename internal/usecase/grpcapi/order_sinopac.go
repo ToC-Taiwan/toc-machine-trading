@@ -24,7 +24,7 @@ func NewOrder(client *sinopac.Connection) *OrdergRPCAPI {
 func (t *OrdergRPCAPI) BuyStock(order *entity.Order, sim bool) (*pb.TradeResult, error) {
 	conn := t.conn.GetReadyConn()
 	defer t.conn.PutReadyConn(conn)
-	c := pb.NewTradeServiceClient(conn)
+	c := pb.NewTradeInterfaceClient(conn)
 	r, err := c.BuyStock(context.Background(), &pb.StockOrderDetail{
 		StockNum: order.StockNum,
 		Price:    order.Price,
@@ -41,7 +41,7 @@ func (t *OrdergRPCAPI) BuyStock(order *entity.Order, sim bool) (*pb.TradeResult,
 func (t *OrdergRPCAPI) SellStock(order *entity.Order, sim bool) (*pb.TradeResult, error) {
 	conn := t.conn.GetReadyConn()
 	defer t.conn.PutReadyConn(conn)
-	c := pb.NewTradeServiceClient(conn)
+	c := pb.NewTradeInterfaceClient(conn)
 	r, err := c.SellStock(context.Background(), &pb.StockOrderDetail{
 		StockNum: order.StockNum,
 		Price:    order.Price,
@@ -58,7 +58,7 @@ func (t *OrdergRPCAPI) SellStock(order *entity.Order, sim bool) (*pb.TradeResult
 func (t *OrdergRPCAPI) SellFirstStock(order *entity.Order, sim bool) (*pb.TradeResult, error) {
 	conn := t.conn.GetReadyConn()
 	defer t.conn.PutReadyConn(conn)
-	c := pb.NewTradeServiceClient(conn)
+	c := pb.NewTradeInterfaceClient(conn)
 	r, err := c.SellFirstStock(context.Background(), &pb.StockOrderDetail{
 		StockNum: order.StockNum,
 		Price:    order.Price,
@@ -75,7 +75,7 @@ func (t *OrdergRPCAPI) SellFirstStock(order *entity.Order, sim bool) (*pb.TradeR
 func (t *OrdergRPCAPI) CancelStock(orderID string, sim bool) (*pb.TradeResult, error) {
 	conn := t.conn.GetReadyConn()
 	defer t.conn.PutReadyConn(conn)
-	c := pb.NewTradeServiceClient(conn)
+	c := pb.NewTradeInterfaceClient(conn)
 	r, err := c.CancelStock(context.Background(), &pb.OrderID{
 		OrderId:  orderID,
 		Simulate: sim,
@@ -90,7 +90,7 @@ func (t *OrdergRPCAPI) CancelStock(orderID string, sim bool) (*pb.TradeResult, e
 func (t *OrdergRPCAPI) GetOrderStatusByID(orderID string, sim bool) (*pb.TradeResult, error) {
 	conn := t.conn.GetReadyConn()
 	defer t.conn.PutReadyConn(conn)
-	c := pb.NewTradeServiceClient(conn)
+	c := pb.NewTradeInterfaceClient(conn)
 	r, err := c.GetOrderStatusByID(context.Background(), &pb.OrderID{
 		OrderId:  orderID,
 		Simulate: sim,
@@ -105,7 +105,7 @@ func (t *OrdergRPCAPI) GetOrderStatusByID(orderID string, sim bool) (*pb.TradeRe
 func (t *OrdergRPCAPI) GetOrderStatusArr() ([]*pb.StockOrderStatus, error) {
 	conn := t.conn.GetReadyConn()
 	defer t.conn.PutReadyConn(conn)
-	c := pb.NewTradeServiceClient(conn)
+	c := pb.NewTradeInterfaceClient(conn)
 	r, err := c.GetOrderStatusArr(context.Background(), &emptypb.Empty{})
 	if err != nil {
 		return []*pb.StockOrderStatus{}, err
@@ -114,10 +114,10 @@ func (t *OrdergRPCAPI) GetOrderStatusArr() ([]*pb.StockOrderStatus, error) {
 }
 
 // GetNonBlockOrderStatusArr GetNonBlockOrderStatusArr
-func (t *OrdergRPCAPI) GetNonBlockOrderStatusArr() (*pb.FunctionErr, error) {
+func (t *OrdergRPCAPI) GetNonBlockOrderStatusArr() (*pb.ErrorMessage, error) {
 	conn := t.conn.GetReadyConn()
 	defer t.conn.PutReadyConn(conn)
-	c := pb.NewTradeServiceClient(conn)
+	c := pb.NewTradeInterfaceClient(conn)
 	r, err := c.GetNonBlockOrderStatusArr(context.Background(), &emptypb.Empty{})
 	if err != nil {
 		return nil, err

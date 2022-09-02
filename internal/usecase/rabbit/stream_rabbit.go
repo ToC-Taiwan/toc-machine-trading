@@ -70,7 +70,7 @@ func (c *StreamRabbit) EventConsumer(eventChan chan *entity.SinopacEvent) {
 			return
 		}
 
-		body := pb.EventResponse{}
+		body := pb.EventMessage{}
 		if err := proto.Unmarshal(d.Body, &body); err != nil {
 			log.Error(err)
 			continue
@@ -137,7 +137,7 @@ func (c *StreamRabbit) TickConsumer(stockNum string, tickChan chan *entity.RealT
 			return
 		}
 
-		body := pb.StockRealTimeTickResponse{}
+		body := pb.StockRealTimeTickMessage{}
 		if err := proto.Unmarshal(d.Body, &body); err != nil {
 			log.Error(err)
 			continue
@@ -189,7 +189,7 @@ func (c *StreamRabbit) FutureTickConsumer(code string, tickChan chan *entity.Rea
 			return
 		}
 
-		body := pb.FutureRealTimeTickResponse{}
+		body := pb.FutureRealTimeTickMessage{}
 		if err := proto.Unmarshal(d.Body, &body); err != nil {
 			log.Error(err)
 			continue
@@ -239,7 +239,7 @@ func (c *StreamRabbit) BidAskConsumer(stockNum string, bidAskChan chan *entity.R
 			return
 		}
 
-		body := pb.StockRealTimeBidAskResponse{}
+		body := pb.StockRealTimeBidAskMessage{}
 		if err := proto.Unmarshal(d.Body, &body); err != nil {
 			log.Error(err)
 			continue

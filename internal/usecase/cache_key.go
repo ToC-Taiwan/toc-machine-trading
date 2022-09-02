@@ -13,27 +13,33 @@ const (
 
 	cacheCatagoryOrder cache.Category = "order"
 
-	cacheCatagoryRealTimeFutureTick cache.Category = "real_time_future_tick"
-	cacheCatagoryFutureGap          cache.Category = "future_gap"
+	cacheCatagoryHistoryFutureTick cache.Category = "history_future_tick"
 
-	cacheCatagoryHistoryOpen        cache.Category = "history_open"
-	cacheCatagoryHistoryClose       cache.Category = "history_close"
+	cacheCatagoryFutureGap cache.Category = "future_gap"
+
+	cacheCatagoryHistoryOpen cache.Category = "history_open"
+
+	cacheCatagoryHistoryClose cache.Category = "history_close"
+
 	cacheCatagoryHistoryTickAnalyze cache.Category = "history_tick_analyze"
-	cacheCatagoryHistoryTickArr     cache.Category = "history_tick_arr"
-	cacheCatagoryBiasRate           cache.Category = "bias_rate"
-	cacheCatagoryDayKbar            cache.Category = "day_kbar"
+
+	cacheCatagoryHistoryTickArr cache.Category = "history_tick_arr"
+
+	cacheCatagoryBiasRate cache.Category = "bias_rate"
+
+	cacheCatagoryDayKbar cache.Category = "day_kbar"
 )
 
 const (
-	// no variable id
-	cacheIDCalendar  string = "calendar"
 	cacheIDBasicInfo string = "basic_info"
-	cacheIDTargets   string = "targets"
 
-	// with variable id
-	cacheIDStockNum   string = "stock_num"
+	cacheIDTargets string = "targets"
+
+	cacheIDStockNum string = "stock_num"
+
 	cacheIDFutureCode string = "future_code"
-	cacheIDOrderID    string = "order_id"
+
+	cacheIDOrderID string = "order_id"
 )
 
 func (c *Cache) generateID(opt ...any) string {
@@ -132,16 +138,16 @@ func (c *Cache) historyTickArrKey(stockNum string, date time.Time) cache.Key {
 	}
 }
 
-func (c *Cache) realTimeFutureTickKey(code string) cache.Key {
-	return cache.Key{
-		Category: cacheCatagoryRealTimeFutureTick,
-		ID:       c.generateID(cacheIDFutureCode, code),
-	}
-}
-
 func (c *Cache) futureGapKey(date time.Time) cache.Key {
 	return cache.Key{
 		Category: cacheCatagoryFutureGap,
 		ID:       date.Format(global.ShortTimeLayout),
+	}
+}
+
+func (c *Cache) futureHistoryTickKey(code string) cache.Key {
+	return cache.Key{
+		Category: cacheCatagoryHistoryFutureTick,
+		ID:       c.generateID(cacheIDFutureCode, code),
 	}
 }

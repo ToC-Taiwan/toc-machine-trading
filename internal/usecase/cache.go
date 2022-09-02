@@ -187,19 +187,6 @@ func (c *Cache) GetHistoryTickArr(stockNum string, date time.Time) []*entity.His
 	return nil
 }
 
-// SetRealTimeFutureTick -.
-func (c *Cache) SetRealTimeFutureTick(tick *entity.RealTimeFutureTick) {
-	c.Set(c.realTimeFutureTickKey(tick.Code), tick)
-}
-
-// GetRealTimeFutureTick -.
-func (c *Cache) GetRealTimeFutureTick(code string) *entity.RealTimeFutureTick {
-	if value, ok := c.Get(c.realTimeFutureTickKey(code)); ok {
-		return value.(*entity.RealTimeFutureTick)
-	}
-	return nil
-}
-
 // SetFutureGap -.
 func (c *Cache) SetFutureGap(gap float64, date time.Time) {
 	c.Set(c.futureGapKey(date), gap)
@@ -211,4 +198,17 @@ func (c *Cache) GetFutureGap(date time.Time) float64 {
 		return value.(float64)
 	}
 	return 0
+}
+
+// SetFutureHistoryTick -.
+func (c *Cache) SetFutureHistoryTick(code string, tick *entity.HistoryTick) {
+	c.Set(c.futureHistoryTickKey(code), tick)
+}
+
+// GetFutureHistoryTick -.
+func (c *Cache) GetFutureHistoryTick(code string) *entity.HistoryTick {
+	if value, ok := c.Get(c.futureHistoryTickKey(code)); ok {
+		return value.(*entity.HistoryTick)
+	}
+	return nil
 }

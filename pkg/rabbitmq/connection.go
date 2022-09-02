@@ -39,7 +39,7 @@ func (c *Connection) AttemptConnect() error {
 			break
 		}
 
-		log.Infof("RabbitMQ is trying to connect, attempts left: %d\n", i)
+		log.Infof("RabbitMQ is trying to connect, attempts left: %d", i)
 		time.Sleep(c.WaitTime)
 	}
 

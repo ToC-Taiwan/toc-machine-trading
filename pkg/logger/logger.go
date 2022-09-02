@@ -100,8 +100,8 @@ func fileHook(basePath string) *lfshook.LfsHook {
 		logrus.ErrorLevel: filepath.Join(basePath, fmt.Sprintf("/logs/tmt-%s.log", date)),
 		logrus.WarnLevel:  filepath.Join(basePath, fmt.Sprintf("/logs/tmt-%s.log", date)),
 		logrus.InfoLevel:  filepath.Join(basePath, fmt.Sprintf("/logs/tmt-%s.log", date)),
-		logrus.DebugLevel: filepath.Join(basePath, fmt.Sprintf("/logs/tmt-%s.log", date)),
-		logrus.TraceLevel: filepath.Join(basePath, fmt.Sprintf("/logs/tmt-%s.log", date)),
+		// logrus.DebugLevel: filepath.Join(basePath, fmt.Sprintf("/logs/tmt-%s.log", date)),
+		// logrus.TraceLevel: filepath.Join(basePath, fmt.Sprintf("/logs/tmt-%s.log", date)),
 	}
 
 	return lfshook.NewHook(

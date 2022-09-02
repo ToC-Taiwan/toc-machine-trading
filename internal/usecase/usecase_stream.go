@@ -8,6 +8,7 @@ import (
 
 	"tmt/internal/entity"
 	"tmt/pkg/config"
+	"tmt/pkg/global"
 )
 
 // StreamUseCase -.
@@ -25,6 +26,8 @@ type StreamUseCase struct {
 	tradeInSwitch bool
 	allowForward  bool
 	allowReverse  bool
+
+	lastFutureTick *entity.RealTimeFutureTick
 }
 
 // NewStream -.
@@ -44,12 +47,6 @@ func NewStream(r StreamRepo, g StreamgRPCAPI, t StreamRabbit) *StreamUseCase {
 	uc.tradeSwitchCfg = cfg.TradeSwitch
 	uc.analyzeCfg = cfg.Analyze
 	uc.basic = *cc.GetBasicInfo()
-
-	if gap := cc.GetFutureGap(uc.basic.TradeDay); gap > 0 {
-		uc.allowForward = true
-	} else if gap != 0 {
-		uc.allowReverse = true
-	}
 
 	go uc.checkTradeSwitch()
 	go uc.ReceiveEvent(context.Background())
@@ -348,9 +345,26 @@ func (uc *StreamUseCase) ReceiveFutureStreamData(ctx context.Context, targetArr 
 		tickChan := make(chan *entity.RealTimeFutureTick)
 		go func() {
 			for {
-				tick := <-tickChan
-				// fmt.Printf("TickTime: %s, Code: %s, Close: %.0f, Volume: %3d, PriceChg: %.0f\n", tick.Code, tick.TickTime.Format(global.LongTimeLayout), tick.Close, tick.Volume, tick.PriceChg)
-				cc.SetRealTimeFutureTick(tick)
+				time.Sleep(time.Second)
+				if uc.lastFutureTick == nil || cc.GetFutureHistoryTick(t) == nil {
+					continue
+				} else if uc.lastFutureTick.TickTime.Hour() != 8 {
+					log.Warn("Not at trade time")
+					break
+				}
+
+				if gap := uc.lastFutureTick.Close - cc.GetFutureHistoryTick(t).Close; gap > 0 {
+					uc.allowForward = true
+				} else if gap != 0 {
+					uc.allowReverse = true
+				}
+				break
+			}
+		}()
+		go func() {
+			for {
+				uc.lastFutureTick = <-tickChan
+				log.Debugf("TickTime: %s, Code: %s, Close: %.0f, Volume: %3d, PriceChg: %.0f", uc.lastFutureTick.TickTime.Format(global.LongTimeLayout), uc.lastFutureTick.Code, uc.lastFutureTick.Close, uc.lastFutureTick.Volume, uc.lastFutureTick.PriceChg)
 			}
 		}()
 

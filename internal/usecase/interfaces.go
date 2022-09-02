@@ -64,10 +64,10 @@ type (
 		GetStockVolumeRank(date string) ([]*pb.StockVolumeRankMessage, error)
 		SubscribeStockTick(stockNumArr []string) ([]string, error)
 		UnSubscribeStockTick(stockNumArr []string) ([]string, error)
-		UnSubscribeStockAllTick() (*pb.FunctionErr, error)
+		UnSubscribeStockAllTick() (*pb.ErrorMessage, error)
 		SubscribeStockBidAsk(stockNumArr []string) ([]string, error)
 		UnSubscribeStockBidAsk(stockNumArr []string) ([]string, error)
-		UnSubscribeStockAllBidAsk() (*pb.FunctionErr, error)
+		UnSubscribeStockAllBidAsk() (*pb.ErrorMessage, error)
 
 		SubscribeFutureTick(codeArr []string) ([]string, error)
 		UnSubscribeFutureTick(codeArr []string) ([]string, error)
@@ -98,18 +98,18 @@ type (
 
 	// HistorygRPCAPI -.
 	HistorygRPCAPI interface {
-		GetStockHistoryTick(stockNumArr []string, date string) ([]*pb.StockHistoryTickMessage, error)
-		GetStockHistoryKbar(stockNumArr []string, date string) ([]*pb.StockHistoryKbarMessage, error)
-		GetStockHistoryClose(stockNumArr []string, date string) ([]*pb.StockHistoryCloseMessage, error)
-		GetStockHistoryCloseByDateArr(stockNumArr []string, date []string) ([]*pb.StockHistoryCloseMessage, error)
+		GetStockHistoryTick(stockNumArr []string, date string) ([]*pb.HistoryTickMessage, error)
+		GetStockHistoryKbar(stockNumArr []string, date string) ([]*pb.HistoryKbarMessage, error)
+		GetStockHistoryClose(stockNumArr []string, date string) ([]*pb.HistoryCloseMessage, error)
+		GetStockHistoryCloseByDateArr(stockNumArr []string, date []string) ([]*pb.HistoryCloseMessage, error)
 
-		GetStockTSEHistoryTick(date string) ([]*pb.StockHistoryTickMessage, error)
-		GetStockTSEHistoryKbar(date string) ([]*pb.StockHistoryKbarMessage, error)
-		GetStockTSEHistoryClose(date string) ([]*pb.StockHistoryCloseMessage, error)
+		GetStockTSEHistoryTick(date string) ([]*pb.HistoryTickMessage, error)
+		GetStockTSEHistoryKbar(date string) ([]*pb.HistoryKbarMessage, error)
+		GetStockTSEHistoryClose(date string) ([]*pb.HistoryCloseMessage, error)
 
-		GetFutureHistoryTick(codeArr []string, date string) ([]*pb.StockHistoryTickMessage, error)
-		GetFutureHistoryKbar(codeArr []string, date string) ([]*pb.StockHistoryKbarMessage, error)
-		GetFutureHistoryClose(codeArr []string, date string) ([]*pb.StockHistoryCloseMessage, error)
+		GetFutureHistoryTick(codeArr []string, date string) ([]*pb.HistoryTickMessage, error)
+		GetFutureHistoryKbar(codeArr []string, date string) ([]*pb.HistoryKbarMessage, error)
+		GetFutureHistoryClose(codeArr []string, date string) ([]*pb.HistoryCloseMessage, error)
 	}
 )
 
@@ -130,11 +130,11 @@ type (
 
 	// StreamgRPCAPI -.
 	StreamgRPCAPI interface {
-		GetAllStockSnapshot() ([]*pb.StockSnapshotMessage, error)
-		GetStockSnapshotByNumArr(stockNumArr []string) ([]*pb.StockSnapshotMessage, error)
-		GetStockSnapshotTSE() (*pb.StockSnapshotMessage, error)
+		GetAllStockSnapshot() ([]*pb.SnapshotMessage, error)
+		GetStockSnapshotByNumArr(stockNumArr []string) ([]*pb.SnapshotMessage, error)
+		GetStockSnapshotTSE() (*pb.SnapshotMessage, error)
 
-		GetFutureSnapshotByCodeArr(codeArr []string) (*pb.StockSnapshotResponse, error)
+		GetFutureSnapshotByCodeArr(codeArr []string) (*pb.SnapshotResponse, error)
 	}
 
 	// StreamRabbit -.
@@ -179,7 +179,7 @@ type (
 		CancelStock(orderID string, sim bool) (*pb.TradeResult, error)
 		GetOrderStatusByID(orderID string, sim bool) (*pb.TradeResult, error)
 		GetOrderStatusArr() ([]*pb.StockOrderStatus, error)
-		GetNonBlockOrderStatusArr() (*pb.FunctionErr, error)
+		GetNonBlockOrderStatusArr() (*pb.ErrorMessage, error)
 	}
 )
 

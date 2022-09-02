@@ -474,10 +474,10 @@ func (mr *MockTargetgRPCAPIMockRecorder) UnSubscribeFutureTick(codeArr interface
 }
 
 // UnSubscribeStockAllBidAsk mocks base method.
-func (m *MockTargetgRPCAPI) UnSubscribeStockAllBidAsk() (*pb.FunctionErr, error) {
+func (m *MockTargetgRPCAPI) UnSubscribeStockAllBidAsk() (*pb.ErrorMessage, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UnSubscribeStockAllBidAsk")
-	ret0, _ := ret[0].(*pb.FunctionErr)
+	ret0, _ := ret[0].(*pb.ErrorMessage)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -489,10 +489,10 @@ func (mr *MockTargetgRPCAPIMockRecorder) UnSubscribeStockAllBidAsk() *gomock.Cal
 }
 
 // UnSubscribeStockAllTick mocks base method.
-func (m *MockTargetgRPCAPI) UnSubscribeStockAllTick() (*pb.FunctionErr, error) {
+func (m *MockTargetgRPCAPI) UnSubscribeStockAllTick() (*pb.ErrorMessage, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UnSubscribeStockAllTick")
-	ret0, _ := ret[0].(*pb.FunctionErr)
+	ret0, _ := ret[0].(*pb.ErrorMessage)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -789,10 +789,10 @@ func (m *MockHistorygRPCAPI) EXPECT() *MockHistorygRPCAPIMockRecorder {
 }
 
 // GetFutureHistoryClose mocks base method.
-func (m *MockHistorygRPCAPI) GetFutureHistoryClose(codeArr []string, date string) ([]*pb.StockHistoryCloseMessage, error) {
+func (m *MockHistorygRPCAPI) GetFutureHistoryClose(codeArr []string, date string) ([]*pb.HistoryCloseMessage, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetFutureHistoryClose", codeArr, date)
-	ret0, _ := ret[0].([]*pb.StockHistoryCloseMessage)
+	ret0, _ := ret[0].([]*pb.HistoryCloseMessage)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -804,10 +804,10 @@ func (mr *MockHistorygRPCAPIMockRecorder) GetFutureHistoryClose(codeArr, date in
 }
 
 // GetFutureHistoryKbar mocks base method.
-func (m *MockHistorygRPCAPI) GetFutureHistoryKbar(codeArr []string, date string) ([]*pb.StockHistoryKbarMessage, error) {
+func (m *MockHistorygRPCAPI) GetFutureHistoryKbar(codeArr []string, date string) ([]*pb.HistoryKbarMessage, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetFutureHistoryKbar", codeArr, date)
-	ret0, _ := ret[0].([]*pb.StockHistoryKbarMessage)
+	ret0, _ := ret[0].([]*pb.HistoryKbarMessage)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -819,10 +819,10 @@ func (mr *MockHistorygRPCAPIMockRecorder) GetFutureHistoryKbar(codeArr, date int
 }
 
 // GetFutureHistoryTick mocks base method.
-func (m *MockHistorygRPCAPI) GetFutureHistoryTick(codeArr []string, date string) ([]*pb.StockHistoryTickMessage, error) {
+func (m *MockHistorygRPCAPI) GetFutureHistoryTick(codeArr []string, date string) ([]*pb.HistoryTickMessage, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetFutureHistoryTick", codeArr, date)
-	ret0, _ := ret[0].([]*pb.StockHistoryTickMessage)
+	ret0, _ := ret[0].([]*pb.HistoryTickMessage)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -834,10 +834,10 @@ func (mr *MockHistorygRPCAPIMockRecorder) GetFutureHistoryTick(codeArr, date int
 }
 
 // GetStockHistoryClose mocks base method.
-func (m *MockHistorygRPCAPI) GetStockHistoryClose(stockNumArr []string, date string) ([]*pb.StockHistoryCloseMessage, error) {
+func (m *MockHistorygRPCAPI) GetStockHistoryClose(stockNumArr []string, date string) ([]*pb.HistoryCloseMessage, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetStockHistoryClose", stockNumArr, date)
-	ret0, _ := ret[0].([]*pb.StockHistoryCloseMessage)
+	ret0, _ := ret[0].([]*pb.HistoryCloseMessage)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -849,10 +849,10 @@ func (mr *MockHistorygRPCAPIMockRecorder) GetStockHistoryClose(stockNumArr, date
 }
 
 // GetStockHistoryCloseByDateArr mocks base method.
-func (m *MockHistorygRPCAPI) GetStockHistoryCloseByDateArr(stockNumArr, date []string) ([]*pb.StockHistoryCloseMessage, error) {
+func (m *MockHistorygRPCAPI) GetStockHistoryCloseByDateArr(stockNumArr, date []string) ([]*pb.HistoryCloseMessage, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetStockHistoryCloseByDateArr", stockNumArr, date)
-	ret0, _ := ret[0].([]*pb.StockHistoryCloseMessage)
+	ret0, _ := ret[0].([]*pb.HistoryCloseMessage)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -864,10 +864,10 @@ func (mr *MockHistorygRPCAPIMockRecorder) GetStockHistoryCloseByDateArr(stockNum
 }
 
 // GetStockHistoryKbar mocks base method.
-func (m *MockHistorygRPCAPI) GetStockHistoryKbar(stockNumArr []string, date string) ([]*pb.StockHistoryKbarMessage, error) {
+func (m *MockHistorygRPCAPI) GetStockHistoryKbar(stockNumArr []string, date string) ([]*pb.HistoryKbarMessage, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetStockHistoryKbar", stockNumArr, date)
-	ret0, _ := ret[0].([]*pb.StockHistoryKbarMessage)
+	ret0, _ := ret[0].([]*pb.HistoryKbarMessage)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -879,10 +879,10 @@ func (mr *MockHistorygRPCAPIMockRecorder) GetStockHistoryKbar(stockNumArr, date 
 }
 
 // GetStockHistoryTick mocks base method.
-func (m *MockHistorygRPCAPI) GetStockHistoryTick(stockNumArr []string, date string) ([]*pb.StockHistoryTickMessage, error) {
+func (m *MockHistorygRPCAPI) GetStockHistoryTick(stockNumArr []string, date string) ([]*pb.HistoryTickMessage, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetStockHistoryTick", stockNumArr, date)
-	ret0, _ := ret[0].([]*pb.StockHistoryTickMessage)
+	ret0, _ := ret[0].([]*pb.HistoryTickMessage)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -894,10 +894,10 @@ func (mr *MockHistorygRPCAPIMockRecorder) GetStockHistoryTick(stockNumArr, date 
 }
 
 // GetStockTSEHistoryClose mocks base method.
-func (m *MockHistorygRPCAPI) GetStockTSEHistoryClose(date string) ([]*pb.StockHistoryCloseMessage, error) {
+func (m *MockHistorygRPCAPI) GetStockTSEHistoryClose(date string) ([]*pb.HistoryCloseMessage, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetStockTSEHistoryClose", date)
-	ret0, _ := ret[0].([]*pb.StockHistoryCloseMessage)
+	ret0, _ := ret[0].([]*pb.HistoryCloseMessage)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -909,10 +909,10 @@ func (mr *MockHistorygRPCAPIMockRecorder) GetStockTSEHistoryClose(date interface
 }
 
 // GetStockTSEHistoryKbar mocks base method.
-func (m *MockHistorygRPCAPI) GetStockTSEHistoryKbar(date string) ([]*pb.StockHistoryKbarMessage, error) {
+func (m *MockHistorygRPCAPI) GetStockTSEHistoryKbar(date string) ([]*pb.HistoryKbarMessage, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetStockTSEHistoryKbar", date)
-	ret0, _ := ret[0].([]*pb.StockHistoryKbarMessage)
+	ret0, _ := ret[0].([]*pb.HistoryKbarMessage)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -924,10 +924,10 @@ func (mr *MockHistorygRPCAPIMockRecorder) GetStockTSEHistoryKbar(date interface{
 }
 
 // GetStockTSEHistoryTick mocks base method.
-func (m *MockHistorygRPCAPI) GetStockTSEHistoryTick(date string) ([]*pb.StockHistoryTickMessage, error) {
+func (m *MockHistorygRPCAPI) GetStockTSEHistoryTick(date string) ([]*pb.HistoryTickMessage, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetStockTSEHistoryTick", date)
-	ret0, _ := ret[0].([]*pb.StockHistoryTickMessage)
+	ret0, _ := ret[0].([]*pb.HistoryTickMessage)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -1088,10 +1088,10 @@ func (m *MockStreamgRPCAPI) EXPECT() *MockStreamgRPCAPIMockRecorder {
 }
 
 // GetAllStockSnapshot mocks base method.
-func (m *MockStreamgRPCAPI) GetAllStockSnapshot() ([]*pb.StockSnapshotMessage, error) {
+func (m *MockStreamgRPCAPI) GetAllStockSnapshot() ([]*pb.SnapshotMessage, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAllStockSnapshot")
-	ret0, _ := ret[0].([]*pb.StockSnapshotMessage)
+	ret0, _ := ret[0].([]*pb.SnapshotMessage)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -1103,10 +1103,10 @@ func (mr *MockStreamgRPCAPIMockRecorder) GetAllStockSnapshot() *gomock.Call {
 }
 
 // GetFutureSnapshotByCodeArr mocks base method.
-func (m *MockStreamgRPCAPI) GetFutureSnapshotByCodeArr(codeArr []string) (*pb.StockSnapshotResponse, error) {
+func (m *MockStreamgRPCAPI) GetFutureSnapshotByCodeArr(codeArr []string) (*pb.SnapshotResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetFutureSnapshotByCodeArr", codeArr)
-	ret0, _ := ret[0].(*pb.StockSnapshotResponse)
+	ret0, _ := ret[0].(*pb.SnapshotResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -1118,10 +1118,10 @@ func (mr *MockStreamgRPCAPIMockRecorder) GetFutureSnapshotByCodeArr(codeArr inte
 }
 
 // GetStockSnapshotByNumArr mocks base method.
-func (m *MockStreamgRPCAPI) GetStockSnapshotByNumArr(stockNumArr []string) ([]*pb.StockSnapshotMessage, error) {
+func (m *MockStreamgRPCAPI) GetStockSnapshotByNumArr(stockNumArr []string) ([]*pb.SnapshotMessage, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetStockSnapshotByNumArr", stockNumArr)
-	ret0, _ := ret[0].([]*pb.StockSnapshotMessage)
+	ret0, _ := ret[0].([]*pb.SnapshotMessage)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -1133,10 +1133,10 @@ func (mr *MockStreamgRPCAPIMockRecorder) GetStockSnapshotByNumArr(stockNumArr in
 }
 
 // GetStockSnapshotTSE mocks base method.
-func (m *MockStreamgRPCAPI) GetStockSnapshotTSE() (*pb.StockSnapshotMessage, error) {
+func (m *MockStreamgRPCAPI) GetStockSnapshotTSE() (*pb.SnapshotMessage, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetStockSnapshotTSE")
-	ret0, _ := ret[0].(*pb.StockSnapshotMessage)
+	ret0, _ := ret[0].(*pb.SnapshotMessage)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -1519,10 +1519,10 @@ func (mr *MockOrdergRPCAPIMockRecorder) CancelStock(orderID, sim interface{}) *g
 }
 
 // GetNonBlockOrderStatusArr mocks base method.
-func (m *MockOrdergRPCAPI) GetNonBlockOrderStatusArr() (*pb.FunctionErr, error) {
+func (m *MockOrdergRPCAPI) GetNonBlockOrderStatusArr() (*pb.ErrorMessage, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetNonBlockOrderStatusArr")
-	ret0, _ := ret[0].(*pb.FunctionErr)
+	ret0, _ := ret[0].(*pb.ErrorMessage)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
