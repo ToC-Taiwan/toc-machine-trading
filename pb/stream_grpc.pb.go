@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.2.0
 // - protoc             v3.21.4
-// source: pb/stream.proto
+// source: stream.proto
 
 package pb
 
@@ -534,5 +534,5 @@ var StreamDataInterface_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "pb/stream.proto",
+	Metadata: "stream.proto",
 }

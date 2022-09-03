@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.2.0
 // - protoc             v3.21.4
-// source: pb/history.proto
+// source: history.proto
 
 package pb
 
@@ -425,5 +425,5 @@ var HistoryDataInterface_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "pb/history.proto",
+	Metadata: "history.proto",
 }

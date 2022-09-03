@@ -83,6 +83,7 @@ func initLogger() {
 
 	if !prodMode {
 		globalLogger.SetReportCaller(true)
+	} else if !jsonFormat {
 		globalLogger.SetLevel(logrus.TraceLevel)
 	}
 
