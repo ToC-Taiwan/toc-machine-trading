@@ -123,12 +123,6 @@ func (o *FutureTradeAgent) generateTradeOutOrder(cfg config.Analyze, postOrderAc
 	}
 
 	if rsi <= 49 || rsi >= 51 {
-		switch postOrderAction {
-		case entity.ActionSell:
-			order.Price = o.lastTick.Close
-		case entity.ActionBuyLater:
-			order.Price = o.lastTick.Close
-		}
 		return order
 	}
 
@@ -250,5 +244,5 @@ func (c RealTimeFutureTickArr) getRSIByTickTime(preTime time.Time, count int) fl
 		}
 	}
 
-	return utils.GenerateRSI(tmp, count)
+	return utils.GenerateFutureRSI(tmp, count)
 }

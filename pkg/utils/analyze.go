@@ -54,3 +54,31 @@ func GenerateRSI(input []float64, effTimes int) float64 {
 
 	return Round(100*positive/(positive+negative), 1)
 }
+
+// GenerateFutureRSI -.
+func GenerateFutureRSI(input []float64, effTimes int) float64 {
+	baseClose := input[0]
+	diff := 1.0
+
+	var positive, negative float64
+	for _, v := range input[1:] {
+		gap := v - baseClose
+		time := math.Abs(Round(gap/diff, 0))
+		switch {
+		case gap > 0:
+			positive += time
+		case gap < 0:
+			negative += time
+		}
+
+		if gap != 0 {
+			baseClose = v
+		}
+	}
+
+	if totalEff := positive + negative; totalEff < float64(effTimes) {
+		return 0
+	}
+
+	return Round(100*positive/(positive+negative), 1)
+}
