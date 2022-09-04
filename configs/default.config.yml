@@ -20,6 +20,7 @@ history:
 simulation: true
 
 trade_switch:
+    allow_trade: true
     # unit: second
     hold_time_from_open: 45
 
@@ -33,16 +34,18 @@ trade_switch:
     cancel_wait_time: 30
 
 future_trade_switch:
+    allow_trade: true
     quantity: 1
     # unit: seccond
     trade_in_wait_time: 10
     trade_out_wait_time: 20
     cancel_wait_time: 30
     trade_time_range:
+        # HH:MM:SS, duration: minute
         - start_time: 08:45:00
-          duration: 300
+          duration: 280
         - start_time: 15:00:00
-          duration: 840
+          duration: 820
 
 quota:
     trade_quota: 1000000

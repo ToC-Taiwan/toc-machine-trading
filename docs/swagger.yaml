@@ -47,6 +47,8 @@ definitions:
     type: object
   config.FutureTradeSwitch:
     properties:
+      allow_trade:
+        type: boolean
       cancel_wait_time:
         type: integer
       quantity:
@@ -142,6 +144,8 @@ definitions:
     type: object
   config.TradeSwitch:
     properties:
+      allow_trade:
+        type: boolean
       cancel_wait_time:
         type: integer
       hold_time_from_open:
@@ -183,7 +187,24 @@ definitions:
       volume:
         type: integer
     type: object
-  entity.Order:
+  entity.Stock:
+    properties:
+      category:
+        type: string
+      day_trade:
+        type: boolean
+      exchange:
+        type: string
+      last_close:
+        type: number
+      name:
+        type: string
+      number:
+        type: string
+      update_date:
+        type: string
+    type: object
+  entity.StockOrder:
     properties:
       action:
         type: integer
@@ -206,23 +227,6 @@ definitions:
       tick_time:
         type: string
       trade_time:
-        type: string
-    type: object
-  entity.Stock:
-    properties:
-      category:
-        type: string
-      day_trade:
-        type: boolean
-      exchange:
-        type: string
-      last_close:
-        type: number
-      name:
-        type: string
-      number:
-        type: string
-      update_date:
         type: string
     type: object
   entity.StockSnapShot:
@@ -498,7 +502,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/entity.Order'
+              $ref: '#/definitions/entity.StockOrder'
             type: array
         "500":
           description: Internal Server Error

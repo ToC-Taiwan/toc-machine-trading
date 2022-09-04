@@ -43,17 +43,17 @@ func parseConfigFile() {
 
 // Config -.
 type Config struct {
-	HTTP              HTTP              `json:"http"         env-required:"true" yaml:"http"`
-	Postgres          Postgres          `json:"postgres"     env-required:"true" yaml:"postgres"`
-	Sinopac           Sinopac           `json:"sinopac"      env-required:"true" yaml:"sinopac"`
-	RabbitMQ          RabbitMQ          `json:"rabbitmq"     env-required:"true" yaml:"rabbitmq"`
+	HTTP              HTTP              `json:"http"                env-required:"true" yaml:"http"`
+	Postgres          Postgres          `json:"postgres"            env-required:"true" yaml:"postgres"`
+	Sinopac           Sinopac           `json:"sinopac"             env-required:"true" yaml:"sinopac"`
+	RabbitMQ          RabbitMQ          `json:"rabbitmq"            env-required:"true" yaml:"rabbitmq"`
 	Simulation        bool              `json:"simulation"          yaml:"simulation"`
-	TradeSwitch       TradeSwitch       `json:"trade_switch" env-required:"true" yaml:"trade_switch"`
+	TradeSwitch       TradeSwitch       `json:"trade_switch"        env-required:"true" yaml:"trade_switch"`
 	FutureTradeSwitch FutureTradeSwitch `json:"future_trade_switch" env-required:"true" yaml:"future_trade_switch"`
-	History           History           `json:"history"      env-required:"true" yaml:"history"`
-	Quota             Quota             `json:"quota"        env-required:"true" yaml:"quota"`
-	TargetCond        TargetCond        `json:"target_cond"  env-required:"true" yaml:"target_cond"`
-	Analyze           Analyze           `json:"analyze"      env-required:"true" yaml:"analyze"`
+	History           History           `json:"history"             env-required:"true" yaml:"history"`
+	Quota             Quota             `json:"quota"               env-required:"true" yaml:"quota"`
+	TargetCond        TargetCond        `json:"target_cond"         env-required:"true" yaml:"target_cond"`
+	Analyze           Analyze           `json:"analyze"             env-required:"true" yaml:"analyze"`
 }
 
 // HTTP -.
@@ -84,6 +84,7 @@ type RabbitMQ struct {
 
 // TradeSwitch -.
 type TradeSwitch struct {
+	AllowTrade       bool    `json:"allow_trade"         yaml:"allow_trade"`
 	HoldTimeFromOpen float64 `json:"hold_time_from_open" env-required:"true" yaml:"hold_time_from_open"`
 	TotalOpenTime    float64 `json:"total_open_time"     env-required:"true" yaml:"total_open_time"`
 	TradeInEndTime   float64 `json:"trade_in_end_time"   env-required:"true" yaml:"trade_in_end_time"`
@@ -94,11 +95,12 @@ type TradeSwitch struct {
 
 // FutureTradeSwitch -.
 type FutureTradeSwitch struct {
+	AllowTrade       bool             `json:"allow_trade"         yaml:"allow_trade"`
 	Quantity         int64            `json:"quantity"            env-required:"true" yaml:"quantity"`
 	TradeInWaitTime  int64            `json:"trade_in_wait_time"  env-required:"true" yaml:"trade_in_wait_time"`
 	TradeOutWaitTime int64            `json:"trade_out_wait_time" env-required:"true" yaml:"trade_out_wait_time"`
 	CancelWaitTime   int64            `json:"cancel_wait_time"    env-required:"true" yaml:"cancel_wait_time"`
-	TradeTimeRange   []TradeTimeRange `json:"trade_time_range" env-required:"true" yaml:"trade_time_range"`
+	TradeTimeRange   []TradeTimeRange `json:"trade_time_range"    env-required:"true" yaml:"trade_time_range"`
 }
 
 // TradeTimeRange -.

@@ -33,7 +33,7 @@ func newOrderRoutes(handler *gin.RouterGroup, t usecase.Order) {
 // @Tags  	    order
 // @Accept      json
 // @Produce     json
-// @Success     200 {object} []entity.Order
+// @Success     200 {object} []entity.StockOrder
 // @Failure     500 {object} response
 // @Router      /order/all [get]
 func (r *orderRoutes) getAllOrder(c *gin.Context) {

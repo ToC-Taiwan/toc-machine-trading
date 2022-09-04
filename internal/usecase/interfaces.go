@@ -164,18 +164,20 @@ type (
 
 	// OrderRepo -.
 	OrderRepo interface {
-		QueryAllTradeBalance(ctx context.Context) ([]*entity.TradeBalance, error)
-		QueryTradeBalanceByDate(ctx context.Context, date time.Time) (*entity.TradeBalance, error)
-		InsertOrUpdateTradeBalance(ctx context.Context, t *entity.TradeBalance) error
+		QueryAllStockTradeBalance(ctx context.Context) ([]*entity.TradeBalance, error)
+		QueryStockTradeBalanceByDate(ctx context.Context, date time.Time) (*entity.TradeBalance, error)
+		InsertOrUpdateStockTradeBalance(ctx context.Context, t *entity.TradeBalance) error
+		QueryFutureTradeBalanceByDate(ctx context.Context, date time.Time) (*entity.TradeBalance, error)
+		InsertOrUpdateFutureTradeBalance(ctx context.Context, t *entity.TradeBalance) error
 
-		QueryOrderByID(ctx context.Context, orderID string) (*entity.StockOrder, error)
+		QueryStockOrderByID(ctx context.Context, orderID string) (*entity.StockOrder, error)
 		InsertOrUpdateOrderByOrderID(ctx context.Context, t *entity.StockOrder) error
-
-		QueryAllOrder(ctx context.Context) ([]*entity.StockOrder, error)
-		QueryAllOrderByDate(ctx context.Context, date time.Time) ([]*entity.StockOrder, error)
+		QueryAllStockOrder(ctx context.Context) ([]*entity.StockOrder, error)
+		QueryAllStockOrderByDate(ctx context.Context, date time.Time) ([]*entity.StockOrder, error)
 
 		QueryFutureOrderByID(ctx context.Context, orderID string) (*entity.FutureOrder, error)
 		InsertOrUpdateFutureOrderByOrderID(ctx context.Context, t *entity.FutureOrder) error
+		QueryAllFutureOrderByDate(ctx context.Context, date time.Time) ([]*entity.FutureOrder, error)
 	}
 
 	// OrdergRPCAPI -.

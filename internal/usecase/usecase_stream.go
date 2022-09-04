@@ -215,6 +215,10 @@ func (uc *StreamUseCase) placeOrder(agent *TradeAgent, order *entity.StockOrder)
 }
 
 func (uc *StreamUseCase) checkTradeSwitch() {
+	if !uc.tradeSwitchCfg.AllowTrade {
+		return
+	}
+
 	openTime := uc.basic.OpenTime
 	tradeInEndTime := uc.basic.TradeInEndTime
 
@@ -424,6 +428,10 @@ func (uc *StreamUseCase) placeFutureOrder(agent *FutureTradeAgent, order *entity
 }
 
 func (uc *StreamUseCase) checkFutureTradeSwitch() {
+	if !uc.futureTradeSwitchCfg.AllowTrade {
+		return
+	}
+
 	for range time.NewTicker(2500 * time.Millisecond).C {
 		now := time.Now()
 		var tempSwitch bool

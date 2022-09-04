@@ -49,11 +49,17 @@ func NewOrder(t OrdergRPCAPI, r OrderRepo) *OrderUseCase {
 
 	go func() {
 		for range time.NewTicker(time.Minute).C {
-			orders, err := uc.repo.QueryAllOrderByDate(context.Background(), cc.GetBasicInfo().TradeDay)
+			stockOrders, err := uc.repo.QueryAllStockOrderByDate(context.Background(), uc.basicInfo.TradeDay)
 			if err != nil {
 				log.Panic(err)
 			}
-			uc.calculateTradeBalance(orders)
+			uc.calculateStockTradeBalance(stockOrders)
+
+			futureOrders, err := uc.repo.QueryAllFutureOrderByDate(context.Background(), uc.basicInfo.TradeDay)
+			if err != nil {
+				log.Panic(err)
+			}
+			uc.calculateFutureTradeBalance(futureOrders)
 		}
 	}()
 
@@ -291,8 +297,8 @@ func (uc *OrderUseCase) updateCacheAndInsertDB(order *entity.StockOrder) {
 	}
 }
 
-// CalculateTradeBalance -.
-func (uc *OrderUseCase) calculateTradeBalance(allOrders []*entity.StockOrder) {
+// calculateStockTradeBalance -.
+func (uc *OrderUseCase) calculateStockTradeBalance(allOrders []*entity.StockOrder) {
 	var forwardOrder, reverseOrder []*entity.StockOrder
 	for _, v := range allOrders {
 		if v.Status != entity.StatusFilled {
@@ -344,7 +350,62 @@ func (uc *OrderUseCase) calculateTradeBalance(allOrders []*entity.StockOrder) {
 		Total:           forwardBalance + revereBalance + discount,
 	}
 
-	err := uc.repo.InsertOrUpdateTradeBalance(context.Background(), tmp)
+	err := uc.repo.InsertOrUpdateStockTradeBalance(context.Background(), tmp)
+	if err != nil {
+		log.Panic(err)
+	}
+}
+
+// calculateFutureTradeBalance -.
+func (uc *OrderUseCase) calculateFutureTradeBalance(allOrders []*entity.FutureOrder) {
+	var forwardOrder, reverseOrder []*entity.FutureOrder
+	for _, v := range allOrders {
+		if v.Status != entity.StatusFilled {
+			continue
+		}
+
+		switch v.Action {
+		case entity.ActionBuy, entity.ActionSell:
+			forwardOrder = append(forwardOrder, v)
+		case entity.ActionSellFirst, entity.ActionBuyLater:
+			reverseOrder = append(reverseOrder, v)
+		}
+	}
+
+	if len(forwardOrder) == 0 && len(reverseOrder) == 0 {
+		return
+	}
+
+	var forwardBalance, revereBalance, tradeCount int64
+	for _, v := range forwardOrder {
+		switch v.Action {
+		case entity.ActionBuy:
+			tradeCount++
+			forwardBalance -= 50*int64(v.Price) + 15 + 30
+		case entity.ActionSell:
+			forwardBalance += 50*int64(v.Price) - 15 - 30
+		}
+	}
+
+	for _, v := range reverseOrder {
+		switch v.Action {
+		case entity.ActionSellFirst:
+			tradeCount++
+			revereBalance += 50*int64(v.Price) - 15 - 30
+		case entity.ActionBuyLater:
+			revereBalance -= 50*int64(v.Price) + 15 + 30
+		}
+	}
+
+	tmp := &entity.TradeBalance{
+		TradeDay:   uc.basicInfo.TradeDay,
+		TradeCount: tradeCount,
+		Forward:    forwardBalance,
+		Reverse:    revereBalance,
+		Total:      forwardBalance + revereBalance,
+	}
+
+	err := uc.repo.InsertOrUpdateFutureTradeBalance(context.Background(), tmp)
 	if err != nil {
 		log.Panic(err)
 	}
@@ -352,7 +413,7 @@ func (uc *OrderUseCase) calculateTradeBalance(allOrders []*entity.StockOrder) {
 
 // GetAllOrder -.
 func (uc *OrderUseCase) GetAllOrder(ctx context.Context) ([]*entity.StockOrder, error) {
-	orderArr, err := uc.repo.QueryAllOrder(ctx)
+	orderArr, err := uc.repo.QueryAllStockOrder(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -361,7 +422,7 @@ func (uc *OrderUseCase) GetAllOrder(ctx context.Context) ([]*entity.StockOrder, 
 
 // GetAllTradeBalance -.
 func (uc *OrderUseCase) GetAllTradeBalance(ctx context.Context) ([]*entity.TradeBalance, error) {
-	tradeBalanceArr, err := uc.repo.QueryAllTradeBalance(ctx)
+	tradeBalanceArr, err := uc.repo.QueryAllStockTradeBalance(ctx)
 	if err != nil {
 		return nil, err
 	}

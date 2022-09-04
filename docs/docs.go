@@ -270,7 +270,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/entity.Order"
+                                "$ref": "#/definitions/entity.StockOrder"
                             }
                         }
                     },
@@ -595,6 +595,9 @@ const docTemplate = `{
         "config.FutureTradeSwitch": {
             "type": "object",
             "properties": {
+                "allow_trade": {
+                    "type": "boolean"
+                },
                 "cancel_wait_time": {
                     "type": "integer"
                 },
@@ -742,6 +745,9 @@ const docTemplate = `{
         "config.TradeSwitch": {
             "type": "object",
             "properties": {
+                "allow_trade": {
+                    "type": "boolean"
+                },
                 "cancel_wait_time": {
                     "type": "integer"
                 },
@@ -805,7 +811,33 @@ const docTemplate = `{
                 }
             }
         },
-        "entity.Order": {
+        "entity.Stock": {
+            "type": "object",
+            "properties": {
+                "category": {
+                    "type": "string"
+                },
+                "day_trade": {
+                    "type": "boolean"
+                },
+                "exchange": {
+                    "type": "string"
+                },
+                "last_close": {
+                    "type": "number"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "number": {
+                    "type": "string"
+                },
+                "update_date": {
+                    "type": "string"
+                }
+            }
+        },
+        "entity.StockOrder": {
             "type": "object",
             "properties": {
                 "action": {
@@ -839,32 +871,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "trade_time": {
-                    "type": "string"
-                }
-            }
-        },
-        "entity.Stock": {
-            "type": "object",
-            "properties": {
-                "category": {
-                    "type": "string"
-                },
-                "day_trade": {
-                    "type": "boolean"
-                },
-                "exchange": {
-                    "type": "string"
-                },
-                "last_close": {
-                    "type": "number"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "number": {
-                    "type": "string"
-                },
-                "update_date": {
                     "type": "string"
                 }
             }
