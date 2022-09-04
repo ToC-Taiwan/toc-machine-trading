@@ -18,8 +18,8 @@ type TargetUseCase struct {
 	gRPCAPI       TargetgRPCAPI
 	streamgRPCAPI StreamgRPCAPI
 
-	targetFilter         *TargetFilter
-	monitorFutureCodeArr []string
+	targetFilter      *TargetFilter
+	monitorFutureCode string
 }
 
 // NewTarget -.
@@ -30,11 +30,11 @@ func NewTarget(r TargetRepo, t TargetgRPCAPI, s StreamgRPCAPI) *TargetUseCase {
 	}
 
 	uc := &TargetUseCase{
-		repo:                 r,
-		gRPCAPI:              t,
-		streamgRPCAPI:        s,
-		monitorFutureCodeArr: cfg.TargetCond.MonitorFutureCodeArr,
-		targetFilter:         NewTargetFilter(cfg.TargetCond),
+		repo:              r,
+		gRPCAPI:           t,
+		streamgRPCAPI:     s,
+		monitorFutureCode: cfg.TargetCond.MonitorFutureCode,
+		targetFilter:      NewTargetFilter(cfg.TargetCond),
 	}
 
 	// unsubscriba all first
@@ -84,7 +84,7 @@ func (uc *TargetUseCase) publishNewTargets(targetArr []*entity.Target) {
 
 	bus.PublishTopicEvent(topicFetchHistory, context.Background(), targetArr)
 	bus.PublishTopicEvent(topicStreamTargets, context.Background(), targetArr)
-	bus.PublishTopicEvent(topicStreamFutureTargets, context.Background(), uc.monitorFutureCodeArr)
+	bus.PublishTopicEvent(topicStreamFutureTargets, context.Background(), uc.monitorFutureCode)
 }
 
 // GetTargets - get targets from cache
@@ -254,8 +254,8 @@ func (uc *TargetUseCase) UnSubscribeStockBidAsk(stockNum string) error {
 }
 
 // SubscribeFutureTick -.
-func (uc *TargetUseCase) SubscribeFutureTick(codeArr []string) error {
-	failSubNumArr, err := uc.gRPCAPI.SubscribeFutureTick(codeArr)
+func (uc *TargetUseCase) SubscribeFutureTick(code string) error {
+	failSubNumArr, err := uc.gRPCAPI.SubscribeFutureTick([]string{code})
 	if err != nil {
 		return err
 	}

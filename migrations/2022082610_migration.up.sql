@@ -15,4 +15,22 @@ CREATE TABLE basic_future (
     "update_date" TIMESTAMPTZ NOT NULL
 );
 
+CREATE TABLE trade_future_order (
+    "order_id" VARCHAR PRIMARY KEY,
+    "group_id" VARCHAR NOT NULL,
+    "status" INT NOT NULL,
+    "order_time" TIMESTAMPTZ NOT NULL,
+    "tick_time" TIMESTAMPTZ NOT NULL,
+    "code" VARCHAR NOT NULL,
+    "action" INT NOT NULL,
+    "price" DECIMAL NOT NULL,
+    "quantity" INT NOT NULL,
+    "trade_time" TIMESTAMPTZ NOT NULL
+);
+
+CREATE INDEX trade_future_order_order_time_index ON trade_future_order USING btree ("order_time");
+
+ALTER TABLE trade_future_order
+ADD CONSTRAINT "fk_trade_future_order_stock" FOREIGN KEY ("code") REFERENCES basic_future ("code");
+
 COMMIT;

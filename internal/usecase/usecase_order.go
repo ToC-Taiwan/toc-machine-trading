@@ -16,10 +16,11 @@ type OrderUseCase struct {
 	gRPCAPI OrdergRPCAPI
 	repo    OrderRepo
 
-	basicInfo      entity.BasicInfo
-	quota          *Quota
-	simTrade       bool
-	placeOrderLock sync.Mutex
+	basicInfo            entity.BasicInfo
+	quota                *Quota
+	simTrade             bool
+	placeOrderLock       sync.Mutex
+	placeFutureOrderLock sync.Mutex
 }
 
 // NewOrder -.
@@ -33,7 +34,7 @@ func NewOrder(t OrdergRPCAPI, r OrderRepo) *OrderUseCase {
 		gRPCAPI:        t,
 		repo:           r,
 		quota:          NewQuota(cfg.Quota),
-		simTrade:       cfg.TradeSwitch.Simulation,
+		simTrade:       cfg.Simulation,
 		placeOrderLock: sync.Mutex{},
 		basicInfo:      *cc.GetBasicInfo(),
 	}
@@ -41,6 +42,10 @@ func NewOrder(t OrdergRPCAPI, r OrderRepo) *OrderUseCase {
 	bus.SubscribeTopic(topicPlaceOrder, uc.placeOrder)
 	bus.SubscribeTopic(topicCancelOrder, uc.cancelOrder)
 	bus.SubscribeTopic(topicInsertOrUpdateOrder, uc.updateCacheAndInsertDB)
+
+	bus.SubscribeTopic(topicPlaceFutureOrder, uc.placeFutureOrder)
+	bus.SubscribeTopic(topicCancelFutureOrder, uc.cancelFutureOrder)
+	bus.SubscribeTopic(topicInsertOrUpdateFutureOrder, uc.updateCacheAndInsertFutureDB)
 
 	go func() {
 		for range time.NewTicker(time.Minute).C {
@@ -229,16 +234,31 @@ func (uc *OrderUseCase) AskOrderUpdate() error {
 			if err != nil {
 				return err
 			}
-			o := &entity.Order{
-				StockNum:  v.GetCode(),
-				OrderID:   v.GetOrderId(),
-				Action:    actionMap[v.GetAction()],
-				Price:     v.GetPrice(),
-				Quantity:  v.GetQuantity(),
-				Status:    statusMap[v.GetStatus()],
-				OrderTime: orderTime,
+
+			switch {
+			case cc.GetOrderByOrderID(v.GetOrderId()) != nil:
+				o := &entity.Order{
+					StockNum:  v.GetCode(),
+					OrderID:   v.GetOrderId(),
+					Action:    actionMap[v.GetAction()],
+					Price:     v.GetPrice(),
+					Quantity:  v.GetQuantity(),
+					Status:    statusMap[v.GetStatus()],
+					OrderTime: orderTime,
+				}
+				uc.updateCacheAndInsertDB(o)
+			case cc.GetFutureOrderByOrderID(v.GetOrderId()) != nil:
+				o := &entity.FutureOrder{
+					Code:      v.GetCode(),
+					OrderID:   v.GetOrderId(),
+					Action:    actionMap[v.GetAction()],
+					Price:     v.GetPrice(),
+					Quantity:  v.GetQuantity(),
+					Status:    statusMap[v.GetStatus()],
+					OrderTime: orderTime,
+				}
+				uc.updateCacheAndInsertFutureDB(o)
 			}
-			uc.updateCacheAndInsertDB(o)
 		}
 	}
 	return nil

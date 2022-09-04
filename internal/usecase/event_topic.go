@@ -15,4 +15,8 @@ const (
 	topicPlaceOrder          string = "place_order"
 	topicCancelOrder         string = "cancel_order"
 	topicInsertOrUpdateOrder string = "insert_or_update_order"
+
+	topicPlaceFutureOrder          string = "place_future_order"
+	topicCancelFutureOrder         string = "cancel_future_order"
+	topicInsertOrUpdateFutureOrder string = "insert_or_update_future_order"
 )

@@ -58,6 +58,19 @@ func (c *Cache) GetOrderByOrderID(orderID string) *entity.Order {
 	return nil
 }
 
+// SetFutureOrderByOrderID -.
+func (c *Cache) SetFutureOrderByOrderID(order *entity.FutureOrder) {
+	c.Set(c.futureOrderKey(order.OrderID), order)
+}
+
+// GetFutureOrderByOrderID -.
+func (c *Cache) GetFutureOrderByOrderID(orderID string) *entity.FutureOrder {
+	if value, ok := c.Get(c.futureOrderKey(orderID)); ok {
+		return value.(*entity.FutureOrder)
+	}
+	return nil
+}
+
 // SetHistoryOpen -.
 func (c *Cache) SetHistoryOpen(stockNum string, date time.Time, open float64) {
 	c.Set(c.historyOpenKey(stockNum, date), open)

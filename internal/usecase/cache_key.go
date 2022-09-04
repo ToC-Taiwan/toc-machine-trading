@@ -13,6 +13,8 @@ const (
 
 	cacheCatagoryOrder cache.Category = "order"
 
+	cacheCatagoryFutureOrder cache.Category = "future_order"
+
 	cacheCatagoryHistoryFutureTick cache.Category = "history_future_tick"
 
 	cacheCatagoryFutureGap cache.Category = "future_gap"
@@ -78,6 +80,13 @@ func (c *Cache) stockDetailKey(stockNum string) cache.Key {
 func (c *Cache) orderKey(orderID string) cache.Key {
 	return cache.Key{
 		Category: cacheCatagoryOrder,
+		ID:       c.generateID(cacheIDOrderID, orderID),
+	}
+}
+
+func (c *Cache) futureOrderKey(orderID string) cache.Key {
+	return cache.Key{
+		Category: cacheCatagoryFutureOrder,
 		ID:       c.generateID(cacheIDOrderID, orderID),
 	}
 }

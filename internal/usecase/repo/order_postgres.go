@@ -245,3 +245,72 @@ func (r *OrderRepo) QueryAllTradeBalance(ctx context.Context) ([]*entity.TradeBa
 	}
 	return result, nil
 }
+
+// QueryFutureOrderByID -.
+func (r *OrderRepo) QueryFutureOrderByID(ctx context.Context, orderID string) (*entity.FutureOrder, error) {
+	sql, arg, err := r.Builder.
+		Select("group_id, order_id, status, order_time, tick_time, code, action, price, quantity, trade_time, code, symbol, name, category, delivery_month, delivery_date, underlying_kind, unit, limit_up, limit_down, reference, update_date").
+		From(tableNameTradeFutureOrder).
+		Where(squirrel.Eq{"order_id": orderID}).
+		Join("basic_future ON trade_future_order.code = basic_future.code").ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	row := r.Pool().QueryRow(ctx, sql, arg...)
+	e := entity.FutureOrder{Future: new(entity.Future)}
+	if err := row.Scan(&e.GroupID, &e.OrderID, &e.Status, &e.OrderTime, &e.TickTime, &e.Code, &e.Action, &e.Price, &e.Quantity, &e.TradeTime,
+		&e.Future.Code, &e.Future.Symbol, &e.Future.Name, &e.Future.Category, &e.Future.DeliveryMonth, &e.Future.DeliveryDate, &e.Future.UnderlyingKind, &e.Future.Unit, &e.Future.LimitUp, &e.Future.LimitDown, &e.Future.Reference, &e.Future.UpdateDate); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &e, nil
+}
+
+// InsertOrUpdateFutureOrderByOrderID -.
+func (r *OrderRepo) InsertOrUpdateFutureOrderByOrderID(ctx context.Context, t *entity.FutureOrder) error {
+	dbOrder, err := r.QueryFutureOrderByID(ctx, t.OrderID)
+	if err != nil {
+		return err
+	}
+
+	tx, err := r.BeginTransaction()
+	if err != nil {
+		return err
+	}
+	defer r.EndTransaction(tx, err)
+	var sql string
+	var args []interface{}
+
+	if dbOrder == nil {
+		builder := r.Builder.Insert(tableNameTradeFutureOrder).Columns("group_id, order_id, status, order_time, tick_time, code, action, price, quantity, trade_time")
+		builder = builder.Values(t.GroupID, t.OrderID, t.Status, t.OrderTime, t.TickTime, t.Code, t.Action, t.Price, t.Quantity, t.TradeTime)
+		if sql, args, err = builder.ToSql(); err != nil {
+			return err
+		} else if _, err = tx.Exec(ctx, sql, args...); err != nil {
+			return err
+		}
+	} else if !cmp.Equal(t, dbOrder) {
+		builder := r.Builder.
+			Update(tableNameTradeOrder).
+			Set("group_id", t.GroupID).
+			Set("order_id", t.OrderID).
+			Set("status", t.Status).
+			Set("order_time", t.OrderTime).
+			Set("tick_time", t.OrderTime).
+			Set("code", t.Code).
+			Set("action", t.Action).
+			Set("price", t.Price).
+			Set("quantity", t.Quantity).
+			Set("trade_time", t.TradeTime).
+			Where(squirrel.Eq{"order_id": t.OrderID})
+		if sql, args, err = builder.ToSql(); err != nil {
+			return err
+		} else if _, err = tx.Exec(ctx, sql, args...); err != nil {
+			return err
+		}
+	}
+	return nil
+}

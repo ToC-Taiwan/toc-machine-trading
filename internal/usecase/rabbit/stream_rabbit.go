@@ -29,6 +29,9 @@ const (
 // StreamRabbit -.
 type StreamRabbit struct {
 	conn *rabbitmq.Connection
+
+	allStockMap  map[string]*entity.Stock
+	allFutureMap map[string]*entity.Future
 }
 
 // NewStream -.
@@ -49,7 +52,9 @@ func NewStream() *StreamRabbit {
 		log.Error(err)
 	}
 
-	return &StreamRabbit{conn}
+	return &StreamRabbit{
+		conn: conn,
+	}
 }
 
 func (c *StreamRabbit) establishDelivery(key string) <-chan amqp.Delivery {
@@ -58,6 +63,12 @@ func (c *StreamRabbit) establishDelivery(key string) <-chan amqp.Delivery {
 		log.Panic(err)
 	}
 	return delivery
+}
+
+// FillAllBasic -.
+func (c *StreamRabbit) FillAllBasic(allStockMap map[string]*entity.Stock, allFutureMap map[string]*entity.Future) {
+	c.allStockMap = allStockMap
+	c.allFutureMap = allFutureMap
 }
 
 // EventConsumer -.
@@ -93,7 +104,11 @@ func (c *StreamRabbit) EventConsumer(eventChan chan *entity.SinopacEvent) {
 }
 
 // OrderStatusConsumer OrderStatusConsumer
-func (c *StreamRabbit) OrderStatusConsumer(orderStatusChan chan *entity.Order) {
+func (c *StreamRabbit) OrderStatusConsumer(orderStatusChan chan interface{}) {
+	if len(c.allStockMap) == 0 || len(c.allFutureMap) == 0 {
+		log.Panic("allStockMap or allFutureMap is empty")
+	}
+
 	delivery := c.establishDelivery(routingKeyOrder)
 	for {
 		d, opened := <-delivery
@@ -115,14 +130,28 @@ func (c *StreamRabbit) OrderStatusConsumer(orderStatusChan chan *entity.Order) {
 			log.Error(err)
 			continue
 		}
-		orderStatusChan <- &entity.Order{
-			StockNum:  body.GetCode(),
-			OrderID:   body.GetOrderId(),
-			Action:    actionMap[body.GetAction()],
-			Price:     body.GetPrice(),
-			Quantity:  body.GetQuantity(),
-			Status:    statusMap[body.GetStatus()],
-			OrderTime: orderTime,
+
+		switch {
+		case c.allStockMap[body.GetCode()] != nil:
+			orderStatusChan <- &entity.Order{
+				StockNum:  body.GetCode(),
+				OrderID:   body.GetOrderId(),
+				Action:    actionMap[body.GetAction()],
+				Price:     body.GetPrice(),
+				Quantity:  body.GetQuantity(),
+				Status:    statusMap[body.GetStatus()],
+				OrderTime: orderTime,
+			}
+		case c.allFutureMap[body.GetCode()] != nil:
+			orderStatusChan <- &entity.FutureOrder{
+				Code:      body.GetCode(),
+				OrderID:   body.GetOrderId(),
+				Action:    actionMap[body.GetAction()],
+				Price:     body.GetPrice(),
+				Quantity:  body.GetQuantity(),
+				Status:    statusMap[body.GetStatus()],
+				OrderTime: orderTime,
+			}
 		}
 	}
 }

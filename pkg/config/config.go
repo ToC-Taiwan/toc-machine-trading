@@ -43,15 +43,17 @@ func parseConfigFile() {
 
 // Config -.
 type Config struct {
-	HTTP        HTTP        `json:"http"         env-required:"true" yaml:"http"`
-	Postgres    Postgres    `json:"postgres"     env-required:"true" yaml:"postgres"`
-	Sinopac     Sinopac     `json:"sinopac"      env-required:"true" yaml:"sinopac"`
-	RabbitMQ    RabbitMQ    `json:"rabbitmq"     env-required:"true" yaml:"rabbitmq"`
-	TradeSwitch TradeSwitch `json:"trade_switch" env-required:"true" yaml:"trade_switch"`
-	History     History     `json:"history"      env-required:"true" yaml:"history"`
-	Quota       Quota       `json:"quota"        env-required:"true" yaml:"quota"`
-	TargetCond  TargetCond  `json:"target_cond"  env-required:"true" yaml:"target_cond"`
-	Analyze     Analyze     `json:"analyze"      env-required:"true" yaml:"analyze"`
+	HTTP              HTTP              `json:"http"         env-required:"true" yaml:"http"`
+	Postgres          Postgres          `json:"postgres"     env-required:"true" yaml:"postgres"`
+	Sinopac           Sinopac           `json:"sinopac"      env-required:"true" yaml:"sinopac"`
+	RabbitMQ          RabbitMQ          `json:"rabbitmq"     env-required:"true" yaml:"rabbitmq"`
+	Simulation        bool              `json:"simulation"          yaml:"simulation"`
+	TradeSwitch       TradeSwitch       `json:"trade_switch" env-required:"true" yaml:"trade_switch"`
+	FutureTradeSwitch FutureTradeSwitch `json:"future_trade_switch" env-required:"true" yaml:"future_trade_switch"`
+	History           History           `json:"history"      env-required:"true" yaml:"history"`
+	Quota             Quota             `json:"quota"        env-required:"true" yaml:"quota"`
+	TargetCond        TargetCond        `json:"target_cond"  env-required:"true" yaml:"target_cond"`
+	Analyze           Analyze           `json:"analyze"      env-required:"true" yaml:"analyze"`
 }
 
 // HTTP -.
@@ -82,13 +84,27 @@ type RabbitMQ struct {
 
 // TradeSwitch -.
 type TradeSwitch struct {
-	Simulation       bool    `json:"simulation"          yaml:"simulation"`
 	HoldTimeFromOpen float64 `json:"hold_time_from_open" env-required:"true" yaml:"hold_time_from_open"`
 	TotalOpenTime    float64 `json:"total_open_time"     env-required:"true" yaml:"total_open_time"`
+	TradeInEndTime   float64 `json:"trade_in_end_time"   env-required:"true" yaml:"trade_in_end_time"`
 	TradeInWaitTime  int64   `json:"trade_in_wait_time"  env-required:"true" yaml:"trade_in_wait_time"`
 	TradeOutWaitTime int64   `json:"trade_out_wait_time" env-required:"true" yaml:"trade_out_wait_time"`
 	CancelWaitTime   int64   `json:"cancel_wait_time"    env-required:"true" yaml:"cancel_wait_time"`
-	TradeInEndTime   float64 `json:"trade_in_end_time"   env-required:"true" yaml:"trade_in_end_time"`
+}
+
+// FutureTradeSwitch -.
+type FutureTradeSwitch struct {
+	Quantity         int64            `json:"quantity"            env-required:"true" yaml:"quantity"`
+	TradeInWaitTime  int64            `json:"trade_in_wait_time"  env-required:"true" yaml:"trade_in_wait_time"`
+	TradeOutWaitTime int64            `json:"trade_out_wait_time" env-required:"true" yaml:"trade_out_wait_time"`
+	CancelWaitTime   int64            `json:"cancel_wait_time"    env-required:"true" yaml:"cancel_wait_time"`
+	TradeTimeRange   []TradeTimeRange `json:"trade_time_range" env-required:"true" yaml:"trade_time_range"`
+}
+
+// TradeTimeRange -.
+type TradeTimeRange struct {
+	StartTime string `json:"start_time" env-required:"true" yaml:"start_time"`
+	Duration  int64  `json:"duration"   env-required:"true" yaml:"duration"`
 }
 
 // History -.
@@ -108,12 +124,12 @@ type Quota struct {
 
 // TargetCond -.
 type TargetCond struct {
-	BlackStock           []string     `json:"black_stock"         env-required:"true" yaml:"black_stock"`
-	BlackCategory        []string     `json:"black_category"      env-required:"true" yaml:"black_category"`
-	RealTimeRank         int64        `json:"real_time_rank"      env-required:"true" yaml:"real_time_rank"`
-	LimitVolume          int64        `json:"limit_volume"        env-required:"true" yaml:"limit_volume"`
-	PriceLimit           []PriceLimit `json:"price_limit"         env-required:"true" yaml:"price_limit"`
-	MonitorFutureCodeArr []string     `json:"monitor_future_code" env-required:"true" yaml:"monitor_future_code"`
+	BlackStock        []string     `json:"black_stock"         env-required:"true" yaml:"black_stock"`
+	BlackCategory     []string     `json:"black_category"      env-required:"true" yaml:"black_category"`
+	RealTimeRank      int64        `json:"real_time_rank"      env-required:"true" yaml:"real_time_rank"`
+	LimitVolume       int64        `json:"limit_volume"        env-required:"true" yaml:"limit_volume"`
+	PriceLimit        []PriceLimit `json:"price_limit"         env-required:"true" yaml:"price_limit"`
+	MonitorFutureCode string       `json:"monitor_future_code" env-required:"true" yaml:"monitor_future_code"`
 }
 
 // PriceLimit -.

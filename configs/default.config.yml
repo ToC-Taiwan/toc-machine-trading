@@ -17,9 +17,9 @@ history:
     history_tick_period: 12
     history_kbar_period: 65
 
-trade_switch:
-    simulation: false
+simulation: true
 
+trade_switch:
     # unit: second
     hold_time_from_open: 45
 
@@ -32,6 +32,18 @@ trade_switch:
     trade_out_wait_time: 60
     cancel_wait_time: 30
 
+future_trade_switch:
+    quantity: 1
+    # unit: seccond
+    trade_in_wait_time: 10
+    trade_out_wait_time: 20
+    cancel_wait_time: 30
+    trade_time_range:
+        - start_time: 08:45:00
+          duration: 300
+        - start_time: 15:00:00
+          duration: 840
+
 quota:
     trade_quota: 1000000
     trade_tax_ratio: 0.0015
@@ -39,8 +51,7 @@ quota:
     fee_discount: 0.28
 
 target_cond:
-    monitor_future_code:
-        - MXFI2
+    monitor_future_code: MXFI2
     real_time_rank: 20
     black_category:
         - 17
@@ -55,8 +66,6 @@ target_cond:
     price_limit:
         - low: 10
           high: 35
-        - low: 100
-          high: 125
 
 analyze:
     # unit: minute

@@ -16,6 +16,9 @@ type BasicUseCase struct {
 
 	cfg      *config.Config
 	tradeDay *TradeDay
+
+	allStockDetail  []*entity.Stock
+	allFutureDetail []*entity.Future
 }
 
 // NewBasic -.
@@ -31,7 +34,6 @@ func NewBasic(r BasicRepo, t BasicgRPCAPI) *BasicUseCase {
 		tradeDay: NewTradeDay(),
 		cfg:      cfg,
 	}
-	uc.fillBasicInfo()
 
 	go func() {
 		err := uc.gRPCAPI.Heartbeat()
@@ -51,6 +53,8 @@ func NewBasic(r BasicRepo, t BasicgRPCAPI) *BasicUseCase {
 	if _, err := uc.GetAllSinopacFutureAndUpdateRepo(context.Background()); err != nil {
 		log.Panic(err)
 	}
+
+	uc.fillBasicInfo()
 	return uc
 }
 
@@ -66,7 +70,6 @@ func (uc *BasicUseCase) GetAllSinopacStockAndUpdateRepo(ctx context.Context) ([]
 		return []*entity.Stock{}, err
 	}
 
-	var stockDetail []*entity.Stock
 	for _, v := range stockArr {
 		if v.GetReference() == 0 {
 			continue
@@ -86,7 +89,7 @@ func (uc *BasicUseCase) GetAllSinopacStockAndUpdateRepo(ctx context.Context) ([]
 			LastClose:  v.GetReference(),
 			UpdateDate: updateTime,
 		}
-		stockDetail = append(stockDetail, stock)
+		uc.allStockDetail = append(uc.allStockDetail, stock)
 
 		// save stock in cache
 		cc.SetStockDetail(stock)
@@ -97,11 +100,11 @@ func (uc *BasicUseCase) GetAllSinopacStockAndUpdateRepo(ctx context.Context) ([]
 		return []*entity.Stock{}, err
 	}
 
-	err = uc.repo.InsertOrUpdatetStockArr(context.Background(), stockDetail)
+	err = uc.repo.InsertOrUpdatetStockArr(context.Background(), uc.allStockDetail)
 	if err != nil {
 		return []*entity.Stock{}, err
 	}
-	return stockDetail, nil
+	return uc.allStockDetail, nil
 }
 
 // GetAllSinopacFutureAndUpdateRepo -.
@@ -112,7 +115,6 @@ func (uc *BasicUseCase) GetAllSinopacFutureAndUpdateRepo(ctx context.Context) ([
 	}
 
 	duplCodeMap := make(map[string]struct{})
-	var futureDetail []*entity.Future
 	for _, v := range futureArr {
 		if v.GetReference() == 0 {
 			continue
@@ -140,17 +142,17 @@ func (uc *BasicUseCase) GetAllSinopacFutureAndUpdateRepo(ctx context.Context) ([
 
 		if _, ok := duplCodeMap[future.Code]; !ok {
 			duplCodeMap[future.Code] = struct{}{}
-			futureDetail = append(futureDetail, future)
+			uc.allFutureDetail = append(uc.allFutureDetail, future)
 		} else {
 			log.Warnf("Dupl future code: %s %s", v.Code, v.Name)
 		}
 	}
 
-	err = uc.repo.InsertOrUpdatetFutureArr(context.Background(), futureDetail)
+	err = uc.repo.InsertOrUpdatetFutureArr(context.Background(), uc.allFutureDetail)
 	if err != nil {
 		return []*entity.Future{}, err
 	}
-	return futureDetail, nil
+	return uc.allFutureDetail, nil
 }
 
 // GetAllRepoStock -.
@@ -191,6 +193,18 @@ func (uc *BasicUseCase) fillBasicInfo() {
 		HistoryCloseRange: uc.tradeDay.getLastNTradeDayByDate(uc.cfg.History.HistoryClosePeriod, tradeDay),
 		HistoryKbarRange:  uc.tradeDay.getLastNTradeDayByDate(uc.cfg.History.HistoryKbarPeriod, tradeDay),
 		HistoryTickRange:  uc.tradeDay.getLastNTradeDayByDate(uc.cfg.History.HistoryTickPeriod, tradeDay),
+
+		AllStocks:  make(map[string]*entity.Stock),
+		AllFutures: make(map[string]*entity.Future),
 	}
+
+	for _, s := range uc.allStockDetail {
+		basic.AllStocks[s.Number] = s
+	}
+
+	for _, f := range uc.allFutureDetail {
+		basic.AllFutures[f.Code] = f
+	}
+
 	cc.SetBasicInfo(basic)
 }

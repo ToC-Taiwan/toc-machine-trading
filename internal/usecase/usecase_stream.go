@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"fmt"
 	"sort"
 	"sync"
 	"time"
@@ -17,17 +18,18 @@ type StreamUseCase struct {
 	rabbit  StreamRabbit
 	grpcapi StreamgRPCAPI
 
-	tradeSwitchCfg config.TradeSwitch
-	analyzeCfg     config.Analyze
-	basic          entity.BasicInfo
+	tradeSwitchCfg       config.TradeSwitch
+	futureTradeSwitchCfg config.FutureTradeSwitch
+	analyzeCfg           config.Analyze
+	basic                entity.BasicInfo
 
 	targetFilter *TargetFilter
 
-	tradeInSwitch bool
-	allowForward  bool
-	allowReverse  bool
+	tradeInSwitch       bool
+	futureTradeInSwitch bool
 
-	lastFutureTick *entity.RealTimeFutureTick
+	allowForward bool
+	allowReverse bool
 }
 
 // NewStream -.
@@ -36,19 +38,22 @@ func NewStream(r StreamRepo, g StreamgRPCAPI, t StreamRabbit) *StreamUseCase {
 	if err != nil {
 		log.Panic(err)
 	}
+	basic := *cc.GetBasicInfo()
+	t.FillAllBasic(basic.AllStocks, basic.AllFutures)
 
 	uc := &StreamUseCase{
-		repo:         r,
-		rabbit:       t,
-		grpcapi:      g,
-		targetFilter: NewTargetFilter(cfg.TargetCond),
+		repo:                 r,
+		rabbit:               t,
+		grpcapi:              g,
+		tradeSwitchCfg:       cfg.TradeSwitch,
+		futureTradeSwitchCfg: cfg.FutureTradeSwitch,
+		analyzeCfg:           cfg.Analyze,
+		basic:                basic,
+		targetFilter:         NewTargetFilter(cfg.TargetCond),
 	}
 
-	uc.tradeSwitchCfg = cfg.TradeSwitch
-	uc.analyzeCfg = cfg.Analyze
-	uc.basic = *cc.GetBasicInfo()
-
 	go uc.checkTradeSwitch()
+	go uc.checkFutureTradeSwitch()
 	go uc.ReceiveEvent(context.Background())
 	go uc.ReceiveOrderStatus(context.Background())
 
@@ -88,11 +93,20 @@ func (uc *StreamUseCase) ReceiveEvent(ctx context.Context) {
 
 // ReceiveOrderStatus -.
 func (uc *StreamUseCase) ReceiveOrderStatus(ctx context.Context) {
-	orderStatusChan := make(chan *entity.Order)
+	orderStatusChan := make(chan interface{})
 	go func() {
 		for {
 			order := <-orderStatusChan
-			bus.PublishTopicEvent(topicInsertOrUpdateOrder, order)
+			switch t := order.(type) {
+			case *entity.Order:
+				if cc.GetOrderByOrderID(t.OrderID) != nil {
+					bus.PublishTopicEvent(topicInsertOrUpdateOrder, t)
+				}
+			case *entity.FutureOrder:
+				if cc.GetFutureOrderByOrderID(t.OrderID) != nil {
+					bus.PublishTopicEvent(topicInsertOrUpdateFutureOrder, t)
+				}
+			}
 		}
 	}()
 	uc.rabbit.OrderStatusConsumer(orderStatusChan)
@@ -340,36 +354,89 @@ func (uc *StreamUseCase) GetStockSnapshotByNumArr(stockNumArr []string) ([]*enti
 }
 
 // ReceiveFutureStreamData -.
-func (uc *StreamUseCase) ReceiveFutureStreamData(ctx context.Context, targetArr []string) {
-	for _, t := range targetArr {
-		tickChan := make(chan *entity.RealTimeFutureTick)
-		go func() {
-			for {
-				time.Sleep(time.Second)
-				if uc.lastFutureTick == nil || cc.GetFutureHistoryTick(t) == nil {
-					continue
-				} else if uc.lastFutureTick.TickTime.Hour() != 8 {
-					log.Warn("Not at trade time")
-					break
-				}
+func (uc *StreamUseCase) ReceiveFutureStreamData(ctx context.Context, code string) {
+	agent := NewFutureAgent(code, uc.futureTradeSwitchCfg)
 
-				if gap := uc.lastFutureTick.Close - cc.GetFutureHistoryTick(t).Close; gap > 0 {
-					uc.allowForward = true
-				} else if gap != 0 {
-					uc.allowReverse = true
-				}
-				break
-			}
-		}()
-		go func() {
-			for {
-				uc.lastFutureTick = <-tickChan
-				log.Debugf("TickTime: %s, Code: %s, Close: %.0f, Volume: %3d, PriceChg: %.0f", uc.lastFutureTick.TickTime.Format(global.LongTimeLayout), uc.lastFutureTick.Code, uc.lastFutureTick.Close, uc.lastFutureTick.Volume, uc.lastFutureTick.PriceChg)
-			}
-		}()
+	go uc.futureTradingRoom(agent)
+	go uc.checkFirstFutureTick(agent)
+	go uc.rabbit.FutureTickConsumer(code, agent.tickChan)
 
-		go uc.rabbit.FutureTickConsumer(t, tickChan)
+	bus.PublishTopicEvent(topicSubscribeFutureTickTargets, code)
+}
+
+func (uc *StreamUseCase) futureTradingRoom(agent *FutureTradeAgent) {
+	for {
+		agent.lastTick = <-agent.tickChan
+		agent.tickArr = append(agent.tickArr, agent.lastTick)
+
+		log.Debugf("TickTime: %s, Code: %s, Close: %.0f, TickType: %d, Volume: %3d, PriceChg: %.0f", agent.lastTick.TickTime.Format(global.LongTimeLayout), agent.lastTick.Code, agent.lastTick.Close, agent.lastTick.TickType, agent.lastTick.Volume, agent.lastTick.PriceChg)
+		if agent.waitingOrder != nil || agent.analyzeTickTime.IsZero() {
+			continue
+		}
+
+		order := agent.generateOrder(uc.analyzeCfg)
+		if order == nil {
+			continue
+		}
+
+		uc.placeFutureOrder(agent, order)
+	}
+}
+
+func (uc *StreamUseCase) checkFirstFutureTick(agent *FutureTradeAgent) {
+	for {
+		time.Sleep(time.Second)
+		if agent.lastTick == nil || cc.GetFutureHistoryTick(agent.code) == nil {
+			continue
+		} else if agent.lastTick.TickTime.Hour() != 8 {
+			log.Warn("Not at stock trading time")
+			break
+		}
+
+		if gap := agent.lastTick.Close - cc.GetFutureHistoryTick(agent.code).Close; gap >= 0 {
+			uc.allowForward = true
+		} else if gap != 0 {
+			uc.allowReverse = true
+		}
+
+		agent.analyzeTickTime = agent.lastTick.TickTime
+		break
+	}
+}
+
+func (uc *StreamUseCase) placeFutureOrder(agent *FutureTradeAgent, order *entity.FutureOrder) {
+	if order.Price == 0 {
+		log.Errorf("%s Future Order price is 0", order.Code)
+		return
 	}
 
-	bus.PublishTopicEvent(topicSubscribeFutureTickTargets, targetArr)
+	agent.waitingOrder = order
+
+	// if out of trade in time, return
+	if !uc.futureTradeInSwitch && (order.Action == entity.ActionBuy || order.Action == entity.ActionSellFirst) {
+		// avoid stuck in the market
+		agent.waitingOrder = nil
+		return
+	}
+
+	bus.PublishTopicEvent(topicPlaceFutureOrder, order)
+	go agent.checkPlaceOrderStatus(order)
+}
+
+func (uc *StreamUseCase) checkFutureTradeSwitch() {
+	for range time.NewTicker(2500 * time.Millisecond).C {
+		now := time.Now()
+		var tempSwitch bool
+		for _, v := range uc.futureTradeSwitchCfg.TradeTimeRange {
+			start, err := time.ParseInLocation(global.LongTimeLayout, fmt.Sprintf("%s %s", now.Format(global.ShortTimeLayout), v.StartTime), time.Local)
+			if err != nil {
+				log.Panic(err)
+			}
+			end := start.Add(time.Duration(v.Duration) * time.Minute)
+			if now.After(start) && now.Before(end) {
+				tempSwitch = true
+			}
+		}
+		uc.futureTradeInSwitch = tempSwitch
+	}
 }

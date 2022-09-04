@@ -139,8 +139,10 @@ type (
 
 	// StreamRabbit -.
 	StreamRabbit interface {
+		FillAllBasic(allStockMap map[string]*entity.Stock, allFutureMap map[string]*entity.Future)
+
 		EventConsumer(eventChan chan *entity.SinopacEvent)
-		OrderStatusConsumer(orderStatusChan chan *entity.Order)
+		OrderStatusConsumer(orderStatusChan chan interface{})
 		TickConsumer(stockNum string, tickChan chan *entity.RealTimeTick)
 		BidAskConsumer(stockNum string, bidAskChan chan *entity.RealTimeBidAsk)
 
@@ -162,13 +164,18 @@ type (
 
 	// OrderRepo -.
 	OrderRepo interface {
-		InsertOrUpdateTradeBalance(ctx context.Context, t *entity.TradeBalance) error
-		QueryTradeBalanceByDate(ctx context.Context, date time.Time) (*entity.TradeBalance, error)
-		InsertOrUpdateOrderByOrderID(ctx context.Context, t *entity.Order) error
-		QueryOrderByID(ctx context.Context, orderID string) (*entity.Order, error)
-		QueryAllOrderByDate(ctx context.Context, date time.Time) ([]*entity.Order, error)
-		QueryAllOrder(ctx context.Context) ([]*entity.Order, error)
 		QueryAllTradeBalance(ctx context.Context) ([]*entity.TradeBalance, error)
+		QueryTradeBalanceByDate(ctx context.Context, date time.Time) (*entity.TradeBalance, error)
+		InsertOrUpdateTradeBalance(ctx context.Context, t *entity.TradeBalance) error
+
+		QueryOrderByID(ctx context.Context, orderID string) (*entity.Order, error)
+		InsertOrUpdateOrderByOrderID(ctx context.Context, t *entity.Order) error
+
+		QueryAllOrder(ctx context.Context) ([]*entity.Order, error)
+		QueryAllOrderByDate(ctx context.Context, date time.Time) ([]*entity.Order, error)
+
+		QueryFutureOrderByID(ctx context.Context, orderID string) (*entity.FutureOrder, error)
+		InsertOrUpdateFutureOrderByOrderID(ctx context.Context, t *entity.FutureOrder) error
 	}
 
 	// OrdergRPCAPI -.
@@ -180,6 +187,11 @@ type (
 		GetOrderStatusByID(orderID string, sim bool) (*pb.TradeResult, error)
 		GetOrderStatusArr() ([]*pb.StockOrderStatus, error)
 		GetNonBlockOrderStatusArr() (*pb.ErrorMessage, error)
+
+		BuyFuture(order *entity.FutureOrder, sim bool) (*pb.TradeResult, error)
+		SellFuture(order *entity.FutureOrder, sim bool) (*pb.TradeResult, error)
+		SellFirstFuture(order *entity.FutureOrder, sim bool) (*pb.TradeResult, error)
+		CancelFuture(orderID string, sim bool) (*pb.TradeResult, error)
 	}
 )
 

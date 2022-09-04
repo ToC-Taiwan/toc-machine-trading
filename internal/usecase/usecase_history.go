@@ -44,7 +44,7 @@ func NewHistory(r HistoryRepo, t HistorygRPCAPI) *HistoryUseCase {
 	uc.basic = *cc.GetBasicInfo()
 
 	bus.SubscribeTopic(topicFetchHistory, uc.FetchHistory)
-	uc.FetchFutureHistoryTick(cfg.TargetCond.MonitorFutureCodeArr, uc.basic.LastTradeDay)
+	uc.FetchFutureHistoryTick(cfg.TargetCond.MonitorFutureCode, uc.basic.LastTradeDay)
 
 	return uc
 }
@@ -509,7 +509,7 @@ func (uc *HistoryUseCase) processKbarArr(arr []*entity.HistoryKbar) {
 }
 
 // FetchFutureHistoryTick -.
-func (uc *HistoryUseCase) FetchFutureHistoryTick(codeArr []string, date time.Time) {
+func (uc *HistoryUseCase) FetchFutureHistoryTick(code string, date time.Time) {
 	defer log.Info("Fetching Future History Tick Done")
 	log.Info("Fetching Future History Tick")
 	result := make(map[string][]*entity.HistoryTick)
@@ -525,7 +525,7 @@ func (uc *HistoryUseCase) FetchFutureHistoryTick(codeArr []string, date time.Tim
 		}
 		close(wait)
 	}()
-	tickArr, err := uc.grpcapi.GetFutureHistoryTick(codeArr, date.Format(global.ShortTimeLayout))
+	tickArr, err := uc.grpcapi.GetFutureHistoryTick([]string{code}, date.Format(global.ShortTimeLayout))
 	if err != nil {
 		log.Error(err)
 	}

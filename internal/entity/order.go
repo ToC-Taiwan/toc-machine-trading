@@ -77,6 +77,22 @@ type Order struct {
 	Stock    *Stock `json:"stock"`
 }
 
+// FutureOrder -.
+type FutureOrder struct {
+	OrderID   string      `json:"order_id"`
+	Status    OrderStatus `json:"status"`
+	OrderTime time.Time   `json:"order_time"`
+	Action    OrderAction `json:"action"`
+	Price     float64     `json:"price"`
+	Quantity  int64       `json:"quantity"`
+	TradeTime time.Time   `json:"trade_time"`
+	TickTime  time.Time   `json:"tick_time"`
+	GroupID   string      `json:"group_id"`
+
+	Code   string  `json:"code"`
+	Future *Future `json:"future"`
+}
+
 // TradeBalance -.
 type TradeBalance struct {
 	ID              int64     `json:"id"`

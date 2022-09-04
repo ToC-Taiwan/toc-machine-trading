@@ -60,4 +60,7 @@ type BasicInfo struct {
 	HistoryCloseRange []time.Time
 	HistoryKbarRange  []time.Time
 	HistoryTickRange  []time.Time
+
+	AllStocks  map[string]*Stock
+	AllFutures map[string]*Future
 }

@@ -560,6 +560,9 @@ const docTemplate = `{
                 "analyze": {
                     "$ref": "#/definitions/config.Analyze"
                 },
+                "future_trade_switch": {
+                    "$ref": "#/definitions/config.FutureTradeSwitch"
+                },
                 "history": {
                     "$ref": "#/definitions/config.History"
                 },
@@ -575,6 +578,9 @@ const docTemplate = `{
                 "rabbitmq": {
                     "$ref": "#/definitions/config.RabbitMQ"
                 },
+                "simulation": {
+                    "type": "boolean"
+                },
                 "sinopac": {
                     "$ref": "#/definitions/config.Sinopac"
                 },
@@ -583,6 +589,29 @@ const docTemplate = `{
                 },
                 "trade_switch": {
                     "$ref": "#/definitions/config.TradeSwitch"
+                }
+            }
+        },
+        "config.FutureTradeSwitch": {
+            "type": "object",
+            "properties": {
+                "cancel_wait_time": {
+                    "type": "integer"
+                },
+                "quantity": {
+                    "type": "integer"
+                },
+                "trade_in_wait_time": {
+                    "type": "integer"
+                },
+                "trade_out_wait_time": {
+                    "type": "integer"
+                },
+                "trade_time_range": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/config.TradeTimeRange"
+                    }
                 }
             }
         },
@@ -697,10 +726,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "monitor_future_code": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
+                    "type": "string"
                 },
                 "price_limit": {
                     "type": "array",
@@ -722,9 +748,6 @@ const docTemplate = `{
                 "hold_time_from_open": {
                     "type": "number"
                 },
-                "simulation": {
-                    "type": "boolean"
-                },
                 "total_open_time": {
                     "type": "number"
                 },
@@ -736,6 +759,17 @@ const docTemplate = `{
                 },
                 "trade_out_wait_time": {
                     "type": "integer"
+                }
+            }
+        },
+        "config.TradeTimeRange": {
+            "type": "object",
+            "properties": {
+                "duration": {
+                    "type": "integer"
+                },
+                "start_time": {
+                    "type": "string"
                 }
             }
         },

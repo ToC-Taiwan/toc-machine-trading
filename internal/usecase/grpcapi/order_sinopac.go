@@ -124,3 +124,69 @@ func (t *OrdergRPCAPI) GetNonBlockOrderStatusArr() (*pb.ErrorMessage, error) {
 	}
 	return r, nil
 }
+
+// BuyFuture -.
+func (t *OrdergRPCAPI) BuyFuture(order *entity.FutureOrder, sim bool) (*pb.TradeResult, error) {
+	conn := t.conn.GetReadyConn()
+	defer t.conn.PutReadyConn(conn)
+	c := pb.NewTradeInterfaceClient(conn)
+	r, err := c.BuyFuture(context.Background(), &pb.FutureOrderDetail{
+		Code:     order.Code,
+		Price:    order.Price,
+		Quantity: order.Quantity,
+		Simulate: sim,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return r, nil
+}
+
+// SellFuture -.
+func (t *OrdergRPCAPI) SellFuture(order *entity.FutureOrder, sim bool) (*pb.TradeResult, error) {
+	conn := t.conn.GetReadyConn()
+	defer t.conn.PutReadyConn(conn)
+	c := pb.NewTradeInterfaceClient(conn)
+	r, err := c.SellFuture(context.Background(), &pb.FutureOrderDetail{
+		Code:     order.Code,
+		Price:    order.Price,
+		Quantity: order.Quantity,
+		Simulate: sim,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return r, nil
+}
+
+// SellFirstFuture -.
+func (t *OrdergRPCAPI) SellFirstFuture(order *entity.FutureOrder, sim bool) (*pb.TradeResult, error) {
+	conn := t.conn.GetReadyConn()
+	defer t.conn.PutReadyConn(conn)
+	c := pb.NewTradeInterfaceClient(conn)
+	r, err := c.SellFirstFuture(context.Background(), &pb.FutureOrderDetail{
+		Code:     order.Code,
+		Price:    order.Price,
+		Quantity: order.Quantity,
+		Simulate: sim,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return r, nil
+}
+
+// CancelFuture -.
+func (t *OrdergRPCAPI) CancelFuture(orderID string, sim bool) (*pb.TradeResult, error) {
+	conn := t.conn.GetReadyConn()
+	defer t.conn.PutReadyConn(conn)
+	c := pb.NewTradeInterfaceClient(conn)
+	r, err := c.CancelFuture(context.Background(), &pb.FutureOrderID{
+		OrderId:  orderID,
+		Simulate: sim,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return r, nil
+}
