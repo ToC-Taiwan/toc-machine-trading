@@ -98,7 +98,7 @@ func (uc *StreamUseCase) ReceiveOrderStatus(ctx context.Context) {
 		for {
 			order := <-orderStatusChan
 			switch t := order.(type) {
-			case *entity.Order:
+			case *entity.StockOrder:
 				if cc.GetOrderByOrderID(t.OrderID) != nil {
 					bus.PublishTopicEvent(topicInsertOrUpdateOrder, t)
 				}
@@ -184,7 +184,7 @@ func (uc *StreamUseCase) tradingRoom(agent *TradeAgent) {
 	}()
 }
 
-func (uc *StreamUseCase) placeOrder(agent *TradeAgent, order *entity.Order) {
+func (uc *StreamUseCase) placeOrder(agent *TradeAgent, order *entity.StockOrder) {
 	switch order.Action {
 	case entity.ActionBuy:
 		if !uc.allowForward {

@@ -19,7 +19,7 @@ type SimulateTradeAgent struct {
 	periodTickArr RealTimeTickArr
 
 	orderMapLock sync.RWMutex
-	orderMap     map[entity.OrderAction][]*entity.Order
+	orderMap     map[entity.OrderAction][]*entity.StockOrder
 
 	tickChan chan *entity.RealTimeTick
 
@@ -51,7 +51,7 @@ func NewSimulateAgent(stockNum string) *SimulateTradeAgent {
 	new := &SimulateTradeAgent{
 		stockNum:           stockNum,
 		orderQuantity:      quantity,
-		orderMap:           make(map[entity.OrderAction][]*entity.Order),
+		orderMap:           make(map[entity.OrderAction][]*entity.StockOrder),
 		tickChan:           make(chan *entity.RealTimeTick),
 		historyTickAnalyze: arr,
 	}
@@ -135,7 +135,7 @@ func (o *SimulateTradeAgent) convertToRealTimeTick(tickArr *[]*entity.HistoryTic
 	}
 }
 
-func (o *SimulateTradeAgent) generateSimulateOrder(cfg config.Analyze) *entity.Order {
+func (o *SimulateTradeAgent) generateSimulateOrder(cfg config.Analyze) *entity.StockOrder {
 	if o.lastTick.TickTime.Sub(o.analyzeTickTime) > time.Duration(cfg.TickAnalyzePeriod*1.1)*time.Millisecond {
 		o.analyzeTickTime = o.lastTick.TickTime
 		o.periodTickArr = RealTimeTickArr{o.lastTick}
@@ -172,12 +172,14 @@ func (o *SimulateTradeAgent) generateSimulateOrder(cfg config.Analyze) *entity.O
 	allOutInRation := o.tickArr.getOutInRatio()
 
 	// need to compare with all and period
-	order := &entity.Order{
-		StockNum:  o.stockNum,
-		TickTime:  o.lastTick.TickTime,
-		Quantity:  o.orderQuantity,
-		GroupID:   uuid.New().String(),
-		TradeTime: o.lastTick.TickTime,
+	order := &entity.StockOrder{
+		StockNum: o.stockNum,
+		BaseOrder: entity.BaseOrder{
+			TickTime:  o.lastTick.TickTime,
+			Quantity:  o.orderQuantity,
+			GroupID:   uuid.New().String(),
+			TradeTime: o.lastTick.TickTime,
+		},
 	}
 
 	switch {
@@ -194,14 +196,16 @@ func (o *SimulateTradeAgent) generateSimulateOrder(cfg config.Analyze) *entity.O
 	}
 }
 
-func (o *SimulateTradeAgent) generateSimulateTradeOutOrder(cfg config.Analyze, postOrderAction entity.OrderAction, preOrder *entity.Order) *entity.Order {
-	order := &entity.Order{
-		StockNum:  o.stockNum,
-		Action:    postOrderAction,
-		Price:     o.lastTick.Close,
-		Quantity:  preOrder.Quantity,
-		TradeTime: o.lastTick.TickTime,
-		GroupID:   preOrder.GroupID,
+func (o *SimulateTradeAgent) generateSimulateTradeOutOrder(cfg config.Analyze, postOrderAction entity.OrderAction, preOrder *entity.StockOrder) *entity.StockOrder {
+	order := &entity.StockOrder{
+		StockNum: o.stockNum,
+		BaseOrder: entity.BaseOrder{
+			Action:    postOrderAction,
+			Price:     o.lastTick.Close,
+			Quantity:  preOrder.Quantity,
+			TradeTime: o.lastTick.TickTime,
+			GroupID:   preOrder.GroupID,
+		},
 	}
 
 	if o.lastTick.TickTime.After(preOrder.TradeTime.Add(time.Duration(cfg.MaxHoldTime) * time.Minute)) {
@@ -239,7 +243,7 @@ func (o *SimulateTradeAgent) getPRByVolume(volume int64) float64 {
 	return 100 * float64(total-position) / float64(total)
 }
 
-func (o *SimulateTradeAgent) checkNeededPost() (entity.OrderAction, *entity.Order) {
+func (o *SimulateTradeAgent) checkNeededPost() (entity.OrderAction, *entity.StockOrder) {
 	defer o.orderMapLock.RUnlock()
 	o.orderMapLock.RLock()
 
@@ -254,18 +258,18 @@ func (o *SimulateTradeAgent) checkNeededPost() (entity.OrderAction, *entity.Orde
 	return entity.ActionNone, nil
 }
 
-func (o *SimulateTradeAgent) getAllOrders() []*entity.Order {
+func (o *SimulateTradeAgent) getAllOrders() []*entity.StockOrder {
 	defer o.orderMapLock.RUnlock()
 	o.orderMapLock.RLock()
 
-	var orders []*entity.Order
+	var orders []*entity.StockOrder
 	for _, v := range o.orderMap {
 		orders = append(orders, v...)
 	}
 
 	if len(orders)%2 != 0 {
 		log.Warnf("Orders are not enough %s", o.stockNum)
-		return []*entity.Order{}
+		return []*entity.StockOrder{}
 	}
 
 	return orders

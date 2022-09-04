@@ -1322,10 +1322,10 @@ func (mr *MockOrderMockRecorder) CalculateTradeDiscount(price, quantity interfac
 }
 
 // GetAllOrder mocks base method.
-func (m *MockOrder) GetAllOrder(ctx context.Context) ([]*entity.Order, error) {
+func (m *MockOrder) GetAllOrder(ctx context.Context) ([]*entity.StockOrder, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAllOrder", ctx)
-	ret0, _ := ret[0].([]*entity.Order)
+	ret0, _ := ret[0].([]*entity.StockOrder)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -1389,7 +1389,7 @@ func (mr *MockOrderRepoMockRecorder) InsertOrUpdateFutureOrderByOrderID(ctx, t i
 }
 
 // InsertOrUpdateOrderByOrderID mocks base method.
-func (m *MockOrderRepo) InsertOrUpdateOrderByOrderID(ctx context.Context, t *entity.Order) error {
+func (m *MockOrderRepo) InsertOrUpdateOrderByOrderID(ctx context.Context, t *entity.StockOrder) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "InsertOrUpdateOrderByOrderID", ctx, t)
 	ret0, _ := ret[0].(error)
@@ -1417,10 +1417,10 @@ func (mr *MockOrderRepoMockRecorder) InsertOrUpdateTradeBalance(ctx, t interface
 }
 
 // QueryAllOrder mocks base method.
-func (m *MockOrderRepo) QueryAllOrder(ctx context.Context) ([]*entity.Order, error) {
+func (m *MockOrderRepo) QueryAllOrder(ctx context.Context) ([]*entity.StockOrder, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "QueryAllOrder", ctx)
-	ret0, _ := ret[0].([]*entity.Order)
+	ret0, _ := ret[0].([]*entity.StockOrder)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -1432,10 +1432,10 @@ func (mr *MockOrderRepoMockRecorder) QueryAllOrder(ctx interface{}) *gomock.Call
 }
 
 // QueryAllOrderByDate mocks base method.
-func (m *MockOrderRepo) QueryAllOrderByDate(ctx context.Context, date time.Time) ([]*entity.Order, error) {
+func (m *MockOrderRepo) QueryAllOrderByDate(ctx context.Context, date time.Time) ([]*entity.StockOrder, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "QueryAllOrderByDate", ctx, date)
-	ret0, _ := ret[0].([]*entity.Order)
+	ret0, _ := ret[0].([]*entity.StockOrder)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -1477,10 +1477,10 @@ func (mr *MockOrderRepoMockRecorder) QueryFutureOrderByID(ctx, orderID interface
 }
 
 // QueryOrderByID mocks base method.
-func (m *MockOrderRepo) QueryOrderByID(ctx context.Context, orderID string) (*entity.Order, error) {
+func (m *MockOrderRepo) QueryOrderByID(ctx context.Context, orderID string) (*entity.StockOrder, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "QueryOrderByID", ctx, orderID)
-	ret0, _ := ret[0].(*entity.Order)
+	ret0, _ := ret[0].(*entity.StockOrder)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -1545,7 +1545,7 @@ func (mr *MockOrdergRPCAPIMockRecorder) BuyFuture(order, sim interface{}) *gomoc
 }
 
 // BuyStock mocks base method.
-func (m *MockOrdergRPCAPI) BuyStock(order *entity.Order, sim bool) (*pb.TradeResult, error) {
+func (m *MockOrdergRPCAPI) BuyStock(order *entity.StockOrder, sim bool) (*pb.TradeResult, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "BuyStock", order, sim)
 	ret0, _ := ret[0].(*pb.TradeResult)
@@ -1650,7 +1650,7 @@ func (mr *MockOrdergRPCAPIMockRecorder) SellFirstFuture(order, sim interface{}) 
 }
 
 // SellFirstStock mocks base method.
-func (m *MockOrdergRPCAPI) SellFirstStock(order *entity.Order, sim bool) (*pb.TradeResult, error) {
+func (m *MockOrdergRPCAPI) SellFirstStock(order *entity.StockOrder, sim bool) (*pb.TradeResult, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SellFirstStock", order, sim)
 	ret0, _ := ret[0].(*pb.TradeResult)
@@ -1680,7 +1680,7 @@ func (mr *MockOrdergRPCAPIMockRecorder) SellFuture(order, sim interface{}) *gomo
 }
 
 // SellStock mocks base method.
-func (m *MockOrdergRPCAPI) SellStock(order *entity.Order, sim bool) (*pb.TradeResult, error) {
+func (m *MockOrdergRPCAPI) SellStock(order *entity.StockOrder, sim bool) (*pb.TradeResult, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SellStock", order, sim)
 	ret0, _ := ret[0].(*pb.TradeResult)

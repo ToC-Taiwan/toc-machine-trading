@@ -72,7 +72,7 @@ func NewOrder(t OrdergRPCAPI, r OrderRepo) *OrderUseCase {
 	return uc
 }
 
-func (uc *OrderUseCase) placeOrder(order *entity.Order) {
+func (uc *OrderUseCase) placeOrder(order *entity.StockOrder) {
 	defer uc.placeOrderLock.Unlock()
 	uc.placeOrderLock.Lock()
 
@@ -116,7 +116,7 @@ func (uc *OrderUseCase) placeOrder(order *entity.Order) {
 	log.Warnf("Place Order -> Stock: %s, Action: %d, Price: %.2f, Qty: %d, Quota: %d", order.StockNum, order.Action, order.Price, order.Quantity, uc.quota.quota)
 }
 
-func (uc *OrderUseCase) cancelOrder(order *entity.Order) {
+func (uc *OrderUseCase) cancelOrder(order *entity.StockOrder) {
 	defer uc.placeOrderLock.Unlock()
 	uc.placeOrderLock.Lock()
 
@@ -137,7 +137,7 @@ func (uc *OrderUseCase) cancelOrder(order *entity.Order) {
 }
 
 // BuyStock -.
-func (uc *OrderUseCase) BuyStock(order *entity.Order) (string, entity.OrderStatus, error) {
+func (uc *OrderUseCase) BuyStock(order *entity.StockOrder) (string, entity.OrderStatus, error) {
 	result, err := uc.gRPCAPI.BuyStock(order, uc.simTrade)
 	if err != nil {
 		return "", entity.StatusUnknow, err
@@ -152,7 +152,7 @@ func (uc *OrderUseCase) BuyStock(order *entity.Order) (string, entity.OrderStatu
 }
 
 // SellStock -.
-func (uc *OrderUseCase) SellStock(order *entity.Order) (string, entity.OrderStatus, error) {
+func (uc *OrderUseCase) SellStock(order *entity.StockOrder) (string, entity.OrderStatus, error) {
 	result, err := uc.gRPCAPI.SellStock(order, uc.simTrade)
 	if err != nil {
 		return "", entity.StatusUnknow, err
@@ -167,7 +167,7 @@ func (uc *OrderUseCase) SellStock(order *entity.Order) (string, entity.OrderStat
 }
 
 // SellFirstStock -.
-func (uc *OrderUseCase) SellFirstStock(order *entity.Order) (string, entity.OrderStatus, error) {
+func (uc *OrderUseCase) SellFirstStock(order *entity.StockOrder) (string, entity.OrderStatus, error) {
 	result, err := uc.gRPCAPI.SellFirstStock(order, uc.simTrade)
 	if err != nil {
 		return "", entity.StatusUnknow, err
@@ -182,7 +182,7 @@ func (uc *OrderUseCase) SellFirstStock(order *entity.Order) (string, entity.Orde
 }
 
 // BuyLaterStock -.
-func (uc *OrderUseCase) BuyLaterStock(order *entity.Order) (string, entity.OrderStatus, error) {
+func (uc *OrderUseCase) BuyLaterStock(order *entity.StockOrder) (string, entity.OrderStatus, error) {
 	result, err := uc.gRPCAPI.BuyStock(order, uc.simTrade)
 	if err != nil {
 		return "", entity.StatusUnknow, err
@@ -237,25 +237,29 @@ func (uc *OrderUseCase) AskOrderUpdate() error {
 
 			switch {
 			case cc.GetOrderByOrderID(v.GetOrderId()) != nil:
-				o := &entity.Order{
-					StockNum:  v.GetCode(),
-					OrderID:   v.GetOrderId(),
-					Action:    actionMap[v.GetAction()],
-					Price:     v.GetPrice(),
-					Quantity:  v.GetQuantity(),
-					Status:    statusMap[v.GetStatus()],
-					OrderTime: orderTime,
+				o := &entity.StockOrder{
+					StockNum: v.GetCode(),
+					BaseOrder: entity.BaseOrder{
+						OrderID:   v.GetOrderId(),
+						Action:    actionMap[v.GetAction()],
+						Price:     v.GetPrice(),
+						Quantity:  v.GetQuantity(),
+						Status:    statusMap[v.GetStatus()],
+						OrderTime: orderTime,
+					},
 				}
 				uc.updateCacheAndInsertDB(o)
 			case cc.GetFutureOrderByOrderID(v.GetOrderId()) != nil:
 				o := &entity.FutureOrder{
-					Code:      v.GetCode(),
-					OrderID:   v.GetOrderId(),
-					Action:    actionMap[v.GetAction()],
-					Price:     v.GetPrice(),
-					Quantity:  v.GetQuantity(),
-					Status:    statusMap[v.GetStatus()],
-					OrderTime: orderTime,
+					Code: v.GetCode(),
+					BaseOrder: entity.BaseOrder{
+						OrderID:   v.GetOrderId(),
+						Action:    actionMap[v.GetAction()],
+						Price:     v.GetPrice(),
+						Quantity:  v.GetQuantity(),
+						Status:    statusMap[v.GetStatus()],
+						OrderTime: orderTime,
+					},
 				}
 				uc.updateCacheAndInsertFutureDB(o)
 			}
@@ -264,7 +268,7 @@ func (uc *OrderUseCase) AskOrderUpdate() error {
 	return nil
 }
 
-func (uc *OrderUseCase) updateCacheAndInsertDB(order *entity.Order) {
+func (uc *OrderUseCase) updateCacheAndInsertDB(order *entity.StockOrder) {
 	// get order from cache
 	cacheOrder := cc.GetOrderByOrderID(order.OrderID)
 	if cacheOrder == nil {
@@ -288,8 +292,8 @@ func (uc *OrderUseCase) updateCacheAndInsertDB(order *entity.Order) {
 }
 
 // CalculateTradeBalance -.
-func (uc *OrderUseCase) calculateTradeBalance(allOrders []*entity.Order) {
-	var forwardOrder, reverseOrder []*entity.Order
+func (uc *OrderUseCase) calculateTradeBalance(allOrders []*entity.StockOrder) {
+	var forwardOrder, reverseOrder []*entity.StockOrder
 	for _, v := range allOrders {
 		if v.Status != entity.StatusFilled {
 			continue
@@ -347,7 +351,7 @@ func (uc *OrderUseCase) calculateTradeBalance(allOrders []*entity.Order) {
 }
 
 // GetAllOrder -.
-func (uc *OrderUseCase) GetAllOrder(ctx context.Context) ([]*entity.Order, error) {
+func (uc *OrderUseCase) GetAllOrder(ctx context.Context) ([]*entity.StockOrder, error) {
 	orderArr, err := uc.repo.QueryAllOrder(ctx)
 	if err != nil {
 		return nil, err

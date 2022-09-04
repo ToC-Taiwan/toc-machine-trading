@@ -133,24 +133,28 @@ func (c *StreamRabbit) OrderStatusConsumer(orderStatusChan chan interface{}) {
 
 		switch {
 		case c.allStockMap[body.GetCode()] != nil:
-			orderStatusChan <- &entity.Order{
-				StockNum:  body.GetCode(),
-				OrderID:   body.GetOrderId(),
-				Action:    actionMap[body.GetAction()],
-				Price:     body.GetPrice(),
-				Quantity:  body.GetQuantity(),
-				Status:    statusMap[body.GetStatus()],
-				OrderTime: orderTime,
+			orderStatusChan <- &entity.StockOrder{
+				StockNum: body.GetCode(),
+				BaseOrder: entity.BaseOrder{
+					OrderID:   body.GetOrderId(),
+					Action:    actionMap[body.GetAction()],
+					Price:     body.GetPrice(),
+					Quantity:  body.GetQuantity(),
+					Status:    statusMap[body.GetStatus()],
+					OrderTime: orderTime,
+				},
 			}
 		case c.allFutureMap[body.GetCode()] != nil:
 			orderStatusChan <- &entity.FutureOrder{
-				Code:      body.GetCode(),
-				OrderID:   body.GetOrderId(),
-				Action:    actionMap[body.GetAction()],
-				Price:     body.GetPrice(),
-				Quantity:  body.GetQuantity(),
-				Status:    statusMap[body.GetStatus()],
-				OrderTime: orderTime,
+				Code: body.GetCode(),
+				BaseOrder: entity.BaseOrder{
+					OrderID:   body.GetOrderId(),
+					Action:    actionMap[body.GetAction()],
+					Price:     body.GetPrice(),
+					Quantity:  body.GetQuantity(),
+					Status:    statusMap[body.GetStatus()],
+					OrderTime: orderTime,
+				},
 			}
 		}
 	}

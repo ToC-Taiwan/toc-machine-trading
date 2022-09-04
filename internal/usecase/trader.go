@@ -20,8 +20,8 @@ type TradeAgent struct {
 	periodTickArr RealTimeTickArr
 
 	orderMapLock sync.RWMutex
-	orderMap     map[entity.OrderAction][]*entity.Order
-	waitingOrder *entity.Order
+	orderMap     map[entity.OrderAction][]*entity.StockOrder
+	waitingOrder *entity.StockOrder
 
 	tickChan   chan *entity.RealTimeTick
 	bidAskChan chan *entity.RealTimeBidAsk
@@ -56,7 +56,7 @@ func NewAgent(stockNum string, tradeSwitch config.TradeSwitch) *TradeAgent {
 	new := &TradeAgent{
 		stockNum:           stockNum,
 		orderQuantity:      quantity,
-		orderMap:           make(map[entity.OrderAction][]*entity.Order),
+		orderMap:           make(map[entity.OrderAction][]*entity.StockOrder),
 		tickChan:           make(chan *entity.RealTimeTick),
 		bidAskChan:         make(chan *entity.RealTimeBidAsk),
 		historyTickAnalyze: arr,
@@ -70,7 +70,7 @@ func NewAgent(stockNum string, tradeSwitch config.TradeSwitch) *TradeAgent {
 	return new
 }
 
-func (o *TradeAgent) generateOrder(cfg config.Analyze) *entity.Order {
+func (o *TradeAgent) generateOrder(cfg config.Analyze) *entity.StockOrder {
 	if o.lastTick.TickTime.Sub(o.analyzeTickTime) > time.Duration(cfg.TickAnalyzePeriod*1.1)*time.Millisecond {
 		o.analyzeTickTime = o.lastTick.TickTime
 		o.periodTickArr = RealTimeTickArr{o.lastTick}
@@ -103,11 +103,13 @@ func (o *TradeAgent) generateOrder(cfg config.Analyze) *entity.Order {
 	allOutInRation := o.tickArr.getOutInRatio()
 
 	// need to compare with all and period
-	order := &entity.Order{
+	order := &entity.StockOrder{
 		StockNum: o.stockNum,
-		Quantity: o.orderQuantity,
-		TickTime: o.lastTick.TickTime,
-		GroupID:  uuid.New().String(),
+		BaseOrder: entity.BaseOrder{
+			Quantity: o.orderQuantity,
+			TickTime: o.lastTick.TickTime,
+			GroupID:  uuid.New().String(),
+		},
 	}
 
 	switch {
@@ -124,15 +126,17 @@ func (o *TradeAgent) generateOrder(cfg config.Analyze) *entity.Order {
 	}
 }
 
-func (o *TradeAgent) generateTradeOutOrder(cfg config.Analyze, postOrderAction entity.OrderAction, preOrder *entity.Order) *entity.Order {
-	order := &entity.Order{
-		StockNum:  o.stockNum,
-		Action:    postOrderAction,
-		Price:     o.lastTick.Close,
-		Quantity:  preOrder.Quantity,
-		TradeTime: o.lastTick.TickTime,
-		TickTime:  o.lastTick.TickTime,
-		GroupID:   preOrder.GroupID,
+func (o *TradeAgent) generateTradeOutOrder(cfg config.Analyze, postOrderAction entity.OrderAction, preOrder *entity.StockOrder) *entity.StockOrder {
+	order := &entity.StockOrder{
+		StockNum: o.stockNum,
+		BaseOrder: entity.BaseOrder{
+			Action:    postOrderAction,
+			Price:     o.lastTick.Close,
+			Quantity:  preOrder.Quantity,
+			TradeTime: o.lastTick.TickTime,
+			TickTime:  o.lastTick.TickTime,
+			GroupID:   preOrder.GroupID,
+		},
 	}
 
 	if o.lastTick.TickTime.After(preOrder.TradeTime.Add(time.Duration(cfg.MaxHoldTime) * time.Minute)) {
@@ -157,7 +161,7 @@ func (o *TradeAgent) generateTradeOutOrder(cfg config.Analyze, postOrderAction e
 	return nil
 }
 
-func (o *TradeAgent) checkPlaceOrderStatus(order *entity.Order) {
+func (o *TradeAgent) checkPlaceOrderStatus(order *entity.StockOrder) {
 	var timeout time.Duration
 	switch order.Action {
 	case entity.ActionBuy, entity.ActionSellFirst:
@@ -198,7 +202,7 @@ func (o *TradeAgent) checkPlaceOrderStatus(order *entity.Order) {
 	log.Error("check place order status raise unknown error")
 }
 
-func (o *TradeAgent) cancelOrder(order *entity.Order) {
+func (o *TradeAgent) cancelOrder(order *entity.StockOrder) {
 	order.TradeTime = time.Time{}
 	bus.PublishTopicEvent(topicCancelOrder, order)
 
@@ -226,7 +230,7 @@ func (o *TradeAgent) cancelOrder(order *entity.Order) {
 	}()
 }
 
-func (o *TradeAgent) checkNeededPost() (entity.OrderAction, *entity.Order) {
+func (o *TradeAgent) checkNeededPost() (entity.OrderAction, *entity.StockOrder) {
 	defer o.orderMapLock.RUnlock()
 	o.orderMapLock.RLock()
 

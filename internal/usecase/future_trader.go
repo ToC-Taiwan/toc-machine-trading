@@ -79,11 +79,13 @@ func (o *FutureTradeAgent) generateOrder(cfg config.Analyze) *entity.FutureOrder
 
 	// need to compare with all and period
 	order := &entity.FutureOrder{
-		Code:     o.code,
-		Quantity: o.orderQuantity,
-		TickTime: o.lastTick.TickTime,
-		GroupID:  uuid.New().String(),
-		Price:    o.lastTick.Close,
+		Code: o.code,
+		BaseOrder: entity.BaseOrder{
+			Quantity: o.orderQuantity,
+			TickTime: o.lastTick.TickTime,
+			GroupID:  uuid.New().String(),
+			Price:    o.lastTick.Close,
+		},
 	}
 
 	switch {
@@ -100,13 +102,15 @@ func (o *FutureTradeAgent) generateOrder(cfg config.Analyze) *entity.FutureOrder
 
 func (o *FutureTradeAgent) generateTradeOutOrder(cfg config.Analyze, postOrderAction entity.OrderAction, preOrder *entity.FutureOrder) *entity.FutureOrder {
 	order := &entity.FutureOrder{
-		Code:      o.code,
-		Action:    postOrderAction,
-		Price:     o.lastTick.Close,
-		Quantity:  preOrder.Quantity,
-		TradeTime: o.lastTick.TickTime,
-		TickTime:  o.lastTick.TickTime,
-		GroupID:   preOrder.GroupID,
+		Code: o.code,
+		BaseOrder: entity.BaseOrder{
+			Action:    postOrderAction,
+			Price:     o.lastTick.Close,
+			Quantity:  preOrder.Quantity,
+			TradeTime: o.lastTick.TickTime,
+			TickTime:  o.lastTick.TickTime,
+			GroupID:   preOrder.GroupID,
+		},
 	}
 
 	if o.lastTick.TickTime.After(preOrder.TradeTime.Add(time.Duration(cfg.MaxHoldTime) * time.Minute)) {

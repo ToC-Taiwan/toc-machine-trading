@@ -21,7 +21,7 @@ func NewOrder(client *sinopac.Connection) *OrdergRPCAPI {
 }
 
 // BuyStock BuyStock
-func (t *OrdergRPCAPI) BuyStock(order *entity.Order, sim bool) (*pb.TradeResult, error) {
+func (t *OrdergRPCAPI) BuyStock(order *entity.StockOrder, sim bool) (*pb.TradeResult, error) {
 	conn := t.conn.GetReadyConn()
 	defer t.conn.PutReadyConn(conn)
 	c := pb.NewTradeInterfaceClient(conn)
@@ -38,7 +38,7 @@ func (t *OrdergRPCAPI) BuyStock(order *entity.Order, sim bool) (*pb.TradeResult,
 }
 
 // SellStock SellStock
-func (t *OrdergRPCAPI) SellStock(order *entity.Order, sim bool) (*pb.TradeResult, error) {
+func (t *OrdergRPCAPI) SellStock(order *entity.StockOrder, sim bool) (*pb.TradeResult, error) {
 	conn := t.conn.GetReadyConn()
 	defer t.conn.PutReadyConn(conn)
 	c := pb.NewTradeInterfaceClient(conn)
@@ -55,7 +55,7 @@ func (t *OrdergRPCAPI) SellStock(order *entity.Order, sim bool) (*pb.TradeResult
 }
 
 // SellFirstStock SellFirstStock
-func (t *OrdergRPCAPI) SellFirstStock(order *entity.Order, sim bool) (*pb.TradeResult, error) {
+func (t *OrdergRPCAPI) SellFirstStock(order *entity.StockOrder, sim bool) (*pb.TradeResult, error) {
 	conn := t.conn.GetReadyConn()
 	defer t.conn.PutReadyConn(conn)
 	c := pb.NewTradeInterfaceClient(conn)

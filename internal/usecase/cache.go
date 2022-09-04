@@ -46,14 +46,14 @@ func (c *Cache) GetBasicInfo() *entity.BasicInfo {
 }
 
 // SetOrderByOrderID -.
-func (c *Cache) SetOrderByOrderID(order *entity.Order) {
+func (c *Cache) SetOrderByOrderID(order *entity.StockOrder) {
 	c.Set(c.orderKey(order.OrderID), order)
 }
 
 // GetOrderByOrderID -.
-func (c *Cache) GetOrderByOrderID(orderID string) *entity.Order {
+func (c *Cache) GetOrderByOrderID(orderID string) *entity.StockOrder {
 	if value, ok := c.Get(c.orderKey(orderID)); ok {
-		return value.(*entity.Order)
+		return value.(*entity.StockOrder)
 	}
 	return nil
 }

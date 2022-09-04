@@ -153,7 +153,7 @@ type (
 type (
 	// Order -.
 	Order interface {
-		GetAllOrder(ctx context.Context) ([]*entity.Order, error)
+		GetAllOrder(ctx context.Context) ([]*entity.StockOrder, error)
 		GetAllTradeBalance(ctx context.Context) ([]*entity.TradeBalance, error)
 		CalculateBuyCost(price float64, quantity int64) int64
 		CalculateSellCost(price float64, quantity int64) int64
@@ -168,11 +168,11 @@ type (
 		QueryTradeBalanceByDate(ctx context.Context, date time.Time) (*entity.TradeBalance, error)
 		InsertOrUpdateTradeBalance(ctx context.Context, t *entity.TradeBalance) error
 
-		QueryOrderByID(ctx context.Context, orderID string) (*entity.Order, error)
-		InsertOrUpdateOrderByOrderID(ctx context.Context, t *entity.Order) error
+		QueryOrderByID(ctx context.Context, orderID string) (*entity.StockOrder, error)
+		InsertOrUpdateOrderByOrderID(ctx context.Context, t *entity.StockOrder) error
 
-		QueryAllOrder(ctx context.Context) ([]*entity.Order, error)
-		QueryAllOrderByDate(ctx context.Context, date time.Time) ([]*entity.Order, error)
+		QueryAllOrder(ctx context.Context) ([]*entity.StockOrder, error)
+		QueryAllOrderByDate(ctx context.Context, date time.Time) ([]*entity.StockOrder, error)
 
 		QueryFutureOrderByID(ctx context.Context, orderID string) (*entity.FutureOrder, error)
 		InsertOrUpdateFutureOrderByOrderID(ctx context.Context, t *entity.FutureOrder) error
@@ -180,9 +180,9 @@ type (
 
 	// OrdergRPCAPI -.
 	OrdergRPCAPI interface {
-		BuyStock(order *entity.Order, sim bool) (*pb.TradeResult, error)
-		SellStock(order *entity.Order, sim bool) (*pb.TradeResult, error)
-		SellFirstStock(order *entity.Order, sim bool) (*pb.TradeResult, error)
+		BuyStock(order *entity.StockOrder, sim bool) (*pb.TradeResult, error)
+		SellStock(order *entity.StockOrder, sim bool) (*pb.TradeResult, error)
+		SellFirstStock(order *entity.StockOrder, sim bool) (*pb.TradeResult, error)
 		CancelStock(orderID string, sim bool) (*pb.TradeResult, error)
 		GetOrderStatusByID(orderID string, sim bool) (*pb.TradeResult, error)
 		GetOrderStatusArr() ([]*pb.StockOrderStatus, error)

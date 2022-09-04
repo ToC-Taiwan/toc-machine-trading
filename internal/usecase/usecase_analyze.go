@@ -59,7 +59,7 @@ func NewAnalyze(r HistoryRepo) *AnalyzeUseCase {
 type simulateResult struct {
 	cfg     config.Analyze
 	balance *entity.TradeBalance
-	orders  []*entity.Order
+	orders  []*entity.StockOrder
 }
 
 // AnalyzeAll -.
@@ -137,7 +137,7 @@ func (uc *AnalyzeUseCase) SimulateOnHistoryTick(ctx context.Context, useDefault 
 	go func() {
 		var bestCfg config.Analyze
 		var bestBalance *entity.TradeBalance
-		var orders *[]*entity.Order
+		var orders *[]*entity.StockOrder
 		for {
 			res, ok := <-resultChan
 			if !ok {
@@ -173,7 +173,7 @@ func (uc *AnalyzeUseCase) SimulateOnHistoryTick(ctx context.Context, useDefault 
 	log.Info("Simulate Done")
 }
 
-func (uc *AnalyzeUseCase) getSimulateCond(targetArr []*entity.Target, analyzeCfg config.Analyze) (config.Analyze, *entity.TradeBalance, []*entity.Order) {
+func (uc *AnalyzeUseCase) getSimulateCond(targetArr []*entity.Target, analyzeCfg config.Analyze) (config.Analyze, *entity.TradeBalance, []*entity.StockOrder) {
 	var wg sync.WaitGroup
 	var agentArr []*SimulateTradeAgent
 	var agentLock sync.Mutex
@@ -201,7 +201,7 @@ func (uc *AnalyzeUseCase) getSimulateCond(targetArr []*entity.Target, analyzeCfg
 	}
 	wg.Wait()
 
-	var allOrders []*entity.Order
+	var allOrders []*entity.StockOrder
 	for i := 0; i < len(agentArr); i++ {
 		orders := agentArr[i].getAllOrders()
 		if len(orders) != 0 {
@@ -210,7 +210,7 @@ func (uc *AnalyzeUseCase) getSimulateCond(targetArr []*entity.Target, analyzeCfg
 	}
 
 	if len(allOrders) == 0 {
-		return config.Analyze{}, &entity.TradeBalance{}, []*entity.Order{}
+		return config.Analyze{}, &entity.TradeBalance{}, []*entity.StockOrder{}
 	}
 
 	balancer := NewSimulateBalance(uc.quotaCfg, allOrders)
@@ -221,18 +221,18 @@ func (uc *AnalyzeUseCase) getSimulateCond(targetArr []*entity.Target, analyzeCfg
 // SimulateBalance -.
 type SimulateBalance struct {
 	quota     *Quota
-	allOrders []*entity.Order
+	allOrders []*entity.StockOrder
 }
 
 // NewSimulateBalance -.
-func NewSimulateBalance(quotaCfg config.Quota, allOrders []*entity.Order) *SimulateBalance {
+func NewSimulateBalance(quotaCfg config.Quota, allOrders []*entity.StockOrder) *SimulateBalance {
 	return &SimulateBalance{
 		quota:     NewQuota(quotaCfg),
 		allOrders: allOrders,
 	}
 }
 
-func (uc *SimulateBalance) calculateBalance(allOrders []*entity.Order) (*entity.TradeBalance, []*entity.Order) {
+func (uc *SimulateBalance) calculateBalance(allOrders []*entity.StockOrder) (*entity.TradeBalance, []*entity.StockOrder) {
 	sort.Slice(allOrders, func(i, j int) bool {
 		return allOrders[i].TradeTime.Before(allOrders[j].TradeTime)
 	})
@@ -263,7 +263,7 @@ func (uc *SimulateBalance) calculateBalance(allOrders []*entity.Order) (*entity.
 		// log.Warnf("TradeTime: %s, Stock: %s, Action: %d, Qty: %d, Price: %.2f", v.TradeTime.Format(global.LongTimeLayout), v.StockNum, v.Action, v.Quantity, v.Price)
 	}
 
-	var orders []*entity.Order
+	var orders []*entity.StockOrder
 	orders = append(orders, forwardOrder...)
 	orders = append(orders, reverseOrder...)
 
@@ -280,8 +280,8 @@ func (uc *SimulateBalance) calculateBalance(allOrders []*entity.Order) (*entity.
 	return tmp, orders
 }
 
-func (uc *SimulateBalance) splitOrdersByQuota(allOrders []*entity.Order) ([]*entity.Order, []*entity.Order) {
-	var forwardOrder, reverseOrder []*entity.Order
+func (uc *SimulateBalance) splitOrdersByQuota(allOrders []*entity.StockOrder) ([]*entity.StockOrder, []*entity.StockOrder) {
+	var forwardOrder, reverseOrder []*entity.StockOrder
 	for _, v := range allOrders {
 		consumeQuota := uc.quota.calculateOriginalOrderCost(v)
 		if uc.quota.quota-consumeQuota < 0 {
@@ -298,13 +298,13 @@ func (uc *SimulateBalance) splitOrdersByQuota(allOrders []*entity.Order) ([]*ent
 	return forwardOrder, reverseOrder
 }
 
-func (uc *SimulateBalance) splitOrdersByAction(allOrders []*entity.Order) ([]*entity.Order, []*entity.Order) {
-	orderMap := make(map[string][]*entity.Order)
+func (uc *SimulateBalance) splitOrdersByAction(allOrders []*entity.StockOrder) ([]*entity.StockOrder, []*entity.StockOrder) {
+	orderMap := make(map[string][]*entity.StockOrder)
 	for _, v := range allOrders {
 		orderMap[v.GroupID] = append(orderMap[v.GroupID], v)
 	}
 
-	var tempForwardOrder, tempReverseOrder []*entity.Order
+	var tempForwardOrder, tempReverseOrder []*entity.StockOrder
 	forwardOrder, reverseOrder := uc.splitOrdersByQuota(allOrders)
 	for _, v := range forwardOrder {
 		tempForwardOrder = append(tempForwardOrder, orderMap[v.GroupID]...)

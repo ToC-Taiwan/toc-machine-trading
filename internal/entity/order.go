@@ -61,8 +61,8 @@ var StatusListMap = map[string]OrderStatus{
 	"Filling":       StatusFilling,       // 部分成交
 }
 
-// Order -.
-type Order struct {
+// BaseOrder -.
+type BaseOrder struct {
 	OrderID   string      `json:"order_id"`
 	Status    OrderStatus `json:"status"`
 	OrderTime time.Time   `json:"order_time"`
@@ -72,23 +72,18 @@ type Order struct {
 	TradeTime time.Time   `json:"trade_time"`
 	TickTime  time.Time   `json:"tick_time"`
 	GroupID   string      `json:"group_id"`
+}
 
+// StockOrder -.
+type StockOrder struct {
+	BaseOrder
 	StockNum string `json:"stock_num"`
 	Stock    *Stock `json:"stock"`
 }
 
 // FutureOrder -.
 type FutureOrder struct {
-	OrderID   string      `json:"order_id"`
-	Status    OrderStatus `json:"status"`
-	OrderTime time.Time   `json:"order_time"`
-	Action    OrderAction `json:"action"`
-	Price     float64     `json:"price"`
-	Quantity  int64       `json:"quantity"`
-	TradeTime time.Time   `json:"trade_time"`
-	TickTime  time.Time   `json:"tick_time"`
-	GroupID   string      `json:"group_id"`
-
+	BaseOrder
 	Code   string  `json:"code"`
 	Future *Future `json:"future"`
 }

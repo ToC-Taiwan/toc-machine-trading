@@ -25,7 +25,7 @@ func NewQuota(cfg config.Quota) *Quota {
 	}
 }
 
-func (q *Quota) calculateOriginalOrderCost(order *entity.Order) int64 {
+func (q *Quota) calculateOriginalOrderCost(order *entity.StockOrder) int64 {
 	if order.Action == entity.ActionBuy || order.Action == entity.ActionSellFirst {
 		return int64(math.Ceil(order.Price * float64(order.Quantity) * 1000))
 	}

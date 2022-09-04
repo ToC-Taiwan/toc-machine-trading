@@ -25,7 +25,7 @@ func NewOrder(pg *postgres.Postgres) *OrderRepo {
 }
 
 // InsertOrUpdateOrderByOrderID -.
-func (r *OrderRepo) InsertOrUpdateOrderByOrderID(ctx context.Context, t *entity.Order) error {
+func (r *OrderRepo) InsertOrUpdateOrderByOrderID(ctx context.Context, t *entity.StockOrder) error {
 	dbOrder, err := r.QueryOrderByID(ctx, t.OrderID)
 	if err != nil {
 		return err
@@ -71,7 +71,7 @@ func (r *OrderRepo) InsertOrUpdateOrderByOrderID(ctx context.Context, t *entity.
 }
 
 // QueryOrderByID -.
-func (r *OrderRepo) QueryOrderByID(ctx context.Context, orderID string) (*entity.Order, error) {
+func (r *OrderRepo) QueryOrderByID(ctx context.Context, orderID string) (*entity.StockOrder, error) {
 	sql, arg, err := r.Builder.
 		Select("group_id, order_id, status, order_time, tick_time, stock_num, action, price, quantity, trade_time, number, name, exchange, category, day_trade, last_close, update_date").
 		From(tableNameTradeOrder).
@@ -82,7 +82,7 @@ func (r *OrderRepo) QueryOrderByID(ctx context.Context, orderID string) (*entity
 	}
 
 	row := r.Pool().QueryRow(ctx, sql, arg...)
-	e := entity.Order{Stock: new(entity.Stock)}
+	e := entity.StockOrder{Stock: new(entity.Stock)}
 	if err := row.Scan(&e.GroupID, &e.OrderID, &e.Status, &e.OrderTime, &e.TickTime, &e.StockNum, &e.Action, &e.Price, &e.Quantity, &e.TradeTime,
 		&e.Stock.Number, &e.Stock.Name, &e.Stock.Exchange, &e.Stock.Category, &e.Stock.DayTrade, &e.Stock.LastClose, &e.Stock.UpdateDate); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -94,7 +94,7 @@ func (r *OrderRepo) QueryOrderByID(ctx context.Context, orderID string) (*entity
 }
 
 // QueryAllOrderByDate -.
-func (r *OrderRepo) QueryAllOrderByDate(ctx context.Context, date time.Time) ([]*entity.Order, error) {
+func (r *OrderRepo) QueryAllOrderByDate(ctx context.Context, date time.Time) ([]*entity.StockOrder, error) {
 	sql, arg, err := r.Builder.
 		Select("group_id, order_id, status, order_time, tick_time, stock_num, action, price, quantity, trade_time, number, name, exchange, category, day_trade, last_close, update_date").
 		From(tableNameTradeOrder).
@@ -111,9 +111,9 @@ func (r *OrderRepo) QueryAllOrderByDate(ctx context.Context, date time.Time) ([]
 	}
 	defer rows.Close()
 
-	var result []*entity.Order
+	var result []*entity.StockOrder
 	for rows.Next() {
-		e := entity.Order{Stock: new(entity.Stock)}
+		e := entity.StockOrder{Stock: new(entity.Stock)}
 		if err := rows.Scan(&e.GroupID, &e.OrderID, &e.Status, &e.OrderTime, &e.TickTime, &e.StockNum, &e.Action, &e.Price, &e.Quantity, &e.TradeTime,
 			&e.Stock.Number, &e.Stock.Name, &e.Stock.Exchange, &e.Stock.Category, &e.Stock.DayTrade, &e.Stock.LastClose, &e.Stock.UpdateDate); err != nil {
 			return nil, err
@@ -124,7 +124,7 @@ func (r *OrderRepo) QueryAllOrderByDate(ctx context.Context, date time.Time) ([]
 }
 
 // QueryAllOrder -.
-func (r *OrderRepo) QueryAllOrder(ctx context.Context) ([]*entity.Order, error) {
+func (r *OrderRepo) QueryAllOrder(ctx context.Context) ([]*entity.StockOrder, error) {
 	sql, _, err := r.Builder.
 		Select("group_id, order_id, status, order_time, tick_time, stock_num, action, price, quantity, trade_time, number, name, exchange, category, day_trade, last_close, update_date").
 		From(tableNameTradeOrder).
@@ -139,9 +139,9 @@ func (r *OrderRepo) QueryAllOrder(ctx context.Context) ([]*entity.Order, error) 
 	}
 	defer rows.Close()
 
-	var result []*entity.Order
+	var result []*entity.StockOrder
 	for rows.Next() {
-		e := entity.Order{Stock: new(entity.Stock)}
+		e := entity.StockOrder{Stock: new(entity.Stock)}
 		if err := rows.Scan(&e.GroupID, &e.OrderID, &e.Status, &e.OrderTime, &e.TickTime, &e.StockNum, &e.Action, &e.Price, &e.Quantity, &e.TradeTime,
 			&e.Stock.Number, &e.Stock.Name, &e.Stock.Exchange, &e.Stock.Category, &e.Stock.DayTrade, &e.Stock.LastClose, &e.Stock.UpdateDate); err != nil {
 			return nil, err
