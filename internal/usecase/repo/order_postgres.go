@@ -294,7 +294,7 @@ func (r *OrderRepo) InsertOrUpdateFutureOrderByOrderID(ctx context.Context, t *e
 		}
 	} else if !cmp.Equal(t, dbOrder) {
 		builder := r.Builder.
-			Update(tableNameTradeOrder).
+			Update(tableNameTradeFutureOrder).
 			Set("group_id", t.GroupID).
 			Set("order_id", t.OrderID).
 			Set("status", t.Status).

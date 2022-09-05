@@ -20,8 +20,10 @@ type StreamUseCase struct {
 
 	tradeSwitchCfg       config.TradeSwitch
 	futureTradeSwitchCfg config.FutureTradeSwitch
-	analyzeCfg           config.Analyze
 	basic                entity.BasicInfo
+
+	stockAnalyzeCfg  config.StockAnalyze
+	futureAnalyzeCfg config.FutureAnalyze
 
 	targetFilter *TargetFilter
 
@@ -47,7 +49,8 @@ func NewStream(r StreamRepo, g StreamgRPCAPI, t StreamRabbit) *StreamUseCase {
 		grpcapi:              g,
 		tradeSwitchCfg:       cfg.TradeSwitch,
 		futureTradeSwitchCfg: cfg.FutureTradeSwitch,
-		analyzeCfg:           cfg.Analyze,
+		stockAnalyzeCfg:      cfg.StockAnalyze,
+		futureAnalyzeCfg:     cfg.FutureAnalyze,
 		basic:                basic,
 		targetFilter:         NewTargetFilter(cfg.TargetCond),
 	}
@@ -167,7 +170,7 @@ func (uc *StreamUseCase) tradingRoom(agent *TradeAgent) {
 				continue
 			}
 
-			order := agent.generateOrder(uc.analyzeCfg)
+			order := agent.generateOrder(uc.stockAnalyzeCfg)
 			if order == nil {
 				continue
 			}
@@ -378,7 +381,7 @@ func (uc *StreamUseCase) futureTradingRoom(agent *FutureTradeAgent) {
 			continue
 		}
 
-		order := agent.generateOrder(uc.analyzeCfg)
+		order := agent.generateOrder(uc.futureAnalyzeCfg)
 		if order == nil {
 			continue
 		}
@@ -390,20 +393,25 @@ func (uc *StreamUseCase) futureTradingRoom(agent *FutureTradeAgent) {
 func (uc *StreamUseCase) checkFirstFutureTick(agent *FutureTradeAgent) {
 	for {
 		time.Sleep(time.Second)
-		if agent.lastTick == nil || cc.GetFutureHistoryTick(agent.code) == nil {
+		dayMarketLastTick := cc.GetFutureHistoryTick(agent.code)
+		if agent.lastTick == nil || dayMarketLastTick == nil {
 			continue
-		} else if agent.lastTick.TickTime.Hour() != 8 {
+		}
+		agent.analyzeTickTime = agent.lastTick.TickTime
+
+		if agent.lastTick.TickTime.Hour() != 8 {
 			log.Warn("Not at stock trading time")
+			log.Warnf("DayMarketLastTickTime: %s, Close: %.0f", dayMarketLastTick.TickTime.Format(global.LongTimeLayout), dayMarketLastTick.Close)
+			log.Warnf("CurrentTickTime %s, Close: %.0f", agent.lastTick.TickTime.Format(global.LongTimeLayout), agent.lastTick.Close)
 			break
 		}
 
-		if gap := agent.lastTick.Close - cc.GetFutureHistoryTick(agent.code).Close; gap >= 0 {
+		if gap := agent.lastTick.Close - dayMarketLastTick.Close; gap >= 0 {
 			uc.allowForward = true
 		} else if gap != 0 {
 			uc.allowReverse = true
 		}
 
-		agent.analyzeTickTime = agent.lastTick.TickTime
 		break
 	}
 }

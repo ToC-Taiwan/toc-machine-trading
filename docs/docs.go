@@ -522,43 +522,11 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "config.Analyze": {
-            "type": "object",
-            "properties": {
-                "all_in_out_ratio": {
-                    "type": "number"
-                },
-                "all_out_in_ratio": {
-                    "type": "number"
-                },
-                "close_change_ratio_high": {
-                    "type": "number"
-                },
-                "close_change_ratio_low": {
-                    "type": "number"
-                },
-                "ma_period": {
-                    "type": "integer"
-                },
-                "max_hold_time": {
-                    "type": "number"
-                },
-                "rsi_min_count": {
-                    "type": "integer"
-                },
-                "tick_analyze_period": {
-                    "type": "number"
-                },
-                "volume_pr_limit": {
-                    "type": "number"
-                }
-            }
-        },
         "config.Config": {
             "type": "object",
             "properties": {
-                "analyze": {
-                    "$ref": "#/definitions/config.Analyze"
+                "future_analyze": {
+                    "$ref": "#/definitions/config.FutureAnalyze"
                 },
                 "future_trade_switch": {
                     "$ref": "#/definitions/config.FutureTradeSwitch"
@@ -584,11 +552,34 @@ const docTemplate = `{
                 "sinopac": {
                     "$ref": "#/definitions/config.Sinopac"
                 },
+                "stock_analyze": {
+                    "$ref": "#/definitions/config.StockAnalyze"
+                },
                 "target_cond": {
                     "$ref": "#/definitions/config.TargetCond"
                 },
                 "trade_switch": {
                     "$ref": "#/definitions/config.TradeSwitch"
+                }
+            }
+        },
+        "config.FutureAnalyze": {
+            "type": "object",
+            "properties": {
+                "all_in_out_ratio": {
+                    "type": "number"
+                },
+                "all_out_in_ratio": {
+                    "type": "number"
+                },
+                "max_hold_time": {
+                    "type": "number"
+                },
+                "rsi_min_count": {
+                    "type": "integer"
+                },
+                "tick_analyze_period": {
+                    "type": "number"
                 }
             }
         },
@@ -707,6 +698,38 @@ const docTemplate = `{
                 },
                 "url": {
                     "type": "string"
+                }
+            }
+        },
+        "config.StockAnalyze": {
+            "type": "object",
+            "properties": {
+                "all_in_out_ratio": {
+                    "type": "number"
+                },
+                "all_out_in_ratio": {
+                    "type": "number"
+                },
+                "close_change_ratio_high": {
+                    "type": "number"
+                },
+                "close_change_ratio_low": {
+                    "type": "number"
+                },
+                "ma_period": {
+                    "type": "integer"
+                },
+                "max_hold_time": {
+                    "type": "number"
+                },
+                "rsi_min_count": {
+                    "type": "integer"
+                },
+                "tick_analyze_period": {
+                    "type": "number"
+                },
+                "volume_pr_limit": {
+                    "type": "number"
                 }
             }
         },

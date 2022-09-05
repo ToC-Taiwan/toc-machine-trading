@@ -18,8 +18,8 @@ type HistoryUseCase struct {
 	repo    HistoryRepo
 	grpcapi HistorygRPCAPI
 
-	analyzeCfg config.Analyze
-	basic      entity.BasicInfo
+	stockAnalyzeCfg config.StockAnalyze
+	basic           entity.BasicInfo
 
 	fetchList map[string]*entity.Target
 	mutex     sync.Mutex
@@ -40,7 +40,7 @@ func NewHistory(r HistoryRepo, t HistorygRPCAPI) *HistoryUseCase {
 		log.Panic(err)
 	}
 
-	uc.analyzeCfg = cfg.Analyze
+	uc.stockAnalyzeCfg = cfg.StockAnalyze
 	uc.basic = *cc.GetBasicInfo()
 
 	bus.SubscribeTopic(topicFetchHistory, uc.FetchHistory)
@@ -399,10 +399,10 @@ func (uc *HistoryUseCase) processCloseArr(arr []*entity.HistoryClose) {
 
 	i := 0
 	for {
-		if i+int(uc.analyzeCfg.MAPeriod) > len(closeArr) {
+		if i+int(uc.stockAnalyzeCfg.MAPeriod) > len(closeArr) {
 			break
 		}
-		tmp := closeArr[i : i+int(uc.analyzeCfg.MAPeriod)]
+		tmp := closeArr[i : i+int(uc.stockAnalyzeCfg.MAPeriod)]
 		ma := utils.GenerareMAByCloseArr(tmp)
 		if err := uc.repo.InsertQuaterMA(context.Background(), &entity.HistoryAnalyze{
 			Date:     arr[i].Date,
@@ -441,8 +441,8 @@ func (uc *HistoryUseCase) processTickArr(arr []*entity.HistoryTick) {
 		cc.SetHistoryTickArr(stockNum, tickTradeDay, arr)
 	}
 
-	minPeriod := time.Duration(uc.analyzeCfg.TickAnalyzePeriod) * time.Millisecond
-	maxPeriod := time.Duration(uc.analyzeCfg.TickAnalyzePeriod*1.1) * time.Millisecond
+	minPeriod := time.Duration(uc.stockAnalyzeCfg.TickAnalyzePeriod) * time.Millisecond
+	maxPeriod := time.Duration(uc.stockAnalyzeCfg.TickAnalyzePeriod*1.1) * time.Millisecond
 
 	var volumeArr []int64
 	var periodVolume int64

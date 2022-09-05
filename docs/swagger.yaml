@@ -1,29 +1,8 @@
 definitions:
-  config.Analyze:
-    properties:
-      all_in_out_ratio:
-        type: number
-      all_out_in_ratio:
-        type: number
-      close_change_ratio_high:
-        type: number
-      close_change_ratio_low:
-        type: number
-      ma_period:
-        type: integer
-      max_hold_time:
-        type: number
-      rsi_min_count:
-        type: integer
-      tick_analyze_period:
-        type: number
-      volume_pr_limit:
-        type: number
-    type: object
   config.Config:
     properties:
-      analyze:
-        $ref: '#/definitions/config.Analyze'
+      future_analyze:
+        $ref: '#/definitions/config.FutureAnalyze'
       future_trade_switch:
         $ref: '#/definitions/config.FutureTradeSwitch'
       history:
@@ -40,10 +19,25 @@ definitions:
         type: boolean
       sinopac:
         $ref: '#/definitions/config.Sinopac'
+      stock_analyze:
+        $ref: '#/definitions/config.StockAnalyze'
       target_cond:
         $ref: '#/definitions/config.TargetCond'
       trade_switch:
         $ref: '#/definitions/config.TradeSwitch'
+    type: object
+  config.FutureAnalyze:
+    properties:
+      all_in_out_ratio:
+        type: number
+      all_out_in_ratio:
+        type: number
+      max_hold_time:
+        type: number
+      rsi_min_count:
+        type: integer
+      tick_analyze_period:
+        type: number
     type: object
   config.FutureTradeSwitch:
     properties:
@@ -120,6 +114,27 @@ definitions:
         type: integer
       url:
         type: string
+    type: object
+  config.StockAnalyze:
+    properties:
+      all_in_out_ratio:
+        type: number
+      all_out_in_ratio:
+        type: number
+      close_change_ratio_high:
+        type: number
+      close_change_ratio_low:
+        type: number
+      ma_period:
+        type: integer
+      max_hold_time:
+        type: number
+      rsi_min_count:
+        type: integer
+      tick_analyze_period:
+        type: number
+      volume_pr_limit:
+        type: number
     type: object
   config.TargetCond:
     properties:

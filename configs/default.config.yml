@@ -12,40 +12,32 @@ sinopac:
     pool_max: 20
 
 history:
-    # unit: day
-    history_close_period: 65
-    history_tick_period: 12
-    history_kbar_period: 65
+    history_close_period: 65 # unit: day
+    history_tick_period: 12 # unit: day
+    history_kbar_period: 65 # unit: day
 
 simulation: true
 
 trade_switch:
     allow_trade: true
-    # unit: second
-    hold_time_from_open: 45
-
-    # unit: minute
-    total_open_time: 270
-    trade_in_end_time: 90
-
-    # unit: seccond
-    trade_in_wait_time: 45
-    trade_out_wait_time: 60
-    cancel_wait_time: 30
+    hold_time_from_open: 45 # unit: second
+    total_open_time: 270 # unit: minute
+    trade_in_end_time: 90 # unit: minute
+    trade_in_wait_time: 45 # unit: seccond
+    trade_out_wait_time: 60 # unit: seccond
+    cancel_wait_time: 30 # unit: seccond
 
 future_trade_switch:
     allow_trade: true
     quantity: 1
-    # unit: seccond
-    trade_in_wait_time: 10
-    trade_out_wait_time: 20
-    cancel_wait_time: 30
+    trade_in_wait_time: 10 # unit: seccond
+    trade_out_wait_time: 20 # unit: seccond
+    cancel_wait_time: 30 # unit: seccond
     trade_time_range:
-        # HH:MM:SS, duration: minute
-        - start_time: 08:45:00
-          duration: 280
-        - start_time: 15:00:00
-          duration: 820
+        - start_time: 08:45:00 # HH:MM:SS
+          duration: 260 # duration: minute
+        - start_time: 15:00:00 # HH:MM:SS
+          duration: 800 # duration: minute
 
 quota:
     trade_quota: 1000000
@@ -70,26 +62,20 @@ target_cond:
         - low: 10
           high: 35
 
-analyze:
-    # unit: minute
-    max_hold_time: 60
+stock_analyze:
+    max_hold_time: 60 # unit: minute
+    close_change_ratio_low: -2 # unit: %
+    close_change_ratio_high: 2 # unit: %
+    tick_analyze_period: 15000 # unit: millisecond
+    volume_pr_limit: 95 # unit: %
+    all_out_in_ratio: 75 # unit: %
+    all_in_out_ratio: 75 # unit: %
+    rsi_min_count: 150 # unit: times
+    ma_period: 60 # unit: day
 
-    # unit: %
-    close_change_ratio_low: -2
-    close_change_ratio_high: 2
-
-    # unit: millisecond
-    tick_analyze_period: 15000
-
-    # unit: %
-    volume_pr_limit: 95
-
-    # unit: %
-    all_out_in_ratio: 75
-    all_in_out_ratio: 75
-
-    # unit: times
-    rsi_min_count: 150
-
-    # unit: day
-    ma_period: 60
+future_analyze:
+    max_hold_time: 20 # unit: minute
+    tick_analyze_period: 15000 # unit: millisecond
+    all_out_in_ratio: 53 # unit: %
+    all_in_out_ratio: 53 # unit: %
+    rsi_min_count: 50 # unit: times

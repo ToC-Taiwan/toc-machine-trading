@@ -48,7 +48,7 @@ func NewFutureAgent(code string, tradeSwitch config.FutureTradeSwitch) *FutureTr
 	return new
 }
 
-func (o *FutureTradeAgent) generateOrder(cfg config.Analyze) *entity.FutureOrder {
+func (o *FutureTradeAgent) generateOrder(cfg config.FutureAnalyze) *entity.FutureOrder {
 	if o.lastTick.TickTime.Sub(o.analyzeTickTime) > time.Duration(cfg.TickAnalyzePeriod*1.1)*time.Millisecond {
 		o.analyzeTickTime = o.lastTick.TickTime
 		o.periodTickArr = RealTimeFutureTickArr{o.lastTick}
@@ -70,9 +70,9 @@ func (o *FutureTradeAgent) generateOrder(cfg config.Analyze) *entity.FutureOrder
 		return o.generateTradeOutOrder(cfg, postOrderAction, preOrder)
 	}
 
-	if o.lastTick.PctChg < cfg.CloseChangeRatioLow || o.lastTick.PctChg > cfg.CloseChangeRatioHigh {
-		return nil
-	}
+	// if o.lastTick.PctChg < cfg.CloseChangeRatioLow || o.lastTick.PctChg > cfg.CloseChangeRatioHigh {
+	// 	return nil
+	// }
 
 	// get out in ration in all tick
 	allOutInRation := o.tickArr.getOutInRatio()
@@ -100,7 +100,7 @@ func (o *FutureTradeAgent) generateOrder(cfg config.Analyze) *entity.FutureOrder
 	}
 }
 
-func (o *FutureTradeAgent) generateTradeOutOrder(cfg config.Analyze, postOrderAction entity.OrderAction, preOrder *entity.FutureOrder) *entity.FutureOrder {
+func (o *FutureTradeAgent) generateTradeOutOrder(cfg config.FutureAnalyze, postOrderAction entity.OrderAction, preOrder *entity.FutureOrder) *entity.FutureOrder {
 	order := &entity.FutureOrder{
 		Code: o.code,
 		BaseOrder: entity.BaseOrder{

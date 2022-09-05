@@ -65,7 +65,7 @@ func NewSimulateAgent(stockNum string) *SimulateTradeAgent {
 	return new
 }
 
-func (o *SimulateTradeAgent) searchOrder(cfg config.Analyze, tickArr *[]*entity.HistoryTick, beforeLastTradeDayClose float64) {
+func (o *SimulateTradeAgent) searchOrder(cfg config.StockAnalyze, tickArr *[]*entity.HistoryTick, beforeLastTradeDayClose float64) {
 	go func() {
 		for {
 			tick, ok := <-o.tickChan
@@ -135,7 +135,7 @@ func (o *SimulateTradeAgent) convertToRealTimeTick(tickArr *[]*entity.HistoryTic
 	}
 }
 
-func (o *SimulateTradeAgent) generateSimulateOrder(cfg config.Analyze) *entity.StockOrder {
+func (o *SimulateTradeAgent) generateSimulateOrder(cfg config.StockAnalyze) *entity.StockOrder {
 	if o.lastTick.TickTime.Sub(o.analyzeTickTime) > time.Duration(cfg.TickAnalyzePeriod*1.1)*time.Millisecond {
 		o.analyzeTickTime = o.lastTick.TickTime
 		o.periodTickArr = RealTimeTickArr{o.lastTick}
@@ -196,7 +196,7 @@ func (o *SimulateTradeAgent) generateSimulateOrder(cfg config.Analyze) *entity.S
 	}
 }
 
-func (o *SimulateTradeAgent) generateSimulateTradeOutOrder(cfg config.Analyze, postOrderAction entity.OrderAction, preOrder *entity.StockOrder) *entity.StockOrder {
+func (o *SimulateTradeAgent) generateSimulateTradeOutOrder(cfg config.StockAnalyze, postOrderAction entity.OrderAction, preOrder *entity.StockOrder) *entity.StockOrder {
 	order := &entity.StockOrder{
 		StockNum: o.stockNum,
 		BaseOrder: entity.BaseOrder{

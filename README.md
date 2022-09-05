@@ -67,6 +67,7 @@ go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@$ve
 ```sh
 echo 'DEPLOYMENT=dev
 LOG_FORMAT=console
+LOG_LEVEL=trace
 DISABLE_SWAGGER_HTTP_HANDLER=
 GIN_MODE=release
 SINOPAC_URL=127.0.0.1:56666

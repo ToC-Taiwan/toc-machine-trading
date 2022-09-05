@@ -62,7 +62,6 @@ func (uc *OrderUseCase) updateCacheAndInsertFutureDB(order *entity.FutureOrder) 
 	// get order from cache
 	cacheOrder := cc.GetFutureOrderByOrderID(order.OrderID)
 	if cacheOrder == nil {
-		log.Debugf("Future order not found in cache: %s", order.Code)
 		return
 	}
 

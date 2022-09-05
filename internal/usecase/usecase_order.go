@@ -21,11 +21,18 @@ type OrderUseCase struct {
 	simTrade             bool
 	placeOrderLock       sync.Mutex
 	placeFutureOrderLock sync.Mutex
+
+	futureTradeDay time.Time
 }
 
 // NewOrder -.
 func NewOrder(t OrdergRPCAPI, r OrderRepo) *OrderUseCase {
 	cfg, err := config.GetConfig()
+	if err != nil {
+		log.Panic(err)
+	}
+
+	futureTradeDay, err := time.ParseInLocation(global.ShortTimeLayout, time.Now().Format(global.ShortTimeLayout), time.Local)
 	if err != nil {
 		log.Panic(err)
 	}
@@ -37,6 +44,7 @@ func NewOrder(t OrdergRPCAPI, r OrderRepo) *OrderUseCase {
 		simTrade:       cfg.Simulation,
 		placeOrderLock: sync.Mutex{},
 		basicInfo:      *cc.GetBasicInfo(),
+		futureTradeDay: futureTradeDay,
 	}
 
 	bus.SubscribeTopic(topicPlaceOrder, uc.placeOrder)
@@ -55,7 +63,7 @@ func NewOrder(t OrdergRPCAPI, r OrderRepo) *OrderUseCase {
 			}
 			uc.calculateStockTradeBalance(stockOrders)
 
-			futureOrders, err := uc.repo.QueryAllFutureOrderByDate(context.Background(), uc.basicInfo.TradeDay)
+			futureOrders, err := uc.repo.QueryAllFutureOrderByDate(context.Background(), uc.futureTradeDay)
 			if err != nil {
 				log.Panic(err)
 			}
@@ -64,13 +72,10 @@ func NewOrder(t OrdergRPCAPI, r OrderRepo) *OrderUseCase {
 	}()
 
 	go func() {
-		time.Sleep(time.Until(uc.basicInfo.OpenTime))
-		for range time.NewTicker(5 * time.Second).C {
-			if time.Now().After(uc.basicInfo.OpenTime) && time.Now().Before(uc.basicInfo.EndTime) {
-				err := uc.AskOrderUpdate()
-				if err != nil {
-					log.Error(err)
-				}
+		for range time.NewTicker(3 * time.Second).C {
+			err := uc.AskOrderUpdate()
+			if err != nil {
+				log.Error(err)
 			}
 		}
 	}()
@@ -278,7 +283,6 @@ func (uc *OrderUseCase) updateCacheAndInsertDB(order *entity.StockOrder) {
 	// get order from cache
 	cacheOrder := cc.GetOrderByOrderID(order.OrderID)
 	if cacheOrder == nil {
-		log.Debugf("Order not found in cache: %s", order.StockNum)
 		return
 	}
 
@@ -398,7 +402,7 @@ func (uc *OrderUseCase) calculateFutureTradeBalance(allOrders []*entity.FutureOr
 	}
 
 	tmp := &entity.TradeBalance{
-		TradeDay:   uc.basicInfo.TradeDay,
+		TradeDay:   uc.futureTradeDay,
 		TradeCount: tradeCount,
 		Forward:    forwardBalance,
 		Reverse:    revereBalance,

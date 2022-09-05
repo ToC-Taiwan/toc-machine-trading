@@ -40,24 +40,20 @@ func Get() *logrus.Logger {
 	return globalLogger
 }
 
+type logConfig struct {
+	jsonFormat bool
+	isDev      bool
+	logLevel   int
+}
+
 func initLogger() {
 	// Get current path
+	logCfg := parseEnvToLogConfig()
 	basePath := global.GetBasePath()
 	globalLogger = logrus.New()
 
-	var jsonFormat, prodMode bool
-	mode, ok := os.LookupEnv("LOG_FORMAT")
-	if !ok || mode == "json" {
-		jsonFormat = true
-	}
-
-	deployment, ok := os.LookupEnv("DEPLOYMENT")
-	if !ok || deployment == "prod" {
-		prodMode = true
-	}
-
 	var formatter logrus.Formatter
-	if jsonFormat {
+	if logCfg.jsonFormat {
 		formatter = &logrus.JSONFormatter{
 			DisableHTMLEscape: true,
 			TimestampFormat:   global.LongTimeLayout,
@@ -78,15 +74,12 @@ func initLogger() {
 		}
 	}
 
-	globalLogger.SetFormatter(formatter)
-	globalLogger.SetLevel(logrus.InfoLevel)
-
-	if !prodMode {
+	if logCfg.isDev {
 		globalLogger.SetReportCaller(true)
-	} else if !jsonFormat {
-		globalLogger.SetLevel(logrus.TraceLevel)
 	}
 
+	globalLogger.SetFormatter(formatter)
+	globalLogger.SetLevel(logrus.Level(logCfg.logLevel))
 	globalLogger.SetOutput(os.Stdout)
 	globalLogger.Hooks.Add(fileHook(basePath))
 }
@@ -122,3 +115,59 @@ func NewCallerPrettyfier(basePath string) func(*runtime.Frame) (function string,
 		return fmt.Sprintf("[%s:%d]", fileName, frame.Line), ""
 	}
 }
+
+func parseEnvToLogConfig() logConfig {
+	var jsonFormat, isDev bool
+	var logLevel int
+
+	if mode := os.Getenv("LOG_FORMAT"); mode == "json" {
+		jsonFormat = true
+	}
+
+	if deployment := os.Getenv("DEPLOYMENT"); deployment == "dev" {
+		isDev = true
+	}
+
+	logLevelString := os.Getenv("LOG_LEVEL")
+	switch logLevelString {
+	case "panic":
+		logLevel = PanicLevel
+	case "fatal":
+		logLevel = FatalLevel
+	case "error":
+		logLevel = ErrorLevel
+	case "warn":
+		logLevel = WarnLevel
+	case "info":
+		logLevel = InfoLevel
+	case "debug":
+		logLevel = DebugLevel
+	case "trace":
+		logLevel = TraceLevel
+	default:
+		logLevel = InfoLevel
+	}
+
+	return logConfig{
+		jsonFormat: jsonFormat,
+		isDev:      isDev,
+		logLevel:   logLevel,
+	}
+}
+
+const (
+	// PanicLevel level, highest level of severity. Logs and then calls panic with the
+	PanicLevel int = iota
+	// FatalLevel level. Logs and then calls `os.Exit(1)`. It will exit even if the
+	FatalLevel
+	// ErrorLevel level. Logs. Used for errors that should definitely be noted.
+	ErrorLevel
+	// WarnLevel level. Non-critical entries that deserve eyes.
+	WarnLevel
+	// InfoLevel level. General operational entries about what's going on inside the
+	InfoLevel
+	// DebugLevel level. Usually only enabled when debugging. Very verbose logging.
+	DebugLevel
+	// TraceLevel level. Designates finer-grained informational events than the Debug.
+	TraceLevel
+)

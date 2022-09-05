@@ -70,7 +70,7 @@ func NewAgent(stockNum string, tradeSwitch config.TradeSwitch) *TradeAgent {
 	return new
 }
 
-func (o *TradeAgent) generateOrder(cfg config.Analyze) *entity.StockOrder {
+func (o *TradeAgent) generateOrder(cfg config.StockAnalyze) *entity.StockOrder {
 	if o.lastTick.TickTime.Sub(o.analyzeTickTime) > time.Duration(cfg.TickAnalyzePeriod*1.1)*time.Millisecond {
 		o.analyzeTickTime = o.lastTick.TickTime
 		o.periodTickArr = RealTimeTickArr{o.lastTick}
@@ -126,7 +126,7 @@ func (o *TradeAgent) generateOrder(cfg config.Analyze) *entity.StockOrder {
 	}
 }
 
-func (o *TradeAgent) generateTradeOutOrder(cfg config.Analyze, postOrderAction entity.OrderAction, preOrder *entity.StockOrder) *entity.StockOrder {
+func (o *TradeAgent) generateTradeOutOrder(cfg config.StockAnalyze, postOrderAction entity.OrderAction, preOrder *entity.StockOrder) *entity.StockOrder {
 	order := &entity.StockOrder{
 		StockNum: o.stockNum,
 		BaseOrder: entity.BaseOrder{

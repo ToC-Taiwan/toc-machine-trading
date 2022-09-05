@@ -53,7 +53,8 @@ type Config struct {
 	History           History           `json:"history"             env-required:"true" yaml:"history"`
 	Quota             Quota             `json:"quota"               env-required:"true" yaml:"quota"`
 	TargetCond        TargetCond        `json:"target_cond"         env-required:"true" yaml:"target_cond"`
-	Analyze           Analyze           `json:"analyze"             env-required:"true" yaml:"analyze"`
+	StockAnalyze      StockAnalyze      `json:"stock_analyze"       env-required:"true" yaml:"stock_analyze"`
+	FutureAnalyze     FutureAnalyze     `json:"future_analyze"      env-required:"true" yaml:"future_analyze"`
 }
 
 // HTTP -.
@@ -140,8 +141,8 @@ type PriceLimit struct {
 	High float64 `json:"high" env-required:"true" yaml:"high"`
 }
 
-// Analyze -.
-type Analyze struct {
+// StockAnalyze -.
+type StockAnalyze struct {
 	MaxHoldTime          float64 `json:"max_hold_time"           env-required:"true" yaml:"max_hold_time"`
 	CloseChangeRatioLow  float64 `json:"close_change_ratio_low"  env-required:"true" yaml:"close_change_ratio_low"`
 	CloseChangeRatioHigh float64 `json:"close_change_ratio_high" env-required:"true" yaml:"close_change_ratio_high"`
@@ -151,4 +152,13 @@ type Analyze struct {
 	TickAnalyzePeriod    float64 `json:"tick_analyze_period"     env-required:"true" yaml:"tick_analyze_period"`
 	RSIMinCount          int     `json:"rsi_min_count"           env-required:"true" yaml:"rsi_min_count"`
 	MAPeriod             int64   `json:"ma_period"               env-required:"true" yaml:"ma_period"`
+}
+
+// FutureAnalyze -.
+type FutureAnalyze struct {
+	MaxHoldTime       float64 `json:"max_hold_time"       env-required:"true" yaml:"max_hold_time"`
+	AllOutInRatio     float64 `json:"all_out_in_ratio"    env-required:"true" yaml:"all_out_in_ratio"`
+	AllInOutRatio     float64 `json:"all_in_out_ratio"    env-required:"true" yaml:"all_in_out_ratio"`
+	TickAnalyzePeriod float64 `json:"tick_analyze_period" env-required:"true" yaml:"tick_analyze_period"`
+	RSIMinCount       int     `json:"rsi_min_count"       env-required:"true" yaml:"rsi_min_count"`
 }

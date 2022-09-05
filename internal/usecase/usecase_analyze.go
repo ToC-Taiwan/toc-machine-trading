@@ -16,10 +16,10 @@ type AnalyzeUseCase struct {
 	repo      HistoryRepo
 	targetArr []*entity.Target
 
-	basic       entity.BasicInfo
-	tradeSwitch config.TradeSwitch
-	quotaCfg    config.Quota
-	analyzeCfg  config.Analyze
+	basic           entity.BasicInfo
+	tradeSwitch     config.TradeSwitch
+	quotaCfg        config.Quota
+	stockAnalyzeCfg config.StockAnalyze
 
 	beforeHistoryClose map[string]float64
 	historyTick        map[string]*[]*entity.HistoryTick
@@ -44,7 +44,7 @@ func NewAnalyze(r HistoryRepo) *AnalyzeUseCase {
 		basic:              *cc.GetBasicInfo(),
 		tradeSwitch:        cfg.TradeSwitch,
 		quotaCfg:           cfg.Quota,
-		analyzeCfg:         cfg.Analyze,
+		stockAnalyzeCfg:    cfg.StockAnalyze,
 		beforeHistoryClose: make(map[string]float64),
 		historyTick:        make(map[string]*[]*entity.HistoryTick),
 		lastBelowMAStock:   make(map[string]*entity.HistoryAnalyze),
@@ -57,7 +57,7 @@ func NewAnalyze(r HistoryRepo) *AnalyzeUseCase {
 }
 
 type simulateResult struct {
-	cfg     config.Analyze
+	cfg     config.StockAnalyze
 	balance *entity.TradeBalance
 	orders  []*entity.StockOrder
 }
@@ -135,7 +135,7 @@ func (uc *AnalyzeUseCase) SimulateOnHistoryTick(ctx context.Context, useDefault 
 	resultChan := make(chan simulateResult)
 
 	go func() {
-		var bestCfg config.Analyze
+		var bestCfg config.StockAnalyze
 		var bestBalance *entity.TradeBalance
 		var orders *[]*entity.StockOrder
 		for {
@@ -173,7 +173,7 @@ func (uc *AnalyzeUseCase) SimulateOnHistoryTick(ctx context.Context, useDefault 
 	log.Info("Simulate Done")
 }
 
-func (uc *AnalyzeUseCase) getSimulateCond(targetArr []*entity.Target, analyzeCfg config.Analyze) (config.Analyze, *entity.TradeBalance, []*entity.StockOrder) {
+func (uc *AnalyzeUseCase) getSimulateCond(targetArr []*entity.Target, analyzeCfg config.StockAnalyze) (config.StockAnalyze, *entity.TradeBalance, []*entity.StockOrder) {
 	var wg sync.WaitGroup
 	var agentArr []*SimulateTradeAgent
 	var agentLock sync.Mutex
@@ -210,7 +210,7 @@ func (uc *AnalyzeUseCase) getSimulateCond(targetArr []*entity.Target, analyzeCfg
 	}
 
 	if len(allOrders) == 0 {
-		return config.Analyze{}, &entity.TradeBalance{}, []*entity.StockOrder{}
+		return config.StockAnalyze{}, &entity.TradeBalance{}, []*entity.StockOrder{}
 	}
 
 	balancer := NewSimulateBalance(uc.quotaCfg, allOrders)
@@ -317,36 +317,36 @@ func (uc *SimulateBalance) splitOrdersByAction(allOrders []*entity.StockOrder) (
 	return tempForwardOrder, tempReverseOrder
 }
 
-func generateAnalyzeCfg(useDefault bool) []config.Analyze {
+func generateAnalyzeCfg(useDefault bool) []config.StockAnalyze {
 	cfg, err := config.GetConfig()
 	if err != nil {
 		log.Panic(err)
 	}
 
 	if useDefault {
-		return []config.Analyze{{
-			MaxHoldTime:          cfg.Analyze.MaxHoldTime,
-			CloseChangeRatioLow:  cfg.Analyze.CloseChangeRatioLow,
-			CloseChangeRatioHigh: cfg.Analyze.CloseChangeRatioHigh,
-			VolumePRLimit:        cfg.Analyze.VolumePRLimit,
-			TickAnalyzePeriod:    cfg.Analyze.TickAnalyzePeriod,
-			RSIMinCount:          cfg.Analyze.RSIMinCount,
-			AllOutInRatio:        cfg.Analyze.AllOutInRatio,
-			AllInOutRatio:        cfg.Analyze.AllInOutRatio,
+		return []config.StockAnalyze{{
+			MaxHoldTime:          cfg.StockAnalyze.MaxHoldTime,
+			CloseChangeRatioLow:  cfg.StockAnalyze.CloseChangeRatioLow,
+			CloseChangeRatioHigh: cfg.StockAnalyze.CloseChangeRatioHigh,
+			VolumePRLimit:        cfg.StockAnalyze.VolumePRLimit,
+			TickAnalyzePeriod:    cfg.StockAnalyze.TickAnalyzePeriod,
+			RSIMinCount:          cfg.StockAnalyze.RSIMinCount,
+			AllOutInRatio:        cfg.StockAnalyze.AllOutInRatio,
+			AllInOutRatio:        cfg.StockAnalyze.AllInOutRatio,
 		}}
 	}
 
-	base := []config.Analyze{
+	base := []config.StockAnalyze{
 		{
 			RSIMinCount:   50,
 			VolumePRLimit: 99,
 			AllOutInRatio: 50,
 			AllInOutRatio: 50,
 
-			MaxHoldTime:          cfg.Analyze.MaxHoldTime,
-			TickAnalyzePeriod:    cfg.Analyze.TickAnalyzePeriod,
-			CloseChangeRatioLow:  cfg.Analyze.CloseChangeRatioLow,
-			CloseChangeRatioHigh: cfg.Analyze.CloseChangeRatioHigh,
+			MaxHoldTime:          cfg.StockAnalyze.MaxHoldTime,
+			TickAnalyzePeriod:    cfg.StockAnalyze.TickAnalyzePeriod,
+			CloseChangeRatioLow:  cfg.StockAnalyze.CloseChangeRatioLow,
+			CloseChangeRatioHigh: cfg.StockAnalyze.CloseChangeRatioHigh,
 		},
 	}
 
@@ -361,8 +361,8 @@ func generateAnalyzeCfg(useDefault bool) []config.Analyze {
 }
 
 // AppendRSICountVar -.
-func AppendRSICountVar(cfgArr *[]config.Analyze) {
-	var appendCfg []config.Analyze
+func AppendRSICountVar(cfgArr *[]config.StockAnalyze) {
+	var appendCfg []config.StockAnalyze
 	for _, v := range *cfgArr {
 		for {
 			if v.RSIMinCount >= 200 {
@@ -376,8 +376,8 @@ func AppendRSICountVar(cfgArr *[]config.Analyze) {
 }
 
 // AppendVolumePRLimitVar -.
-func AppendVolumePRLimitVar(cfgArr *[]config.Analyze) {
-	var appendCfg []config.Analyze
+func AppendVolumePRLimitVar(cfgArr *[]config.StockAnalyze) {
+	var appendCfg []config.StockAnalyze
 	for _, v := range *cfgArr {
 		for {
 			if v.VolumePRLimit <= 95 {
@@ -391,8 +391,8 @@ func AppendVolumePRLimitVar(cfgArr *[]config.Analyze) {
 }
 
 // AppendAllOutInRatioVar -.
-func AppendAllOutInRatioVar(cfgArr *[]config.Analyze) {
-	var appendCfg []config.Analyze
+func AppendAllOutInRatioVar(cfgArr *[]config.StockAnalyze) {
+	var appendCfg []config.StockAnalyze
 	for _, v := range *cfgArr {
 		for {
 			if v.AllOutInRatio >= 90 {
@@ -406,8 +406,8 @@ func AppendAllOutInRatioVar(cfgArr *[]config.Analyze) {
 }
 
 // AppendAllInOutRatioVar -.
-func AppendAllInOutRatioVar(cfgArr *[]config.Analyze) {
-	var appendCfg []config.Analyze
+func AppendAllInOutRatioVar(cfgArr *[]config.StockAnalyze) {
+	var appendCfg []config.StockAnalyze
 	for _, v := range *cfgArr {
 		for {
 			if v.AllInOutRatio >= 90 {
