@@ -8,11 +8,11 @@ require (
 	github.com/gin-gonic/gin v1.8.1
 	github.com/golang-migrate/migrate/v4 v4.15.2
 	github.com/golang/mock v1.6.0
-	github.com/google/go-cmp v0.5.8
+	github.com/google/go-cmp v0.5.9
 	github.com/google/uuid v1.3.0
 	github.com/gorilla/websocket v1.5.0
 	github.com/ilyakaznacheev/cleanenv v1.3.0
-	github.com/jackc/pgx/v4 v4.17.1
+	github.com/jackc/pgx/v4 v4.17.2
 	github.com/markcheno/go-talib v0.0.0-20190307022042-cd53a9264d70
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/prometheus/client_golang v1.13.0
@@ -20,7 +20,7 @@ require (
 	github.com/sirupsen/logrus v1.9.0
 	github.com/streadway/amqp v1.0.0
 	github.com/swaggo/files v0.0.0-20220728132757-551d4a08d97a
-	github.com/swaggo/gin-swagger v1.5.2
+	github.com/swaggo/gin-swagger v1.5.3
 	github.com/swaggo/swag v1.8.5
 	google.golang.org/grpc v1.49.0
 	google.golang.org/protobuf v1.28.1

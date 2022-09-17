@@ -362,7 +362,7 @@ func (uc *StreamUseCase) GetStockSnapshotByNumArr(stockNumArr []string) ([]*enti
 
 // ReceiveFutureStreamData -.
 func (uc *StreamUseCase) ReceiveFutureStreamData(ctx context.Context, code string) {
-	agent := NewFutureAgent(code, uc.futureTradeSwitchCfg)
+	agent := NewFutureAgent(code, uc.futureTradeSwitchCfg, uc.futureAnalyzeCfg)
 
 	go uc.futureTradingRoom(agent)
 	go uc.checkFirstFutureTick(agent)
@@ -381,12 +381,11 @@ func (uc *StreamUseCase) futureTradingRoom(agent *FutureTradeAgent) {
 			continue
 		}
 
-		order := agent.generateOrder(uc.futureAnalyzeCfg)
-		if order == nil {
+		if order := agent.generateOrder(); order == nil {
 			continue
+		} else {
+			uc.placeFutureOrder(agent, order)
 		}
-
-		uc.placeFutureOrder(agent, order)
 	}
 }
 

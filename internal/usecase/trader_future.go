@@ -28,54 +28,50 @@ type FutureTradeAgent struct {
 	lastTick *entity.RealTimeFutureTick
 
 	analyzeTickTime time.Time
-
-	tradeInWaitTime  time.Duration
-	tradeOutWaitTime time.Duration
-	cancelWaitTime   time.Duration
+	tradeSwitch     config.FutureTradeSwitch
+	analyzeCfg      config.FutureAnalyze
 }
 
 // NewFutureAgent -.
-func NewFutureAgent(code string, tradeSwitch config.FutureTradeSwitch) *FutureTradeAgent {
+func NewFutureAgent(code string, tradeSwitch config.FutureTradeSwitch, analyzeCfg config.FutureAnalyze) *FutureTradeAgent {
 	new := &FutureTradeAgent{
-		code:             code,
-		orderQuantity:    tradeSwitch.Quantity,
-		orderMap:         make(map[entity.OrderAction][]*entity.FutureOrder),
-		tickChan:         make(chan *entity.RealTimeFutureTick),
-		tradeInWaitTime:  time.Duration(tradeSwitch.TradeInWaitTime) * time.Second,
-		tradeOutWaitTime: time.Duration(tradeSwitch.TradeOutWaitTime) * time.Second,
-		cancelWaitTime:   time.Duration(tradeSwitch.CancelWaitTime) * time.Second,
+		code:          code,
+		orderQuantity: tradeSwitch.Quantity,
+		orderMap:      make(map[entity.OrderAction][]*entity.FutureOrder),
+		tickChan:      make(chan *entity.RealTimeFutureTick),
+		tradeSwitch:   tradeSwitch,
+		analyzeCfg:    analyzeCfg,
 	}
 	return new
 }
 
-func (o *FutureTradeAgent) generateOrder(cfg config.FutureAnalyze) *entity.FutureOrder {
-	if o.lastTick.TickTime.Sub(o.analyzeTickTime) > time.Duration(cfg.TickAnalyzePeriod*1.1)*time.Millisecond {
+func (o *FutureTradeAgent) generateOrder() *entity.FutureOrder {
+	if o.lastTick.TickTime.Sub(o.analyzeTickTime) > time.Duration(o.analyzeCfg.TickAnalyzePeriod*1.1)*time.Millisecond {
 		o.analyzeTickTime = o.lastTick.TickTime
 		o.periodTickArr = RealTimeFutureTickArr{o.lastTick}
 		return nil
 	}
 
-	if o.lastTick.TickTime.Sub(o.analyzeTickTime) < time.Duration(cfg.TickAnalyzePeriod)*time.Millisecond {
+	if o.lastTick.TickTime.Sub(o.analyzeTickTime) < time.Duration(o.analyzeCfg.TickAnalyzePeriod)*time.Millisecond {
 		o.periodTickArr = append(o.periodTickArr, o.lastTick)
 		return nil
 	}
-	// copy new arr before reset
-	// analyzeArr := o.periodTickArr
+
+	// TODO: use volume from config
+	if volume := o.periodTickArr.getTotalVolume(); volume < 25 {
+		return nil
+	}
+
+	// get out in ration in period
+	outInRation := o.periodTickArr.getOutInRatio()
 
 	// reset analyze tick time and arr
 	o.analyzeTickTime = o.lastTick.TickTime
 	o.periodTickArr = RealTimeFutureTickArr{o.lastTick}
 
 	if postOrderAction, preOrder := o.checkNeededPost(); postOrderAction != entity.ActionNone {
-		return o.generateTradeOutOrder(cfg, postOrderAction, preOrder)
+		return o.generateTradeOutOrder(postOrderAction, preOrder)
 	}
-
-	// if o.lastTick.PctChg < cfg.CloseChangeRatioLow || o.lastTick.PctChg > cfg.CloseChangeRatioHigh {
-	// 	return nil
-	// }
-
-	// get out in ration in all tick
-	allOutInRation := o.tickArr.getOutInRatio()
 
 	// need to compare with all and period
 	order := &entity.FutureOrder{
@@ -89,10 +85,10 @@ func (o *FutureTradeAgent) generateOrder(cfg config.FutureAnalyze) *entity.Futur
 	}
 
 	switch {
-	case allOutInRation > cfg.AllOutInRatio && o.lastTick.Low < o.lastTick.Close:
+	case outInRation > o.analyzeCfg.AllOutInRatio && o.lastTick.Low < o.lastTick.Close:
 		order.Action = entity.ActionBuy
 		return order
-	case 100-allOutInRation > cfg.AllInOutRatio && o.lastTick.High > o.lastTick.Close:
+	case 100-outInRation > o.analyzeCfg.AllInOutRatio && o.lastTick.High > o.lastTick.Close:
 		order.Action = entity.ActionSellFirst
 		return order
 	default:
@@ -100,7 +96,7 @@ func (o *FutureTradeAgent) generateOrder(cfg config.FutureAnalyze) *entity.Futur
 	}
 }
 
-func (o *FutureTradeAgent) generateTradeOutOrder(cfg config.FutureAnalyze, postOrderAction entity.OrderAction, preOrder *entity.FutureOrder) *entity.FutureOrder {
+func (o *FutureTradeAgent) generateTradeOutOrder(postOrderAction entity.OrderAction, preOrder *entity.FutureOrder) *entity.FutureOrder {
 	order := &entity.FutureOrder{
 		Code: o.code,
 		BaseOrder: entity.BaseOrder{
@@ -113,11 +109,11 @@ func (o *FutureTradeAgent) generateTradeOutOrder(cfg config.FutureAnalyze, postO
 		},
 	}
 
-	if o.lastTick.TickTime.After(preOrder.TradeTime.Add(time.Duration(cfg.MaxHoldTime) * time.Minute)) {
+	if o.lastTick.TickTime.After(preOrder.TradeTime.Add(time.Duration(o.analyzeCfg.MaxHoldTime) * time.Minute)) {
 		return order
 	}
 
-	rsi := o.tickArr.getRSIByTickTime(preOrder.TickTime, cfg.RSIMinCount)
+	rsi := o.tickArr.getRSIByTickTime(preOrder.TickTime, o.analyzeCfg.RSIMinCount)
 	if rsi == 0 {
 		return nil
 	}
@@ -133,9 +129,9 @@ func (o *FutureTradeAgent) checkPlaceOrderStatus(order *entity.FutureOrder) {
 	var timeout time.Duration
 	switch order.Action {
 	case entity.ActionBuy, entity.ActionSellFirst:
-		timeout = o.tradeInWaitTime
+		timeout = time.Duration(o.tradeSwitch.TradeInWaitTime) * time.Second
 	case entity.ActionSell, entity.ActionBuyLater:
-		timeout = o.tradeOutWaitTime
+		timeout = time.Duration(o.tradeSwitch.TradeOutWaitTime) * time.Second
 	}
 
 	for {
@@ -185,7 +181,7 @@ func (o *FutureTradeAgent) cancelOrder(order *entity.FutureOrder) {
 				log.Warnf("Future Order Canceled -> Future: %s, Action: %d, Price: %.2f, Qty: %d", order.Code, order.Action, order.Price, order.Quantity)
 				o.waitingOrder = nil
 				return
-			} else if order.TradeTime.Add(o.cancelWaitTime).Before(time.Now()) {
+			} else if order.TradeTime.Add(time.Duration(o.tradeSwitch.CancelWaitTime) * time.Second).Before(time.Now()) {
 				log.Warnf("Try Cancel Future Order Again -> Future: %s, Action: %d, Price: %.2f, Qty: %d", order.Code, order.Action, order.Price, order.Quantity)
 				go o.checkPlaceOrderStatus(order)
 				return
@@ -211,6 +207,14 @@ func (o *FutureTradeAgent) checkNeededPost() (entity.OrderAction, *entity.Future
 
 // RealTimeFutureTickArr -.
 type RealTimeFutureTickArr []*entity.RealTimeFutureTick
+
+func (c RealTimeFutureTickArr) getTotalVolume() int64 {
+	var volume int64
+	for _, v := range c {
+		volume += v.Volume
+	}
+	return volume
+}
 
 func (c RealTimeFutureTickArr) getOutInRatio() float64 {
 	if len(c) == 0 {
