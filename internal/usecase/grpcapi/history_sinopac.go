@@ -4,16 +4,16 @@ import (
 	"context"
 
 	"tmt/pb"
-	"tmt/pkg/sinopac"
+	"tmt/pkg/grpc"
 )
 
 // HistorygRPCAPI -.
 type HistorygRPCAPI struct {
-	conn *sinopac.Connection
+	conn *grpc.Connection
 }
 
 // NewHistory -.
-func NewHistory(client *sinopac.Connection) *HistorygRPCAPI {
+func NewHistory(client *grpc.Connection) *HistorygRPCAPI {
 	return &HistorygRPCAPI{client}
 }
 

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
+	"tmt/global"
 	"tmt/pkg/cache"
-	"tmt/pkg/global"
 )
 
 const (

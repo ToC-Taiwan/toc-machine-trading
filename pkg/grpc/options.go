@@ -1,4 +1,5 @@
-package sinopac
+// Package grpc package grpc
+package grpc
 
 import "time"
 

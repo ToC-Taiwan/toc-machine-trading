@@ -12,10 +12,10 @@ import (
 	"tmt/internal/usecase/grpcapi"
 	"tmt/internal/usecase/rabbit"
 	"tmt/internal/usecase/repo"
+	"tmt/pkg/grpc"
 	"tmt/pkg/httpserver"
 	"tmt/pkg/logger"
 	"tmt/pkg/postgres"
-	"tmt/pkg/sinopac"
 
 	v1 "tmt/internal/controller/http/v1"
 
@@ -35,9 +35,9 @@ func Run(cfg *config.Config) {
 	}
 	defer pg.Close()
 
-	sc, err := sinopac.New(
+	sc, err := grpc.New(
 		cfg.Sinopac.URL,
-		sinopac.MaxPoolSize(cfg.Sinopac.PoolMax),
+		grpc.MaxPoolSize(cfg.Sinopac.PoolMax),
 	)
 	if err != nil {
 		log.Panic(err)

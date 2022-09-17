@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"tmt/cmd/config"
+	"tmt/global"
 	"tmt/internal/entity"
-	"tmt/pkg/global"
 	"tmt/pkg/utils"
 )
 

@@ -4,18 +4,18 @@ import (
 	"context"
 
 	"tmt/pb"
-	"tmt/pkg/sinopac"
+	"tmt/pkg/grpc"
 
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 // StreamgRPCAPI -.
 type StreamgRPCAPI struct {
-	conn *sinopac.Connection
+	conn *grpc.Connection
 }
 
 // NewStream -.
-func NewStream(client *sinopac.Connection) *StreamgRPCAPI {
+func NewStream(client *grpc.Connection) *StreamgRPCAPI {
 	return &StreamgRPCAPI{client}
 }
 

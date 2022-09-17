@@ -10,7 +10,7 @@ import (
 	"sync"
 	"time"
 
-	"tmt/pkg/global"
+	"tmt/global"
 
 	"github.com/rifflock/lfshook"
 	"github.com/sirupsen/logrus"

@@ -6,9 +6,9 @@ import (
 	"time"
 
 	"tmt/cmd/config"
+	"tmt/global"
 	"tmt/internal/entity"
 	"tmt/pb"
-	"tmt/pkg/global"
 	"tmt/pkg/logger"
 	"tmt/pkg/rabbitmq"
 

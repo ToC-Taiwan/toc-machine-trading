@@ -4,18 +4,18 @@ import (
 	"context"
 
 	"tmt/pb"
-	"tmt/pkg/sinopac"
+	"tmt/pkg/grpc"
 
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 // TargetgRPCAPI -.
 type TargetgRPCAPI struct {
-	conn *sinopac.Connection
+	conn *grpc.Connection
 }
 
 // NewTarget -.
-func NewTarget(client *sinopac.Connection) *TargetgRPCAPI {
+func NewTarget(client *grpc.Connection) *TargetgRPCAPI {
 	return &TargetgRPCAPI{client}
 }
 

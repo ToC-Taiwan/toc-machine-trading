@@ -5,18 +5,18 @@ import (
 
 	"tmt/internal/entity"
 	"tmt/pb"
-	"tmt/pkg/sinopac"
+	"tmt/pkg/grpc"
 
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 // OrdergRPCAPI -.
 type OrdergRPCAPI struct {
-	conn *sinopac.Connection
+	conn *grpc.Connection
 }
 
 // NewOrder -.
-func NewOrder(client *sinopac.Connection) *OrdergRPCAPI {
+func NewOrder(client *grpc.Connection) *OrdergRPCAPI {
 	return &OrdergRPCAPI{client}
 }
 

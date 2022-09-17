@@ -9,19 +9,19 @@ import (
 	"time"
 
 	"tmt/pb"
-	"tmt/pkg/sinopac"
+	"tmt/pkg/grpc"
 
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 // BasicgRPCAPI -.
 type BasicgRPCAPI struct {
-	conn         *sinopac.Connection
+	conn         *grpc.Connection
 	heartbeatMsg string
 }
 
 // NewBasic -.
-func NewBasic(client *sinopac.Connection) *BasicgRPCAPI {
+func NewBasic(client *grpc.Connection) *BasicgRPCAPI {
 	instance := &BasicgRPCAPI{
 		conn:         client,
 		heartbeatMsg: "beat",

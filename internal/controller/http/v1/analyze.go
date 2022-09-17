@@ -5,9 +5,9 @@ import (
 	"sort"
 	"time"
 
+	"tmt/global"
 	"tmt/internal/entity"
 	"tmt/internal/usecase"
-	"tmt/pkg/global"
 
 	"github.com/gin-gonic/gin"
 )
