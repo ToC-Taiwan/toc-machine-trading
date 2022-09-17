@@ -7,8 +7,8 @@ import (
 	"sync"
 	"time"
 
+	"tmt/cmd/config"
 	"tmt/internal/entity"
-	"tmt/pkg/config"
 	"tmt/pkg/global"
 	"tmt/pkg/utils"
 )
@@ -35,11 +35,7 @@ func NewHistory(r HistoryRepo, t HistorygRPCAPI) *HistoryUseCase {
 		fetchList: make(map[string]*entity.Target),
 	}
 
-	cfg, err := config.GetConfig()
-	if err != nil {
-		log.Panic(err)
-	}
-
+	cfg := config.GetConfig()
 	uc.stockAnalyzeCfg = cfg.StockAnalyze
 	uc.basic = *cc.GetBasicInfo()
 

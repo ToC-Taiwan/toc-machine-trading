@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"time"
 
+	"tmt/cmd/config"
 	"tmt/internal/entity"
 	"tmt/pb"
-	"tmt/pkg/config"
 	"tmt/pkg/global"
 	"tmt/pkg/logger"
 	"tmt/pkg/rabbitmq"
@@ -36,10 +36,7 @@ type StreamRabbit struct {
 
 // NewStream -.
 func NewStream() *StreamRabbit {
-	allConfig, err := config.GetConfig()
-	if err != nil {
-		log.Panic(err)
-	}
+	allConfig := config.GetConfig()
 
 	conn := rabbitmq.NewConnection(
 		allConfig.RabbitMQ.Exchange,

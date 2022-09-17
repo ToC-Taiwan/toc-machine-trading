@@ -6,8 +6,8 @@ import (
 	"sync"
 	"time"
 
+	"tmt/cmd/config"
 	"tmt/internal/entity"
-	"tmt/pkg/config"
 	"tmt/pkg/global"
 )
 
@@ -34,11 +34,7 @@ type AnalyzeUseCase struct {
 
 // NewAnalyze -.
 func NewAnalyze(r HistoryRepo) *AnalyzeUseCase {
-	cfg, err := config.GetConfig()
-	if err != nil {
-		log.Panic(err)
-	}
-
+	cfg := config.GetConfig()
 	uc := &AnalyzeUseCase{
 		repo:               r,
 		basic:              *cc.GetBasicInfo(),
@@ -318,11 +314,7 @@ func (uc *SimulateBalance) splitOrdersByAction(allOrders []*entity.StockOrder) (
 }
 
 func generateAnalyzeCfg(useDefault bool) []config.StockAnalyze {
-	cfg, err := config.GetConfig()
-	if err != nil {
-		log.Panic(err)
-	}
-
+	cfg := config.GetConfig()
 	if useDefault {
 		return []config.StockAnalyze{{
 			MaxHoldTime:          cfg.StockAnalyze.MaxHoldTime,

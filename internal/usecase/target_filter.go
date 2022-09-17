@@ -3,8 +3,8 @@ package usecase
 import (
 	"sync"
 
+	"tmt/cmd/config"
 	"tmt/internal/entity"
-	"tmt/pkg/config"
 )
 
 // TargetFilter -.

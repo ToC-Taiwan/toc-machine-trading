@@ -7,8 +7,8 @@ import (
 	"sort"
 	"time"
 
+	"tmt/cmd/config"
 	"tmt/internal/entity"
-	"tmt/pkg/config"
 	"tmt/pkg/global"
 )
 
@@ -24,11 +24,7 @@ type TargetUseCase struct {
 
 // NewTarget -.
 func NewTarget(r TargetRepo, t TargetgRPCAPI, s StreamgRPCAPI) *TargetUseCase {
-	cfg, err := config.GetConfig()
-	if err != nil {
-		log.Panic(err)
-	}
-
+	cfg := config.GetConfig()
 	uc := &TargetUseCase{
 		repo:              r,
 		gRPCAPI:           t,
@@ -38,7 +34,7 @@ func NewTarget(r TargetRepo, t TargetgRPCAPI, s StreamgRPCAPI) *TargetUseCase {
 	}
 
 	// unsubscriba all first
-	if err = uc.UnSubscribeAll(context.Background()); err != nil {
+	if err := uc.UnSubscribeAll(context.Background()); err != nil {
 		log.Panic("unsubscribe all fail")
 	}
 

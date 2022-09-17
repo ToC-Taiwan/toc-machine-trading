@@ -6,8 +6,8 @@ import (
 	"sync"
 	"time"
 
+	"tmt/cmd/config"
 	"tmt/internal/entity"
-	"tmt/pkg/config"
 	"tmt/pkg/global"
 )
 
@@ -27,11 +27,7 @@ type OrderUseCase struct {
 
 // NewOrder -.
 func NewOrder(t OrdergRPCAPI, r OrderRepo) *OrderUseCase {
-	cfg, err := config.GetConfig()
-	if err != nil {
-		log.Panic(err)
-	}
-
+	cfg := config.GetConfig()
 	futureTradeDay, err := time.ParseInLocation(global.ShortTimeLayout, time.Now().Format(global.ShortTimeLayout), time.Local)
 	if err != nil {
 		log.Panic(err)

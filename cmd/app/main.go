@@ -1,15 +1,12 @@
 package main
 
 import (
+	"tmt/cmd/config"
 	"tmt/internal/app"
-	"tmt/pkg/config"
 )
 
 func main() {
-	cfg, err := config.GetConfig()
-	if err != nil {
-		panic(err)
-	}
+	cfg := config.GetConfig()
 
 	app.MigrateDB(cfg)
 	app.Run(cfg)

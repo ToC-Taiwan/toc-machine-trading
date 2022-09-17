@@ -7,11 +7,11 @@ import (
 	"os/signal"
 	"syscall"
 
+	"tmt/cmd/config"
 	"tmt/internal/usecase"
 	"tmt/internal/usecase/grpcapi"
 	"tmt/internal/usecase/rabbit"
 	"tmt/internal/usecase/repo"
-	"tmt/pkg/config"
 	"tmt/pkg/httpserver"
 	"tmt/pkg/logger"
 	"tmt/pkg/postgres"

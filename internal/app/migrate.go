@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"tmt/pkg/config"
+	"tmt/cmd/config"
 	"tmt/pkg/postgres"
 
 	"github.com/golang-migrate/migrate/v4"
@@ -70,11 +70,7 @@ func MigrateDB(cfg *config.Config) {
 }
 
 func tryCreateDB(dbName string) error {
-	cfg, err := config.GetConfig()
-	if err != nil {
-		return err
-	}
-
+	cfg := config.GetConfig()
 	pg, err := postgres.New(cfg.Postgres.URL, postgres.MaxPoolSize(cfg.Postgres.PoolMax))
 	if err != nil {
 		return err

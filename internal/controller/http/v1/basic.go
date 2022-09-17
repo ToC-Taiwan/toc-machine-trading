@@ -3,9 +3,9 @@ package v1
 import (
 	"net/http"
 
+	"tmt/cmd/config"
 	"tmt/internal/entity"
 	"tmt/internal/usecase"
-	"tmt/pkg/config"
 
 	"github.com/gin-gonic/gin"
 )
@@ -85,13 +85,7 @@ func (r *basicRoutes) getAllSinopacStockAndUpdateRepo(c *gin.Context) {
 // @Failure     500 {object} response
 // @Router      /basic/config [get]
 func (r *basicRoutes) getAllConfig(c *gin.Context) {
-	cfg, err := config.GetConfig()
-	if err != nil {
-		log.Error(err)
-		errorResponse(c, http.StatusInternalServerError, err.Error())
-		return
-	}
-
+	cfg := config.GetConfig()
 	c.JSON(http.StatusOK, cfg)
 }
 

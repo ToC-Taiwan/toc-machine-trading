@@ -3,8 +3,8 @@ package usecase
 import (
 	"math"
 
+	"tmt/cmd/config"
 	"tmt/internal/entity"
-	"tmt/pkg/config"
 )
 
 // Quota -.

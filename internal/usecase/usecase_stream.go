@@ -7,8 +7,8 @@ import (
 	"sync"
 	"time"
 
+	"tmt/cmd/config"
 	"tmt/internal/entity"
-	"tmt/pkg/config"
 	"tmt/pkg/global"
 )
 
@@ -36,10 +36,7 @@ type StreamUseCase struct {
 
 // NewStream -.
 func NewStream(r StreamRepo, g StreamgRPCAPI, t StreamRabbit) *StreamUseCase {
-	cfg, err := config.GetConfig()
-	if err != nil {
-		log.Panic(err)
-	}
+	cfg := config.GetConfig()
 	basic := *cc.GetBasicInfo()
 	t.FillAllBasic(basic.AllStocks, basic.AllFutures)
 

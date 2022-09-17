@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
+	"tmt/cmd/config"
 	"tmt/internal/entity"
-	"tmt/pkg/config"
 	"tmt/pkg/global"
 )
 
@@ -23,11 +23,7 @@ type BasicUseCase struct {
 
 // NewBasic -.
 func NewBasic(r BasicRepo, t BasicgRPCAPI) *BasicUseCase {
-	cfg, err := config.GetConfig()
-	if err != nil {
-		log.Panic(err)
-	}
-
+	cfg := config.GetConfig()
 	uc := &BasicUseCase{
 		repo:     r,
 		gRPCAPI:  t,

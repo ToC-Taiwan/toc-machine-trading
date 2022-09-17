@@ -5,8 +5,8 @@ import (
 	"sync"
 	"time"
 
+	"tmt/cmd/config"
 	"tmt/internal/entity"
-	"tmt/pkg/config"
 
 	"github.com/google/uuid"
 )
