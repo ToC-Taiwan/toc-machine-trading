@@ -6,14 +6,10 @@ import (
 	"fmt"
 	"time"
 
-	"tmt/pkg/logger"
-
 	"github.com/Masterminds/squirrel"
 	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
 )
-
-var log = logger.Get()
 
 const (
 	_defaultMaxPoolSize  = 1
@@ -60,7 +56,7 @@ func New(url string, opts ...Option) (*Postgres, error) {
 			break
 		}
 
-		log.Infof("Postgres trying connect, attempts left: %d", pg.connAttempts)
+		fmt.Printf("Postgres trying connect, attempts left: %d\n", pg.connAttempts)
 
 		time.Sleep(pg.connTimeout)
 
@@ -100,12 +96,12 @@ func (p *Postgres) EndTransaction(tx pgx.Tx, err error) {
 	if err != nil {
 		rollErr := tx.Rollback(context.Background())
 		if rollErr != nil {
-			log.Errorf("Postgres: error on rollback transaction: %s", rollErr)
+			fmt.Printf("Postgres: error on rollback transaction: %s\n", rollErr)
 		}
 	} else {
 		commitErr := tx.Commit(context.Background())
 		if commitErr != nil {
-			log.Errorf("Postgres: error on commit transaction: %s", commitErr)
+			fmt.Printf("Postgres: error on commit transaction: %s\n", commitErr)
 		}
 	}
 }

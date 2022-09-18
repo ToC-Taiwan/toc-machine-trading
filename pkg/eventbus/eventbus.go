@@ -2,12 +2,8 @@
 package eventbus
 
 import (
-	"tmt/pkg/logger"
-
 	"github.com/asaskevich/EventBus"
 )
-
-var log = logger.Get()
 
 // Bus Bus
 type Bus struct {
@@ -31,7 +27,7 @@ func (c *Bus) SubscribeTopic(topic string, fn ...interface{}) {
 	for _, f := range fn {
 		err := c.bus.SubscribeAsync(topic, f, false)
 		if err != nil {
-			log.Panic(err)
+			panic(err)
 		}
 	}
 }

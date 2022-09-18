@@ -2,14 +2,11 @@
 package rabbitmq
 
 import (
+	"fmt"
 	"time"
-
-	"tmt/pkg/logger"
 
 	"github.com/streadway/amqp"
 )
-
-var log = logger.Get()
 
 // Connection -.
 type Connection struct {
@@ -39,7 +36,7 @@ func (c *Connection) AttemptConnect() error {
 			break
 		}
 
-		log.Infof("RabbitMQ is trying to connect, attempts left: %d", i)
+		fmt.Printf("RabbitMQ is trying to connect, attempts left: %d\n", i)
 		time.Sleep(c.WaitTime)
 	}
 

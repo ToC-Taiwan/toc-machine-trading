@@ -2,15 +2,12 @@
 package grpc
 
 import (
+	"fmt"
 	"time"
-
-	"tmt/pkg/logger"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
-
-var log = logger.Get()
 
 const (
 	_defaultMaxPoolSize  = 10
@@ -65,7 +62,7 @@ func New(url string, opts ...Option) (*Connection, error) {
 			continue
 		}
 
-		log.Infof("gRPC trying connect, attempts left: %d", conn.connAttempts)
+		fmt.Printf("gRPC trying connect, attempts left: %d\n", conn.connAttempts)
 		time.Sleep(conn.connTimeout)
 		conn.connAttempts--
 	}
