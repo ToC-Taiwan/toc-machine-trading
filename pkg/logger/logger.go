@@ -10,8 +10,6 @@ import (
 	"sync"
 	"time"
 
-	"tmt/global"
-
 	"github.com/rifflock/lfshook"
 	"github.com/sirupsen/logrus"
 )
@@ -21,15 +19,6 @@ var (
 	once         sync.Once
 )
 
-func init() {
-	ex, err := os.Executable()
-	if err != nil {
-		panic(err)
-	}
-
-	global.SetBasePath(filepath.Clean(filepath.Dir(ex)))
-}
-
 // Get Get
 func Get() *logrus.Logger {
 	if globalLogger != nil {
@@ -37,6 +26,12 @@ func Get() *logrus.Logger {
 	}
 
 	once.Do(initLogger)
+
+	for {
+		if globalLogger != nil {
+			break
+		}
+	}
 	return globalLogger
 }
 
@@ -48,15 +43,20 @@ type logConfig struct {
 
 func initLogger() {
 	// Get current path
+	ex, err := os.Executable()
+	if err != nil {
+		panic(err)
+	}
+	basePath := filepath.Clean(filepath.Dir(ex))
+
 	logCfg := parseEnvToLogConfig()
-	basePath := global.GetBasePath()
-	globalLogger = logrus.New()
+	newLogger := logrus.New()
 
 	var formatter logrus.Formatter
 	if logCfg.jsonFormat {
 		formatter = &logrus.JSONFormatter{
 			DisableHTMLEscape: true,
-			TimestampFormat:   global.LongTimeLayout,
+			TimestampFormat:   time.RFC3339,
 			PrettyPrint:       false,
 		}
 	} else {
@@ -67,25 +67,24 @@ func initLogger() {
 			PadLevelText:     false,
 			ForceColors:      true,
 			ForceQuote:       true,
-			CallerPrettyfier: func(frame *runtime.Frame) (function string, file string) {
-				fileName := strings.ReplaceAll(frame.File, fmt.Sprintf("%s/", basePath), "")
-				return fmt.Sprintf("[%s:%d]", fileName, frame.Line), ""
-			},
+			CallerPrettyfier: newCallerPrettyfier(basePath),
 		}
 	}
 
 	if logCfg.isDev {
-		globalLogger.SetReportCaller(true)
+		newLogger.SetReportCaller(true)
 	}
 
-	globalLogger.SetFormatter(formatter)
-	globalLogger.SetLevel(logrus.Level(logCfg.logLevel))
-	globalLogger.SetOutput(os.Stdout)
-	globalLogger.Hooks.Add(fileHook(basePath))
+	newLogger.SetFormatter(formatter)
+	newLogger.SetLevel(logrus.Level(logCfg.logLevel))
+	newLogger.SetOutput(os.Stdout)
+	newLogger.Hooks.Add(fileHook(basePath))
+
+	globalLogger = newLogger
 }
 
 func fileHook(basePath string) *lfshook.LfsHook {
-	date := time.Now().Format(global.ShortTimeLayoutNoDash)
+	date := time.Now().Format(time.RFC3339)
 	date = strings.ReplaceAll(date, ":", "")
 
 	pathMap := lfshook.PathMap{
@@ -94,22 +93,19 @@ func fileHook(basePath string) *lfshook.LfsHook {
 		logrus.ErrorLevel: filepath.Join(basePath, fmt.Sprintf("/logs/tmt-%s.log", date)),
 		logrus.WarnLevel:  filepath.Join(basePath, fmt.Sprintf("/logs/tmt-%s.log", date)),
 		logrus.InfoLevel:  filepath.Join(basePath, fmt.Sprintf("/logs/tmt-%s.log", date)),
-		// logrus.DebugLevel: filepath.Join(basePath, fmt.Sprintf("/logs/tmt-%s.log", date)),
-		// logrus.TraceLevel: filepath.Join(basePath, fmt.Sprintf("/logs/tmt-%s.log", date)),
 	}
 
 	return lfshook.NewHook(
 		pathMap,
 		&logrus.JSONFormatter{
 			DisableHTMLEscape: true,
-			TimestampFormat:   global.LongTimeLayout,
+			TimestampFormat:   time.RFC3339,
 			PrettyPrint:       true,
 		},
 	)
 }
 
-// NewCallerPrettyfier -.
-func NewCallerPrettyfier(basePath string) func(*runtime.Frame) (function string, file string) {
+func newCallerPrettyfier(basePath string) func(*runtime.Frame) (function string, file string) {
 	return func(frame *runtime.Frame) (function string, file string) {
 		fileName := strings.ReplaceAll(frame.File, fmt.Sprintf("%s/", basePath), "")
 		return fmt.Sprintf("[%s:%d]", fileName, frame.Line), ""
@@ -117,42 +113,36 @@ func NewCallerPrettyfier(basePath string) func(*runtime.Frame) (function string,
 }
 
 func parseEnvToLogConfig() logConfig {
-	var jsonFormat, isDev bool
-	var logLevel int
-
+	var cfg logConfig
 	if mode := os.Getenv("LOG_FORMAT"); mode == "json" {
-		jsonFormat = true
+		cfg.jsonFormat = true
 	}
 
 	if deployment := os.Getenv("DEPLOYMENT"); deployment == "dev" {
-		isDev = true
+		cfg.isDev = true
 	}
 
 	logLevelString := os.Getenv("LOG_LEVEL")
 	switch logLevelString {
 	case "panic":
-		logLevel = PanicLevel
+		cfg.logLevel = PanicLevel
 	case "fatal":
-		logLevel = FatalLevel
+		cfg.logLevel = FatalLevel
 	case "error":
-		logLevel = ErrorLevel
+		cfg.logLevel = ErrorLevel
 	case "warn":
-		logLevel = WarnLevel
+		cfg.logLevel = WarnLevel
 	case "info":
-		logLevel = InfoLevel
+		cfg.logLevel = InfoLevel
 	case "debug":
-		logLevel = DebugLevel
+		cfg.logLevel = DebugLevel
 	case "trace":
-		logLevel = TraceLevel
+		cfg.logLevel = TraceLevel
 	default:
-		logLevel = InfoLevel
+		cfg.logLevel = InfoLevel
 	}
 
-	return logConfig{
-		jsonFormat: jsonFormat,
-		isDev:      isDev,
-		logLevel:   logLevel,
-	}
+	return cfg
 }
 
 const (

@@ -18,15 +18,3 @@ const (
 	// EndTradeYear -.
 	EndTradeYear int = 2022
 )
-
-var basePath string
-
-// SetBasePath SetBasePath
-func SetBasePath(path string) {
-	basePath = path
-}
-
-// GetBasePath GetBasePath
-func GetBasePath() string {
-	return basePath
-}
