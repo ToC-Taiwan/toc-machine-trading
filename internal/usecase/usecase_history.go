@@ -40,7 +40,7 @@ func NewHistory(r HistoryRepo, t HistorygRPCAPI) *HistoryUseCase {
 	uc.basic = *cc.GetBasicInfo()
 
 	bus.SubscribeTopic(topicFetchHistory, uc.FetchHistory)
-	uc.FetchFutureHistoryTick(cfg.TargetCond.MonitorFutureCode, uc.basic.LastTradeDay)
+	// uc.FetchFutureHistoryTick(cfg.TargetCond.MonitorFutureCode, uc.basic.LastTradeDay)
 
 	return uc
 }
@@ -536,24 +536,24 @@ func (uc *HistoryUseCase) FetchFutureHistoryTick(code string, date time.Time) {
 	}
 	close(dataChan)
 	<-wait
-	if len(result) != 0 {
-		for code, v := range result {
-			var nightMarketLastTick *entity.HistoryTick
-			for i, tick := range v {
-				if tick.TickTime.Hour() == 8 {
-					nightMarketLastTick = v[i-1]
-					cc.SetFutureHistoryTick(code, nightMarketLastTick)
-					cc.SetFutureGap(tick.Close-nightMarketLastTick.Close, date)
-					log.Infof("Future night market gap: %.0f", tick.Close-nightMarketLastTick.Close)
-					break
-				}
-			}
+	// if len(result) != 0 {
+	// 	for code, v := range result {
+	// 		var nightMarketLastTick *entity.HistoryTick
+	// 		for i, tick := range v {
+	// 			if tick.TickTime.Hour() == 8 {
+	// 				nightMarketLastTick = v[i-1]
+	// 				cc.SetFutureHistoryTick(code, nightMarketLastTick)
+	// 				cc.SetFutureGap(tick.Close-nightMarketLastTick.Close, date)
+	// 				log.Infof("Future night market gap: %.0f", tick.Close-nightMarketLastTick.Close)
+	// 				break
+	// 			}
+	// 		}
 
-			if nightMarketLastTick == nil {
-				cc.SetFutureHistoryTick(code, v[len(v)-1])
-			}
-		}
-	}
+	// 		if nightMarketLastTick == nil {
+	// 			cc.SetFutureHistoryTick(code, v[len(v)-1])
+	// 		}
+	// 	}
+	// }
 }
 
 // FetchFutureHistoryClose -.

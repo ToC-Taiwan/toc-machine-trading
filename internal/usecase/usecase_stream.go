@@ -30,8 +30,8 @@ type StreamUseCase struct {
 	tradeInSwitch       bool
 	futureTradeInSwitch bool
 
-	allowForward bool
-	allowReverse bool
+	// allowForward bool
+	// allowReverse bool
 }
 
 // NewStream -.
@@ -185,16 +185,16 @@ func (uc *StreamUseCase) tradingRoom(agent *TradeAgent) {
 }
 
 func (uc *StreamUseCase) placeOrder(agent *TradeAgent, order *entity.StockOrder) {
-	switch order.Action {
-	case entity.ActionBuy:
-		if !uc.allowForward {
-			return
-		}
-	case entity.ActionSellFirst:
-		if !uc.allowReverse {
-			return
-		}
-	}
+	// switch order.Action {
+	// case entity.ActionBuy:
+	// 	if !uc.allowForward {
+	// 		return
+	// 	}
+	// case entity.ActionSellFirst:
+	// 	if !uc.allowReverse {
+	// 		return
+	// 	}
+	// }
 
 	if order.Price == 0 {
 		log.Errorf("%s Order price is 0", order.StockNum)
@@ -362,7 +362,7 @@ func (uc *StreamUseCase) ReceiveFutureStreamData(ctx context.Context, code strin
 	agent := NewFutureAgent(code, uc.futureTradeSwitchCfg, uc.futureAnalyzeCfg)
 
 	go uc.futureTradingRoom(agent)
-	go uc.checkFirstFutureTick(agent)
+	// go uc.checkFirstFutureTick(agent)
 	go uc.rabbit.FutureTickConsumer(code, agent.tickChan)
 
 	bus.PublishTopicEvent(topicSubscribeFutureTickTargets, code)
@@ -386,31 +386,31 @@ func (uc *StreamUseCase) futureTradingRoom(agent *FutureTradeAgent) {
 	}
 }
 
-func (uc *StreamUseCase) checkFirstFutureTick(agent *FutureTradeAgent) {
-	for {
-		time.Sleep(time.Second)
-		dayMarketLastTick := cc.GetFutureHistoryTick(agent.code)
-		if agent.lastTick == nil || dayMarketLastTick == nil {
-			continue
-		}
-		agent.analyzeTickTime = agent.lastTick.TickTime
+// func (uc *StreamUseCase) checkFirstFutureTick(agent *FutureTradeAgent) {
+// 	for {
+// 		time.Sleep(time.Second)
+// 		dayMarketLastTick := cc.GetFutureHistoryTick(agent.code)
+// 		if agent.lastTick == nil || dayMarketLastTick == nil {
+// 			continue
+// 		}
+// 		agent.analyzeTickTime = agent.lastTick.TickTime
 
-		if agent.lastTick.TickTime.Hour() != 8 {
-			log.Warn("Not at stock trading time")
-			log.Warnf("DayMarketLastTickTime: %s, Close: %.0f", dayMarketLastTick.TickTime.Format(global.LongTimeLayout), dayMarketLastTick.Close)
-			log.Warnf("CurrentTickTime %s, Close: %.0f", agent.lastTick.TickTime.Format(global.LongTimeLayout), agent.lastTick.Close)
-			break
-		}
+// 		if agent.lastTick.TickTime.Hour() != 8 {
+// 			log.Warn("Not at stock trading time")
+// 			log.Warnf("DayMarketLastTickTime: %s, Close: %.0f", dayMarketLastTick.TickTime.Format(global.LongTimeLayout), dayMarketLastTick.Close)
+// 			log.Warnf("CurrentTickTime %s, Close: %.0f", agent.lastTick.TickTime.Format(global.LongTimeLayout), agent.lastTick.Close)
+// 			break
+// 		}
 
-		if gap := agent.lastTick.Close - dayMarketLastTick.Close; gap >= 0 {
-			uc.allowForward = true
-		} else if gap != 0 {
-			uc.allowReverse = true
-		}
+// 		if gap := agent.lastTick.Close - dayMarketLastTick.Close; gap >= 0 {
+// 			uc.allowForward = true
+// 		} else if gap != 0 {
+// 			uc.allowReverse = true
+// 		}
 
-		break
-	}
-}
+// 		break
+// 	}
+// }
 
 func (uc *StreamUseCase) placeFutureOrder(agent *FutureTradeAgent, order *entity.FutureOrder) {
 	if order.Price == 0 {

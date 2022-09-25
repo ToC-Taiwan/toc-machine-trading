@@ -15,10 +15,6 @@ const (
 
 	cacheCatagoryFutureOrder cache.Category = "future_order"
 
-	cacheCatagoryHistoryFutureTick cache.Category = "history_future_tick"
-
-	cacheCatagoryFutureGap cache.Category = "future_gap"
-
 	cacheCatagoryHistoryOpen cache.Category = "history_open"
 
 	cacheCatagoryHistoryClose cache.Category = "history_close"
@@ -38,8 +34,6 @@ const (
 	cacheIDTargets string = "targets"
 
 	cacheIDStockNum string = "stock_num"
-
-	cacheIDFutureCode string = "future_code"
 
 	cacheIDOrderID string = "order_id"
 )
@@ -144,19 +138,5 @@ func (c *Cache) historyTickArrKey(stockNum string, date time.Time) cache.Key {
 	return cache.Key{
 		Category: cacheCatagoryHistoryTickArr,
 		ID:       c.generateID(cacheIDStockNum, stockNum, date.Format(global.ShortTimeLayout)),
-	}
-}
-
-func (c *Cache) futureGapKey(date time.Time) cache.Key {
-	return cache.Key{
-		Category: cacheCatagoryFutureGap,
-		ID:       date.Format(global.ShortTimeLayout),
-	}
-}
-
-func (c *Cache) futureHistoryTickKey(code string) cache.Key {
-	return cache.Key{
-		Category: cacheCatagoryHistoryFutureTick,
-		ID:       c.generateID(cacheIDFutureCode, code),
 	}
 }
