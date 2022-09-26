@@ -357,12 +357,22 @@ func (uc *StreamUseCase) GetStockSnapshotByNumArr(stockNumArr []string) ([]*enti
 	return result, nil
 }
 
+// NewFutureRealTimeConnection -.
+func (uc *StreamUseCase) NewFutureRealTimeConnection(timestamp int64, tickChan chan *entity.RealTimeFutureTick) {
+	uc.rabbit.AddFutureTickChan(timestamp, tickChan)
+}
+
+// DeleteFutureRealTimeConnection -.
+func (uc *StreamUseCase) DeleteFutureRealTimeConnection(timestamp int64) {
+	uc.rabbit.RemoveFutureTickChan(timestamp)
+}
+
 // ReceiveFutureStreamData -.
 func (uc *StreamUseCase) ReceiveFutureStreamData(ctx context.Context, code string) {
 	agent := NewFutureAgent(code, uc.futureTradeSwitchCfg, uc.futureAnalyzeCfg)
 
-	go uc.futureTradingRoom(agent)
 	// go uc.checkFirstFutureTick(agent)
+	go uc.futureTradingRoom(agent)
 	go uc.rabbit.FutureTickConsumer(code, agent.tickChan)
 
 	bus.PublishTopicEvent(topicSubscribeFutureTickTargets, code)

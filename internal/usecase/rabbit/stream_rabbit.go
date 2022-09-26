@@ -3,6 +3,7 @@ package rabbit
 
 import (
 	"fmt"
+	"sync"
 	"time"
 
 	"tmt/cmd/config"
@@ -30,6 +31,9 @@ const (
 type StreamRabbit struct {
 	conn *rabbitmq.Connection
 
+	futureTickChan map[int64]chan *entity.RealTimeFutureTick
+	mutex          sync.RWMutex
+
 	allStockMap  map[string]*entity.Stock
 	allFutureMap map[string]*entity.Future
 }
@@ -50,7 +54,8 @@ func NewStream() *StreamRabbit {
 	}
 
 	return &StreamRabbit{
-		conn: conn,
+		conn:           conn,
+		futureTickChan: make(map[int64]chan *entity.RealTimeFutureTick),
 	}
 }
 
@@ -209,8 +214,28 @@ func (c *StreamRabbit) TickConsumer(stockNum string, tickChan chan *entity.RealT
 	}
 }
 
+// AddFutureTickChan -.
+func (c *StreamRabbit) AddFutureTickChan(timestamp int64, tickChan chan *entity.RealTimeFutureTick) {
+	defer c.mutex.Unlock()
+	c.mutex.Lock()
+	c.futureTickChan[timestamp] = tickChan
+}
+
+// RemoveFutureTickChan -.
+func (c *StreamRabbit) RemoveFutureTickChan(timestamp int64) {
+	defer c.mutex.Unlock()
+	c.mutex.Lock()
+	close(c.futureTickChan[timestamp])
+	delete(c.futureTickChan, timestamp)
+}
+
 // FutureTickConsumer -.
 func (c *StreamRabbit) FutureTickConsumer(code string, tickChan chan *entity.RealTimeFutureTick) {
+	c.mutex.Lock()
+	if len(c.futureTickChan) == 0 {
+		c.futureTickChan[time.Now().UnixNano()] = tickChan
+	}
+	c.mutex.Unlock()
 	delivery := c.establishDelivery(fmt.Sprintf("%s:%s", routingKeyFutureTick, code))
 	for {
 		d, opened := <-delivery
@@ -235,7 +260,7 @@ func (c *StreamRabbit) FutureTickConsumer(code string, tickChan chan *entity.Rea
 			continue
 		}
 
-		tickChan <- &entity.RealTimeFutureTick{
+		tick := &entity.RealTimeFutureTick{
 			Code:            body.GetCode(),
 			TickTime:        dataTime,
 			Open:            body.GetOpen(),
@@ -256,6 +281,12 @@ func (c *StreamRabbit) FutureTickConsumer(code string, tickChan chan *entity.Rea
 			PctChg:          body.GetPctChg(),
 			Simtrade:        body.GetSimtrade(),
 		}
+
+		c.mutex.RLock()
+		for _, tickChan := range c.futureTickChan {
+			tickChan <- tick
+		}
+		c.mutex.RUnlock()
 	}
 }
 

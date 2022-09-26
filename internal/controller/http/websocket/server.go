@@ -15,6 +15,16 @@ import (
 
 var log = logger.Get()
 
+// WSType -
+type WSType int
+
+const (
+	// WSPickStock -
+	WSPickStock WSType = iota + 1
+	// WSFuture -
+	WSFuture
+)
+
 // WSRouter -.
 type WSRouter struct {
 	pickStockArr []string
@@ -39,7 +49,7 @@ func NewWSRouter(s usecase.Stream) *WSRouter {
 }
 
 // Run -.
-func (w *WSRouter) Run(gin *gin.Context) {
+func (w *WSRouter) Run(gin *gin.Context, wsType WSType) {
 	upGrader := websocket.Upgrader{
 		CheckOrigin: func(r *http.Request) bool {
 			return true
@@ -57,7 +67,13 @@ func (w *WSRouter) Run(gin *gin.Context) {
 	ctx := gin.Request.Context()
 
 	go w.write()
-	go w.sendSnapShotArr(ctx)
+
+	switch wsType {
+	case WSPickStock:
+		go w.sendSnapShotArr(ctx)
+	case WSFuture:
+		go w.sendFuture(ctx)
+	}
 
 	w.read(c)
 }

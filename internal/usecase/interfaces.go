@@ -121,6 +121,9 @@ type (
 		ReceiveStreamData(ctx context.Context, targetArr []*entity.Target)
 		GetTSESnapshot(ctx context.Context) (*entity.StockSnapShot, error)
 		GetStockSnapshotByNumArr(stockNumArr []string) ([]*entity.StockSnapShot, error)
+
+		NewFutureRealTimeConnection(timestamp int64, tickChan chan *entity.RealTimeFutureTick)
+		DeleteFutureRealTimeConnection(timestamp int64)
 	}
 
 	// StreamRepo -.
@@ -147,6 +150,8 @@ type (
 		BidAskConsumer(stockNum string, bidAskChan chan *entity.RealTimeBidAsk)
 
 		FutureTickConsumer(code string, tickChan chan *entity.RealTimeFutureTick)
+		AddFutureTickChan(timestamp int64, tickChan chan *entity.RealTimeFutureTick)
+		RemoveFutureTickChan(timestamp int64)
 	}
 )
 

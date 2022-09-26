@@ -506,8 +506,6 @@ func (uc *HistoryUseCase) processKbarArr(arr []*entity.HistoryKbar) {
 
 // FetchFutureHistoryTick -.
 func (uc *HistoryUseCase) FetchFutureHistoryTick(code string, date time.Time) {
-	defer log.Info("Fetching Future History Tick Done")
-	log.Info("Fetching Future History Tick")
 	result := make(map[string][]*entity.HistoryTick)
 	dataChan := make(chan *entity.HistoryTick)
 	wait := make(chan struct{})
@@ -554,6 +552,14 @@ func (uc *HistoryUseCase) FetchFutureHistoryTick(code string, date time.Time) {
 	// 		}
 	// 	}
 	// }
+	if len(result) != 0 {
+		for _, v := range result {
+			total := len(v)
+			log.Warnf("Fetch Date: %s, FirstTickTime: %s, LastTickTime: %s, Total: %d", date.Format(global.ShortTimeLayout), v[0].TickTime.Format(global.LongTimeLayout), v[total-1].TickTime.Format(global.LongTimeLayout), total)
+		}
+	} else {
+		log.Warnf("Fetch Date: %s, No Data", date.Format(global.ShortTimeLayout))
+	}
 }
 
 // FetchFutureHistoryClose -.

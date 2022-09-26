@@ -19,7 +19,8 @@ func newStreamRoutes(handler *gin.RouterGroup, t usecase.Stream) {
 	h := handler.Group("/stream")
 	{
 		h.GET("/tse/snapshot", r.getTSESnapshot)
-		h.GET("/ws/pick-stock", r.serveWS)
+		h.GET("/ws/pick-stock", r.servePickStockWS)
+		h.GET("/ws/future", r.serveFutureWS)
 	}
 }
 
@@ -42,7 +43,12 @@ func (r *streamRoutes) getTSESnapshot(c *gin.Context) {
 	c.JSON(http.StatusOK, snapshot)
 }
 
-func (r *streamRoutes) serveWS(c *gin.Context) {
+func (r *streamRoutes) servePickStockWS(c *gin.Context) {
 	wsRouter := websocket.NewWSRouter(r.t)
-	wsRouter.Run(c)
+	wsRouter.Run(c, websocket.WSPickStock)
+}
+
+func (r *streamRoutes) serveFutureWS(c *gin.Context) {
+	wsRouter := websocket.NewWSRouter(r.t)
+	wsRouter.Run(c, websocket.WSFuture)
 }
