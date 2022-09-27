@@ -28,7 +28,7 @@ go-lint:
             codequality: gl-code-quality-report.json
 
 go-build-test:
-    image: golang:1.19-bullseye
+    image: golang:1.19.1-bullseye
     only:
         - main
     stage: test
@@ -36,7 +36,7 @@ go-build-test:
         - go build -o toc-machine-trading ./cmd/app
 
 go-test:
-    image: golang:1.19-bullseye
+    image: golang:1.19.1-bullseye
     only:
         - main
     stage: test
@@ -123,3 +123,15 @@ stop_production:
         paths:
             - toc-machine-trading-logs-$CI_COMMIT_SHORT_SHA.tgz
         expire_in: 2 week
+# deploy:
+#     only:
+#         - main
+#     stage: deployment
+#     when: manual
+#     image:
+#         name: bitnami/kubectl:latest
+#         entrypoint: [""]
+#     script:
+#         - kubectl config get-contexts
+#         - kubectl config use-context .gitlab/agents//repository:agent-name
+#         - kubectl get pods
