@@ -1,0 +1,27 @@
+name: Stop-Deployment
+run-name: ${{ github.actor }} is stopping deployment
+
+on:
+    workflow_dispatch:
+
+jobs:
+    Stop-Deployment:
+        runs-on: ubuntu-latest
+        steps:
+            - name: deploying
+              uses: appleboy/ssh-action@master
+              with:
+                  host: ${{ secrets.TRADER_HOST }}
+                  username: ${{ secrets.TRADER_USERNAME }}
+                  key: ${{ secrets.TRADER_KEY }}
+                  script: |
+                      docker kill toc-machine-trading || true
+                      docker rmi ${{ secrets.DOCKERHUB_USERNAME }}/toc-machine-trading:latest || true
+                      docker system prune --volumes -f
+
+            - name: deactivate deployments
+              uses: strumwolf/delete-deployment-environment@v2
+              with:
+                  token: ${{ secrets.GITHUB_TOKEN }}
+                  environment: production
+                  onlyDeactivateDeployments: true
