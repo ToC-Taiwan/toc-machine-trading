@@ -83,8 +83,10 @@ jobs:
                   username: ${{ secrets.TRADER_USERNAME }}
                   key: ${{ secrets.TRADER_KEY }}
                   script: |
-                      mkdir -p ~/toc-machine-trading-env
-                      mkdir -p ~/toc-machine-trading-configs
+                      rm -rf ~/toc-machine-trading-env && mkdir -p ~/toc-machine-trading-env && touch ~/toc-machine-trading-env/.env
+                      rm -rf ~/toc-machine-trading-configs && mkdir -p ~/toc-machine-trading-configs && touch ~/toc-machine-trading-configs/config.yml
+                      rm -rf ~/toc-machine-trading-logs
+
                       echo "${{ secrets.MACHINE_TRADING_ENV }}" > ~/toc-machine-trading-env/.env
                       echo "${{ secrets.MACHINE_TRADING_CONFIG }}" > ~/toc-machine-trading-configs/config.yml
 

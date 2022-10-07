@@ -116,4 +116,4 @@ cp ./configs/default.config.yml ./configs/config.yml
 
 ## Authors
 
-- [**Tim Hsu**](https://gitlab.tocraw.com/root)
+- [**Tim Hsu**](https://github.com/Chindada)
