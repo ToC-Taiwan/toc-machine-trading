@@ -86,7 +86,7 @@ jobs:
                       mkdir -p ~/toc-machine-trading-env
                       mkdir -p ~/toc-machine-trading-configs
                       echo "${{ secrets.MACHINE_TRADING_ENV }}" > ~/toc-machine-trading-env/.env
-                      echo "${{ secrets.MACHINE_TRADING_CONFIG }}" > ~/toc-machine-trading-env/config.yml
+                      echo "${{ secrets.MACHINE_TRADING_CONFIG }}" > ~/toc-machine-trading-configs/config.yml
 
                       docker kill toc-machine-trading || true
                       docker rmi ${{ secrets.DOCKERHUB_USERNAME }}/toc-machine-trading:latest || true
