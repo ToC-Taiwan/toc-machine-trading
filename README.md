@@ -1,5 +1,11 @@
 # TOC MACHINE TRADING
 
+[![Workflow](https://github.com/ToC-Taiwan/toc-machine-trading/actions/workflows/main.yml/badge.svg)](https://github.com/ToC-Taiwan/toc-machine-trading/actions/workflows/main.yml)
+[![Maintained](https://img.shields.io/badge/Maintained-yes-green)](https://github.com/ToC-Taiwan/toc-sinopac-python)
+[![Go](https://img.shields.io/badge/Go-1.19.1-blue?logo=go&logoColor=blue)](https://golang.org)
+[![OS](https://img.shields.io/badge/OS-Linux-orange?logo=linux&logoColor=orange)](https://www.linux.org/)
+[![Container](https://img.shields.io/badge/Container-Docker-blue?logo=docker&logoColor=blue)](https://www.docker.com/)
+
 ## Layers
 
 ![Example](docs/img/layers.png)
