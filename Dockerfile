@@ -1,5 +1,5 @@
 # build-stage
-FROM golang:1.19.1-bullseye as build-stage
+FROM golang:1.19.2-bullseye as build-stage
 USER root
 
 ENV TZ=Asia/Taipei

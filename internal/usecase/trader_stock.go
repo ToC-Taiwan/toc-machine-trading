@@ -7,6 +7,7 @@ import (
 
 	"tmt/cmd/config"
 	"tmt/internal/entity"
+	"tmt/internal/usecase/events"
 	"tmt/pkg/utils"
 
 	"github.com/google/uuid"
@@ -204,7 +205,7 @@ func (o *TradeAgent) checkPlaceOrderStatus(order *entity.StockOrder) {
 
 func (o *TradeAgent) cancelOrder(order *entity.StockOrder) {
 	order.TradeTime = time.Time{}
-	bus.PublishTopicEvent(topicCancelOrder, order)
+	bus.PublishTopicEvent(events.TopicCancelOrder, order)
 
 	go func() {
 		for {
@@ -216,7 +217,7 @@ func (o *TradeAgent) cancelOrder(order *entity.StockOrder) {
 			if order.Status == entity.StatusCancelled {
 				log.Warnf("Order Canceled -> Stock: %s, Action: %d, Price: %.2f, Qty: %d", order.StockNum, order.Action, order.Price, order.Quantity)
 				if order.Action == entity.ActionBuy || order.Action == entity.ActionSellFirst {
-					bus.PublishTopicEvent(topicUnSubscribeTickTargets, order.StockNum)
+					bus.PublishTopicEvent(events.TopicUnSubscribeTickTargets, order.StockNum)
 					return
 				}
 				o.waitingOrder = nil

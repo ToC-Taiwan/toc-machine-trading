@@ -16,7 +16,7 @@ history:
     history_tick_period: 12 # unit: day
     history_kbar_period: 65 # unit: day
 
-simulation: false
+simulation: true
 
 trade_switch:
     allow_trade: false
@@ -28,7 +28,7 @@ trade_switch:
     cancel_wait_time: 30 # unit: seccond
 
 future_trade_switch:
-    allow_trade: false
+    allow_trade: true
     quantity: 1
     trade_in_wait_time: 10 # unit: seccond
     trade_out_wait_time: 20 # unit: seccond
@@ -74,8 +74,8 @@ stock_analyze:
     ma_period: 60 # unit: day
 
 future_analyze:
-    max_hold_time: 20 # unit: minute
+    max_hold_time: 10 # unit: minute
     tick_analyze_period: 10000 # unit: millisecond
-    all_out_in_ratio: 65 # unit: %
-    all_in_out_ratio: 65 # unit: %
+    all_out_in_ratio: 75 # unit: %
+    all_in_out_ratio: 75 # unit: %
     rsi_min_count: 35 # unit: times

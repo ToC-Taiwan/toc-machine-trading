@@ -10,6 +10,8 @@ import (
 	"tmt/cmd/config"
 	"tmt/global"
 	"tmt/internal/entity"
+	"tmt/internal/usecase/events"
+	"tmt/internal/usecase/modules/trader"
 )
 
 // StreamUseCase -.
@@ -68,8 +70,8 @@ func NewStream(r StreamRepo, g StreamgRPCAPI, t StreamRabbit) *StreamUseCase {
 		}
 	}()
 
-	bus.SubscribeTopic(topicStreamTargets, uc.ReceiveStreamData)
-	bus.SubscribeTopic(topicStreamFutureTargets, uc.ReceiveFutureStreamData)
+	bus.SubscribeTopic(events.TopicStreamTargets, uc.ReceiveStreamData)
+	bus.SubscribeTopic(events.TopicStreamFutureTargets, uc.ReceiveFutureStreamData)
 	return uc
 }
 
@@ -100,11 +102,11 @@ func (uc *StreamUseCase) ReceiveOrderStatus(ctx context.Context) {
 			switch t := order.(type) {
 			case *entity.StockOrder:
 				if cc.GetOrderByOrderID(t.OrderID) != nil {
-					bus.PublishTopicEvent(topicInsertOrUpdateOrder, t)
+					bus.PublishTopicEvent(events.TopicInsertOrUpdateOrder, t)
 				}
 			case *entity.FutureOrder:
 				if cc.GetFutureOrderByOrderID(t.OrderID) != nil {
-					bus.PublishTopicEvent(topicInsertOrUpdateFutureOrder, t)
+					bus.PublishTopicEvent(events.TopicInsertOrUpdateFutureOrder, t)
 				}
 			}
 		}
@@ -134,7 +136,7 @@ func (uc *StreamUseCase) ReceiveStreamData(ctx context.Context, targetArr []*ent
 			target := targetMap[agent.stockNum]
 			mutex.RUnlock()
 
-			bus.PublishTopicEvent(topicSubscribeTickTargets, []*entity.Target{target})
+			bus.PublishTopicEvent(events.TopicSubscribeTickTargets, []*entity.Target{target})
 		}
 	}()
 
@@ -210,7 +212,7 @@ func (uc *StreamUseCase) placeOrder(agent *TradeAgent, order *entity.StockOrder)
 		return
 	}
 
-	bus.PublishTopicEvent(topicPlaceOrder, order)
+	bus.PublishTopicEvent(events.TopicPlaceOrder, order)
 	go agent.checkPlaceOrderStatus(order)
 }
 
@@ -303,7 +305,7 @@ func (uc *StreamUseCase) realTimeAddTargets() error {
 	}
 
 	if len(newTargets) != 0 {
-		bus.PublishTopicEvent(topicNewTargets, newTargets)
+		bus.PublishTopicEvent(events.TopicNewTargets, newTargets)
 	}
 	return nil
 }
@@ -369,26 +371,28 @@ func (uc *StreamUseCase) DeleteFutureRealTimeConnection(timestamp int64) {
 
 // ReceiveFutureStreamData -.
 func (uc *StreamUseCase) ReceiveFutureStreamData(ctx context.Context, code string) {
-	agent := NewFutureAgent(code, uc.futureTradeSwitchCfg, uc.futureAnalyzeCfg)
+	agent := trader.NewFutureAgent(code, uc.futureTradeSwitchCfg, uc.futureAnalyzeCfg, bus)
 
 	// go uc.checkFirstFutureTick(agent)
 	go uc.futureTradingRoom(agent)
-	go uc.rabbit.FutureTickConsumer(code, agent.tickChan)
+	go uc.rabbit.FutureTickConsumer(code, agent.GetTickChan())
 
-	bus.PublishTopicEvent(topicSubscribeFutureTickTargets, code)
+	bus.PublishTopicEvent(events.TopicSubscribeFutureTickTargets, code)
 }
 
-func (uc *StreamUseCase) futureTradingRoom(agent *FutureTradeAgent) {
-	for {
-		agent.lastTick = <-agent.tickChan
-		agent.tickArr = append(agent.tickArr, agent.lastTick)
+func (uc *StreamUseCase) futureTradingRoom(agent *trader.FutureTradeAgent) {
+	tickChan := agent.GetTickChan()
 
-		log.Debugf("TickTime: %s, Code: %s, Close: %.0f, TickType: %d, Volume: %3d, PriceChg: %.0f", agent.lastTick.TickTime.Format(global.LongTimeLayout), agent.lastTick.Code, agent.lastTick.Close, agent.lastTick.TickType, agent.lastTick.Volume, agent.lastTick.PriceChg)
-		if agent.waitingOrder != nil {
+	for {
+		tick := <-tickChan
+		agent.ReceiveTick(tick)
+
+		log.Debugf("TickTime: %s, Code: %s, Close: %.0f, TickType: %d, Volume: %3d, PriceChg: %.0f", tick.TickTime.Format(global.LongTimeLayout), tick.Code, tick.Close, tick.TickType, tick.Volume, tick.PriceChg)
+		if agent.IsWaiting() {
 			continue
 		}
 
-		if order := agent.generateOrder(); order == nil {
+		if order := agent.GenerateOrder(); order == nil {
 			continue
 		} else {
 			uc.placeFutureOrder(agent, order)
@@ -422,23 +426,23 @@ func (uc *StreamUseCase) futureTradingRoom(agent *FutureTradeAgent) {
 // 	}
 // }
 
-func (uc *StreamUseCase) placeFutureOrder(agent *FutureTradeAgent, order *entity.FutureOrder) {
+func (uc *StreamUseCase) placeFutureOrder(agent *trader.FutureTradeAgent, order *entity.FutureOrder) {
 	if order.Price == 0 {
 		log.Errorf("%s Future Order price is 0", order.Code)
 		return
 	}
 
-	agent.waitingOrder = order
+	agent.WaitOrder(order)
 
 	// if out of trade in time, return
 	if !uc.futureTradeInSwitch && (order.Action == entity.ActionBuy || order.Action == entity.ActionSellFirst) {
 		// avoid stuck in the market
-		agent.waitingOrder = nil
+		agent.CancelWaiting()
 		return
 	}
 
-	bus.PublishTopicEvent(topicPlaceFutureOrder, order)
-	go agent.checkPlaceOrderStatus(order)
+	bus.PublishTopicEvent(events.TopicPlaceFutureOrder, order)
+	go agent.CheckPlaceOrderStatus(order)
 }
 
 func (uc *StreamUseCase) checkFutureTradeSwitch() {

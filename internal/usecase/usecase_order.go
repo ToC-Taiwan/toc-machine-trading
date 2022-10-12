@@ -9,6 +9,7 @@ import (
 	"tmt/cmd/config"
 	"tmt/global"
 	"tmt/internal/entity"
+	"tmt/internal/usecase/events"
 )
 
 // OrderUseCase -.
@@ -43,16 +44,16 @@ func NewOrder(t OrdergRPCAPI, r OrderRepo) *OrderUseCase {
 		futureTradeDay: futureTradeDay,
 	}
 
-	bus.SubscribeTopic(topicPlaceOrder, uc.placeOrder)
-	bus.SubscribeTopic(topicCancelOrder, uc.cancelOrder)
-	bus.SubscribeTopic(topicInsertOrUpdateOrder, uc.updateCacheAndInsertDB)
+	bus.SubscribeTopic(events.TopicPlaceOrder, uc.placeOrder)
+	bus.SubscribeTopic(events.TopicCancelOrder, uc.cancelOrder)
+	bus.SubscribeTopic(events.TopicInsertOrUpdateOrder, uc.updateCacheAndInsertDB)
 
-	bus.SubscribeTopic(topicPlaceFutureOrder, uc.placeFutureOrder)
-	bus.SubscribeTopic(topicCancelFutureOrder, uc.cancelFutureOrder)
-	bus.SubscribeTopic(topicInsertOrUpdateFutureOrder, uc.updateCacheAndInsertFutureDB)
+	bus.SubscribeTopic(events.TopicPlaceFutureOrder, uc.placeFutureOrder)
+	bus.SubscribeTopic(events.TopicCancelFutureOrder, uc.cancelFutureOrder)
+	bus.SubscribeTopic(events.TopicInsertOrUpdateFutureOrder, uc.updateCacheAndInsertFutureDB)
 
 	go func() {
-		for range time.NewTicker(time.Minute).C {
+		for range time.NewTicker(20 * time.Second).C {
 			stockOrders, err := uc.repo.QueryAllStockOrderByDate(context.Background(), uc.basicInfo.TradeDay)
 			if err != nil {
 				log.Panic(err)

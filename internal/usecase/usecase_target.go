@@ -10,6 +10,7 @@ import (
 	"tmt/cmd/config"
 	"tmt/global"
 	"tmt/internal/entity"
+	"tmt/internal/usecase/events"
 )
 
 // TargetUseCase -.
@@ -62,10 +63,10 @@ func NewTarget(r TargetRepo, t TargetgRPCAPI, s StreamgRPCAPI) *TargetUseCase {
 	uc.publishNewTargets(targetArr)
 
 	// sub events
-	bus.SubscribeTopic(topicNewTargets, uc.publishNewTargets)
-	bus.SubscribeTopic(topicSubscribeTickTargets, uc.SubscribeStockTick, uc.SubscribeStockBidAsk)
-	bus.SubscribeTopic(topicUnSubscribeTickTargets, uc.UnSubscribeStockTick, uc.UnSubscribeStockBidAsk)
-	bus.SubscribeTopic(topicSubscribeFutureTickTargets, uc.SubscribeFutureTick)
+	bus.SubscribeTopic(events.TopicNewTargets, uc.publishNewTargets)
+	bus.SubscribeTopic(events.TopicSubscribeTickTargets, uc.SubscribeStockTick, uc.SubscribeStockBidAsk)
+	bus.SubscribeTopic(events.TopicUnSubscribeTickTargets, uc.UnSubscribeStockTick, uc.UnSubscribeStockBidAsk)
+	bus.SubscribeTopic(events.TopicSubscribeFutureTickTargets, uc.SubscribeFutureTick)
 
 	return uc
 }
@@ -78,9 +79,9 @@ func (uc *TargetUseCase) publishNewTargets(targetArr []*entity.Target) {
 
 	cc.AppendTargets(targetArr)
 
-	bus.PublishTopicEvent(topicFetchHistory, context.Background(), targetArr)
-	bus.PublishTopicEvent(topicStreamTargets, context.Background(), targetArr)
-	bus.PublishTopicEvent(topicStreamFutureTargets, context.Background(), uc.monitorFutureCode)
+	bus.PublishTopicEvent(events.TopicFetchHistory, context.Background(), targetArr)
+	bus.PublishTopicEvent(events.TopicStreamTargets, context.Background(), targetArr)
+	bus.PublishTopicEvent(events.TopicStreamFutureTargets, context.Background(), uc.monitorFutureCode)
 }
 
 // GetTargets - get targets from cache
