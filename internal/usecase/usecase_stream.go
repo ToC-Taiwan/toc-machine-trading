@@ -384,7 +384,7 @@ func (uc *StreamUseCase) futureTradingRoom(agent *FutureTradeAgent) {
 		agent.tickArr = append(agent.tickArr, agent.lastTick)
 
 		log.Debugf("TickTime: %s, Code: %s, Close: %.0f, TickType: %d, Volume: %3d, PriceChg: %.0f", agent.lastTick.TickTime.Format(global.LongTimeLayout), agent.lastTick.Code, agent.lastTick.Close, agent.lastTick.TickType, agent.lastTick.Volume, agent.lastTick.PriceChg)
-		if agent.waitingOrder != nil || agent.analyzeTickTime.IsZero() {
+		if agent.waitingOrder != nil {
 			continue
 		}
 

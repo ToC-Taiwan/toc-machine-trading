@@ -7,8 +7,6 @@ import (
 	"tmt/cmd/config"
 	"tmt/internal/entity"
 	"tmt/pkg/utils"
-
-	"github.com/google/uuid"
 )
 
 // FutureTradeAgent -.
@@ -18,6 +16,7 @@ type FutureTradeAgent struct {
 
 	tickArr       RealTimeFutureTickArr
 	periodTickArr RealTimeFutureTickArr
+	periodMap     map[int64]RealTimeFutureTickArr
 
 	orderMapLock sync.RWMutex
 	orderMap     map[entity.OrderAction][]*entity.FutureOrder
@@ -37,6 +36,7 @@ func NewFutureAgent(code string, tradeSwitch config.FutureTradeSwitch, analyzeCf
 	new := &FutureTradeAgent{
 		code:          code,
 		orderQuantity: tradeSwitch.Quantity,
+		periodMap:     make(map[int64]RealTimeFutureTickArr),
 		orderMap:      make(map[entity.OrderAction][]*entity.FutureOrder),
 		tickChan:      make(chan *entity.RealTimeFutureTick),
 		tradeSwitch:   tradeSwitch,
@@ -46,54 +46,55 @@ func NewFutureAgent(code string, tradeSwitch config.FutureTradeSwitch, analyzeCf
 }
 
 func (o *FutureTradeAgent) generateOrder() *entity.FutureOrder {
-	if o.lastTick.TickTime.Sub(o.analyzeTickTime) > time.Duration(o.analyzeCfg.TickAnalyzePeriod*1.1)*time.Millisecond {
-		o.analyzeTickTime = o.lastTick.TickTime
-		o.periodTickArr = RealTimeFutureTickArr{o.lastTick}
+	o.periodTickArr = append(o.periodTickArr, o.lastTick)
+	tmp := o.periodTickArr.splitBySecond()
+	if len(tmp) < 2 {
 		return nil
 	}
-
-	if o.lastTick.TickTime.Sub(o.analyzeTickTime) < time.Duration(o.analyzeCfg.TickAnalyzePeriod)*time.Millisecond {
-		o.periodTickArr = append(o.periodTickArr, o.lastTick)
-		return nil
+	lastSecond := tmp[len(tmp)-2]
+	if _, ok := o.periodMap[lastSecond.getFirstTickTimestamp()]; !ok {
+		o.periodMap[lastSecond.getFirstTickTimestamp()] = lastSecond
+		log.Warn(lastSecond.getFirstTickTimestamp(), lastSecond.getTotalVolume())
 	}
+	return nil
 
 	// TODO: use volume from config
-	if volume := o.periodTickArr.getTotalVolume(); volume < 25 {
-		return nil
-	}
+	// if volume := o.periodTickArr.getTotalVolume(); volume < 25 {
+	// 	return nil
+	// }
 
-	// get out in ration in period
-	outInRation := o.periodTickArr.getOutInRatio()
+	// // get out in ration in period
+	// outInRation := o.periodTickArr.getOutInRatio()
 
-	// reset analyze tick time and arr
-	o.analyzeTickTime = o.lastTick.TickTime
-	o.periodTickArr = RealTimeFutureTickArr{o.lastTick}
+	// // reset analyze tick time and arr
+	// o.analyzeTickTime = o.lastTick.TickTime
+	// o.periodTickArr = RealTimeFutureTickArr{o.lastTick}
 
-	if postOrderAction, preOrder := o.checkNeededPost(); postOrderAction != entity.ActionNone {
-		return o.generateTradeOutOrder(postOrderAction, preOrder)
-	}
+	// if postOrderAction, preOrder := o.checkNeededPost(); postOrderAction != entity.ActionNone {
+	// 	return o.generateTradeOutOrder(postOrderAction, preOrder)
+	// }
 
-	// need to compare with all and period
-	order := &entity.FutureOrder{
-		Code: o.code,
-		BaseOrder: entity.BaseOrder{
-			Quantity: o.orderQuantity,
-			TickTime: o.lastTick.TickTime,
-			GroupID:  uuid.New().String(),
-			Price:    o.lastTick.Close,
-		},
-	}
+	// // need to compare with all and period
+	// order := &entity.FutureOrder{
+	// 	Code: o.code,
+	// 	BaseOrder: entity.BaseOrder{
+	// 		Quantity: o.orderQuantity,
+	// 		TickTime: o.lastTick.TickTime,
+	// 		GroupID:  uuid.New().String(),
+	// 		Price:    o.lastTick.Close,
+	// 	},
+	// }
 
-	switch {
-	case outInRation > o.analyzeCfg.AllOutInRatio && o.lastTick.Low < o.lastTick.Close:
-		order.Action = entity.ActionBuy
-		return order
-	case 100-outInRation > o.analyzeCfg.AllInOutRatio && o.lastTick.High > o.lastTick.Close:
-		order.Action = entity.ActionSellFirst
-		return order
-	default:
-		return nil
-	}
+	// switch {
+	// case outInRation > o.analyzeCfg.AllOutInRatio && o.lastTick.Low < o.lastTick.Close:
+	// 	order.Action = entity.ActionBuy
+	// 	return order
+	// case 100-outInRation > o.analyzeCfg.AllInOutRatio && o.lastTick.High > o.lastTick.Close:
+	// 	order.Action = entity.ActionSellFirst
+	// 	return order
+	// default:
+	// 	return nil
+	// }
 }
 
 func (o *FutureTradeAgent) generateTradeOutOrder(postOrderAction entity.OrderAction, preOrder *entity.FutureOrder) *entity.FutureOrder {
@@ -207,6 +208,46 @@ func (o *FutureTradeAgent) checkNeededPost() (entity.OrderAction, *entity.Future
 
 // RealTimeFutureTickArr -.
 type RealTimeFutureTickArr []*entity.RealTimeFutureTick
+
+func (c RealTimeFutureTickArr) splitBySecond() []RealTimeFutureTickArr {
+	if len(c) < 2 {
+		return nil
+	}
+
+	var result []RealTimeFutureTickArr
+	var tmp RealTimeFutureTickArr
+	for i, tick := range c {
+		if i == len(tmp)-1 {
+			break
+		}
+
+		if i == 0 {
+			tmp = append(tmp, tick)
+			continue
+		}
+
+		if tick.TickTime.Second() == tmp[i+1].TickTime.Second() {
+			tmp = append(tmp, tick)
+		} else {
+			result = append(result, tmp)
+			tmp = RealTimeFutureTickArr{tick}
+		}
+	}
+	return result
+}
+
+func (c RealTimeFutureTickArr) getFirstTickTimestamp() int64 {
+	return c[0].TickTime.Unix()
+}
+
+func (c RealTimeFutureTickArr) getTotalTime() float64 {
+	if len(c) < 2 {
+		return 0
+	}
+	firstTickTime := c[0].TickTime
+	lastTickTime := c[len(c)-1].TickTime
+	return lastTickTime.Sub(firstTickTime).Seconds()
+}
 
 func (c RealTimeFutureTickArr) getTotalVolume() int64 {
 	var volume int64
