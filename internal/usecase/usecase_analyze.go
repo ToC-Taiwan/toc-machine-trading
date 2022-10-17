@@ -10,6 +10,7 @@ import (
 	"tmt/global"
 	"tmt/internal/entity"
 	"tmt/internal/usecase/events"
+	"tmt/internal/usecase/modules/quota"
 	"tmt/internal/usecase/modules/tradeday"
 )
 
@@ -218,14 +219,14 @@ func (uc *AnalyzeUseCase) getSimulateCond(targetArr []*entity.Target, analyzeCfg
 
 // SimulateBalance -.
 type SimulateBalance struct {
-	quota     *Quota
+	quota     *quota.Quota
 	allOrders []*entity.StockOrder
 }
 
 // NewSimulateBalance -.
 func NewSimulateBalance(quotaCfg config.Quota, allOrders []*entity.StockOrder) *SimulateBalance {
 	return &SimulateBalance{
-		quota:     NewQuota(quotaCfg),
+		quota:     quota.NewQuota(quotaCfg),
 		allOrders: allOrders,
 	}
 }
@@ -281,11 +282,11 @@ func (uc *SimulateBalance) calculateBalance(allOrders []*entity.StockOrder) (*en
 func (uc *SimulateBalance) splitOrdersByQuota(allOrders []*entity.StockOrder) ([]*entity.StockOrder, []*entity.StockOrder) {
 	var forwardOrder, reverseOrder []*entity.StockOrder
 	for _, v := range allOrders {
-		consumeQuota := uc.quota.calculateOriginalOrderCost(v)
-		if uc.quota.quota-consumeQuota < 0 {
+		consumeQuota := uc.quota.CalculateOriginalOrderCost(v)
+		if uc.quota.GetCurrentQuota()-consumeQuota < 0 {
 			break
 		}
-		uc.quota.quota -= consumeQuota
+		uc.quota.CosumeQuota(consumeQuota)
 		switch v.Action {
 		case entity.ActionBuy:
 			forwardOrder = append(forwardOrder, v)
