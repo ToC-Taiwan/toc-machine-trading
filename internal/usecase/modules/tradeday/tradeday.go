@@ -1,7 +1,9 @@
-package usecase
+// Package tradeday package tradeday
+package tradeday
 
 import (
 	"encoding/json"
+	"log"
 	"os"
 	"time"
 
@@ -65,7 +67,8 @@ func (t *TradeDay) parseHolidayFile() error {
 	return nil
 }
 
-func (t *TradeDay) getAllCalendar() []*entity.CalendarDate {
+// GetAllCalendar -.
+func (t *TradeDay) GetAllCalendar() []*entity.CalendarDate {
 	var calendarArr []*entity.CalendarDate
 	for k, v := range t.tradeDayMap {
 		calendarArr = append(calendarArr, &entity.CalendarDate{
@@ -76,7 +79,8 @@ func (t *TradeDay) getAllCalendar() []*entity.CalendarDate {
 	return calendarArr
 }
 
-func (t *TradeDay) decideStockTradeDay() time.Time {
+// DecideStockTradeDay -.
+func (t *TradeDay) DecideStockTradeDay() time.Time {
 	var today time.Time
 	if time.Now().Hour() >= 15 {
 		today = time.Now().AddDate(0, 0, 1)
@@ -95,16 +99,18 @@ func (t *TradeDay) getNextTradeDay(nowTime time.Time) time.Time {
 	return d
 }
 
-func (t *TradeDay) getAbsNextTradeDayTime(dt time.Time) time.Time {
+// GetAbsNextTradeDayTime -.
+func (t *TradeDay) GetAbsNextTradeDayTime(dt time.Time) time.Time {
 	d := time.Date(dt.Year(), dt.Month(), dt.Day(), 0, 0, 0, 0, time.Local).AddDate(0, 0, 1)
 	if !t.tradeDayMap[d] {
 		dt = dt.AddDate(0, 0, 1)
-		return t.getAbsNextTradeDayTime(dt)
+		return t.GetAbsNextTradeDayTime(dt)
 	}
 	return d
 }
 
-func (t *TradeDay) getLastNTradeDayByDate(n int64, firstDay time.Time) []time.Time {
+// GetLastNTradeDayByDate -.
+func (t *TradeDay) GetLastNTradeDayByDate(n int64, firstDay time.Time) []time.Time {
 	var arr []time.Time
 	for {
 		if t.tradeDayMap[firstDay.AddDate(0, 0, -1)] {
