@@ -66,7 +66,7 @@ func NewTarget(r TargetRepo, t TargetgRPCAPI, s StreamgRPCAPI) *TargetUseCase {
 	bus.SubscribeTopic(events.TopicNewTargets, uc.publishNewTargets)
 	bus.SubscribeTopic(events.TopicSubscribeTickTargets, uc.SubscribeStockTick, uc.SubscribeStockBidAsk)
 	bus.SubscribeTopic(events.TopicUnSubscribeTickTargets, uc.UnSubscribeStockTick, uc.UnSubscribeStockBidAsk)
-	bus.SubscribeTopic(events.TopicSubscribeFutureTickTargets, uc.SubscribeFutureTick)
+	bus.SubscribeTopic(events.TopicSubscribeFutureTickTargets, uc.SubscribeFutureTick, uc.SubscribeFutureBidAsk)
 
 	return uc
 }
@@ -253,6 +253,20 @@ func (uc *TargetUseCase) UnSubscribeStockBidAsk(stockNum string) error {
 // SubscribeFutureTick -.
 func (uc *TargetUseCase) SubscribeFutureTick(code string) error {
 	failSubNumArr, err := uc.gRPCAPI.SubscribeFutureTick([]string{code})
+	if err != nil {
+		return err
+	}
+
+	if len(failSubNumArr) != 0 {
+		return fmt.Errorf("subscribe future fail %v", failSubNumArr)
+	}
+
+	return nil
+}
+
+// SubscribeFutureBidAsk -.
+func (uc *TargetUseCase) SubscribeFutureBidAsk(code string) error {
+	failSubNumArr, err := uc.gRPCAPI.SubscribeFutureBidAsk([]string{code})
 	if err != nil {
 		return err
 	}

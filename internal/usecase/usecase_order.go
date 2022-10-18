@@ -10,6 +10,7 @@ import (
 	"tmt/global"
 	"tmt/internal/entity"
 	"tmt/internal/usecase/events"
+	"tmt/internal/usecase/modules/quota"
 )
 
 // OrderUseCase -.
@@ -18,7 +19,7 @@ type OrderUseCase struct {
 	repo    OrderRepo
 
 	basicInfo            entity.BasicInfo
-	quota                *Quota
+	quota                *quota.Quota
 	simTrade             bool
 	placeOrderLock       sync.Mutex
 	placeFutureOrderLock sync.Mutex
@@ -37,7 +38,7 @@ func NewOrder(t OrdergRPCAPI, r OrderRepo) *OrderUseCase {
 	uc := &OrderUseCase{
 		gRPCAPI:        t,
 		repo:           r,
-		quota:          NewQuota(cfg.Quota),
+		quota:          quota.NewQuota(cfg.Quota),
 		simTrade:       cfg.Simulation,
 		placeOrderLock: sync.Mutex{},
 		basicInfo:      *cc.GetBasicInfo(),
@@ -84,8 +85,8 @@ func (uc *OrderUseCase) placeOrder(order *entity.StockOrder) {
 	defer uc.placeOrderLock.Unlock()
 	uc.placeOrderLock.Lock()
 
-	cosumeQuota := uc.quota.calculateOriginalOrderCost(order)
-	if cosumeQuota != 0 && uc.quota.quota-cosumeQuota < 0 {
+	cosumeQuota := uc.quota.CalculateOriginalOrderCost(order)
+	if cosumeQuota != 0 && uc.quota.IsEnough(cosumeQuota) {
 		order.Status = entity.StatusAborted
 		return
 	}
@@ -113,7 +114,7 @@ func (uc *OrderUseCase) placeOrder(order *entity.StockOrder) {
 	}
 
 	// count quota
-	uc.quota.quota -= cosumeQuota
+	uc.quota.CosumeQuota(cosumeQuota)
 
 	// modify order and save to cache
 	order.OrderID = orderID
@@ -121,7 +122,7 @@ func (uc *OrderUseCase) placeOrder(order *entity.StockOrder) {
 	order.TradeTime = time.Now()
 	cc.SetOrderByOrderID(order)
 
-	log.Warnf("Place Order -> Stock: %s, Action: %d, Price: %.2f, Qty: %d, Quota: %d", order.StockNum, order.Action, order.Price, order.Quantity, uc.quota.quota)
+	log.Warnf("Place Order -> Stock: %s, Action: %d, Price: %.2f, Qty: %d, Quota: %d", order.StockNum, order.Action, order.Price, order.Quantity, uc.quota.GetCurrentQuota())
 }
 
 func (uc *OrderUseCase) cancelOrder(order *entity.StockOrder) {
@@ -138,9 +139,9 @@ func (uc *OrderUseCase) cancelOrder(order *entity.StockOrder) {
 		return
 	}
 
-	if cosumeQuota := uc.quota.calculateOriginalOrderCost(order); cosumeQuota > 0 {
-		uc.quota.quota += cosumeQuota
-		log.Warnf("Quota Back: %d", uc.quota.quota)
+	if cosumeQuota := uc.quota.CalculateOriginalOrderCost(order); cosumeQuota > 0 {
+		uc.quota.BackQuota(cosumeQuota)
+		log.Warnf("Quota Back: %d", uc.quota.GetCurrentQuota())
 	}
 }
 

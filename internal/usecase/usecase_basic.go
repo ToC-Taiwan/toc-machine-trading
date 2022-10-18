@@ -7,6 +7,7 @@ import (
 	"tmt/cmd/config"
 	"tmt/global"
 	"tmt/internal/entity"
+	"tmt/internal/usecase/modules/tradeday"
 )
 
 // BasicUseCase -.
@@ -15,7 +16,7 @@ type BasicUseCase struct {
 	gRPCAPI BasicgRPCAPI
 
 	cfg      *config.Config
-	tradeDay *TradeDay
+	tradeDay *tradeday.TradeDay
 
 	allStockDetail  []*entity.Stock
 	allFutureDetail []*entity.Future
@@ -27,7 +28,7 @@ func NewBasic(r BasicRepo, t BasicgRPCAPI) *BasicUseCase {
 	uc := &BasicUseCase{
 		repo:     r,
 		gRPCAPI:  t,
-		tradeDay: NewTradeDay(),
+		tradeDay: tradeday.NewStockTradeDay(),
 		cfg:      cfg,
 	}
 
@@ -166,16 +167,16 @@ func (uc *BasicUseCase) GetAllRepoStock(ctx context.Context) ([]*entity.Stock, e
 }
 
 func (uc *BasicUseCase) importCalendarDate(ctx context.Context) error {
-	if err := uc.repo.InsertOrUpdatetCalendarDateArr(ctx, uc.tradeDay.getAllCalendar()); err != nil {
+	if err := uc.repo.InsertOrUpdatetCalendarDateArr(ctx, uc.tradeDay.GetAllCalendar()); err != nil {
 		return err
 	}
 	return nil
 }
 
 func (uc *BasicUseCase) fillBasicInfo() {
-	tradeDay := uc.tradeDay.decideStockTradeDay()
+	tradeDay := uc.tradeDay.DecideStockTradeDay()
 	openTime := 9 * time.Hour
-	lastTradeDayArr := uc.tradeDay.getLastNTradeDayByDate(2, tradeDay)
+	lastTradeDayArr := uc.tradeDay.GetLastNTradeDayByDate(2, tradeDay)
 
 	basic := &entity.BasicInfo{
 		TradeDay:           tradeDay,
@@ -186,9 +187,9 @@ func (uc *BasicUseCase) fillBasicInfo() {
 		TradeInEndTime: tradeDay.Add(openTime).Add(time.Duration(uc.cfg.TradeSwitch.TradeInEndTime) * time.Minute),
 		EndTime:        tradeDay.Add(openTime).Add(time.Duration(uc.cfg.TradeSwitch.TotalOpenTime) * time.Minute),
 
-		HistoryCloseRange: uc.tradeDay.getLastNTradeDayByDate(uc.cfg.History.HistoryClosePeriod, tradeDay),
-		HistoryKbarRange:  uc.tradeDay.getLastNTradeDayByDate(uc.cfg.History.HistoryKbarPeriod, tradeDay),
-		HistoryTickRange:  uc.tradeDay.getLastNTradeDayByDate(uc.cfg.History.HistoryTickPeriod, tradeDay),
+		HistoryCloseRange: uc.tradeDay.GetLastNTradeDayByDate(uc.cfg.History.HistoryClosePeriod, tradeDay),
+		HistoryKbarRange:  uc.tradeDay.GetLastNTradeDayByDate(uc.cfg.History.HistoryKbarPeriod, tradeDay),
+		HistoryTickRange:  uc.tradeDay.GetLastNTradeDayByDate(uc.cfg.History.HistoryTickPeriod, tradeDay),
 
 		AllStocks:  make(map[string]*entity.Stock),
 		AllFutures: make(map[string]*entity.Future),

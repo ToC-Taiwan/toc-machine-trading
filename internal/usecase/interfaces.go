@@ -71,6 +71,8 @@ type (
 
 		SubscribeFutureTick(codeArr []string) ([]string, error)
 		UnSubscribeFutureTick(codeArr []string) ([]string, error)
+		SubscribeFutureBidAsk(codeArr []string) ([]string, error)
+		UnSubscribeFutureBidAsk(codeArr []string) ([]string, error)
 	}
 )
 
@@ -147,9 +149,10 @@ type (
 		EventConsumer(eventChan chan *entity.SinopacEvent)
 		OrderStatusConsumer(orderStatusChan chan interface{})
 		TickConsumer(stockNum string, tickChan chan *entity.RealTimeTick)
-		BidAskConsumer(stockNum string, bidAskChan chan *entity.RealTimeBidAsk)
+		StockBidAskConsumer(stockNum string, bidAskChan chan *entity.RealTimeBidAsk)
 
 		FutureTickConsumer(code string, tickChan chan *entity.RealTimeFutureTick)
+		FutureBidAskConsumer(code string, bidAskChan chan *entity.FutureRealTimeBidAsk)
 		AddFutureTickChan(timestamp int64, tickChan chan *entity.RealTimeFutureTick)
 		RemoveFutureTickChan(timestamp int64)
 	}
