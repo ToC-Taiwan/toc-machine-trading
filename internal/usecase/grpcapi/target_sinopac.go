@@ -129,3 +129,27 @@ func (t *TargetgRPCAPI) UnSubscribeFutureTick(codeArr []string) ([]string, error
 	}
 	return r.GetFailArr(), nil
 }
+
+// SubscribeFutureBidAsk return arry means fail to subscribe
+func (t *TargetgRPCAPI) SubscribeFutureBidAsk(codeArr []string) ([]string, error) {
+	conn := t.conn.GetReadyConn()
+	defer t.conn.PutReadyConn(conn)
+	c := pb.NewStreamDataInterfaceClient(conn)
+	r, err := c.SubscribeFutureBidAsk(context.Background(), &pb.FutureCodeArr{FutureCodeArr: codeArr})
+	if err != nil {
+		return []string{}, err
+	}
+	return r.GetFailArr(), nil
+}
+
+// UnSubscribeFutureBidAsk return arry means fail to subscribe
+func (t *TargetgRPCAPI) UnSubscribeFutureBidAsk(codeArr []string) ([]string, error) {
+	conn := t.conn.GetReadyConn()
+	defer t.conn.PutReadyConn(conn)
+	c := pb.NewStreamDataInterfaceClient(conn)
+	r, err := c.UnSubscribeFutureBidAsk(context.Background(), &pb.FutureCodeArr{FutureCodeArr: codeArr})
+	if err != nil {
+		return []string{}, err
+	}
+	return r.GetFailArr(), nil
+}

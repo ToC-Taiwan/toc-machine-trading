@@ -33,6 +33,8 @@ type StreamDataInterfaceClient interface {
 	UnSubscribeStockBidAsk(ctx context.Context, in *StockNumArr, opts ...grpc.CallOption) (*SubscribeResponse, error)
 	SubscribeFutureTick(ctx context.Context, in *FutureCodeArr, opts ...grpc.CallOption) (*SubscribeResponse, error)
 	UnSubscribeFutureTick(ctx context.Context, in *FutureCodeArr, opts ...grpc.CallOption) (*SubscribeResponse, error)
+	SubscribeFutureBidAsk(ctx context.Context, in *FutureCodeArr, opts ...grpc.CallOption) (*SubscribeResponse, error)
+	UnSubscribeFutureBidAsk(ctx context.Context, in *FutureCodeArr, opts ...grpc.CallOption) (*SubscribeResponse, error)
 	UnSubscribeStockAllTick(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ErrorMessage, error)
 	UnSubscribeStockAllBidAsk(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ErrorMessage, error)
 	GetFutureSnapshotByCodeArr(ctx context.Context, in *FutureCodeArr, opts ...grpc.CallOption) (*SnapshotResponse, error)
@@ -136,6 +138,24 @@ func (c *streamDataInterfaceClient) UnSubscribeFutureTick(ctx context.Context, i
 	return out, nil
 }
 
+func (c *streamDataInterfaceClient) SubscribeFutureBidAsk(ctx context.Context, in *FutureCodeArr, opts ...grpc.CallOption) (*SubscribeResponse, error) {
+	out := new(SubscribeResponse)
+	err := c.cc.Invoke(ctx, "/sinopac_forwarder.StreamDataInterface/SubscribeFutureBidAsk", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *streamDataInterfaceClient) UnSubscribeFutureBidAsk(ctx context.Context, in *FutureCodeArr, opts ...grpc.CallOption) (*SubscribeResponse, error) {
+	out := new(SubscribeResponse)
+	err := c.cc.Invoke(ctx, "/sinopac_forwarder.StreamDataInterface/UnSubscribeFutureBidAsk", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *streamDataInterfaceClient) UnSubscribeStockAllTick(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ErrorMessage, error) {
 	out := new(ErrorMessage)
 	err := c.cc.Invoke(ctx, "/sinopac_forwarder.StreamDataInterface/UnSubscribeStockAllTick", in, out, opts...)
@@ -177,6 +197,8 @@ type StreamDataInterfaceServer interface {
 	UnSubscribeStockBidAsk(context.Context, *StockNumArr) (*SubscribeResponse, error)
 	SubscribeFutureTick(context.Context, *FutureCodeArr) (*SubscribeResponse, error)
 	UnSubscribeFutureTick(context.Context, *FutureCodeArr) (*SubscribeResponse, error)
+	SubscribeFutureBidAsk(context.Context, *FutureCodeArr) (*SubscribeResponse, error)
+	UnSubscribeFutureBidAsk(context.Context, *FutureCodeArr) (*SubscribeResponse, error)
 	UnSubscribeStockAllTick(context.Context, *emptypb.Empty) (*ErrorMessage, error)
 	UnSubscribeStockAllBidAsk(context.Context, *emptypb.Empty) (*ErrorMessage, error)
 	GetFutureSnapshotByCodeArr(context.Context, *FutureCodeArr) (*SnapshotResponse, error)
@@ -216,6 +238,12 @@ func (UnimplementedStreamDataInterfaceServer) SubscribeFutureTick(context.Contex
 }
 func (UnimplementedStreamDataInterfaceServer) UnSubscribeFutureTick(context.Context, *FutureCodeArr) (*SubscribeResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UnSubscribeFutureTick not implemented")
+}
+func (UnimplementedStreamDataInterfaceServer) SubscribeFutureBidAsk(context.Context, *FutureCodeArr) (*SubscribeResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SubscribeFutureBidAsk not implemented")
+}
+func (UnimplementedStreamDataInterfaceServer) UnSubscribeFutureBidAsk(context.Context, *FutureCodeArr) (*SubscribeResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UnSubscribeFutureBidAsk not implemented")
 }
 func (UnimplementedStreamDataInterfaceServer) UnSubscribeStockAllTick(context.Context, *emptypb.Empty) (*ErrorMessage, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UnSubscribeStockAllTick not implemented")
@@ -419,6 +447,42 @@ func _StreamDataInterface_UnSubscribeFutureTick_Handler(srv interface{}, ctx con
 	return interceptor(ctx, in, info, handler)
 }
 
+func _StreamDataInterface_SubscribeFutureBidAsk_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(FutureCodeArr)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(StreamDataInterfaceServer).SubscribeFutureBidAsk(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/sinopac_forwarder.StreamDataInterface/SubscribeFutureBidAsk",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(StreamDataInterfaceServer).SubscribeFutureBidAsk(ctx, req.(*FutureCodeArr))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _StreamDataInterface_UnSubscribeFutureBidAsk_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(FutureCodeArr)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(StreamDataInterfaceServer).UnSubscribeFutureBidAsk(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/sinopac_forwarder.StreamDataInterface/UnSubscribeFutureBidAsk",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(StreamDataInterfaceServer).UnSubscribeFutureBidAsk(ctx, req.(*FutureCodeArr))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _StreamDataInterface_UnSubscribeStockAllTick_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(emptypb.Empty)
 	if err := dec(in); err != nil {
@@ -519,6 +583,14 @@ var StreamDataInterface_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UnSubscribeFutureTick",
 			Handler:    _StreamDataInterface_UnSubscribeFutureTick_Handler,
+		},
+		{
+			MethodName: "SubscribeFutureBidAsk",
+			Handler:    _StreamDataInterface_SubscribeFutureBidAsk_Handler,
+		},
+		{
+			MethodName: "UnSubscribeFutureBidAsk",
+			Handler:    _StreamDataInterface_UnSubscribeFutureBidAsk_Handler,
 		},
 		{
 			MethodName: "UnSubscribeStockAllTick",

@@ -413,6 +413,21 @@ func (mr *MockTargetgRPCAPIMockRecorder) GetStockVolumeRank(date interface{}) *g
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStockVolumeRank", reflect.TypeOf((*MockTargetgRPCAPI)(nil).GetStockVolumeRank), date)
 }
 
+// SubscribeFutureBidAsk mocks base method.
+func (m *MockTargetgRPCAPI) SubscribeFutureBidAsk(codeArr []string) ([]string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SubscribeFutureBidAsk", codeArr)
+	ret0, _ := ret[0].([]string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SubscribeFutureBidAsk indicates an expected call of SubscribeFutureBidAsk.
+func (mr *MockTargetgRPCAPIMockRecorder) SubscribeFutureBidAsk(codeArr interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SubscribeFutureBidAsk", reflect.TypeOf((*MockTargetgRPCAPI)(nil).SubscribeFutureBidAsk), codeArr)
+}
+
 // SubscribeFutureTick mocks base method.
 func (m *MockTargetgRPCAPI) SubscribeFutureTick(codeArr []string) ([]string, error) {
 	m.ctrl.T.Helper()
@@ -456,6 +471,21 @@ func (m *MockTargetgRPCAPI) SubscribeStockTick(stockNumArr []string) ([]string, 
 func (mr *MockTargetgRPCAPIMockRecorder) SubscribeStockTick(stockNumArr interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SubscribeStockTick", reflect.TypeOf((*MockTargetgRPCAPI)(nil).SubscribeStockTick), stockNumArr)
+}
+
+// UnSubscribeFutureBidAsk mocks base method.
+func (m *MockTargetgRPCAPI) UnSubscribeFutureBidAsk(codeArr []string) ([]string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UnSubscribeFutureBidAsk", codeArr)
+	ret0, _ := ret[0].([]string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UnSubscribeFutureBidAsk indicates an expected call of UnSubscribeFutureBidAsk.
+func (mr *MockTargetgRPCAPIMockRecorder) UnSubscribeFutureBidAsk(codeArr interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UnSubscribeFutureBidAsk", reflect.TypeOf((*MockTargetgRPCAPI)(nil).UnSubscribeFutureBidAsk), codeArr)
 }
 
 // UnSubscribeFutureTick mocks base method.
@@ -1206,18 +1236,6 @@ func (mr *MockStreamRabbitMockRecorder) AddFutureTickChan(timestamp, tickChan in
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddFutureTickChan", reflect.TypeOf((*MockStreamRabbit)(nil).AddFutureTickChan), timestamp, tickChan)
 }
 
-// BidAskConsumer mocks base method.
-func (m *MockStreamRabbit) BidAskConsumer(stockNum string, bidAskChan chan *entity.RealTimeBidAsk) {
-	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "BidAskConsumer", stockNum, bidAskChan)
-}
-
-// BidAskConsumer indicates an expected call of BidAskConsumer.
-func (mr *MockStreamRabbitMockRecorder) BidAskConsumer(stockNum, bidAskChan interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BidAskConsumer", reflect.TypeOf((*MockStreamRabbit)(nil).BidAskConsumer), stockNum, bidAskChan)
-}
-
 // EventConsumer mocks base method.
 func (m *MockStreamRabbit) EventConsumer(eventChan chan *entity.SinopacEvent) {
 	m.ctrl.T.Helper()
@@ -1240,6 +1258,18 @@ func (m *MockStreamRabbit) FillAllBasic(allStockMap map[string]*entity.Stock, al
 func (mr *MockStreamRabbitMockRecorder) FillAllBasic(allStockMap, allFutureMap interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FillAllBasic", reflect.TypeOf((*MockStreamRabbit)(nil).FillAllBasic), allStockMap, allFutureMap)
+}
+
+// FutureBidAskConsumer mocks base method.
+func (m *MockStreamRabbit) FutureBidAskConsumer(code string, bidAskChan chan *entity.FutureRealTimeBidAsk) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "FutureBidAskConsumer", code, bidAskChan)
+}
+
+// FutureBidAskConsumer indicates an expected call of FutureBidAskConsumer.
+func (mr *MockStreamRabbitMockRecorder) FutureBidAskConsumer(code, bidAskChan interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FutureBidAskConsumer", reflect.TypeOf((*MockStreamRabbit)(nil).FutureBidAskConsumer), code, bidAskChan)
 }
 
 // FutureTickConsumer mocks base method.
@@ -1276,6 +1306,18 @@ func (m *MockStreamRabbit) RemoveFutureTickChan(timestamp int64) {
 func (mr *MockStreamRabbitMockRecorder) RemoveFutureTickChan(timestamp interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RemoveFutureTickChan", reflect.TypeOf((*MockStreamRabbit)(nil).RemoveFutureTickChan), timestamp)
+}
+
+// StockBidAskConsumer mocks base method.
+func (m *MockStreamRabbit) StockBidAskConsumer(stockNum string, bidAskChan chan *entity.RealTimeBidAsk) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "StockBidAskConsumer", stockNum, bidAskChan)
+}
+
+// StockBidAskConsumer indicates an expected call of StockBidAskConsumer.
+func (mr *MockStreamRabbitMockRecorder) StockBidAskConsumer(stockNum, bidAskChan interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "StockBidAskConsumer", reflect.TypeOf((*MockStreamRabbit)(nil).StockBidAskConsumer), stockNum, bidAskChan)
 }
 
 // TickConsumer mocks base method.

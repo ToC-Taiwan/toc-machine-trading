@@ -28,7 +28,7 @@ func NewBasic(r BasicRepo, t BasicgRPCAPI) *BasicUseCase {
 	uc := &BasicUseCase{
 		repo:     r,
 		gRPCAPI:  t,
-		tradeDay: tradeday.NewTradeDay(),
+		tradeDay: tradeday.NewStockTradeDay(),
 		cfg:      cfg,
 	}
 

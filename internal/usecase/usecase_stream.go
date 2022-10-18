@@ -130,7 +130,7 @@ func (uc *StreamUseCase) ReceiveStreamData(ctx context.Context, targetArr []*ent
 
 			// send tick, bidask to trade room's channel
 			go uc.rabbit.TickConsumer(agent.stockNum, agent.tickChan)
-			go uc.rabbit.BidAskConsumer(agent.stockNum, agent.bidAskChan)
+			go uc.rabbit.StockBidAskConsumer(agent.stockNum, agent.bidAskChan)
 
 			mutex.RLock()
 			target := targetMap[agent.stockNum]
@@ -376,18 +376,33 @@ func (uc *StreamUseCase) ReceiveFutureStreamData(ctx context.Context, code strin
 	// go uc.checkFirstFutureTick(agent)
 	go uc.futureTradingRoom(agent)
 	go uc.rabbit.FutureTickConsumer(code, agent.GetTickChan())
+	go uc.rabbit.FutureBidAskConsumer(code, agent.GetBidAskChan())
 
 	bus.PublishTopicEvent(events.TopicSubscribeFutureTickTargets, code)
 }
 
 func (uc *StreamUseCase) futureTradingRoom(agent *trader.FutureTradeAgent) {
 	tickChan := agent.GetTickChan()
+	bidAskChan := agent.GetBidAskChan()
+
+	go func() {
+		for {
+			agent.ReceiveBidAsk(<-bidAskChan)
+		}
+	}()
 
 	for {
-		tick := <-tickChan
-		agent.ReceiveTick(tick)
+		tick := agent.ReceiveTick(<-tickChan)
+		bidAsk := agent.GetLastBidAsk()
 
-		log.Debugf("TickTime: %s, Code: %s, Close: %.0f, TickType: %d, Volume: %3d, PriceChg: %.0f", tick.TickTime.Format(global.LongTimeLayout), tick.Code, tick.Close, tick.TickType, tick.Volume, tick.PriceChg)
+		// log.Debugf("TickTime: %s, Code: %s, Close: %.0f, TickType: %d, Volume: %3d, PriceChg: %.0f", tick.TickTime.Format(global.LongTimeLayout), tick.Code, tick.Close, tick.TickType, tick.Volume, tick.PriceChg)
+		log.Debugf("Code: %s, Close: %.0f, Volume: %3d, PriceChg: %.0f", bidAsk.Code, tick.Close, tick.Volume, tick.PriceChg)
+		log.Debugf("%2d %.0f %.0f %2d", bidAsk.BidVolume1, bidAsk.BidPrice1, bidAsk.AskPrice1, bidAsk.AskVolume1)
+		log.Debugf("%2d %.0f %.0f %2d", bidAsk.BidVolume2, bidAsk.BidPrice2, bidAsk.AskPrice2, bidAsk.AskVolume2)
+		log.Debugf("%2d %.0f %.0f %2d", bidAsk.BidVolume3, bidAsk.BidPrice3, bidAsk.AskPrice3, bidAsk.AskVolume3)
+		log.Debugf("%2d %.0f %.0f %2d", bidAsk.BidVolume4, bidAsk.BidPrice4, bidAsk.AskPrice4, bidAsk.AskVolume4)
+		log.Debugf("%2d %.0f %.0f %2d", bidAsk.BidVolume5, bidAsk.BidPrice5, bidAsk.AskPrice5, bidAsk.AskVolume5)
+
 		if agent.IsWaiting() {
 			continue
 		}

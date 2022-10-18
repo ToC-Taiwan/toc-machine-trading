@@ -29,7 +29,9 @@ type FutureTradeAgent struct {
 	periodMap     map[int64]RealTimeFutureTickArr
 	orderMap      map[entity.OrderAction][]*entity.FutureOrder
 	tickChan      chan *entity.RealTimeFutureTick
+	bidAskChan    chan *entity.FutureRealTimeBidAsk
 	lastTick      *entity.RealTimeFutureTick
+	lastBidAsk    *entity.FutureRealTimeBidAsk
 
 	tradeSwitch config.FutureTradeSwitch
 	analyzeCfg  config.FutureAnalyze
@@ -44,6 +46,7 @@ func NewFutureAgent(code string, tradeSwitch config.FutureTradeSwitch, analyzeCf
 		periodMap:     make(map[int64]RealTimeFutureTickArr),
 		orderMap:      make(map[entity.OrderAction][]*entity.FutureOrder),
 		tickChan:      make(chan *entity.RealTimeFutureTick),
+		bidAskChan:    make(chan *entity.FutureRealTimeBidAsk),
 		tradeSwitch:   tradeSwitch,
 		analyzeCfg:    analyzeCfg,
 		bus:           bus,
@@ -52,7 +55,7 @@ func NewFutureAgent(code string, tradeSwitch config.FutureTradeSwitch, analyzeCf
 }
 
 // ReceiveTick -.
-func (o *FutureTradeAgent) ReceiveTick(tick *entity.RealTimeFutureTick) {
+func (o *FutureTradeAgent) ReceiveTick(tick *entity.RealTimeFutureTick) *entity.RealTimeFutureTick {
 	o.lastTick = tick
 	for i, v := range o.tickArr {
 		if time.Since(v.TickTime) < time.Duration(o.analyzePeriod)*time.Second {
@@ -72,11 +75,27 @@ func (o *FutureTradeAgent) ReceiveTick(tick *entity.RealTimeFutureTick) {
 	}
 	avg := float64(total) / float64(len(tmp)-2)
 	o.magnification = float64(last) / avg
+	return tick
+}
+
+// GetLastBidAsk -.
+func (o *FutureTradeAgent) GetLastBidAsk() *entity.FutureRealTimeBidAsk {
+	return o.lastBidAsk
+}
+
+// ReceiveBidAsk -.
+func (o *FutureTradeAgent) ReceiveBidAsk(bidAsk *entity.FutureRealTimeBidAsk) {
+	o.lastBidAsk = bidAsk
 }
 
 // GetTickChan -.
 func (o *FutureTradeAgent) GetTickChan() chan *entity.RealTimeFutureTick {
 	return o.tickChan
+}
+
+// GetBidAskChan -.
+func (o *FutureTradeAgent) GetBidAskChan() chan *entity.FutureRealTimeBidAsk {
+	return o.bidAskChan
 }
 
 // WaitOrder -.
