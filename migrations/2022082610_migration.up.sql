@@ -6,7 +6,7 @@ CREATE TABLE basic_future (
     "name" VARCHAR NOT NULL,
     "category" VARCHAR NOT NULL,
     "delivery_month" VARCHAR NOT NULL,
-    "delivery_date" VARCHAR NOT NULL,
+    "delivery_date" TIMESTAMPTZ NOT NULL,
     "underlying_kind" VARCHAR NOT NULL,
     "unit" INT NOT NULL,
     "limit_up" DECIMAL NOT NULL,

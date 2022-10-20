@@ -176,6 +176,21 @@ func (mr *MockBasicRepoMockRecorder) QueryAllFuture(ctx interface{}) *gomock.Cal
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryAllFuture", reflect.TypeOf((*MockBasicRepo)(nil).QueryAllFuture), ctx)
 }
 
+// QueryAllMXFFuture mocks base method.
+func (m *MockBasicRepo) QueryAllMXFFuture(ctx context.Context) ([]*entity.Future, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "QueryAllMXFFuture", ctx)
+	ret0, _ := ret[0].([]*entity.Future)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// QueryAllMXFFuture indicates an expected call of QueryAllMXFFuture.
+func (mr *MockBasicRepoMockRecorder) QueryAllMXFFuture(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryAllMXFFuture", reflect.TypeOf((*MockBasicRepo)(nil).QueryAllMXFFuture), ctx)
+}
+
 // QueryAllStock mocks base method.
 func (m *MockBasicRepo) QueryAllStock(ctx context.Context) (map[string]*entity.Stock, error) {
 	m.ctrl.T.Helper()

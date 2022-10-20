@@ -10,6 +10,7 @@ import (
 	"tmt/internal/usecase/events"
 	"tmt/pkg/eventbus"
 	"tmt/pkg/logger"
+	"tmt/pkg/utils"
 
 	"github.com/google/uuid"
 )
@@ -22,6 +23,8 @@ type FutureTradeAgent struct {
 	orderQuantity int64
 	analyzePeriod int
 	magnification float64
+	outInRation   float64
+	avgVolume     float64
 	orderMapLock  sync.RWMutex
 	bus           *eventbus.Bus
 	waitingOrder  *entity.FutureOrder
@@ -73,13 +76,18 @@ func (o *FutureTradeAgent) ReceiveTick(tick *entity.RealTimeFutureTick) *entity.
 			last = int(v.getTotalVolume())
 		}
 	}
-	avg := float64(total) / float64(len(tmp)-2)
-	o.magnification = float64(last) / avg
+	if avg := float64(total) / float64(len(tmp)-2); avg != 0 {
+		o.magnification = float64(last) / avg
+		o.avgVolume = avg
+	}
 	return tick
 }
 
 // GetLastBidAsk -.
 func (o *FutureTradeAgent) GetLastBidAsk() *entity.FutureRealTimeBidAsk {
+	if o.lastBidAsk == nil {
+		return &entity.FutureRealTimeBidAsk{}
+	}
 	return o.lastBidAsk
 }
 
@@ -119,13 +127,14 @@ func (o *FutureTradeAgent) GenerateOrder() *entity.FutureOrder {
 		return o.generateTradeOutOrder(postOrderAction, preOrder)
 	}
 
-	if o.magnification < 5 {
+	if o.magnification <= 2 {
+		o.outInRation = 0.0
 		return nil
 	}
 
 	// // get out in ration in period
 	outInRation := o.tickArr.getOutInRatio()
-	log.Warnf("magnification: %.2f, outInRatio: %.2f", o.magnification, outInRation)
+	o.outInRation = outInRation
 	order := &entity.FutureOrder{
 		Code: o.code,
 		BaseOrder: entity.BaseOrder{
@@ -146,6 +155,19 @@ func (o *FutureTradeAgent) GenerateOrder() *entity.FutureOrder {
 	default:
 		return nil
 	}
+}
+
+// GetAvgVolume -.
+func (o *FutureTradeAgent) GetAvgVolume() float64 {
+	if o.avgVolume == 0 {
+		return 0
+	}
+	return utils.Round(o.avgVolume, 2)
+}
+
+// GetOutInRatio -.
+func (o *FutureTradeAgent) GetOutInRatio() float64 {
+	return utils.Round(o.outInRation, 2)
 }
 
 func (o *FutureTradeAgent) generateTradeOutOrder(postOrderAction entity.OrderAction, preOrder *entity.FutureOrder) *entity.FutureOrder {

@@ -751,9 +751,6 @@ const docTemplate = `{
                 "limit_volume": {
                     "type": "integer"
                 },
-                "monitor_future_code": {
-                    "type": "string"
-                },
                 "price_limit": {
                     "type": "array",
                     "items": {

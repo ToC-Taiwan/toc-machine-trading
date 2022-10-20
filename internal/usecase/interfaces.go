@@ -36,6 +36,7 @@ type (
 
 		InsertOrUpdatetFutureArr(ctx context.Context, t []*entity.Future) error
 		QueryAllFuture(ctx context.Context) (map[string]*entity.Future, error)
+		QueryAllMXFFuture(ctx context.Context) ([]*entity.Future, error)
 	}
 
 	// BasicgRPCAPI -.

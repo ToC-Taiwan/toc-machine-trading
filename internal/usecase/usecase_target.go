@@ -21,6 +21,7 @@ type TargetUseCase struct {
 
 	targetFilter      *TargetFilter
 	monitorFutureCode string
+	waitMonitorFuture chan struct{}
 }
 
 // NewTarget -.
@@ -30,9 +31,13 @@ func NewTarget(r TargetRepo, t TargetgRPCAPI, s StreamgRPCAPI) *TargetUseCase {
 		repo:              r,
 		gRPCAPI:           t,
 		streamgRPCAPI:     s,
-		monitorFutureCode: cfg.TargetCond.MonitorFutureCode,
 		targetFilter:      NewTargetFilter(cfg.TargetCond),
+		waitMonitorFuture: make(chan struct{}),
 	}
+
+	bus.SubscribeTopic(events.TopicMonitorFutureCode, uc.fillMonitorFutureCode)
+	bus.PublishTopicEvent(events.TopicQueryMonitorFutureCode)
+	<-uc.waitMonitorFuture
 
 	// unsubscriba all first
 	if err := uc.UnSubscribeAll(context.Background()); err != nil {
@@ -69,6 +74,11 @@ func NewTarget(r TargetRepo, t TargetgRPCAPI, s StreamgRPCAPI) *TargetUseCase {
 	bus.SubscribeTopic(events.TopicSubscribeFutureTickTargets, uc.SubscribeFutureTick, uc.SubscribeFutureBidAsk)
 
 	return uc
+}
+
+func (uc *TargetUseCase) fillMonitorFutureCode(future *entity.Future) {
+	uc.monitorFutureCode = future.Code
+	close(uc.waitMonitorFuture)
 }
 
 func (uc *TargetUseCase) publishNewTargets(targetArr []*entity.Target) {

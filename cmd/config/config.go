@@ -123,12 +123,11 @@ type Quota struct {
 
 // TargetCond -.
 type TargetCond struct {
-	BlackStock        []string     `json:"black_stock"         env-required:"true" yaml:"black_stock"`
-	BlackCategory     []string     `json:"black_category"      env-required:"true" yaml:"black_category"`
-	RealTimeRank      int64        `json:"real_time_rank"      env-required:"true" yaml:"real_time_rank"`
-	LimitVolume       int64        `json:"limit_volume"        env-required:"true" yaml:"limit_volume"`
-	PriceLimit        []PriceLimit `json:"price_limit"         env-required:"true" yaml:"price_limit"`
-	MonitorFutureCode string       `json:"monitor_future_code" env-required:"true" yaml:"monitor_future_code"`
+	BlackStock    []string     `json:"black_stock"    env-required:"true" yaml:"black_stock"`
+	BlackCategory []string     `json:"black_category" env-required:"true" yaml:"black_category"`
+	RealTimeRank  int64        `json:"real_time_rank" env-required:"true" yaml:"real_time_rank"`
+	LimitVolume   int64        `json:"limit_volume"   env-required:"true" yaml:"limit_volume"`
+	PriceLimit    []PriceLimit `json:"price_limit"    env-required:"true" yaml:"price_limit"`
 }
 
 // PriceLimit -.

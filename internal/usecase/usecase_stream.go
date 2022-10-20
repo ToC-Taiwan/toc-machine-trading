@@ -163,7 +163,7 @@ func (uc *StreamUseCase) tradingRoom(agent *TradeAgent) {
 		for {
 			agent.lastTick = <-agent.tickChan
 			agent.tickArr = append(agent.tickArr, agent.lastTick)
-			log.Debugf("%s tick time delay: %s", agent.stockNum, time.Since(agent.lastTick.TickTime).String())
+			// log.Debugf("%s tick time delay: %s", agent.stockNum, time.Since(agent.lastTick.TickTime).String())
 
 			if agent.waitingOrder != nil || agent.analyzeTickTime.IsZero() || !agent.openPass {
 				continue
@@ -181,7 +181,7 @@ func (uc *StreamUseCase) tradingRoom(agent *TradeAgent) {
 	go func() {
 		for {
 			agent.lastBidAsk = <-agent.bidAskChan
-			log.Debugf("%s bidask time delay: %s", agent.stockNum, time.Since(agent.lastBidAsk.BidAskTime).String())
+			// log.Debugf("%s bidask time delay: %s", agent.stockNum, time.Since(agent.lastBidAsk.BidAskTime).String())
 		}
 	}()
 }
@@ -392,16 +392,23 @@ func (uc *StreamUseCase) futureTradingRoom(agent *trader.FutureTradeAgent) {
 	}()
 
 	for {
-		tick := agent.ReceiveTick(<-tickChan)
-		bidAsk := agent.GetLastBidAsk()
+		_ = agent.ReceiveTick(<-tickChan)
+		// bidAsk := agent.GetLastBidAsk()
 
-		// log.Debugf("TickTime: %s, Code: %s, Close: %.0f, TickType: %d, Volume: %3d, PriceChg: %.0f", tick.TickTime.Format(global.LongTimeLayout), tick.Code, tick.Close, tick.TickType, tick.Volume, tick.PriceChg)
-		log.Debugf("Code: %s, Close: %.0f, Volume: %3d, PriceChg: %.0f", bidAsk.Code, tick.Close, tick.Volume, tick.PriceChg)
-		log.Debugf("%2d %.0f %.0f %2d", bidAsk.BidVolume1, bidAsk.BidPrice1, bidAsk.AskPrice1, bidAsk.AskVolume1)
-		log.Debugf("%2d %.0f %.0f %2d", bidAsk.BidVolume2, bidAsk.BidPrice2, bidAsk.AskPrice2, bidAsk.AskVolume2)
-		log.Debugf("%2d %.0f %.0f %2d", bidAsk.BidVolume3, bidAsk.BidPrice3, bidAsk.AskPrice3, bidAsk.AskVolume3)
-		log.Debugf("%2d %.0f %.0f %2d", bidAsk.BidVolume4, bidAsk.BidPrice4, bidAsk.AskPrice4, bidAsk.AskVolume4)
-		log.Debugf("%2d %.0f %.0f %2d", bidAsk.BidVolume5, bidAsk.BidPrice5, bidAsk.AskPrice5, bidAsk.AskVolume5)
+		// t := table.NewWriter()
+		// t.SetOutputMirror(os.Stdout)
+		// t.AppendHeader(table.Row{"Code", bidAsk.Code, tick.Volume, tick.PriceChg, "", "Avg-Volume", "Out-In-Ratio"})
+		// t.AppendSeparator()
+
+		// tmp := []table.Row{}
+		// tmp = append(tmp, table.Row{bidAsk.BidVolume1, bidAsk.BidPrice1, bidAsk.AskPrice1, bidAsk.AskVolume1})
+		// tmp = append(tmp, table.Row{bidAsk.BidVolume2, bidAsk.BidPrice2, bidAsk.AskPrice2, bidAsk.AskVolume2})
+		// tmp = append(tmp, table.Row{bidAsk.BidVolume3, bidAsk.BidPrice3, bidAsk.AskPrice3, bidAsk.AskVolume3})
+		// tmp = append(tmp, table.Row{bidAsk.BidVolume4, bidAsk.BidPrice4, bidAsk.AskPrice4, bidAsk.AskVolume4})
+		// tmp = append(tmp, table.Row{bidAsk.BidVolume5, bidAsk.BidPrice5, bidAsk.AskPrice5, bidAsk.AskVolume5})
+		// t.AppendRows(tmp)
+		// t.AppendFooter(table.Row{"", "", "", "", "", agent.GetAvgVolume(), agent.GetOutInRatio()})
+		// t.Render()
 
 		if agent.IsWaiting() {
 			continue

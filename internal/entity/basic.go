@@ -29,7 +29,7 @@ type Future struct {
 	Name           string    `json:"name"`
 	Category       string    `json:"category"`
 	DeliveryMonth  string    `json:"delivery_month"`
-	DeliveryDate   string    `json:"delivery_date"`
+	DeliveryDate   time.Time `json:"delivery_date"`
 	UnderlyingKind string    `json:"underlying_kind"`
 	Unit           int64     `json:"unit"`
 	LimitUp        float64   `json:"limit_up"`

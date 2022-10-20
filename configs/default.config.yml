@@ -46,7 +46,6 @@ quota:
     fee_discount: 0.28
 
 target_cond:
-    monitor_future_code: MXFJ2
     real_time_rank: 20
     black_category:
         - 17
