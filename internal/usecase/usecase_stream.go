@@ -2,15 +2,14 @@ package usecase
 
 import (
 	"context"
-	"fmt"
 	"sort"
 	"sync"
 	"time"
 
 	"tmt/cmd/config"
-	"tmt/global"
 	"tmt/internal/entity"
 	"tmt/internal/usecase/events"
+	"tmt/internal/usecase/modules/tradeday"
 	"tmt/internal/usecase/modules/trader"
 )
 
@@ -28,6 +27,7 @@ type StreamUseCase struct {
 	futureAnalyzeCfg config.FutureAnalyze
 
 	targetFilter *TargetFilter
+	tradeDay     *tradeday.TradeDay
 
 	tradeInSwitch       bool
 	futureTradeInSwitch bool
@@ -36,23 +36,26 @@ type StreamUseCase struct {
 // NewStream -.
 func NewStream(r StreamRepo, g StreamgRPCAPI, t StreamRabbit) *StreamUseCase {
 	cfg := config.GetConfig()
-	basic := *cc.GetBasicInfo()
-	t.FillAllBasic(basic.AllStocks, basic.AllFutures)
-
 	uc := &StreamUseCase{
-		repo:                 r,
-		rabbit:               t,
-		grpcapi:              g,
+		repo:    r,
+		rabbit:  t,
+		grpcapi: g,
+
 		tradeSwitchCfg:       cfg.TradeSwitch,
 		futureTradeSwitchCfg: cfg.FutureTradeSwitch,
-		stockAnalyzeCfg:      cfg.StockAnalyze,
-		futureAnalyzeCfg:     cfg.FutureAnalyze,
-		basic:                basic,
-		targetFilter:         NewTargetFilter(cfg.TargetCond),
+
+		stockAnalyzeCfg:  cfg.StockAnalyze,
+		futureAnalyzeCfg: cfg.FutureAnalyze,
+
+		basic:        *cc.GetBasicInfo(),
+		targetFilter: NewTargetFilter(cfg.TargetCond),
+		tradeDay:     tradeday.NewTradeDay(),
 	}
+	t.FillAllBasic(uc.basic.AllStocks, uc.basic.AllFutures)
 
 	go uc.checkTradeSwitch()
 	go uc.checkFutureTradeSwitch()
+
 	go uc.ReceiveEvent(context.Background())
 	go uc.ReceiveOrderStatus(context.Background())
 
@@ -457,16 +460,20 @@ func (uc *StreamUseCase) checkFutureTradeSwitch() {
 		return
 	}
 
+	futureTradeDay := uc.tradeDay.GetFutureTradeDay()
+
+	timeRange := [][]time.Time{}
+	firstStart := futureTradeDay.StartTime
+	secondStart := futureTradeDay.EndTime.Add(-300 * time.Minute)
+
+	timeRange = append(timeRange, []time.Time{firstStart, firstStart.Add(time.Duration(uc.futureTradeSwitchCfg.TradeTimeRange.FirstPartDuration) * time.Minute)})
+	timeRange = append(timeRange, []time.Time{secondStart, secondStart.Add(time.Duration(uc.futureTradeSwitchCfg.TradeTimeRange.SecondPartDuration) * time.Minute)})
+
 	for range time.NewTicker(2500 * time.Millisecond).C {
-		now := time.Now()
 		var tempSwitch bool
-		for _, v := range uc.futureTradeSwitchCfg.TradeTimeRange {
-			start, err := time.ParseInLocation(global.LongTimeLayout, fmt.Sprintf("%s %s", now.Format(global.ShortTimeLayout), v.StartTime), time.Local)
-			if err != nil {
-				log.Panic(err)
-			}
-			end := start.Add(time.Duration(v.Duration) * time.Minute)
-			if now.After(start) && now.Before(end) {
+		now := time.Now()
+		for _, rangeTime := range timeRange {
+			if now.After(rangeTime[0]) && now.Before(rangeTime[1]) {
 				tempSwitch = true
 			}
 		}

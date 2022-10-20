@@ -382,9 +382,9 @@ func (uc *OrderUseCase) calculateFutureTradeBalance(allOrders []*entity.FutureOr
 		switch v.Action {
 		case entity.ActionBuy:
 			tradeCount++
-			forwardBalance -= 50*int64(v.Price) + 15 + 30
+			forwardBalance -= uc.quota.GetMXFBuyCost(v.Price, v.Quantity)
 		case entity.ActionSell:
-			forwardBalance += 50*int64(v.Price) - 15 - 30
+			forwardBalance += uc.quota.GetMXFSellCost(v.Price, v.Quantity)
 		}
 	}
 
@@ -392,9 +392,9 @@ func (uc *OrderUseCase) calculateFutureTradeBalance(allOrders []*entity.FutureOr
 		switch v.Action {
 		case entity.ActionSellFirst:
 			tradeCount++
-			revereBalance += 50*int64(v.Price) - 15 - 30
+			revereBalance += uc.quota.GetMXFSellCost(v.Price, v.Quantity)
 		case entity.ActionBuyLater:
-			revereBalance -= 50*int64(v.Price) + 15 + 30
+			revereBalance -= uc.quota.GetMXFBuyCost(v.Price, v.Quantity)
 		}
 	}
 

@@ -52,9 +52,7 @@ definitions:
       trade_out_wait_time:
         type: integer
       trade_time_range:
-        items:
-          $ref: '#/definitions/config.TradeTimeRange'
-        type: array
+        $ref: '#/definitions/config.TradeTimeRange'
     type: object
   config.HTTP:
     properties:
@@ -88,14 +86,12 @@ definitions:
     type: object
   config.Quota:
     properties:
-      fee_discount:
-        type: number
-      trade_fee_ratio:
-        type: number
-      trade_quota:
+      future_trade_fee:
         type: integer
-      trade_tax_ratio:
+      stock_fee_discount:
         type: number
+      stock_trade_quota:
+        type: integer
     type: object
   config.RabbitMQ:
     properties:
@@ -174,10 +170,10 @@ definitions:
     type: object
   config.TradeTimeRange:
     properties:
-      duration:
+      first_part_duration:
         type: integer
-      start_time:
-        type: string
+      second_part_duration:
+        type: integer
     type: object
   entity.HistoryKbar:
     properties:

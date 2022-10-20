@@ -602,10 +602,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "trade_time_range": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/config.TradeTimeRange"
-                    }
+                    "$ref": "#/definitions/config.TradeTimeRange"
                 }
             }
         },
@@ -659,17 +656,14 @@ const docTemplate = `{
         "config.Quota": {
             "type": "object",
             "properties": {
-                "fee_discount": {
-                    "type": "number"
-                },
-                "trade_fee_ratio": {
-                    "type": "number"
-                },
-                "trade_quota": {
+                "future_trade_fee": {
                     "type": "integer"
                 },
-                "trade_tax_ratio": {
+                "stock_fee_discount": {
                     "type": "number"
+                },
+                "stock_trade_quota": {
+                    "type": "integer"
                 }
             }
         },
@@ -791,11 +785,11 @@ const docTemplate = `{
         "config.TradeTimeRange": {
             "type": "object",
             "properties": {
-                "duration": {
+                "first_part_duration": {
                     "type": "integer"
                 },
-                "start_time": {
-                    "type": "string"
+                "second_part_duration": {
+                    "type": "integer"
                 }
             }
         },

@@ -92,18 +92,18 @@ type TradeSwitch struct {
 
 // FutureTradeSwitch -.
 type FutureTradeSwitch struct {
-	AllowTrade       bool             `json:"allow_trade"         yaml:"allow_trade"`
-	Quantity         int64            `json:"quantity"            env-required:"true" yaml:"quantity"`
-	TradeInWaitTime  int64            `json:"trade_in_wait_time"  env-required:"true" yaml:"trade_in_wait_time"`
-	TradeOutWaitTime int64            `json:"trade_out_wait_time" env-required:"true" yaml:"trade_out_wait_time"`
-	CancelWaitTime   int64            `json:"cancel_wait_time"    env-required:"true" yaml:"cancel_wait_time"`
-	TradeTimeRange   []TradeTimeRange `json:"trade_time_range"    env-required:"true" yaml:"trade_time_range"`
+	AllowTrade       bool           `json:"allow_trade"         yaml:"allow_trade"`
+	Quantity         int64          `json:"quantity"            env-required:"true" yaml:"quantity"`
+	TradeInWaitTime  int64          `json:"trade_in_wait_time"  env-required:"true" yaml:"trade_in_wait_time"`
+	TradeOutWaitTime int64          `json:"trade_out_wait_time" env-required:"true" yaml:"trade_out_wait_time"`
+	CancelWaitTime   int64          `json:"cancel_wait_time"    env-required:"true" yaml:"cancel_wait_time"`
+	TradeTimeRange   TradeTimeRange `json:"trade_time_range"    env-required:"true" yaml:"trade_time_range"`
 }
 
 // TradeTimeRange -.
 type TradeTimeRange struct {
-	StartTime string `json:"start_time" env-required:"true" yaml:"start_time"`
-	Duration  int64  `json:"duration"   env-required:"true" yaml:"duration"`
+	FirstPartDuration  int64 `json:"first_part_duration"  env-required:"true" yaml:"first_part_duration"`
+	SecondPartDuration int64 `json:"second_part_duration" env-required:"true" yaml:"second_part_duration"`
 }
 
 // History -.
@@ -115,10 +115,9 @@ type History struct {
 
 // Quota -.
 type Quota struct {
-	TradeQuota    int64   `json:"trade_quota"     env-required:"true" yaml:"trade_quota"`
-	TradeTaxRatio float64 `json:"trade_tax_ratio" env-required:"true" yaml:"trade_tax_ratio"`
-	TradeFeeRatio float64 `json:"trade_fee_ratio" env-required:"true" yaml:"trade_fee_ratio"`
-	FeeDiscount   float64 `json:"fee_discount"    env-required:"true" yaml:"fee_discount"`
+	StockTradeQuota  int64   `json:"stock_trade_quota"  env-required:"true" yaml:"stock_trade_quota"`
+	StockFeeDiscount float64 `json:"stock_fee_discount" env-required:"true" yaml:"stock_fee_discount"`
+	FutureTradeFee   int64   `json:"future_trade_fee"   env-required:"true" yaml:"future_trade_fee"`
 }
 
 // TargetCond -.
