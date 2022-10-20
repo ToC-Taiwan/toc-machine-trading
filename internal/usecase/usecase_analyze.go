@@ -48,7 +48,7 @@ func NewAnalyze(r HistoryRepo) *AnalyzeUseCase {
 		historyTick:        make(map[string]*[]*entity.HistoryTick),
 		lastBelowMAStock:   make(map[string]*entity.HistoryAnalyze),
 		rebornMap:          make(map[time.Time][]entity.Stock),
-		tradeDay:           tradeday.NewStockTradeDay(),
+		tradeDay:           tradeday.NewTradeDay(),
 	}
 
 	bus.SubscribeTopic(events.TopicAnalyzeTargets, uc.AnalyzeAll)

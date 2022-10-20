@@ -182,11 +182,11 @@ type (
 		QueryStockOrderByID(ctx context.Context, orderID string) (*entity.StockOrder, error)
 		InsertOrUpdateOrderByOrderID(ctx context.Context, t *entity.StockOrder) error
 		QueryAllStockOrder(ctx context.Context) ([]*entity.StockOrder, error)
-		QueryAllStockOrderByDate(ctx context.Context, date time.Time) ([]*entity.StockOrder, error)
+		QueryAllStockOrderByDate(ctx context.Context, timeTange []time.Time) ([]*entity.StockOrder, error)
 
 		QueryFutureOrderByID(ctx context.Context, orderID string) (*entity.FutureOrder, error)
 		InsertOrUpdateFutureOrderByOrderID(ctx context.Context, t *entity.FutureOrder) error
-		QueryAllFutureOrderByDate(ctx context.Context, date time.Time) ([]*entity.FutureOrder, error)
+		QueryAllFutureOrderByDate(ctx context.Context, timeTange []time.Time) ([]*entity.FutureOrder, error)
 	}
 
 	// OrdergRPCAPI -.

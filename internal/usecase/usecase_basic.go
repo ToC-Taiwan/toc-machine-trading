@@ -29,7 +29,7 @@ func NewBasic(r BasicRepo, t BasicgRPCAPI) *BasicUseCase {
 	uc := &BasicUseCase{
 		repo:     r,
 		gRPCAPI:  t,
-		tradeDay: tradeday.NewStockTradeDay(),
+		tradeDay: tradeday.NewTradeDay(),
 		cfg:      cfg,
 	}
 
@@ -182,7 +182,7 @@ func (uc *BasicUseCase) importCalendarDate(ctx context.Context) error {
 }
 
 func (uc *BasicUseCase) fillBasicInfo() {
-	tradeDay := uc.tradeDay.DecideStockTradeDay()
+	tradeDay := uc.tradeDay.GetStockTradeDay().TradeDay
 	openTime := 9 * time.Hour
 	lastTradeDayArr := uc.tradeDay.GetLastNTradeDayByDate(2, tradeDay)
 

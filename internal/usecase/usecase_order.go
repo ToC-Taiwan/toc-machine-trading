@@ -11,6 +11,7 @@ import (
 	"tmt/internal/entity"
 	"tmt/internal/usecase/events"
 	"tmt/internal/usecase/modules/quota"
+	"tmt/internal/usecase/modules/tradeday"
 )
 
 // OrderUseCase -.
@@ -18,31 +19,29 @@ type OrderUseCase struct {
 	gRPCAPI OrdergRPCAPI
 	repo    OrderRepo
 
-	basicInfo            entity.BasicInfo
 	quota                *quota.Quota
 	simTrade             bool
 	placeOrderLock       sync.Mutex
 	placeFutureOrderLock sync.Mutex
 
-	futureTradeDay time.Time
+	stockTradeDay  tradeday.TradePeriod
+	futureTradeDay tradeday.TradePeriod
 }
 
 // NewOrder -.
 func NewOrder(t OrdergRPCAPI, r OrderRepo) *OrderUseCase {
 	cfg := config.GetConfig()
-	futureTradeDay, err := time.ParseInLocation(global.ShortTimeLayout, time.Now().Format(global.ShortTimeLayout), time.Local)
-	if err != nil {
-		log.Panic(err)
-	}
+	tradeDay := tradeday.NewTradeDay()
 
 	uc := &OrderUseCase{
-		gRPCAPI:        t,
-		repo:           r,
-		quota:          quota.NewQuota(cfg.Quota),
-		simTrade:       cfg.Simulation,
-		placeOrderLock: sync.Mutex{},
-		basicInfo:      *cc.GetBasicInfo(),
-		futureTradeDay: futureTradeDay,
+		simTrade: cfg.Simulation,
+
+		gRPCAPI: t,
+		repo:    r,
+		quota:   quota.NewQuota(cfg.Quota),
+
+		stockTradeDay:  tradeDay.GetStockTradeDay(),
+		futureTradeDay: tradeDay.GetFutureTradeDay(),
 	}
 
 	bus.SubscribeTopic(events.TopicPlaceOrder, uc.placeOrder)
@@ -55,13 +54,13 @@ func NewOrder(t OrdergRPCAPI, r OrderRepo) *OrderUseCase {
 
 	go func() {
 		for range time.NewTicker(20 * time.Second).C {
-			stockOrders, err := uc.repo.QueryAllStockOrderByDate(context.Background(), uc.basicInfo.TradeDay)
+			stockOrders, err := uc.repo.QueryAllStockOrderByDate(context.Background(), uc.stockTradeDay.ToStartEndArray())
 			if err != nil {
 				log.Panic(err)
 			}
 			uc.calculateStockTradeBalance(stockOrders)
 
-			futureOrders, err := uc.repo.QueryAllFutureOrderByDate(context.Background(), uc.futureTradeDay)
+			futureOrders, err := uc.repo.QueryAllFutureOrderByDate(context.Background(), uc.futureTradeDay.ToStartEndArray())
 			if err != nil {
 				log.Panic(err)
 			}
@@ -400,7 +399,7 @@ func (uc *OrderUseCase) calculateFutureTradeBalance(allOrders []*entity.FutureOr
 	}
 
 	tmp := &entity.TradeBalance{
-		TradeDay:   uc.futureTradeDay,
+		TradeDay:   uc.futureTradeDay.TradeDay,
 		TradeCount: tradeCount,
 		Forward:    forwardBalance,
 		Reverse:    revereBalance,

@@ -31,9 +31,6 @@ type StreamUseCase struct {
 
 	tradeInSwitch       bool
 	futureTradeInSwitch bool
-
-	// allowForward bool
-	// allowReverse bool
 }
 
 // NewStream -.
@@ -187,17 +184,6 @@ func (uc *StreamUseCase) tradingRoom(agent *TradeAgent) {
 }
 
 func (uc *StreamUseCase) placeOrder(agent *TradeAgent, order *entity.StockOrder) {
-	// switch order.Action {
-	// case entity.ActionBuy:
-	// 	if !uc.allowForward {
-	// 		return
-	// 	}
-	// case entity.ActionSellFirst:
-	// 	if !uc.allowReverse {
-	// 		return
-	// 	}
-	// }
-
 	if order.Price == 0 {
 		log.Errorf("%s Order price is 0", order.StockNum)
 		return
@@ -373,7 +359,6 @@ func (uc *StreamUseCase) DeleteFutureRealTimeConnection(timestamp int64) {
 func (uc *StreamUseCase) ReceiveFutureStreamData(ctx context.Context, code string) {
 	agent := trader.NewFutureAgent(code, uc.futureTradeSwitchCfg, uc.futureAnalyzeCfg, bus)
 
-	// go uc.checkFirstFutureTick(agent)
 	go uc.futureTradingRoom(agent)
 	go uc.rabbit.FutureTickConsumer(code, agent.GetTickChan())
 	go uc.rabbit.FutureBidAskConsumer(code, agent.GetBidAskChan())
