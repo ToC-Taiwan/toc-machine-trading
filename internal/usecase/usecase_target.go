@@ -11,6 +11,7 @@ import (
 	"tmt/global"
 	"tmt/internal/entity"
 	"tmt/internal/usecase/events"
+	"tmt/internal/usecase/modules/target"
 )
 
 // TargetUseCase -.
@@ -19,7 +20,7 @@ type TargetUseCase struct {
 	gRPCAPI       TargetgRPCAPI
 	streamgRPCAPI StreamgRPCAPI
 
-	targetFilter      *TargetFilter
+	targetFilter      *target.Filter
 	monitorFutureCode string
 	waitMonitorFuture chan struct{}
 }
@@ -31,7 +32,7 @@ func NewTarget(r TargetRepo, t TargetgRPCAPI, s StreamgRPCAPI) *TargetUseCase {
 		repo:              r,
 		gRPCAPI:           t,
 		streamgRPCAPI:     s,
-		targetFilter:      NewTargetFilter(cfg.TargetCond),
+		targetFilter:      target.NewFilter(cfg.TargetCond),
 		waitMonitorFuture: make(chan struct{}),
 	}
 
@@ -119,7 +120,7 @@ func (uc *TargetUseCase) SearchTradeDayTargets(ctx context.Context, tradeDay tim
 			continue
 		}
 
-		if !uc.targetFilter.checkVolume(v.GetTotalVolume()) || !uc.targetFilter.isTarget(stock, v.GetClose()) {
+		if !uc.targetFilter.CheckVolume(v.GetTotalVolume()) || !uc.targetFilter.IsTarget(stock, v.GetClose()) {
 			continue
 		}
 
@@ -156,7 +157,7 @@ func (uc *TargetUseCase) SearchTradeDayTargetsFromAllSnapshot(tradeDay time.Time
 			continue
 		}
 
-		if !uc.targetFilter.checkVolume(v.GetTotalVolume()) || !uc.targetFilter.isTarget(stock, v.GetClose()) {
+		if !uc.targetFilter.CheckVolume(v.GetTotalVolume()) || !uc.targetFilter.IsTarget(stock, v.GetClose()) {
 			continue
 		}
 

@@ -1,4 +1,5 @@
-package usecase
+// Package target package target
+package target
 
 import (
 	"sync"
@@ -7,19 +8,20 @@ import (
 	"tmt/internal/entity"
 )
 
-// TargetFilter -.
-type TargetFilter struct {
+// Filter -.
+type Filter struct {
 	blackCategory map[string]struct{}
 	blackStock    map[string]struct{}
-	priceLimit    []config.PriceLimit
-	realTimeRank  int64
-	volumeLimit   int64
+	mutex         sync.RWMutex
 
-	mutex sync.RWMutex
+	priceLimit  []config.PriceLimit
+	volumeLimit int64
+
+	RealTimeRank int64
 }
 
-// NewTargetFilter -.
-func NewTargetFilter(cond config.TargetCond) *TargetFilter {
+// NewFilter -.
+func NewFilter(cond config.TargetCond) *Filter {
 	blackCategoryMap := make(map[string]struct{})
 	for _, category := range cond.BlackCategory {
 		blackCategoryMap[category] = struct{}{}
@@ -30,16 +32,17 @@ func NewTargetFilter(cond config.TargetCond) *TargetFilter {
 		blackStockMap[stockNum] = struct{}{}
 	}
 
-	return &TargetFilter{
+	return &Filter{
 		blackCategory: blackCategoryMap,
 		blackStock:    blackStockMap,
 		priceLimit:    cond.PriceLimit,
-		realTimeRank:  cond.RealTimeRank,
+		RealTimeRank:  cond.RealTimeRank,
 		volumeLimit:   cond.LimitVolume,
 	}
 }
 
-func (t *TargetFilter) isTarget(stock *entity.Stock, close float64) bool {
+// IsTarget -.
+func (t *Filter) IsTarget(stock *entity.Stock, close float64) bool {
 	defer t.mutex.RUnlock()
 	t.mutex.RLock()
 
@@ -59,6 +62,7 @@ func (t *TargetFilter) isTarget(stock *entity.Stock, close float64) bool {
 	return false
 }
 
-func (t *TargetFilter) checkVolume(volume int64) bool {
+// CheckVolume -.
+func (t *Filter) CheckVolume(volume int64) bool {
 	return volume > t.volumeLimit
 }

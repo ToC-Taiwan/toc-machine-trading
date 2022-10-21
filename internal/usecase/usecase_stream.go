@@ -9,6 +9,7 @@ import (
 	"tmt/cmd/config"
 	"tmt/internal/entity"
 	"tmt/internal/usecase/events"
+	"tmt/internal/usecase/modules/target"
 	"tmt/internal/usecase/modules/tradeday"
 	"tmt/internal/usecase/modules/trader"
 )
@@ -26,7 +27,7 @@ type StreamUseCase struct {
 	stockAnalyzeCfg  config.StockAnalyze
 	futureAnalyzeCfg config.FutureAnalyze
 
-	targetFilter *TargetFilter
+	targetFilter *target.Filter
 	tradeDay     *tradeday.TradeDay
 
 	tradeInSwitch       bool
@@ -48,7 +49,7 @@ func NewStream(r StreamRepo, g StreamgRPCAPI, t StreamRabbit) *StreamUseCase {
 		futureAnalyzeCfg: cfg.FutureAnalyze,
 
 		basic:        *cc.GetBasicInfo(),
-		targetFilter: NewTargetFilter(cfg.TargetCond),
+		targetFilter: target.NewFilter(cfg.TargetCond),
 		tradeDay:     tradeday.NewTradeDay(),
 	}
 	t.FillAllBasic(uc.basic.AllStocks, uc.basic.AllFutures)
@@ -262,7 +263,7 @@ func (uc *StreamUseCase) realTimeAddTargets() error {
 	sort.Slice(data, func(i, j int) bool {
 		return data[i].GetTotalVolume() > data[j].GetTotalVolume()
 	})
-	data = data[:uc.targetFilter.realTimeRank]
+	data = data[:uc.targetFilter.RealTimeRank]
 
 	currentTargets := cc.GetTargets()
 	targetsMap := make(map[string]*entity.Target)
@@ -277,7 +278,7 @@ func (uc *StreamUseCase) realTimeAddTargets() error {
 			continue
 		}
 
-		if !uc.targetFilter.isTarget(stock, d.GetClose()) {
+		if !uc.targetFilter.IsTarget(stock, d.GetClose()) {
 			continue
 		}
 
