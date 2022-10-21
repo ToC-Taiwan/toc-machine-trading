@@ -1,4 +1,5 @@
-package usecase
+// Package trader package trader
+package trader
 
 import (
 	"sort"
@@ -8,7 +9,6 @@ import (
 	"tmt/cmd/config"
 	"tmt/internal/entity"
 	"tmt/internal/usecase/events"
-	"tmt/pkg/utils"
 
 	"github.com/google/uuid"
 )
@@ -71,7 +71,8 @@ func NewAgent(stockNum string, tradeSwitch config.TradeSwitch) *TradeAgent {
 	return new
 }
 
-func (o *TradeAgent) generateOrder(cfg config.StockAnalyze) *entity.StockOrder {
+// GenerateOrder -.
+func (o *TradeAgent) GenerateOrder(cfg config.StockAnalyze) *entity.StockOrder {
 	if o.lastTick.TickTime.Sub(o.analyzeTickTime) > time.Duration(cfg.TickAnalyzePeriod*1.1)*time.Millisecond {
 		o.analyzeTickTime = o.lastTick.TickTime
 		o.periodTickArr = RealTimeTickArr{o.lastTick}
@@ -162,7 +163,8 @@ func (o *TradeAgent) generateTradeOutOrder(cfg config.StockAnalyze, postOrderAct
 	return nil
 }
 
-func (o *TradeAgent) checkPlaceOrderStatus(order *entity.StockOrder) {
+// CheckPlaceOrderStatus -.
+func (o *TradeAgent) CheckPlaceOrderStatus(order *entity.StockOrder) {
 	var timeout time.Duration
 	switch order.Action {
 	case entity.ActionBuy, entity.ActionSellFirst:
@@ -224,7 +226,7 @@ func (o *TradeAgent) cancelOrder(order *entity.StockOrder) {
 				return
 			} else if order.TradeTime.Add(o.cancelWaitTime).Before(time.Now()) {
 				log.Warnf("Try Cancel Order Again -> Stock: %s, Action: %d, Price: %.2f, Qty: %d", order.StockNum, order.Action, order.Price, order.Quantity)
-				go o.checkPlaceOrderStatus(order)
+				go o.CheckPlaceOrderStatus(order)
 				return
 			}
 		}
@@ -296,48 +298,46 @@ func (o *TradeAgent) getPRByVolume(volume int64) float64 {
 // 	return len(o.orderMap) != 0 && len(o.orderMap)%2 == 0
 // }
 
-// RealTimeTickArr -.
-type RealTimeTickArr []*entity.RealTimeTick
-
-func (c RealTimeTickArr) getTotalVolume() int64 {
-	var volume int64
-	for _, v := range c {
-		volume += v.Volume
-	}
-	return volume
+// GetStockNum -/
+func (o *TradeAgent) GetStockNum() string {
+	return o.stockNum
 }
 
-func (c RealTimeTickArr) getOutInRatio() float64 {
-	if len(c) == 0 {
-		return 0
-	}
-
-	var outVolume, inVolume int64
-	for _, v := range c {
-		switch v.TickType {
-		case 1:
-			outVolume += v.Volume
-		case 2:
-			inVolume += v.Volume
-		default:
-			continue
-		}
-	}
-
-	return 100 * float64(outVolume) / float64(outVolume+inVolume)
+// GetTickChan -.
+func (o *TradeAgent) GetTickChan() chan *entity.RealTimeTick {
+	return o.tickChan
 }
 
-func (c RealTimeTickArr) getRSIByTickTime(preTime time.Time, count int) float64 {
-	if len(c) == 0 || preTime.IsZero() {
-		return 0
-	}
+// GetBidAskChan -.
+func (o *TradeAgent) GetBidAskChan() chan *entity.RealTimeBidAsk {
+	return o.bidAskChan
+}
 
-	var tmp []float64
-	for _, v := range c {
-		if v.TickTime.Equal(preTime) || v.TickTime.After(preTime) {
-			tmp = append(tmp, v.Close)
-		}
-	}
+// ReceiveTick -.
+func (o *TradeAgent) ReceiveTick(input *entity.RealTimeTick) {
+	o.lastTick = input
+	o.tickArr = append(o.tickArr, input)
+}
 
-	return utils.GenerateRSI(tmp, count)
+// ReceiveBidAsk -.
+func (o *TradeAgent) ReceiveBidAsk(input *entity.RealTimeBidAsk) {
+	o.lastBidAsk = input
+}
+
+// IsReady -.
+func (o *TradeAgent) IsReady() bool {
+	if o.waitingOrder != nil || o.analyzeTickTime.IsZero() || !o.openPass {
+		return false
+	}
+	return true
+}
+
+// WaitingOrder -.
+func (o *TradeAgent) WaitingOrder(order *entity.StockOrder) {
+	o.waitingOrder = order
+}
+
+// CancelWaitingOrder -.
+func (o *TradeAgent) CancelWaitingOrder() {
+	o.waitingOrder = nil
 }

@@ -34,8 +34,6 @@ definitions:
         type: number
       max_hold_time:
         type: number
-      rsi_min_count:
-        type: integer
       tick_analyze_period:
         type: number
     type: object
@@ -360,26 +358,6 @@ paths:
               $ref: '#/definitions/v1.reborn'
             type: array
       summary: getRebornTargets
-      tags:
-      - analyze
-  /analyze/simulate-historytick:
-    get:
-      consumes:
-      - application/json
-      description: startSimulateHistoryTick
-      operationId: startSimulateHistoryTick
-      parameters:
-      - description: use_default
-        in: header
-        name: use_default
-        required: true
-        type: boolean
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-      summary: startSimulateHistoryTick
       tags:
       - analyze
   /basic/config:

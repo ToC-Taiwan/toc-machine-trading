@@ -116,7 +116,7 @@ func (uc *StreamUseCase) ReceiveOrderStatus(ctx context.Context) {
 
 // ReceiveStreamData - receive target data, start goroutine to trade
 func (uc *StreamUseCase) ReceiveStreamData(ctx context.Context, targetArr []*entity.Target) {
-	agentChan := make(chan *TradeAgent)
+	agentChan := make(chan *trader.TradeAgent)
 	targetMap := make(map[string]*entity.Target)
 	mutex := sync.RWMutex{}
 
@@ -129,11 +129,11 @@ func (uc *StreamUseCase) ReceiveStreamData(ctx context.Context, targetArr []*ent
 			go uc.tradingRoom(agent)
 
 			// send tick, bidask to trade room's channel
-			go uc.rabbit.TickConsumer(agent.stockNum, agent.tickChan)
-			go uc.rabbit.StockBidAskConsumer(agent.stockNum, agent.bidAskChan)
+			go uc.rabbit.TickConsumer(agent.GetStockNum(), agent.GetTickChan())
+			go uc.rabbit.StockBidAskConsumer(agent.GetStockNum(), agent.GetBidAskChan())
 
 			mutex.RLock()
-			target := targetMap[agent.stockNum]
+			target := targetMap[agent.GetStockNum()]
 			mutex.RUnlock()
 
 			bus.PublishTopicEvent(events.TopicSubscribeTickTargets, []*entity.Target{target})
@@ -150,7 +150,7 @@ func (uc *StreamUseCase) ReceiveStreamData(ctx context.Context, targetArr []*ent
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			agent := NewAgent(target.StockNum, uc.tradeSwitchCfg)
+			agent := trader.NewAgent(target.StockNum, uc.tradeSwitchCfg)
 			agentChan <- agent
 		}()
 	}
@@ -158,18 +158,17 @@ func (uc *StreamUseCase) ReceiveStreamData(ctx context.Context, targetArr []*ent
 	close(agentChan)
 }
 
-func (uc *StreamUseCase) tradingRoom(agent *TradeAgent) {
+func (uc *StreamUseCase) tradingRoom(agent *trader.TradeAgent) {
 	go func() {
 		for {
-			agent.lastTick = <-agent.tickChan
-			agent.tickArr = append(agent.tickArr, agent.lastTick)
+			agent.ReceiveTick(<-agent.GetTickChan())
 			// log.Debugf("%s tick time delay: %s", agent.stockNum, time.Since(agent.lastTick.TickTime).String())
 
-			if agent.waitingOrder != nil || agent.analyzeTickTime.IsZero() || !agent.openPass {
+			if !agent.IsReady() {
 				continue
 			}
 
-			order := agent.generateOrder(uc.stockAnalyzeCfg)
+			order := agent.GenerateOrder(uc.stockAnalyzeCfg)
 			if order == nil {
 				continue
 			}
@@ -180,29 +179,29 @@ func (uc *StreamUseCase) tradingRoom(agent *TradeAgent) {
 
 	go func() {
 		for {
-			agent.lastBidAsk = <-agent.bidAskChan
+			agent.ReceiveBidAsk(<-agent.GetBidAskChan())
 			// log.Debugf("%s bidask time delay: %s", agent.stockNum, time.Since(agent.lastBidAsk.BidAskTime).String())
 		}
 	}()
 }
 
-func (uc *StreamUseCase) placeOrder(agent *TradeAgent, order *entity.StockOrder) {
+func (uc *StreamUseCase) placeOrder(agent *trader.TradeAgent, order *entity.StockOrder) {
 	if order.Price == 0 {
 		log.Errorf("%s Order price is 0", order.StockNum)
 		return
 	}
 
-	agent.waitingOrder = order
+	agent.WaitingOrder(order)
 
 	// if out of trade in time, return
 	if !uc.tradeInSwitch && (order.Action == entity.ActionBuy || order.Action == entity.ActionSellFirst) {
 		// avoid stuck in the market
-		agent.waitingOrder = nil
+		agent.CancelWaitingOrder()
 		return
 	}
 
 	bus.PublishTopicEvent(events.TopicPlaceOrder, order)
-	go agent.checkPlaceOrderStatus(order)
+	go agent.CheckPlaceOrderStatus(order)
 }
 
 func (uc *StreamUseCase) checkTradeSwitch() {

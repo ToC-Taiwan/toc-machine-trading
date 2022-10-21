@@ -5,6 +5,8 @@ import (
 	"github.com/asaskevich/EventBus"
 )
 
+var singleInstance *Bus
+
 // Bus Bus
 type Bus struct {
 	bus EventBus.Bus
@@ -12,9 +14,15 @@ type Bus struct {
 
 // New New
 func New() *Bus {
-	return &Bus{
+	if singleInstance != nil {
+		return singleInstance
+	}
+
+	singleInstance = &Bus{
 		bus: EventBus.New(),
 	}
+
+	return singleInstance
 }
 
 // PublishTopicEvent PublishTopicEvent

@@ -47,36 +47,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/analyze/simulate-historytick": {
-            "get": {
-                "description": "startSimulateHistoryTick",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "analyze"
-                ],
-                "summary": "startSimulateHistoryTick",
-                "operationId": "startSimulateHistoryTick",
-                "parameters": [
-                    {
-                        "type": "boolean",
-                        "description": "use_default",
-                        "name": "use_default",
-                        "in": "header",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    }
-                }
-            }
-        },
         "/basic/config": {
             "get": {
                 "description": "getAllConfig",
@@ -574,9 +544,6 @@ const docTemplate = `{
                 },
                 "max_hold_time": {
                     "type": "number"
-                },
-                "rsi_min_count": {
-                    "type": "integer"
                 },
                 "tick_analyze_period": {
                     "type": "number"
