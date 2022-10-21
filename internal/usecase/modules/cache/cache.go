@@ -1,4 +1,5 @@
-package usecase
+// Package cache package cache
+package cache
 
 import (
 	"time"
@@ -7,16 +8,24 @@ import (
 	"tmt/pkg/cache"
 )
 
+var singleInstance *Cache
+
 // Cache -.
 type Cache struct {
 	*cache.Cache
 }
 
-// NewCache -.
-func NewCache() *Cache {
-	return &Cache{
+// GetCache -.
+func GetCache() *Cache {
+	if singleInstance != nil {
+		return singleInstance
+	}
+
+	singleInstance = &Cache{
 		Cache: cache.New(),
 	}
+
+	return singleInstance
 }
 
 // SetStockDetail -.

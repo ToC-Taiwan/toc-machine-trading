@@ -22,7 +22,6 @@ func newAnalyzeRoutes(handler *gin.RouterGroup, t usecase.Analyze) {
 	h := handler.Group("/analyze")
 	{
 		h.GET("/reborn", r.getRebornTargets)
-		h.GET("/simulate-historytick", r.startSimulateHistoryTick)
 	}
 }
 
@@ -58,21 +57,4 @@ func (r *analyzeRoutes) getRebornTargets(c *gin.Context) {
 		})
 	}
 	c.JSON(http.StatusOK, result)
-}
-
-// @Summary     startSimulateHistoryTick
-// @Description startSimulateHistoryTick
-// @ID          startSimulateHistoryTick
-// @Tags  	    analyze
-// @Accept      json
-// @param use_default header bool true "use_default"
-// @Produce     json
-// @Success     200
-// @Router      /analyze/simulate-historytick [get]
-func (r *analyzeRoutes) startSimulateHistoryTick(c *gin.Context) {
-	useDefaultString := c.Request.Header.Get("use_default")
-	go r.t.SimulateOnHistoryTick(c.Request.Context(), useDefaultString == "true")
-	c.JSON(http.StatusOK, gin.H{
-		"message": "start simulate history tick, check result in logs",
-	})
 }

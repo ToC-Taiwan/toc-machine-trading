@@ -176,6 +176,21 @@ func (mr *MockBasicRepoMockRecorder) QueryAllFuture(ctx interface{}) *gomock.Cal
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryAllFuture", reflect.TypeOf((*MockBasicRepo)(nil).QueryAllFuture), ctx)
 }
 
+// QueryAllMXFFuture mocks base method.
+func (m *MockBasicRepo) QueryAllMXFFuture(ctx context.Context) ([]*entity.Future, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "QueryAllMXFFuture", ctx)
+	ret0, _ := ret[0].([]*entity.Future)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// QueryAllMXFFuture indicates an expected call of QueryAllMXFFuture.
+func (mr *MockBasicRepoMockRecorder) QueryAllMXFFuture(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryAllMXFFuture", reflect.TypeOf((*MockBasicRepo)(nil).QueryAllMXFFuture), ctx)
+}
+
 // QueryAllStock mocks base method.
 func (m *MockBasicRepo) QueryAllStock(ctx context.Context) (map[string]*entity.Stock, error) {
 	m.ctrl.T.Helper()
@@ -1521,18 +1536,18 @@ func (mr *MockOrderRepoMockRecorder) InsertOrUpdateStockTradeBalance(ctx, t inte
 }
 
 // QueryAllFutureOrderByDate mocks base method.
-func (m *MockOrderRepo) QueryAllFutureOrderByDate(ctx context.Context, date time.Time) ([]*entity.FutureOrder, error) {
+func (m *MockOrderRepo) QueryAllFutureOrderByDate(ctx context.Context, timeTange []time.Time) ([]*entity.FutureOrder, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "QueryAllFutureOrderByDate", ctx, date)
+	ret := m.ctrl.Call(m, "QueryAllFutureOrderByDate", ctx, timeTange)
 	ret0, _ := ret[0].([]*entity.FutureOrder)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // QueryAllFutureOrderByDate indicates an expected call of QueryAllFutureOrderByDate.
-func (mr *MockOrderRepoMockRecorder) QueryAllFutureOrderByDate(ctx, date interface{}) *gomock.Call {
+func (mr *MockOrderRepoMockRecorder) QueryAllFutureOrderByDate(ctx, timeTange interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryAllFutureOrderByDate", reflect.TypeOf((*MockOrderRepo)(nil).QueryAllFutureOrderByDate), ctx, date)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryAllFutureOrderByDate", reflect.TypeOf((*MockOrderRepo)(nil).QueryAllFutureOrderByDate), ctx, timeTange)
 }
 
 // QueryAllStockOrder mocks base method.
@@ -1551,18 +1566,18 @@ func (mr *MockOrderRepoMockRecorder) QueryAllStockOrder(ctx interface{}) *gomock
 }
 
 // QueryAllStockOrderByDate mocks base method.
-func (m *MockOrderRepo) QueryAllStockOrderByDate(ctx context.Context, date time.Time) ([]*entity.StockOrder, error) {
+func (m *MockOrderRepo) QueryAllStockOrderByDate(ctx context.Context, timeTange []time.Time) ([]*entity.StockOrder, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "QueryAllStockOrderByDate", ctx, date)
+	ret := m.ctrl.Call(m, "QueryAllStockOrderByDate", ctx, timeTange)
 	ret0, _ := ret[0].([]*entity.StockOrder)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // QueryAllStockOrderByDate indicates an expected call of QueryAllStockOrderByDate.
-func (mr *MockOrderRepoMockRecorder) QueryAllStockOrderByDate(ctx, date interface{}) *gomock.Call {
+func (mr *MockOrderRepoMockRecorder) QueryAllStockOrderByDate(ctx, timeTange interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryAllStockOrderByDate", reflect.TypeOf((*MockOrderRepo)(nil).QueryAllStockOrderByDate), ctx, date)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryAllStockOrderByDate", reflect.TypeOf((*MockOrderRepo)(nil).QueryAllStockOrderByDate), ctx, timeTange)
 }
 
 // QueryAllStockTradeBalance mocks base method.
@@ -1863,16 +1878,4 @@ func (m *MockAnalyze) GetRebornMap(ctx context.Context) map[time.Time][]entity.S
 func (mr *MockAnalyzeMockRecorder) GetRebornMap(ctx interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRebornMap", reflect.TypeOf((*MockAnalyze)(nil).GetRebornMap), ctx)
-}
-
-// SimulateOnHistoryTick mocks base method.
-func (m *MockAnalyze) SimulateOnHistoryTick(ctx context.Context, useDefault bool) {
-	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "SimulateOnHistoryTick", ctx, useDefault)
-}
-
-// SimulateOnHistoryTick indicates an expected call of SimulateOnHistoryTick.
-func (mr *MockAnalyzeMockRecorder) SimulateOnHistoryTick(ctx, useDefault interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SimulateOnHistoryTick", reflect.TypeOf((*MockAnalyze)(nil).SimulateOnHistoryTick), ctx, useDefault)
 }

@@ -92,18 +92,18 @@ type TradeSwitch struct {
 
 // FutureTradeSwitch -.
 type FutureTradeSwitch struct {
-	AllowTrade       bool             `json:"allow_trade"         yaml:"allow_trade"`
-	Quantity         int64            `json:"quantity"            env-required:"true" yaml:"quantity"`
-	TradeInWaitTime  int64            `json:"trade_in_wait_time"  env-required:"true" yaml:"trade_in_wait_time"`
-	TradeOutWaitTime int64            `json:"trade_out_wait_time" env-required:"true" yaml:"trade_out_wait_time"`
-	CancelWaitTime   int64            `json:"cancel_wait_time"    env-required:"true" yaml:"cancel_wait_time"`
-	TradeTimeRange   []TradeTimeRange `json:"trade_time_range"    env-required:"true" yaml:"trade_time_range"`
+	AllowTrade       bool           `json:"allow_trade"         yaml:"allow_trade"`
+	Quantity         int64          `json:"quantity"            env-required:"true" yaml:"quantity"`
+	TradeInWaitTime  int64          `json:"trade_in_wait_time"  env-required:"true" yaml:"trade_in_wait_time"`
+	TradeOutWaitTime int64          `json:"trade_out_wait_time" env-required:"true" yaml:"trade_out_wait_time"`
+	CancelWaitTime   int64          `json:"cancel_wait_time"    env-required:"true" yaml:"cancel_wait_time"`
+	TradeTimeRange   TradeTimeRange `json:"trade_time_range"    env-required:"true" yaml:"trade_time_range"`
 }
 
 // TradeTimeRange -.
 type TradeTimeRange struct {
-	StartTime string `json:"start_time" env-required:"true" yaml:"start_time"`
-	Duration  int64  `json:"duration"   env-required:"true" yaml:"duration"`
+	FirstPartDuration  int64 `json:"first_part_duration"  env-required:"true" yaml:"first_part_duration"`
+	SecondPartDuration int64 `json:"second_part_duration" env-required:"true" yaml:"second_part_duration"`
 }
 
 // History -.
@@ -115,20 +115,18 @@ type History struct {
 
 // Quota -.
 type Quota struct {
-	TradeQuota    int64   `json:"trade_quota"     env-required:"true" yaml:"trade_quota"`
-	TradeTaxRatio float64 `json:"trade_tax_ratio" env-required:"true" yaml:"trade_tax_ratio"`
-	TradeFeeRatio float64 `json:"trade_fee_ratio" env-required:"true" yaml:"trade_fee_ratio"`
-	FeeDiscount   float64 `json:"fee_discount"    env-required:"true" yaml:"fee_discount"`
+	StockTradeQuota  int64   `json:"stock_trade_quota"  env-required:"true" yaml:"stock_trade_quota"`
+	StockFeeDiscount float64 `json:"stock_fee_discount" env-required:"true" yaml:"stock_fee_discount"`
+	FutureTradeFee   int64   `json:"future_trade_fee"   env-required:"true" yaml:"future_trade_fee"`
 }
 
 // TargetCond -.
 type TargetCond struct {
-	BlackStock        []string     `json:"black_stock"         env-required:"true" yaml:"black_stock"`
-	BlackCategory     []string     `json:"black_category"      env-required:"true" yaml:"black_category"`
-	RealTimeRank      int64        `json:"real_time_rank"      env-required:"true" yaml:"real_time_rank"`
-	LimitVolume       int64        `json:"limit_volume"        env-required:"true" yaml:"limit_volume"`
-	PriceLimit        []PriceLimit `json:"price_limit"         env-required:"true" yaml:"price_limit"`
-	MonitorFutureCode string       `json:"monitor_future_code" env-required:"true" yaml:"monitor_future_code"`
+	BlackStock    []string     `json:"black_stock"    env-required:"true" yaml:"black_stock"`
+	BlackCategory []string     `json:"black_category" env-required:"true" yaml:"black_category"`
+	RealTimeRank  int64        `json:"real_time_rank" env-required:"true" yaml:"real_time_rank"`
+	LimitVolume   int64        `json:"limit_volume"   env-required:"true" yaml:"limit_volume"`
+	PriceLimit    []PriceLimit `json:"price_limit"    env-required:"true" yaml:"price_limit"`
 }
 
 // PriceLimit -.
@@ -156,5 +154,4 @@ type FutureAnalyze struct {
 	AllOutInRatio     float64 `json:"all_out_in_ratio"    env-required:"true" yaml:"all_out_in_ratio"`
 	AllInOutRatio     float64 `json:"all_in_out_ratio"    env-required:"true" yaml:"all_in_out_ratio"`
 	TickAnalyzePeriod float64 `json:"tick_analyze_period" env-required:"true" yaml:"tick_analyze_period"`
-	RSIMinCount       int     `json:"rsi_min_count"       env-required:"true" yaml:"rsi_min_count"`
 }

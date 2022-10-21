@@ -6,15 +6,17 @@ import (
 	"time"
 
 	"tmt/internal/entity"
+	"tmt/internal/usecase/modules/cache"
+	"tmt/internal/usecase/modules/event"
+
 	"tmt/pb"
-	"tmt/pkg/eventbus"
 	"tmt/pkg/logger"
 )
 
 var (
 	log = logger.Get()
-	bus = eventbus.New()
-	cc  = NewCache()
+	cc  = cache.GetCache()
+	bus = event.GetBus()
 )
 
 //go:generate mockgen -source=interfaces.go -destination=./mocks_test.go -package=usecase_test
@@ -36,6 +38,7 @@ type (
 
 		InsertOrUpdatetFutureArr(ctx context.Context, t []*entity.Future) error
 		QueryAllFuture(ctx context.Context) (map[string]*entity.Future, error)
+		QueryAllMXFFuture(ctx context.Context) ([]*entity.Future, error)
 	}
 
 	// BasicgRPCAPI -.
@@ -181,11 +184,11 @@ type (
 		QueryStockOrderByID(ctx context.Context, orderID string) (*entity.StockOrder, error)
 		InsertOrUpdateOrderByOrderID(ctx context.Context, t *entity.StockOrder) error
 		QueryAllStockOrder(ctx context.Context) ([]*entity.StockOrder, error)
-		QueryAllStockOrderByDate(ctx context.Context, date time.Time) ([]*entity.StockOrder, error)
+		QueryAllStockOrderByDate(ctx context.Context, timeTange []time.Time) ([]*entity.StockOrder, error)
 
 		QueryFutureOrderByID(ctx context.Context, orderID string) (*entity.FutureOrder, error)
 		InsertOrUpdateFutureOrderByOrderID(ctx context.Context, t *entity.FutureOrder) error
-		QueryAllFutureOrderByDate(ctx context.Context, date time.Time) ([]*entity.FutureOrder, error)
+		QueryAllFutureOrderByDate(ctx context.Context, timeTange []time.Time) ([]*entity.FutureOrder, error)
 	}
 
 	// OrdergRPCAPI -.
@@ -209,6 +212,5 @@ type (
 	// Analyze -.
 	Analyze interface {
 		GetRebornMap(ctx context.Context) map[time.Time][]entity.Stock
-		SimulateOnHistoryTick(ctx context.Context, useDefault bool)
 	}
 )

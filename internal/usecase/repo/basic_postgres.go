@@ -277,3 +277,31 @@ func (r *BasicRepo) QueryAllFuture(ctx context.Context) (map[string]*entity.Futu
 	}
 	return entities, nil
 }
+
+// QueryAllMXFFuture -.
+func (r *BasicRepo) QueryAllMXFFuture(ctx context.Context) ([]*entity.Future, error) {
+	sql, _, err := r.Builder.
+		Select("code, symbol, name, category, delivery_month, delivery_date, underlying_kind, unit, limit_up, limit_down, reference, update_date").
+		Where("code like 'MXF%'").
+		OrderBy("delivery_date asc").
+		From(tableNameFuture).ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	rows, err := r.Pool().Query(ctx, sql)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	entities := []*entity.Future{}
+	for rows.Next() {
+		e := entity.Future{}
+		if err = rows.Scan(&e.Code, &e.Symbol, &e.Name, &e.Category, &e.DeliveryMonth, &e.DeliveryDate, &e.UnderlyingKind, &e.Unit, &e.LimitUp, &e.LimitDown, &e.Reference, &e.UpdateDate); err != nil {
+			return nil, err
+		}
+		entities = append(entities, &e)
+	}
+	return entities, nil
+}

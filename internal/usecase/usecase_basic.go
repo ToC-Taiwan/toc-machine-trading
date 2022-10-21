@@ -7,6 +7,7 @@ import (
 	"tmt/cmd/config"
 	"tmt/global"
 	"tmt/internal/entity"
+	"tmt/internal/usecase/modules/event"
 	"tmt/internal/usecase/modules/tradeday"
 )
 
@@ -28,7 +29,7 @@ func NewBasic(r BasicRepo, t BasicgRPCAPI) *BasicUseCase {
 	uc := &BasicUseCase{
 		repo:     r,
 		gRPCAPI:  t,
-		tradeDay: tradeday.NewStockTradeDay(),
+		tradeDay: tradeday.NewTradeDay(),
 		cfg:      cfg,
 	}
 
@@ -52,6 +53,8 @@ func NewBasic(r BasicRepo, t BasicgRPCAPI) *BasicUseCase {
 	}
 
 	uc.fillBasicInfo()
+
+	bus.SubscribeTopic(event.TopicQueryMonitorFutureCode, uc.pubMonitorFutureCode)
 	return uc
 }
 
@@ -122,13 +125,18 @@ func (uc *BasicUseCase) GetAllSinopacFutureAndUpdateRepo(ctx context.Context) ([
 			return []*entity.Future{}, pErr
 		}
 
+		dDate, e := time.ParseInLocation(global.ShortSlashTimeLayout, v.GetDeliveryDate(), time.Local)
+		if e != nil {
+			return []*entity.Future{}, err
+		}
+
 		future := &entity.Future{
 			Code:           v.GetCode(),
 			Symbol:         v.GetSymbol(),
 			Name:           v.GetName(),
 			Category:       v.GetCategory(),
 			DeliveryMonth:  v.GetDeliveryMonth(),
-			DeliveryDate:   v.GetDeliveryDate(),
+			DeliveryDate:   dDate.Add(810 * time.Minute),
 			UnderlyingKind: v.GetUnderlyingKind(),
 			Unit:           v.GetUnit(),
 			LimitUp:        v.GetLimitUp(),
@@ -174,7 +182,7 @@ func (uc *BasicUseCase) importCalendarDate(ctx context.Context) error {
 }
 
 func (uc *BasicUseCase) fillBasicInfo() {
-	tradeDay := uc.tradeDay.DecideStockTradeDay()
+	tradeDay := uc.tradeDay.GetStockTradeDay().TradeDay
 	openTime := 9 * time.Hour
 	lastTradeDayArr := uc.tradeDay.GetLastNTradeDayByDate(2, tradeDay)
 
@@ -204,4 +212,22 @@ func (uc *BasicUseCase) fillBasicInfo() {
 	}
 
 	cc.SetBasicInfo(basic)
+}
+
+func (uc *BasicUseCase) pubMonitorFutureCode() {
+	futures, err := uc.repo.QueryAllMXFFuture(context.Background())
+	if err != nil {
+		log.Panic(err)
+	}
+
+	for _, v := range futures {
+		if v.Code == "MXFR1" || v.Code == "MXFR2" {
+			continue
+		}
+
+		if time.Now().Before(v.DeliveryDate) {
+			bus.PublishTopicEvent(event.TopicMonitorFutureCode, v)
+			return
+		}
+	}
 }

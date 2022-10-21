@@ -9,8 +9,9 @@ import (
 	"tmt/cmd/config"
 	"tmt/global"
 	"tmt/internal/entity"
-	"tmt/internal/usecase/events"
+	"tmt/internal/usecase/modules/event"
 	"tmt/internal/usecase/modules/quota"
+	"tmt/internal/usecase/modules/tradeday"
 )
 
 // OrderUseCase -.
@@ -18,50 +19,48 @@ type OrderUseCase struct {
 	gRPCAPI OrdergRPCAPI
 	repo    OrderRepo
 
-	basicInfo            entity.BasicInfo
 	quota                *quota.Quota
 	simTrade             bool
 	placeOrderLock       sync.Mutex
 	placeFutureOrderLock sync.Mutex
 
-	futureTradeDay time.Time
+	stockTradeDay  tradeday.TradePeriod
+	futureTradeDay tradeday.TradePeriod
 }
 
 // NewOrder -.
 func NewOrder(t OrdergRPCAPI, r OrderRepo) *OrderUseCase {
 	cfg := config.GetConfig()
-	futureTradeDay, err := time.ParseInLocation(global.ShortTimeLayout, time.Now().Format(global.ShortTimeLayout), time.Local)
-	if err != nil {
-		log.Panic(err)
-	}
+	tradeDay := tradeday.NewTradeDay()
 
 	uc := &OrderUseCase{
-		gRPCAPI:        t,
-		repo:           r,
-		quota:          quota.NewQuota(cfg.Quota),
-		simTrade:       cfg.Simulation,
-		placeOrderLock: sync.Mutex{},
-		basicInfo:      *cc.GetBasicInfo(),
-		futureTradeDay: futureTradeDay,
+		simTrade: cfg.Simulation,
+
+		gRPCAPI: t,
+		repo:    r,
+		quota:   quota.NewQuota(cfg.Quota),
+
+		stockTradeDay:  tradeDay.GetStockTradeDay(),
+		futureTradeDay: tradeDay.GetFutureTradeDay(),
 	}
 
-	bus.SubscribeTopic(events.TopicPlaceOrder, uc.placeOrder)
-	bus.SubscribeTopic(events.TopicCancelOrder, uc.cancelOrder)
-	bus.SubscribeTopic(events.TopicInsertOrUpdateOrder, uc.updateCacheAndInsertDB)
+	bus.SubscribeTopic(event.TopicPlaceOrder, uc.placeOrder)
+	bus.SubscribeTopic(event.TopicCancelOrder, uc.cancelOrder)
+	bus.SubscribeTopic(event.TopicInsertOrUpdateOrder, uc.updateCacheAndInsertDB)
 
-	bus.SubscribeTopic(events.TopicPlaceFutureOrder, uc.placeFutureOrder)
-	bus.SubscribeTopic(events.TopicCancelFutureOrder, uc.cancelFutureOrder)
-	bus.SubscribeTopic(events.TopicInsertOrUpdateFutureOrder, uc.updateCacheAndInsertFutureDB)
+	bus.SubscribeTopic(event.TopicPlaceFutureOrder, uc.placeFutureOrder)
+	bus.SubscribeTopic(event.TopicCancelFutureOrder, uc.cancelFutureOrder)
+	bus.SubscribeTopic(event.TopicInsertOrUpdateFutureOrder, uc.updateCacheAndInsertFutureDB)
 
 	go func() {
 		for range time.NewTicker(20 * time.Second).C {
-			stockOrders, err := uc.repo.QueryAllStockOrderByDate(context.Background(), uc.basicInfo.TradeDay)
+			stockOrders, err := uc.repo.QueryAllStockOrderByDate(context.Background(), uc.stockTradeDay.ToStartEndArray())
 			if err != nil {
 				log.Panic(err)
 			}
 			uc.calculateStockTradeBalance(stockOrders)
 
-			futureOrders, err := uc.repo.QueryAllFutureOrderByDate(context.Background(), uc.futureTradeDay)
+			futureOrders, err := uc.repo.QueryAllFutureOrderByDate(context.Background(), uc.futureTradeDay.ToStartEndArray())
 			if err != nil {
 				log.Panic(err)
 			}
@@ -383,9 +382,9 @@ func (uc *OrderUseCase) calculateFutureTradeBalance(allOrders []*entity.FutureOr
 		switch v.Action {
 		case entity.ActionBuy:
 			tradeCount++
-			forwardBalance -= 50*int64(v.Price) + 15 + 30
+			forwardBalance -= uc.quota.GetMXFBuyCost(v.Price, v.Quantity)
 		case entity.ActionSell:
-			forwardBalance += 50*int64(v.Price) - 15 - 30
+			forwardBalance += uc.quota.GetMXFSellCost(v.Price, v.Quantity)
 		}
 	}
 
@@ -393,14 +392,14 @@ func (uc *OrderUseCase) calculateFutureTradeBalance(allOrders []*entity.FutureOr
 		switch v.Action {
 		case entity.ActionSellFirst:
 			tradeCount++
-			revereBalance += 50*int64(v.Price) - 15 - 30
+			revereBalance += uc.quota.GetMXFSellCost(v.Price, v.Quantity)
 		case entity.ActionBuyLater:
-			revereBalance -= 50*int64(v.Price) + 15 + 30
+			revereBalance -= uc.quota.GetMXFBuyCost(v.Price, v.Quantity)
 		}
 	}
 
 	tmp := &entity.TradeBalance{
-		TradeDay:   uc.futureTradeDay,
+		TradeDay:   uc.futureTradeDay.TradeDay,
 		TradeCount: tradeCount,
 		Forward:    forwardBalance,
 		Reverse:    revereBalance,

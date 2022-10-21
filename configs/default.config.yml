@@ -34,19 +34,15 @@ future_trade_switch:
     trade_out_wait_time: 20 # unit: seccond
     cancel_wait_time: 30 # unit: seccond
     trade_time_range:
-        - start_time: 08:45:00 # HH:MM:SS
-          duration: 260 # duration: minute
-        - start_time: 15:00:00 # HH:MM:SS
-          duration: 780 # duration: minute
+        first_part_duration: 780 # duration: minute 04:00:00
+        second_part_duration: 260 # duration: minute 13:05:00
 
 quota:
-    trade_quota: 1000000
-    trade_tax_ratio: 0.0015
-    trade_fee_ratio: 0.001425
-    fee_discount: 0.28
+    stock_trade_quota: 1000000
+    stock_fee_discount: 0.28
+    future_trade_fee: 20
 
 target_cond:
-    monitor_future_code: MXFJ2
     real_time_rank: 20
     black_category:
         - 17
@@ -78,4 +74,3 @@ future_analyze:
     tick_analyze_period: 10000 # unit: millisecond
     all_out_in_ratio: 75 # unit: %
     all_in_out_ratio: 75 # unit: %
-    rsi_min_count: 35 # unit: times

@@ -2,15 +2,15 @@ package usecase
 
 import (
 	"context"
-	"fmt"
 	"sort"
 	"sync"
 	"time"
 
 	"tmt/cmd/config"
-	"tmt/global"
 	"tmt/internal/entity"
-	"tmt/internal/usecase/events"
+	"tmt/internal/usecase/modules/event"
+	"tmt/internal/usecase/modules/target"
+	"tmt/internal/usecase/modules/tradeday"
 	"tmt/internal/usecase/modules/trader"
 )
 
@@ -27,35 +27,36 @@ type StreamUseCase struct {
 	stockAnalyzeCfg  config.StockAnalyze
 	futureAnalyzeCfg config.FutureAnalyze
 
-	targetFilter *TargetFilter
+	targetFilter *target.Filter
+	tradeDay     *tradeday.TradeDay
 
 	tradeInSwitch       bool
 	futureTradeInSwitch bool
-
-	// allowForward bool
-	// allowReverse bool
 }
 
 // NewStream -.
 func NewStream(r StreamRepo, g StreamgRPCAPI, t StreamRabbit) *StreamUseCase {
 	cfg := config.GetConfig()
-	basic := *cc.GetBasicInfo()
-	t.FillAllBasic(basic.AllStocks, basic.AllFutures)
-
 	uc := &StreamUseCase{
-		repo:                 r,
-		rabbit:               t,
-		grpcapi:              g,
+		repo:    r,
+		rabbit:  t,
+		grpcapi: g,
+
 		tradeSwitchCfg:       cfg.TradeSwitch,
 		futureTradeSwitchCfg: cfg.FutureTradeSwitch,
-		stockAnalyzeCfg:      cfg.StockAnalyze,
-		futureAnalyzeCfg:     cfg.FutureAnalyze,
-		basic:                basic,
-		targetFilter:         NewTargetFilter(cfg.TargetCond),
+
+		stockAnalyzeCfg:  cfg.StockAnalyze,
+		futureAnalyzeCfg: cfg.FutureAnalyze,
+
+		basic:        *cc.GetBasicInfo(),
+		targetFilter: target.NewFilter(cfg.TargetCond),
+		tradeDay:     tradeday.NewTradeDay(),
 	}
+	t.FillAllBasic(uc.basic.AllStocks, uc.basic.AllFutures)
 
 	go uc.checkTradeSwitch()
 	go uc.checkFutureTradeSwitch()
+
 	go uc.ReceiveEvent(context.Background())
 	go uc.ReceiveOrderStatus(context.Background())
 
@@ -70,8 +71,8 @@ func NewStream(r StreamRepo, g StreamgRPCAPI, t StreamRabbit) *StreamUseCase {
 		}
 	}()
 
-	bus.SubscribeTopic(events.TopicStreamTargets, uc.ReceiveStreamData)
-	bus.SubscribeTopic(events.TopicStreamFutureTargets, uc.ReceiveFutureStreamData)
+	bus.SubscribeTopic(event.TopicStreamTargets, uc.ReceiveStreamData)
+	bus.SubscribeTopic(event.TopicStreamFutureTargets, uc.ReceiveFutureStreamData)
 	return uc
 }
 
@@ -102,11 +103,11 @@ func (uc *StreamUseCase) ReceiveOrderStatus(ctx context.Context) {
 			switch t := order.(type) {
 			case *entity.StockOrder:
 				if cc.GetOrderByOrderID(t.OrderID) != nil {
-					bus.PublishTopicEvent(events.TopicInsertOrUpdateOrder, t)
+					bus.PublishTopicEvent(event.TopicInsertOrUpdateOrder, t)
 				}
 			case *entity.FutureOrder:
 				if cc.GetFutureOrderByOrderID(t.OrderID) != nil {
-					bus.PublishTopicEvent(events.TopicInsertOrUpdateFutureOrder, t)
+					bus.PublishTopicEvent(event.TopicInsertOrUpdateFutureOrder, t)
 				}
 			}
 		}
@@ -116,7 +117,7 @@ func (uc *StreamUseCase) ReceiveOrderStatus(ctx context.Context) {
 
 // ReceiveStreamData - receive target data, start goroutine to trade
 func (uc *StreamUseCase) ReceiveStreamData(ctx context.Context, targetArr []*entity.Target) {
-	agentChan := make(chan *TradeAgent)
+	agentChan := make(chan *trader.TradeAgent)
 	targetMap := make(map[string]*entity.Target)
 	mutex := sync.RWMutex{}
 
@@ -129,14 +130,14 @@ func (uc *StreamUseCase) ReceiveStreamData(ctx context.Context, targetArr []*ent
 			go uc.tradingRoom(agent)
 
 			// send tick, bidask to trade room's channel
-			go uc.rabbit.TickConsumer(agent.stockNum, agent.tickChan)
-			go uc.rabbit.StockBidAskConsumer(agent.stockNum, agent.bidAskChan)
+			go uc.rabbit.TickConsumer(agent.GetStockNum(), agent.GetTickChan())
+			go uc.rabbit.StockBidAskConsumer(agent.GetStockNum(), agent.GetBidAskChan())
 
 			mutex.RLock()
-			target := targetMap[agent.stockNum]
+			target := targetMap[agent.GetStockNum()]
 			mutex.RUnlock()
 
-			bus.PublishTopicEvent(events.TopicSubscribeTickTargets, []*entity.Target{target})
+			bus.PublishTopicEvent(event.TopicSubscribeTickTargets, []*entity.Target{target})
 		}
 	}()
 
@@ -150,7 +151,7 @@ func (uc *StreamUseCase) ReceiveStreamData(ctx context.Context, targetArr []*ent
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			agent := NewAgent(target.StockNum, uc.tradeSwitchCfg)
+			agent := trader.NewAgent(target.StockNum, uc.tradeSwitchCfg)
 			agentChan <- agent
 		}()
 	}
@@ -158,18 +159,17 @@ func (uc *StreamUseCase) ReceiveStreamData(ctx context.Context, targetArr []*ent
 	close(agentChan)
 }
 
-func (uc *StreamUseCase) tradingRoom(agent *TradeAgent) {
+func (uc *StreamUseCase) tradingRoom(agent *trader.TradeAgent) {
 	go func() {
 		for {
-			agent.lastTick = <-agent.tickChan
-			agent.tickArr = append(agent.tickArr, agent.lastTick)
-			log.Debugf("%s tick time delay: %s", agent.stockNum, time.Since(agent.lastTick.TickTime).String())
+			agent.ReceiveTick(<-agent.GetTickChan())
+			// log.Debugf("%s tick time delay: %s", agent.stockNum, time.Since(agent.lastTick.TickTime).String())
 
-			if agent.waitingOrder != nil || agent.analyzeTickTime.IsZero() || !agent.openPass {
+			if !agent.IsReady() {
 				continue
 			}
 
-			order := agent.generateOrder(uc.stockAnalyzeCfg)
+			order := agent.GenerateOrder(uc.stockAnalyzeCfg)
 			if order == nil {
 				continue
 			}
@@ -180,40 +180,29 @@ func (uc *StreamUseCase) tradingRoom(agent *TradeAgent) {
 
 	go func() {
 		for {
-			agent.lastBidAsk = <-agent.bidAskChan
-			log.Debugf("%s bidask time delay: %s", agent.stockNum, time.Since(agent.lastBidAsk.BidAskTime).String())
+			agent.ReceiveBidAsk(<-agent.GetBidAskChan())
+			// log.Debugf("%s bidask time delay: %s", agent.stockNum, time.Since(agent.lastBidAsk.BidAskTime).String())
 		}
 	}()
 }
 
-func (uc *StreamUseCase) placeOrder(agent *TradeAgent, order *entity.StockOrder) {
-	// switch order.Action {
-	// case entity.ActionBuy:
-	// 	if !uc.allowForward {
-	// 		return
-	// 	}
-	// case entity.ActionSellFirst:
-	// 	if !uc.allowReverse {
-	// 		return
-	// 	}
-	// }
-
+func (uc *StreamUseCase) placeOrder(agent *trader.TradeAgent, order *entity.StockOrder) {
 	if order.Price == 0 {
 		log.Errorf("%s Order price is 0", order.StockNum)
 		return
 	}
 
-	agent.waitingOrder = order
+	agent.WaitingOrder(order)
 
 	// if out of trade in time, return
 	if !uc.tradeInSwitch && (order.Action == entity.ActionBuy || order.Action == entity.ActionSellFirst) {
 		// avoid stuck in the market
-		agent.waitingOrder = nil
+		agent.CancelWaitingOrder()
 		return
 	}
 
-	bus.PublishTopicEvent(events.TopicPlaceOrder, order)
-	go agent.checkPlaceOrderStatus(order)
+	bus.PublishTopicEvent(event.TopicPlaceOrder, order)
+	go agent.CheckPlaceOrderStatus(order)
 }
 
 func (uc *StreamUseCase) checkTradeSwitch() {
@@ -274,7 +263,7 @@ func (uc *StreamUseCase) realTimeAddTargets() error {
 	sort.Slice(data, func(i, j int) bool {
 		return data[i].GetTotalVolume() > data[j].GetTotalVolume()
 	})
-	data = data[:uc.targetFilter.realTimeRank]
+	data = data[:uc.targetFilter.RealTimeRank]
 
 	currentTargets := cc.GetTargets()
 	targetsMap := make(map[string]*entity.Target)
@@ -289,7 +278,7 @@ func (uc *StreamUseCase) realTimeAddTargets() error {
 			continue
 		}
 
-		if !uc.targetFilter.isTarget(stock, d.GetClose()) {
+		if !uc.targetFilter.IsTarget(stock, d.GetClose()) {
 			continue
 		}
 
@@ -305,7 +294,7 @@ func (uc *StreamUseCase) realTimeAddTargets() error {
 	}
 
 	if len(newTargets) != 0 {
-		bus.PublishTopicEvent(events.TopicNewTargets, newTargets)
+		bus.PublishTopicEvent(event.TopicNewTargets, newTargets)
 	}
 	return nil
 }
@@ -371,17 +360,16 @@ func (uc *StreamUseCase) DeleteFutureRealTimeConnection(timestamp int64) {
 
 // ReceiveFutureStreamData -.
 func (uc *StreamUseCase) ReceiveFutureStreamData(ctx context.Context, code string) {
-	agent := trader.NewFutureAgent(code, uc.futureTradeSwitchCfg, uc.futureAnalyzeCfg, bus)
+	agent := trader.NewFutureTrader(code, uc.futureTradeSwitchCfg, uc.futureAnalyzeCfg)
 
-	// go uc.checkFirstFutureTick(agent)
 	go uc.futureTradingRoom(agent)
 	go uc.rabbit.FutureTickConsumer(code, agent.GetTickChan())
 	go uc.rabbit.FutureBidAskConsumer(code, agent.GetBidAskChan())
 
-	bus.PublishTopicEvent(events.TopicSubscribeFutureTickTargets, code)
+	bus.PublishTopicEvent(event.TopicSubscribeFutureTickTargets, code)
 }
 
-func (uc *StreamUseCase) futureTradingRoom(agent *trader.FutureTradeAgent) {
+func (uc *StreamUseCase) futureTradingRoom(agent *trader.FutureTrader) {
 	tickChan := agent.GetTickChan()
 	bidAskChan := agent.GetBidAskChan()
 
@@ -392,16 +380,23 @@ func (uc *StreamUseCase) futureTradingRoom(agent *trader.FutureTradeAgent) {
 	}()
 
 	for {
-		tick := agent.ReceiveTick(<-tickChan)
-		bidAsk := agent.GetLastBidAsk()
+		_ = agent.ReceiveTick(<-tickChan)
+		// bidAsk := agent.GetLastBidAsk()
 
-		// log.Debugf("TickTime: %s, Code: %s, Close: %.0f, TickType: %d, Volume: %3d, PriceChg: %.0f", tick.TickTime.Format(global.LongTimeLayout), tick.Code, tick.Close, tick.TickType, tick.Volume, tick.PriceChg)
-		log.Debugf("Code: %s, Close: %.0f, Volume: %3d, PriceChg: %.0f", bidAsk.Code, tick.Close, tick.Volume, tick.PriceChg)
-		log.Debugf("%2d %.0f %.0f %2d", bidAsk.BidVolume1, bidAsk.BidPrice1, bidAsk.AskPrice1, bidAsk.AskVolume1)
-		log.Debugf("%2d %.0f %.0f %2d", bidAsk.BidVolume2, bidAsk.BidPrice2, bidAsk.AskPrice2, bidAsk.AskVolume2)
-		log.Debugf("%2d %.0f %.0f %2d", bidAsk.BidVolume3, bidAsk.BidPrice3, bidAsk.AskPrice3, bidAsk.AskVolume3)
-		log.Debugf("%2d %.0f %.0f %2d", bidAsk.BidVolume4, bidAsk.BidPrice4, bidAsk.AskPrice4, bidAsk.AskVolume4)
-		log.Debugf("%2d %.0f %.0f %2d", bidAsk.BidVolume5, bidAsk.BidPrice5, bidAsk.AskPrice5, bidAsk.AskVolume5)
+		// t := table.NewWriter()
+		// t.SetOutputMirror(os.Stdout)
+		// t.AppendHeader(table.Row{"Code", bidAsk.Code, tick.Volume, tick.PriceChg, "", "Avg-Volume", "Out-In-Ratio"})
+		// t.AppendSeparator()
+
+		// tmp := []table.Row{}
+		// tmp = append(tmp, table.Row{bidAsk.BidVolume1, bidAsk.BidPrice1, bidAsk.AskPrice1, bidAsk.AskVolume1})
+		// tmp = append(tmp, table.Row{bidAsk.BidVolume2, bidAsk.BidPrice2, bidAsk.AskPrice2, bidAsk.AskVolume2})
+		// tmp = append(tmp, table.Row{bidAsk.BidVolume3, bidAsk.BidPrice3, bidAsk.AskPrice3, bidAsk.AskVolume3})
+		// tmp = append(tmp, table.Row{bidAsk.BidVolume4, bidAsk.BidPrice4, bidAsk.AskPrice4, bidAsk.AskVolume4})
+		// tmp = append(tmp, table.Row{bidAsk.BidVolume5, bidAsk.BidPrice5, bidAsk.AskPrice5, bidAsk.AskVolume5})
+		// t.AppendRows(tmp)
+		// t.AppendFooter(table.Row{"", "", "", "", "", agent.GetAvgVolume(), agent.GetOutInRatio()})
+		// t.Render()
 
 		if agent.IsWaiting() {
 			continue
@@ -441,7 +436,7 @@ func (uc *StreamUseCase) futureTradingRoom(agent *trader.FutureTradeAgent) {
 // 	}
 // }
 
-func (uc *StreamUseCase) placeFutureOrder(agent *trader.FutureTradeAgent, order *entity.FutureOrder) {
+func (uc *StreamUseCase) placeFutureOrder(agent *trader.FutureTrader, order *entity.FutureOrder) {
 	if order.Price == 0 {
 		log.Errorf("%s Future Order price is 0", order.Code)
 		return
@@ -456,7 +451,7 @@ func (uc *StreamUseCase) placeFutureOrder(agent *trader.FutureTradeAgent, order 
 		return
 	}
 
-	bus.PublishTopicEvent(events.TopicPlaceFutureOrder, order)
+	bus.PublishTopicEvent(event.TopicPlaceFutureOrder, order)
 	go agent.CheckPlaceOrderStatus(order)
 }
 
@@ -465,16 +460,20 @@ func (uc *StreamUseCase) checkFutureTradeSwitch() {
 		return
 	}
 
+	futureTradeDay := uc.tradeDay.GetFutureTradeDay()
+
+	timeRange := [][]time.Time{}
+	firstStart := futureTradeDay.StartTime
+	secondStart := futureTradeDay.EndTime.Add(-300 * time.Minute)
+
+	timeRange = append(timeRange, []time.Time{firstStart, firstStart.Add(time.Duration(uc.futureTradeSwitchCfg.TradeTimeRange.FirstPartDuration) * time.Minute)})
+	timeRange = append(timeRange, []time.Time{secondStart, secondStart.Add(time.Duration(uc.futureTradeSwitchCfg.TradeTimeRange.SecondPartDuration) * time.Minute)})
+
 	for range time.NewTicker(2500 * time.Millisecond).C {
-		now := time.Now()
 		var tempSwitch bool
-		for _, v := range uc.futureTradeSwitchCfg.TradeTimeRange {
-			start, err := time.ParseInLocation(global.LongTimeLayout, fmt.Sprintf("%s %s", now.Format(global.ShortTimeLayout), v.StartTime), time.Local)
-			if err != nil {
-				log.Panic(err)
-			}
-			end := start.Add(time.Duration(v.Duration) * time.Minute)
-			if now.After(start) && now.Before(end) {
+		now := time.Now()
+		for _, rangeTime := range timeRange {
+			if now.After(rangeTime[0]) && now.Before(rangeTime[1]) {
 				tempSwitch = true
 			}
 		}

@@ -1,5 +1,5 @@
-// Package events package events
-package events
+// Package event package event
+package event
 
 const (
 	// TopicNewTargets -.
@@ -30,4 +30,8 @@ const (
 	TopicCancelFutureOrder string = "cancel_future_order"
 	// TopicInsertOrUpdateFutureOrder -.
 	TopicInsertOrUpdateFutureOrder string = "insert_or_update_future_order"
+	// TopicQueryMonitorFutureCode -.
+	TopicQueryMonitorFutureCode string = "query_monitor_future_code"
+	// TopicMonitorFutureCode -.
+	TopicMonitorFutureCode string = "monitor_future_code"
 )

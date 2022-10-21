@@ -10,7 +10,7 @@ swag-v1: ### swag init
 	@echo 'package main' > ./tradebot.go && \
 	swag init -g internal/controller/http/v1/router.go && \
 	rm -rf ./tradebot.go && \
-	echo "" >> ./docs/swagger.json
+	echo "" >> ./docs/swagger.json && git add ./docs
 .PHONY: swag-v1
 
 run-dev: swag-v1 ### swag run

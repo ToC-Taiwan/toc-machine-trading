@@ -47,36 +47,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/analyze/simulate-historytick": {
-            "get": {
-                "description": "startSimulateHistoryTick",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "analyze"
-                ],
-                "summary": "startSimulateHistoryTick",
-                "operationId": "startSimulateHistoryTick",
-                "parameters": [
-                    {
-                        "type": "boolean",
-                        "description": "use_default",
-                        "name": "use_default",
-                        "in": "header",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    }
-                }
-            }
-        },
         "/basic/config": {
             "get": {
                 "description": "getAllConfig",
@@ -575,9 +545,6 @@ const docTemplate = `{
                 "max_hold_time": {
                     "type": "number"
                 },
-                "rsi_min_count": {
-                    "type": "integer"
-                },
                 "tick_analyze_period": {
                     "type": "number"
                 }
@@ -602,10 +569,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "trade_time_range": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/config.TradeTimeRange"
-                    }
+                    "$ref": "#/definitions/config.TradeTimeRange"
                 }
             }
         },
@@ -659,17 +623,14 @@ const docTemplate = `{
         "config.Quota": {
             "type": "object",
             "properties": {
-                "fee_discount": {
-                    "type": "number"
-                },
-                "trade_fee_ratio": {
-                    "type": "number"
-                },
-                "trade_quota": {
+                "future_trade_fee": {
                     "type": "integer"
                 },
-                "trade_tax_ratio": {
+                "stock_fee_discount": {
                     "type": "number"
+                },
+                "stock_trade_quota": {
+                    "type": "integer"
                 }
             }
         },
@@ -751,9 +712,6 @@ const docTemplate = `{
                 "limit_volume": {
                     "type": "integer"
                 },
-                "monitor_future_code": {
-                    "type": "string"
-                },
                 "price_limit": {
                     "type": "array",
                     "items": {
@@ -794,11 +752,11 @@ const docTemplate = `{
         "config.TradeTimeRange": {
             "type": "object",
             "properties": {
-                "duration": {
+                "first_part_duration": {
                     "type": "integer"
                 },
-                "start_time": {
-                    "type": "string"
+                "second_part_duration": {
+                    "type": "integer"
                 }
             }
         },
