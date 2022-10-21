@@ -9,7 +9,7 @@ import (
 	"tmt/cmd/config"
 	"tmt/global"
 	"tmt/internal/entity"
-	"tmt/internal/usecase/events"
+	"tmt/internal/usecase/modules/event"
 	"tmt/internal/usecase/modules/quota"
 	"tmt/internal/usecase/modules/tradeday"
 )
@@ -44,13 +44,13 @@ func NewOrder(t OrdergRPCAPI, r OrderRepo) *OrderUseCase {
 		futureTradeDay: tradeDay.GetFutureTradeDay(),
 	}
 
-	bus.SubscribeTopic(events.TopicPlaceOrder, uc.placeOrder)
-	bus.SubscribeTopic(events.TopicCancelOrder, uc.cancelOrder)
-	bus.SubscribeTopic(events.TopicInsertOrUpdateOrder, uc.updateCacheAndInsertDB)
+	bus.SubscribeTopic(event.TopicPlaceOrder, uc.placeOrder)
+	bus.SubscribeTopic(event.TopicCancelOrder, uc.cancelOrder)
+	bus.SubscribeTopic(event.TopicInsertOrUpdateOrder, uc.updateCacheAndInsertDB)
 
-	bus.SubscribeTopic(events.TopicPlaceFutureOrder, uc.placeFutureOrder)
-	bus.SubscribeTopic(events.TopicCancelFutureOrder, uc.cancelFutureOrder)
-	bus.SubscribeTopic(events.TopicInsertOrUpdateFutureOrder, uc.updateCacheAndInsertFutureDB)
+	bus.SubscribeTopic(event.TopicPlaceFutureOrder, uc.placeFutureOrder)
+	bus.SubscribeTopic(event.TopicCancelFutureOrder, uc.cancelFutureOrder)
+	bus.SubscribeTopic(event.TopicInsertOrUpdateFutureOrder, uc.updateCacheAndInsertFutureDB)
 
 	go func() {
 		for range time.NewTicker(20 * time.Second).C {

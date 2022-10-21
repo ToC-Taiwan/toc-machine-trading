@@ -7,7 +7,7 @@ import (
 	"tmt/cmd/config"
 	"tmt/global"
 	"tmt/internal/entity"
-	"tmt/internal/usecase/events"
+	"tmt/internal/usecase/modules/event"
 	"tmt/internal/usecase/modules/tradeday"
 )
 
@@ -54,7 +54,7 @@ func NewBasic(r BasicRepo, t BasicgRPCAPI) *BasicUseCase {
 
 	uc.fillBasicInfo()
 
-	bus.SubscribeTopic(events.TopicQueryMonitorFutureCode, uc.pubMonitorFutureCode)
+	bus.SubscribeTopic(event.TopicQueryMonitorFutureCode, uc.pubMonitorFutureCode)
 	return uc
 }
 
@@ -226,7 +226,7 @@ func (uc *BasicUseCase) pubMonitorFutureCode() {
 		}
 
 		if time.Now().Before(v.DeliveryDate) {
-			bus.PublishTopicEvent(events.TopicMonitorFutureCode, v)
+			bus.PublishTopicEvent(event.TopicMonitorFutureCode, v)
 			return
 		}
 	}

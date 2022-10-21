@@ -7,7 +7,7 @@ import (
 
 	"tmt/cmd/config"
 	"tmt/internal/entity"
-	"tmt/internal/usecase/events"
+	"tmt/internal/usecase/modules/event"
 	"tmt/pkg/logger"
 	"tmt/pkg/utils"
 
@@ -245,7 +245,7 @@ func (o *FutureTrader) CheckPlaceOrderStatus(order *entity.FutureOrder) {
 
 func (o *FutureTrader) cancelOrder(order *entity.FutureOrder) {
 	order.TradeTime = time.Time{}
-	bus.PublishTopicEvent(events.TopicCancelFutureOrder, order)
+	bus.PublishTopicEvent(event.TopicCancelFutureOrder, order)
 
 	go func() {
 		for {

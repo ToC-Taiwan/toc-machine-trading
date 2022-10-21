@@ -8,7 +8,7 @@ import (
 
 	"tmt/cmd/config"
 	"tmt/internal/entity"
-	"tmt/internal/usecase/events"
+	"tmt/internal/usecase/modules/event"
 	"tmt/internal/usecase/modules/target"
 	"tmt/internal/usecase/modules/tradeday"
 	"tmt/internal/usecase/modules/trader"
@@ -71,8 +71,8 @@ func NewStream(r StreamRepo, g StreamgRPCAPI, t StreamRabbit) *StreamUseCase {
 		}
 	}()
 
-	bus.SubscribeTopic(events.TopicStreamTargets, uc.ReceiveStreamData)
-	bus.SubscribeTopic(events.TopicStreamFutureTargets, uc.ReceiveFutureStreamData)
+	bus.SubscribeTopic(event.TopicStreamTargets, uc.ReceiveStreamData)
+	bus.SubscribeTopic(event.TopicStreamFutureTargets, uc.ReceiveFutureStreamData)
 	return uc
 }
 
@@ -103,11 +103,11 @@ func (uc *StreamUseCase) ReceiveOrderStatus(ctx context.Context) {
 			switch t := order.(type) {
 			case *entity.StockOrder:
 				if cc.GetOrderByOrderID(t.OrderID) != nil {
-					bus.PublishTopicEvent(events.TopicInsertOrUpdateOrder, t)
+					bus.PublishTopicEvent(event.TopicInsertOrUpdateOrder, t)
 				}
 			case *entity.FutureOrder:
 				if cc.GetFutureOrderByOrderID(t.OrderID) != nil {
-					bus.PublishTopicEvent(events.TopicInsertOrUpdateFutureOrder, t)
+					bus.PublishTopicEvent(event.TopicInsertOrUpdateFutureOrder, t)
 				}
 			}
 		}
@@ -137,7 +137,7 @@ func (uc *StreamUseCase) ReceiveStreamData(ctx context.Context, targetArr []*ent
 			target := targetMap[agent.GetStockNum()]
 			mutex.RUnlock()
 
-			bus.PublishTopicEvent(events.TopicSubscribeTickTargets, []*entity.Target{target})
+			bus.PublishTopicEvent(event.TopicSubscribeTickTargets, []*entity.Target{target})
 		}
 	}()
 
@@ -201,7 +201,7 @@ func (uc *StreamUseCase) placeOrder(agent *trader.TradeAgent, order *entity.Stoc
 		return
 	}
 
-	bus.PublishTopicEvent(events.TopicPlaceOrder, order)
+	bus.PublishTopicEvent(event.TopicPlaceOrder, order)
 	go agent.CheckPlaceOrderStatus(order)
 }
 
@@ -294,7 +294,7 @@ func (uc *StreamUseCase) realTimeAddTargets() error {
 	}
 
 	if len(newTargets) != 0 {
-		bus.PublishTopicEvent(events.TopicNewTargets, newTargets)
+		bus.PublishTopicEvent(event.TopicNewTargets, newTargets)
 	}
 	return nil
 }
@@ -366,7 +366,7 @@ func (uc *StreamUseCase) ReceiveFutureStreamData(ctx context.Context, code strin
 	go uc.rabbit.FutureTickConsumer(code, agent.GetTickChan())
 	go uc.rabbit.FutureBidAskConsumer(code, agent.GetBidAskChan())
 
-	bus.PublishTopicEvent(events.TopicSubscribeFutureTickTargets, code)
+	bus.PublishTopicEvent(event.TopicSubscribeFutureTickTargets, code)
 }
 
 func (uc *StreamUseCase) futureTradingRoom(agent *trader.FutureTrader) {
@@ -451,7 +451,7 @@ func (uc *StreamUseCase) placeFutureOrder(agent *trader.FutureTrader, order *ent
 		return
 	}
 
-	bus.PublishTopicEvent(events.TopicPlaceFutureOrder, order)
+	bus.PublishTopicEvent(event.TopicPlaceFutureOrder, order)
 	go agent.CheckPlaceOrderStatus(order)
 }
 

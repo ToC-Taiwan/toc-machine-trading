@@ -10,7 +10,7 @@ import (
 	"tmt/cmd/config"
 	"tmt/global"
 	"tmt/internal/entity"
-	"tmt/internal/usecase/events"
+	"tmt/internal/usecase/modules/event"
 	"tmt/internal/usecase/modules/target"
 )
 
@@ -36,8 +36,8 @@ func NewTarget(r TargetRepo, t TargetgRPCAPI, s StreamgRPCAPI) *TargetUseCase {
 		waitMonitorFuture: make(chan struct{}),
 	}
 
-	bus.SubscribeTopic(events.TopicMonitorFutureCode, uc.fillMonitorFutureCode)
-	bus.PublishTopicEvent(events.TopicQueryMonitorFutureCode)
+	bus.SubscribeTopic(event.TopicMonitorFutureCode, uc.fillMonitorFutureCode)
+	bus.PublishTopicEvent(event.TopicQueryMonitorFutureCode)
 	<-uc.waitMonitorFuture
 
 	// unsubscriba all first
@@ -69,10 +69,10 @@ func NewTarget(r TargetRepo, t TargetgRPCAPI, s StreamgRPCAPI) *TargetUseCase {
 	uc.publishNewTargets(targetArr)
 
 	// sub events
-	bus.SubscribeTopic(events.TopicNewTargets, uc.publishNewTargets)
-	bus.SubscribeTopic(events.TopicSubscribeTickTargets, uc.SubscribeStockTick, uc.SubscribeStockBidAsk)
-	bus.SubscribeTopic(events.TopicUnSubscribeTickTargets, uc.UnSubscribeStockTick, uc.UnSubscribeStockBidAsk)
-	bus.SubscribeTopic(events.TopicSubscribeFutureTickTargets, uc.SubscribeFutureTick, uc.SubscribeFutureBidAsk)
+	bus.SubscribeTopic(event.TopicNewTargets, uc.publishNewTargets)
+	bus.SubscribeTopic(event.TopicSubscribeTickTargets, uc.SubscribeStockTick, uc.SubscribeStockBidAsk)
+	bus.SubscribeTopic(event.TopicUnSubscribeTickTargets, uc.UnSubscribeStockTick, uc.UnSubscribeStockBidAsk)
+	bus.SubscribeTopic(event.TopicSubscribeFutureTickTargets, uc.SubscribeFutureTick, uc.SubscribeFutureBidAsk)
 
 	return uc
 }
@@ -90,9 +90,9 @@ func (uc *TargetUseCase) publishNewTargets(targetArr []*entity.Target) {
 
 	cc.AppendTargets(targetArr)
 
-	bus.PublishTopicEvent(events.TopicFetchHistory, context.Background(), targetArr)
-	bus.PublishTopicEvent(events.TopicStreamTargets, context.Background(), targetArr)
-	bus.PublishTopicEvent(events.TopicStreamFutureTargets, context.Background(), uc.monitorFutureCode)
+	bus.PublishTopicEvent(event.TopicFetchHistory, context.Background(), targetArr)
+	bus.PublishTopicEvent(event.TopicStreamTargets, context.Background(), targetArr)
+	bus.PublishTopicEvent(event.TopicStreamFutureTargets, context.Background(), uc.monitorFutureCode)
 }
 
 // GetTargets - get targets from cache

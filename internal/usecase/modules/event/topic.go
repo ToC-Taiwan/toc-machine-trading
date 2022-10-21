@@ -1,5 +1,5 @@
-// Package events package events
-package events
+// Package event package event
+package event
 
 const (
 	// TopicNewTargets -.

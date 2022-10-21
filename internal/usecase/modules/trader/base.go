@@ -7,6 +7,6 @@ import (
 )
 
 var (
-	cc  = cache.NewCache()
+	cc  = cache.GetCache()
 	bus = eventbus.New()
 )

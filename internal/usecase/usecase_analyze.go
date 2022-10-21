@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"tmt/internal/entity"
-	"tmt/internal/usecase/events"
+	"tmt/internal/usecase/modules/event"
 	"tmt/internal/usecase/modules/tradeday"
 )
 
@@ -31,7 +31,7 @@ func NewAnalyze(r HistoryRepo) *AnalyzeUseCase {
 		tradeDay:         tradeday.NewTradeDay(),
 	}
 
-	bus.SubscribeTopic(events.TopicAnalyzeTargets, uc.AnalyzeAll)
+	bus.SubscribeTopic(event.TopicAnalyzeTargets, uc.AnalyzeAll)
 	return uc
 }
 
