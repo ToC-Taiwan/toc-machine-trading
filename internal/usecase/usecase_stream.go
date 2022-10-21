@@ -360,7 +360,7 @@ func (uc *StreamUseCase) DeleteFutureRealTimeConnection(timestamp int64) {
 
 // ReceiveFutureStreamData -.
 func (uc *StreamUseCase) ReceiveFutureStreamData(ctx context.Context, code string) {
-	agent := trader.NewFutureAgent(code, uc.futureTradeSwitchCfg, uc.futureAnalyzeCfg, bus)
+	agent := trader.NewFutureTrader(code, uc.futureTradeSwitchCfg, uc.futureAnalyzeCfg)
 
 	go uc.futureTradingRoom(agent)
 	go uc.rabbit.FutureTickConsumer(code, agent.GetTickChan())
@@ -369,7 +369,7 @@ func (uc *StreamUseCase) ReceiveFutureStreamData(ctx context.Context, code strin
 	bus.PublishTopicEvent(events.TopicSubscribeFutureTickTargets, code)
 }
 
-func (uc *StreamUseCase) futureTradingRoom(agent *trader.FutureTradeAgent) {
+func (uc *StreamUseCase) futureTradingRoom(agent *trader.FutureTrader) {
 	tickChan := agent.GetTickChan()
 	bidAskChan := agent.GetBidAskChan()
 
@@ -436,7 +436,7 @@ func (uc *StreamUseCase) futureTradingRoom(agent *trader.FutureTradeAgent) {
 // 	}
 // }
 
-func (uc *StreamUseCase) placeFutureOrder(agent *trader.FutureTradeAgent, order *entity.FutureOrder) {
+func (uc *StreamUseCase) placeFutureOrder(agent *trader.FutureTrader, order *entity.FutureOrder) {
 	if order.Price == 0 {
 		log.Errorf("%s Future Order price is 0", order.Code)
 		return

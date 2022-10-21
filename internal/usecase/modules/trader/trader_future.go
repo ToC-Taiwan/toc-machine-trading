@@ -8,7 +8,6 @@ import (
 	"tmt/cmd/config"
 	"tmt/internal/entity"
 	"tmt/internal/usecase/events"
-	"tmt/pkg/eventbus"
 	"tmt/pkg/logger"
 	"tmt/pkg/utils"
 
@@ -17,48 +16,50 @@ import (
 
 var log = logger.Get()
 
-// FutureTradeAgent -.
-type FutureTradeAgent struct {
+// FutureTrader -.
+type FutureTrader struct {
 	code          string
 	orderQuantity int64
+
 	analyzePeriod int
+
 	magnification float64
 	outInRation   float64
 	avgVolume     float64
-	orderMapLock  sync.RWMutex
-	bus           *eventbus.Bus
-	waitingOrder  *entity.FutureOrder
-	tickArr       RealTimeFutureTickArr
-	periodMap     map[int64]RealTimeFutureTickArr
-	orderMap      map[entity.OrderAction][]*entity.FutureOrder
-	tickChan      chan *entity.RealTimeFutureTick
-	bidAskChan    chan *entity.FutureRealTimeBidAsk
-	lastTick      *entity.RealTimeFutureTick
-	lastBidAsk    *entity.FutureRealTimeBidAsk
+
+	orderMapLock sync.RWMutex
+	orderMap     map[entity.OrderAction][]*entity.FutureOrder
+
+	waitingOrder *entity.FutureOrder
+
+	tickArr    RealTimeFutureTickArr
+	lastTick   *entity.RealTimeFutureTick
+	lastBidAsk *entity.FutureRealTimeBidAsk
+
+	tickChan   chan *entity.RealTimeFutureTick
+	bidAskChan chan *entity.FutureRealTimeBidAsk
 
 	tradeSwitch config.FutureTradeSwitch
 	analyzeCfg  config.FutureAnalyze
 }
 
-// NewFutureAgent -.
-func NewFutureAgent(code string, tradeSwitch config.FutureTradeSwitch, analyzeCfg config.FutureAnalyze, bus *eventbus.Bus) *FutureTradeAgent {
-	new := &FutureTradeAgent{
+// NewFutureTrader -.
+func NewFutureTrader(code string, tradeSwitch config.FutureTradeSwitch, analyzeCfg config.FutureAnalyze) *FutureTrader {
+	new := &FutureTrader{
 		code:          code,
 		analyzePeriod: 15,
 		orderQuantity: tradeSwitch.Quantity,
-		periodMap:     make(map[int64]RealTimeFutureTickArr),
 		orderMap:      make(map[entity.OrderAction][]*entity.FutureOrder),
 		tickChan:      make(chan *entity.RealTimeFutureTick),
 		bidAskChan:    make(chan *entity.FutureRealTimeBidAsk),
 		tradeSwitch:   tradeSwitch,
 		analyzeCfg:    analyzeCfg,
-		bus:           bus,
 	}
 	return new
 }
 
 // ReceiveTick -.
-func (o *FutureTradeAgent) ReceiveTick(tick *entity.RealTimeFutureTick) *entity.RealTimeFutureTick {
+func (o *FutureTrader) ReceiveTick(tick *entity.RealTimeFutureTick) *entity.RealTimeFutureTick {
 	o.lastTick = tick
 	for i, v := range o.tickArr {
 		if time.Since(v.TickTime) < time.Duration(o.analyzePeriod)*time.Second {
@@ -84,7 +85,7 @@ func (o *FutureTradeAgent) ReceiveTick(tick *entity.RealTimeFutureTick) *entity.
 }
 
 // GetLastBidAsk -.
-func (o *FutureTradeAgent) GetLastBidAsk() *entity.FutureRealTimeBidAsk {
+func (o *FutureTrader) GetLastBidAsk() *entity.FutureRealTimeBidAsk {
 	if o.lastBidAsk == nil {
 		return &entity.FutureRealTimeBidAsk{}
 	}
@@ -92,37 +93,37 @@ func (o *FutureTradeAgent) GetLastBidAsk() *entity.FutureRealTimeBidAsk {
 }
 
 // ReceiveBidAsk -.
-func (o *FutureTradeAgent) ReceiveBidAsk(bidAsk *entity.FutureRealTimeBidAsk) {
+func (o *FutureTrader) ReceiveBidAsk(bidAsk *entity.FutureRealTimeBidAsk) {
 	o.lastBidAsk = bidAsk
 }
 
 // GetTickChan -.
-func (o *FutureTradeAgent) GetTickChan() chan *entity.RealTimeFutureTick {
+func (o *FutureTrader) GetTickChan() chan *entity.RealTimeFutureTick {
 	return o.tickChan
 }
 
 // GetBidAskChan -.
-func (o *FutureTradeAgent) GetBidAskChan() chan *entity.FutureRealTimeBidAsk {
+func (o *FutureTrader) GetBidAskChan() chan *entity.FutureRealTimeBidAsk {
 	return o.bidAskChan
 }
 
 // WaitOrder -.
-func (o *FutureTradeAgent) WaitOrder(order *entity.FutureOrder) {
+func (o *FutureTrader) WaitOrder(order *entity.FutureOrder) {
 	o.waitingOrder = order
 }
 
 // CancelWaiting -.
-func (o *FutureTradeAgent) CancelWaiting() {
+func (o *FutureTrader) CancelWaiting() {
 	o.waitingOrder = nil
 }
 
 // IsWaiting -.
-func (o *FutureTradeAgent) IsWaiting() bool {
+func (o *FutureTrader) IsWaiting() bool {
 	return o.waitingOrder != nil
 }
 
 // GenerateOrder -.
-func (o *FutureTradeAgent) GenerateOrder() *entity.FutureOrder {
+func (o *FutureTrader) GenerateOrder() *entity.FutureOrder {
 	if postOrderAction, preOrder := o.checkNeededPost(); postOrderAction != entity.ActionNone {
 		return o.generateTradeOutOrder(postOrderAction, preOrder)
 	}
@@ -158,7 +159,7 @@ func (o *FutureTradeAgent) GenerateOrder() *entity.FutureOrder {
 }
 
 // GetAvgVolume -.
-func (o *FutureTradeAgent) GetAvgVolume() float64 {
+func (o *FutureTrader) GetAvgVolume() float64 {
 	if o.avgVolume == 0 {
 		return 0
 	}
@@ -166,11 +167,11 @@ func (o *FutureTradeAgent) GetAvgVolume() float64 {
 }
 
 // GetOutInRatio -.
-func (o *FutureTradeAgent) GetOutInRatio() float64 {
+func (o *FutureTrader) GetOutInRatio() float64 {
 	return utils.Round(o.outInRation, 2)
 }
 
-func (o *FutureTradeAgent) generateTradeOutOrder(postOrderAction entity.OrderAction, preOrder *entity.FutureOrder) *entity.FutureOrder {
+func (o *FutureTrader) generateTradeOutOrder(postOrderAction entity.OrderAction, preOrder *entity.FutureOrder) *entity.FutureOrder {
 	order := &entity.FutureOrder{
 		Code: o.code,
 		BaseOrder: entity.BaseOrder{
@@ -201,7 +202,7 @@ func (o *FutureTradeAgent) generateTradeOutOrder(postOrderAction entity.OrderAct
 }
 
 // CheckPlaceOrderStatus -.
-func (o *FutureTradeAgent) CheckPlaceOrderStatus(order *entity.FutureOrder) {
+func (o *FutureTrader) CheckPlaceOrderStatus(order *entity.FutureOrder) {
 	var timeout time.Duration
 	switch order.Action {
 	case entity.ActionBuy, entity.ActionSellFirst:
@@ -242,9 +243,9 @@ func (o *FutureTradeAgent) CheckPlaceOrderStatus(order *entity.FutureOrder) {
 	log.Error("check place order status raise unknown error")
 }
 
-func (o *FutureTradeAgent) cancelOrder(order *entity.FutureOrder) {
+func (o *FutureTrader) cancelOrder(order *entity.FutureOrder) {
 	order.TradeTime = time.Time{}
-	o.bus.PublishTopicEvent(events.TopicCancelFutureOrder, order)
+	bus.PublishTopicEvent(events.TopicCancelFutureOrder, order)
 
 	go func() {
 		for {
@@ -266,7 +267,7 @@ func (o *FutureTradeAgent) cancelOrder(order *entity.FutureOrder) {
 	}()
 }
 
-func (o *FutureTradeAgent) checkNeededPost() (entity.OrderAction, *entity.FutureOrder) {
+func (o *FutureTrader) checkNeededPost() (entity.OrderAction, *entity.FutureOrder) {
 	defer o.orderMapLock.RUnlock()
 	o.orderMapLock.RLock()
 
