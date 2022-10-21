@@ -29,9 +29,6 @@ type SimulateTradeAgent struct {
 
 	tradeSwitch  config.TradeSwitch
 	simulateDone bool
-
-	// allowForward bool
-	// allowReverse bool
 }
 
 // NewSimulateAgent -.

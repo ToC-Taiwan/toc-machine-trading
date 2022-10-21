@@ -74,4 +74,3 @@ future_analyze:
     tick_analyze_period: 10000 # unit: millisecond
     all_out_in_ratio: 75 # unit: %
     all_in_out_ratio: 75 # unit: %
-    rsi_min_count: 35 # unit: times

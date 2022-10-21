@@ -154,5 +154,4 @@ type FutureAnalyze struct {
 	AllOutInRatio     float64 `json:"all_out_in_ratio"    env-required:"true" yaml:"all_out_in_ratio"`
 	AllInOutRatio     float64 `json:"all_in_out_ratio"    env-required:"true" yaml:"all_in_out_ratio"`
 	TickAnalyzePeriod float64 `json:"tick_analyze_period" env-required:"true" yaml:"tick_analyze_period"`
-	RSIMinCount       int     `json:"rsi_min_count"       env-required:"true" yaml:"rsi_min_count"`
 }
