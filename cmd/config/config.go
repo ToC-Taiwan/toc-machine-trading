@@ -79,27 +79,6 @@ type RabbitMQ struct {
 	Attempts int    `json:"attempts"  env-required:"true" yaml:"attempts"`
 }
 
-// StockTradeSwitch -.
-type StockTradeSwitch struct {
-	AllowTrade       bool    `json:"allow_trade"         yaml:"allow_trade"`
-	HoldTimeFromOpen float64 `json:"hold_time_from_open" env-required:"true" yaml:"hold_time_from_open"`
-	TotalOpenTime    float64 `json:"total_open_time"     env-required:"true" yaml:"total_open_time"`
-	TradeInEndTime   float64 `json:"trade_in_end_time"   env-required:"true" yaml:"trade_in_end_time"`
-	TradeInWaitTime  int64   `json:"trade_in_wait_time"  env-required:"true" yaml:"trade_in_wait_time"`
-	TradeOutWaitTime int64   `json:"trade_out_wait_time" env-required:"true" yaml:"trade_out_wait_time"`
-	CancelWaitTime   int64   `json:"cancel_wait_time"    env-required:"true" yaml:"cancel_wait_time"`
-}
-
-// FutureTradeSwitch -.
-type FutureTradeSwitch struct {
-	AllowTrade       bool           `json:"allow_trade"         yaml:"allow_trade"`
-	Quantity         int64          `json:"quantity"            env-required:"true" yaml:"quantity"`
-	TradeInWaitTime  int64          `json:"trade_in_wait_time"  env-required:"true" yaml:"trade_in_wait_time"`
-	TradeOutWaitTime int64          `json:"trade_out_wait_time" env-required:"true" yaml:"trade_out_wait_time"`
-	CancelWaitTime   int64          `json:"cancel_wait_time"    env-required:"true" yaml:"cancel_wait_time"`
-	TradeTimeRange   TradeTimeRange `json:"trade_time_range"    env-required:"true" yaml:"trade_time_range"`
-}
-
 // TradeTimeRange -.
 type TradeTimeRange struct {
 	FirstPartDuration  int64 `json:"first_part_duration"  env-required:"true" yaml:"first_part_duration"`
@@ -135,6 +114,17 @@ type PriceLimit struct {
 	High float64 `json:"high" env-required:"true" yaml:"high"`
 }
 
+// StockTradeSwitch -.
+type StockTradeSwitch struct {
+	AllowTrade       bool    `json:"allow_trade"         yaml:"allow_trade"`
+	HoldTimeFromOpen float64 `json:"hold_time_from_open" env-required:"true" yaml:"hold_time_from_open"`
+	TotalOpenTime    float64 `json:"total_open_time"     env-required:"true" yaml:"total_open_time"`
+	TradeInEndTime   float64 `json:"trade_in_end_time"   env-required:"true" yaml:"trade_in_end_time"`
+	TradeInWaitTime  int64   `json:"trade_in_wait_time"  env-required:"true" yaml:"trade_in_wait_time"`
+	TradeOutWaitTime int64   `json:"trade_out_wait_time" env-required:"true" yaml:"trade_out_wait_time"`
+	CancelWaitTime   int64   `json:"cancel_wait_time"    env-required:"true" yaml:"cancel_wait_time"`
+}
+
 // StockAnalyze -.
 type StockAnalyze struct {
 	MaxHoldTime          float64 `json:"max_hold_time"           env-required:"true" yaml:"max_hold_time"`
@@ -146,6 +136,16 @@ type StockAnalyze struct {
 	TickAnalyzePeriod    float64 `json:"tick_analyze_period"     env-required:"true" yaml:"tick_analyze_period"`
 	RSIMinCount          int     `json:"rsi_min_count"           env-required:"true" yaml:"rsi_min_count"`
 	MAPeriod             int64   `json:"ma_period"               env-required:"true" yaml:"ma_period"`
+}
+
+// FutureTradeSwitch -.
+type FutureTradeSwitch struct {
+	AllowTrade       bool           `json:"allow_trade"         yaml:"allow_trade"`
+	Quantity         int64          `json:"quantity"            env-required:"true" yaml:"quantity"`
+	TradeInWaitTime  int64          `json:"trade_in_wait_time"  env-required:"true" yaml:"trade_in_wait_time"`
+	TradeOutWaitTime int64          `json:"trade_out_wait_time" env-required:"true" yaml:"trade_out_wait_time"`
+	CancelWaitTime   int64          `json:"cancel_wait_time"    env-required:"true" yaml:"cancel_wait_time"`
+	TradeTimeRange   TradeTimeRange `json:"trade_time_range"    env-required:"true" yaml:"trade_time_range"`
 }
 
 // FutureAnalyze -.
