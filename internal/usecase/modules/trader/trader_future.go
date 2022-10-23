@@ -8,13 +8,9 @@ import (
 	"tmt/cmd/config"
 	"tmt/internal/entity"
 	"tmt/internal/usecase/modules/event"
-	"tmt/pkg/logger"
-	"tmt/pkg/utils"
 
 	"github.com/google/uuid"
 )
-
-var log = logger.Get()
 
 // FutureTrader -.
 type FutureTrader struct {
@@ -41,60 +37,32 @@ type FutureTrader struct {
 
 	tradeSwitch config.FutureTradeSwitch
 	analyzeCfg  config.FutureAnalyze
+
+	allowTrade bool
 }
 
 // NewFutureTrader -.
 func NewFutureTrader(code string, tradeSwitch config.FutureTradeSwitch, analyzeCfg config.FutureAnalyze) *FutureTrader {
-	new := &FutureTrader{
+	t := &FutureTrader{
 		code:          code,
-		analyzePeriod: 15,
 		orderQuantity: tradeSwitch.Quantity,
 		orderMap:      make(map[entity.OrderAction][]*entity.FutureOrder),
 		tickChan:      make(chan *entity.RealTimeFutureTick),
 		bidAskChan:    make(chan *entity.FutureRealTimeBidAsk),
 		tradeSwitch:   tradeSwitch,
 		analyzeCfg:    analyzeCfg,
+		allowTrade:    false,
+
+		// TODO: get from config
+		analyzePeriod: 15,
 	}
-	return new
+
+	bus.SubscribeTopic(event.TopicUpdateFutureTradeSwitch, t.updateAllowTrade)
+	return t
 }
 
-// ReceiveTick -.
-func (o *FutureTrader) ReceiveTick(tick *entity.RealTimeFutureTick) *entity.RealTimeFutureTick {
-	o.lastTick = tick
-	for i, v := range o.tickArr {
-		if time.Since(v.TickTime) < time.Duration(o.analyzePeriod)*time.Second {
-			o.tickArr = o.tickArr[i:]
-			break
-		}
-	}
-	o.tickArr = append(o.tickArr, tick)
-	tmp := o.tickArr.splitBySecond()
-	var total, last int
-	for i, v := range tmp {
-		if i != len(tmp)-1 {
-			total += int(v.getTotalVolume())
-		} else {
-			last = int(v.getTotalVolume())
-		}
-	}
-	if avg := float64(total) / float64(len(tmp)-2); avg != 0 {
-		o.magnification = float64(last) / avg
-		o.avgVolume = avg
-	}
-	return tick
-}
-
-// GetLastBidAsk -.
-func (o *FutureTrader) GetLastBidAsk() *entity.FutureRealTimeBidAsk {
-	if o.lastBidAsk == nil {
-		return &entity.FutureRealTimeBidAsk{}
-	}
-	return o.lastBidAsk
-}
-
-// ReceiveBidAsk -.
-func (o *FutureTrader) ReceiveBidAsk(bidAsk *entity.FutureRealTimeBidAsk) {
-	o.lastBidAsk = bidAsk
+func (o *FutureTrader) updateAllowTrade(allow bool) {
+	o.allowTrade = allow
 }
 
 // GetTickChan -.
@@ -107,23 +75,71 @@ func (o *FutureTrader) GetBidAskChan() chan *entity.FutureRealTimeBidAsk {
 	return o.bidAskChan
 }
 
-// WaitOrder -.
-func (o *FutureTrader) WaitOrder(order *entity.FutureOrder) {
+// TradingRoom -.
+func (o *FutureTrader) TradingRoom() {
+	go func() {
+		for {
+			o.lastBidAsk = <-o.bidAskChan
+		}
+	}()
+
+	for {
+		tick := <-o.tickChan
+		for i, v := range o.tickArr {
+			if time.Since(v.TickTime) < time.Duration(o.analyzePeriod)*time.Second {
+				o.tickArr = o.tickArr[i:]
+				break
+			}
+		}
+		o.tickArr = append(o.tickArr, tick)
+		tmp := o.tickArr.splitBySecond()
+		var total, last int
+		for i, v := range tmp {
+			if i != len(tmp)-1 {
+				total += int(v.getTotalVolume())
+			} else {
+				last = int(v.getTotalVolume())
+			}
+		}
+		if avg := float64(total) / float64(len(tmp)-2); avg != 0 {
+			o.magnification = float64(last) / avg
+			o.avgVolume = avg
+		}
+
+		o.lastTick = tick
+
+		if order := o.generateOrder(); order == nil {
+			continue
+		} else {
+			o.placeFutureOrder(order)
+		}
+	}
+}
+
+func (o *FutureTrader) placeFutureOrder(order *entity.FutureOrder) {
+	if order.Price == 0 {
+		log.Errorf("%s Future Order price is 0", order.Code)
+		return
+	}
+
 	o.waitingOrder = order
+
+	// if out of trade in time, return
+	if !o.allowTrade && (order.Action == entity.ActionBuy || order.Action == entity.ActionSellFirst) {
+		// avoid stuck in the market
+		o.waitingOrder = nil
+		return
+	}
+
+	bus.PublishTopicEvent(event.TopicPlaceFutureOrder, order)
+	go o.checkPlaceOrderStatus(order)
 }
 
-// CancelWaiting -.
-func (o *FutureTrader) CancelWaiting() {
-	o.waitingOrder = nil
-}
+func (o *FutureTrader) generateOrder() *entity.FutureOrder {
+	if o.waitingOrder != nil {
+		return nil
+	}
 
-// IsWaiting -.
-func (o *FutureTrader) IsWaiting() bool {
-	return o.waitingOrder != nil
-}
-
-// GenerateOrder -.
-func (o *FutureTrader) GenerateOrder() *entity.FutureOrder {
 	if postOrderAction, preOrder := o.checkNeededPost(); postOrderAction != entity.ActionNone {
 		return o.generateTradeOutOrder(postOrderAction, preOrder)
 	}
@@ -158,19 +174,6 @@ func (o *FutureTrader) GenerateOrder() *entity.FutureOrder {
 	}
 }
 
-// GetAvgVolume -.
-func (o *FutureTrader) GetAvgVolume() float64 {
-	if o.avgVolume == 0 {
-		return 0
-	}
-	return utils.Round(o.avgVolume, 2)
-}
-
-// GetOutInRatio -.
-func (o *FutureTrader) GetOutInRatio() float64 {
-	return utils.Round(o.outInRation, 2)
-}
-
 func (o *FutureTrader) generateTradeOutOrder(postOrderAction entity.OrderAction, preOrder *entity.FutureOrder) *entity.FutureOrder {
 	order := &entity.FutureOrder{
 		Code: o.code,
@@ -201,8 +204,7 @@ func (o *FutureTrader) generateTradeOutOrder(postOrderAction entity.OrderAction,
 	return nil
 }
 
-// CheckPlaceOrderStatus -.
-func (o *FutureTrader) CheckPlaceOrderStatus(order *entity.FutureOrder) {
+func (o *FutureTrader) checkPlaceOrderStatus(order *entity.FutureOrder) {
 	var timeout time.Duration
 	switch order.Action {
 	case entity.ActionBuy, entity.ActionSellFirst:
@@ -260,7 +262,7 @@ func (o *FutureTrader) cancelOrder(order *entity.FutureOrder) {
 				return
 			} else if order.TradeTime.Add(time.Duration(o.tradeSwitch.CancelWaitTime) * time.Second).Before(time.Now()) {
 				log.Warnf("Try Cancel Future Order Again -> Future: %s, Action: %d, Price: %.2f, Qty: %d", order.Code, order.Action, order.Price, order.Quantity)
-				go o.CheckPlaceOrderStatus(order)
+				go o.checkPlaceOrderStatus(order)
 				return
 			}
 		}
@@ -280,58 +282,4 @@ func (o *FutureTrader) checkNeededPost() (entity.OrderAction, *entity.FutureOrde
 	}
 
 	return entity.ActionNone, nil
-}
-
-// RealTimeFutureTickArr -.
-type RealTimeFutureTickArr []*entity.RealTimeFutureTick
-
-func (c RealTimeFutureTickArr) splitBySecond() []RealTimeFutureTickArr {
-	if len(c) < 2 {
-		return nil
-	}
-
-	var result []RealTimeFutureTickArr
-	var tmp RealTimeFutureTickArr
-	for i, tick := range c {
-		if i == len(c)-1 {
-			result = append(result, tmp)
-			break
-		}
-
-		if tick.TickTime.Second() == c[i+1].TickTime.Second() {
-			tmp = append(tmp, tick)
-		} else {
-			result = append(result, tmp)
-			tmp = RealTimeFutureTickArr{tick}
-		}
-	}
-
-	return result
-}
-
-func (c RealTimeFutureTickArr) getTotalVolume() int64 {
-	var volume int64
-	for _, v := range c {
-		volume += v.Volume
-	}
-	return volume
-}
-
-func (c RealTimeFutureTickArr) getOutInRatio() float64 {
-	if len(c) == 0 {
-		return 0
-	}
-
-	var outVolume, inVolume int64
-	for _, v := range c {
-		switch v.TickType {
-		case 1:
-			outVolume += v.Volume
-		case 2:
-			inVolume += v.Volume
-		default:
-			continue
-		}
-	}
-	return 100 * float64(outVolume) / float64(outVolume+inVolume)
 }

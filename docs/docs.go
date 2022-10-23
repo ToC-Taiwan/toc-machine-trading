@@ -525,11 +525,11 @@ const docTemplate = `{
                 "stock_analyze": {
                     "$ref": "#/definitions/config.StockAnalyze"
                 },
+                "stock_trade_switch": {
+                    "$ref": "#/definitions/config.StockTradeSwitch"
+                },
                 "target_cond": {
                     "$ref": "#/definitions/config.TargetCond"
-                },
-                "trade_switch": {
-                    "$ref": "#/definitions/config.TradeSwitch"
                 }
             }
         },
@@ -694,6 +694,32 @@ const docTemplate = `{
                 }
             }
         },
+        "config.StockTradeSwitch": {
+            "type": "object",
+            "properties": {
+                "allow_trade": {
+                    "type": "boolean"
+                },
+                "cancel_wait_time": {
+                    "type": "integer"
+                },
+                "hold_time_from_open": {
+                    "type": "number"
+                },
+                "total_open_time": {
+                    "type": "number"
+                },
+                "trade_in_end_time": {
+                    "type": "number"
+                },
+                "trade_in_wait_time": {
+                    "type": "integer"
+                },
+                "trade_out_wait_time": {
+                    "type": "integer"
+                }
+            }
+        },
         "config.TargetCond": {
             "type": "object",
             "properties": {
@@ -719,32 +745,6 @@ const docTemplate = `{
                     }
                 },
                 "real_time_rank": {
-                    "type": "integer"
-                }
-            }
-        },
-        "config.TradeSwitch": {
-            "type": "object",
-            "properties": {
-                "allow_trade": {
-                    "type": "boolean"
-                },
-                "cancel_wait_time": {
-                    "type": "integer"
-                },
-                "hold_time_from_open": {
-                    "type": "number"
-                },
-                "total_open_time": {
-                    "type": "number"
-                },
-                "trade_in_end_time": {
-                    "type": "number"
-                },
-                "trade_in_wait_time": {
-                    "type": "integer"
-                },
-                "trade_out_wait_time": {
                     "type": "integer"
                 }
             }

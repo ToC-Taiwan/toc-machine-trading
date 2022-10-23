@@ -9,8 +9,8 @@ type Bus struct {
 	bus *eventbus.Bus
 }
 
-// GetBus -.
-func GetBus() *Bus {
+// Get -.
+func Get() *Bus {
 	if singletonBus != nil {
 		return singletonBus
 	}

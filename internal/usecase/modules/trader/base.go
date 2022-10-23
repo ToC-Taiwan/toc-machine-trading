@@ -3,10 +3,13 @@ package trader
 
 import (
 	"tmt/internal/usecase/modules/cache"
-	"tmt/pkg/eventbus"
+	"tmt/internal/usecase/modules/event"
+
+	"tmt/pkg/logger"
 )
 
 var (
-	cc  = cache.GetCache()
-	bus = eventbus.New()
+	cc  = cache.Get()
+	bus = event.Get()
+	log = logger.Get()
 )

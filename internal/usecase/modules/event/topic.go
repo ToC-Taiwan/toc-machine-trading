@@ -34,4 +34,9 @@ const (
 	TopicQueryMonitorFutureCode string = "query_monitor_future_code"
 	// TopicMonitorFutureCode -.
 	TopicMonitorFutureCode string = "monitor_future_code"
+
+	// TopicUpdateStockTradeSwitch -.
+	TopicUpdateStockTradeSwitch string = "update_stock_trade_switch"
+	// TopicUpdateFutureTradeSwitch -.
+	TopicUpdateFutureTradeSwitch string = "update_future_trade_switch"
 )

@@ -18,7 +18,7 @@ history:
 
 simulation: true
 
-trade_switch:
+stock_trade_switch:
     allow_trade: false
     hold_time_from_open: 45 # unit: second
     total_open_time: 270 # unit: minute

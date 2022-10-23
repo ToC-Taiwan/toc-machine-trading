@@ -13,12 +13,14 @@ import (
 	"github.com/google/uuid"
 )
 
-// TradeAgent -.
-type TradeAgent struct {
+// StockTrader -.
+type StockTrader struct {
 	stockNum      string
 	orderQuantity int64
 	tickArr       RealTimeTickArr
 	periodTickArr RealTimeTickArr
+
+	stockAnalyzeCfg config.StockAnalyze
 
 	orderMapLock sync.RWMutex
 	orderMap     map[entity.OrderAction][]*entity.StockOrder
@@ -36,17 +38,15 @@ type TradeAgent struct {
 	tradeOutWaitTime time.Duration
 	cancelWaitTime   time.Duration
 
-	openPass bool
+	openPass           bool
+	stockTradeInSwitch bool
 }
 
-// NewAgent -.
-func NewAgent(stockNum string, tradeSwitch config.TradeSwitch) *TradeAgent {
+// NewStockTrader -.
+func NewStockTrader(stockNum string, tradeSwitch config.StockTradeSwitch, stockAnalyzeCfg config.StockAnalyze) *StockTrader {
 	var quantity int64 = 1
 	if biasRate := cc.GetBiasRate(stockNum); biasRate > cc.GetHighBiasRate() || biasRate < cc.GetLowBiasRate() {
 		quantity = 2
-	} else if biasRate == 0 {
-		time.Sleep(time.Second)
-		return NewAgent(stockNum, tradeSwitch)
 	}
 
 	arr := cc.GetHistoryTickAnalyze(stockNum)
@@ -54,7 +54,7 @@ func NewAgent(stockNum string, tradeSwitch config.TradeSwitch) *TradeAgent {
 		return arr[i] > arr[j]
 	})
 
-	new := &TradeAgent{
+	new := &StockTrader{
 		stockNum:           stockNum,
 		orderQuantity:      quantity,
 		orderMap:           make(map[entity.OrderAction][]*entity.StockOrder),
@@ -64,22 +64,74 @@ func NewAgent(stockNum string, tradeSwitch config.TradeSwitch) *TradeAgent {
 		tradeInWaitTime:    time.Duration(tradeSwitch.TradeInWaitTime) * time.Second,
 		tradeOutWaitTime:   time.Duration(tradeSwitch.TradeOutWaitTime) * time.Second,
 		cancelWaitTime:     time.Duration(tradeSwitch.CancelWaitTime) * time.Second,
+		stockAnalyzeCfg:    stockAnalyzeCfg,
 	}
 
 	go new.checkFirstTickArrive()
 
+	bus.SubscribeTopic(event.TopicUpdateStockTradeSwitch, new.updateStockTradeSwitch)
 	return new
 }
 
-// GenerateOrder -.
-func (o *TradeAgent) GenerateOrder(cfg config.StockAnalyze) *entity.StockOrder {
-	if o.lastTick.TickTime.Sub(o.analyzeTickTime) > time.Duration(cfg.TickAnalyzePeriod*1.1)*time.Millisecond {
+func (o *StockTrader) updateStockTradeSwitch(allow bool) {
+	o.stockTradeInSwitch = allow
+}
+
+// TradingRoom -.
+func (o *StockTrader) TradingRoom() {
+	go func() {
+		for {
+			tick := <-o.tickChan
+			o.lastTick = tick
+			o.tickArr = append(o.tickArr, tick)
+
+			if o.waitingOrder != nil || o.analyzeTickTime.IsZero() || !o.openPass {
+				continue
+			}
+
+			order := o.generateOrder()
+			if order == nil {
+				continue
+			}
+
+			o.placeOrder(order)
+		}
+	}()
+
+	go func() {
+		for {
+			o.lastBidAsk = <-o.bidAskChan
+		}
+	}()
+}
+
+func (o *StockTrader) placeOrder(order *entity.StockOrder) {
+	if order.Price == 0 {
+		log.Errorf("%s Order price is 0", order.StockNum)
+		return
+	}
+
+	o.waitingOrder = order
+
+	// if out of trade in time, return
+	if !o.stockTradeInSwitch && (order.Action == entity.ActionBuy || order.Action == entity.ActionSellFirst) {
+		// avoid stuck in the market
+		o.waitingOrder = nil
+		return
+	}
+
+	bus.PublishTopicEvent(event.TopicPlaceOrder, order)
+	go o.checkPlaceOrderStatus(order)
+}
+
+func (o *StockTrader) generateOrder() *entity.StockOrder {
+	if o.lastTick.TickTime.Sub(o.analyzeTickTime) > time.Duration(o.stockAnalyzeCfg.TickAnalyzePeriod*1.1)*time.Millisecond {
 		o.analyzeTickTime = o.lastTick.TickTime
 		o.periodTickArr = RealTimeTickArr{o.lastTick}
 		return nil
 	}
 
-	if o.lastTick.TickTime.Sub(o.analyzeTickTime) < time.Duration(cfg.TickAnalyzePeriod)*time.Millisecond {
+	if o.lastTick.TickTime.Sub(o.analyzeTickTime) < time.Duration(o.stockAnalyzeCfg.TickAnalyzePeriod)*time.Millisecond {
 		o.periodTickArr = append(o.periodTickArr, o.lastTick)
 		return nil
 	}
@@ -90,14 +142,14 @@ func (o *TradeAgent) GenerateOrder(cfg config.StockAnalyze) *entity.StockOrder {
 	o.periodTickArr = RealTimeTickArr{o.lastTick}
 
 	if postOrderAction, preOrder := o.checkNeededPost(); postOrderAction != entity.ActionNone {
-		return o.generateTradeOutOrder(cfg, postOrderAction, preOrder)
+		return o.generateTradeOutOrder(o.stockAnalyzeCfg, postOrderAction, preOrder)
 	}
 
-	if o.lastTick.PctChg < cfg.CloseChangeRatioLow || o.lastTick.PctChg > cfg.CloseChangeRatioHigh {
+	if o.lastTick.PctChg < o.stockAnalyzeCfg.CloseChangeRatioLow || o.lastTick.PctChg > o.stockAnalyzeCfg.CloseChangeRatioHigh {
 		return nil
 	}
 
-	if pr := o.getPRByVolume(analyzeArr.getTotalVolume()); pr < cfg.VolumePRLimit {
+	if pr := o.getPRByVolume(analyzeArr.getTotalVolume()); pr < o.stockAnalyzeCfg.VolumePRLimit {
 		return nil
 	}
 
@@ -115,11 +167,11 @@ func (o *TradeAgent) GenerateOrder(cfg config.StockAnalyze) *entity.StockOrder {
 	}
 
 	switch {
-	case allOutInRation > cfg.AllOutInRatio && o.lastTick.Low < o.lastTick.Close:
+	case allOutInRation > o.stockAnalyzeCfg.AllOutInRatio && o.lastTick.Low < o.lastTick.Close:
 		order.Action = entity.ActionBuy
 		order.Price = o.lastBidAsk.AskPrice1
 		return order
-	case 100-allOutInRation > cfg.AllInOutRatio && o.lastTick.High > o.lastTick.Close:
+	case 100-allOutInRation > o.stockAnalyzeCfg.AllInOutRatio && o.lastTick.High > o.lastTick.Close:
 		order.Action = entity.ActionSellFirst
 		order.Price = o.lastBidAsk.BidPrice1
 		return order
@@ -128,7 +180,7 @@ func (o *TradeAgent) GenerateOrder(cfg config.StockAnalyze) *entity.StockOrder {
 	}
 }
 
-func (o *TradeAgent) generateTradeOutOrder(cfg config.StockAnalyze, postOrderAction entity.OrderAction, preOrder *entity.StockOrder) *entity.StockOrder {
+func (o *StockTrader) generateTradeOutOrder(cfg config.StockAnalyze, postOrderAction entity.OrderAction, preOrder *entity.StockOrder) *entity.StockOrder {
 	order := &entity.StockOrder{
 		StockNum: o.stockNum,
 		BaseOrder: entity.BaseOrder{
@@ -163,8 +215,7 @@ func (o *TradeAgent) generateTradeOutOrder(cfg config.StockAnalyze, postOrderAct
 	return nil
 }
 
-// CheckPlaceOrderStatus -.
-func (o *TradeAgent) CheckPlaceOrderStatus(order *entity.StockOrder) {
+func (o *StockTrader) checkPlaceOrderStatus(order *entity.StockOrder) {
 	var timeout time.Duration
 	switch order.Action {
 	case entity.ActionBuy, entity.ActionSellFirst:
@@ -205,7 +256,7 @@ func (o *TradeAgent) CheckPlaceOrderStatus(order *entity.StockOrder) {
 	log.Error("check place order status raise unknown error")
 }
 
-func (o *TradeAgent) cancelOrder(order *entity.StockOrder) {
+func (o *StockTrader) cancelOrder(order *entity.StockOrder) {
 	order.TradeTime = time.Time{}
 	bus.PublishTopicEvent(event.TopicCancelOrder, order)
 
@@ -226,14 +277,14 @@ func (o *TradeAgent) cancelOrder(order *entity.StockOrder) {
 				return
 			} else if order.TradeTime.Add(o.cancelWaitTime).Before(time.Now()) {
 				log.Warnf("Try Cancel Order Again -> Stock: %s, Action: %d, Price: %.2f, Qty: %d", order.StockNum, order.Action, order.Price, order.Quantity)
-				go o.CheckPlaceOrderStatus(order)
+				go o.checkPlaceOrderStatus(order)
 				return
 			}
 		}
 	}()
 }
 
-func (o *TradeAgent) checkNeededPost() (entity.OrderAction, *entity.StockOrder) {
+func (o *StockTrader) checkNeededPost() (entity.OrderAction, *entity.StockOrder) {
 	defer o.orderMapLock.RUnlock()
 	o.orderMapLock.RLock()
 
@@ -248,7 +299,7 @@ func (o *TradeAgent) checkNeededPost() (entity.OrderAction, *entity.StockOrder) 
 	return entity.ActionNone, nil
 }
 
-func (o *TradeAgent) checkFirstTickArrive() {
+func (o *StockTrader) checkFirstTickArrive() {
 	// calculate open change rate here
 	//
 	// lastClose := cc.GetHistoryClose(o.stockNum, basic.LastTradeDay)
@@ -273,7 +324,7 @@ func (o *TradeAgent) checkFirstTickArrive() {
 	}
 }
 
-func (o *TradeAgent) getPRByVolume(volume int64) float64 {
+func (o *StockTrader) getPRByVolume(volume int64) float64 {
 	if len(o.historyTickAnalyze) < 2 {
 		return 0
 	}
@@ -292,52 +343,23 @@ func (o *TradeAgent) getPRByVolume(volume int64) float64 {
 	return 100 * float64(total-position) / float64(total)
 }
 
-// func (o *TradeAgent) alreadyTrade() bool {
+// func (o *StockTrader) alreadyTrade() bool {
 // 	defer o.orderMapLock.RUnlock()
 // 	o.orderMapLock.RLock()
 // 	return len(o.orderMap) != 0 && len(o.orderMap)%2 == 0
 // }
 
 // GetStockNum -/
-func (o *TradeAgent) GetStockNum() string {
+func (o *StockTrader) GetStockNum() string {
 	return o.stockNum
 }
 
 // GetTickChan -.
-func (o *TradeAgent) GetTickChan() chan *entity.RealTimeTick {
+func (o *StockTrader) GetTickChan() chan *entity.RealTimeTick {
 	return o.tickChan
 }
 
 // GetBidAskChan -.
-func (o *TradeAgent) GetBidAskChan() chan *entity.RealTimeBidAsk {
+func (o *StockTrader) GetBidAskChan() chan *entity.RealTimeBidAsk {
 	return o.bidAskChan
-}
-
-// ReceiveTick -.
-func (o *TradeAgent) ReceiveTick(input *entity.RealTimeTick) {
-	o.lastTick = input
-	o.tickArr = append(o.tickArr, input)
-}
-
-// ReceiveBidAsk -.
-func (o *TradeAgent) ReceiveBidAsk(input *entity.RealTimeBidAsk) {
-	o.lastBidAsk = input
-}
-
-// IsReady -.
-func (o *TradeAgent) IsReady() bool {
-	if o.waitingOrder != nil || o.analyzeTickTime.IsZero() || !o.openPass {
-		return false
-	}
-	return true
-}
-
-// WaitingOrder -.
-func (o *TradeAgent) WaitingOrder(order *entity.StockOrder) {
-	o.waitingOrder = order
-}
-
-// CancelWaitingOrder -.
-func (o *TradeAgent) CancelWaitingOrder() {
-	o.waitingOrder = nil
 }

@@ -20,9 +20,10 @@ type StreamUseCase struct {
 	rabbit  StreamRabbit
 	grpcapi StreamgRPCAPI
 
-	tradeSwitchCfg       config.TradeSwitch
+	basic entity.BasicInfo
+
+	stockTradeSwitchCfg  config.StockTradeSwitch
 	futureTradeSwitchCfg config.FutureTradeSwitch
-	basic                entity.BasicInfo
 
 	stockAnalyzeCfg  config.StockAnalyze
 	futureAnalyzeCfg config.FutureAnalyze
@@ -30,7 +31,7 @@ type StreamUseCase struct {
 	targetFilter *target.Filter
 	tradeDay     *tradeday.TradeDay
 
-	tradeInSwitch       bool
+	stockTradeInSwitch  bool
 	futureTradeInSwitch bool
 }
 
@@ -42,11 +43,10 @@ func NewStream(r StreamRepo, g StreamgRPCAPI, t StreamRabbit) *StreamUseCase {
 		rabbit:  t,
 		grpcapi: g,
 
-		tradeSwitchCfg:       cfg.TradeSwitch,
+		stockTradeSwitchCfg:  cfg.StockTradeSwitch,
 		futureTradeSwitchCfg: cfg.FutureTradeSwitch,
-
-		stockAnalyzeCfg:  cfg.StockAnalyze,
-		futureAnalyzeCfg: cfg.FutureAnalyze,
+		stockAnalyzeCfg:      cfg.StockAnalyze,
+		futureAnalyzeCfg:     cfg.FutureAnalyze,
 
 		basic:        *cc.GetBasicInfo(),
 		targetFilter: target.NewFilter(cfg.TargetCond),
@@ -54,16 +54,13 @@ func NewStream(r StreamRepo, g StreamgRPCAPI, t StreamRabbit) *StreamUseCase {
 	}
 	t.FillAllBasic(uc.basic.AllStocks, uc.basic.AllFutures)
 
-	go uc.checkTradeSwitch()
-	go uc.checkFutureTradeSwitch()
-
 	go uc.ReceiveEvent(context.Background())
 	go uc.ReceiveOrderStatus(context.Background())
 
 	go func() {
 		time.Sleep(time.Until(cc.GetBasicInfo().TradeDay.Add(time.Hour * 9)))
 		for range time.NewTicker(time.Second * 60).C {
-			if uc.tradeInSwitch {
+			if uc.stockTradeInSwitch {
 				if err := uc.realTimeAddTargets(); err != nil {
 					log.Panic(err)
 				}
@@ -74,6 +71,57 @@ func NewStream(r StreamRepo, g StreamgRPCAPI, t StreamRabbit) *StreamUseCase {
 	bus.SubscribeTopic(event.TopicStreamTargets, uc.ReceiveStreamData)
 	bus.SubscribeTopic(event.TopicStreamFutureTargets, uc.ReceiveFutureStreamData)
 	return uc
+}
+
+func (uc *StreamUseCase) realTimeAddTargets() error {
+	data, err := uc.grpcapi.GetAllStockSnapshot()
+	if err != nil {
+		return err
+	}
+
+	// at least 200 snapshot to rank volume
+	if len(data) < 200 {
+		log.Warnf("stock snapshot len is not enough: %d", len(data))
+		return nil
+	}
+
+	sort.Slice(data, func(i, j int) bool {
+		return data[i].GetTotalVolume() > data[j].GetTotalVolume()
+	})
+	data = data[:uc.targetFilter.RealTimeRank]
+
+	currentTargets := cc.GetTargets()
+	targetsMap := make(map[string]*entity.Target)
+	for _, t := range currentTargets {
+		targetsMap[t.StockNum] = t
+	}
+
+	var newTargets []*entity.Target
+	for i, d := range data {
+		stock := cc.GetStockDetail(d.GetCode())
+		if stock == nil {
+			continue
+		}
+
+		if !uc.targetFilter.IsTarget(stock, d.GetClose()) {
+			continue
+		}
+
+		if targetsMap[d.GetCode()] == nil {
+			newTargets = append(newTargets, &entity.Target{
+				Rank:     100 + i + 1,
+				StockNum: d.GetCode(),
+				Volume:   d.GetTotalVolume(),
+				TradeDay: uc.basic.TradeDay,
+				Stock:    stock,
+			})
+		}
+	}
+
+	if len(newTargets) != 0 {
+		bus.PublishTopicEvent(event.TopicNewTargets, newTargets)
+	}
+	return nil
 }
 
 // ReceiveEvent -.
@@ -115,115 +163,6 @@ func (uc *StreamUseCase) ReceiveOrderStatus(ctx context.Context) {
 	uc.rabbit.OrderStatusConsumer(orderStatusChan)
 }
 
-// ReceiveStreamData - receive target data, start goroutine to trade
-func (uc *StreamUseCase) ReceiveStreamData(ctx context.Context, targetArr []*entity.Target) {
-	agentChan := make(chan *trader.TradeAgent)
-	targetMap := make(map[string]*entity.Target)
-	mutex := sync.RWMutex{}
-
-	go func() {
-		for {
-			agent, ok := <-agentChan
-			if !ok {
-				break
-			}
-			go uc.tradingRoom(agent)
-
-			// send tick, bidask to trade room's channel
-			go uc.rabbit.TickConsumer(agent.GetStockNum(), agent.GetTickChan())
-			go uc.rabbit.StockBidAskConsumer(agent.GetStockNum(), agent.GetBidAskChan())
-
-			mutex.RLock()
-			target := targetMap[agent.GetStockNum()]
-			mutex.RUnlock()
-
-			bus.PublishTopicEvent(event.TopicSubscribeTickTargets, []*entity.Target{target})
-		}
-	}()
-
-	var wg sync.WaitGroup
-	for _, t := range targetArr {
-		target := t
-		mutex.Lock()
-		targetMap[target.StockNum] = target
-		mutex.Unlock()
-
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			agent := trader.NewAgent(target.StockNum, uc.tradeSwitchCfg)
-			agentChan <- agent
-		}()
-	}
-	wg.Wait()
-	close(agentChan)
-}
-
-func (uc *StreamUseCase) tradingRoom(agent *trader.TradeAgent) {
-	go func() {
-		for {
-			agent.ReceiveTick(<-agent.GetTickChan())
-			// log.Debugf("%s tick time delay: %s", agent.stockNum, time.Since(agent.lastTick.TickTime).String())
-
-			if !agent.IsReady() {
-				continue
-			}
-
-			order := agent.GenerateOrder(uc.stockAnalyzeCfg)
-			if order == nil {
-				continue
-			}
-
-			uc.placeOrder(agent, order)
-		}
-	}()
-
-	go func() {
-		for {
-			agent.ReceiveBidAsk(<-agent.GetBidAskChan())
-			// log.Debugf("%s bidask time delay: %s", agent.stockNum, time.Since(agent.lastBidAsk.BidAskTime).String())
-		}
-	}()
-}
-
-func (uc *StreamUseCase) placeOrder(agent *trader.TradeAgent, order *entity.StockOrder) {
-	if order.Price == 0 {
-		log.Errorf("%s Order price is 0", order.StockNum)
-		return
-	}
-
-	agent.WaitingOrder(order)
-
-	// if out of trade in time, return
-	if !uc.tradeInSwitch && (order.Action == entity.ActionBuy || order.Action == entity.ActionSellFirst) {
-		// avoid stuck in the market
-		agent.CancelWaitingOrder()
-		return
-	}
-
-	bus.PublishTopicEvent(event.TopicPlaceOrder, order)
-	go agent.CheckPlaceOrderStatus(order)
-}
-
-func (uc *StreamUseCase) checkTradeSwitch() {
-	if !uc.tradeSwitchCfg.AllowTrade {
-		return
-	}
-
-	openTime := uc.basic.OpenTime
-	tradeInEndTime := uc.basic.TradeInEndTime
-
-	for range time.NewTicker(2500 * time.Millisecond).C {
-		now := time.Now()
-		switch {
-		case now.Before(openTime) || now.After(tradeInEndTime):
-			uc.tradeInSwitch = false
-		case now.After(openTime) && now.Before(tradeInEndTime):
-			uc.tradeInSwitch = true
-		}
-	}
-}
-
 // GetTSESnapshot -.
 func (uc *StreamUseCase) GetTSESnapshot(ctx context.Context) (*entity.StockSnapShot, error) {
 	body, err := uc.grpcapi.GetStockSnapshotTSE()
@@ -247,56 +186,6 @@ func (uc *StreamUseCase) GetTSESnapshot(ctx context.Context) (*entity.StockSnapS
 		YesterdayVolume: body.GetYesterdayVolume(),
 		VolumeRatio:     body.GetVolumeRatio(),
 	}, nil
-}
-
-func (uc *StreamUseCase) realTimeAddTargets() error {
-	data, err := uc.grpcapi.GetAllStockSnapshot()
-	if err != nil {
-		return err
-	}
-
-	// at least 200 snapshot to rank volume
-	if len(data) < 200 {
-		return nil
-	}
-
-	sort.Slice(data, func(i, j int) bool {
-		return data[i].GetTotalVolume() > data[j].GetTotalVolume()
-	})
-	data = data[:uc.targetFilter.RealTimeRank]
-
-	currentTargets := cc.GetTargets()
-	targetsMap := make(map[string]*entity.Target)
-	for _, t := range currentTargets {
-		targetsMap[t.StockNum] = t
-	}
-
-	var newTargets []*entity.Target
-	for i, d := range data {
-		stock := cc.GetStockDetail(d.GetCode())
-		if stock == nil {
-			continue
-		}
-
-		if !uc.targetFilter.IsTarget(stock, d.GetClose()) {
-			continue
-		}
-
-		if targetsMap[d.GetCode()] == nil {
-			newTargets = append(newTargets, &entity.Target{
-				Rank:     100 + i + 1,
-				StockNum: d.GetCode(),
-				Volume:   d.GetTotalVolume(),
-				TradeDay: uc.basic.TradeDay,
-				Stock:    stock,
-			})
-		}
-	}
-
-	if len(newTargets) != 0 {
-		bus.PublishTopicEvent(event.TopicNewTargets, newTargets)
-	}
-	return nil
 }
 
 // GetStockSnapshotByNumArr -.
@@ -358,101 +247,90 @@ func (uc *StreamUseCase) DeleteFutureRealTimeConnection(timestamp int64) {
 	uc.rabbit.RemoveFutureTickChan(timestamp)
 }
 
+// ReceiveStreamData - receive target data, start goroutine to trade
+func (uc *StreamUseCase) ReceiveStreamData(ctx context.Context, targetArr []*entity.Target) {
+	agentChan := make(chan *trader.StockTrader)
+	targetMap := make(map[string]*entity.Target)
+	mutex := sync.RWMutex{}
+
+	go func() {
+		for {
+			agent, ok := <-agentChan
+			if !ok {
+				break
+			}
+			go agent.TradingRoom()
+
+			// send tick, bidask to trade room's channel
+			go uc.rabbit.TickConsumer(agent.GetStockNum(), agent.GetTickChan())
+			go uc.rabbit.StockBidAskConsumer(agent.GetStockNum(), agent.GetBidAskChan())
+
+			mutex.RLock()
+			target := targetMap[agent.GetStockNum()]
+			mutex.RUnlock()
+
+			bus.PublishTopicEvent(event.TopicSubscribeTickTargets, []*entity.Target{target})
+		}
+	}()
+
+	var wg sync.WaitGroup
+	for _, t := range targetArr {
+		target := t
+		mutex.Lock()
+		targetMap[target.StockNum] = target
+		mutex.Unlock()
+
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			agent := trader.NewStockTrader(target.StockNum, uc.stockTradeSwitchCfg, uc.stockAnalyzeCfg)
+			agentChan <- agent
+		}()
+	}
+
+	wg.Wait()
+	close(agentChan)
+
+	go uc.checkStockTradeSwitch()
+}
+
 // ReceiveFutureStreamData -.
 func (uc *StreamUseCase) ReceiveFutureStreamData(ctx context.Context, code string) {
 	agent := trader.NewFutureTrader(code, uc.futureTradeSwitchCfg, uc.futureAnalyzeCfg)
 
-	go uc.futureTradingRoom(agent)
+	go agent.TradingRoom()
+
 	go uc.rabbit.FutureTickConsumer(code, agent.GetTickChan())
 	go uc.rabbit.FutureBidAskConsumer(code, agent.GetBidAskChan())
 
 	bus.PublishTopicEvent(event.TopicSubscribeFutureTickTargets, code)
+
+	go uc.checkFutureTradeSwitch()
 }
 
-func (uc *StreamUseCase) futureTradingRoom(agent *trader.FutureTrader) {
-	tickChan := agent.GetTickChan()
-	bidAskChan := agent.GetBidAskChan()
-
-	go func() {
-		for {
-			agent.ReceiveBidAsk(<-bidAskChan)
-		}
-	}()
-
-	for {
-		_ = agent.ReceiveTick(<-tickChan)
-		// bidAsk := agent.GetLastBidAsk()
-
-		// t := table.NewWriter()
-		// t.SetOutputMirror(os.Stdout)
-		// t.AppendHeader(table.Row{"Code", bidAsk.Code, tick.Volume, tick.PriceChg, "", "Avg-Volume", "Out-In-Ratio"})
-		// t.AppendSeparator()
-
-		// tmp := []table.Row{}
-		// tmp = append(tmp, table.Row{bidAsk.BidVolume1, bidAsk.BidPrice1, bidAsk.AskPrice1, bidAsk.AskVolume1})
-		// tmp = append(tmp, table.Row{bidAsk.BidVolume2, bidAsk.BidPrice2, bidAsk.AskPrice2, bidAsk.AskVolume2})
-		// tmp = append(tmp, table.Row{bidAsk.BidVolume3, bidAsk.BidPrice3, bidAsk.AskPrice3, bidAsk.AskVolume3})
-		// tmp = append(tmp, table.Row{bidAsk.BidVolume4, bidAsk.BidPrice4, bidAsk.AskPrice4, bidAsk.AskVolume4})
-		// tmp = append(tmp, table.Row{bidAsk.BidVolume5, bidAsk.BidPrice5, bidAsk.AskPrice5, bidAsk.AskVolume5})
-		// t.AppendRows(tmp)
-		// t.AppendFooter(table.Row{"", "", "", "", "", agent.GetAvgVolume(), agent.GetOutInRatio()})
-		// t.Render()
-
-		if agent.IsWaiting() {
-			continue
-		}
-
-		if order := agent.GenerateOrder(); order == nil {
-			continue
-		} else {
-			uc.placeFutureOrder(agent, order)
-		}
-	}
-}
-
-// func (uc *StreamUseCase) checkFirstFutureTick(agent *FutureTradeAgent) {
-// 	for {
-// 		time.Sleep(time.Second)
-// 		dayMarketLastTick := cc.GetFutureHistoryTick(agent.code)
-// 		if agent.lastTick == nil || dayMarketLastTick == nil {
-// 			continue
-// 		}
-// 		agent.analyzeTickTime = agent.lastTick.TickTime
-
-// 		if agent.lastTick.TickTime.Hour() != 8 {
-// 			log.Warn("Not at stock trading time")
-// 			log.Warnf("DayMarketLastTickTime: %s, Close: %.0f", dayMarketLastTick.TickTime.Format(global.LongTimeLayout), dayMarketLastTick.Close)
-// 			log.Warnf("CurrentTickTime %s, Close: %.0f", agent.lastTick.TickTime.Format(global.LongTimeLayout), agent.lastTick.Close)
-// 			break
-// 		}
-
-// 		if gap := agent.lastTick.Close - dayMarketLastTick.Close; gap >= 0 {
-// 			uc.allowForward = true
-// 		} else if gap != 0 {
-// 			uc.allowReverse = true
-// 		}
-
-// 		break
-// 	}
-// }
-
-func (uc *StreamUseCase) placeFutureOrder(agent *trader.FutureTrader, order *entity.FutureOrder) {
-	if order.Price == 0 {
-		log.Errorf("%s Future Order price is 0", order.Code)
+func (uc *StreamUseCase) checkStockTradeSwitch() {
+	if !uc.stockTradeSwitchCfg.AllowTrade {
 		return
 	}
 
-	agent.WaitOrder(order)
+	openTime := uc.basic.OpenTime
+	tradeInEndTime := uc.basic.TradeInEndTime
 
-	// if out of trade in time, return
-	if !uc.futureTradeInSwitch && (order.Action == entity.ActionBuy || order.Action == entity.ActionSellFirst) {
-		// avoid stuck in the market
-		agent.CancelWaiting()
-		return
+	for range time.NewTicker(2500 * time.Millisecond).C {
+		now := time.Now()
+		var tempSwitch bool
+		switch {
+		case now.Before(openTime) || now.After(tradeInEndTime):
+			tempSwitch = false
+		case now.After(openTime) && now.Before(tradeInEndTime):
+			tempSwitch = true
+		}
+
+		if uc.stockTradeInSwitch != tempSwitch {
+			uc.stockTradeInSwitch = tempSwitch
+			bus.PublishTopicEvent(event.TopicUpdateStockTradeSwitch, uc.stockTradeInSwitch)
+		}
 	}
-
-	bus.PublishTopicEvent(event.TopicPlaceFutureOrder, order)
-	go agent.CheckPlaceOrderStatus(order)
 }
 
 func (uc *StreamUseCase) checkFutureTradeSwitch() {
@@ -461,7 +339,6 @@ func (uc *StreamUseCase) checkFutureTradeSwitch() {
 	}
 
 	futureTradeDay := uc.tradeDay.GetFutureTradeDay()
-
 	timeRange := [][]time.Time{}
 	firstStart := futureTradeDay.StartTime
 	secondStart := futureTradeDay.EndTime.Add(-300 * time.Minute)
@@ -470,13 +347,17 @@ func (uc *StreamUseCase) checkFutureTradeSwitch() {
 	timeRange = append(timeRange, []time.Time{secondStart, secondStart.Add(time.Duration(uc.futureTradeSwitchCfg.TradeTimeRange.SecondPartDuration) * time.Minute)})
 
 	for range time.NewTicker(2500 * time.Millisecond).C {
-		var tempSwitch bool
 		now := time.Now()
+		var tempSwitch bool
 		for _, rangeTime := range timeRange {
 			if now.After(rangeTime[0]) && now.Before(rangeTime[1]) {
 				tempSwitch = true
 			}
 		}
-		uc.futureTradeInSwitch = tempSwitch
+
+		if uc.futureTradeInSwitch != tempSwitch {
+			uc.futureTradeInSwitch = tempSwitch
+			bus.PublishTopicEvent(event.TopicUpdateFutureTradeSwitch, uc.futureTradeInSwitch)
+		}
 	}
 }
