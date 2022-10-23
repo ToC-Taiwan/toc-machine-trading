@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"tmt/internal/entity"
 	"tmt/internal/usecase"
 
 	"github.com/gin-gonic/gin"
@@ -46,23 +47,39 @@ func (r *orderRoutes) getAllOrder(c *gin.Context) {
 	c.JSON(http.StatusOK, orderArr)
 }
 
+type tradeBalance struct {
+	Stock  []*entity.TradeBalance `json:"stock"`
+	Future []*entity.TradeBalance `json:"future"`
+}
+
 // @Summary     getAllTradeBalance
 // @Description getAllTradeBalance
 // @ID          getAllTradeBalance
 // @Tags  	    order
 // @Accept      json
 // @Produce     json
-// @Success     200 {object} []entity.TradeBalance
+// @Success     200 {object} tradeBalance
 // @Failure     500 {object} response
 // @Router      /order/balance [get]
 func (r *orderRoutes) getAllTradeBalance(c *gin.Context) {
-	orderArr, err := r.t.GetAllTradeBalance(c.Request.Context())
+	stockArr, err := r.t.GetAllStockTradeBalance(c.Request.Context())
 	if err != nil {
 		log.Error(err)
 		errorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
-	c.JSON(http.StatusOK, orderArr)
+
+	futureArr, err := r.t.GetAllFutureTradeBalance(c.Request.Context())
+	if err != nil {
+		log.Error(err)
+		errorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, tradeBalance{
+		Stock:  stockArr,
+		Future: futureArr,
+	})
 }
 
 type dayTradeResult struct {

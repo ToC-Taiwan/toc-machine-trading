@@ -17,8 +17,8 @@ import (
 type StockTrader struct {
 	stockNum      string
 	orderQuantity int64
-	tickArr       RealTimeTickArr
-	periodTickArr RealTimeTickArr
+	tickArr       realTimeStockTickArr
+	periodTickArr realTimeStockTickArr
 
 	stockAnalyzeCfg config.StockAnalyze
 
@@ -127,7 +127,7 @@ func (o *StockTrader) placeOrder(order *entity.StockOrder) {
 func (o *StockTrader) generateOrder() *entity.StockOrder {
 	if o.lastTick.TickTime.Sub(o.analyzeTickTime) > time.Duration(o.stockAnalyzeCfg.TickAnalyzePeriod*1.1)*time.Millisecond {
 		o.analyzeTickTime = o.lastTick.TickTime
-		o.periodTickArr = RealTimeTickArr{o.lastTick}
+		o.periodTickArr = realTimeStockTickArr{o.lastTick}
 		return nil
 	}
 
@@ -139,7 +139,7 @@ func (o *StockTrader) generateOrder() *entity.StockOrder {
 	analyzeArr := o.periodTickArr
 	// reset analyze tick time and arr
 	o.analyzeTickTime = o.lastTick.TickTime
-	o.periodTickArr = RealTimeTickArr{o.lastTick}
+	o.periodTickArr = realTimeStockTickArr{o.lastTick}
 
 	if postOrderAction, preOrder := o.checkNeededPost(); postOrderAction != entity.ActionNone {
 		return o.generateTradeOutOrder(o.stockAnalyzeCfg, postOrderAction, preOrder)

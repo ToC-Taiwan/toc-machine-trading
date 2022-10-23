@@ -1,6 +1,12 @@
 <a name="unreleased"></a>
 ## [Unreleased]
 
+### Chore
+- **changelog:** add git-chglog instead of cz-conventional-changelog
+
+### Feat
+- **strategy:** modify future trader strategy
+
 
 <a name="v1.2.0"></a>
 ## [v1.2.0] - 2022-10-23

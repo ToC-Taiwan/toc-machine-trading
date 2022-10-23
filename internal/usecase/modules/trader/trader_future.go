@@ -19,8 +19,8 @@ type FutureTrader struct {
 
 	analyzePeriod int
 
+	lastArr       realTimeFutureTickArr
 	magnification float64
-	outInRation   float64
 	avgVolume     float64
 
 	orderMapLock sync.RWMutex
@@ -28,7 +28,7 @@ type FutureTrader struct {
 
 	waitingOrder *entity.FutureOrder
 
-	tickArr    RealTimeFutureTickArr
+	tickArr    realTimeFutureTickArr
 	lastTick   *entity.RealTimeFutureTick
 	lastBidAsk *entity.FutureRealTimeBidAsk
 
@@ -38,23 +38,21 @@ type FutureTrader struct {
 	tradeSwitch config.FutureTradeSwitch
 	analyzeCfg  config.FutureAnalyze
 
-	allowTrade bool
+	futureTradeInSwitch bool
 }
 
 // NewFutureTrader -.
 func NewFutureTrader(code string, tradeSwitch config.FutureTradeSwitch, analyzeCfg config.FutureAnalyze) *FutureTrader {
 	t := &FutureTrader{
-		code:          code,
-		orderQuantity: tradeSwitch.Quantity,
-		orderMap:      make(map[entity.OrderAction][]*entity.FutureOrder),
-		tickChan:      make(chan *entity.RealTimeFutureTick),
-		bidAskChan:    make(chan *entity.FutureRealTimeBidAsk),
-		tradeSwitch:   tradeSwitch,
-		analyzeCfg:    analyzeCfg,
-		allowTrade:    false,
-
-		// TODO: get from config
-		analyzePeriod: 15,
+		code:                code,
+		orderQuantity:       tradeSwitch.Quantity,
+		orderMap:            make(map[entity.OrderAction][]*entity.FutureOrder),
+		tickChan:            make(chan *entity.RealTimeFutureTick),
+		bidAskChan:          make(chan *entity.FutureRealTimeBidAsk),
+		tradeSwitch:         tradeSwitch,
+		analyzeCfg:          analyzeCfg,
+		futureTradeInSwitch: false,
+		analyzePeriod:       int(analyzeCfg.TickAnalyzePeriod),
 	}
 
 	bus.SubscribeTopic(event.TopicUpdateFutureTradeSwitch, t.updateAllowTrade)
@@ -62,7 +60,7 @@ func NewFutureTrader(code string, tradeSwitch config.FutureTradeSwitch, analyzeC
 }
 
 func (o *FutureTrader) updateAllowTrade(allow bool) {
-	o.allowTrade = allow
+	o.futureTradeInSwitch = allow
 }
 
 // GetTickChan -.
@@ -86,7 +84,7 @@ func (o *FutureTrader) TradingRoom() {
 	for {
 		tick := <-o.tickChan
 		for i, v := range o.tickArr {
-			if time.Since(v.TickTime) < time.Duration(o.analyzePeriod)*time.Second {
+			if time.Since(v.TickTime) < time.Duration(o.analyzePeriod)*time.Millisecond {
 				o.tickArr = o.tickArr[i:]
 				break
 			}
@@ -99,6 +97,7 @@ func (o *FutureTrader) TradingRoom() {
 				total += int(v.getTotalVolume())
 			} else {
 				last = int(v.getTotalVolume())
+				o.lastArr = v
 			}
 		}
 		if avg := float64(total) / float64(len(tmp)-2); avg != 0 {
@@ -107,32 +106,28 @@ func (o *FutureTrader) TradingRoom() {
 		}
 
 		o.lastTick = tick
-
-		if order := o.generateOrder(); order == nil {
-			continue
-		} else {
-			o.placeFutureOrder(order)
-		}
+		o.placeFutureOrder(o.generateOrder())
 	}
 }
 
 func (o *FutureTrader) placeFutureOrder(order *entity.FutureOrder) {
+	if order == nil {
+		return
+	}
+
 	if order.Price == 0 {
 		log.Errorf("%s Future Order price is 0", order.Code)
 		return
 	}
 
-	o.waitingOrder = order
-
 	// if out of trade in time, return
-	if !o.allowTrade && (order.Action == entity.ActionBuy || order.Action == entity.ActionSellFirst) {
-		// avoid stuck in the market
-		o.waitingOrder = nil
+	if !o.futureTradeInSwitch && (order.Action == entity.ActionBuy || order.Action == entity.ActionSellFirst) {
 		return
 	}
 
-	bus.PublishTopicEvent(event.TopicPlaceFutureOrder, order)
+	o.waitingOrder = order
 	go o.checkPlaceOrderStatus(order)
+	bus.PublishTopicEvent(event.TopicPlaceFutureOrder, order)
 }
 
 func (o *FutureTrader) generateOrder() *entity.FutureOrder {
@@ -144,14 +139,12 @@ func (o *FutureTrader) generateOrder() *entity.FutureOrder {
 		return o.generateTradeOutOrder(postOrderAction, preOrder)
 	}
 
-	if o.magnification <= 2 {
-		o.outInRation = 0.0
+	if o.magnification <= 3 {
 		return nil
 	}
 
 	// // get out in ration in period
-	outInRation := o.tickArr.getOutInRatio()
-	o.outInRation = outInRation
+	outInRation := o.lastArr.getOutInRatio()
 	order := &entity.FutureOrder{
 		Code: o.code,
 		BaseOrder: entity.BaseOrder{
@@ -191,13 +184,23 @@ func (o *FutureTrader) generateTradeOutOrder(postOrderAction entity.OrderAction,
 		return order
 	}
 
+	outInRation := o.tickArr.getOutInRatio()
 	switch order.Action {
 	case entity.ActionSell:
-		if order.Price-preOrder.Price > 3 || order.Price-preOrder.Price < -2 {
+		if order.Price-preOrder.Price < -2 {
 			return order
 		}
+
+		if 100-outInRation > o.analyzeCfg.AllInOutRatio && order.Price-preOrder.Price > 2 {
+			return order
+		}
+
 	case entity.ActionBuyLater:
-		if order.Price-preOrder.Price < -3 || order.Price-preOrder.Price > 2 {
+		if order.Price-preOrder.Price > 2 {
+			return order
+		}
+
+		if outInRation > o.analyzeCfg.AllInOutRatio && order.Price-preOrder.Price < -2 {
 			return order
 		}
 	}

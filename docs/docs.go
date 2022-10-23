@@ -271,10 +271,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/entity.TradeBalance"
-                            }
+                            "$ref": "#/definitions/v1.tradeBalance"
                         }
                     },
                     "500": {
@@ -1001,6 +998,23 @@ const docTemplate = `{
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/entity.Stock"
+                    }
+                }
+            }
+        },
+        "v1.tradeBalance": {
+            "type": "object",
+            "properties": {
+                "future": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entity.TradeBalance"
+                    }
+                },
+                "stock": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entity.TradeBalance"
                     }
                 }
             }

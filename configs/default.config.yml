@@ -16,27 +16,6 @@ history:
     history_tick_period: 12 # unit: day
     history_kbar_period: 65 # unit: day
 
-simulation: true
-
-stock_trade_switch:
-    allow_trade: false
-    hold_time_from_open: 45 # unit: second
-    total_open_time: 270 # unit: minute
-    trade_in_end_time: 90 # unit: minute
-    trade_in_wait_time: 45 # unit: seccond
-    trade_out_wait_time: 60 # unit: seccond
-    cancel_wait_time: 30 # unit: seccond
-
-future_trade_switch:
-    allow_trade: true
-    quantity: 1
-    trade_in_wait_time: 10 # unit: seccond
-    trade_out_wait_time: 20 # unit: seccond
-    cancel_wait_time: 30 # unit: seccond
-    trade_time_range:
-        first_part_duration: 780 # duration: minute 04:00:00
-        second_part_duration: 260 # duration: minute 13:05:00
-
 quota:
     stock_trade_quota: 1000000
     stock_fee_discount: 0.28
@@ -58,6 +37,17 @@ target_cond:
         - low: 10
           high: 35
 
+simulation: true
+
+stock_trade_switch:
+    allow_trade: false
+    hold_time_from_open: 45 # unit: second
+    total_open_time: 270 # unit: minute
+    trade_in_end_time: 90 # unit: minute
+    trade_in_wait_time: 45 # unit: seccond
+    trade_out_wait_time: 60 # unit: seccond
+    cancel_wait_time: 30 # unit: seccond
+
 stock_analyze:
     max_hold_time: 60 # unit: minute
     close_change_ratio_low: -2 # unit: %
@@ -69,8 +59,18 @@ stock_analyze:
     rsi_min_count: 150 # unit: times
     ma_period: 60 # unit: day
 
+future_trade_switch:
+    allow_trade: true
+    quantity: 1
+    trade_in_wait_time: 10 # unit: seccond
+    trade_out_wait_time: 20 # unit: seccond
+    cancel_wait_time: 30 # unit: seccond
+    trade_time_range:
+        first_part_duration: 780 # duration: minute 04:00:00
+        second_part_duration: 260 # duration: minute 13:05:00
+
 future_analyze:
     max_hold_time: 10 # unit: minute
-    tick_analyze_period: 10000 # unit: millisecond
+    tick_analyze_period: 30000 # unit: millisecond
     all_out_in_ratio: 75 # unit: %
     all_in_out_ratio: 75 # unit: %

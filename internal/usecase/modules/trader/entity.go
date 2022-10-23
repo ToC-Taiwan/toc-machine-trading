@@ -8,10 +8,10 @@ import (
 	"tmt/pkg/utils"
 )
 
-// RealTimeTickArr -.
-type RealTimeTickArr []*entity.RealTimeTick
+// realTimeStockTickArr -.
+type realTimeStockTickArr []*entity.RealTimeTick
 
-func (c RealTimeTickArr) getTotalVolume() int64 {
+func (c realTimeStockTickArr) getTotalVolume() int64 {
 	var volume int64
 	for _, v := range c {
 		volume += v.Volume
@@ -19,7 +19,7 @@ func (c RealTimeTickArr) getTotalVolume() int64 {
 	return volume
 }
 
-func (c RealTimeTickArr) getOutInRatio() float64 {
+func (c realTimeStockTickArr) getOutInRatio() float64 {
 	if len(c) == 0 {
 		return 0
 	}
@@ -39,7 +39,7 @@ func (c RealTimeTickArr) getOutInRatio() float64 {
 	return 100 * float64(outVolume) / float64(outVolume+inVolume)
 }
 
-func (c RealTimeTickArr) getRSIByTickTime(preTime time.Time, count int) float64 {
+func (c realTimeStockTickArr) getRSIByTickTime(preTime time.Time, count int) float64 {
 	if len(c) == 0 || preTime.IsZero() {
 		return 0
 	}
@@ -54,16 +54,16 @@ func (c RealTimeTickArr) getRSIByTickTime(preTime time.Time, count int) float64 
 	return utils.GenerateRSI(tmp, count)
 }
 
-// RealTimeFutureTickArr -.
-type RealTimeFutureTickArr []*entity.RealTimeFutureTick
+// realTimeFutureTickArr -.
+type realTimeFutureTickArr []*entity.RealTimeFutureTick
 
-func (c RealTimeFutureTickArr) splitBySecond() []RealTimeFutureTickArr {
+func (c realTimeFutureTickArr) splitBySecond() []realTimeFutureTickArr {
 	if len(c) < 2 {
 		return nil
 	}
 
-	var result []RealTimeFutureTickArr
-	var tmp RealTimeFutureTickArr
+	var result []realTimeFutureTickArr
+	var tmp realTimeFutureTickArr
 	for i, tick := range c {
 		if i == len(c)-1 {
 			result = append(result, tmp)
@@ -74,14 +74,14 @@ func (c RealTimeFutureTickArr) splitBySecond() []RealTimeFutureTickArr {
 			tmp = append(tmp, tick)
 		} else {
 			result = append(result, tmp)
-			tmp = RealTimeFutureTickArr{tick}
+			tmp = realTimeFutureTickArr{tick}
 		}
 	}
 
 	return result
 }
 
-func (c RealTimeFutureTickArr) getTotalVolume() int64 {
+func (c realTimeFutureTickArr) getTotalVolume() int64 {
 	var volume int64
 	for _, v := range c {
 		volume += v.Volume
@@ -89,7 +89,7 @@ func (c RealTimeFutureTickArr) getTotalVolume() int64 {
 	return volume
 }
 
-func (c RealTimeFutureTickArr) getOutInRatio() float64 {
+func (c realTimeFutureTickArr) getOutInRatio() float64 {
 	if len(c) == 0 {
 		return 0
 	}

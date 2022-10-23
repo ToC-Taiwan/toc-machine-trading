@@ -165,10 +165,12 @@ type (
 	// Order -.
 	Order interface {
 		GetAllOrder(ctx context.Context) ([]*entity.StockOrder, error)
-		GetAllTradeBalance(ctx context.Context) ([]*entity.TradeBalance, error)
 		CalculateBuyCost(price float64, quantity int64) int64
 		CalculateSellCost(price float64, quantity int64) int64
 		CalculateTradeDiscount(price float64, quantity int64) int64
+
+		GetAllStockTradeBalance(ctx context.Context) ([]*entity.TradeBalance, error)
+		GetAllFutureTradeBalance(ctx context.Context) ([]*entity.TradeBalance, error)
 
 		AskOrderUpdate() error
 	}
@@ -189,6 +191,7 @@ type (
 		QueryFutureOrderByID(ctx context.Context, orderID string) (*entity.FutureOrder, error)
 		InsertOrUpdateFutureOrderByOrderID(ctx context.Context, t *entity.FutureOrder) error
 		QueryAllFutureOrderByDate(ctx context.Context, timeTange []time.Time) ([]*entity.FutureOrder, error)
+		QueryAllFutureTradeBalance(ctx context.Context) ([]*entity.TradeBalance, error)
 	}
 
 	// OrdergRPCAPI -.
