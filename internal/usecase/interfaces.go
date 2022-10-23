@@ -15,8 +15,8 @@ import (
 
 var (
 	log = logger.Get()
-	cc  = cache.GetCache()
-	bus = event.GetBus()
+	cc  = cache.Get()
+	bus = event.Get()
 )
 
 //go:generate mockgen -source=interfaces.go -destination=./mocks_test.go -package=usecase_test

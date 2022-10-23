@@ -15,8 +15,8 @@ type Cache struct {
 	*cache.Cache
 }
 
-// GetCache -.
-func GetCache() *Cache {
+// Get -.
+func Get() *Cache {
 	if singleInstance != nil {
 		return singleInstance
 	}

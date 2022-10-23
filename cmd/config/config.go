@@ -44,7 +44,7 @@ type Config struct {
 	Sinopac           Sinopac           `json:"sinopac"             env-required:"true" yaml:"sinopac"`
 	RabbitMQ          RabbitMQ          `json:"rabbitmq"            env-required:"true" yaml:"rabbitmq"`
 	Simulation        bool              `json:"simulation"          yaml:"simulation"`
-	TradeSwitch       TradeSwitch       `json:"trade_switch"        env-required:"true" yaml:"trade_switch"`
+	StockTradeSwitch  StockTradeSwitch  `json:"stock_trade_switch"  env-required:"true" yaml:"stock_trade_switch"`
 	FutureTradeSwitch FutureTradeSwitch `json:"future_trade_switch" env-required:"true" yaml:"future_trade_switch"`
 	History           History           `json:"history"             env-required:"true" yaml:"history"`
 	Quota             Quota             `json:"quota"               env-required:"true" yaml:"quota"`
@@ -79,8 +79,8 @@ type RabbitMQ struct {
 	Attempts int    `json:"attempts"  env-required:"true" yaml:"attempts"`
 }
 
-// TradeSwitch -.
-type TradeSwitch struct {
+// StockTradeSwitch -.
+type StockTradeSwitch struct {
 	AllowTrade       bool    `json:"allow_trade"         yaml:"allow_trade"`
 	HoldTimeFromOpen float64 `json:"hold_time_from_open" env-required:"true" yaml:"hold_time_from_open"`
 	TotalOpenTime    float64 `json:"total_open_time"     env-required:"true" yaml:"total_open_time"`
