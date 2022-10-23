@@ -333,6 +333,17 @@ definitions:
           $ref: '#/definitions/entity.Stock'
         type: array
     type: object
+  v1.tradeBalance:
+    properties:
+      future:
+        items:
+          $ref: '#/definitions/entity.TradeBalance'
+        type: array
+      stock:
+        items:
+          $ref: '#/definitions/entity.TradeBalance'
+        type: array
+    type: object
 info:
   contact: {}
   description: API docs for Auto Trade
@@ -510,9 +521,7 @@ paths:
         "200":
           description: OK
           schema:
-            items:
-              $ref: '#/definitions/entity.TradeBalance'
-            type: array
+            $ref: '#/definitions/v1.tradeBalance'
         "500":
           description: Internal Server Error
           schema:

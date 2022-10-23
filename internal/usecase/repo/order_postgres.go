@@ -246,6 +246,36 @@ func (r *OrderRepo) QueryAllStockTradeBalance(ctx context.Context) ([]*entity.Tr
 	return result, nil
 }
 
+// QueryAllFutureTradeBalance -.
+func (r *OrderRepo) QueryAllFutureTradeBalance(ctx context.Context) ([]*entity.TradeBalance, error) {
+	sql, _, err := r.Builder.
+		Select("trade_count, forward, reverse, original_balance, discount, total, trade_day").
+		From(tableNameFutureTradeBalance).
+		ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	rows, err := r.Pool().Query(ctx, sql)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var result []*entity.TradeBalance
+	for rows.Next() {
+		e := entity.TradeBalance{}
+		if err := rows.Scan(&e.TradeCount, &e.Forward, &e.Reverse, &e.OriginalBalance, &e.Discount, &e.Total, &e.TradeDay); err != nil {
+			if errors.Is(err, pgx.ErrNoRows) {
+				return nil, nil
+			}
+			return nil, err
+		}
+		result = append(result, &e)
+	}
+	return result, nil
+}
+
 // QueryFutureOrderByID -.
 func (r *OrderRepo) QueryFutureOrderByID(ctx context.Context, orderID string) (*entity.FutureOrder, error) {
 	sql, arg, err := r.Builder.

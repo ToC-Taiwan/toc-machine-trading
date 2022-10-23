@@ -421,9 +421,18 @@ func (uc *OrderUseCase) GetAllOrder(ctx context.Context) ([]*entity.StockOrder, 
 	return orderArr, nil
 }
 
-// GetAllTradeBalance -.
-func (uc *OrderUseCase) GetAllTradeBalance(ctx context.Context) ([]*entity.TradeBalance, error) {
+// GetAllStockTradeBalance -.
+func (uc *OrderUseCase) GetAllStockTradeBalance(ctx context.Context) ([]*entity.TradeBalance, error) {
 	tradeBalanceArr, err := uc.repo.QueryAllStockTradeBalance(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return tradeBalanceArr, nil
+}
+
+// GetAllFutureTradeBalance -.
+func (uc *OrderUseCase) GetAllFutureTradeBalance(ctx context.Context) ([]*entity.TradeBalance, error) {
+	tradeBalanceArr, err := uc.repo.QueryAllFutureTradeBalance(ctx)
 	if err != nil {
 		return nil, err
 	}
