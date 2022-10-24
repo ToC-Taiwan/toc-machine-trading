@@ -120,7 +120,7 @@ func (o *StockTrader) placeOrder(order *entity.StockOrder) {
 		return
 	}
 
-	bus.PublishTopicEvent(event.TopicPlaceOrder, order)
+	bus.PublishTopicEvent(event.TopicPlaceStockOrder, order)
 	go o.checkPlaceOrderStatus(order)
 }
 
@@ -258,7 +258,7 @@ func (o *StockTrader) checkPlaceOrderStatus(order *entity.StockOrder) {
 
 func (o *StockTrader) cancelOrder(order *entity.StockOrder) {
 	order.TradeTime = time.Time{}
-	bus.PublishTopicEvent(event.TopicCancelOrder, order)
+	bus.PublishTopicEvent(event.TopicCancelStockOrder, order)
 
 	go func() {
 		for {
@@ -270,7 +270,7 @@ func (o *StockTrader) cancelOrder(order *entity.StockOrder) {
 			if order.Status == entity.StatusCancelled {
 				log.Warnf("Order Canceled -> Stock: %s, Action: %d, Price: %.2f, Qty: %d", order.StockNum, order.Action, order.Price, order.Quantity)
 				if order.Action == entity.ActionBuy || order.Action == entity.ActionSellFirst {
-					bus.PublishTopicEvent(event.TopicUnSubscribeTickTargets, order.StockNum)
+					bus.PublishTopicEvent(event.TopicUnSubscribeStockTickTargets, order.StockNum)
 					return
 				}
 				o.waitingOrder = nil

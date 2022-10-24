@@ -70,8 +70,8 @@ func NewTarget(r TargetRepo, t TargetgRPCAPI, s StreamgRPCAPI) *TargetUseCase {
 
 	// sub events
 	bus.SubscribeTopic(event.TopicNewTargets, uc.publishNewTargets)
-	bus.SubscribeTopic(event.TopicSubscribeTickTargets, uc.SubscribeStockTick, uc.SubscribeStockBidAsk)
-	bus.SubscribeTopic(event.TopicUnSubscribeTickTargets, uc.UnSubscribeStockTick, uc.UnSubscribeStockBidAsk)
+	bus.SubscribeTopic(event.TopicSubscribeStockTickTargets, uc.SubscribeStockTick, uc.SubscribeStockBidAsk)
+	bus.SubscribeTopic(event.TopicUnSubscribeStockTickTargets, uc.UnSubscribeStockTick, uc.UnSubscribeStockBidAsk)
 	bus.SubscribeTopic(event.TopicSubscribeFutureTickTargets, uc.SubscribeFutureTick, uc.SubscribeFutureBidAsk)
 
 	return uc
@@ -90,8 +90,11 @@ func (uc *TargetUseCase) publishNewTargets(targetArr []*entity.Target) {
 
 	cc.AppendTargets(targetArr)
 
-	bus.PublishTopicEvent(event.TopicFetchHistory, context.Background(), targetArr)
-	bus.PublishTopicEvent(event.TopicStreamTargets, context.Background(), targetArr)
+	// stock
+	bus.PublishTopicEvent(event.TopicFetchStockHistory, context.Background(), targetArr)
+	bus.PublishTopicEvent(event.TopicStreamStockTargets, context.Background(), targetArr)
+
+	// future
 	bus.PublishTopicEvent(event.TopicStreamFutureTargets, context.Background(), uc.monitorFutureCode)
 }
 

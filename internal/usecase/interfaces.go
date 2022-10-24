@@ -164,7 +164,7 @@ type (
 type (
 	// Order -.
 	Order interface {
-		GetAllOrder(ctx context.Context) ([]*entity.StockOrder, error)
+		GetAllStockOrder(ctx context.Context) ([]*entity.StockOrder, error)
 		CalculateBuyCost(price float64, quantity int64) int64
 		CalculateSellCost(price float64, quantity int64) int64
 		CalculateTradeDiscount(price float64, quantity int64) int64
