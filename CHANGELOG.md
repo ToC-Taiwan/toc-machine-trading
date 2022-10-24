@@ -2,9 +2,12 @@
 ## [Unreleased]
 
 ### Chore
+- **changelog:** modify changelog
 - **changelog:** add git-chglog instead of cz-conventional-changelog
 
 ### Feat
+- **balance:** exclude unfinish order in calculate balance, modify topic name
+- **router:** add future trade balance to get balance
 - **strategy:** modify future trader strategy
 
 

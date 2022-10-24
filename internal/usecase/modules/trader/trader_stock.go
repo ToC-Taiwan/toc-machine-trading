@@ -89,12 +89,7 @@ func (o *StockTrader) TradingRoom() {
 				continue
 			}
 
-			order := o.generateOrder()
-			if order == nil {
-				continue
-			}
-
-			o.placeOrder(order)
+			o.placeOrder(o.generateOrder())
 		}
 	}()
 
@@ -106,6 +101,10 @@ func (o *StockTrader) TradingRoom() {
 }
 
 func (o *StockTrader) placeOrder(order *entity.StockOrder) {
+	if order == nil {
+		return
+	}
+
 	if order.Price == 0 {
 		log.Errorf("%s Order price is 0", order.StockNum)
 		return
