@@ -38,7 +38,7 @@ func newOrderRoutes(handler *gin.RouterGroup, t usecase.Order) {
 // @Failure     500 {object} response
 // @Router      /order/all [get]
 func (r *orderRoutes) getAllOrder(c *gin.Context) {
-	orderArr, err := r.t.GetAllOrder(c.Request.Context())
+	orderArr, err := r.t.GetAllStockOrder(c.Request.Context())
 	if err != nil {
 		log.Error(err)
 		errorResponse(c, http.StatusInternalServerError, err.Error())

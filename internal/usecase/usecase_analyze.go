@@ -31,7 +31,7 @@ func NewAnalyze(r HistoryRepo) *AnalyzeUseCase {
 		tradeDay:         tradeday.NewTradeDay(),
 	}
 
-	bus.SubscribeTopic(event.TopicAnalyzeTargets, uc.AnalyzeAll)
+	bus.SubscribeTopic(event.TopicAnalyzeStockTargets, uc.AnalyzeAll)
 	return uc
 }
 

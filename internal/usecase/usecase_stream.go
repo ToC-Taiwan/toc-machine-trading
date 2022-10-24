@@ -68,7 +68,7 @@ func NewStream(r StreamRepo, g StreamgRPCAPI, t StreamRabbit) *StreamUseCase {
 		}
 	}()
 
-	bus.SubscribeTopic(event.TopicStreamTargets, uc.ReceiveStreamData)
+	bus.SubscribeTopic(event.TopicStreamStockTargets, uc.ReceiveStreamData)
 	bus.SubscribeTopic(event.TopicStreamFutureTargets, uc.ReceiveFutureStreamData)
 	return uc
 }
@@ -151,7 +151,7 @@ func (uc *StreamUseCase) ReceiveOrderStatus(ctx context.Context) {
 			switch t := order.(type) {
 			case *entity.StockOrder:
 				if cc.GetOrderByOrderID(t.OrderID) != nil {
-					bus.PublishTopicEvent(event.TopicInsertOrUpdateOrder, t)
+					bus.PublishTopicEvent(event.TopicInsertOrUpdateStockOrder, t)
 				}
 			case *entity.FutureOrder:
 				if cc.GetFutureOrderByOrderID(t.OrderID) != nil {
@@ -269,7 +269,7 @@ func (uc *StreamUseCase) ReceiveStreamData(ctx context.Context, targetArr []*ent
 			target := targetMap[agent.GetStockNum()]
 			mutex.RUnlock()
 
-			bus.PublishTopicEvent(event.TopicSubscribeTickTargets, []*entity.Target{target})
+			bus.PublishTopicEvent(event.TopicSubscribeStockTickTargets, []*entity.Target{target})
 		}
 	}()
 

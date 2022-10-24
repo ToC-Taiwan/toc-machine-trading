@@ -40,7 +40,7 @@ func NewHistory(r HistoryRepo, t HistorygRPCAPI) *HistoryUseCase {
 	uc.stockAnalyzeCfg = cfg.StockAnalyze
 	uc.basic = *cc.GetBasicInfo()
 
-	bus.SubscribeTopic(event.TopicFetchHistory, uc.FetchHistory)
+	bus.SubscribeTopic(event.TopicFetchStockHistory, uc.FetchHistory)
 	// uc.FetchFutureHistoryTick(cfg.TargetCond.MonitorFutureCode, uc.basic.LastTradeDay)
 
 	return uc
@@ -88,7 +88,7 @@ func (uc *HistoryUseCase) FetchHistory(ctx context.Context, targetArr []*entity.
 		log.Panic(err)
 	}
 
-	bus.PublishTopicEvent(event.TopicAnalyzeTargets, ctx, fetchArr)
+	bus.PublishTopicEvent(event.TopicAnalyzeStockTargets, ctx, fetchArr)
 }
 
 func (uc *HistoryUseCase) fetchHistoryClose(targetArr []*entity.Target) error {

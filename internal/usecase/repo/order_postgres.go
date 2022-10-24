@@ -100,6 +100,7 @@ func (r *OrderRepo) QueryAllStockOrderByDate(ctx context.Context, timeRange []ti
 		From(tableNameTradeOrder).
 		Where(squirrel.GtOrEq{"order_time": timeRange[0]}).
 		Where(squirrel.Lt{"order_time": timeRange[1]}).
+		OrderBy("order_time ASC").
 		Join("basic_stock ON trade_order.stock_num = basic_stock.number").ToSql()
 	if err != nil {
 		return nil, err
@@ -352,6 +353,7 @@ func (r *OrderRepo) QueryAllFutureOrderByDate(ctx context.Context, timeRange []t
 		From(tableNameTradeFutureOrder).
 		Where(squirrel.GtOrEq{"order_time": timeRange[0]}).
 		Where(squirrel.Lt{"order_time": timeRange[1]}).
+		OrderBy("order_time ASC").
 		Join("basic_future ON trade_future_order.code = basic_future.code").ToSql()
 	if err != nil {
 		return nil, err
