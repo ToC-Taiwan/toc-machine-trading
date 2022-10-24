@@ -71,6 +71,6 @@ future_trade_switch:
 
 future_analyze:
     max_hold_time: 10 # unit: minute
-    tick_analyze_period: 30000 # unit: millisecond
-    all_out_in_ratio: 75 # unit: %
-    all_in_out_ratio: 75 # unit: %
+    tick_analyze_period: 15000 # unit: millisecond
+    all_out_in_ratio: 90 # unit: %
+    all_in_out_ratio: 90 # unit: %

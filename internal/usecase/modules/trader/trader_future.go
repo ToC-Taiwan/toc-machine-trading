@@ -21,7 +21,6 @@ type FutureTrader struct {
 
 	lastArr       realTimeFutureTickArr
 	magnification float64
-	avgVolume     float64
 
 	orderMapLock sync.RWMutex
 	orderMap     map[entity.OrderAction][]*entity.FutureOrder
@@ -91,18 +90,24 @@ func (o *FutureTrader) TradingRoom() {
 		}
 		o.tickArr = append(o.tickArr, tick)
 		tmp := o.tickArr.splitBySecond()
+		if len(tmp) < 10 {
+			continue
+		}
+
 		var total, last int
 		for i, v := range tmp {
-			if i != len(tmp)-1 {
-				total += int(v.getTotalVolume())
-			} else {
+			switch {
+			case i == len(tmp)-1:
+				continue
+			case i == len(tmp)-2:
 				last = int(v.getTotalVolume())
 				o.lastArr = v
+			default:
+				total += int(v.getTotalVolume())
 			}
 		}
 		if avg := float64(total) / float64(len(tmp)-2); avg != 0 {
 			o.magnification = float64(last) / avg
-			o.avgVolume = avg
 		}
 
 		o.lastTick = tick
@@ -156,10 +161,10 @@ func (o *FutureTrader) generateOrder() *entity.FutureOrder {
 	}
 
 	switch {
-	case outInRation > o.analyzeCfg.AllOutInRatio:
+	case outInRation >= o.analyzeCfg.AllOutInRatio:
 		order.Action = entity.ActionBuy
 		return order
-	case 100-outInRation > o.analyzeCfg.AllInOutRatio:
+	case 100-outInRation >= o.analyzeCfg.AllInOutRatio:
 		order.Action = entity.ActionSellFirst
 		return order
 	default:
@@ -191,7 +196,7 @@ func (o *FutureTrader) generateTradeOutOrder(postOrderAction entity.OrderAction,
 			return order
 		}
 
-		if 100-outInRation > o.analyzeCfg.AllInOutRatio && order.Price-preOrder.Price > 2 {
+		if 100-outInRation >= o.analyzeCfg.AllInOutRatio && order.Price-preOrder.Price > 1 {
 			return order
 		}
 
@@ -200,7 +205,7 @@ func (o *FutureTrader) generateTradeOutOrder(postOrderAction entity.OrderAction,
 			return order
 		}
 
-		if outInRation > o.analyzeCfg.AllInOutRatio && order.Price-preOrder.Price < -2 {
+		if outInRation >= o.analyzeCfg.AllInOutRatio && order.Price-preOrder.Price < -1 {
 			return order
 		}
 	}
