@@ -157,23 +157,29 @@ func (o *FutureTrader) generateTradeOutOrder(postOrderAction entity.OrderAction,
 		},
 	}
 
-	if o.lastTick.TickTime.After(preOrder.TradeTime.Add(time.Duration(o.analyzeCfg.MaxHoldTime) * time.Minute)) {
-		return order
+	// if o.lastTick.TickTime.After(preOrder.TradeTime.Add(time.Duration(o.analyzeCfg.MaxHoldTime) * time.Minute)) {
+	// 	return order
+	// }
+
+	if !o.kbarArr.isStable(3) {
+		return nil
 	}
+
+	return order
 
 	// outInRation := o.tickArr.getOutInRatio()
-	switch order.Action {
-	case entity.ActionSell:
-		if order.Price-preOrder.Price < -2 || order.Price-preOrder.Price > 1 {
-			return order
-		}
+	// switch order.Action {
+	// case entity.ActionSell:
+	// 	if order.Price-preOrder.Price < -2 || order.Price-preOrder.Price > 1 {
+	// 		return order
+	// 	}
 
-	case entity.ActionBuyLater:
-		if order.Price-preOrder.Price > 2 || order.Price-preOrder.Price < -1 {
-			return order
-		}
-	}
-	return nil
+	// case entity.ActionBuyLater:
+	// 	if order.Price-preOrder.Price > 2 || order.Price-preOrder.Price < -1 {
+	// 		return order
+	// 	}
+	// }
+	// return nil
 }
 
 func (o *FutureTrader) placeFutureOrder(order *entity.FutureOrder) {
