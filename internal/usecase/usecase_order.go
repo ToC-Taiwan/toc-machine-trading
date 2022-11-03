@@ -182,7 +182,7 @@ func (uc *OrderUseCase) placeStockOrder(order *entity.StockOrder) {
 	order.TradeTime = time.Now()
 	cc.SetOrderByOrderID(order)
 
-	log.Warnf("Place Order -> Stock: %s, Action: %d, Price: %.2f, Qty: %d, Quota: %d", order.StockNum, order.Action, order.Price, order.Quantity, uc.quota.GetCurrentQuota())
+	log.Infof("Place Stock Order -> Stock: %s, Action: %d, Price: %.2f, Qty: %d, Quota: %d", order.StockNum, order.Action, order.Price, order.Quantity, uc.quota.GetCurrentQuota())
 }
 
 func (uc *OrderUseCase) cancelStockOrder(order *entity.StockOrder) {
@@ -190,7 +190,7 @@ func (uc *OrderUseCase) cancelStockOrder(order *entity.StockOrder) {
 	uc.placeOrderLock.Lock()
 
 	order.TradeTime = time.Now()
-	log.Warnf("Cancel Order -> Stock: %s, Action: %d, Price: %.2f, Qty: %d", order.StockNum, order.Action, order.Price, order.Quantity)
+	log.Infof("Cancel Stock Order -> Stock: %s, Action: %d, Price: %.2f, Qty: %d", order.StockNum, order.Action, order.Price, order.Quantity)
 
 	// result will return instantly
 	_, _, err := uc.CancelOrderID(order.OrderID)
@@ -201,7 +201,7 @@ func (uc *OrderUseCase) cancelStockOrder(order *entity.StockOrder) {
 
 	if cosumeQuota := uc.quota.CalculateOriginalOrderCost(order); cosumeQuota > 0 {
 		uc.quota.BackQuota(cosumeQuota)
-		log.Warnf("Quota Back: %d", uc.quota.GetCurrentQuota())
+		log.Infof("Quota Back: %d", uc.quota.GetCurrentQuota())
 	}
 }
 
@@ -396,7 +396,7 @@ func (uc *OrderUseCase) placeFutureOrder(order *entity.FutureOrder) {
 	order.TradeTime = time.Now()
 	cc.SetFutureOrderByOrderID(order)
 
-	log.Warnf("Place Future Order -> Future: %s, Action: %d, Price: %.0f, Qty: %d", order.Code, order.Action, order.Price, order.Quantity)
+	log.Infof("Place Future Order -> Future: %s, Action: %d, Price: %.0f, Qty: %d", order.Code, order.Action, order.Price, order.Quantity)
 }
 
 func (uc *OrderUseCase) cancelFutureOrder(order *entity.FutureOrder) {
@@ -404,7 +404,7 @@ func (uc *OrderUseCase) cancelFutureOrder(order *entity.FutureOrder) {
 	uc.placeFutureOrderLock.Lock()
 
 	order.TradeTime = time.Now()
-	log.Warnf("Cancel Future Order -> Future: %s, Action: %d, Price: %.0f, Qty: %d", order.Code, order.Action, order.Price, order.Quantity)
+	log.Infof("Cancel Future Order -> Future: %s, Action: %d, Price: %.0f, Qty: %d", order.Code, order.Action, order.Price, order.Quantity)
 
 	// result will return instantly
 	_, _, err := uc.CancelFutureOrderID(order.OrderID)

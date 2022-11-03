@@ -255,17 +255,17 @@ linters:
         - godox
         - gofmt
         - goimports
-        - golint
+        # - golint
         - gosec
         - gosimple
         - govet
         - ineffassign
-        - interfacer
+        # - interfacer
         # - misspell
         - nakedret
-        - scopelint
+        # - scopelint
         - staticcheck
-        - structcheck
+        # - structcheck
         - stylecheck
         - typecheck
         - unconvert

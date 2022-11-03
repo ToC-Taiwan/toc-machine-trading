@@ -150,8 +150,7 @@ type FutureTradeSwitch struct {
 
 // FutureAnalyze -.
 type FutureAnalyze struct {
-	MaxHoldTime       float64 `json:"max_hold_time"       env-required:"true" yaml:"max_hold_time"`
-	AllOutInRatio     float64 `json:"all_out_in_ratio"    env-required:"true" yaml:"all_out_in_ratio"`
-	AllInOutRatio     float64 `json:"all_in_out_ratio"    env-required:"true" yaml:"all_in_out_ratio"`
-	TickAnalyzePeriod float64 `json:"tick_analyze_period" env-required:"true" yaml:"tick_analyze_period"`
+	MaxHoldTime   float64 `json:"max_hold_time"    env-required:"true" yaml:"max_hold_time"`
+	AllOutInRatio float64 `json:"all_out_in_ratio" env-required:"true" yaml:"all_out_in_ratio"`
+	AllInOutRatio float64 `json:"all_in_out_ratio" env-required:"true" yaml:"all_in_out_ratio"`
 }

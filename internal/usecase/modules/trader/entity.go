@@ -107,3 +107,54 @@ func (c realTimeFutureTickArr) getOutInRatio() float64 {
 	}
 	return 100 * float64(outVolume) / float64(outVolume+inVolume)
 }
+
+type realTimeKbar struct {
+	open   float64
+	high   float64
+	low    float64
+	close  float64
+	volume int64
+}
+
+func (c realTimeFutureTickArr) getKbar() realTimeKbar {
+	kbar := realTimeKbar{
+		open:  c[0].Close,
+		high:  c[0].Close,
+		low:   c[0].Close,
+		close: c[len(c)-1].Close,
+	}
+
+	for _, v := range c {
+		kbar.volume += v.Volume
+
+		if v.Close > kbar.high {
+			kbar.high = v.Close
+		}
+
+		if v.Close < kbar.low {
+			kbar.low = v.Close
+		}
+	}
+	return kbar
+}
+
+type realTimeKbarArr []realTimeKbar
+
+func (k realTimeKbarArr) isStable(count int) bool {
+	if len(k) < count {
+		return false
+	}
+
+	tmp := k[len(k)-count:]
+	for i, v := range tmp {
+		if i == 0 {
+			continue
+		}
+
+		if v.low > tmp[i-1].close || v.high < tmp[i-1].close {
+			return false
+		}
+	}
+
+	return true
+}

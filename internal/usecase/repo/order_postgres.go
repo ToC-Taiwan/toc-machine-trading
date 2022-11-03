@@ -221,7 +221,7 @@ func (r *OrderRepo) QueryStockTradeBalanceByDate(ctx context.Context, date time.
 func (r *OrderRepo) QueryAllStockTradeBalance(ctx context.Context) ([]*entity.TradeBalance, error) {
 	sql, _, err := r.Builder.
 		Select("trade_count, forward, reverse, original_balance, discount, total, trade_day").
-		From(tableNameTradeBalance).
+		From(tableNameTradeBalance).OrderBy("trade_day ASC").
 		ToSql()
 	if err != nil {
 		return nil, err
@@ -251,7 +251,7 @@ func (r *OrderRepo) QueryAllStockTradeBalance(ctx context.Context) ([]*entity.Tr
 func (r *OrderRepo) QueryAllFutureTradeBalance(ctx context.Context) ([]*entity.TradeBalance, error) {
 	sql, _, err := r.Builder.
 		Select("trade_count, forward, reverse, original_balance, discount, total, trade_day").
-		From(tableNameFutureTradeBalance).
+		From(tableNameFutureTradeBalance).OrderBy("trade_day ASC").
 		ToSql()
 	if err != nil {
 		return nil, err
