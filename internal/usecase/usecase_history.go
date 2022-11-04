@@ -29,7 +29,8 @@ type HistoryUseCase struct {
 
 	biasRateArr []float64
 
-	tradeDay *tradeday.TradeDay
+	tradeDay           *tradeday.TradeDay
+	simulateFutureCode string
 }
 
 // NewHistory -.
@@ -45,10 +46,13 @@ func NewHistory(r HistoryRepo, t HistorygRPCAPI) *HistoryUseCase {
 	uc.stockAnalyzeCfg = cfg.StockAnalyze
 	uc.basic = *cc.GetBasicInfo()
 
-	// uc.GetFutureTradeCond("MXFK2", 6)
-
 	bus.SubscribeTopic(event.TopicFetchStockHistory, uc.FetchHistory)
+	bus.SubscribeTopic(event.TopicMonitorFutureCode, uc.updateSimulateFutureCode)
 	return uc
+}
+
+func (uc *HistoryUseCase) updateSimulateFutureCode(future *entity.Future) {
+	uc.simulateFutureCode = future.Code
 }
 
 // GetTradeDay -.
@@ -568,11 +572,11 @@ func (uc *HistoryUseCase) findExistFutureHistoryTick(date tradeday.TradePeriod, 
 	return dbTickArr, nil
 }
 
-func (uc *HistoryUseCase) GetFutureTradeCond(code string, days int) {
+func (uc *HistoryUseCase) GetFutureTradeCond(days int) trader.TradeBalance {
 	simulateDateArr := uc.tradeDay.GetLastNFutureTradeDay(days)
 	var balanceArr []trader.TradeBalance
 	for _, date := range simulateDateArr {
-		dbTickArr, err := uc.findExistFutureHistoryTick(date, code)
+		dbTickArr, err := uc.findExistFutureHistoryTick(date, uc.simulateFutureCode)
 		if err != nil {
 			log.Error(err)
 			continue
@@ -584,11 +588,11 @@ func (uc *HistoryUseCase) GetFutureTradeCond(code string, days int) {
 			AllInOutRatio: 75,
 		}
 
-		simulator := trader.NewFutureSimulator(code, cond, date)
+		simulator := trader.NewFutureSimulator(uc.simulateFutureCode, cond, date)
 		tickChan := simulator.GetTickChan()
 		for _, tick := range dbTickArr {
 			tickChan <- &entity.RealTimeFutureTick{
-				Code:     code,
+				Code:     uc.simulateFutureCode,
 				TickTime: tick.TickTime,
 				Close:    tick.Close,
 				Volume:   tick.Volume,
@@ -605,10 +609,9 @@ func (uc *HistoryUseCase) GetFutureTradeCond(code string, days int) {
 		totalCount += balance.Count
 		totalBalance += balance.Balance
 	}
-	log.Warnf("Total count: %d", totalCount)
-	log.Warnf("Total balance: %d", totalBalance)
 
-	// TODO: remove this stuck
-	stuck := make(chan struct{})
-	<-stuck
+	return trader.TradeBalance{
+		Count:   totalCount,
+		Balance: totalBalance,
+	}
 }

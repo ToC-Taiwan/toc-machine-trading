@@ -8,6 +8,7 @@ import (
 	"tmt/internal/entity"
 	"tmt/internal/usecase/modules/cache"
 	"tmt/internal/usecase/modules/event"
+	"tmt/internal/usecase/modules/trader"
 
 	"tmt/pb"
 	"tmt/pkg/logger"
@@ -84,6 +85,8 @@ type (
 	History interface {
 		GetTradeDay() time.Time
 		GetDayKbarByStockNumDate(stockNum string, date time.Time) *entity.HistoryKbar
+
+		GetFutureTradeCond(days int) trader.TradeBalance
 	}
 
 	// HistoryRepo -.

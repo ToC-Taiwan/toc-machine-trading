@@ -220,6 +220,45 @@ const docTemplate = `{
                 }
             }
         },
+        "/history/simulate/{interval}": {
+            "get": {
+                "description": "simulateFuture",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "history"
+                ],
+                "summary": "simulateFuture",
+                "operationId": "simulateFuture",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "interval",
+                        "name": "interval",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/trader.TradeBalance"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/v1.response"
+                        }
+                    }
+                }
+            }
+        },
         "/order/all": {
             "get": {
                 "description": "getAllOrder",
@@ -955,6 +994,17 @@ const docTemplate = `{
                 },
                 "trade_day": {
                     "type": "string"
+                }
+            }
+        },
+        "trader.TradeBalance": {
+            "type": "object",
+            "properties": {
+                "balance": {
+                    "type": "integer"
+                },
+                "count": {
+                    "type": "integer"
                 }
             }
         },

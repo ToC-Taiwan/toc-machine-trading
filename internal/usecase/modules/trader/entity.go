@@ -160,6 +160,6 @@ func (k realTimeKbarArr) isStable(count int) bool {
 
 // TradeBalance -.
 type TradeBalance struct {
-	Count   int64
-	Balance int64
+	Count   int64 `json:"count"   yaml:"count"`
+	Balance int64 `json:"balance" yaml:"balance"`
 }

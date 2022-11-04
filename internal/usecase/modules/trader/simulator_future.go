@@ -43,7 +43,7 @@ func NewFutureSimulator(code string, analyzeCfg config.FutureAnalyze, period tra
 	cfg := config.GetConfig()
 	t := &FutureSimulator{
 		code:              code,
-		orderQuantity:     1,
+		orderQuantity:     2,
 		orderMap:          make(map[entity.OrderAction][]*entity.FutureOrder),
 		tickChan:          make(chan *entity.RealTimeFutureTick),
 		analyzeCfg:        analyzeCfg,

@@ -9,6 +9,7 @@ import (
 	reflect "reflect"
 	time "time"
 	entity "tmt/internal/entity"
+	trader "tmt/internal/usecase/modules/trader"
 	pb "tmt/pb"
 
 	gomock "github.com/golang/mock/gomock"
@@ -613,6 +614,20 @@ func (m *MockHistory) GetDayKbarByStockNumDate(stockNum string, date time.Time) 
 func (mr *MockHistoryMockRecorder) GetDayKbarByStockNumDate(stockNum, date interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetDayKbarByStockNumDate", reflect.TypeOf((*MockHistory)(nil).GetDayKbarByStockNumDate), stockNum, date)
+}
+
+// GetFutureTradeCond mocks base method.
+func (m *MockHistory) GetFutureTradeCond(days int) trader.TradeBalance {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetFutureTradeCond", days)
+	ret0, _ := ret[0].(trader.TradeBalance)
+	return ret0
+}
+
+// GetFutureTradeCond indicates an expected call of GetFutureTradeCond.
+func (mr *MockHistoryMockRecorder) GetFutureTradeCond(days interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFutureTradeCond", reflect.TypeOf((*MockHistory)(nil).GetFutureTradeCond), days)
 }
 
 // GetTradeDay mocks base method.
