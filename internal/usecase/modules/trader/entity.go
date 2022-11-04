@@ -57,28 +57,27 @@ func (c realTimeStockTickArr) getRSIByTickTime(preTime time.Time, count int) flo
 // realTimeFutureTickArr -.
 type realTimeFutureTickArr []*entity.RealTimeFutureTick
 
-func (c realTimeFutureTickArr) splitBySecond() []realTimeFutureTickArr {
+func (c realTimeFutureTickArr) splitBySecond(last int) []realTimeFutureTickArr {
 	if len(c) < 2 {
 		return nil
 	}
 
 	var result []realTimeFutureTickArr
 	var tmp realTimeFutureTickArr
-	for i, tick := range c {
-		if i == len(c)-1 {
-			result = append(result, tmp)
-			break
+	for i := len(c) - 2; i >= 1; i-- {
+		if len(result) == last {
+			return result
 		}
 
-		if tick.TickTime.Second() == c[i+1].TickTime.Second() {
-			tmp = append(tmp, tick)
+		if c[i].TickTime.Second() == c[i-1].TickTime.Second() {
+			tmp = append(tmp, c[i])
 		} else {
 			result = append(result, tmp)
-			tmp = realTimeFutureTickArr{tick}
+			tmp = realTimeFutureTickArr{c[i]}
 		}
 	}
 
-	return result
+	return nil
 }
 
 func (c realTimeFutureTickArr) getTotalVolume() int64 {
@@ -151,10 +150,16 @@ func (k realTimeKbarArr) isStable(count int) bool {
 			continue
 		}
 
-		if v.low > tmp[i-1].close || v.high < tmp[i-1].close {
+		if v.high > tmp[i-1].high || v.low < tmp[i-1].low {
 			return false
 		}
 	}
 
 	return true
+}
+
+// TradeBalance -.
+type TradeBalance struct {
+	Count   int64 `json:"count"   yaml:"count"`
+	Balance int64 `json:"balance" yaml:"balance"`
 }

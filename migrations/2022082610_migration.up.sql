@@ -31,7 +31,7 @@ CREATE TABLE trade_future_order (
 CREATE INDEX trade_future_order_order_time_index ON trade_future_order USING btree ("order_time");
 
 ALTER TABLE trade_future_order
-ADD CONSTRAINT "fk_trade_future_order_stock" FOREIGN KEY ("code") REFERENCES basic_future ("code");
+ADD CONSTRAINT "fk_trade_future_order_future" FOREIGN KEY ("code") REFERENCES basic_future ("code");
 
 CREATE TABLE trade_future_balance (
     "id" SERIAL PRIMARY KEY,

@@ -301,7 +301,7 @@ func (uc *StreamUseCase) ReceiveFutureStreamData(ctx context.Context, code strin
 	go agent.TradingRoom()
 
 	go uc.rabbit.FutureTickConsumer(code, agent.GetTickChan())
-	go uc.rabbit.FutureBidAskConsumer(code, agent.GetBidAskChan())
+	// go uc.rabbit.FutureBidAskConsumer(code, agent.GetBidAskChan())
 
 	bus.PublishTopicEvent(event.TopicSubscribeFutureTickTargets, code)
 

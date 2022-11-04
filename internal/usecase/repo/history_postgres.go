@@ -116,8 +116,8 @@ func (r *HistoryRepo) QueryMutltiStockCloseByDate(ctx context.Context, stockNumA
 }
 
 // InsertHistoryTickArr -.
-func (r *HistoryRepo) InsertHistoryTickArr(ctx context.Context, t []*entity.HistoryTick) error {
-	var split [][]*entity.HistoryTick
+func (r *HistoryRepo) InsertHistoryTickArr(ctx context.Context, t []*entity.StockHistoryTick) error {
+	var split [][]*entity.StockHistoryTick
 	if len(t) > batchSize {
 		count := len(t)/batchSize + 1
 		for i := 0; i < count; i++ {
@@ -180,7 +180,7 @@ func (r *HistoryRepo) DeleteHistoryTickByStockAndDate(ctx context.Context, stock
 }
 
 // QueryMultiStockTickArrByDate -.
-func (r *HistoryRepo) QueryMultiStockTickArrByDate(ctx context.Context, stockNumArr []string, date time.Time) (map[string][]*entity.HistoryTick, error) {
+func (r *HistoryRepo) QueryMultiStockTickArrByDate(ctx context.Context, stockNumArr []string, date time.Time) (map[string][]*entity.StockHistoryTick, error) {
 	sql, args, err := r.Builder.
 		Select("stock_num, tick_time, close, tick_type, volume, bid_price, bid_volume, ask_price, ask_volume, number, name, exchange, category, day_trade, last_close, update_date").
 		From(tableNameHistoryTick).
@@ -199,9 +199,9 @@ func (r *HistoryRepo) QueryMultiStockTickArrByDate(ctx context.Context, stockNum
 	}
 	defer rows.Close()
 
-	result := make(map[string][]*entity.HistoryTick)
+	result := make(map[string][]*entity.StockHistoryTick)
 	for rows.Next() {
-		e := entity.HistoryTick{Stock: new(entity.Stock)}
+		e := entity.StockHistoryTick{Stock: new(entity.Stock)}
 		if err := rows.Scan(
 			&e.StockNum, &e.TickTime, &e.Close, &e.TickType, &e.Volume, &e.BidPrice, &e.BidVolume, &e.AskPrice, &e.AskVolume,
 			&e.Stock.Number, &e.Stock.Name, &e.Stock.Exchange, &e.Stock.Category, &e.Stock.DayTrade, &e.Stock.LastClose, &e.Stock.UpdateDate,
@@ -362,6 +362,82 @@ func (r *HistoryRepo) QueryAllQuaterMAByStockNum(ctx context.Context, stockNum s
 			return nil, err
 		}
 		result[e.Date] = &e
+	}
+	return result, nil
+}
+
+// InsertFutureHistoryTickArr -.
+func (r *HistoryRepo) InsertFutureHistoryTickArr(ctx context.Context, t []*entity.FutureHistoryTick) error {
+	var split [][]*entity.FutureHistoryTick
+	if len(t) > batchSize {
+		count := len(t)/batchSize + 1
+		for i := 0; i < count; i++ {
+			start := i * batchSize
+			end := (i + 1) * batchSize
+			if end > len(t) {
+				end = len(t)
+			}
+			if start != end {
+				split = append(split, t[start:end])
+			}
+		}
+	} else {
+		split = append(split, t)
+	}
+
+	tx, err := r.BeginTransaction()
+	if err != nil {
+		return err
+	}
+	defer r.EndTransaction(tx, err)
+	var sql string
+	var args []interface{}
+
+	for _, s := range split {
+		builder := r.Builder.Insert(tableNameHistoryTickFuture).Columns("code, tick_time, close, tick_type, volume, bid_price, bid_volume, ask_price, ask_volume")
+		for _, v := range s {
+			builder = builder.Values(v.Code, v.TickTime, v.Close, v.TickType, v.Volume, v.BidPrice, v.BidVolume, v.AskPrice, v.AskVolume)
+		}
+
+		if sql, args, err = builder.ToSql(); err != nil {
+			return err
+		} else if _, err = tx.Exec(ctx, sql, args...); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// QueryFutureTickArrByTime -.
+func (r *HistoryRepo) QueryFutureTickArrByTime(ctx context.Context, code string, startTime, endTime time.Time) ([]*entity.FutureHistoryTick, error) {
+	sql, args, err := r.Builder.
+		Select("history_tick_future.code, tick_time, close, tick_type, volume, bid_price, bid_volume, ask_price, ask_volume, basic_future.code, symbol, name, category, delivery_month, delivery_date, underlying_kind, unit, limit_up, limit_down, reference, update_date").
+		From(tableNameHistoryTickFuture).
+		Where(squirrel.GtOrEq{"tick_time": startTime}).
+		Where(squirrel.Lt{"tick_time": endTime}).
+		Where(squirrel.Eq{"history_tick_future.code": code}).
+		OrderBy("tick_time ASC").
+		Join("basic_future ON history_tick_future.code = basic_future.code").ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	rows, err := r.Pool().Query(ctx, sql, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	result := []*entity.FutureHistoryTick{}
+	for rows.Next() {
+		e := entity.FutureHistoryTick{Future: new(entity.Future)}
+		if err := rows.Scan(
+			&e.Code, &e.TickTime, &e.Close, &e.TickType, &e.Volume, &e.BidPrice, &e.BidVolume, &e.AskPrice, &e.AskVolume,
+			&e.Future.Code, &e.Future.Symbol, &e.Future.Name, &e.Future.Category, &e.Future.DeliveryMonth, &e.Future.DeliveryDate, &e.Future.UnderlyingKind, &e.Future.Unit, &e.Future.LimitUp, &e.Future.LimitDown, &e.Future.Reference, &e.Future.UpdateDate,
+		); err != nil {
+			return nil, err
+		}
+		result = append(result, &e)
 	}
 	return result, nil
 }

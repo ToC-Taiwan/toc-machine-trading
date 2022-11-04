@@ -8,6 +8,7 @@ import (
 	"tmt/internal/entity"
 	"tmt/internal/usecase/modules/cache"
 	"tmt/internal/usecase/modules/event"
+	"tmt/internal/usecase/modules/trader"
 
 	"tmt/pb"
 	"tmt/pkg/logger"
@@ -84,14 +85,16 @@ type (
 	History interface {
 		GetTradeDay() time.Time
 		GetDayKbarByStockNumDate(stockNum string, date time.Time) *entity.HistoryKbar
+
+		GetFutureTradeCond(days int) trader.TradeBalance
 	}
 
 	// HistoryRepo -.
 	HistoryRepo interface {
 		InsertHistoryCloseArr(ctx context.Context, t []*entity.HistoryClose) error
 		QueryMutltiStockCloseByDate(ctx context.Context, stockNumArr []string, date time.Time) (map[string]*entity.HistoryClose, error)
-		InsertHistoryTickArr(ctx context.Context, t []*entity.HistoryTick) error
-		QueryMultiStockTickArrByDate(ctx context.Context, stockNumArr []string, date time.Time) (map[string][]*entity.HistoryTick, error)
+		InsertHistoryTickArr(ctx context.Context, t []*entity.StockHistoryTick) error
+		QueryMultiStockTickArrByDate(ctx context.Context, stockNumArr []string, date time.Time) (map[string][]*entity.StockHistoryTick, error)
 		InsertHistoryKbarArr(ctx context.Context, t []*entity.HistoryKbar) error
 		QueryMultiStockKbarArrByDate(ctx context.Context, stockNumArr []string, date time.Time) (map[string][]*entity.HistoryKbar, error)
 		InsertQuaterMA(ctx context.Context, t *entity.HistoryAnalyze) error
@@ -99,6 +102,9 @@ type (
 		DeleteHistoryKbarByStockAndDate(ctx context.Context, stockNumArr []string, date time.Time) error
 		DeleteHistoryTickByStockAndDate(ctx context.Context, stockNumArr []string, date time.Time) error
 		DeleteHistoryCloseByStockAndDate(ctx context.Context, stockNumArr []string, date time.Time) error
+
+		InsertFutureHistoryTickArr(ctx context.Context, t []*entity.FutureHistoryTick) error
+		QueryFutureTickArrByTime(ctx context.Context, code string, startTime, endTime time.Time) ([]*entity.FutureHistoryTick, error)
 	}
 
 	// HistorygRPCAPI -.

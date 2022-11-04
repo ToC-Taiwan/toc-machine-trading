@@ -61,7 +61,7 @@ stock_analyze:
 
 future_trade_switch:
     allow_trade: true
-    quantity: 1
+    quantity: 2
     trade_in_wait_time: 10 # unit: seccond
     trade_out_wait_time: 20 # unit: seccond
     cancel_wait_time: 30 # unit: seccond
