@@ -694,6 +694,20 @@ func (mr *MockHistoryRepoMockRecorder) DeleteHistoryTickByStockAndDate(ctx, stoc
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteHistoryTickByStockAndDate", reflect.TypeOf((*MockHistoryRepo)(nil).DeleteHistoryTickByStockAndDate), ctx, stockNumArr, date)
 }
 
+// InsertFutureHistoryTickArr mocks base method.
+func (m *MockHistoryRepo) InsertFutureHistoryTickArr(ctx context.Context, t []*entity.FutureHistoryTick) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "InsertFutureHistoryTickArr", ctx, t)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// InsertFutureHistoryTickArr indicates an expected call of InsertFutureHistoryTickArr.
+func (mr *MockHistoryRepoMockRecorder) InsertFutureHistoryTickArr(ctx, t interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertFutureHistoryTickArr", reflect.TypeOf((*MockHistoryRepo)(nil).InsertFutureHistoryTickArr), ctx, t)
+}
+
 // InsertHistoryCloseArr mocks base method.
 func (m *MockHistoryRepo) InsertHistoryCloseArr(ctx context.Context, t []*entity.HistoryClose) error {
 	m.ctrl.T.Helper()
@@ -723,7 +737,7 @@ func (mr *MockHistoryRepoMockRecorder) InsertHistoryKbarArr(ctx, t interface{}) 
 }
 
 // InsertHistoryTickArr mocks base method.
-func (m *MockHistoryRepo) InsertHistoryTickArr(ctx context.Context, t []*entity.HistoryTick) error {
+func (m *MockHistoryRepo) InsertHistoryTickArr(ctx context.Context, t []*entity.StockHistoryTick) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "InsertHistoryTickArr", ctx, t)
 	ret0, _ := ret[0].(error)
@@ -765,6 +779,21 @@ func (mr *MockHistoryRepoMockRecorder) QueryAllQuaterMAByStockNum(ctx, stockNum 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryAllQuaterMAByStockNum", reflect.TypeOf((*MockHistoryRepo)(nil).QueryAllQuaterMAByStockNum), ctx, stockNum)
 }
 
+// QueryFutureTickArrByTime mocks base method.
+func (m *MockHistoryRepo) QueryFutureTickArrByTime(ctx context.Context, code string, startTime, endTime time.Time) ([]*entity.FutureHistoryTick, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "QueryFutureTickArrByTime", ctx, code, startTime, endTime)
+	ret0, _ := ret[0].([]*entity.FutureHistoryTick)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// QueryFutureTickArrByTime indicates an expected call of QueryFutureTickArrByTime.
+func (mr *MockHistoryRepoMockRecorder) QueryFutureTickArrByTime(ctx, code, startTime, endTime interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryFutureTickArrByTime", reflect.TypeOf((*MockHistoryRepo)(nil).QueryFutureTickArrByTime), ctx, code, startTime, endTime)
+}
+
 // QueryMultiStockKbarArrByDate mocks base method.
 func (m *MockHistoryRepo) QueryMultiStockKbarArrByDate(ctx context.Context, stockNumArr []string, date time.Time) (map[string][]*entity.HistoryKbar, error) {
 	m.ctrl.T.Helper()
@@ -781,10 +810,10 @@ func (mr *MockHistoryRepoMockRecorder) QueryMultiStockKbarArrByDate(ctx, stockNu
 }
 
 // QueryMultiStockTickArrByDate mocks base method.
-func (m *MockHistoryRepo) QueryMultiStockTickArrByDate(ctx context.Context, stockNumArr []string, date time.Time) (map[string][]*entity.HistoryTick, error) {
+func (m *MockHistoryRepo) QueryMultiStockTickArrByDate(ctx context.Context, stockNumArr []string, date time.Time) (map[string][]*entity.StockHistoryTick, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "QueryMultiStockTickArrByDate", ctx, stockNumArr, date)
-	ret0, _ := ret[0].(map[string][]*entity.HistoryTick)
+	ret0, _ := ret[0].(map[string][]*entity.StockHistoryTick)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

@@ -541,9 +541,6 @@ const docTemplate = `{
                 },
                 "max_hold_time": {
                     "type": "number"
-                },
-                "tick_analyze_period": {
-                    "type": "number"
                 }
             }
         },

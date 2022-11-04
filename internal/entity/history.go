@@ -26,8 +26,8 @@ type HistoryKbar struct {
 	Stock    *Stock `json:"stock"`
 }
 
-// HistoryTick -.
-type HistoryTick struct {
+// HistoryTickBase -.
+type HistoryTickBase struct {
 	ID        int64     `json:"id"`
 	TickTime  time.Time `json:"tick_time"`
 	Close     float64   `json:"close"`
@@ -37,9 +37,20 @@ type HistoryTick struct {
 	BidVolume int64     `json:"bid_volume"`
 	AskPrice  float64   `json:"ask_price"`
 	AskVolume int64     `json:"ask_volume"`
+}
 
+// StockHistoryTick -.
+type StockHistoryTick struct {
 	StockNum string `json:"stock_num"`
 	Stock    *Stock `json:"stock"`
+	HistoryTickBase
+}
+
+// FutureHistoryTick -.
+type FutureHistoryTick struct {
+	Code   string  `json:"code"`
+	Future *Future `json:"future"`
+	HistoryTickBase
 }
 
 // HistoryAnalyze -.

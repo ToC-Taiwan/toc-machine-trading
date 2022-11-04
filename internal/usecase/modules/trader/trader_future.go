@@ -108,7 +108,7 @@ func (o *FutureTrader) generateOrder() *entity.FutureOrder {
 		return nil
 	}
 
-	splitBySecondArr := o.tickArr.splitBySecond()
+	splitBySecondArr := o.tickArr.splitBySecond(10)
 	if len(splitBySecondArr) < 5 {
 		return nil
 	}

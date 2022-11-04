@@ -58,33 +58,68 @@ func (t *TradeDay) GetStockTradeDay() TradePeriod {
 func (t *TradeDay) GetFutureTradeDay() TradePeriod {
 	var nowTime time.Time
 	if time.Now().Hour() >= 14 {
-		nowTime = time.Now()
+		nowTime = time.Now().AddDate(0, 0, 1)
 	} else {
-		nowTime = time.Now().AddDate(0, 0, -1)
+		nowTime = time.Now()
 	}
 
-	d := time.Date(nowTime.Year(), nowTime.Month(), nowTime.Day(), 0, 0, 0, 0, time.Local)
 	var startTime, endTime, tradeDay time.Time
+	d := time.Date(nowTime.Year(), nowTime.Month(), nowTime.Day(), 0, 0, 0, 0, time.Local)
 	for {
-		if startTime.IsZero() {
-			if t.isTradeDay(d) {
-				tradeDay = d
-				startTime = d
-				endTime = d.AddDate(0, 0, 1)
-			} else {
-				d = d.AddDate(0, 0, -1)
-			}
+		if t.isTradeDay(d) {
+			tradeDay = d
+			endTime = d.Add(13 * time.Hour).Add(45 * time.Minute)
+			break
 		}
+		d = d.AddDate(0, 0, 1)
+	}
 
-		if t.isTradeDay(endTime) {
-			startTime = startTime.Add(15 * time.Hour)
-			endTime = endTime.Add(13 * time.Hour).Add(45 * time.Minute)
+	d = d.AddDate(0, 0, -1)
+	for {
+		if t.isTradeDay(d) {
+			startTime = d.Add(15 * time.Hour)
+			break
+		}
+		d = d.AddDate(0, 0, -1)
+	}
+
+	return TradePeriod{startTime, endTime, tradeDay}
+}
+
+// GetLastNFutureTradeDay -.
+func (t *TradeDay) GetLastNFutureTradeDay(count int) []TradePeriod {
+	firstDay := t.GetFutureTradeDay()
+	d := firstDay.TradeDay.AddDate(0, 0, -1)
+
+	var tradePeriodArr []TradePeriod
+	for {
+		if len(tradePeriodArr) == count {
 			break
 		}
 
-		endTime = endTime.AddDate(0, 0, 1)
+		var startTime, endTime, tradeDay time.Time
+		for {
+			if t.isTradeDay(d) {
+				tradeDay = d
+				endTime = d.Add(13 * time.Hour).Add(45 * time.Minute)
+				break
+			}
+			d = d.AddDate(0, 0, -1)
+		}
+
+		d = d.AddDate(0, 0, -1)
+		for {
+			if t.isTradeDay(d) {
+				startTime = d.Add(15 * time.Hour)
+				break
+			}
+			d = d.AddDate(0, 0, -1)
+		}
+
+		tradePeriodArr = append(tradePeriodArr, TradePeriod{startTime, endTime, tradeDay})
 	}
-	return TradePeriod{startTime, endTime, tradeDay}
+
+	return tradePeriodArr
 }
 
 func (t *TradeDay) parseHolidayFile() {

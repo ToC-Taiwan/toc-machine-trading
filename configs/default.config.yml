@@ -19,7 +19,7 @@ history:
 quota:
     stock_trade_quota: 1000000
     stock_fee_discount: 0.28
-    future_trade_fee: 20
+    future_trade_fee: 10
 
 target_cond:
     real_time_rank: 20

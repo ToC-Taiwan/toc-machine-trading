@@ -11,6 +11,8 @@ import (
 	"tmt/global"
 	"tmt/internal/entity"
 	"tmt/internal/usecase/modules/event"
+	"tmt/internal/usecase/modules/tradeday"
+	"tmt/internal/usecase/modules/trader"
 	"tmt/pkg/utils"
 )
 
@@ -26,6 +28,8 @@ type HistoryUseCase struct {
 	mutex     sync.Mutex
 
 	biasRateArr []float64
+
+	tradeDay *tradeday.TradeDay
 }
 
 // NewHistory -.
@@ -34,15 +38,16 @@ func NewHistory(r HistoryRepo, t HistorygRPCAPI) *HistoryUseCase {
 		repo:      r,
 		grpcapi:   t,
 		fetchList: make(map[string]*entity.Target),
+		tradeDay:  tradeday.NewTradeDay(),
 	}
 
 	cfg := config.GetConfig()
 	uc.stockAnalyzeCfg = cfg.StockAnalyze
 	uc.basic = *cc.GetBasicInfo()
 
-	bus.SubscribeTopic(event.TopicFetchStockHistory, uc.FetchHistory)
-	// uc.FetchFutureHistoryTick(cfg.TargetCond.MonitorFutureCode, uc.basic.LastTradeDay)
+	// uc.GetFutureTradeCond("MXFK2", 6)
 
+	bus.SubscribeTopic(event.TopicFetchStockHistory, uc.FetchHistory)
 	return uc
 }
 
@@ -193,14 +198,14 @@ func (uc *HistoryUseCase) fetchHistoryTick(targetArr []*entity.Target) error {
 		stockNumArr = append(stockNumArr, target.StockNum)
 	}
 
-	stockNumArrInDayMap, total, err := uc.findExistHistoryTick(fetchTradeDayArr, stockNumArr)
+	stockNumArrInDayMap, total, err := uc.findExistStockHistoryTick(fetchTradeDayArr, stockNumArr)
 	if err != nil {
 		return err
 	}
 	defer log.Info("Fetching History Tick Done")
 	log.Infof("Fetching History Tick -> Count: %d", total)
-	result := make(map[string][]*entity.HistoryTick)
-	dataChan := make(chan *entity.HistoryTick)
+	result := make(map[string][]*entity.StockHistoryTick)
+	dataChan := make(chan *entity.StockHistoryTick)
 	wait := make(chan struct{})
 	go func() {
 		for {
@@ -224,12 +229,14 @@ func (uc *HistoryUseCase) fetchHistoryTick(targetArr []*entity.Target) error {
 			log.Error(err)
 		}
 		for _, t := range tickArr {
-			dataChan <- &entity.HistoryTick{
+			dataChan <- &entity.StockHistoryTick{
 				StockNum: t.GetCode(),
-				TickTime: time.Unix(0, t.GetTs()).Add(-8 * time.Hour), Close: t.GetClose(),
-				TickType: t.GetTickType(), Volume: t.GetVolume(),
-				BidPrice: t.GetBidPrice(), BidVolume: t.GetBidVolume(),
-				AskPrice: t.GetAskPrice(), AskVolume: t.GetAskVolume(),
+				HistoryTickBase: entity.HistoryTickBase{
+					TickTime: time.Unix(0, t.GetTs()).Add(-8 * time.Hour), Close: t.GetClose(),
+					TickType: t.GetTickType(), Volume: t.GetVolume(),
+					BidPrice: t.GetBidPrice(), BidVolume: t.GetBidVolume(),
+					AskPrice: t.GetAskPrice(), AskVolume: t.GetAskVolume(),
+				},
 			}
 		}
 	}
@@ -247,7 +254,7 @@ func (uc *HistoryUseCase) fetchHistoryTick(targetArr []*entity.Target) error {
 	return nil
 }
 
-func (uc *HistoryUseCase) findExistHistoryTick(fetchTradeDayArr []time.Time, stockNumArr []string) (map[time.Time][]string, int64, error) {
+func (uc *HistoryUseCase) findExistStockHistoryTick(fetchTradeDayArr []time.Time, stockNumArr []string) (map[time.Time][]string, int64, error) {
 	log.Info("Query Exist History Tick")
 	result := make(map[time.Time][]string)
 	var total int64
@@ -422,7 +429,7 @@ func (uc *HistoryUseCase) processBiasRate() {
 	cc.SetLowBiasRate(uc.biasRateArr[3*total/4])
 }
 
-func (uc *HistoryUseCase) processTickArr(arr []*entity.HistoryTick) {
+func (uc *HistoryUseCase) processTickArr(arr []*entity.StockHistoryTick) {
 	if len(arr) < 2 {
 		return
 	}
@@ -506,9 +513,9 @@ func (uc *HistoryUseCase) processKbarArr(arr []*entity.HistoryKbar) {
 }
 
 // FetchFutureHistoryTick -.
-func (uc *HistoryUseCase) FetchFutureHistoryTick(code string, date time.Time) {
-	result := make(map[string][]*entity.HistoryTick)
-	dataChan := make(chan *entity.HistoryTick)
+func (uc *HistoryUseCase) FetchFutureHistoryTick(code string, date time.Time) []*entity.FutureHistoryTick {
+	result := make(map[string][]*entity.FutureHistoryTick)
+	dataChan := make(chan *entity.FutureHistoryTick)
 	wait := make(chan struct{})
 	go func() {
 		for {
@@ -516,7 +523,7 @@ func (uc *HistoryUseCase) FetchFutureHistoryTick(code string, date time.Time) {
 			if !ok {
 				break
 			}
-			result[tick.StockNum] = append(result[tick.StockNum], tick)
+			result[tick.Code] = append(result[tick.Code], tick)
 		}
 		close(wait)
 	}()
@@ -525,122 +532,83 @@ func (uc *HistoryUseCase) FetchFutureHistoryTick(code string, date time.Time) {
 		log.Error(err)
 	}
 	for _, t := range tickArr {
-		dataChan <- &entity.HistoryTick{
-			StockNum: t.GetCode(),
-			TickTime: time.Unix(0, t.GetTs()).Add(-8 * time.Hour), Close: t.GetClose(),
-			TickType: t.GetTickType(), Volume: t.GetVolume(),
-			BidPrice: t.GetBidPrice(), BidVolume: t.GetBidVolume(),
-			AskPrice: t.GetAskPrice(), AskVolume: t.GetAskVolume(),
+		dataChan <- &entity.FutureHistoryTick{
+			Code: t.GetCode(),
+			HistoryTickBase: entity.HistoryTickBase{
+				TickTime: time.Unix(0, t.GetTs()).Add(-8 * time.Hour), Close: t.GetClose(),
+				TickType: t.GetTickType(), Volume: t.GetVolume(),
+				BidPrice: t.GetBidPrice(), BidVolume: t.GetBidVolume(),
+				AskPrice: t.GetAskPrice(), AskVolume: t.GetAskVolume(),
+			},
 		}
 	}
 	close(dataChan)
 	<-wait
-	// if len(result) != 0 {
-	// 	for code, v := range result {
-	// 		var nightMarketLastTick *entity.HistoryTick
-	// 		for i, tick := range v {
-	// 			if tick.TickTime.Hour() == 8 {
-	// 				nightMarketLastTick = v[i-1]
-	// 				cc.SetFutureHistoryTick(code, nightMarketLastTick)
-	// 				cc.SetFutureGap(tick.Close-nightMarketLastTick.Close, date)
-	// 				log.Infof("Future night market gap: %.0f", tick.Close-nightMarketLastTick.Close)
-	// 				break
-	// 			}
-	// 		}
-
-	// 		if nightMarketLastTick == nil {
-	// 			cc.SetFutureHistoryTick(code, v[len(v)-1])
-	// 		}
-	// 	}
-	// }
-	if len(result) != 0 {
-		for _, v := range result {
-			total := len(v)
-			log.Warnf("Fetch Date: %s, FirstTickTime: %s, LastTickTime: %s, Total: %d", date.Format(global.ShortTimeLayout), v[0].TickTime.Format(global.LongTimeLayout), v[total-1].TickTime.Format(global.LongTimeLayout), total)
-		}
-	} else {
-		log.Warnf("Fetch Date: %s, No Data", date.Format(global.ShortTimeLayout))
-	}
+	return result[code]
 }
 
-// FetchFutureHistoryClose -.
-func (uc *HistoryUseCase) FetchFutureHistoryClose(codeArr []string, date time.Time) {
-	defer log.Info("Fetching Future History Close Done")
-	log.Info("Fetching Future History Close")
-	result := make(map[string][]*entity.HistoryClose)
-	dataChan := make(chan *entity.HistoryClose)
-	wait := make(chan struct{})
-	go func() {
-		for {
-			close, ok := <-dataChan
-			if !ok {
-				break
-			}
-			result[close.StockNum] = append(result[close.StockNum], close)
-		}
-		close(wait)
-	}()
-	closeArr, err := uc.grpcapi.GetFutureHistoryClose(codeArr, date.Format(global.ShortTimeLayout))
+func (uc *HistoryUseCase) findExistFutureHistoryTick(date tradeday.TradePeriod, code string) ([]*entity.FutureHistoryTick, error) {
+	log.Infof("Fetching %s tick %s", code, date.TradeDay.Format(global.ShortTimeLayout))
+	dbTickArr, err := uc.repo.QueryFutureTickArrByTime(context.Background(), code, date.StartTime, date.EndTime)
 	if err != nil {
-		log.Error(err)
+		return nil, err
 	}
-	for _, close := range closeArr {
-		dataChan <- &entity.HistoryClose{
-			Date:     date,
-			StockNum: close.GetCode(),
-			Close:    close.GetClose(),
+
+	if len(dbTickArr) == 0 {
+		dbTickArr = uc.FetchFutureHistoryTick(code, date.TradeDay)
+		if dbTickArr == nil {
+			return nil, fmt.Errorf("fetch %s tick failed", date.TradeDay.Format(global.ShortTimeLayout))
+		}
+
+		err = uc.repo.InsertFutureHistoryTickArr(context.Background(), dbTickArr)
+		if err != nil {
+			return nil, err
 		}
 	}
-	close(dataChan)
-	<-wait
-	if len(result) != 0 {
-		log.Info("Inserting History Close")
-		for _, v := range result {
-			for _, close := range v {
-				log.Warnf("%s %s Close: %.0f", close.StockNum, close.Date.Format(global.ShortTimeLayout), close.Close)
-				cc.SetHistoryClose(close.StockNum, close.Date, close.Close)
-			}
-		}
-	}
+	return dbTickArr, nil
 }
 
-// FetchFutureHistoryKbar -.
-func (uc *HistoryUseCase) FetchFutureHistoryKbar(codeArr []string, date time.Time) {
-	defer log.Info("Fetching Future History Kbar Done")
-	log.Info("Fetching Future History Kbar")
-	result := make(map[string][]*entity.HistoryKbar)
-	dataChan := make(chan *entity.HistoryKbar)
-	wait := make(chan struct{})
-	go func() {
-		for {
-			kbar, ok := <-dataChan
-			if !ok {
-				break
+func (uc *HistoryUseCase) GetFutureTradeCond(code string, days int) {
+	simulateDateArr := uc.tradeDay.GetLastNFutureTradeDay(days)
+	var balanceArr []trader.TradeBalance
+	for _, date := range simulateDateArr {
+		dbTickArr, err := uc.findExistFutureHistoryTick(date, code)
+		if err != nil {
+			log.Error(err)
+			continue
+		}
+
+		cond := config.FutureAnalyze{
+			MaxHoldTime:   15,
+			AllOutInRatio: 75,
+			AllInOutRatio: 75,
+		}
+
+		simulator := trader.NewFutureSimulator(code, cond, date)
+		tickChan := simulator.GetTickChan()
+		for _, tick := range dbTickArr {
+			tickChan <- &entity.RealTimeFutureTick{
+				Code:     code,
+				TickTime: tick.TickTime,
+				Close:    tick.Close,
+				Volume:   tick.Volume,
+				TickType: tick.TickType,
 			}
-			result[kbar.StockNum] = append(result[kbar.StockNum], kbar)
 		}
-		close(wait)
-	}()
-	tickArr, err := uc.grpcapi.GetFutureHistoryKbar(codeArr, date.Format(global.ShortTimeLayout))
-	if err != nil {
-		log.Error(err)
+		close(tickChan)
+
+		balanceArr = append(balanceArr, simulator.CalculateFutureTradeBalance())
 	}
-	for _, t := range tickArr {
-		dataChan <- &entity.HistoryKbar{
-			StockNum: t.GetCode(),
-			KbarTime: time.Unix(0, t.GetTs()).Add(-8 * time.Hour),
-			Open:     t.GetOpen(),
-			High:     t.GetHigh(),
-			Low:      t.GetLow(),
-			Close:    t.GetClose(),
-			Volume:   t.GetVolume(),
-		}
+
+	var totalCount, totalBalance int64
+	for _, balance := range balanceArr {
+		totalCount += balance.Count
+		totalBalance += balance.Balance
 	}
-	close(dataChan)
-	<-wait
-	if len(result) != 0 {
-		for _, v := range result {
-			log.Info(*v[len(v)-1])
-		}
-	}
+	log.Warnf("Total count: %d", totalCount)
+	log.Warnf("Total balance: %d", totalBalance)
+
+	// TODO: remove this stuck
+	stuck := make(chan struct{})
+	<-stuck
 }
