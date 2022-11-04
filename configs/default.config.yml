@@ -19,7 +19,7 @@ history:
 quota:
     stock_trade_quota: 1000000
     stock_fee_discount: 0.28
-    future_trade_fee: 10
+    future_trade_fee: 20
 
 target_cond:
     real_time_rank: 20
@@ -61,7 +61,7 @@ stock_analyze:
 
 future_trade_switch:
     allow_trade: true
-    quantity: 1
+    quantity: 2
     trade_in_wait_time: 10 # unit: seccond
     trade_out_wait_time: 20 # unit: seccond
     cancel_wait_time: 30 # unit: seccond

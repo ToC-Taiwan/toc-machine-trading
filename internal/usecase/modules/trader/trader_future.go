@@ -22,31 +22,34 @@ type FutureTrader struct {
 
 	waitingOrder *entity.FutureOrder
 
-	tickArr    realTimeFutureTickArr
-	kbarArr    realTimeKbarArr
-	lastTick   *entity.RealTimeFutureTick
-	lastBidAsk *entity.FutureRealTimeBidAsk
+	tickArr  realTimeFutureTickArr
+	kbarArr  realTimeKbarArr
+	lastTick *entity.RealTimeFutureTick
+	// lastBidAsk *entity.FutureRealTimeBidAsk
 
-	tickChan   chan *entity.RealTimeFutureTick
-	bidAskChan chan *entity.FutureRealTimeBidAsk
+	tickChan chan *entity.RealTimeFutureTick
+	// bidAskChan chan *entity.FutureRealTimeBidAsk
 
 	tradeSwitch config.FutureTradeSwitch
 	analyzeCfg  config.FutureAnalyze
 
 	futureTradeInSwitch bool
+
+	tradeOutRecord map[string]int
 }
 
 // NewFutureTrader -.
 func NewFutureTrader(code string, tradeSwitch config.FutureTradeSwitch, analyzeCfg config.FutureAnalyze) *FutureTrader {
 	t := &FutureTrader{
-		code:                code,
-		orderQuantity:       tradeSwitch.Quantity,
-		orderMap:            make(map[entity.OrderAction][]*entity.FutureOrder),
-		tickChan:            make(chan *entity.RealTimeFutureTick),
-		bidAskChan:          make(chan *entity.FutureRealTimeBidAsk),
+		code:          code,
+		orderQuantity: tradeSwitch.Quantity,
+		orderMap:      make(map[entity.OrderAction][]*entity.FutureOrder),
+		tickChan:      make(chan *entity.RealTimeFutureTick),
+		// bidAskChan:          make(chan *entity.FutureRealTimeBidAsk),
 		tradeSwitch:         tradeSwitch,
 		analyzeCfg:          analyzeCfg,
 		futureTradeInSwitch: false,
+		tradeOutRecord:      make(map[string]int),
 	}
 
 	bus.SubscribeTopic(event.TopicUpdateFutureTradeSwitch, t.updateAllowTrade)
@@ -63,17 +66,17 @@ func (o *FutureTrader) GetTickChan() chan *entity.RealTimeFutureTick {
 }
 
 // GetBidAskChan -.
-func (o *FutureTrader) GetBidAskChan() chan *entity.FutureRealTimeBidAsk {
-	return o.bidAskChan
-}
+// func (o *FutureTrader) GetBidAskChan() chan *entity.FutureRealTimeBidAsk {
+// 	return o.bidAskChan
+// }
 
 // TradingRoom -.
 func (o *FutureTrader) TradingRoom() {
-	go func() {
-		for {
-			o.lastBidAsk = <-o.bidAskChan
-		}
-	}()
+	// go func() {
+	// 	for {
+	// 		o.lastBidAsk = <-o.bidAskChan
+	// 	}
+	// }()
 
 	for {
 		tick := <-o.tickChan
@@ -86,12 +89,12 @@ func (o *FutureTrader) TradingRoom() {
 		tick := <-o.tickChan
 		if tick.TickTime.Minute() != o.lastTick.TickTime.Minute() {
 			o.kbarArr = append(o.kbarArr, o.tickArr.getKbar())
-			o.tickArr = realTimeFutureTickArr{}
+			// o.tickArr = realTimeFutureTickArr{}
+			o.placeFutureOrder(o.generateOrder())
 		}
 
 		o.lastTick = tick
 		o.tickArr = append(o.tickArr, tick)
-		o.placeFutureOrder(o.generateOrder())
 	}
 }
 
@@ -109,19 +112,19 @@ func (o *FutureTrader) generateOrder() *entity.FutureOrder {
 	}
 
 	splitBySecondArr := o.tickArr.splitBySecond(10)
-	if len(splitBySecondArr) < 5 {
+	if splitBySecondArr == nil {
 		return nil
 	}
 
-	base := splitBySecondArr[len(splitBySecondArr)-1].getTotalVolume()
-	for i := len(splitBySecondArr) - 2; i >= 0; i-- {
-		if splitBySecondArr[i].getTotalVolume() > base {
+	base := splitBySecondArr[0].getTotalVolume()
+	for i := 1; i <= len(splitBySecondArr)-1; i++ {
+		if splitBySecondArr[i].getTotalVolume() > base*2 {
 			return nil
 		}
 	}
 
 	// get out in ration in period
-	outInRation := o.tickArr.getOutInRatio()
+	outInRation := splitBySecondArr[0].getOutInRatio()
 	order := &entity.FutureOrder{
 		Code: o.code,
 		BaseOrder: entity.BaseOrder{
@@ -157,23 +160,32 @@ func (o *FutureTrader) generateTradeOutOrder(postOrderAction entity.OrderAction,
 		},
 	}
 
-	// if o.lastTick.TickTime.After(preOrder.TradeTime.Add(time.Duration(o.analyzeCfg.MaxHoldTime) * time.Minute)) {
-	// 	return order
-	// }
-
-	if !o.kbarArr.isStable(3) {
-		return nil
+	if o.lastTick.TickTime.After(preOrder.TickTime.Add(time.Duration(o.analyzeCfg.MaxHoldTime) * time.Minute)) {
+		return order
 	}
 
-	// outInRation := o.tickArr.getOutInRatio()
 	switch order.Action {
 	case entity.ActionSell:
-		if order.Price-preOrder.Price < -2 || order.Price-preOrder.Price > 1 {
+		if order.Price-preOrder.Price < -2 {
+			if o.tradeOutRecord[order.GroupID] >= 5 {
+				return order
+			}
+			o.tradeOutRecord[order.GroupID]++
+		}
+
+		if order.Price-preOrder.Price > 10 {
 			return order
 		}
 
 	case entity.ActionBuyLater:
-		if order.Price-preOrder.Price > 2 || order.Price-preOrder.Price < -1 {
+		if order.Price-preOrder.Price > 2 {
+			if o.tradeOutRecord[order.GroupID] >= 5 {
+				return order
+			}
+			o.tradeOutRecord[order.GroupID]++
+		}
+
+		if order.Price-preOrder.Price < -10 {
 			return order
 		}
 	}

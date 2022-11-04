@@ -583,9 +583,9 @@ func (uc *HistoryUseCase) GetFutureTradeCond(days int) trader.TradeBalance {
 		}
 
 		cond := config.FutureAnalyze{
-			MaxHoldTime:   15,
-			AllOutInRatio: 75,
-			AllInOutRatio: 75,
+			MaxHoldTime:   10,
+			AllOutInRatio: 90,
+			AllInOutRatio: 90,
 		}
 
 		simulator := trader.NewFutureSimulator(uc.simulateFutureCode, cond, date)
