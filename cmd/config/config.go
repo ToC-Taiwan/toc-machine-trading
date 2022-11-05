@@ -81,8 +81,8 @@ type RabbitMQ struct {
 
 // TradeTimeRange -.
 type TradeTimeRange struct {
-	FirstPartDuration  int64 `json:"first_part_duration"  env-required:"true" yaml:"first_part_duration"`
-	SecondPartDuration int64 `json:"second_part_duration" env-required:"true" yaml:"second_part_duration"`
+	FirstPartDuration  int64 `json:"first_part_duration"  yaml:"first_part_duration"`
+	SecondPartDuration int64 `json:"second_part_duration" yaml:"second_part_duration"`
 }
 
 // History -.
@@ -150,7 +150,5 @@ type FutureTradeSwitch struct {
 
 // FutureAnalyze -.
 type FutureAnalyze struct {
-	MaxHoldTime   float64 `json:"max_hold_time"    env-required:"true" yaml:"max_hold_time"`
-	AllOutInRatio float64 `json:"all_out_in_ratio" env-required:"true" yaml:"all_out_in_ratio"`
-	AllInOutRatio float64 `json:"all_in_out_ratio" env-required:"true" yaml:"all_in_out_ratio"`
+	MaxHoldTime float64 `json:"max_hold_time" env-required:"true" yaml:"max_hold_time"`
 }

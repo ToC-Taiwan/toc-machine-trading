@@ -24,15 +24,13 @@ type FutureSimulator struct {
 	quota *quota.Quota
 
 	tickArr realTimeFutureTickArr
-	kbarArr realTimeKbarArr
 
 	lastTick *entity.RealTimeFutureTick
 	tickChan chan *entity.RealTimeFutureTick
 
 	analyzeCfg config.FutureAnalyze
 
-	tradeOutRecord map[string]int
-	simDone        bool
+	simDone bool
 
 	firstTradePeriod  []time.Time
 	secondTradePeriod []time.Time
@@ -48,7 +46,6 @@ func NewFutureSimulator(code string, analyzeCfg config.FutureAnalyze, period tra
 		tickChan:          make(chan *entity.RealTimeFutureTick),
 		analyzeCfg:        analyzeCfg,
 		quota:             quota.NewQuota(cfg.Quota),
-		tradeOutRecord:    make(map[string]int),
 		firstTradePeriod:  []time.Time{period.StartTime, period.StartTime.Add(time.Duration(cfg.FutureTradeSwitch.TradeTimeRange.FirstPartDuration) * time.Minute)},
 		secondTradePeriod: []time.Time{period.EndTime.Add(-300 * time.Minute), period.EndTime.Add(-300 * time.Minute).Add(time.Duration(cfg.FutureTradeSwitch.TradeTimeRange.SecondPartDuration) * time.Minute)},
 	}
@@ -61,9 +58,12 @@ func NewFutureSimulator(code string, analyzeCfg config.FutureAnalyze, period tra
 func (o *FutureSimulator) SimulateRoom() {
 	for {
 		tick := <-o.tickChan
-		o.lastTick = tick
 		o.tickArr = append(o.tickArr, tick)
-		break
+		if len(o.tickArr) == 2 {
+			o.tickArr = o.tickArr[1:]
+			o.lastTick = tick
+			break
+		}
 	}
 
 	for {
@@ -72,8 +72,8 @@ func (o *FutureSimulator) SimulateRoom() {
 			o.simDone = true
 			break
 		}
+
 		if tick.TickTime.Minute() != o.lastTick.TickTime.Minute() {
-			o.kbarArr = append(o.kbarArr, o.tickArr.getKbar())
 			o.placeFutureOrder(o.generateOrder())
 		}
 
@@ -87,24 +87,12 @@ func (o *FutureSimulator) generateOrder() *entity.FutureOrder {
 		return o.generateTradeOutOrder(postOrderAction, preOrder)
 	}
 
-	if !o.kbarArr.isStable(10) {
+	rsi := o.tickArr.getRSIByTickCount(300)
+	if rsi == 0 {
 		return nil
-	}
-
-	splitBySecondArr := o.tickArr.splitBySecond(10)
-	if splitBySecondArr == nil {
-		return nil
-	}
-
-	base := splitBySecondArr[0].getTotalVolume()
-	for i := 1; i <= len(splitBySecondArr)-1; i++ {
-		if splitBySecondArr[i].getTotalVolume() > base*2 {
-			return nil
-		}
 	}
 
 	// get out in ration in period
-	outInRation := splitBySecondArr[0].getOutInRatio()
 	order := &entity.FutureOrder{
 		Code: o.code,
 		BaseOrder: entity.BaseOrder{
@@ -116,15 +104,14 @@ func (o *FutureSimulator) generateOrder() *entity.FutureOrder {
 	}
 
 	switch {
-	case outInRation >= o.analyzeCfg.AllOutInRatio:
+	case rsi <= 40:
 		order.Action = entity.ActionBuy
-		return order
-	case 100-outInRation >= o.analyzeCfg.AllInOutRatio:
+	case rsi >= 60:
 		order.Action = entity.ActionSellFirst
-		return order
 	default:
 		return nil
 	}
+	return order
 }
 
 func (o *FutureSimulator) generateTradeOutOrder(postOrderAction entity.OrderAction, preOrder *entity.FutureOrder) *entity.FutureOrder {
@@ -143,39 +130,6 @@ func (o *FutureSimulator) generateTradeOutOrder(postOrderAction entity.OrderActi
 		return order
 	}
 
-	switch order.Action {
-	case entity.ActionSell:
-		if order.Price-preOrder.Price < -2 {
-			if o.tradeOutRecord[order.GroupID] >= 5 {
-				return order
-			}
-			o.tradeOutRecord[order.GroupID]++
-		}
-
-		if order.Price-preOrder.Price > 10 {
-			return order
-		}
-
-		// if order.Price-preOrder.Price > 5 || order.Price-preOrder.Price < -2 {
-		// 	return order
-		// }
-
-	case entity.ActionBuyLater:
-		if order.Price-preOrder.Price > 2 {
-			if o.tradeOutRecord[order.GroupID] >= 5 {
-				return order
-			}
-			o.tradeOutRecord[order.GroupID]++
-		}
-
-		if order.Price-preOrder.Price < -10 {
-			return order
-		}
-
-		// if order.Price-preOrder.Price < -5 || order.Price-preOrder.Price > 2 {
-		// 	return order
-		// }
-	}
 	return nil
 }
 
@@ -227,6 +181,10 @@ func (o *FutureSimulator) CalculateFutureTradeBalance() TradeBalance {
 		orderList = append(orderList, v...)
 	}
 
+	if len(orderList) == 0 {
+		return TradeBalance{}
+	}
+
 	sort.Slice(orderList, func(i, j int) bool {
 		return orderList[i].TickTime.Before(orderList[j].TickTime)
 	})
@@ -255,7 +213,7 @@ func (o *FutureSimulator) CalculateFutureTradeBalance() TradeBalance {
 		}
 	}
 
-	log.Warnf("#  TradeCount: %d, Total: %d", tradeCount, forwardBalance+revereBalance)
+	log.Warnf("#%3d Total: %d", tradeCount+1, forwardBalance+revereBalance)
 	return TradeBalance{
 		Count:   tradeCount,
 		Balance: forwardBalance + revereBalance,

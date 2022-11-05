@@ -90,5 +90,6 @@ func (r *historyRoutes) simulateFuture(c *gin.Context) {
 	}
 
 	cond := r.t.GetFutureTradeCond(interval)
+	log.Warnf("Days: %d, Count: %d, Balance: %d", interval, cond.Count, cond.Balance)
 	c.JSON(http.StatusOK, cond)
 }

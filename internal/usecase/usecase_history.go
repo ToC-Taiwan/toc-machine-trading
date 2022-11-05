@@ -551,7 +551,7 @@ func (uc *HistoryUseCase) FetchFutureHistoryTick(code string, date time.Time) []
 	return result[code]
 }
 
-func (uc *HistoryUseCase) findExistFutureHistoryTick(date tradeday.TradePeriod, code string) ([]*entity.FutureHistoryTick, error) {
+func (uc *HistoryUseCase) findExistFutureHistoryTick(date tradeday.TradePeriod, code string) ([][]*entity.FutureHistoryTick, error) {
 	log.Infof("Fetching %s tick %s", code, date.TradeDay.Format(global.ShortTimeLayout))
 	dbTickArr, err := uc.repo.QueryFutureTickArrByTime(context.Background(), code, date.StartTime, date.EndTime)
 	if err != nil {
@@ -569,39 +569,50 @@ func (uc *HistoryUseCase) findExistFutureHistoryTick(date tradeday.TradePeriod, 
 			return nil, err
 		}
 	}
-	return dbTickArr, nil
+
+	var cut int
+	for i, v := range dbTickArr {
+		if v.TickTime.After(date.StartTime.Add(14 * time.Hour)) {
+			cut = i
+			break
+		}
+	}
+
+	firstPart := dbTickArr[:cut]
+	secondPart := dbTickArr[cut:]
+
+	return [][]*entity.FutureHistoryTick{firstPart, secondPart}, nil
 }
 
 func (uc *HistoryUseCase) GetFutureTradeCond(days int) trader.TradeBalance {
 	simulateDateArr := uc.tradeDay.GetLastNFutureTradeDay(days)
 	var balanceArr []trader.TradeBalance
 	for _, date := range simulateDateArr {
-		dbTickArr, err := uc.findExistFutureHistoryTick(date, uc.simulateFutureCode)
+		dbTickArrArr, err := uc.findExistFutureHistoryTick(date, uc.simulateFutureCode)
 		if err != nil {
 			log.Error(err)
 			continue
 		}
 
 		cond := config.FutureAnalyze{
-			MaxHoldTime:   10,
-			AllOutInRatio: 90,
-			AllInOutRatio: 90,
+			MaxHoldTime: 5,
 		}
 
-		simulator := trader.NewFutureSimulator(uc.simulateFutureCode, cond, date)
-		tickChan := simulator.GetTickChan()
-		for _, tick := range dbTickArr {
-			tickChan <- &entity.RealTimeFutureTick{
-				Code:     uc.simulateFutureCode,
-				TickTime: tick.TickTime,
-				Close:    tick.Close,
-				Volume:   tick.Volume,
-				TickType: tick.TickType,
+		for _, dbTickArr := range dbTickArrArr {
+			simulator := trader.NewFutureSimulator(uc.simulateFutureCode, cond, date)
+			tickChan := simulator.GetTickChan()
+			for _, tick := range dbTickArr {
+				tickChan <- &entity.RealTimeFutureTick{
+					Code:     uc.simulateFutureCode,
+					TickTime: tick.TickTime,
+					Close:    tick.Close,
+					Volume:   tick.Volume,
+					TickType: tick.TickType,
+				}
 			}
+			close(tickChan)
+			balanceArr = append(balanceArr, simulator.CalculateFutureTradeBalance())
 		}
-		close(tickChan)
-
-		balanceArr = append(balanceArr, simulator.CalculateFutureTradeBalance())
 	}
 
 	var totalCount, totalBalance int64

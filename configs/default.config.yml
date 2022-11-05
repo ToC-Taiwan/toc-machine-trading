@@ -66,10 +66,8 @@ future_trade_switch:
     trade_out_wait_time: 20 # unit: seccond
     cancel_wait_time: 30 # unit: seccond
     trade_time_range:
-        first_part_duration: 780 # duration: minute 04:00:00
-        second_part_duration: 260 # duration: minute 13:05:00
+        first_part_duration: 0 # duration: minute 04:00:00(780)
+        second_part_duration: 75 # duration: minute 13:05:00(260)
 
 future_analyze:
-    max_hold_time: 10 # unit: minute
-    all_out_in_ratio: 90 # unit: %
-    all_in_out_ratio: 90 # unit: %
+    max_hold_time: 5 # unit: minute

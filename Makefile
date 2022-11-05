@@ -20,7 +20,7 @@ run-dev: swag-v1 ### swag run
 
 run: swag-v1 ### swag run
 	@go mod tidy && go mod download && go generate ./... && \
-	cp ./configs/default.config.yml ./configs/config.yml && \
+	cp ./configs/default.config.yml ./configs/config.yml && clear && \
 	go build -o toc-machine-trading ./cmd/app && ./toc-machine-trading
 .PHONY: run
 
