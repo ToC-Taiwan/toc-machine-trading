@@ -1471,10 +1471,10 @@ func (mr *MockOrderMockRecorder) CalculateTradeDiscount(price, quantity interfac
 }
 
 // GetAllFutureTradeBalance mocks base method.
-func (m *MockOrder) GetAllFutureTradeBalance(ctx context.Context) ([]*entity.TradeBalance, error) {
+func (m *MockOrder) GetAllFutureTradeBalance(ctx context.Context) ([]*entity.FutureTradeBalance, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAllFutureTradeBalance", ctx)
-	ret0, _ := ret[0].([]*entity.TradeBalance)
+	ret0, _ := ret[0].([]*entity.FutureTradeBalance)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -1501,10 +1501,10 @@ func (mr *MockOrderMockRecorder) GetAllStockOrder(ctx interface{}) *gomock.Call 
 }
 
 // GetAllStockTradeBalance mocks base method.
-func (m *MockOrder) GetAllStockTradeBalance(ctx context.Context) ([]*entity.TradeBalance, error) {
+func (m *MockOrder) GetAllStockTradeBalance(ctx context.Context) ([]*entity.StockTradeBalance, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAllStockTradeBalance", ctx)
-	ret0, _ := ret[0].([]*entity.TradeBalance)
+	ret0, _ := ret[0].([]*entity.StockTradeBalance)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -1553,7 +1553,7 @@ func (mr *MockOrderRepoMockRecorder) InsertOrUpdateFutureOrderByOrderID(ctx, t i
 }
 
 // InsertOrUpdateFutureTradeBalance mocks base method.
-func (m *MockOrderRepo) InsertOrUpdateFutureTradeBalance(ctx context.Context, t *entity.TradeBalance) error {
+func (m *MockOrderRepo) InsertOrUpdateFutureTradeBalance(ctx context.Context, t *entity.FutureTradeBalance) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "InsertOrUpdateFutureTradeBalance", ctx, t)
 	ret0, _ := ret[0].(error)
@@ -1581,7 +1581,7 @@ func (mr *MockOrderRepoMockRecorder) InsertOrUpdateOrderByOrderID(ctx, t interfa
 }
 
 // InsertOrUpdateStockTradeBalance mocks base method.
-func (m *MockOrderRepo) InsertOrUpdateStockTradeBalance(ctx context.Context, t *entity.TradeBalance) error {
+func (m *MockOrderRepo) InsertOrUpdateStockTradeBalance(ctx context.Context, t *entity.StockTradeBalance) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "InsertOrUpdateStockTradeBalance", ctx, t)
 	ret0, _ := ret[0].(error)
@@ -1610,10 +1610,10 @@ func (mr *MockOrderRepoMockRecorder) QueryAllFutureOrderByDate(ctx, timeTange in
 }
 
 // QueryAllFutureTradeBalance mocks base method.
-func (m *MockOrderRepo) QueryAllFutureTradeBalance(ctx context.Context) ([]*entity.TradeBalance, error) {
+func (m *MockOrderRepo) QueryAllFutureTradeBalance(ctx context.Context) ([]*entity.FutureTradeBalance, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "QueryAllFutureTradeBalance", ctx)
-	ret0, _ := ret[0].([]*entity.TradeBalance)
+	ret0, _ := ret[0].([]*entity.FutureTradeBalance)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -1655,10 +1655,10 @@ func (mr *MockOrderRepoMockRecorder) QueryAllStockOrderByDate(ctx, timeTange int
 }
 
 // QueryAllStockTradeBalance mocks base method.
-func (m *MockOrderRepo) QueryAllStockTradeBalance(ctx context.Context) ([]*entity.TradeBalance, error) {
+func (m *MockOrderRepo) QueryAllStockTradeBalance(ctx context.Context) ([]*entity.StockTradeBalance, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "QueryAllStockTradeBalance", ctx)
-	ret0, _ := ret[0].([]*entity.TradeBalance)
+	ret0, _ := ret[0].([]*entity.StockTradeBalance)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -1685,10 +1685,10 @@ func (mr *MockOrderRepoMockRecorder) QueryFutureOrderByID(ctx, orderID interface
 }
 
 // QueryFutureTradeBalanceByDate mocks base method.
-func (m *MockOrderRepo) QueryFutureTradeBalanceByDate(ctx context.Context, date time.Time) (*entity.TradeBalance, error) {
+func (m *MockOrderRepo) QueryFutureTradeBalanceByDate(ctx context.Context, date time.Time) (*entity.FutureTradeBalance, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "QueryFutureTradeBalanceByDate", ctx, date)
-	ret0, _ := ret[0].(*entity.TradeBalance)
+	ret0, _ := ret[0].(*entity.FutureTradeBalance)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -1715,10 +1715,10 @@ func (mr *MockOrderRepoMockRecorder) QueryStockOrderByID(ctx, orderID interface{
 }
 
 // QueryStockTradeBalanceByDate mocks base method.
-func (m *MockOrderRepo) QueryStockTradeBalanceByDate(ctx context.Context, date time.Time) (*entity.TradeBalance, error) {
+func (m *MockOrderRepo) QueryStockTradeBalanceByDate(ctx context.Context, date time.Time) (*entity.StockTradeBalance, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "QueryStockTradeBalanceByDate", ctx, date)
-	ret0, _ := ret[0].(*entity.TradeBalance)
+	ret0, _ := ret[0].(*entity.StockTradeBalance)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

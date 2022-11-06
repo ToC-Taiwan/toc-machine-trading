@@ -344,7 +344,7 @@ func (uc *OrderUseCase) calculateStockTradeBalance(allOrders []*entity.StockOrde
 		discount += uc.quota.GetStockTradeFeeDiscount(v.Price, v.Quantity)
 	}
 
-	tmp := &entity.TradeBalance{
+	tmp := &entity.StockTradeBalance{
 		TradeDay:        cc.GetBasicInfo().TradeDay,
 		TradeCount:      tradeCount,
 		Forward:         forwardBalance,
@@ -551,7 +551,7 @@ func (uc *OrderUseCase) calculateFutureTradeBalance(allOrders []*entity.FutureOr
 		}
 	}
 
-	tmp := &entity.TradeBalance{
+	tmp := &entity.FutureTradeBalance{
 		TradeDay:   uc.futureTradeDay.TradeDay,
 		TradeCount: tradeCount,
 		Forward:    forwardBalance,
@@ -579,7 +579,7 @@ func (uc *OrderUseCase) GetAllStockOrder(ctx context.Context) ([]*entity.StockOr
 }
 
 // GetAllStockTradeBalance -.
-func (uc *OrderUseCase) GetAllStockTradeBalance(ctx context.Context) ([]*entity.TradeBalance, error) {
+func (uc *OrderUseCase) GetAllStockTradeBalance(ctx context.Context) ([]*entity.StockTradeBalance, error) {
 	tradeBalanceArr, err := uc.repo.QueryAllStockTradeBalance(ctx)
 	if err != nil {
 		return nil, err
@@ -588,7 +588,7 @@ func (uc *OrderUseCase) GetAllStockTradeBalance(ctx context.Context) ([]*entity.
 }
 
 // GetAllFutureTradeBalance -.
-func (uc *OrderUseCase) GetAllFutureTradeBalance(ctx context.Context) ([]*entity.TradeBalance, error) {
+func (uc *OrderUseCase) GetAllFutureTradeBalance(ctx context.Context) ([]*entity.FutureTradeBalance, error) {
 	tradeBalanceArr, err := uc.repo.QueryAllFutureTradeBalance(ctx)
 	if err != nil {
 		return nil, err

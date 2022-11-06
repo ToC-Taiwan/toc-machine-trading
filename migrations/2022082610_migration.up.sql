@@ -38,8 +38,6 @@ CREATE TABLE trade_future_balance (
     "trade_count" INT NOT NULL,
     "forward" INT NOT NULL,
     "reverse" INT NOT NULL,
-    "original_balance" INT NOT NULL,
-    "discount" INT NOT NULL,
     "total" INT NOT NULL,
     "trade_day" TIMESTAMPTZ NOT NULL
 );

@@ -88,8 +88,8 @@ type FutureOrder struct {
 	Future *Future `json:"future"`
 }
 
-// TradeBalance -.
-type TradeBalance struct {
+// StockTradeBalance -.
+type StockTradeBalance struct {
 	ID              int64     `json:"id"`
 	TradeCount      int64     `json:"trade_count"`
 	Forward         int64     `json:"forward"`
@@ -98,4 +98,14 @@ type TradeBalance struct {
 	Discount        int64     `json:"discount"`
 	Total           int64     `json:"total"`
 	TradeDay        time.Time `json:"trade_day"`
+}
+
+// FutureTradeBalance -.
+type FutureTradeBalance struct {
+	ID         int64     `json:"id"`
+	TradeCount int64     `json:"trade_count"`
+	Forward    int64     `json:"forward"`
+	Reverse    int64     `json:"reverse"`
+	Total      int64     `json:"total"`
+	TradeDay   time.Time `json:"trade_day"`
 }

@@ -167,6 +167,21 @@ definitions:
       second_part_duration:
         type: integer
     type: object
+  entity.FutureTradeBalance:
+    properties:
+      forward:
+        type: integer
+      id:
+        type: integer
+      reverse:
+        type: integer
+      total:
+        type: integer
+      trade_count:
+        type: integer
+      trade_day:
+        type: string
+    type: object
   entity.Stock:
     properties:
       category:
@@ -267,22 +282,7 @@ definitions:
       yesterday_volume:
         type: number
     type: object
-  entity.Target:
-    properties:
-      id:
-        type: integer
-      rank:
-        type: integer
-      stock:
-        $ref: '#/definitions/entity.Stock'
-      stock_num:
-        type: string
-      trade_day:
-        type: string
-      volume:
-        type: integer
-    type: object
-  entity.TradeBalance:
+  entity.StockTradeBalance:
     properties:
       discount:
         type: integer
@@ -300,6 +300,21 @@ definitions:
         type: integer
       trade_day:
         type: string
+    type: object
+  entity.Target:
+    properties:
+      id:
+        type: integer
+      rank:
+        type: integer
+      stock:
+        $ref: '#/definitions/entity.Stock'
+      stock_num:
+        type: string
+      trade_day:
+        type: string
+      volume:
+        type: integer
     type: object
   trader.TradeBalance:
     properties:
@@ -338,11 +353,11 @@ definitions:
     properties:
       future:
         items:
-          $ref: '#/definitions/entity.TradeBalance'
+          $ref: '#/definitions/entity.FutureTradeBalance'
         type: array
       stock:
         items:
-          $ref: '#/definitions/entity.TradeBalance'
+          $ref: '#/definitions/entity.StockTradeBalance'
         type: array
     type: object
 info:

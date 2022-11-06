@@ -175,19 +175,21 @@ type (
 		CalculateSellCost(price float64, quantity int64) int64
 		CalculateTradeDiscount(price float64, quantity int64) int64
 
-		GetAllStockTradeBalance(ctx context.Context) ([]*entity.TradeBalance, error)
-		GetAllFutureTradeBalance(ctx context.Context) ([]*entity.TradeBalance, error)
+		GetAllStockTradeBalance(ctx context.Context) ([]*entity.StockTradeBalance, error)
+		GetAllFutureTradeBalance(ctx context.Context) ([]*entity.FutureTradeBalance, error)
 
 		AskOrderUpdate() error
 	}
 
 	// OrderRepo -.
 	OrderRepo interface {
-		QueryAllStockTradeBalance(ctx context.Context) ([]*entity.TradeBalance, error)
-		QueryStockTradeBalanceByDate(ctx context.Context, date time.Time) (*entity.TradeBalance, error)
-		InsertOrUpdateStockTradeBalance(ctx context.Context, t *entity.TradeBalance) error
-		QueryFutureTradeBalanceByDate(ctx context.Context, date time.Time) (*entity.TradeBalance, error)
-		InsertOrUpdateFutureTradeBalance(ctx context.Context, t *entity.TradeBalance) error
+		QueryAllStockTradeBalance(ctx context.Context) ([]*entity.StockTradeBalance, error)
+		QueryStockTradeBalanceByDate(ctx context.Context, date time.Time) (*entity.StockTradeBalance, error)
+		InsertOrUpdateStockTradeBalance(ctx context.Context, t *entity.StockTradeBalance) error
+
+		QueryAllFutureTradeBalance(ctx context.Context) ([]*entity.FutureTradeBalance, error)
+		QueryFutureTradeBalanceByDate(ctx context.Context, date time.Time) (*entity.FutureTradeBalance, error)
+		InsertOrUpdateFutureTradeBalance(ctx context.Context, t *entity.FutureTradeBalance) error
 
 		QueryStockOrderByID(ctx context.Context, orderID string) (*entity.StockOrder, error)
 		InsertOrUpdateOrderByOrderID(ctx context.Context, t *entity.StockOrder) error
@@ -197,7 +199,6 @@ type (
 		QueryFutureOrderByID(ctx context.Context, orderID string) (*entity.FutureOrder, error)
 		InsertOrUpdateFutureOrderByOrderID(ctx context.Context, t *entity.FutureOrder) error
 		QueryAllFutureOrderByDate(ctx context.Context, timeTange []time.Time) ([]*entity.FutureOrder, error)
-		QueryAllFutureTradeBalance(ctx context.Context) ([]*entity.TradeBalance, error)
 	}
 
 	// OrdergRPCAPI -.

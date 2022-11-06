@@ -48,8 +48,8 @@ func (r *orderRoutes) getAllOrder(c *gin.Context) {
 }
 
 type tradeBalance struct {
-	Stock  []*entity.TradeBalance `json:"stock"`
-	Future []*entity.TradeBalance `json:"future"`
+	Stock  []*entity.StockTradeBalance  `json:"stock"`
+	Future []*entity.FutureTradeBalance `json:"future"`
 }
 
 // @Summary     getAllTradeBalance

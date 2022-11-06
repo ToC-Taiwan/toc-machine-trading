@@ -787,6 +787,29 @@ const docTemplate = `{
                 }
             }
         },
+        "entity.FutureTradeBalance": {
+            "type": "object",
+            "properties": {
+                "forward": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "reverse": {
+                    "type": "integer"
+                },
+                "total": {
+                    "type": "integer"
+                },
+                "trade_count": {
+                    "type": "integer"
+                },
+                "trade_day": {
+                    "type": "string"
+                }
+            }
+        },
         "entity.Stock": {
             "type": "object",
             "properties": {
@@ -939,30 +962,7 @@ const docTemplate = `{
                 }
             }
         },
-        "entity.Target": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "integer"
-                },
-                "rank": {
-                    "type": "integer"
-                },
-                "stock": {
-                    "$ref": "#/definitions/entity.Stock"
-                },
-                "stock_num": {
-                    "type": "string"
-                },
-                "trade_day": {
-                    "type": "string"
-                },
-                "volume": {
-                    "type": "integer"
-                }
-            }
-        },
-        "entity.TradeBalance": {
+        "entity.StockTradeBalance": {
             "type": "object",
             "properties": {
                 "discount": {
@@ -988,6 +988,29 @@ const docTemplate = `{
                 },
                 "trade_day": {
                     "type": "string"
+                }
+            }
+        },
+        "entity.Target": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "rank": {
+                    "type": "integer"
+                },
+                "stock": {
+                    "$ref": "#/definitions/entity.Stock"
+                },
+                "stock_num": {
+                    "type": "string"
+                },
+                "trade_day": {
+                    "type": "string"
+                },
+                "volume": {
+                    "type": "integer"
                 }
             }
         },
@@ -1049,13 +1072,13 @@ const docTemplate = `{
                 "future": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/entity.TradeBalance"
+                        "$ref": "#/definitions/entity.FutureTradeBalance"
                     }
                 },
                 "stock": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/entity.TradeBalance"
+                        "$ref": "#/definitions/entity.StockTradeBalance"
                     }
                 }
             }
