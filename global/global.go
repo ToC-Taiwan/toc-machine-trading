@@ -16,5 +16,5 @@ const (
 	// StartTradeYear -.
 	StartTradeYear int = 2021
 	// EndTradeYear -.
-	EndTradeYear int = 2022
+	EndTradeYear int = 2023
 )

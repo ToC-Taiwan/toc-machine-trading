@@ -1,9 +1,26 @@
 <a name="unreleased"></a>
 ## [Unreleased]
 
+
+<a name="v1.4.0"></a>
+## [v1.4.0] - 2022-11-06
+### Feat
+- **future:** use rsi to decide trade in, max hold time to trade out
+- **future:** test new method of future trader
+- **future:** modify trade out method
+- **future:** add kbar analyze to trade out of future
+- **router:** add simulate future to history router
+- **simulate:** add simulate future trade proto type
+- **strategy:** modify future trade strategy default config
+- **trader:** add kbar analyze to future trader
+
+
+<a name="v1.3.0"></a>
+## [v1.3.0] - 2022-10-24
 ### Chore
 - **changelog:** modify changelog
 - **changelog:** add git-chglog instead of cz-conventional-changelog
+- **make:** copy default config in every run, modify stock trader
 
 ### Feat
 - **balance:** exclude unfinish order in calculate balance, modify topic name
@@ -226,6 +243,8 @@
 - **clean:** first commit from clean code layout
 
 
-[Unreleased]: https://github.com/ToC-Taiwan/toc-machine-trading/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/ToC-Taiwan/toc-machine-trading/compare/v1.4.0...HEAD
+[v1.4.0]: https://github.com/ToC-Taiwan/toc-machine-trading/compare/v1.3.0...v1.4.0
+[v1.3.0]: https://github.com/ToC-Taiwan/toc-machine-trading/compare/v1.2.0...v1.3.0
 [v1.2.0]: https://github.com/ToC-Taiwan/toc-machine-trading/compare/v1.1.0...v1.2.0
 [v1.1.0]: https://github.com/ToC-Taiwan/toc-machine-trading/compare/v1.0.0...v1.1.0
