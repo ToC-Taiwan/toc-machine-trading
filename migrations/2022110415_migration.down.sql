@@ -1,5 +1,5 @@
 BEGIN;
 
-DROP TABLE IF EXISTS history_tick_future;
+DROP TABLE IF EXISTS history_future_tick;
 
 COMMIT;

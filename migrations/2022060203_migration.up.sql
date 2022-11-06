@@ -28,31 +28,31 @@ CREATE INDEX basic_targets_trade_day_index ON basic_targets USING btree ("trade_
 ALTER TABLE basic_targets
 ADD CONSTRAINT "fk_basic_targets_stock" FOREIGN KEY ("stock_num") REFERENCES basic_stock ("number");
 
-CREATE TABLE history_analyze (
+CREATE TABLE history_stock_analyze (
     "id" SERIAL PRIMARY KEY,
     "stock_num" VARCHAR NOT NULL,
     "date" TIMESTAMPTZ,
     "quater_ma" DECIMAL NOT NULL
 );
 
-CREATE INDEX history_analyze_stock_num_index ON history_analyze USING btree ("stock_num");
+CREATE INDEX history_stock_analyze_stock_num_index ON history_stock_analyze USING btree ("stock_num");
 
-ALTER TABLE history_analyze
-ADD CONSTRAINT "fk_history_analyze_stock" FOREIGN KEY ("stock_num") REFERENCES basic_stock ("number");
+ALTER TABLE history_stock_analyze
+ADD CONSTRAINT "fk_history_stock_analyze_stock" FOREIGN KEY ("stock_num") REFERENCES basic_stock ("number");
 
-CREATE TABLE history_close (
+CREATE TABLE history_stock_close (
     "id" SERIAL PRIMARY KEY,
     "date" TIMESTAMPTZ NOT NULL,
     "stock_num" VARCHAR NOT NULL,
     "close" DECIMAL NOT NULL
 );
 
-CREATE INDEX history_close_stock_num_index ON history_close USING btree ("stock_num");
+CREATE INDEX history_stock_close_stock_num_index ON history_stock_close USING btree ("stock_num");
 
-ALTER TABLE history_close
-ADD CONSTRAINT "fk_history_close_stock" FOREIGN KEY ("stock_num") REFERENCES basic_stock ("number");
+ALTER TABLE history_stock_close
+ADD CONSTRAINT "fk_history_stock_close_stock" FOREIGN KEY ("stock_num") REFERENCES basic_stock ("number");
 
-CREATE TABLE history_kbar (
+CREATE TABLE history_stock_kbar (
     "id" SERIAL PRIMARY KEY,
     "stock_num" VARCHAR NOT NULL,
     "kbar_time" TIMESTAMPTZ NOT NULL,
@@ -63,12 +63,12 @@ CREATE TABLE history_kbar (
     "volume" INT NOT NULL
 );
 
-CREATE INDEX history_kbar_stock_num_index ON history_kbar USING btree ("stock_num");
+CREATE INDEX history_stock_kbar_stock_num_index ON history_stock_kbar USING btree ("stock_num");
 
-ALTER TABLE history_kbar
-ADD CONSTRAINT "fk_history_kbar_stock" FOREIGN KEY ("stock_num") REFERENCES basic_stock ("number");
+ALTER TABLE history_stock_kbar
+ADD CONSTRAINT "fk_history_stock_kbar_stock" FOREIGN KEY ("stock_num") REFERENCES basic_stock ("number");
 
-CREATE TABLE history_tick (
+CREATE TABLE history_stock_tick (
     "id" SERIAL PRIMARY KEY,
     "stock_num" VARCHAR NOT NULL,
     "tick_time" TIMESTAMPTZ NOT NULL,
@@ -81,12 +81,12 @@ CREATE TABLE history_tick (
     "ask_volume" INT NOT NULL
 );
 
-CREATE INDEX history_tick_stock_num_index ON history_tick USING btree ("stock_num");
+CREATE INDEX history_stock_tick_stock_num_index ON history_stock_tick USING btree ("stock_num");
 
-ALTER TABLE history_tick
-ADD CONSTRAINT "fk_history_tick_stock" FOREIGN KEY ("stock_num") REFERENCES basic_stock ("number");
+ALTER TABLE history_stock_tick
+ADD CONSTRAINT "fk_history_stock_tick_stock" FOREIGN KEY ("stock_num") REFERENCES basic_stock ("number");
 
-CREATE TABLE trade_order (
+CREATE TABLE trade_stock_order (
     "order_id" VARCHAR PRIMARY KEY,
     "group_id" VARCHAR NOT NULL,
     "status" INT NOT NULL,
@@ -99,10 +99,10 @@ CREATE TABLE trade_order (
     "trade_time" TIMESTAMPTZ NOT NULL
 );
 
-CREATE INDEX trade_order_order_time_index ON trade_order USING btree ("order_time");
+CREATE INDEX trade_stock_order_order_time_index ON trade_stock_order USING btree ("order_time");
 
-ALTER TABLE trade_order
-ADD CONSTRAINT "fk_trade_order_stock" FOREIGN KEY ("stock_num") REFERENCES basic_stock ("number");
+ALTER TABLE trade_stock_order
+ADD CONSTRAINT "fk_trade_stock_order_stock" FOREIGN KEY ("stock_num") REFERENCES basic_stock ("number");
 
 CREATE TABLE sinopac_event (
     "id" SERIAL PRIMARY KEY,
@@ -113,7 +113,7 @@ CREATE TABLE sinopac_event (
     "event_time" TIMESTAMPTZ NOT NULL
 );
 
-CREATE TABLE trade_balance (
+CREATE TABLE trade_stock_balance (
     "id" SERIAL PRIMARY KEY,
     "trade_count" INT NOT NULL,
     "forward" INT NOT NULL,
@@ -124,6 +124,6 @@ CREATE TABLE trade_balance (
     "trade_day" TIMESTAMPTZ NOT NULL
 );
 
-CREATE INDEX trade_balance_trade_day_index ON trade_balance USING btree ("trade_day");
+CREATE INDEX trade_stock_balance_trade_day_index ON trade_stock_balance USING btree ("trade_day");
 
 COMMIT;

@@ -1,4 +1,4 @@
-CREATE TABLE history_tick_future (
+CREATE TABLE history_future_tick (
     "id" SERIAL PRIMARY KEY,
     "code" VARCHAR NOT NULL,
     "tick_time" TIMESTAMPTZ NOT NULL,
@@ -11,7 +11,7 @@ CREATE TABLE history_tick_future (
     "ask_volume" INT NOT NULL
 );
 
-CREATE INDEX history_tick_future_code_index ON history_tick_future USING btree ("code");
+CREATE INDEX history_future_tick_code_index ON history_future_tick USING btree ("code");
 
-ALTER TABLE history_tick_future
-ADD CONSTRAINT "fk_history_tick_future_future" FOREIGN KEY ("code") REFERENCES basic_future ("code");
+ALTER TABLE history_future_tick
+ADD CONSTRAINT "fk_history_future_tick_future" FOREIGN KEY ("code") REFERENCES basic_future ("code");
