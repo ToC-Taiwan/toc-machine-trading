@@ -24,7 +24,7 @@ type HistoryUseCase struct {
 	stockAnalyzeCfg config.StockAnalyze
 	basic           entity.BasicInfo
 
-	fetchList map[string]*entity.Target
+	fetchList map[string]*entity.StockTarget
 	mutex     sync.Mutex
 
 	biasRateArr []float64
@@ -38,7 +38,7 @@ func NewHistory(r HistoryRepo, t HistorygRPCAPI) *HistoryUseCase {
 	uc := &HistoryUseCase{
 		repo:      r,
 		grpcapi:   t,
-		fetchList: make(map[string]*entity.Target),
+		fetchList: make(map[string]*entity.StockTarget),
 		tradeDay:  tradeday.NewTradeDay(),
 	}
 
@@ -66,11 +66,11 @@ func (uc *HistoryUseCase) GetDayKbarByStockNumDate(stockNum string, date time.Ti
 }
 
 // FetchHistory FetchHistory
-func (uc *HistoryUseCase) FetchHistory(ctx context.Context, targetArr []*entity.Target) {
+func (uc *HistoryUseCase) FetchHistory(ctx context.Context, targetArr []*entity.StockTarget) {
 	defer uc.mutex.Unlock()
 	uc.mutex.Lock()
 
-	var fetchArr []*entity.Target
+	var fetchArr []*entity.StockTarget
 	for _, v := range targetArr {
 		if _, ok := uc.fetchList[v.StockNum]; !ok {
 			uc.fetchList[v.StockNum] = v
@@ -100,7 +100,7 @@ func (uc *HistoryUseCase) FetchHistory(ctx context.Context, targetArr []*entity.
 	bus.PublishTopicEvent(event.TopicAnalyzeStockTargets, ctx, fetchArr)
 }
 
-func (uc *HistoryUseCase) fetchHistoryClose(targetArr []*entity.Target) error {
+func (uc *HistoryUseCase) fetchHistoryClose(targetArr []*entity.StockTarget) error {
 	fetchTradeDayArr := cc.GetBasicInfo().HistoryCloseRange
 	stockNumArr := []string{}
 	for _, target := range targetArr {
@@ -197,7 +197,7 @@ func (uc *HistoryUseCase) findExistHistoryClose(fetchTradeDayArr []time.Time, st
 	return result, total, nil
 }
 
-func (uc *HistoryUseCase) fetchHistoryTick(targetArr []*entity.Target) error {
+func (uc *HistoryUseCase) fetchHistoryTick(targetArr []*entity.StockTarget) error {
 	fetchTradeDayArr := cc.GetBasicInfo().HistoryTickRange
 	stockNumArr := []string{}
 	for _, target := range targetArr {
@@ -291,7 +291,7 @@ func (uc *HistoryUseCase) findExistStockHistoryTick(fetchTradeDayArr []time.Time
 	return result, total, nil
 }
 
-func (uc *HistoryUseCase) fetchHistoryKbar(targetArr []*entity.Target) error {
+func (uc *HistoryUseCase) fetchHistoryKbar(targetArr []*entity.StockTarget) error {
 	fetchTradeDayArr := cc.GetBasicInfo().HistoryKbarRange
 	stockNumArr := []string{}
 	for _, target := range targetArr {

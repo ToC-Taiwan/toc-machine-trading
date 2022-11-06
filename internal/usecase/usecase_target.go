@@ -82,7 +82,7 @@ func (uc *TargetUseCase) fillMonitorFutureCode(future *entity.Future) {
 	close(uc.waitMonitorFuture)
 }
 
-func (uc *TargetUseCase) publishNewTargets(targetArr []*entity.Target) {
+func (uc *TargetUseCase) publishNewTargets(targetArr []*entity.StockTarget) {
 	err := uc.repo.InsertOrUpdateTargetArr(context.Background(), targetArr)
 	if err != nil {
 		log.Panic(err)
@@ -99,12 +99,12 @@ func (uc *TargetUseCase) publishNewTargets(targetArr []*entity.Target) {
 }
 
 // GetTargets - get targets from cache
-func (uc *TargetUseCase) GetTargets(ctx context.Context) []*entity.Target {
+func (uc *TargetUseCase) GetTargets(ctx context.Context) []*entity.StockTarget {
 	return cc.GetTargets()
 }
 
 // SearchTradeDayTargets - search targets by trade day
-func (uc *TargetUseCase) SearchTradeDayTargets(ctx context.Context, tradeDay time.Time) ([]*entity.Target, error) {
+func (uc *TargetUseCase) SearchTradeDayTargets(ctx context.Context, tradeDay time.Time) ([]*entity.StockTarget, error) {
 	lastTradeDay := cc.GetBasicInfo().LastTradeDay
 	t, err := uc.gRPCAPI.GetStockVolumeRank(lastTradeDay.Format(common.ShortTimeLayout))
 	if err != nil {
@@ -116,7 +116,7 @@ func (uc *TargetUseCase) SearchTradeDayTargets(ctx context.Context, tradeDay tim
 		return uc.SearchTradeDayTargetsFromAllSnapshot(tradeDay)
 	}
 
-	var result []*entity.Target
+	var result []*entity.StockTarget
 	for _, v := range t {
 		stock := cc.GetStockDetail(v.GetCode())
 		if stock == nil {
@@ -127,7 +127,7 @@ func (uc *TargetUseCase) SearchTradeDayTargets(ctx context.Context, tradeDay tim
 			continue
 		}
 
-		result = append(result, &entity.Target{
+		result = append(result, &entity.StockTarget{
 			Rank:     len(result) + 1,
 			StockNum: v.GetCode(),
 			Volume:   v.GetTotalVolume(),
@@ -139,21 +139,21 @@ func (uc *TargetUseCase) SearchTradeDayTargets(ctx context.Context, tradeDay tim
 }
 
 // SearchTradeDayTargetsFromAllSnapshot -.
-func (uc *TargetUseCase) SearchTradeDayTargetsFromAllSnapshot(tradeDay time.Time) ([]*entity.Target, error) {
+func (uc *TargetUseCase) SearchTradeDayTargetsFromAllSnapshot(tradeDay time.Time) ([]*entity.StockTarget, error) {
 	data, err := uc.streamgRPCAPI.GetAllStockSnapshot()
 	if err != nil {
-		return []*entity.Target{}, err
+		return []*entity.StockTarget{}, err
 	}
 
 	if len(data) < 200 {
-		return []*entity.Target{}, errors.New("no all snapshots")
+		return []*entity.StockTarget{}, errors.New("no all snapshots")
 	}
 
 	sort.Slice(data, func(i, j int) bool {
 		return data[i].GetTotalVolume() > data[j].GetTotalVolume()
 	})
 
-	var result []*entity.Target
+	var result []*entity.StockTarget
 	for _, v := range data[:200] {
 		stock := cc.GetStockDetail(v.GetCode())
 		if stock == nil {
@@ -164,7 +164,7 @@ func (uc *TargetUseCase) SearchTradeDayTargetsFromAllSnapshot(tradeDay time.Time
 			continue
 		}
 
-		result = append(result, &entity.Target{
+		result = append(result, &entity.StockTarget{
 			Rank:     len(result) + 1,
 			StockNum: v.GetCode(),
 			Volume:   v.GetTotalVolume(),
@@ -199,7 +199,7 @@ func (uc *TargetUseCase) UnSubscribeAll(ctx context.Context) error {
 }
 
 // SubscribeStockTick -.
-func (uc *TargetUseCase) SubscribeStockTick(targetArr []*entity.Target) error {
+func (uc *TargetUseCase) SubscribeStockTick(targetArr []*entity.StockTarget) error {
 	var subArr []string
 	for _, v := range targetArr {
 		subArr = append(subArr, v.StockNum)
@@ -218,7 +218,7 @@ func (uc *TargetUseCase) SubscribeStockTick(targetArr []*entity.Target) error {
 }
 
 // SubscribeStockBidAsk -.
-func (uc *TargetUseCase) SubscribeStockBidAsk(targetArr []*entity.Target) error {
+func (uc *TargetUseCase) SubscribeStockBidAsk(targetArr []*entity.StockTarget) error {
 	var subArr []string
 	for _, v := range targetArr {
 		subArr = append(subArr, v.StockNum)

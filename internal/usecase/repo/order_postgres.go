@@ -40,7 +40,7 @@ func (r *OrderRepo) InsertOrUpdateOrderByOrderID(ctx context.Context, t *entity.
 	var args []interface{}
 
 	if dbOrder == nil {
-		builder := r.Builder.Insert(tableNameTradeOrder).Columns("group_id, order_id, status, order_time, tick_time, stock_num, action, price, quantity, trade_time")
+		builder := r.Builder.Insert(tableNameTradeStockOrder).Columns("group_id, order_id, status, order_time, tick_time, stock_num, action, price, quantity, trade_time")
 		builder = builder.Values(t.GroupID, t.OrderID, t.Status, t.OrderTime, t.TickTime, t.StockNum, t.Action, t.Price, t.Quantity, t.TradeTime)
 		if sql, args, err = builder.ToSql(); err != nil {
 			return err
@@ -49,7 +49,7 @@ func (r *OrderRepo) InsertOrUpdateOrderByOrderID(ctx context.Context, t *entity.
 		}
 	} else if !cmp.Equal(t, dbOrder) {
 		builder := r.Builder.
-			Update(tableNameTradeOrder).
+			Update(tableNameTradeStockOrder).
 			Set("group_id", t.GroupID).
 			Set("order_id", t.OrderID).
 			Set("status", t.Status).
@@ -74,9 +74,9 @@ func (r *OrderRepo) InsertOrUpdateOrderByOrderID(ctx context.Context, t *entity.
 func (r *OrderRepo) QueryStockOrderByID(ctx context.Context, orderID string) (*entity.StockOrder, error) {
 	sql, arg, err := r.Builder.
 		Select("group_id, order_id, status, order_time, tick_time, stock_num, action, price, quantity, trade_time, number, name, exchange, category, day_trade, last_close, update_date").
-		From(tableNameTradeOrder).
+		From(tableNameTradeStockOrder).
 		Where(squirrel.Eq{"order_id": orderID}).
-		Join("basic_stock ON trade_order.stock_num = basic_stock.number").ToSql()
+		Join("basic_stock ON trade_stock_order.stock_num = basic_stock.number").ToSql()
 	if err != nil {
 		return nil, err
 	}
@@ -97,11 +97,11 @@ func (r *OrderRepo) QueryStockOrderByID(ctx context.Context, orderID string) (*e
 func (r *OrderRepo) QueryAllStockOrderByDate(ctx context.Context, timeRange []time.Time) ([]*entity.StockOrder, error) {
 	sql, arg, err := r.Builder.
 		Select("group_id, order_id, status, order_time, tick_time, stock_num, action, price, quantity, trade_time, number, name, exchange, category, day_trade, last_close, update_date").
-		From(tableNameTradeOrder).
+		From(tableNameTradeStockOrder).
 		Where(squirrel.GtOrEq{"order_time": timeRange[0]}).
 		Where(squirrel.Lt{"order_time": timeRange[1]}).
 		OrderBy("order_time ASC").
-		Join("basic_stock ON trade_order.stock_num = basic_stock.number").ToSql()
+		Join("basic_stock ON trade_stock_order.stock_num = basic_stock.number").ToSql()
 	if err != nil {
 		return nil, err
 	}
@@ -128,8 +128,8 @@ func (r *OrderRepo) QueryAllStockOrderByDate(ctx context.Context, timeRange []ti
 func (r *OrderRepo) QueryAllStockOrder(ctx context.Context) ([]*entity.StockOrder, error) {
 	sql, _, err := r.Builder.
 		Select("group_id, order_id, status, order_time, tick_time, stock_num, action, price, quantity, trade_time, number, name, exchange, category, day_trade, last_close, update_date").
-		From(tableNameTradeOrder).
-		Join("basic_stock ON trade_order.stock_num = basic_stock.number").ToSql()
+		From(tableNameTradeStockOrder).
+		Join("basic_stock ON trade_stock_order.stock_num = basic_stock.number").ToSql()
 	if err != nil {
 		return nil, err
 	}
@@ -168,7 +168,7 @@ func (r *OrderRepo) InsertOrUpdateStockTradeBalance(ctx context.Context, t *enti
 	var args []interface{}
 
 	if dbTradeBalance == nil {
-		builder := r.Builder.Insert(tableNameTradeBalance).Columns("trade_count, forward, reverse, original_balance, discount, total, trade_day")
+		builder := r.Builder.Insert(tableNameTradeStockBalance).Columns("trade_count, forward, reverse, original_balance, discount, total, trade_day")
 		builder = builder.Values(t.TradeCount, t.Forward, t.Reverse, t.OriginalBalance, t.Discount, t.Total, t.TradeDay)
 		if sql, args, err = builder.ToSql(); err != nil {
 			return err
@@ -177,7 +177,7 @@ func (r *OrderRepo) InsertOrUpdateStockTradeBalance(ctx context.Context, t *enti
 		}
 	} else {
 		builder := r.Builder.
-			Update(tableNameTradeBalance).
+			Update(tableNameTradeStockBalance).
 			Set("trade_count", t.TradeCount).
 			Set("forward", t.Forward).
 			Set("reverse", t.Reverse).
@@ -199,7 +199,7 @@ func (r *OrderRepo) InsertOrUpdateStockTradeBalance(ctx context.Context, t *enti
 func (r *OrderRepo) QueryStockTradeBalanceByDate(ctx context.Context, date time.Time) (*entity.StockTradeBalance, error) {
 	sql, arg, err := r.Builder.
 		Select("trade_count, forward, reverse, original_balance, discount, total, trade_day").
-		From(tableNameTradeBalance).
+		From(tableNameTradeStockBalance).
 		Where(squirrel.Eq{"trade_day": date}).
 		ToSql()
 	if err != nil {
@@ -221,7 +221,7 @@ func (r *OrderRepo) QueryStockTradeBalanceByDate(ctx context.Context, date time.
 func (r *OrderRepo) QueryAllStockTradeBalance(ctx context.Context) ([]*entity.StockTradeBalance, error) {
 	sql, _, err := r.Builder.
 		Select("trade_count, forward, reverse, original_balance, discount, total, trade_day").
-		From(tableNameTradeBalance).OrderBy("trade_day ASC").
+		From(tableNameTradeStockBalance).OrderBy("trade_day ASC").
 		ToSql()
 	if err != nil {
 		return nil, err

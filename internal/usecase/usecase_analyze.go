@@ -13,7 +13,7 @@ import (
 // AnalyzeUseCase -.
 type AnalyzeUseCase struct {
 	repo      HistoryRepo
-	targetArr []*entity.Target
+	targetArr []*entity.StockTarget
 
 	lastBelowMAStock map[string]*entity.StockHistoryAnalyze
 	rebornMap        map[time.Time][]entity.Stock
@@ -36,11 +36,11 @@ func NewAnalyze(r HistoryRepo) *AnalyzeUseCase {
 }
 
 // AnalyzeAll -.
-func (uc *AnalyzeUseCase) AnalyzeAll(ctx context.Context, targetArr []*entity.Target) {
+func (uc *AnalyzeUseCase) AnalyzeAll(ctx context.Context, targetArr []*entity.StockTarget) {
 	uc.findBelowQuaterMATargets(ctx, targetArr)
 }
 
-func (uc *AnalyzeUseCase) findBelowQuaterMATargets(ctx context.Context, targetArr []*entity.Target) {
+func (uc *AnalyzeUseCase) findBelowQuaterMATargets(ctx context.Context, targetArr []*entity.StockTarget) {
 	defer uc.rebornLock.Unlock()
 	uc.rebornLock.Lock()
 	uc.targetArr = append(uc.targetArr, targetArr...)

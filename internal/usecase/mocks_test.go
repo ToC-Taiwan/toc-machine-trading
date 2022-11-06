@@ -326,10 +326,10 @@ func (m *MockTarget) EXPECT() *MockTargetMockRecorder {
 }
 
 // GetTargets mocks base method.
-func (m *MockTarget) GetTargets(ctx context.Context) []*entity.Target {
+func (m *MockTarget) GetTargets(ctx context.Context) []*entity.StockTarget {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetTargets", ctx)
-	ret0, _ := ret[0].([]*entity.Target)
+	ret0, _ := ret[0].([]*entity.StockTarget)
 	return ret0
 }
 
@@ -363,7 +363,7 @@ func (m *MockTargetRepo) EXPECT() *MockTargetRepoMockRecorder {
 }
 
 // InsertOrUpdateTargetArr mocks base method.
-func (m *MockTargetRepo) InsertOrUpdateTargetArr(ctx context.Context, t []*entity.Target) error {
+func (m *MockTargetRepo) InsertOrUpdateTargetArr(ctx context.Context, t []*entity.StockTarget) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "InsertOrUpdateTargetArr", ctx, t)
 	ret0, _ := ret[0].(error)
@@ -377,10 +377,10 @@ func (mr *MockTargetRepoMockRecorder) InsertOrUpdateTargetArr(ctx, t interface{}
 }
 
 // QueryTargetsByTradeDay mocks base method.
-func (m *MockTargetRepo) QueryTargetsByTradeDay(ctx context.Context, tradeDay time.Time) ([]*entity.Target, error) {
+func (m *MockTargetRepo) QueryTargetsByTradeDay(ctx context.Context, tradeDay time.Time) ([]*entity.StockTarget, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "QueryTargetsByTradeDay", ctx, tradeDay)
-	ret0, _ := ret[0].([]*entity.Target)
+	ret0, _ := ret[0].([]*entity.StockTarget)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -1129,7 +1129,7 @@ func (mr *MockStreamMockRecorder) ReceiveOrderStatus(ctx interface{}) *gomock.Ca
 }
 
 // ReceiveStreamData mocks base method.
-func (m *MockStream) ReceiveStreamData(ctx context.Context, targetArr []*entity.Target) {
+func (m *MockStream) ReceiveStreamData(ctx context.Context, targetArr []*entity.StockTarget) {
 	m.ctrl.T.Helper()
 	m.ctrl.Call(m, "ReceiveStreamData", ctx, targetArr)
 }
@@ -1368,7 +1368,7 @@ func (mr *MockStreamRabbitMockRecorder) RemoveFutureTickChan(timestamp interface
 }
 
 // StockBidAskConsumer mocks base method.
-func (m *MockStreamRabbit) StockBidAskConsumer(stockNum string, bidAskChan chan *entity.RealTimeBidAsk) {
+func (m *MockStreamRabbit) StockBidAskConsumer(stockNum string, bidAskChan chan *entity.RealTimeStockBidAsk) {
 	m.ctrl.T.Helper()
 	m.ctrl.Call(m, "StockBidAskConsumer", stockNum, bidAskChan)
 }
@@ -1380,7 +1380,7 @@ func (mr *MockStreamRabbitMockRecorder) StockBidAskConsumer(stockNum, bidAskChan
 }
 
 // TickConsumer mocks base method.
-func (m *MockStreamRabbit) TickConsumer(stockNum string, tickChan chan *entity.RealTimeTick) {
+func (m *MockStreamRabbit) TickConsumer(stockNum string, tickChan chan *entity.RealTimeStockTick) {
 	m.ctrl.T.Helper()
 	m.ctrl.Call(m, "TickConsumer", stockNum, tickChan)
 }

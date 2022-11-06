@@ -27,7 +27,7 @@ func newTargetRoutes(handler *gin.RouterGroup, t usecase.Target) {
 // @Tags  	    targets
 // @Accept      json
 // @Produce     json
-// @Success     200 {object} []entity.Target
+// @Success     200 {object} []entity.StockTarget
 // @Router      /targets [get]
 func (r *targetRoutes) getTargets(c *gin.Context) {
 	c.JSON(http.StatusOK, r.t.GetTargets(c.Request.Context()))

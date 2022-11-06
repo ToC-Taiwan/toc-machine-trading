@@ -9,7 +9,7 @@ import (
 )
 
 // realTimeStockTickArr -.
-type realTimeStockTickArr []*entity.RealTimeTick
+type realTimeStockTickArr []*entity.RealTimeStockTick
 
 func (c realTimeStockTickArr) getTotalVolume() int64 {
 	var volume int64

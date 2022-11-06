@@ -519,7 +519,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/entity.Target"
+                                "$ref": "#/definitions/entity.StockTarget"
                             }
                         }
                     }
@@ -962,6 +962,29 @@ const docTemplate = `{
                 }
             }
         },
+        "entity.StockTarget": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "rank": {
+                    "type": "integer"
+                },
+                "stock": {
+                    "$ref": "#/definitions/entity.Stock"
+                },
+                "stock_num": {
+                    "type": "string"
+                },
+                "trade_day": {
+                    "type": "string"
+                },
+                "volume": {
+                    "type": "integer"
+                }
+            }
+        },
         "entity.StockTradeBalance": {
             "type": "object",
             "properties": {
@@ -988,29 +1011,6 @@ const docTemplate = `{
                 },
                 "trade_day": {
                     "type": "string"
-                }
-            }
-        },
-        "entity.Target": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "integer"
-                },
-                "rank": {
-                    "type": "integer"
-                },
-                "stock": {
-                    "$ref": "#/definitions/entity.Stock"
-                },
-                "stock_num": {
-                    "type": "string"
-                },
-                "trade_day": {
-                    "type": "string"
-                },
-                "volume": {
-                    "type": "integer"
                 }
             }
         },

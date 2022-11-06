@@ -146,22 +146,22 @@ func (c *Cache) GetLowBiasRate() float64 {
 }
 
 // AppendTargets -.
-func (c *Cache) AppendTargets(targets []*entity.Target) {
+func (c *Cache) AppendTargets(targets []*entity.StockTarget) {
 	original := c.GetTargets()
 	original = append(original, targets...)
 	c.setTargets(original)
 }
 
-func (c *Cache) setTargets(targets []*entity.Target) {
+func (c *Cache) setTargets(targets []*entity.StockTarget) {
 	c.Set(c.targetsKey(), targets)
 }
 
 // GetTargets -.
-func (c *Cache) GetTargets() []*entity.Target {
+func (c *Cache) GetTargets() []*entity.StockTarget {
 	if value, ok := c.Get(c.targetsKey()); ok {
-		return value.([]*entity.Target)
+		return value.([]*entity.StockTarget)
 	}
-	return []*entity.Target{}
+	return []*entity.StockTarget{}
 }
 
 // GetHistoryTickAnalyze -.

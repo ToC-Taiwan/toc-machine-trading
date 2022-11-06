@@ -54,13 +54,13 @@ type (
 type (
 	// Target -.
 	Target interface {
-		GetTargets(ctx context.Context) []*entity.Target
+		GetTargets(ctx context.Context) []*entity.StockTarget
 	}
 
 	// TargetRepo -.
 	TargetRepo interface {
-		InsertOrUpdateTargetArr(ctx context.Context, t []*entity.Target) error
-		QueryTargetsByTradeDay(ctx context.Context, tradeDay time.Time) ([]*entity.Target, error)
+		InsertOrUpdateTargetArr(ctx context.Context, t []*entity.StockTarget) error
+		QueryTargetsByTradeDay(ctx context.Context, tradeDay time.Time) ([]*entity.StockTarget, error)
 	}
 
 	// TargetgRPCAPI -.
@@ -129,7 +129,7 @@ type (
 	Stream interface {
 		ReceiveEvent(ctx context.Context)
 		ReceiveOrderStatus(ctx context.Context)
-		ReceiveStreamData(ctx context.Context, targetArr []*entity.Target)
+		ReceiveStreamData(ctx context.Context, targetArr []*entity.StockTarget)
 		GetTSESnapshot(ctx context.Context) (*entity.StockSnapShot, error)
 		GetStockSnapshotByNumArr(stockNumArr []string) ([]*entity.StockSnapShot, error)
 
@@ -157,8 +157,8 @@ type (
 
 		EventConsumer(eventChan chan *entity.SinopacEvent)
 		OrderStatusConsumer(orderStatusChan chan interface{})
-		TickConsumer(stockNum string, tickChan chan *entity.RealTimeTick)
-		StockBidAskConsumer(stockNum string, bidAskChan chan *entity.RealTimeBidAsk)
+		TickConsumer(stockNum string, tickChan chan *entity.RealTimeStockTick)
+		StockBidAskConsumer(stockNum string, bidAskChan chan *entity.RealTimeStockBidAsk)
 
 		FutureTickConsumer(code string, tickChan chan *entity.RealTimeFutureTick)
 		FutureBidAskConsumer(code string, bidAskChan chan *entity.FutureRealTimeBidAsk)

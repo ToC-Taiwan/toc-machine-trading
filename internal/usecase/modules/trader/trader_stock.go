@@ -26,13 +26,13 @@ type StockTrader struct {
 	orderMap     map[entity.OrderAction][]*entity.StockOrder
 	waitingOrder *entity.StockOrder
 
-	tickChan   chan *entity.RealTimeTick
-	bidAskChan chan *entity.RealTimeBidAsk
+	tickChan   chan *entity.RealTimeStockTick
+	bidAskChan chan *entity.RealTimeStockBidAsk
 
 	historyTickAnalyze []int64
 	analyzeTickTime    time.Time
-	lastTick           *entity.RealTimeTick
-	lastBidAsk         *entity.RealTimeBidAsk
+	lastTick           *entity.RealTimeStockTick
+	lastBidAsk         *entity.RealTimeStockBidAsk
 
 	tradeInWaitTime  time.Duration
 	tradeOutWaitTime time.Duration
@@ -58,8 +58,8 @@ func NewStockTrader(stockNum string, tradeSwitch config.StockTradeSwitch, stockA
 		stockNum:           stockNum,
 		orderQuantity:      quantity,
 		orderMap:           make(map[entity.OrderAction][]*entity.StockOrder),
-		tickChan:           make(chan *entity.RealTimeTick),
-		bidAskChan:         make(chan *entity.RealTimeBidAsk),
+		tickChan:           make(chan *entity.RealTimeStockTick),
+		bidAskChan:         make(chan *entity.RealTimeStockBidAsk),
 		historyTickAnalyze: arr,
 		tradeInWaitTime:    time.Duration(tradeSwitch.TradeInWaitTime) * time.Second,
 		tradeOutWaitTime:   time.Duration(tradeSwitch.TradeOutWaitTime) * time.Second,
@@ -354,11 +354,11 @@ func (o *StockTrader) GetStockNum() string {
 }
 
 // GetTickChan -.
-func (o *StockTrader) GetTickChan() chan *entity.RealTimeTick {
+func (o *StockTrader) GetTickChan() chan *entity.RealTimeStockTick {
 	return o.tickChan
 }
 
 // GetBidAskChan -.
-func (o *StockTrader) GetBidAskChan() chan *entity.RealTimeBidAsk {
+func (o *StockTrader) GetBidAskChan() chan *entity.RealTimeStockBidAsk {
 	return o.bidAskChan
 }

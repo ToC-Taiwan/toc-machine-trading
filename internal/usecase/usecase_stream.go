@@ -91,12 +91,12 @@ func (uc *StreamUseCase) realTimeAddTargets() error {
 	data = data[:uc.targetFilter.RealTimeRank]
 
 	currentTargets := cc.GetTargets()
-	targetsMap := make(map[string]*entity.Target)
+	targetsMap := make(map[string]*entity.StockTarget)
 	for _, t := range currentTargets {
 		targetsMap[t.StockNum] = t
 	}
 
-	var newTargets []*entity.Target
+	var newTargets []*entity.StockTarget
 	for i, d := range data {
 		stock := cc.GetStockDetail(d.GetCode())
 		if stock == nil {
@@ -108,7 +108,7 @@ func (uc *StreamUseCase) realTimeAddTargets() error {
 		}
 
 		if targetsMap[d.GetCode()] == nil {
-			newTargets = append(newTargets, &entity.Target{
+			newTargets = append(newTargets, &entity.StockTarget{
 				Rank:     100 + i + 1,
 				StockNum: d.GetCode(),
 				Volume:   d.GetTotalVolume(),
@@ -170,21 +170,24 @@ func (uc *StreamUseCase) GetTSESnapshot(ctx context.Context) (*entity.StockSnapS
 		return nil, err
 	}
 	return &entity.StockSnapShot{
-		SnapTime:        time.Unix(0, body.GetTs()).Add(-8 * time.Hour),
-		Open:            body.GetOpen(),
-		High:            body.GetHigh(),
-		Low:             body.GetLow(),
-		Close:           body.GetClose(),
-		TickType:        body.GetTickType(),
-		PriceChg:        body.GetChangePrice(),
-		PctChg:          body.GetChangeRate(),
-		ChgType:         body.GetChangeType(),
-		Volume:          body.GetVolume(),
-		VolumeSum:       body.GetTotalVolume(),
-		Amount:          body.GetAmount(),
-		AmountSum:       body.GetTotalAmount(),
-		YesterdayVolume: body.GetYesterdayVolume(),
-		VolumeRatio:     body.GetVolumeRatio(),
+		SnapShotBase: entity.SnapShotBase{
+			SnapTime:        time.Unix(0, body.GetTs()).Add(-8 * time.Hour),
+			Open:            body.GetOpen(),
+			High:            body.GetHigh(),
+			Low:             body.GetLow(),
+			Close:           body.GetClose(),
+			TickType:        body.GetTickType(),
+			PriceChg:        body.GetChangePrice(),
+			PctChg:          body.GetChangeRate(),
+			ChgType:         body.GetChangeType(),
+			Volume:          body.GetVolume(),
+			VolumeSum:       body.GetTotalVolume(),
+			Amount:          body.GetAmount(),
+			AmountSum:       body.GetTotalAmount(),
+			YesterdayVolume: body.GetYesterdayVolume(),
+			VolumeRatio:     body.GetVolumeRatio(),
+		},
+		StockNum: body.GetCode(),
 	}, nil
 }
 
@@ -208,23 +211,25 @@ func (uc *StreamUseCase) GetStockSnapshotByNumArr(stockNumArr []string) ([]*enti
 	for _, body := range snapshot {
 		stockNum := body.GetCode()
 		result = append(result, &entity.StockSnapShot{
-			StockNum:        stockNum,
-			StockName:       cc.GetStockDetail(stockNum).Name,
-			SnapTime:        time.Unix(0, body.GetTs()).Add(-8 * time.Hour),
-			Open:            body.GetOpen(),
-			High:            body.GetHigh(),
-			Low:             body.GetLow(),
-			Close:           body.GetClose(),
-			TickType:        body.GetTickType(),
-			PriceChg:        body.GetChangePrice(),
-			PctChg:          body.GetChangeRate(),
-			ChgType:         body.GetChangeType(),
-			Volume:          body.GetVolume(),
-			VolumeSum:       body.GetTotalVolume(),
-			Amount:          body.GetAmount(),
-			AmountSum:       body.GetTotalAmount(),
-			YesterdayVolume: body.GetYesterdayVolume(),
-			VolumeRatio:     body.GetVolumeRatio(),
+			StockNum:  stockNum,
+			StockName: cc.GetStockDetail(stockNum).Name,
+			SnapShotBase: entity.SnapShotBase{
+				SnapTime:        time.Unix(0, body.GetTs()).Add(-8 * time.Hour),
+				Open:            body.GetOpen(),
+				High:            body.GetHigh(),
+				Low:             body.GetLow(),
+				Close:           body.GetClose(),
+				TickType:        body.GetTickType(),
+				PriceChg:        body.GetChangePrice(),
+				PctChg:          body.GetChangeRate(),
+				ChgType:         body.GetChangeType(),
+				Volume:          body.GetVolume(),
+				VolumeSum:       body.GetTotalVolume(),
+				Amount:          body.GetAmount(),
+				AmountSum:       body.GetTotalAmount(),
+				YesterdayVolume: body.GetYesterdayVolume(),
+				VolumeRatio:     body.GetVolumeRatio(),
+			},
 		})
 	}
 
@@ -248,9 +253,9 @@ func (uc *StreamUseCase) DeleteFutureRealTimeConnection(timestamp int64) {
 }
 
 // ReceiveStreamData - receive target data, start goroutine to trade
-func (uc *StreamUseCase) ReceiveStreamData(ctx context.Context, targetArr []*entity.Target) {
+func (uc *StreamUseCase) ReceiveStreamData(ctx context.Context, targetArr []*entity.StockTarget) {
 	agentChan := make(chan *trader.StockTrader)
-	targetMap := make(map[string]*entity.Target)
+	targetMap := make(map[string]*entity.StockTarget)
 	mutex := sync.RWMutex{}
 
 	go func() {
@@ -269,7 +274,7 @@ func (uc *StreamUseCase) ReceiveStreamData(ctx context.Context, targetArr []*ent
 			target := targetMap[agent.GetStockNum()]
 			mutex.RUnlock()
 
-			bus.PublishTopicEvent(event.TopicSubscribeStockTickTargets, []*entity.Target{target})
+			bus.PublishTopicEvent(event.TopicSubscribeStockTickTargets, []*entity.StockTarget{target})
 		}
 	}()
 
