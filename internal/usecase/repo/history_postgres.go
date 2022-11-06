@@ -21,8 +21,8 @@ func NewHistory(pg *postgres.Postgres) *HistoryRepo {
 }
 
 // InsertHistoryCloseArr -.
-func (r *HistoryRepo) InsertHistoryCloseArr(ctx context.Context, t []*entity.HistoryClose) error {
-	split := [][]*entity.HistoryClose{}
+func (r *HistoryRepo) InsertHistoryCloseArr(ctx context.Context, t []*entity.StockHistoryClose) error {
+	split := [][]*entity.StockHistoryClose{}
 	if len(t) > batchSize {
 		count := len(t)/batchSize + 1
 		for i := 0; i < count; i++ {
@@ -84,7 +84,7 @@ func (r *HistoryRepo) DeleteHistoryCloseByStockAndDate(ctx context.Context, stoc
 }
 
 // QueryMutltiStockCloseByDate -.
-func (r *HistoryRepo) QueryMutltiStockCloseByDate(ctx context.Context, stockNumArr []string, date time.Time) (map[string]*entity.HistoryClose, error) {
+func (r *HistoryRepo) QueryMutltiStockCloseByDate(ctx context.Context, stockNumArr []string, date time.Time) (map[string]*entity.StockHistoryClose, error) {
 	sql, args, err := r.Builder.
 		Select("date, stock_num, close, number, name, exchange, category, day_trade, last_close, update_date").
 		From(tableNameHistoryClose).
@@ -101,9 +101,9 @@ func (r *HistoryRepo) QueryMutltiStockCloseByDate(ctx context.Context, stockNumA
 	}
 	defer rows.Close()
 
-	closeMap := make(map[string]*entity.HistoryClose)
+	closeMap := make(map[string]*entity.StockHistoryClose)
 	for rows.Next() {
-		e := entity.HistoryClose{Stock: new(entity.Stock)}
+		e := entity.StockHistoryClose{Stock: new(entity.Stock)}
 		if err := rows.Scan(
 			&e.Date, &e.StockNum, &e.Close,
 			&e.Stock.Number, &e.Stock.Name, &e.Stock.Exchange, &e.Stock.Category, &e.Stock.DayTrade, &e.Stock.LastClose, &e.Stock.UpdateDate,
@@ -214,8 +214,8 @@ func (r *HistoryRepo) QueryMultiStockTickArrByDate(ctx context.Context, stockNum
 }
 
 // InsertHistoryKbarArr -.
-func (r *HistoryRepo) InsertHistoryKbarArr(ctx context.Context, t []*entity.HistoryKbar) error {
-	var split [][]*entity.HistoryKbar
+func (r *HistoryRepo) InsertHistoryKbarArr(ctx context.Context, t []*entity.StockHistoryKbar) error {
+	var split [][]*entity.StockHistoryKbar
 	if len(t) > batchSize {
 		count := len(t)/batchSize + 1
 		for i := 0; i < count; i++ {
@@ -278,7 +278,7 @@ func (r *HistoryRepo) DeleteHistoryKbarByStockAndDate(ctx context.Context, stock
 }
 
 // QueryMultiStockKbarArrByDate -.
-func (r *HistoryRepo) QueryMultiStockKbarArrByDate(ctx context.Context, stockNumArr []string, date time.Time) (map[string][]*entity.HistoryKbar, error) {
+func (r *HistoryRepo) QueryMultiStockKbarArrByDate(ctx context.Context, stockNumArr []string, date time.Time) (map[string][]*entity.StockHistoryKbar, error) {
 	sql, args, err := r.Builder.
 		Select("stock_num, kbar_time, open, high, low, close, volume, number, name, exchange, category, day_trade, last_close, update_date").
 		From(tableNameHistoryKbar).
@@ -297,9 +297,9 @@ func (r *HistoryRepo) QueryMultiStockKbarArrByDate(ctx context.Context, stockNum
 	}
 	defer rows.Close()
 
-	result := make(map[string][]*entity.HistoryKbar)
+	result := make(map[string][]*entity.StockHistoryKbar)
 	for rows.Next() {
-		e := entity.HistoryKbar{Stock: new(entity.Stock)}
+		e := entity.StockHistoryKbar{Stock: new(entity.Stock)}
 		if err := rows.Scan(
 			&e.StockNum, &e.KbarTime, &e.Open, &e.High, &e.Low, &e.Close, &e.Volume,
 			&e.Stock.Number, &e.Stock.Name, &e.Stock.Exchange, &e.Stock.Category, &e.Stock.DayTrade, &e.Stock.LastClose, &e.Stock.UpdateDate,
@@ -312,7 +312,7 @@ func (r *HistoryRepo) QueryMultiStockKbarArrByDate(ctx context.Context, stockNum
 }
 
 // InsertQuaterMA -.
-func (r *HistoryRepo) InsertQuaterMA(ctx context.Context, t *entity.HistoryAnalyze) error {
+func (r *HistoryRepo) InsertQuaterMA(ctx context.Context, t *entity.StockHistoryAnalyze) error {
 	dbQuaterMA, err := r.QueryAllQuaterMAByStockNum(ctx, t.StockNum)
 	if err != nil {
 		return err
@@ -338,7 +338,7 @@ func (r *HistoryRepo) InsertQuaterMA(ctx context.Context, t *entity.HistoryAnaly
 }
 
 // QueryAllQuaterMAByStockNum -.
-func (r *HistoryRepo) QueryAllQuaterMAByStockNum(ctx context.Context, stockNum string) (map[time.Time]*entity.HistoryAnalyze, error) {
+func (r *HistoryRepo) QueryAllQuaterMAByStockNum(ctx context.Context, stockNum string) (map[time.Time]*entity.StockHistoryAnalyze, error) {
 	sql, args, err := r.Builder.
 		Select("date, stock_num, quater_ma, number, name, exchange, category, day_trade, last_close, update_date").
 		From(tableNameHistoryAnalyze).
@@ -355,9 +355,9 @@ func (r *HistoryRepo) QueryAllQuaterMAByStockNum(ctx context.Context, stockNum s
 	}
 	defer rows.Close()
 
-	result := make(map[time.Time]*entity.HistoryAnalyze)
+	result := make(map[time.Time]*entity.StockHistoryAnalyze)
 	for rows.Next() {
-		e := entity.HistoryAnalyze{Stock: new(entity.Stock)}
+		e := entity.StockHistoryAnalyze{Stock: new(entity.Stock)}
 		if err := rows.Scan(&e.Date, &e.StockNum, &e.QuaterMA, &e.Stock.Number, &e.Stock.Name, &e.Stock.Exchange, &e.Stock.Category, &e.Stock.DayTrade, &e.Stock.LastClose, &e.Stock.UpdateDate); err != nil {
 			return nil, err
 		}

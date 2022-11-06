@@ -167,7 +167,24 @@ definitions:
       second_part_duration:
         type: integer
     type: object
-  entity.HistoryKbar:
+  entity.Stock:
+    properties:
+      category:
+        type: string
+      day_trade:
+        type: boolean
+      exchange:
+        type: string
+      last_close:
+        type: number
+      name:
+        type: string
+      number:
+        type: string
+      update_date:
+        type: string
+    type: object
+  entity.StockHistoryKbar:
     properties:
       close:
         type: number
@@ -187,23 +204,6 @@ definitions:
         type: string
       volume:
         type: integer
-    type: object
-  entity.Stock:
-    properties:
-      category:
-        type: string
-      day_trade:
-        type: boolean
-      exchange:
-        type: string
-      last_close:
-        type: number
-      name:
-        type: string
-      number:
-        type: string
-      update_date:
-        type: string
     type: object
   entity.StockOrder:
     properties:
@@ -479,7 +479,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/entity.HistoryKbar'
+              $ref: '#/definitions/entity.StockHistoryKbar'
             type: array
         "500":
           description: Internal Server Error

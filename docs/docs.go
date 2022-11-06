@@ -207,7 +207,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/entity.HistoryKbar"
+                                "$ref": "#/definitions/entity.StockHistoryKbar"
                             }
                         }
                     },
@@ -787,7 +787,33 @@ const docTemplate = `{
                 }
             }
         },
-        "entity.HistoryKbar": {
+        "entity.Stock": {
+            "type": "object",
+            "properties": {
+                "category": {
+                    "type": "string"
+                },
+                "day_trade": {
+                    "type": "boolean"
+                },
+                "exchange": {
+                    "type": "string"
+                },
+                "last_close": {
+                    "type": "number"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "number": {
+                    "type": "string"
+                },
+                "update_date": {
+                    "type": "string"
+                }
+            }
+        },
+        "entity.StockHistoryKbar": {
             "type": "object",
             "properties": {
                 "close": {
@@ -816,32 +842,6 @@ const docTemplate = `{
                 },
                 "volume": {
                     "type": "integer"
-                }
-            }
-        },
-        "entity.Stock": {
-            "type": "object",
-            "properties": {
-                "category": {
-                    "type": "string"
-                },
-                "day_trade": {
-                    "type": "boolean"
-                },
-                "exchange": {
-                    "type": "string"
-                },
-                "last_close": {
-                    "type": "number"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "number": {
-                    "type": "string"
-                },
-                "update_date": {
-                    "type": "string"
                 }
             }
         },

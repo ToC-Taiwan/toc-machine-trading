@@ -15,7 +15,7 @@ type AnalyzeUseCase struct {
 	repo      HistoryRepo
 	targetArr []*entity.Target
 
-	lastBelowMAStock map[string]*entity.HistoryAnalyze
+	lastBelowMAStock map[string]*entity.StockHistoryAnalyze
 	rebornMap        map[time.Time][]entity.Stock
 	rebornLock       sync.Mutex
 
@@ -26,7 +26,7 @@ type AnalyzeUseCase struct {
 func NewAnalyze(r HistoryRepo) *AnalyzeUseCase {
 	uc := &AnalyzeUseCase{
 		repo:             r,
-		lastBelowMAStock: make(map[string]*entity.HistoryAnalyze),
+		lastBelowMAStock: make(map[string]*entity.StockHistoryAnalyze),
 		rebornMap:        make(map[time.Time][]entity.Stock),
 		tradeDay:         tradeday.NewTradeDay(),
 	}

@@ -603,10 +603,10 @@ func (m *MockHistory) EXPECT() *MockHistoryMockRecorder {
 }
 
 // GetDayKbarByStockNumDate mocks base method.
-func (m *MockHistory) GetDayKbarByStockNumDate(stockNum string, date time.Time) *entity.HistoryKbar {
+func (m *MockHistory) GetDayKbarByStockNumDate(stockNum string, date time.Time) *entity.StockHistoryKbar {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetDayKbarByStockNumDate", stockNum, date)
-	ret0, _ := ret[0].(*entity.HistoryKbar)
+	ret0, _ := ret[0].(*entity.StockHistoryKbar)
 	return ret0
 }
 
@@ -724,7 +724,7 @@ func (mr *MockHistoryRepoMockRecorder) InsertFutureHistoryTickArr(ctx, t interfa
 }
 
 // InsertHistoryCloseArr mocks base method.
-func (m *MockHistoryRepo) InsertHistoryCloseArr(ctx context.Context, t []*entity.HistoryClose) error {
+func (m *MockHistoryRepo) InsertHistoryCloseArr(ctx context.Context, t []*entity.StockHistoryClose) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "InsertHistoryCloseArr", ctx, t)
 	ret0, _ := ret[0].(error)
@@ -738,7 +738,7 @@ func (mr *MockHistoryRepoMockRecorder) InsertHistoryCloseArr(ctx, t interface{})
 }
 
 // InsertHistoryKbarArr mocks base method.
-func (m *MockHistoryRepo) InsertHistoryKbarArr(ctx context.Context, t []*entity.HistoryKbar) error {
+func (m *MockHistoryRepo) InsertHistoryKbarArr(ctx context.Context, t []*entity.StockHistoryKbar) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "InsertHistoryKbarArr", ctx, t)
 	ret0, _ := ret[0].(error)
@@ -766,7 +766,7 @@ func (mr *MockHistoryRepoMockRecorder) InsertHistoryTickArr(ctx, t interface{}) 
 }
 
 // InsertQuaterMA mocks base method.
-func (m *MockHistoryRepo) InsertQuaterMA(ctx context.Context, t *entity.HistoryAnalyze) error {
+func (m *MockHistoryRepo) InsertQuaterMA(ctx context.Context, t *entity.StockHistoryAnalyze) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "InsertQuaterMA", ctx, t)
 	ret0, _ := ret[0].(error)
@@ -780,10 +780,10 @@ func (mr *MockHistoryRepoMockRecorder) InsertQuaterMA(ctx, t interface{}) *gomoc
 }
 
 // QueryAllQuaterMAByStockNum mocks base method.
-func (m *MockHistoryRepo) QueryAllQuaterMAByStockNum(ctx context.Context, stockNum string) (map[time.Time]*entity.HistoryAnalyze, error) {
+func (m *MockHistoryRepo) QueryAllQuaterMAByStockNum(ctx context.Context, stockNum string) (map[time.Time]*entity.StockHistoryAnalyze, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "QueryAllQuaterMAByStockNum", ctx, stockNum)
-	ret0, _ := ret[0].(map[time.Time]*entity.HistoryAnalyze)
+	ret0, _ := ret[0].(map[time.Time]*entity.StockHistoryAnalyze)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -810,10 +810,10 @@ func (mr *MockHistoryRepoMockRecorder) QueryFutureTickArrByTime(ctx, code, start
 }
 
 // QueryMultiStockKbarArrByDate mocks base method.
-func (m *MockHistoryRepo) QueryMultiStockKbarArrByDate(ctx context.Context, stockNumArr []string, date time.Time) (map[string][]*entity.HistoryKbar, error) {
+func (m *MockHistoryRepo) QueryMultiStockKbarArrByDate(ctx context.Context, stockNumArr []string, date time.Time) (map[string][]*entity.StockHistoryKbar, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "QueryMultiStockKbarArrByDate", ctx, stockNumArr, date)
-	ret0, _ := ret[0].(map[string][]*entity.HistoryKbar)
+	ret0, _ := ret[0].(map[string][]*entity.StockHistoryKbar)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -840,10 +840,10 @@ func (mr *MockHistoryRepoMockRecorder) QueryMultiStockTickArrByDate(ctx, stockNu
 }
 
 // QueryMutltiStockCloseByDate mocks base method.
-func (m *MockHistoryRepo) QueryMutltiStockCloseByDate(ctx context.Context, stockNumArr []string, date time.Time) (map[string]*entity.HistoryClose, error) {
+func (m *MockHistoryRepo) QueryMutltiStockCloseByDate(ctx context.Context, stockNumArr []string, date time.Time) (map[string]*entity.StockHistoryClose, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "QueryMutltiStockCloseByDate", ctx, stockNumArr, date)
-	ret0, _ := ret[0].(map[string]*entity.HistoryClose)
+	ret0, _ := ret[0].(map[string]*entity.StockHistoryClose)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

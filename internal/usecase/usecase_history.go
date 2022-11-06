@@ -61,7 +61,7 @@ func (uc *HistoryUseCase) GetTradeDay() time.Time {
 }
 
 // GetDayKbarByStockNumDate -.
-func (uc *HistoryUseCase) GetDayKbarByStockNumDate(stockNum string, date time.Time) *entity.HistoryKbar {
+func (uc *HistoryUseCase) GetDayKbarByStockNumDate(stockNum string, date time.Time) *entity.StockHistoryKbar {
 	return cc.GetDaykbar(stockNum, date)
 }
 
@@ -113,8 +113,8 @@ func (uc *HistoryUseCase) fetchHistoryClose(targetArr []*entity.Target) error {
 	}
 	defer log.Info("Fetching History Close Done")
 	log.Infof("Fetching History Close -> Count: %d", total)
-	result := make(map[string][]*entity.HistoryClose)
-	dataChan := make(chan *entity.HistoryClose)
+	result := make(map[string][]*entity.StockHistoryClose)
+	dataChan := make(chan *entity.StockHistoryClose)
 	wait := make(chan struct{})
 	go func() {
 		for {
@@ -137,10 +137,12 @@ func (uc *HistoryUseCase) fetchHistoryClose(targetArr []*entity.Target) error {
 			log.Error(err)
 		}
 		for _, close := range closeArr {
-			dataChan <- &entity.HistoryClose{
-				Date:     date,
+			dataChan <- &entity.StockHistoryClose{
 				StockNum: close.GetCode(),
-				Close:    close.GetClose(),
+				HistoryCloseBase: entity.HistoryCloseBase{
+					Date:  date,
+					Close: close.GetClose(),
+				},
 			}
 		}
 	}
@@ -162,7 +164,7 @@ func (uc *HistoryUseCase) fetchHistoryClose(targetArr []*entity.Target) error {
 func (uc *HistoryUseCase) findExistHistoryClose(fetchTradeDayArr []time.Time, stockNumArr []string) (map[time.Time][]string, int64, error) {
 	log.Info("Query Exist History Close")
 	result := make(map[time.Time][]string)
-	dbCloseMap := make(map[string][]*entity.HistoryClose)
+	dbCloseMap := make(map[string][]*entity.StockHistoryClose)
 	var total int64
 	for _, d := range fetchTradeDayArr {
 		closeMap, err := uc.repo.QueryMutltiStockCloseByDate(context.Background(), stockNumArr, d)
@@ -302,8 +304,8 @@ func (uc *HistoryUseCase) fetchHistoryKbar(targetArr []*entity.Target) error {
 	}
 	defer log.Info("Fetching History Kbar Done")
 	log.Infof("Fetching History Kbar -> Count: %d", total)
-	result := make(map[string][]*entity.HistoryKbar)
-	dataChan := make(chan *entity.HistoryKbar)
+	result := make(map[string][]*entity.StockHistoryKbar)
+	dataChan := make(chan *entity.StockHistoryKbar)
 	wait := make(chan struct{})
 	go func() {
 		for {
@@ -327,14 +329,13 @@ func (uc *HistoryUseCase) fetchHistoryKbar(targetArr []*entity.Target) error {
 			log.Error(err)
 		}
 		for _, t := range tickArr {
-			dataChan <- &entity.HistoryKbar{
+			dataChan <- &entity.StockHistoryKbar{
 				StockNum: t.GetCode(),
-				KbarTime: time.Unix(0, t.GetTs()).Add(-8 * time.Hour),
-				Open:     t.GetOpen(),
-				High:     t.GetHigh(),
-				Low:      t.GetLow(),
-				Close:    t.GetClose(),
-				Volume:   t.GetVolume(),
+				HistoryKbarBase: entity.HistoryKbarBase{
+					KbarTime: time.Unix(0, t.GetTs()).Add(-8 * time.Hour),
+					Open:     t.GetOpen(), High: t.GetHigh(), Low: t.GetLow(),
+					Close: t.GetClose(), Volume: t.GetVolume(),
+				},
 			}
 		}
 	}
@@ -383,7 +384,7 @@ func (uc *HistoryUseCase) findExistHistoryKbar(fetchTradeDayArr []time.Time, sto
 	return result, total, nil
 }
 
-func (uc *HistoryUseCase) processCloseArr(arr []*entity.HistoryClose) {
+func (uc *HistoryUseCase) processCloseArr(arr []*entity.StockHistoryClose) {
 	sort.Slice(arr, func(i, j int) bool {
 		return arr[i].Date.After(arr[j].Date)
 	})
@@ -412,10 +413,12 @@ func (uc *HistoryUseCase) processCloseArr(arr []*entity.HistoryClose) {
 		}
 		tmp := closeArr[i : i+int(uc.stockAnalyzeCfg.MAPeriod)]
 		ma := utils.GenerareMAByCloseArr(tmp)
-		if err := uc.repo.InsertQuaterMA(context.Background(), &entity.HistoryAnalyze{
-			Date:     arr[i].Date,
+		if err := uc.repo.InsertQuaterMA(context.Background(), &entity.StockHistoryAnalyze{
 			StockNum: stockNum,
-			QuaterMA: utils.Round(ma, 2),
+			HistoryAnalyzeBase: entity.HistoryAnalyzeBase{
+				Date:     arr[i].Date,
+				QuaterMA: utils.Round(ma, 2),
+			},
 		}); err != nil {
 			log.Error(err)
 		}
@@ -475,7 +478,7 @@ func (uc *HistoryUseCase) processTickArr(arr []*entity.StockHistoryTick) {
 	cc.AppendHistoryTickAnalyze(stockNum, volumeArr)
 }
 
-func (uc *HistoryUseCase) processKbarArr(arr []*entity.HistoryKbar) {
+func (uc *HistoryUseCase) processKbarArr(arr []*entity.StockHistoryKbar) {
 	sort.Slice(arr, func(i, j int) bool {
 		return arr[i].KbarTime.Before(arr[j].KbarTime)
 	})
@@ -504,15 +507,17 @@ func (uc *HistoryUseCase) processKbarArr(arr []*entity.HistoryKbar) {
 		}
 		volume += kbar.Volume
 	}
-	cc.SetDaykbar(firstKbar.StockNum, firstKbar.KbarTime, &entity.HistoryKbar{
+	cc.SetDaykbar(firstKbar.StockNum, firstKbar.KbarTime, &entity.StockHistoryKbar{
 		StockNum: firstKbar.StockNum,
-		KbarTime: lastKbarTime,
-		Open:     open,
-		High:     high,
-		Low:      low,
-		Close:    close,
-		Volume:   volume,
 		Stock:    cc.GetStockDetail(firstKbar.StockNum),
+		HistoryKbarBase: entity.HistoryKbarBase{
+			KbarTime: lastKbarTime,
+			Open:     open,
+			High:     high,
+			Low:      low,
+			Close:    close,
+			Volume:   volume,
+		},
 	})
 }
 

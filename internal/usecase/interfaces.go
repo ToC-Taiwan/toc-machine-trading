@@ -84,21 +84,21 @@ type (
 	// History -.
 	History interface {
 		GetTradeDay() time.Time
-		GetDayKbarByStockNumDate(stockNum string, date time.Time) *entity.HistoryKbar
+		GetDayKbarByStockNumDate(stockNum string, date time.Time) *entity.StockHistoryKbar
 
 		GetFutureTradeCond(days int) trader.TradeBalance
 	}
 
 	// HistoryRepo -.
 	HistoryRepo interface {
-		InsertHistoryCloseArr(ctx context.Context, t []*entity.HistoryClose) error
-		QueryMutltiStockCloseByDate(ctx context.Context, stockNumArr []string, date time.Time) (map[string]*entity.HistoryClose, error)
+		InsertHistoryCloseArr(ctx context.Context, t []*entity.StockHistoryClose) error
+		QueryMutltiStockCloseByDate(ctx context.Context, stockNumArr []string, date time.Time) (map[string]*entity.StockHistoryClose, error)
 		InsertHistoryTickArr(ctx context.Context, t []*entity.StockHistoryTick) error
 		QueryMultiStockTickArrByDate(ctx context.Context, stockNumArr []string, date time.Time) (map[string][]*entity.StockHistoryTick, error)
-		InsertHistoryKbarArr(ctx context.Context, t []*entity.HistoryKbar) error
-		QueryMultiStockKbarArrByDate(ctx context.Context, stockNumArr []string, date time.Time) (map[string][]*entity.HistoryKbar, error)
-		InsertQuaterMA(ctx context.Context, t *entity.HistoryAnalyze) error
-		QueryAllQuaterMAByStockNum(ctx context.Context, stockNum string) (map[time.Time]*entity.HistoryAnalyze, error)
+		InsertHistoryKbarArr(ctx context.Context, t []*entity.StockHistoryKbar) error
+		QueryMultiStockKbarArrByDate(ctx context.Context, stockNumArr []string, date time.Time) (map[string][]*entity.StockHistoryKbar, error)
+		InsertQuaterMA(ctx context.Context, t *entity.StockHistoryAnalyze) error
+		QueryAllQuaterMAByStockNum(ctx context.Context, stockNum string) (map[time.Time]*entity.StockHistoryAnalyze, error)
 		DeleteHistoryKbarByStockAndDate(ctx context.Context, stockNumArr []string, date time.Time) error
 		DeleteHistoryTickByStockAndDate(ctx context.Context, stockNumArr []string, date time.Time) error
 		DeleteHistoryCloseByStockAndDate(ctx context.Context, stockNumArr []string, date time.Time) error

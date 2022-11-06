@@ -2,28 +2,18 @@ package entity
 
 import "time"
 
-// HistoryClose -.
-type HistoryClose struct {
-	ID    int64     `json:"id"`
-	Date  time.Time `json:"date"`
-	Close float64   `json:"close"`
-
+// StockHistoryTick -.
+type StockHistoryTick struct {
 	StockNum string `json:"stock_num"`
 	Stock    *Stock `json:"stock"`
+	HistoryTickBase
 }
 
-// HistoryKbar -.
-type HistoryKbar struct {
-	ID       int64     `json:"id"`
-	KbarTime time.Time `json:"kbar_time"`
-	Open     float64   `json:"open"`
-	High     float64   `json:"high"`
-	Low      float64   `json:"low"`
-	Close    float64   `json:"close"`
-	Volume   int64     `json:"volume"`
-
-	StockNum string `json:"stock_num"`
-	Stock    *Stock `json:"stock"`
+// FutureHistoryTick -.
+type FutureHistoryTick struct {
+	Code   string  `json:"code"`
+	Future *Future `json:"future"`
+	HistoryTickBase
 }
 
 // HistoryTickBase -.
@@ -39,26 +29,45 @@ type HistoryTickBase struct {
 	AskVolume int64     `json:"ask_volume"`
 }
 
-// StockHistoryTick -.
-type StockHistoryTick struct {
+type StockHistoryClose struct {
 	StockNum string `json:"stock_num"`
 	Stock    *Stock `json:"stock"`
-	HistoryTickBase
+	HistoryCloseBase
 }
 
-// FutureHistoryTick -.
-type FutureHistoryTick struct {
-	Code   string  `json:"code"`
-	Future *Future `json:"future"`
-	HistoryTickBase
+// HistoryCloseBase -.
+type HistoryCloseBase struct {
+	ID    int64     `json:"id"`
+	Date  time.Time `json:"date"`
+	Close float64   `json:"close"`
 }
 
-// HistoryAnalyze -.
-type HistoryAnalyze struct {
+type StockHistoryKbar struct {
+	StockNum string `json:"stock_num"`
+	Stock    *Stock `json:"stock"`
+	HistoryKbarBase
+}
+
+// HistoryKbarBase -.
+type HistoryKbarBase struct {
+	ID       int64     `json:"id"`
+	KbarTime time.Time `json:"kbar_time"`
+	Open     float64   `json:"open"`
+	High     float64   `json:"high"`
+	Low      float64   `json:"low"`
+	Close    float64   `json:"close"`
+	Volume   int64     `json:"volume"`
+}
+
+// StockHistoryAnalyze -.
+type StockHistoryAnalyze struct {
+	StockNum string `json:"stock_num"`
+	Stock    *Stock `json:"stock"`
+	HistoryAnalyzeBase
+}
+
+type HistoryAnalyzeBase struct {
 	ID       int64     `json:"id"`
 	Date     time.Time `json:"date"`
 	QuaterMA float64   `json:"quater_ma"`
-
-	StockNum string `json:"stock_num"`
-	Stock    *Stock `json:"stock"`
 }

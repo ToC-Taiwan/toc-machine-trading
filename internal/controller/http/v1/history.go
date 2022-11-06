@@ -35,7 +35,7 @@ func newHistoryRoutes(handler *gin.RouterGroup, t usecase.History) {
 // @param stock path string true "stock"
 // @param start_date path string true "start_date"
 // @param interval path string true "interval"
-// @success 200 {object} []entity.HistoryKbar
+// @success 200 {object} []entity.StockHistoryKbar
 // @Failure     500 {object} response
 // @Router      /history/day-kbar/{stock}/{start_date}/{interval} [get]
 func (r *historyRoutes) getKbarData(c *gin.Context) {
@@ -58,7 +58,7 @@ func (r *historyRoutes) getKbarData(c *gin.Context) {
 		startDateTime = startDateTime.AddDate(0, 0, -1)
 	}
 
-	var result []entity.HistoryKbar
+	var result []entity.StockHistoryKbar
 	for i := 0; i < interval; i++ {
 		tmp := r.t.GetDayKbarByStockNumDate(stockNum, startDateTime)
 		startDateTime = startDateTime.AddDate(0, 0, -1)
