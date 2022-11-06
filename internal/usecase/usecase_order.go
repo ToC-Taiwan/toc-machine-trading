@@ -7,11 +7,11 @@ import (
 	"time"
 
 	"tmt/cmd/config"
-	"tmt/global"
 	"tmt/internal/entity"
 	"tmt/internal/usecase/modules/event"
 	"tmt/internal/usecase/modules/quota"
 	"tmt/internal/usecase/modules/tradeday"
+	"tmt/pkg/common"
 )
 
 // OrderUseCase -.
@@ -103,7 +103,7 @@ func (uc *OrderUseCase) AskOrderUpdate() error {
 		actionMap := entity.ActionListMap
 		statusMap := entity.StatusListMap
 		for _, v := range orders {
-			orderTime, err := time.ParseInLocation(global.LongTimeLayout, v.GetOrderTime(), time.Local)
+			orderTime, err := time.ParseInLocation(common.LongTimeLayout, v.GetOrderTime(), time.Local)
 			if err != nil {
 				return err
 			}

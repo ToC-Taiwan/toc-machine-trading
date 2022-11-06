@@ -8,10 +8,10 @@ import (
 	"time"
 
 	"tmt/cmd/config"
-	"tmt/global"
 	"tmt/internal/entity"
 	"tmt/internal/usecase/modules/event"
 	"tmt/internal/usecase/modules/target"
+	"tmt/pkg/common"
 )
 
 // TargetUseCase -.
@@ -106,7 +106,7 @@ func (uc *TargetUseCase) GetTargets(ctx context.Context) []*entity.Target {
 // SearchTradeDayTargets - search targets by trade day
 func (uc *TargetUseCase) SearchTradeDayTargets(ctx context.Context, tradeDay time.Time) ([]*entity.Target, error) {
 	lastTradeDay := cc.GetBasicInfo().LastTradeDay
-	t, err := uc.gRPCAPI.GetStockVolumeRank(lastTradeDay.Format(global.ShortTimeLayout))
+	t, err := uc.gRPCAPI.GetStockVolumeRank(lastTradeDay.Format(common.ShortTimeLayout))
 	if err != nil {
 		return nil, err
 	}

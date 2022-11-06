@@ -5,10 +5,10 @@ import (
 	"time"
 
 	"tmt/cmd/config"
-	"tmt/global"
 	"tmt/internal/entity"
 	"tmt/internal/usecase/modules/event"
 	"tmt/internal/usecase/modules/tradeday"
+	"tmt/pkg/common"
 )
 
 // BasicUseCase -.
@@ -75,7 +75,7 @@ func (uc *BasicUseCase) GetAllSinopacStockAndUpdateRepo(ctx context.Context) ([]
 			continue
 		}
 
-		updateTime, pErr := time.ParseInLocation(global.ShortSlashTimeLayout, v.GetUpdateDate(), time.Local)
+		updateTime, pErr := time.ParseInLocation(common.ShortSlashTimeLayout, v.GetUpdateDate(), time.Local)
 		if err != nil {
 			return []*entity.Stock{}, pErr
 		}
@@ -120,12 +120,12 @@ func (uc *BasicUseCase) GetAllSinopacFutureAndUpdateRepo(ctx context.Context) ([
 			continue
 		}
 
-		updateTime, pErr := time.ParseInLocation(global.ShortSlashTimeLayout, v.GetUpdateDate(), time.Local)
+		updateTime, pErr := time.ParseInLocation(common.ShortSlashTimeLayout, v.GetUpdateDate(), time.Local)
 		if err != nil {
 			return []*entity.Future{}, pErr
 		}
 
-		dDate, e := time.ParseInLocation(global.ShortSlashTimeLayout, v.GetDeliveryDate(), time.Local)
+		dDate, e := time.ParseInLocation(common.ShortSlashTimeLayout, v.GetDeliveryDate(), time.Local)
 		if e != nil {
 			return []*entity.Future{}, err
 		}

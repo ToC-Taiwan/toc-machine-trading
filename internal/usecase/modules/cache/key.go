@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"tmt/global"
 	"tmt/pkg/cache"
+	"tmt/pkg/common"
 )
 
 const (
@@ -89,14 +89,14 @@ func (c *Cache) futureOrderKey(orderID string) cache.Key {
 func (c *Cache) historyOpenKey(stockNum string, date time.Time) cache.Key {
 	return cache.Key{
 		Category: cacheCatagoryHistoryOpen,
-		ID:       c.generateID(cacheIDStockNum, stockNum, date.Format(global.ShortTimeLayout)),
+		ID:       c.generateID(cacheIDStockNum, stockNum, date.Format(common.ShortTimeLayout)),
 	}
 }
 
 func (c *Cache) historyCloseKey(stockNum string, date time.Time) cache.Key {
 	return cache.Key{
 		Category: cacheCatagoryHistoryClose,
-		ID:       c.generateID(cacheIDStockNum, stockNum, date.Format(global.ShortTimeLayout)),
+		ID:       c.generateID(cacheIDStockNum, stockNum, date.Format(common.ShortTimeLayout)),
 	}
 }
 
@@ -131,13 +131,13 @@ func (c *Cache) historyTickAnalyzeKey(stockNum string) cache.Key {
 func (c *Cache) dayKbarKey(stockNum string, date time.Time) cache.Key {
 	return cache.Key{
 		Category: cacheCatagoryDayKbar,
-		ID:       c.generateID(cacheIDStockNum, stockNum, date.Format(global.ShortTimeLayout)),
+		ID:       c.generateID(cacheIDStockNum, stockNum, date.Format(common.ShortTimeLayout)),
 	}
 }
 
 func (c *Cache) historyTickArrKey(stockNum string, date time.Time) cache.Key {
 	return cache.Key{
 		Category: cacheCatagoryHistoryTickArr,
-		ID:       c.generateID(cacheIDStockNum, stockNum, date.Format(global.ShortTimeLayout)),
+		ID:       c.generateID(cacheIDStockNum, stockNum, date.Format(common.ShortTimeLayout)),
 	}
 }

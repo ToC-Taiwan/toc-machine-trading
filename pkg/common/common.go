@@ -1,5 +1,5 @@
-// Package global package global
-package global
+// Package common package common
+package common
 
 const (
 	// LongTimeLayout -.
@@ -10,11 +10,4 @@ const (
 	ShortTimeLayoutNoDash string = "20060102"
 	// ShortSlashTimeLayout -.
 	ShortSlashTimeLayout string = "2006/01/02"
-)
-
-const (
-	// StartTradeYear -.
-	StartTradeYear int = 2021
-	// EndTradeYear -.
-	EndTradeYear int = 2023
 )

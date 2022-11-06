@@ -6,8 +6,13 @@ import (
 	"os"
 	"time"
 
-	"tmt/global"
 	"tmt/internal/entity"
+	"tmt/pkg/common"
+)
+
+const (
+	startTradeYear int = 2021
+	endTradeYear   int = 2023
 )
 
 // TradeDay -.
@@ -134,7 +139,7 @@ func (t *TradeDay) parseHolidayFile() {
 	}
 
 	for _, v := range tmp.DateArr {
-		tm, err := time.ParseInLocation(global.ShortTimeLayout, v, time.Local)
+		tm, err := time.ParseInLocation(common.ShortTimeLayout, v, time.Local)
 		if err != nil {
 			panic(err)
 		}
@@ -144,9 +149,9 @@ func (t *TradeDay) parseHolidayFile() {
 }
 
 func (t *TradeDay) fillTradeDay() {
-	tm := time.Date(global.StartTradeYear, 1, 1, 0, 0, 0, 0, time.Local)
+	tm := time.Date(startTradeYear, 1, 1, 0, 0, 0, 0, time.Local)
 	for {
-		if tm.Year() > global.EndTradeYear {
+		if tm.Year() > endTradeYear {
 			break
 		}
 

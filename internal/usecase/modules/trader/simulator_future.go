@@ -6,10 +6,10 @@ import (
 	"time"
 
 	"tmt/cmd/config"
-	"tmt/global"
 	"tmt/internal/entity"
 	"tmt/internal/usecase/modules/quota"
 	"tmt/internal/usecase/modules/tradeday"
+	"tmt/pkg/common"
 
 	"github.com/google/uuid"
 )
@@ -203,13 +203,13 @@ func (o *FutureSimulator) CalculateFutureTradeBalance() TradeBalance {
 			tradeCount++
 			balance := -o.quota.GetFutureBuyCost(v.Price, v.Quantity) + o.quota.GetFutureSellCost(tradeOutOrderMap[v.GroupID].Price, tradeOutOrderMap[v.GroupID].Quantity)
 			forwardBalance += balance
-			log.Warnf("#%3d %s -> %5d (f:%s)", tradeCount, v.TickTime.Format(global.LongTimeLayout), balance, tradeOutOrderMap[v.GroupID].TickTime.Sub(v.TickTime).String())
+			log.Warnf("#%3d %s -> %5d (f:%s)", tradeCount, v.TickTime.Format(common.LongTimeLayout), balance, tradeOutOrderMap[v.GroupID].TickTime.Sub(v.TickTime).String())
 
 		case entity.ActionSellFirst:
 			tradeCount++
 			balance := o.quota.GetFutureSellCost(v.Price, v.Quantity) - o.quota.GetFutureBuyCost(tradeOutOrderMap[v.GroupID].Price, tradeOutOrderMap[v.GroupID].Quantity)
 			revereBalance += balance
-			log.Warnf("#%3d %s -> %5d (r:%s)", tradeCount, v.TickTime.Format(global.LongTimeLayout), balance, tradeOutOrderMap[v.GroupID].TickTime.Sub(v.TickTime).String())
+			log.Warnf("#%3d %s -> %5d (r:%s)", tradeCount, v.TickTime.Format(common.LongTimeLayout), balance, tradeOutOrderMap[v.GroupID].TickTime.Sub(v.TickTime).String())
 		}
 	}
 

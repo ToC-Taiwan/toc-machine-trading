@@ -7,9 +7,9 @@ import (
 	"time"
 
 	"tmt/cmd/config"
-	"tmt/global"
 	"tmt/internal/entity"
 	"tmt/pb"
+	"tmt/pkg/common"
 	"tmt/pkg/logger"
 	"tmt/pkg/rabbitmq"
 
@@ -90,7 +90,7 @@ func (c *StreamRabbit) EventConsumer(eventChan chan *entity.SinopacEvent) {
 			continue
 		}
 
-		dataTime, err := time.ParseInLocation(global.LongTimeLayout, body.GetEventTime(), time.Local)
+		dataTime, err := time.ParseInLocation(common.LongTimeLayout, body.GetEventTime(), time.Local)
 		if err != nil {
 			log.Error(err)
 			continue
@@ -128,7 +128,7 @@ func (c *StreamRabbit) OrderStatusConsumer(orderStatusChan chan interface{}) {
 
 		actionMap := entity.ActionListMap
 		statusMap := entity.StatusListMap
-		orderTime, err := time.ParseInLocation(global.LongTimeLayout, body.GetOrderTime(), time.Local)
+		orderTime, err := time.ParseInLocation(common.LongTimeLayout, body.GetOrderTime(), time.Local)
 		if err != nil {
 			log.Error(err)
 			continue
@@ -179,7 +179,7 @@ func (c *StreamRabbit) TickConsumer(stockNum string, tickChan chan *entity.RealT
 			continue
 		}
 
-		dataTime, err := time.ParseInLocation(global.LongTimeLayout, body.GetDateTime(), time.Local)
+		dataTime, err := time.ParseInLocation(common.LongTimeLayout, body.GetDateTime(), time.Local)
 		if err != nil {
 			log.Error(err)
 			continue
@@ -249,7 +249,7 @@ func (c *StreamRabbit) FutureTickConsumer(code string, tickChan chan *entity.Rea
 			continue
 		}
 
-		dataTime, err := time.ParseInLocation(global.LongTimeLayout, body.GetDateTime(), time.Local)
+		dataTime, err := time.ParseInLocation(common.LongTimeLayout, body.GetDateTime(), time.Local)
 		if err != nil {
 			log.Error(err)
 			continue
@@ -304,7 +304,7 @@ func (c *StreamRabbit) StockBidAskConsumer(stockNum string, bidAskChan chan *ent
 			continue
 		}
 
-		dataTime, err := time.ParseInLocation(global.LongTimeLayout, body.GetDateTime(), time.Local)
+		dataTime, err := time.ParseInLocation(common.LongTimeLayout, body.GetDateTime(), time.Local)
 		if err != nil {
 			log.Error(err)
 			continue
@@ -347,7 +347,7 @@ func (c *StreamRabbit) FutureBidAskConsumer(code string, bidAskChan chan *entity
 			continue
 		}
 
-		dataTime, err := time.ParseInLocation(global.LongTimeLayout, body.GetDateTime(), time.Local)
+		dataTime, err := time.ParseInLocation(common.LongTimeLayout, body.GetDateTime(), time.Local)
 		if err != nil {
 			log.Error(err)
 			continue
