@@ -72,7 +72,7 @@ func NewTarget(r TargetRepo, t TargetgRPCAPI, s StreamgRPCAPI) *TargetUseCase {
 	bus.SubscribeTopic(event.TopicNewTargets, uc.publishNewTargets)
 	bus.SubscribeTopic(event.TopicSubscribeStockTickTargets, uc.SubscribeStockTick, uc.SubscribeStockBidAsk)
 	bus.SubscribeTopic(event.TopicUnSubscribeStockTickTargets, uc.UnSubscribeStockTick, uc.UnSubscribeStockBidAsk)
-	bus.SubscribeTopic(event.TopicSubscribeFutureTickTargets, uc.SubscribeFutureTick, uc.SubscribeFutureBidAsk)
+	bus.SubscribeTopic(event.TopicSubscribeFutureTickTargets, uc.SubscribeFutureTick)
 
 	return uc
 }
