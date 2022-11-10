@@ -19,7 +19,7 @@ history:
 quota:
     stock_trade_quota: 1000000
     stock_fee_discount: 0.28
-    future_trade_fee: 20
+    future_trade_fee: 15
 
 target_cond:
     real_time_rank: 20
@@ -40,7 +40,7 @@ target_cond:
 simulation: true
 
 stock_trade_switch:
-    allow_trade: false
+    allow_trade: true
     hold_time_from_open: 45 # unit: second
     total_open_time: 270 # unit: minute
     trade_in_end_time: 90 # unit: minute
@@ -66,8 +66,10 @@ future_trade_switch:
     trade_out_wait_time: 20 # unit: seccond
     cancel_wait_time: 30 # unit: seccond
     trade_time_range:
-        first_part_duration: 0 # duration: minute 04:00:00(780)
-        second_part_duration: 75 # duration: minute 13:05:00(260)
+        first_part_duration: 0 # duration: minute 04:00:00(780/840)
+        second_part_duration: 75 # duration: minute 13:05:00(260/300)
 
 future_analyze:
     max_hold_time: 5 # unit: minute
+    tick_arr_analyze_count: 5
+    tick_arr_analyze_unit: 25

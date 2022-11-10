@@ -87,31 +87,21 @@ func (o *FutureSimulator) generateOrder() *entity.FutureOrder {
 		return o.generateTradeOutOrder(postOrderAction, preOrder)
 	}
 
-	rsi := o.tickArr.getRSIByTickCount(300)
-	if rsi == 0 {
+	act := o.tickArr.getActionByPeriodOutInRatioTrend(o.analyzeCfg.TickArrAnalyzeCount, o.analyzeCfg.TickArrAnalyzeUnit)
+	if act == entity.ActionNone {
 		return nil
 	}
 
-	// get out in ration in period
-	order := &entity.FutureOrder{
+	return &entity.FutureOrder{
 		Code: o.code,
 		BaseOrder: entity.BaseOrder{
+			Action:   act,
 			Quantity: o.orderQuantity,
 			TickTime: o.lastTick.TickTime,
 			GroupID:  uuid.New().String(),
 			Price:    o.lastTick.Close,
 		},
 	}
-
-	switch {
-	case rsi <= 40:
-		order.Action = entity.ActionBuy
-	case rsi >= 60:
-		order.Action = entity.ActionSellFirst
-	default:
-		return nil
-	}
-	return order
 }
 
 func (o *FutureSimulator) generateTradeOutOrder(postOrderAction entity.OrderAction, preOrder *entity.FutureOrder) *entity.FutureOrder {

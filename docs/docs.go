@@ -574,6 +574,12 @@ const docTemplate = `{
             "properties": {
                 "max_hold_time": {
                     "type": "number"
+                },
+                "tick_arr_analyze_count": {
+                    "type": "integer"
+                },
+                "tick_arr_analyze_unit": {
+                    "type": "integer"
                 }
             }
         },

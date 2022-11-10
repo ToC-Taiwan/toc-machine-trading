@@ -57,7 +57,7 @@ func GenerateRSI(input []float64, effTimes int) float64 {
 
 // GenerateFutureRSI -.
 func GenerateFutureRSI(input []float64) float64 {
-	tmp := talib.Rsi(input, 5)
+	tmp := talib.Rsi(input, len(input)-1)
 	return tmp[len(tmp)-1]
 }
 

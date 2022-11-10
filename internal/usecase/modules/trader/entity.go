@@ -57,20 +57,50 @@ func (c realTimeStockTickArr) getRSIByTickTime(preTime time.Time, count int) flo
 // realTimeFutureTickArr -.
 type realTimeFutureTickArr []*entity.RealTimeFutureTick
 
-func (c realTimeFutureTickArr) getRSIByTickCount(count int) float64 {
-	if len(c) == 0 || len(c) < count {
-		return 0
+func (c realTimeFutureTickArr) getActionByPeriodOutInRatioTrend(count, unit int) entity.OrderAction {
+	if len(c) == 0 || len(c) < count*unit {
+		return entity.ActionNone
 	}
 
-	var tmp []float64
-	for _, v := range c {
-		if len(tmp) == count {
+	period := []realTimeFutureTickArr{}
+	single := realTimeFutureTickArr{}
+	for i := len(c) - 1; i >= 0; i-- {
+		v := c[i]
+		single = append(single, v)
+
+		if len(single)%unit == 0 {
+			period = append(period, single)
+		}
+
+		if len(period) == count {
 			break
 		}
-		tmp = append(tmp, v.Close)
 	}
 
-	return utils.GenerateFutureRSI(tmp)
+	arr := outInRatioArr{}
+	for _, v := range period {
+		arr = append(arr, v.getOutInRatio())
+	}
+
+	return arr.getAction(count)
+}
+
+type outInRatioArr []float64
+
+func (o outInRatioArr) getAction(count int) entity.OrderAction {
+	if count%2 != 1 {
+		return entity.ActionNone
+	}
+
+	// TODO: out in ratio should come from config
+	middle := count / 2
+	switch {
+	case o[0] > o[middle] && o[middle] > o[count-1] && o[0] < 40:
+		return entity.ActionBuy
+	case o[0] < o[middle] && o[middle] < o[count-1] && o[0] > 60:
+		return entity.ActionSellFirst
+	}
+	return entity.ActionNone
 }
 
 // func (c realTimeFutureTickArr) splitBySecond(last int) []realTimeFutureTickArr {
@@ -104,24 +134,24 @@ func (c realTimeFutureTickArr) getRSIByTickCount(count int) float64 {
 // 	return volume
 // }
 
-// func (c realTimeFutureTickArr) getOutInRatio() float64 {
-// 	if len(c) == 0 {
-// 		return 0
-// 	}
+func (c realTimeFutureTickArr) getOutInRatio() float64 {
+	if len(c) == 0 {
+		return 0
+	}
 
-// 	var outVolume, inVolume int64
-// 	for _, v := range c {
-// 		switch v.TickType {
-// 		case 1:
-// 			outVolume += v.Volume
-// 		case 2:
-// 			inVolume += v.Volume
-// 		default:
-// 			continue
-// 		}
-// 	}
-// 	return 100 * float64(outVolume) / float64(outVolume+inVolume)
-// }
+	var outVolume, inVolume int64
+	for _, v := range c {
+		switch v.TickType {
+		case 1:
+			outVolume += v.Volume
+		case 2:
+			inVolume += v.Volume
+		default:
+			continue
+		}
+	}
+	return 100 * float64(outVolume) / float64(outVolume+inVolume)
+}
 
 // TradeBalance -.
 type TradeBalance struct {

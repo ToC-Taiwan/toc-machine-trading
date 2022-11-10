@@ -150,5 +150,7 @@ type FutureTradeSwitch struct {
 
 // FutureAnalyze -.
 type FutureAnalyze struct {
-	MaxHoldTime float64 `json:"max_hold_time" env-required:"true" yaml:"max_hold_time"`
+	MaxHoldTime         float64 `json:"max_hold_time"          env-required:"true" yaml:"max_hold_time"`
+	TickArrAnalyzeCount int     `json:"tick_arr_analyze_count" env-required:"true" yaml:"tick_arr_analyze_count"`
+	TickArrAnalyzeUnit  int     `json:"tick_arr_analyze_unit"  env-required:"true" yaml:"tick_arr_analyze_unit"`
 }

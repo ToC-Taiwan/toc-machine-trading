@@ -600,7 +600,9 @@ func (uc *HistoryUseCase) GetFutureTradeCond(days int) trader.TradeBalance {
 		}
 
 		cond := config.FutureAnalyze{
-			MaxHoldTime: 5,
+			MaxHoldTime:         5,
+			TickArrAnalyzeCount: 5,
+			TickArrAnalyzeUnit:  25,
 		}
 
 		for _, dbTickArr := range dbTickArrArr {
