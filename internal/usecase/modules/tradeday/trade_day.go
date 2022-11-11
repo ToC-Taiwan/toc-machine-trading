@@ -228,7 +228,7 @@ func (tp *TradePeriod) ToStartEndArray() []time.Time {
 }
 
 // GetLastTradePeriod -.
-func (tp *TradePeriod) GetLastTradePeriod() *TradePeriod {
+func (tp *TradePeriod) GetLastTradePeriod() TradePeriod {
 	firstDay := tp
 	d := firstDay.TradeDay.AddDate(0, 0, -1)
 
@@ -250,5 +250,5 @@ func (tp *TradePeriod) GetLastTradePeriod() *TradePeriod {
 		}
 		d = d.AddDate(0, 0, -1)
 	}
-	return &TradePeriod{startTime, endTime, tradeDay, tp.base}
+	return TradePeriod{startTime, endTime, tradeDay, tp.base}
 }

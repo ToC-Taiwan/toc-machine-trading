@@ -54,7 +54,8 @@ func (r *BasicRepo) InsertOrUpdatetStockArr(ctx context.Context, t []*entity.Sto
 				Set("last_close", v.LastClose).
 				Set("update_date", v.UpdateDate).
 				Where("number = ?", v.Number)
-			if sql, args, err = b.ToSql(); err != nil {
+			sql, args, err = b.ToSql()
+			if err != nil {
 				return err
 			} else if _, err = tx.Exec(ctx, sql, args...); err != nil {
 				return err
@@ -63,13 +64,14 @@ func (r *BasicRepo) InsertOrUpdatetStockArr(ctx context.Context, t []*entity.Sto
 	}
 
 	if insert != 0 {
-		if sql, args, err = builder.ToSql(); err != nil {
+		sql, args, err = builder.ToSql()
+		if err != nil {
 			return err
 		} else if _, err = tx.Exec(ctx, sql, args...); err != nil {
 			return err
 		}
 	}
-	log.Infof("InsertOrUpdatetStockArr -> Exist: %d, Insert: %d, Update: %d", len(t)-update-insert, insert, update)
+	log.Infof("Insert Stock -> Exist: %d, Insert: %d, Update: %d", len(t)-update-insert, insert, update)
 	return nil
 }
 
@@ -164,7 +166,7 @@ func (r *BasicRepo) InsertOrUpdatetCalendarDateArr(ctx context.Context, t []*ent
 			return err
 		}
 	}
-	log.Infof("InsertOrUpdatetCalendarDateArr -> Exist: %d, Insert: %d, Update: %d", len(t)-update-insert, insert, update)
+	log.Infof("Insert Calendar -> Exist: %d, Insert: %d, Update: %d", len(t)-update-insert, insert, update)
 	return nil
 }
 
@@ -248,7 +250,7 @@ func (r *BasicRepo) InsertOrUpdatetFutureArr(ctx context.Context, t []*entity.Fu
 			return err
 		}
 	}
-	log.Infof("InsertOrUpdatetFutureArr -> Exist: %d, Insert: %d, Update: %d", len(t)-update-insert, insert, update)
+	log.Infof("Insert Future -> Exist: %d, Insert: %d, Update: %d", len(t)-update-insert, insert, update)
 	return nil
 }
 

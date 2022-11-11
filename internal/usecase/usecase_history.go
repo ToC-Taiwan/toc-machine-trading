@@ -557,8 +557,7 @@ func (uc *HistoryUseCase) FetchFutureHistoryTick(code string, date time.Time) []
 }
 
 func (uc *HistoryUseCase) findExistFutureHistoryTick(date tradeday.TradePeriod, code string) ([][]*entity.FutureHistoryTick, error) {
-	log.Infof("Fetching %s tick %s", code, date.TradeDay.Format(common.ShortTimeLayout))
-	dbTickArr, err := uc.repo.QueryFutureTickArrByTime(context.Background(), code, date.StartTime, date.EndTime)
+	dbTickArr, err := uc.repo.QueryFutureHistoryTickArrByTime(context.Background(), code, date.StartTime, date.EndTime)
 	if err != nil {
 		return nil, err
 	}
@@ -589,11 +588,73 @@ func (uc *HistoryUseCase) findExistFutureHistoryTick(date tradeday.TradePeriod, 
 	return [][]*entity.FutureHistoryTick{firstPart, secondPart}, nil
 }
 
+func (uc *HistoryUseCase) fetchFutureHistoryClose(code string, date time.Time) *entity.FutureHistoryClose {
+	result := make(map[string]*entity.FutureHistoryClose)
+	dataChan := make(chan *entity.FutureHistoryClose)
+	wait := make(chan struct{})
+	go func() {
+		for {
+			close, ok := <-dataChan
+			if !ok {
+				break
+			}
+			result[close.Code] = close
+		}
+		close(wait)
+	}()
+	closeArr, err := uc.grpcapi.GetFutureHistoryClose([]string{code}, date.Format(common.ShortTimeLayout))
+	if err != nil {
+		log.Error(err)
+	}
+	for _, close := range closeArr {
+		dataChan <- &entity.FutureHistoryClose{
+			Code: close.GetCode(),
+			HistoryCloseBase: entity.HistoryCloseBase{
+				Date:  date,
+				Close: close.GetClose(),
+			},
+		}
+	}
+	close(dataChan)
+	<-wait
+	if len(result) != 0 {
+		return result[code]
+	}
+	return nil
+}
+
+func (uc *HistoryUseCase) findExistFutureHistoryClose(date tradeday.TradePeriod, code string) (*entity.FutureHistoryClose, error) {
+	dbClose, err := uc.repo.QueryFutureHistoryCloseByDate(context.Background(), code, date.TradeDay)
+	if err != nil {
+		return nil, err
+	}
+
+	if dbClose.Close == 0 {
+		dbClose = uc.fetchFutureHistoryClose(code, date.TradeDay)
+		if dbClose == nil {
+			return nil, fmt.Errorf("fetch %s close failed", date.TradeDay.Format(common.ShortTimeLayout))
+		}
+
+		err = uc.repo.InsertFutureHistoryClose(context.Background(), dbClose)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return dbClose, nil
+}
+
 func (uc *HistoryUseCase) GetFutureTradeCond(days int) trader.TradeBalance {
 	simulateDateArr := uc.tradeDay.GetLastNFutureTradeDay(days)
 	var balanceArr []trader.TradeBalance
 	for _, date := range simulateDateArr {
 		dbTickArrArr, err := uc.findExistFutureHistoryTick(date, uc.simulateFutureCode)
+		if err != nil {
+			log.Error(err)
+			continue
+		}
+
+		lastPeriod := date.GetLastTradePeriod()
+		dbClose, err := uc.findExistFutureHistoryClose(lastPeriod, uc.simulateFutureCode)
 		if err != nil {
 			log.Error(err)
 			continue
@@ -605,6 +666,7 @@ func (uc *HistoryUseCase) GetFutureTradeCond(days int) trader.TradeBalance {
 			TickArrAnalyzeUnit:  25,
 		}
 
+		log.Infof("Simulating %s %s, last close: %.0f", uc.simulateFutureCode, date.TradeDay.Format(common.ShortTimeLayout), dbClose.Close)
 		for _, dbTickArr := range dbTickArrArr {
 			simulator := trader.NewFutureSimulator(uc.simulateFutureCode, cond, date)
 			tickChan := simulator.GetTickChan()
@@ -615,6 +677,7 @@ func (uc *HistoryUseCase) GetFutureTradeCond(days int) trader.TradeBalance {
 					Close:    tick.Close,
 					Volume:   tick.Volume,
 					TickType: tick.TickType,
+					PctChg:   utils.Round(100*(tick.Close-dbClose.Close)/dbClose.Close, 2),
 				}
 			}
 			close(tickChan)

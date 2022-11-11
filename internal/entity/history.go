@@ -35,6 +35,13 @@ type StockHistoryClose struct {
 	HistoryCloseBase
 }
 
+// FutureHistoryClose -.
+type FutureHistoryClose struct {
+	Code   string  `json:"code"`
+	Future *Future `json:"future"`
+	HistoryCloseBase
+}
+
 // HistoryCloseBase -.
 type HistoryCloseBase struct {
 	ID    int64     `json:"id"`

@@ -64,7 +64,7 @@ func (uc *AnalyzeUseCase) findBelowQuaterMATargets(ctx context.Context, targetAr
 			}
 		}
 	}
-	log.Info("FindBelowQuaterMATargets Done")
+	log.Info("Find below quaterMA targets done")
 }
 
 // GetRebornMap -.

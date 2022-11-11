@@ -2,12 +2,14 @@ package repo
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"tmt/internal/entity"
 	"tmt/pkg/postgres"
 
 	"github.com/Masterminds/squirrel"
+	"github.com/jackc/pgx/v4"
 )
 
 // HistoryRepo -.
@@ -394,7 +396,7 @@ func (r *HistoryRepo) InsertFutureHistoryTickArr(ctx context.Context, t []*entit
 	var args []interface{}
 
 	for _, s := range split {
-		builder := r.Builder.Insert(tableNameHistoryTickFuture).Columns("code, tick_time, close, tick_type, volume, bid_price, bid_volume, ask_price, ask_volume")
+		builder := r.Builder.Insert(tableNameHistoryFutureTick).Columns("code, tick_time, close, tick_type, volume, bid_price, bid_volume, ask_price, ask_volume")
 		for _, v := range s {
 			builder = builder.Values(v.Code, v.TickTime, v.Close, v.TickType, v.Volume, v.BidPrice, v.BidVolume, v.AskPrice, v.AskVolume)
 		}
@@ -408,11 +410,11 @@ func (r *HistoryRepo) InsertFutureHistoryTickArr(ctx context.Context, t []*entit
 	return nil
 }
 
-// QueryFutureTickArrByTime -.
-func (r *HistoryRepo) QueryFutureTickArrByTime(ctx context.Context, code string, startTime, endTime time.Time) ([]*entity.FutureHistoryTick, error) {
+// QueryFutureHistoryTickArrByTime -.
+func (r *HistoryRepo) QueryFutureHistoryTickArrByTime(ctx context.Context, code string, startTime, endTime time.Time) ([]*entity.FutureHistoryTick, error) {
 	sql, args, err := r.Builder.
 		Select("history_future_tick.code, tick_time, close, tick_type, volume, bid_price, bid_volume, ask_price, ask_volume, basic_future.code, symbol, name, category, delivery_month, delivery_date, underlying_kind, unit, limit_up, limit_down, reference, update_date").
-		From(tableNameHistoryTickFuture).
+		From(tableNameHistoryFutureTick).
 		Where(squirrel.GtOrEq{"tick_time": startTime}).
 		Where(squirrel.Lt{"tick_time": endTime}).
 		Where(squirrel.Eq{"history_future_tick.code": code}).
@@ -440,4 +442,56 @@ func (r *HistoryRepo) QueryFutureTickArrByTime(ctx context.Context, code string,
 		result = append(result, &e)
 	}
 	return result, nil
+}
+
+func (r *HistoryRepo) InsertFutureHistoryClose(ctx context.Context, c *entity.FutureHistoryClose) error {
+	dbClose, err := r.QueryFutureHistoryCloseByDate(ctx, c.Code, c.Date)
+	if err != nil {
+		return err
+	}
+
+	if dbClose.Close != 0 {
+		return nil
+	}
+
+	tx, err := r.BeginTransaction()
+	if err != nil {
+		return err
+	}
+	defer r.EndTransaction(tx, err)
+	var sql string
+	var args []interface{}
+
+	builder := r.Builder.Insert(tableNameHistoryFutureClose).Columns("date, code, close").Values(c.Date, c.Code, c.Close)
+	if sql, args, err = builder.ToSql(); err != nil {
+		return err
+	} else if _, err = tx.Exec(ctx, sql, args...); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *HistoryRepo) QueryFutureHistoryCloseByDate(ctx context.Context, code string, tradeDay time.Time) (*entity.FutureHistoryClose, error) {
+	sql, args, err := r.Builder.
+		Select("history_future_close.code, date, close, basic_future.code, symbol, name, category, delivery_month, delivery_date, underlying_kind, unit, limit_up, limit_down, reference, update_date").
+		From(tableNameHistoryFutureClose).
+		Where(squirrel.Eq{"history_future_close.code": code}).
+		Where(squirrel.Eq{"date": tradeDay}).
+		Join("basic_future ON history_future_close.code = basic_future.code").ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	row := r.Pool().QueryRow(ctx, sql, args...)
+	e := entity.FutureHistoryClose{Future: new(entity.Future)}
+	if err := row.Scan(
+		&e.Code, &e.Date, &e.Close,
+		&e.Future.Code, &e.Future.Symbol, &e.Future.Name, &e.Future.Category, &e.Future.DeliveryMonth, &e.Future.DeliveryDate, &e.Future.UnderlyingKind, &e.Future.Unit, &e.Future.LimitUp, &e.Future.LimitDown, &e.Future.Reference, &e.Future.UpdateDate,
+	); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return &entity.FutureHistoryClose{}, nil
+		}
+		return nil, err
+	}
+	return &e, nil
 }

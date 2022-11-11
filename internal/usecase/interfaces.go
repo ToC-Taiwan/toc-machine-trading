@@ -104,7 +104,10 @@ type (
 		DeleteHistoryCloseByStockAndDate(ctx context.Context, stockNumArr []string, date time.Time) error
 
 		InsertFutureHistoryTickArr(ctx context.Context, t []*entity.FutureHistoryTick) error
-		QueryFutureTickArrByTime(ctx context.Context, code string, startTime, endTime time.Time) ([]*entity.FutureHistoryTick, error)
+		QueryFutureHistoryTickArrByTime(ctx context.Context, code string, startTime, endTime time.Time) ([]*entity.FutureHistoryTick, error)
+
+		InsertFutureHistoryClose(ctx context.Context, c *entity.FutureHistoryClose) error
+		QueryFutureHistoryCloseByDate(ctx context.Context, code string, tradeDay time.Time) (*entity.FutureHistoryClose, error)
 	}
 
 	// HistorygRPCAPI -.
