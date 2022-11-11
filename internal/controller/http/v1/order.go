@@ -28,23 +28,38 @@ func newOrderRoutes(handler *gin.RouterGroup, t usecase.Order) {
 	}
 }
 
+type allOrder struct {
+	Stock  []*entity.StockOrder  `json:"stock"`
+	Future []*entity.FutureOrder `json:"future"`
+}
+
 // @Summary     getAllOrder
 // @Description getAllOrder
 // @ID          getAllOrder
 // @Tags  	    order
 // @Accept      json
 // @Produce     json
-// @Success     200 {object} []entity.StockOrder
+// @Success     200 {object} allOrder
 // @Failure     500 {object} response
 // @Router      /order/all [get]
 func (r *orderRoutes) getAllOrder(c *gin.Context) {
-	orderArr, err := r.t.GetAllStockOrder(c.Request.Context())
+	stockOrderArr, err := r.t.GetAllStockOrder(c.Request.Context())
 	if err != nil {
 		log.Error(err)
 		errorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
-	c.JSON(http.StatusOK, orderArr)
+
+	futureOrderArr, err := r.t.GetAllFutureOrder(c.Request.Context())
+	if err != nil {
+		log.Error(err)
+		errorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	c.JSON(http.StatusOK, allOrder{
+		Stock:  stockOrderArr,
+		Future: futureOrderArr,
+	})
 }
 
 type tradeBalance struct {

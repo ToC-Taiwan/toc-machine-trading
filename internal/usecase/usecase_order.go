@@ -571,11 +571,11 @@ func (uc *OrderUseCase) calculateFutureTradeBalance(allOrders []*entity.FutureOr
 
 // GetAllStockOrder -.
 func (uc *OrderUseCase) GetAllStockOrder(ctx context.Context) ([]*entity.StockOrder, error) {
-	orderArr, err := uc.repo.QueryAllStockOrder(ctx)
-	if err != nil {
-		return nil, err
-	}
-	return orderArr, nil
+	return uc.repo.QueryAllStockOrder(ctx)
+}
+
+func (uc *OrderUseCase) GetAllFutureOrder(ctx context.Context) ([]*entity.FutureOrder, error) {
+	return uc.repo.QueryAllFutureOrder(ctx)
 }
 
 // GetAllStockTradeBalance -.

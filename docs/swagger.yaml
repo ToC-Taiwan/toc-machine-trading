@@ -171,6 +171,58 @@ definitions:
       second_part_duration:
         type: integer
     type: object
+  entity.Future:
+    properties:
+      category:
+        type: string
+      code:
+        type: string
+      delivery_date:
+        type: string
+      delivery_month:
+        type: string
+      limit_down:
+        type: number
+      limit_up:
+        type: number
+      name:
+        type: string
+      reference:
+        type: number
+      symbol:
+        type: string
+      underlying_kind:
+        type: string
+      unit:
+        type: integer
+      update_date:
+        type: string
+    type: object
+  entity.FutureOrder:
+    properties:
+      action:
+        type: integer
+      code:
+        type: string
+      future:
+        $ref: '#/definitions/entity.Future'
+      group_id:
+        type: string
+      order_id:
+        type: string
+      order_time:
+        type: string
+      price:
+        type: number
+      quantity:
+        type: integer
+      status:
+        type: integer
+      tick_time:
+        type: string
+      trade_time:
+        type: string
+    type: object
   entity.FutureTradeBalance:
     properties:
       forward:
@@ -326,6 +378,17 @@ definitions:
         type: integer
       count:
         type: integer
+    type: object
+  v1.allOrder:
+    properties:
+      future:
+        items:
+          $ref: '#/definitions/entity.FutureOrder'
+        type: array
+      stock:
+        items:
+          $ref: '#/definitions/entity.StockOrder'
+        type: array
     type: object
   v1.dayTradeResult:
     properties:
@@ -545,9 +608,7 @@ paths:
         "200":
           description: OK
           schema:
-            items:
-              $ref: '#/definitions/entity.StockOrder'
-            type: array
+            $ref: '#/definitions/v1.allOrder'
         "500":
           description: Internal Server Error
           schema:

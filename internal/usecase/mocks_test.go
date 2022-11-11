@@ -1499,6 +1499,21 @@ func (mr *MockOrderMockRecorder) CalculateTradeDiscount(price, quantity interfac
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CalculateTradeDiscount", reflect.TypeOf((*MockOrder)(nil).CalculateTradeDiscount), price, quantity)
 }
 
+// GetAllFutureOrder mocks base method.
+func (m *MockOrder) GetAllFutureOrder(ctx context.Context) ([]*entity.FutureOrder, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAllFutureOrder", ctx)
+	ret0, _ := ret[0].([]*entity.FutureOrder)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAllFutureOrder indicates an expected call of GetAllFutureOrder.
+func (mr *MockOrderMockRecorder) GetAllFutureOrder(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllFutureOrder", reflect.TypeOf((*MockOrder)(nil).GetAllFutureOrder), ctx)
+}
+
 // GetAllFutureTradeBalance mocks base method.
 func (m *MockOrder) GetAllFutureTradeBalance(ctx context.Context) ([]*entity.FutureTradeBalance, error) {
 	m.ctrl.T.Helper()
@@ -1621,6 +1636,21 @@ func (m *MockOrderRepo) InsertOrUpdateStockTradeBalance(ctx context.Context, t *
 func (mr *MockOrderRepoMockRecorder) InsertOrUpdateStockTradeBalance(ctx, t interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertOrUpdateStockTradeBalance", reflect.TypeOf((*MockOrderRepo)(nil).InsertOrUpdateStockTradeBalance), ctx, t)
+}
+
+// QueryAllFutureOrder mocks base method.
+func (m *MockOrderRepo) QueryAllFutureOrder(ctx context.Context) ([]*entity.FutureOrder, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "QueryAllFutureOrder", ctx)
+	ret0, _ := ret[0].([]*entity.FutureOrder)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// QueryAllFutureOrder indicates an expected call of QueryAllFutureOrder.
+func (mr *MockOrderRepoMockRecorder) QueryAllFutureOrder(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryAllFutureOrder", reflect.TypeOf((*MockOrderRepo)(nil).QueryAllFutureOrder), ctx)
 }
 
 // QueryAllFutureOrderByDate mocks base method.

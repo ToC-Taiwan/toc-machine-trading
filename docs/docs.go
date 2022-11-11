@@ -277,10 +277,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/entity.StockOrder"
-                            }
+                            "$ref": "#/definitions/v1.allOrder"
                         }
                     },
                     "500": {
@@ -793,6 +790,85 @@ const docTemplate = `{
                 }
             }
         },
+        "entity.Future": {
+            "type": "object",
+            "properties": {
+                "category": {
+                    "type": "string"
+                },
+                "code": {
+                    "type": "string"
+                },
+                "delivery_date": {
+                    "type": "string"
+                },
+                "delivery_month": {
+                    "type": "string"
+                },
+                "limit_down": {
+                    "type": "number"
+                },
+                "limit_up": {
+                    "type": "number"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "reference": {
+                    "type": "number"
+                },
+                "symbol": {
+                    "type": "string"
+                },
+                "underlying_kind": {
+                    "type": "string"
+                },
+                "unit": {
+                    "type": "integer"
+                },
+                "update_date": {
+                    "type": "string"
+                }
+            }
+        },
+        "entity.FutureOrder": {
+            "type": "object",
+            "properties": {
+                "action": {
+                    "type": "integer"
+                },
+                "code": {
+                    "type": "string"
+                },
+                "future": {
+                    "$ref": "#/definitions/entity.Future"
+                },
+                "group_id": {
+                    "type": "string"
+                },
+                "order_id": {
+                    "type": "string"
+                },
+                "order_time": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "number"
+                },
+                "quantity": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "integer"
+                },
+                "tick_time": {
+                    "type": "string"
+                },
+                "trade_time": {
+                    "type": "string"
+                }
+            }
+        },
         "entity.FutureTradeBalance": {
             "type": "object",
             "properties": {
@@ -1028,6 +1104,23 @@ const docTemplate = `{
                 },
                 "count": {
                     "type": "integer"
+                }
+            }
+        },
+        "v1.allOrder": {
+            "type": "object",
+            "properties": {
+                "future": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entity.FutureOrder"
+                    }
+                },
+                "stock": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entity.StockOrder"
+                    }
                 }
             }
         },

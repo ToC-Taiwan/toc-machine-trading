@@ -346,6 +346,34 @@ func (r *OrderRepo) InsertOrUpdateFutureOrderByOrderID(ctx context.Context, t *e
 	return nil
 }
 
+func (r *OrderRepo) QueryAllFutureOrder(ctx context.Context) ([]*entity.FutureOrder, error) {
+	sql, _, err := r.Builder.
+		Select("group_id, order_id, status, order_time, tick_time, trade_future_order.code, action, price, quantity, trade_time, basic_future.code, symbol, name, category, delivery_month, delivery_date, underlying_kind, unit, limit_up, limit_down, reference, update_date").
+		From(tableNameTradeFutureOrder).
+		OrderBy("order_time ASC").
+		Join("basic_future ON trade_future_order.code = basic_future.code").ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	rows, err := r.Pool().Query(ctx, sql)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var result []*entity.FutureOrder
+	for rows.Next() {
+		e := entity.FutureOrder{Future: new(entity.Future)}
+		if err := rows.Scan(&e.GroupID, &e.OrderID, &e.Status, &e.OrderTime, &e.TickTime, &e.Code, &e.Action, &e.Price, &e.Quantity, &e.TradeTime,
+			&e.Future.Code, &e.Future.Symbol, &e.Future.Name, &e.Future.Category, &e.Future.DeliveryMonth, &e.Future.DeliveryDate, &e.Future.UnderlyingKind, &e.Future.Unit, &e.Future.LimitUp, &e.Future.LimitDown, &e.Future.Reference, &e.Future.UpdateDate); err != nil {
+			return nil, err
+		}
+		result = append(result, &e)
+	}
+	return result, nil
+}
+
 // QueryAllFutureOrderByDate -.
 func (r *OrderRepo) QueryAllFutureOrderByDate(ctx context.Context, timeRange []time.Time) ([]*entity.FutureOrder, error) {
 	sql, arg, err := r.Builder.
