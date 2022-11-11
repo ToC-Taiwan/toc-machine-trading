@@ -184,6 +184,11 @@ type (
 		CalculateTradeDiscount(price float64, quantity int64) int64
 
 		AskOrderUpdate() error
+
+		BuyFuture(order *entity.FutureOrder) (string, entity.OrderStatus, error)
+		SellFuture(order *entity.FutureOrder) (string, entity.OrderStatus, error)
+		SellFirstFuture(order *entity.FutureOrder) (string, entity.OrderStatus, error)
+		BuyLaterFuture(order *entity.FutureOrder) (string, entity.OrderStatus, error)
 	}
 
 	// OrderRepo -.

@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"sync"
 
+	"tmt/internal/entity"
 	"tmt/internal/usecase"
 	"tmt/pkg/logger"
 
@@ -31,18 +32,33 @@ type WSRouter struct {
 	mutex        sync.Mutex
 
 	s       usecase.Stream
+	o       usecase.Order
 	conn    *websocket.Conn
 	msgChan chan interface{}
 }
 
 type msg struct {
-	Data interface{} `json:"data"`
+	Topic         string       `json:"topic"`
+	PickStockList []string     `json:"pick_stock_list"`
+	FutureOrder   *futureOrder `json:"future_order"`
+}
+
+type futureOrder struct {
+	Code   string             `json:"code"`
+	Action entity.OrderAction `json:"action"`
+	Price  float64            `json:"price"`
+	Qty    int64              `json:"qty"`
+}
+
+type errMsg struct {
+	ErrMsg string `json:"err_msg"`
 }
 
 // NewWSRouter -.
-func NewWSRouter(s usecase.Stream) *WSRouter {
+func NewWSRouter(s usecase.Stream, o usecase.Order) *WSRouter {
 	r := &WSRouter{
 		s:       s,
+		o:       o,
 		msgChan: make(chan interface{}),
 	}
 	return r
@@ -97,16 +113,43 @@ func (w *WSRouter) read(c *websocket.Conn) {
 			return
 		}
 
-		var pickStock []string
-		if arr, ok := clientMsg.Data.(map[string]interface{})["pick_stock_list"].([]interface{}); ok {
-			for _, v := range arr {
-				if stock, ok := v.(string); ok {
-					pickStock = append(pickStock, stock)
-				}
-			}
-			w.mutex.Lock()
-			w.pickStockArr = pickStock
-			w.mutex.Unlock()
+		switch clientMsg.Topic {
+		case "pick_stock":
+			w.updatePickStock(clientMsg)
+		case "future_trade":
+			w.processTrade(clientMsg)
+		}
+	}
+}
+
+func (w *WSRouter) updatePickStock(clientMsg msg) {
+	w.mutex.Lock()
+	w.pickStockArr = clientMsg.PickStockList
+	w.mutex.Unlock()
+}
+
+func (w *WSRouter) processTrade(clientMsg msg) {
+	if clientMsg.FutureOrder == nil {
+		return
+	}
+
+	order := &entity.FutureOrder{
+		Code: clientMsg.FutureOrder.Code,
+		BaseOrder: entity.BaseOrder{
+			Action:   clientMsg.FutureOrder.Action,
+			Quantity: clientMsg.FutureOrder.Qty,
+			Price:    clientMsg.FutureOrder.Price,
+		},
+	}
+
+	switch clientMsg.FutureOrder.Action {
+	case entity.ActionBuy:
+		if _, _, err := w.o.BuyFuture(order); err != nil {
+			w.msgChan <- errMsg{ErrMsg: err.Error()}
+		}
+	case entity.ActionSell:
+		if _, _, err := w.o.SellFuture(order); err != nil {
+			w.msgChan <- errMsg{ErrMsg: err.Error()}
 		}
 	}
 }

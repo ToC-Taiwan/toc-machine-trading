@@ -1457,6 +1457,38 @@ func (mr *MockOrderMockRecorder) AskOrderUpdate() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AskOrderUpdate", reflect.TypeOf((*MockOrder)(nil).AskOrderUpdate))
 }
 
+// BuyFuture mocks base method.
+func (m *MockOrder) BuyFuture(order *entity.FutureOrder) (string, entity.OrderStatus, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "BuyFuture", order)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(entity.OrderStatus)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// BuyFuture indicates an expected call of BuyFuture.
+func (mr *MockOrderMockRecorder) BuyFuture(order interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BuyFuture", reflect.TypeOf((*MockOrder)(nil).BuyFuture), order)
+}
+
+// BuyLaterFuture mocks base method.
+func (m *MockOrder) BuyLaterFuture(order *entity.FutureOrder) (string, entity.OrderStatus, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "BuyLaterFuture", order)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(entity.OrderStatus)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// BuyLaterFuture indicates an expected call of BuyLaterFuture.
+func (mr *MockOrderMockRecorder) BuyLaterFuture(order interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BuyLaterFuture", reflect.TypeOf((*MockOrder)(nil).BuyLaterFuture), order)
+}
+
 // CalculateBuyCost mocks base method.
 func (m *MockOrder) CalculateBuyCost(price float64, quantity int64) int64 {
 	m.ctrl.T.Helper()
@@ -1557,6 +1589,38 @@ func (m *MockOrder) GetAllStockTradeBalance(ctx context.Context) ([]*entity.Stoc
 func (mr *MockOrderMockRecorder) GetAllStockTradeBalance(ctx interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllStockTradeBalance", reflect.TypeOf((*MockOrder)(nil).GetAllStockTradeBalance), ctx)
+}
+
+// SellFirstFuture mocks base method.
+func (m *MockOrder) SellFirstFuture(order *entity.FutureOrder) (string, entity.OrderStatus, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SellFirstFuture", order)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(entity.OrderStatus)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// SellFirstFuture indicates an expected call of SellFirstFuture.
+func (mr *MockOrderMockRecorder) SellFirstFuture(order interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SellFirstFuture", reflect.TypeOf((*MockOrder)(nil).SellFirstFuture), order)
+}
+
+// SellFuture mocks base method.
+func (m *MockOrder) SellFuture(order *entity.FutureOrder) (string, entity.OrderStatus, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SellFuture", order)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(entity.OrderStatus)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// SellFuture indicates an expected call of SellFuture.
+func (mr *MockOrderMockRecorder) SellFuture(order interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SellFuture", reflect.TypeOf((*MockOrder)(nil).SellFuture), order)
 }
 
 // MockOrderRepo is a mock of OrderRepo interface.
