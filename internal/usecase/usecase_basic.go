@@ -2,6 +2,9 @@ package usecase
 
 import (
 	"context"
+	"errors"
+	"io"
+	"os"
 	"time"
 
 	"tmt/cmd/config"
@@ -33,12 +36,7 @@ func NewBasic(r BasicRepo, t BasicgRPCAPI) *BasicUseCase {
 		cfg:      cfg,
 	}
 
-	go func() {
-		err := uc.gRPCAPI.Heartbeat()
-		if err != nil {
-			log.Panic(err)
-		}
-	}()
+	go uc.HealthCheck()
 
 	if err := uc.importCalendarDate(context.Background()); err != nil {
 		log.Panic(err)
@@ -56,6 +54,17 @@ func NewBasic(r BasicRepo, t BasicgRPCAPI) *BasicUseCase {
 
 	bus.SubscribeTopic(event.TopicQueryMonitorFutureCode, uc.pubMonitorFutureCode)
 	return uc
+}
+
+func (uc *BasicUseCase) HealthCheck() {
+	err := uc.gRPCAPI.Heartbeat()
+	if err != nil {
+		if errors.Is(err, io.EOF) {
+			log.Warn("gRPC server is not ready, terminate")
+			os.Exit(0)
+		}
+		log.Panic(err)
+	}
 }
 
 // TerminateSinopac -.
