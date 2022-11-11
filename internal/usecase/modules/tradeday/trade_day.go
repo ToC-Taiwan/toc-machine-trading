@@ -56,7 +56,7 @@ func (t *TradeDay) GetStockTradeDay() TradePeriod {
 		}
 		d = d.AddDate(0, 0, 1)
 	}
-	return TradePeriod{startTime, endTime, d}
+	return TradePeriod{startTime, endTime, d, t}
 }
 
 // GetFutureTradeDay -.
@@ -88,7 +88,7 @@ func (t *TradeDay) GetFutureTradeDay() TradePeriod {
 		d = d.AddDate(0, 0, -1)
 	}
 
-	return TradePeriod{startTime, endTime, tradeDay}
+	return TradePeriod{startTime, endTime, tradeDay, t}
 }
 
 // GetLastNFutureTradeDay -.
@@ -121,7 +121,7 @@ func (t *TradeDay) GetLastNFutureTradeDay(count int) []TradePeriod {
 			d = d.AddDate(0, 0, -1)
 		}
 
-		tradePeriodArr = append(tradePeriodArr, TradePeriod{startTime, endTime, tradeDay})
+		tradePeriodArr = append(tradePeriodArr, TradePeriod{startTime, endTime, tradeDay, t})
 	}
 
 	return tradePeriodArr
@@ -219,9 +219,36 @@ type TradePeriod struct {
 	StartTime time.Time
 	EndTime   time.Time
 	TradeDay  time.Time
+	base      *TradeDay
 }
 
 // ToStartEndArray -.
 func (tp *TradePeriod) ToStartEndArray() []time.Time {
 	return []time.Time{tp.StartTime, tp.EndTime}
+}
+
+// GetLastTradePeriod -.
+func (tp *TradePeriod) GetLastTradePeriod() *TradePeriod {
+	firstDay := tp
+	d := firstDay.TradeDay.AddDate(0, 0, -1)
+
+	var startTime, endTime, tradeDay time.Time
+	for {
+		if tp.base.isTradeDay(d) {
+			tradeDay = d
+			endTime = d.Add(13 * time.Hour).Add(45 * time.Minute)
+			break
+		}
+		d = d.AddDate(0, 0, -1)
+	}
+
+	d = d.AddDate(0, 0, -1)
+	for {
+		if tp.base.isTradeDay(d) {
+			startTime = d.Add(15 * time.Hour)
+			break
+		}
+		d = d.AddDate(0, 0, -1)
+	}
+	return &TradePeriod{startTime, endTime, tradeDay, tp.base}
 }
