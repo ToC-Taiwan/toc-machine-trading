@@ -2,6 +2,7 @@ package grpcapi
 
 import (
 	"context"
+	"errors"
 
 	"tmt/pb"
 	"tmt/pkg/grpc"
@@ -57,16 +58,20 @@ func (t *StreamgRPCAPI) GetStockSnapshotTSE() (*pb.SnapshotMessage, error) {
 	return r, nil
 }
 
-// GetFutureSnapshotByCodeArr -.
-func (t *StreamgRPCAPI) GetFutureSnapshotByCodeArr(codeArr []string) (*pb.SnapshotResponse, error) {
+// GetFutureSnapshotByCode -.
+func (t *StreamgRPCAPI) GetFutureSnapshotByCode(code string) (*pb.SnapshotMessage, error) {
 	conn := t.conn.GetReadyConn()
 	defer t.conn.PutReadyConn(conn)
 	c := pb.NewStreamDataInterfaceClient(conn)
 	r, err := c.GetFutureSnapshotByCodeArr(context.Background(), &pb.FutureCodeArr{
-		FutureCodeArr: codeArr,
+		FutureCodeArr: []string{code},
 	})
 	if err != nil {
-		return &pb.SnapshotResponse{}, err
+		return &pb.SnapshotMessage{}, err
 	}
-	return r, nil
+
+	if data := r.GetData(); len(data) > 0 {
+		return data[0], nil
+	}
+	return nil, errors.New("no data")
 }

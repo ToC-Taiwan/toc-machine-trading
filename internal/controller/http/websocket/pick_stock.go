@@ -5,8 +5,7 @@ import (
 	"time"
 )
 
-// SocketPickStock -.
-type SocketPickStock struct {
+type socketPickStock struct {
 	StockNum        string  `json:"stock_num"`
 	StockName       string  `json:"stock_name"`
 	IsTarget        bool    `json:"is_target"`
@@ -16,14 +15,22 @@ type SocketPickStock struct {
 	Wrong           bool    `json:"wrong"`
 }
 
-func (w *WSRouter) sendSnapShotArr(ctx context.Context) {
+func (w *WSRouter) updatePickStock(clientMsg msg) {
+	w.mutex.Lock()
+	w.pickStockArr = clientMsg.PickStockList
+	w.mutex.Unlock()
+}
+
+func (w *WSRouter) sendPickStockSnapShot(ctx context.Context) {
 	for {
 		select {
 		case <-ctx.Done():
 			close(w.msgChan)
 			return
+
 		default:
 			time.Sleep(time.Second)
+
 			w.mutex.Lock()
 			tmpStockArr := w.pickStockArr
 			w.mutex.Unlock()
@@ -38,10 +45,10 @@ func (w *WSRouter) sendSnapShotArr(ctx context.Context) {
 				return
 			}
 
-			data := []SocketPickStock{}
+			data := []socketPickStock{}
 			for _, s := range snapShot {
 				if s.StockName != "" {
-					data = append(data, SocketPickStock{
+					data = append(data, socketPickStock{
 						StockNum:        s.StockNum,
 						StockName:       s.StockName,
 						IsTarget:        false,
@@ -50,7 +57,7 @@ func (w *WSRouter) sendSnapShotArr(ctx context.Context) {
 						Price:           s.Close,
 					})
 				} else {
-					data = append(data, SocketPickStock{
+					data = append(data, socketPickStock{
 						StockNum: s.StockNum,
 						Wrong:    true,
 					})

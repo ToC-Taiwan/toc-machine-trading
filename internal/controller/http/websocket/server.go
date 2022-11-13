@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"sync"
 
-	"tmt/internal/entity"
 	"tmt/internal/usecase"
 	"tmt/pkg/logger"
 
@@ -31,8 +30,9 @@ type WSRouter struct {
 	pickStockArr []string
 	mutex        sync.Mutex
 
-	s       usecase.Stream
-	o       usecase.Order
+	s usecase.Stream
+	o usecase.Order
+
 	conn    *websocket.Conn
 	msgChan chan interface{}
 }
@@ -43,25 +43,17 @@ type msg struct {
 	FutureOrder   *futureOrder `json:"future_order"`
 }
 
-type futureOrder struct {
-	Code   string             `json:"code"`
-	Action entity.OrderAction `json:"action"`
-	Price  float64            `json:"price"`
-	Qty    int64              `json:"qty"`
-}
-
 type errMsg struct {
 	ErrMsg string `json:"err_msg"`
 }
 
 // NewWSRouter -.
 func NewWSRouter(s usecase.Stream, o usecase.Order) *WSRouter {
-	r := &WSRouter{
+	return &WSRouter{
 		s:       s,
 		o:       o,
 		msgChan: make(chan interface{}),
 	}
-	return r
 }
 
 // Run -.
@@ -86,7 +78,7 @@ func (w *WSRouter) Run(gin *gin.Context, wsType WSType) {
 
 	switch wsType {
 	case WSPickStock:
-		go w.sendSnapShotArr(ctx)
+		go w.sendPickStockSnapShot(ctx)
 	case WSFuture:
 		go w.sendFuture(ctx)
 	}
@@ -122,38 +114,6 @@ func (w *WSRouter) read(c *websocket.Conn) {
 	}
 }
 
-func (w *WSRouter) updatePickStock(clientMsg msg) {
-	w.mutex.Lock()
-	w.pickStockArr = clientMsg.PickStockList
-	w.mutex.Unlock()
-}
-
-func (w *WSRouter) processTrade(clientMsg msg) {
-	if clientMsg.FutureOrder == nil {
-		return
-	}
-
-	order := &entity.FutureOrder{
-		Code: clientMsg.FutureOrder.Code,
-		BaseOrder: entity.BaseOrder{
-			Action:   clientMsg.FutureOrder.Action,
-			Quantity: clientMsg.FutureOrder.Qty,
-			Price:    clientMsg.FutureOrder.Price,
-		},
-	}
-
-	switch clientMsg.FutureOrder.Action {
-	case entity.ActionBuy:
-		if _, _, err := w.o.BuyFuture(order); err != nil {
-			w.msgChan <- errMsg{ErrMsg: err.Error()}
-		}
-	case entity.ActionSell:
-		if _, _, err := w.o.SellFuture(order); err != nil {
-			w.msgChan <- errMsg{ErrMsg: err.Error()}
-		}
-	}
-}
-
 func (w *WSRouter) write() {
 	for {
 		cl, ok := <-w.msgChan
@@ -161,7 +121,16 @@ func (w *WSRouter) write() {
 			return
 		}
 
-		serveMsgStr, _ := json.Marshal(cl)
-		_ = w.conn.WriteMessage(websocket.TextMessage, serveMsgStr)
+		serveMsgStr, err := json.Marshal(cl)
+		if err != nil {
+			log.Error(err)
+			return
+		}
+
+		err = w.conn.WriteMessage(websocket.TextMessage, serveMsgStr)
+		if err != nil {
+			log.Error(err)
+			return
+		}
 	}
 }

@@ -124,6 +124,13 @@ type StockSnapShot struct {
 	SnapShotBase
 }
 
+// FutureSnapShot -.
+type FutureSnapShot struct {
+	Code       string `json:"code"`
+	FutureName string `json:"future_name"`
+	SnapShotBase
+}
+
 // SnapShotBase -.
 type SnapShotBase struct {
 	SnapTime        time.Time `json:"snap_time"`

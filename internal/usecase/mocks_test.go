@@ -1091,6 +1091,35 @@ func (mr *MockStreamMockRecorder) DeleteFutureRealTimeConnection(timestamp inter
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteFutureRealTimeConnection", reflect.TypeOf((*MockStream)(nil).DeleteFutureRealTimeConnection), timestamp)
 }
 
+// GetFutureSnapshotByCode mocks base method.
+func (m *MockStream) GetFutureSnapshotByCode(code string) (*entity.FutureSnapShot, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetFutureSnapshotByCode", code)
+	ret0, _ := ret[0].(*entity.FutureSnapShot)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetFutureSnapshotByCode indicates an expected call of GetFutureSnapshotByCode.
+func (mr *MockStreamMockRecorder) GetFutureSnapshotByCode(code interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFutureSnapshotByCode", reflect.TypeOf((*MockStream)(nil).GetFutureSnapshotByCode), code)
+}
+
+// GetMainFutureCode mocks base method.
+func (m *MockStream) GetMainFutureCode() string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetMainFutureCode")
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// GetMainFutureCode indicates an expected call of GetMainFutureCode.
+func (mr *MockStreamMockRecorder) GetMainFutureCode() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMainFutureCode", reflect.TypeOf((*MockStream)(nil).GetMainFutureCode))
+}
+
 // GetStockSnapshotByNumArr mocks base method.
 func (m *MockStream) GetStockSnapshotByNumArr(stockNumArr []string) ([]*entity.StockSnapShot, error) {
 	m.ctrl.T.Helper()
@@ -1244,19 +1273,19 @@ func (mr *MockStreamgRPCAPIMockRecorder) GetAllStockSnapshot() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllStockSnapshot", reflect.TypeOf((*MockStreamgRPCAPI)(nil).GetAllStockSnapshot))
 }
 
-// GetFutureSnapshotByCodeArr mocks base method.
-func (m *MockStreamgRPCAPI) GetFutureSnapshotByCodeArr(codeArr []string) (*pb.SnapshotResponse, error) {
+// GetFutureSnapshotByCode mocks base method.
+func (m *MockStreamgRPCAPI) GetFutureSnapshotByCode(code string) (*pb.SnapshotMessage, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetFutureSnapshotByCodeArr", codeArr)
-	ret0, _ := ret[0].(*pb.SnapshotResponse)
+	ret := m.ctrl.Call(m, "GetFutureSnapshotByCode", code)
+	ret0, _ := ret[0].(*pb.SnapshotMessage)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetFutureSnapshotByCodeArr indicates an expected call of GetFutureSnapshotByCodeArr.
-func (mr *MockStreamgRPCAPIMockRecorder) GetFutureSnapshotByCodeArr(codeArr interface{}) *gomock.Call {
+// GetFutureSnapshotByCode indicates an expected call of GetFutureSnapshotByCode.
+func (mr *MockStreamgRPCAPIMockRecorder) GetFutureSnapshotByCode(code interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFutureSnapshotByCodeArr", reflect.TypeOf((*MockStreamgRPCAPI)(nil).GetFutureSnapshotByCodeArr), codeArr)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFutureSnapshotByCode", reflect.TypeOf((*MockStreamgRPCAPI)(nil).GetFutureSnapshotByCode), code)
 }
 
 // GetStockSnapshotByNumArr mocks base method.

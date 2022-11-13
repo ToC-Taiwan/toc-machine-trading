@@ -33,6 +33,8 @@ type StreamUseCase struct {
 
 	stockTradeInSwitch  bool
 	futureTradeInSwitch bool
+
+	mainFutureCode string
 }
 
 // NewStream -.
@@ -70,6 +72,7 @@ func NewStream(r StreamRepo, g StreamgRPCAPI, t StreamRabbit) *StreamUseCase {
 
 	bus.SubscribeTopic(event.TopicStreamStockTargets, uc.ReceiveStreamData)
 	bus.SubscribeTopic(event.TopicStreamFutureTargets, uc.ReceiveFutureStreamData)
+	bus.SubscribeTopic(event.TopicMonitorFutureCode, uc.updateMainFutureCode)
 	return uc
 }
 
@@ -242,6 +245,36 @@ func (uc *StreamUseCase) GetStockSnapshotByNumArr(stockNumArr []string) ([]*enti
 	return result, nil
 }
 
+// GetFutureSnapshotByCode -.
+func (uc *StreamUseCase) GetFutureSnapshotByCode(code string) (*entity.FutureSnapShot, error) {
+	snapshot, err := uc.grpcapi.GetFutureSnapshotByCode(code)
+	if err != nil {
+		return nil, err
+	}
+
+	return &entity.FutureSnapShot{
+		Code:       snapshot.GetCode(),
+		FutureName: cc.GetFutureDetail(code).Name,
+		SnapShotBase: entity.SnapShotBase{
+			SnapTime:        time.Unix(0, snapshot.GetTs()).Add(-8 * time.Hour),
+			Open:            snapshot.GetOpen(),
+			High:            snapshot.GetHigh(),
+			Low:             snapshot.GetLow(),
+			Close:           snapshot.GetClose(),
+			TickType:        snapshot.GetTickType(),
+			PriceChg:        snapshot.GetChangePrice(),
+			PctChg:          snapshot.GetChangeRate(),
+			ChgType:         snapshot.GetChangeType(),
+			Volume:          snapshot.GetVolume(),
+			VolumeSum:       snapshot.GetTotalVolume(),
+			Amount:          snapshot.GetAmount(),
+			AmountSum:       snapshot.GetTotalAmount(),
+			YesterdayVolume: snapshot.GetYesterdayVolume(),
+			VolumeRatio:     snapshot.GetVolumeRatio(),
+		},
+	}, nil
+}
+
 // NewFutureRealTimeConnection -.
 func (uc *StreamUseCase) NewFutureRealTimeConnection(timestamp int64, tickChan chan *entity.RealTimeFutureTick) {
 	uc.rabbit.AddFutureTickChan(timestamp, tickChan)
@@ -250,6 +283,15 @@ func (uc *StreamUseCase) NewFutureRealTimeConnection(timestamp int64, tickChan c
 // DeleteFutureRealTimeConnection -.
 func (uc *StreamUseCase) DeleteFutureRealTimeConnection(timestamp int64) {
 	uc.rabbit.RemoveFutureTickChan(timestamp)
+}
+
+func (uc *StreamUseCase) updateMainFutureCode(future *entity.Future) {
+	uc.mainFutureCode = future.Code
+}
+
+// GetMainFutureCode -.
+func (uc *StreamUseCase) GetMainFutureCode() string {
+	return uc.mainFutureCode
 }
 
 // ReceiveStreamData - receive target data, start goroutine to trade

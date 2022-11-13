@@ -41,6 +41,19 @@ func (c *Cache) GetStockDetail(stockNum string) *entity.Stock {
 	return nil
 }
 
+// SetFutureDetail -.
+func (c *Cache) SetFutureDetail(future *entity.Future) {
+	c.Set(c.futureDetailKey(future.Code), future)
+}
+
+// GetFutureDetail -.
+func (c *Cache) GetFutureDetail(code string) *entity.Future {
+	if value, ok := c.Get(c.futureDetailKey(code)); ok {
+		return value.(*entity.Future)
+	}
+	return nil
+}
+
 // SetBasicInfo -.
 func (c *Cache) SetBasicInfo(info *entity.BasicInfo) {
 	c.Set(c.basicInfoKey(), info)

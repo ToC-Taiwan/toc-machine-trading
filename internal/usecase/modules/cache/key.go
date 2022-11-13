@@ -36,6 +36,8 @@ const (
 
 	cacheIDStockNum string = "stock_num"
 
+	cacheIDFutureCode string = "future_code"
+
 	cacheIDOrderID string = "order_id"
 )
 
@@ -69,6 +71,13 @@ func (c *Cache) stockDetailKey(stockNum string) cache.Key {
 	return cache.Key{
 		Category: cacheCatagoryBasic,
 		ID:       c.generateID(cacheIDStockNum, stockNum),
+	}
+}
+
+func (c *Cache) futureDetailKey(code string) cache.Key {
+	return cache.Key{
+		Category: cacheCatagoryBasic,
+		ID:       c.generateID(cacheIDFutureCode, code),
 	}
 }
 

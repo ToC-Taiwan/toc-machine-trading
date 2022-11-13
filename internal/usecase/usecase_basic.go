@@ -157,6 +157,7 @@ func (uc *BasicUseCase) GetAllSinopacFutureAndUpdateRepo(ctx context.Context) ([
 		if _, ok := duplCodeMap[future.Code]; !ok {
 			duplCodeMap[future.Code] = struct{}{}
 			uc.allFutureDetail = append(uc.allFutureDetail, future)
+			cc.SetFutureDetail(future)
 		} else {
 			log.Warnf("Dupl future code: %s %s", v.Code, v.Name)
 		}

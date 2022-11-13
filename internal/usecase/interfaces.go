@@ -136,6 +136,8 @@ type (
 		GetTSESnapshot(ctx context.Context) (*entity.StockSnapShot, error)
 		GetStockSnapshotByNumArr(stockNumArr []string) ([]*entity.StockSnapShot, error)
 
+		GetMainFutureCode() string
+		GetFutureSnapshotByCode(code string) (*entity.FutureSnapShot, error)
 		NewFutureRealTimeConnection(timestamp int64, tickChan chan *entity.RealTimeFutureTick)
 		DeleteFutureRealTimeConnection(timestamp int64)
 	}
@@ -151,7 +153,7 @@ type (
 		GetStockSnapshotByNumArr(stockNumArr []string) ([]*pb.SnapshotMessage, error)
 		GetStockSnapshotTSE() (*pb.SnapshotMessage, error)
 
-		GetFutureSnapshotByCodeArr(codeArr []string) (*pb.SnapshotResponse, error)
+		GetFutureSnapshotByCode(code string) (*pb.SnapshotMessage, error)
 	}
 
 	// StreamRabbit -.
