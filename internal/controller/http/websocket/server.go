@@ -93,7 +93,9 @@ func (w *WSRouter) read(c *websocket.Conn) {
 	for {
 		_, message, err := c.ReadMessage()
 		if err != nil {
-			log.Error(err)
+			if !websocket.IsCloseError(err, websocket.CloseNoStatusReceived) {
+				log.Error(err)
+			}
 			return
 		}
 
