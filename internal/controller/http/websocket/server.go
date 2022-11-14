@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"sync"
 
+	"tmt/internal/entity"
 	"tmt/internal/usecase"
 	"tmt/pkg/logger"
 
@@ -124,21 +125,27 @@ func (w *WSRouter) write() {
 			return
 		}
 
-		if cl.(string) == "pong" {
-			if err := w.send([]byte("pong")); err != nil {
+		switch v := cl.(type) {
+		case string:
+			if v == "pong" {
+				if err := w.send([]byte(v)); err != nil {
+					return
+				}
+			}
+
+		case *entity.RealTimeFutureTick:
+			serveMsgStr, err := json.Marshal(v)
+			if err != nil {
+				log.Error(err)
 				return
 			}
+
+			if err := w.send(serveMsgStr); err != nil {
+				return
+			}
+
+		default:
 			continue
-		}
-
-		serveMsgStr, err := json.Marshal(cl)
-		if err != nil {
-			log.Error(err)
-			return
-		}
-
-		if err := w.send(serveMsgStr); err != nil {
-			return
 		}
 	}
 }
