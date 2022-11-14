@@ -104,5 +104,4 @@ func (w *WSRouter) sendFuture(ctx context.Context) {
 	defer w.s.DeleteFutureRealTimeConnection(timestamp)
 	w.s.NewFutureRealTimeConnection(timestamp, tickChan)
 	<-ctx.Done()
-	log.Info("WSFuture Done")
 }

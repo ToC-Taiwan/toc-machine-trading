@@ -82,7 +82,6 @@ func (w *WSRouter) Run(gin *gin.Context, wsType WSType) {
 	case WSPickStock:
 		go w.sendPickStockSnapShot(ctx)
 	case WSFuture:
-		log.Info("New WSFuture")
 		go w.sendFuture(ctx)
 	}
 
