@@ -93,9 +93,6 @@ func (w *WSRouter) read(c *websocket.Conn) {
 	for {
 		_, message, err := c.ReadMessage()
 		if err != nil {
-			if !websocket.IsCloseError(err, websocket.CloseNoStatusReceived) {
-				log.Error(err)
-			}
 			return
 		}
 
@@ -133,7 +130,7 @@ func (w *WSRouter) write() {
 				return
 			}
 
-		case *entity.RealTimeFutureTick:
+		case *entity.RealTimeFutureTick, []socketPickStock:
 			serveMsgStr, err := json.Marshal(v)
 			if err != nil {
 				log.Error(err)
