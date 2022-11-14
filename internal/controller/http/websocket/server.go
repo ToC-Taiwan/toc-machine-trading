@@ -129,10 +129,8 @@ func (w *WSRouter) write() {
 
 		switch v := cl.(type) {
 		case string:
-			if v == "pong" {
-				if err := w.send([]byte(v)); err != nil {
-					return
-				}
+			if err := w.send([]byte(v)); err != nil {
+				return
 			}
 
 		case *entity.RealTimeFutureTick:
@@ -147,6 +145,7 @@ func (w *WSRouter) write() {
 			}
 
 		default:
+			log.Warn("Unknown socket message type")
 			continue
 		}
 	}
