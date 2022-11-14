@@ -3,6 +3,7 @@ package websocket
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"sync"
 
@@ -91,11 +92,12 @@ func (w *WSRouter) read(c *websocket.Conn) {
 	for {
 		_, message, err := c.ReadMessage()
 		if err != nil {
+			log.Error(err)
 			return
 		}
 
 		if string(message) == "ping" {
-			_ = c.WriteMessage(websocket.TextMessage, []byte("pong"))
+			w.msgChan <- "pong"
 			continue
 		}
 
@@ -122,16 +124,31 @@ func (w *WSRouter) write() {
 			return
 		}
 
+		if cl.(string) == "pong" {
+			if err := w.send([]byte("pong")); err != nil {
+				return
+			}
+			continue
+		}
+
 		serveMsgStr, err := json.Marshal(cl)
 		if err != nil {
 			log.Error(err)
 			return
 		}
 
-		err = w.conn.WriteMessage(websocket.TextMessage, serveMsgStr)
-		if err != nil {
-			log.Error(err)
+		if err := w.send(serveMsgStr); err != nil {
 			return
 		}
 	}
+}
+
+func (w *WSRouter) send(data []byte) error {
+	if err := w.conn.WriteMessage(websocket.TextMessage, data); err != nil {
+		if !errors.Is(err, websocket.ErrCloseSent) {
+			log.Error(err)
+		}
+		return err
+	}
+	return nil
 }
