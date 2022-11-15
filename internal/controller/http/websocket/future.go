@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"tmt/internal/entity"
+	"tmt/pkg/utils"
 )
 
 type futureOrder struct {
@@ -12,6 +13,10 @@ type futureOrder struct {
 	Action entity.OrderAction `json:"action"`
 	Price  float64            `json:"price"`
 	Qty    int64              `json:"qty"`
+}
+
+type tradeRate struct {
+	Rate float64 `json:"rate"`
 }
 
 func (w *WSRouter) processTrade(clientMsg msg) {
@@ -91,17 +96,35 @@ func (w *WSRouter) sendFuture(ctx context.Context) {
 		PriceChg:    snapshot.PriceChg,
 		PctChg:      snapshot.PctChg,
 	}
-	go func() {
-		for {
-			tick, ok := <-tickChan
-			if !ok {
-				close(w.msgChan)
-				return
-			}
-			w.msgChan <- tick
-		}
-	}()
+	go w.processTickArr(tickChan)
+
 	defer w.s.DeleteFutureRealTimeConnection(timestamp)
 	w.s.NewFutureRealTimeConnection(timestamp, tickChan)
 	<-ctx.Done()
+}
+
+func (w *WSRouter) processTickArr(tickChan chan *entity.RealTimeFutureTick) {
+	var tickArr []*entity.RealTimeFutureTick
+	for {
+		tick, ok := <-tickChan
+		if !ok {
+			close(w.msgChan)
+			return
+		}
+		tickArr = append(tickArr, tick)
+
+		var totalVolume float64
+		var startTime time.Time
+		for i := len(tickArr) - 1; i >= 0; i-- {
+			if time.Since(tickArr[i].TickTime) > time.Minute {
+				tickArr = tickArr[i+1:]
+				startTime = tickArr[i-1].TickTime
+				break
+			}
+			totalVolume += float64(tickArr[i].Volume)
+		}
+		totalTime := tickArr[len(tickArr)-1].TickTime.Sub(startTime).Seconds()
+		w.msgChan <- tradeRate{utils.Round(totalVolume/totalTime, 2)}
+		w.msgChan <- tick
+	}
 }
