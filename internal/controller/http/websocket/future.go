@@ -17,7 +17,6 @@ type futureOrder struct {
 type tradeRate struct {
 	OutRate int64 `json:"out_rate"`
 	InRate  int64 `json:"in_rate"`
-	Period  int64 `json:"period"`
 }
 
 func (w *WSRouter) processTrade(clientMsg msg) {
@@ -115,11 +114,9 @@ func (w *WSRouter) processTickArr(tickChan chan *entity.RealTimeFutureTick) {
 		tickArr = append(tickArr, tick)
 
 		var outVolume, inVolume int64
-		var startTime time.Time
 		for i := len(tickArr) - 1; i >= 0; i-- {
 			if time.Since(tickArr[i].TickTime) > 30*time.Second {
 				tickArr = tickArr[i+1:]
-				startTime = tickArr[i-1].TickTime
 				break
 			}
 
@@ -134,7 +131,6 @@ func (w *WSRouter) processTickArr(tickChan chan *entity.RealTimeFutureTick) {
 		w.msgChan <- &tradeRate{
 			OutRate: outVolume,
 			InRate:  inVolume,
-			Period:  int64(time.Since(startTime).Seconds()),
 		}
 		w.msgChan <- tick
 	}
