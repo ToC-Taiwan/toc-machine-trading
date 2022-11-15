@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"tmt/internal/entity"
-	"tmt/pkg/utils"
 )
 
 type futureOrder struct {
@@ -113,18 +112,15 @@ func (w *WSRouter) processTickArr(tickChan chan *entity.RealTimeFutureTick) {
 		}
 		tickArr = append(tickArr, tick)
 
-		var totalVolume float64
-		var startTime time.Time
+		var totalVolume int64
 		for i := len(tickArr) - 1; i >= 0; i-- {
 			if time.Since(tickArr[i].TickTime) > time.Minute {
 				tickArr = tickArr[i+1:]
-				startTime = tickArr[i-1].TickTime
 				break
 			}
-			totalVolume += float64(tickArr[i].Volume)
+			totalVolume += tickArr[i].Volume
 		}
-		totalTime := tickArr[len(tickArr)-1].TickTime.Sub(startTime).Seconds()
-		w.msgChan <- tradeRate{utils.Round(totalVolume/totalTime, 2)}
+		w.msgChan <- tradeRate{float64(totalVolume)}
 		w.msgChan <- tick
 	}
 }
