@@ -1151,18 +1151,15 @@ func (mr *MockStreamMockRecorder) GetTSESnapshot(ctx interface{}) *gomock.Call {
 }
 
 // NewFutureRealTimeConnection mocks base method.
-func (m *MockStream) NewFutureRealTimeConnection() (chan *entity.RealTimeFutureTick, string) {
+func (m *MockStream) NewFutureRealTimeConnection(tickChan chan *entity.RealTimeFutureTick, connectionID string) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "NewFutureRealTimeConnection")
-	ret0, _ := ret[0].(chan *entity.RealTimeFutureTick)
-	ret1, _ := ret[1].(string)
-	return ret0, ret1
+	m.ctrl.Call(m, "NewFutureRealTimeConnection", tickChan, connectionID)
 }
 
 // NewFutureRealTimeConnection indicates an expected call of NewFutureRealTimeConnection.
-func (mr *MockStreamMockRecorder) NewFutureRealTimeConnection() *gomock.Call {
+func (mr *MockStreamMockRecorder) NewFutureRealTimeConnection(tickChan, connectionID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NewFutureRealTimeConnection", reflect.TypeOf((*MockStream)(nil).NewFutureRealTimeConnection))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NewFutureRealTimeConnection", reflect.TypeOf((*MockStream)(nil).NewFutureRealTimeConnection), tickChan, connectionID)
 }
 
 // ReceiveEvent mocks base method.
@@ -1345,17 +1342,15 @@ func (m *MockStreamRabbit) EXPECT() *MockStreamRabbitMockRecorder {
 }
 
 // AddFutureTickChan mocks base method.
-func (m *MockStreamRabbit) AddFutureTickChan(tickChan chan *entity.RealTimeFutureTick) string {
+func (m *MockStreamRabbit) AddFutureTickChan(tickChan chan *entity.RealTimeFutureTick, connectionID string) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AddFutureTickChan", tickChan)
-	ret0, _ := ret[0].(string)
-	return ret0
+	m.ctrl.Call(m, "AddFutureTickChan", tickChan, connectionID)
 }
 
 // AddFutureTickChan indicates an expected call of AddFutureTickChan.
-func (mr *MockStreamRabbitMockRecorder) AddFutureTickChan(tickChan interface{}) *gomock.Call {
+func (mr *MockStreamRabbitMockRecorder) AddFutureTickChan(tickChan, connectionID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddFutureTickChan", reflect.TypeOf((*MockStreamRabbit)(nil).AddFutureTickChan), tickChan)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddFutureTickChan", reflect.TypeOf((*MockStreamRabbit)(nil).AddFutureTickChan), tickChan, connectionID)
 }
 
 // EventConsumer mocks base method.
@@ -1419,15 +1414,15 @@ func (mr *MockStreamRabbitMockRecorder) OrderStatusConsumer(orderStatusChan inte
 }
 
 // RemoveFutureTickChan mocks base method.
-func (m *MockStreamRabbit) RemoveFutureTickChan(id string) {
+func (m *MockStreamRabbit) RemoveFutureTickChan(connectionID string) {
 	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "RemoveFutureTickChan", id)
+	m.ctrl.Call(m, "RemoveFutureTickChan", connectionID)
 }
 
 // RemoveFutureTickChan indicates an expected call of RemoveFutureTickChan.
-func (mr *MockStreamRabbitMockRecorder) RemoveFutureTickChan(id interface{}) *gomock.Call {
+func (mr *MockStreamRabbitMockRecorder) RemoveFutureTickChan(connectionID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RemoveFutureTickChan", reflect.TypeOf((*MockStreamRabbit)(nil).RemoveFutureTickChan), id)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RemoveFutureTickChan", reflect.TypeOf((*MockStreamRabbit)(nil).RemoveFutureTickChan), connectionID)
 }
 
 // StockBidAskConsumer mocks base method.

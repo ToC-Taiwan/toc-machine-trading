@@ -5,6 +5,8 @@ import (
 	"time"
 
 	"tmt/internal/entity"
+
+	"github.com/google/uuid"
 )
 
 type futureOrder struct {
@@ -51,7 +53,6 @@ func (w *WSRouter) processTrade(clientMsg msg) {
 }
 
 func (w *WSRouter) sendFuture(ctx context.Context) {
-	tickChan, connectionID := w.s.NewFutureRealTimeConnection()
 	snapshot, err := w.s.GetFutureSnapshotByCode(w.s.GetMainFutureCode())
 	if err != nil {
 		w.msgChan <- errMsg{ErrMsg: err.Error()}
@@ -94,7 +95,13 @@ func (w *WSRouter) sendFuture(ctx context.Context) {
 		PriceChg:    snapshot.PriceChg,
 		PctChg:      snapshot.PctChg,
 	}
+
+	tickChan := make(chan *entity.RealTimeFutureTick)
 	go w.processTickArr(tickChan)
+
+	connectionID := uuid.New().String()
+	w.s.NewFutureRealTimeConnection(tickChan, connectionID)
+
 	<-ctx.Done()
 	w.s.DeleteFutureRealTimeConnection(connectionID)
 }

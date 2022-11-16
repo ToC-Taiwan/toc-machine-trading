@@ -138,7 +138,7 @@ type (
 
 		GetMainFutureCode() string
 		GetFutureSnapshotByCode(code string) (*entity.FutureSnapShot, error)
-		NewFutureRealTimeConnection() (chan *entity.RealTimeFutureTick, string)
+		NewFutureRealTimeConnection(tickChan chan *entity.RealTimeFutureTick, connectionID string)
 		DeleteFutureRealTimeConnection(connectionID string)
 	}
 
@@ -168,8 +168,8 @@ type (
 		FutureTickConsumer(code string, tickChan chan *entity.RealTimeFutureTick)
 		FutureBidAskConsumer(code string, bidAskChan chan *entity.FutureRealTimeBidAsk)
 
-		AddFutureTickChan(tickChan chan *entity.RealTimeFutureTick) string
-		RemoveFutureTickChan(id string)
+		AddFutureTickChan(tickChan chan *entity.RealTimeFutureTick, connectionID string)
+		RemoveFutureTickChan(connectionID string)
 	}
 )
 

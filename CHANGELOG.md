@@ -2,6 +2,43 @@
 ## [Unreleased]
 
 
+<a name="v1.5.0"></a>
+## [v1.5.0] - 2022-11-16
+### Chore
+- **entity:** change db table name to split stock future, modify target stream entity
+- **entity:** split trade balance to stock and future
+- **entity:** modify history entity to split history data and base
+- **global:** remove global pkg, move to common pkg
+- **log:** remove redundant log of websocket
+- **websocket:** add log for unsupport message, remove if v == pong
+
+### Feat
+- **action:** use period tick out in ratio to decide action, and add to simulator
+- **history:** add future history close fetch and simulate
+- **holiday:** extend trade year to 2023, update holiday.json
+- **order:** modify all order router to future and stock all order
+- **tick:** modify future tick chan and connection id
+- **trade:** add ws trade
+- **tradeperiod:** add get last 1 trade period for future method
+- **websocket:** modify trade rate content to out, in and period
+- **websocket:** add trade rate in websocket
+- **websocket:** ignore CloseNoStatusReceived error
+- **ws:** add log for new future ws and done log
+- **ws:** modify ws layout, add send snapshot in future stream ws
+
+### Fix
+- **health:** if disconnect from grpc not panic but os exit
+- **migration:** fix wrong table name in migration sql
+- **subscribe:** remove redundant future bidask subscribe
+- **websocket:** remove period to fix out of index
+- **websocket:** add missing socketPickStock
+- **websocket:** fix interface cast bug
+- **websocket:** fix concurrency write websocket
+- **websocket:** fix wrong scoket data type
+- **websocket:** fix wrong calculation of trade rate
+- **websocket:** fix missing format in send websocket data
+
+
 <a name="v1.4.0"></a>
 ## [v1.4.0] - 2022-11-06
 ### Feat
@@ -243,7 +280,8 @@
 - **clean:** first commit from clean code layout
 
 
-[Unreleased]: https://github.com/ToC-Taiwan/toc-machine-trading/compare/v1.4.0...HEAD
+[Unreleased]: https://github.com/ToC-Taiwan/toc-machine-trading/compare/v1.5.0...HEAD
+[v1.5.0]: https://github.com/ToC-Taiwan/toc-machine-trading/compare/v1.4.0...v1.5.0
 [v1.4.0]: https://github.com/ToC-Taiwan/toc-machine-trading/compare/v1.3.0...v1.4.0
 [v1.3.0]: https://github.com/ToC-Taiwan/toc-machine-trading/compare/v1.2.0...v1.3.0
 [v1.2.0]: https://github.com/ToC-Taiwan/toc-machine-trading/compare/v1.1.0...v1.2.0

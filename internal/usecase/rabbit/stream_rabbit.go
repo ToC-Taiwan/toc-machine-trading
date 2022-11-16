@@ -215,20 +215,18 @@ func (c *StreamRabbit) TickConsumer(stockNum string, tickChan chan *entity.RealT
 }
 
 // AddFutureTickChan -.
-func (c *StreamRabbit) AddFutureTickChan(tickChan chan *entity.RealTimeFutureTick) string {
+func (c *StreamRabbit) AddFutureTickChan(tickChan chan *entity.RealTimeFutureTick, connectionID string) {
 	defer c.mutex.Unlock()
 	c.mutex.Lock()
-	id := uuid.New().String()
-	c.futureTickChan[id] = tickChan
-	return id
+	c.futureTickChan[connectionID] = tickChan
 }
 
 // RemoveFutureTickChan -.
-func (c *StreamRabbit) RemoveFutureTickChan(id string) {
+func (c *StreamRabbit) RemoveFutureTickChan(connectionID string) {
 	defer c.mutex.Unlock()
 	c.mutex.Lock()
-	close(c.futureTickChan[id])
-	delete(c.futureTickChan, id)
+	close(c.futureTickChan[connectionID])
+	delete(c.futureTickChan, connectionID)
 }
 
 // FutureTickConsumer -.
