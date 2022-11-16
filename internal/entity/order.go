@@ -102,6 +102,7 @@ type StockTradeBalance struct {
 	Discount        int64     `json:"discount"`
 	Total           int64     `json:"total"`
 	TradeDay        time.Time `json:"trade_day"`
+	Manual          bool      `json:"manual"`
 }
 
 // FutureTradeBalance -.
@@ -112,4 +113,5 @@ type FutureTradeBalance struct {
 	Reverse    int64     `json:"reverse"`
 	Total      int64     `json:"total"`
 	TradeDay   time.Time `json:"trade_day"`
+	Manual     bool      `json:"manual"`
 }

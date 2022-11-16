@@ -231,6 +231,8 @@ definitions:
         type: integer
       id:
         type: integer
+      manual:
+        type: boolean
       reverse:
         type: integer
       total:
@@ -365,6 +367,8 @@ definitions:
         type: integer
       id:
         type: integer
+      manual:
+        type: boolean
       original_balance:
         type: integer
       reverse:

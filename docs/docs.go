@@ -881,6 +881,9 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
+                "manual": {
+                    "type": "boolean"
+                },
                 "reverse": {
                     "type": "integer"
                 },
@@ -1084,6 +1087,9 @@ const docTemplate = `{
                 },
                 "id": {
                     "type": "integer"
+                },
+                "manual": {
+                    "type": "boolean"
                 },
                 "original_balance": {
                     "type": "integer"
