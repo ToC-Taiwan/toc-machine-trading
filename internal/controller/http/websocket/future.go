@@ -19,11 +19,6 @@ type futureOrder struct {
 	AutomationType AutomationType `json:"automation_type"`
 }
 
-// type orderResult struct {
-// 	OrderID string             `json:"order_id"`
-// 	Status  entity.OrderStatus `json:"status"`
-// }
-
 type AutomationType int
 
 const (
@@ -36,11 +31,6 @@ const (
 type tradeRate struct {
 	OutRate int64 `json:"out_rate"`
 	InRate  int64 `json:"in_rate"`
-}
-
-type orderIDWithStatus struct {
-	OrderID string             `json:"order_id"`
-	Status  entity.OrderStatus `json:"status"`
 }
 
 func (w *WSRouter) processTrade(clientMsg msg) {
@@ -59,60 +49,17 @@ func (w *WSRouter) processTrade(clientMsg msg) {
 
 	switch clientMsg.FutureOrder.Action {
 	case entity.ActionBuy:
-		orderID, s, err := w.o.BuyFuture(order)
+		_, _, err := w.o.BuyFuture(order)
 		if err != nil {
 			w.msgChan <- errMsg{ErrMsg: err.Error()}
 			log.Error(err)
 		}
-		w.checkOrderChan <- orderIDWithStatus{OrderID: orderID, Status: s}
 
 	case entity.ActionSell:
-		orderID, s, err := w.o.SellFuture(order)
+		_, _, err := w.o.SellFuture(order)
 		if err != nil {
 			w.msgChan <- errMsg{ErrMsg: err.Error()}
 			log.Error(err)
-		}
-		w.checkOrderChan <- orderIDWithStatus{OrderID: orderID, Status: s}
-	}
-}
-
-func (w *WSRouter) checkOrderStatus(ctx context.Context) {
-	for {
-		select {
-		case <-ctx.Done():
-			return
-
-		case o := <-w.checkOrderChan:
-			if o.OrderID == "" {
-				w.msgChan <- errMsg{ErrMsg: "order id is empty"}
-			}
-
-			if o.Status == entity.StatusFailed {
-				w.msgChan <- errMsg{ErrMsg: "order failed"}
-			}
-			go w.queryOrderStatus(o.OrderID, ctx)
-		}
-	}
-}
-
-func (w *WSRouter) queryOrderStatus(orderID string, ctx context.Context) {
-	for {
-		select {
-		case <-ctx.Done():
-			return
-
-		case <-time.After(1 * time.Second):
-			order, err := w.o.GetFutureOrderStatusByID(orderID)
-			if err != nil {
-				w.msgChan <- errMsg{ErrMsg: err.Error()}
-				log.Error(err)
-				return
-			}
-
-			if order.Status == entity.StatusFilled || order.Status == entity.StatusFilling {
-				w.msgChan <- order
-				return
-			}
 		}
 	}
 }
