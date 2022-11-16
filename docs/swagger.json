@@ -310,6 +310,36 @@
                 }
             }
         },
+        "/order/balance/manual": {
+            "get": {
+                "description": "getAllManualTradeBalance",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "order"
+                ],
+                "summary": "getAllManualTradeBalance",
+                "operationId": "getAllManualTradeBalance",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v1.tradeBalance"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/v1.response"
+                        }
+                    }
+                }
+            }
+        },
         "/order/day-trade/forward": {
             "get": {
                 "description": "calculateForwardDayTradeBalance",

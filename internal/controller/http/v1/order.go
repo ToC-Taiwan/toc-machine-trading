@@ -21,6 +21,8 @@ func newOrderRoutes(handler *gin.RouterGroup, t usecase.Order) {
 	{
 		h.GET("/all", r.getAllOrder)
 		h.GET("/balance", r.getAllTradeBalance)
+		h.GET("/balance/manual", r.getAllManualTradeBalance)
+
 		h.GET("/day-trade/forward", r.calculateForwardDayTradeBalance)
 		h.GET("/day-trade/reverse", r.calculateReverseDayTradeBalance)
 
@@ -77,18 +79,76 @@ type tradeBalance struct {
 // @Failure     500 {object} response
 // @Router      /order/balance [get]
 func (r *orderRoutes) getAllTradeBalance(c *gin.Context) {
-	stockArr, err := r.t.GetAllStockTradeBalance(c.Request.Context())
+	allStockArr, err := r.t.GetAllStockTradeBalance(c.Request.Context())
 	if err != nil {
 		log.Error(err)
 		errorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	futureArr, err := r.t.GetAllFutureTradeBalance(c.Request.Context())
+	var stockArr []*entity.StockTradeBalance
+	for _, stock := range allStockArr {
+		if !stock.Manual {
+			stockArr = append(stockArr, stock)
+		}
+	}
+
+	allFutureArr, err := r.t.GetAllFutureTradeBalance(c.Request.Context())
 	if err != nil {
 		log.Error(err)
 		errorResponse(c, http.StatusInternalServerError, err.Error())
 		return
+	}
+
+	var futureArr []*entity.FutureTradeBalance
+	for _, v := range allFutureArr {
+		if !v.Manual {
+			futureArr = append(futureArr, v)
+		}
+	}
+
+	c.JSON(http.StatusOK, tradeBalance{
+		Stock:  stockArr,
+		Future: futureArr,
+	})
+}
+
+// @Summary     getAllManualTradeBalance
+// @Description getAllManualTradeBalance
+// @ID          getAllManualTradeBalance
+// @Tags  	    order
+// @Accept      json
+// @Produce     json
+// @Success     200 {object} tradeBalance
+// @Failure     500 {object} response
+// @Router      /order/balance/manual [get]
+func (r *orderRoutes) getAllManualTradeBalance(c *gin.Context) {
+	allStockArr, err := r.t.GetAllStockTradeBalance(c.Request.Context())
+	if err != nil {
+		log.Error(err)
+		errorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	var stockArr []*entity.StockTradeBalance
+	for _, stock := range allStockArr {
+		if stock.Manual {
+			stockArr = append(stockArr, stock)
+		}
+	}
+
+	allFutureArr, err := r.t.GetAllFutureTradeBalance(c.Request.Context())
+	if err != nil {
+		log.Error(err)
+		errorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	var futureArr []*entity.FutureTradeBalance
+	for _, v := range allFutureArr {
+		if v.Manual {
+			futureArr = append(futureArr, v)
+		}
 	}
 
 	c.JSON(http.StatusOK, tradeBalance{

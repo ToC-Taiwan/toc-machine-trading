@@ -157,6 +157,7 @@ func (uc *StreamUseCase) ReceiveOrderStatus(ctx context.Context) {
 					t.Manual = true
 					t.GroupID = "-"
 					t.TradeTime = t.OrderTime
+					t.TickTime = t.OrderTime
 					cc.SetOrderByOrderID(t)
 				}
 				bus.PublishTopicEvent(event.TopicInsertOrUpdateStockOrder, t)
@@ -165,6 +166,7 @@ func (uc *StreamUseCase) ReceiveOrderStatus(ctx context.Context) {
 					t.Manual = true
 					t.GroupID = "-"
 					t.TradeTime = t.OrderTime
+					t.TickTime = t.OrderTime
 					cc.SetFutureOrderByOrderID(t)
 				}
 				bus.PublishTopicEvent(event.TopicInsertOrUpdateFutureOrder, t)

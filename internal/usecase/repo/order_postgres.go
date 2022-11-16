@@ -55,7 +55,7 @@ func (r *OrderRepo) InsertOrUpdateOrderByOrderID(ctx context.Context, t *entity.
 			Set("order_id", t.OrderID).
 			Set("status", t.Status).
 			Set("order_time", t.OrderTime).
-			Set("tick_time", t.OrderTime).
+			Set("tick_time", t.TickTime).
 			Set("stock_num", t.StockNum).
 			Set("action", t.Action).
 			Set("price", t.Price).
@@ -187,7 +187,8 @@ func (r *OrderRepo) InsertOrUpdateStockTradeBalance(ctx context.Context, t *enti
 			Set("discount", t.Discount).
 			Set("total", t.Total).
 			Set("trade_day", t.TradeDay).
-			Where(squirrel.Eq{"trade_day": t.TradeDay})
+			Where(squirrel.Eq{"trade_day": t.TradeDay}).
+			Where(squirrel.Eq{"manual": t.Manual})
 		if sql, args, err = builder.ToSql(); err != nil {
 			return err
 		} else if _, err = tx.Exec(ctx, sql, args...); err != nil {
@@ -333,7 +334,7 @@ func (r *OrderRepo) InsertOrUpdateFutureOrderByOrderID(ctx context.Context, t *e
 			Set("order_id", t.OrderID).
 			Set("status", t.Status).
 			Set("order_time", t.OrderTime).
-			Set("tick_time", t.OrderTime).
+			Set("tick_time", t.TickTime).
 			Set("code", t.Code).
 			Set("action", t.Action).
 			Set("price", t.Price).
@@ -379,11 +380,15 @@ func (r *OrderRepo) QueryAllFutureOrder(ctx context.Context) ([]*entity.FutureOr
 
 // QueryAllFutureOrderByDate -.
 func (r *OrderRepo) QueryAllFutureOrderByDate(ctx context.Context, timeRange []time.Time) ([]*entity.FutureOrder, error) {
+	// TODO: after sinopac fix, remove this
+	startTime := timeRange[0].Add(-15 * time.Hour)
+	endTime := startTime.Add(24 * time.Hour)
+
 	sql, arg, err := r.Builder.
 		Select("manual, group_id, order_id, status, order_time, tick_time, trade_future_order.code, action, price, quantity, trade_time, basic_future.code, symbol, name, category, delivery_month, delivery_date, underlying_kind, unit, limit_up, limit_down, reference, update_date").
 		From(tableNameTradeFutureOrder).
-		Where(squirrel.GtOrEq{"order_time": timeRange[0]}).
-		Where(squirrel.Lt{"order_time": timeRange[1]}).
+		Where(squirrel.GtOrEq{"order_time": startTime}).
+		Where(squirrel.Lt{"order_time": endTime}).
 		OrderBy("order_time ASC").
 		Join("basic_future ON trade_future_order.code = basic_future.code").ToSql()
 	if err != nil {
@@ -462,7 +467,8 @@ func (r *OrderRepo) InsertOrUpdateFutureTradeBalance(ctx context.Context, t *ent
 			Set("reverse", t.Reverse).
 			Set("total", t.Total).
 			Set("trade_day", t.TradeDay).
-			Where(squirrel.Eq{"trade_day": t.TradeDay})
+			Where(squirrel.Eq{"trade_day": t.TradeDay}).
+			Where(squirrel.Eq{"manual": t.Manual})
 		if sql, args, err = builder.ToSql(); err != nil {
 			return err
 		} else if _, err = tx.Exec(ctx, sql, args...); err != nil {
