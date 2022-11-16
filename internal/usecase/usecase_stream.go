@@ -276,13 +276,14 @@ func (uc *StreamUseCase) GetFutureSnapshotByCode(code string) (*entity.FutureSna
 }
 
 // NewFutureRealTimeConnection -.
-func (uc *StreamUseCase) NewFutureRealTimeConnection(timestamp int64, tickChan chan *entity.RealTimeFutureTick) {
-	uc.rabbit.AddFutureTickChan(timestamp, tickChan)
+func (uc *StreamUseCase) NewFutureRealTimeConnection() (chan *entity.RealTimeFutureTick, string) {
+	tickChan := make(chan *entity.RealTimeFutureTick)
+	return tickChan, uc.rabbit.AddFutureTickChan(tickChan)
 }
 
 // DeleteFutureRealTimeConnection -.
-func (uc *StreamUseCase) DeleteFutureRealTimeConnection(timestamp int64) {
-	uc.rabbit.RemoveFutureTickChan(timestamp)
+func (uc *StreamUseCase) DeleteFutureRealTimeConnection(connectionID string) {
+	uc.rabbit.RemoveFutureTickChan(connectionID)
 }
 
 func (uc *StreamUseCase) updateMainFutureCode(future *entity.Future) {

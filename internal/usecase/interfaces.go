@@ -138,8 +138,8 @@ type (
 
 		GetMainFutureCode() string
 		GetFutureSnapshotByCode(code string) (*entity.FutureSnapShot, error)
-		NewFutureRealTimeConnection(timestamp int64, tickChan chan *entity.RealTimeFutureTick)
-		DeleteFutureRealTimeConnection(timestamp int64)
+		NewFutureRealTimeConnection() (chan *entity.RealTimeFutureTick, string)
+		DeleteFutureRealTimeConnection(connectionID string)
 	}
 
 	// StreamRepo -.
@@ -167,8 +167,9 @@ type (
 
 		FutureTickConsumer(code string, tickChan chan *entity.RealTimeFutureTick)
 		FutureBidAskConsumer(code string, bidAskChan chan *entity.FutureRealTimeBidAsk)
-		AddFutureTickChan(timestamp int64, tickChan chan *entity.RealTimeFutureTick)
-		RemoveFutureTickChan(timestamp int64)
+
+		AddFutureTickChan(tickChan chan *entity.RealTimeFutureTick) string
+		RemoveFutureTickChan(id string)
 	}
 )
 

@@ -13,6 +13,7 @@ import (
 	"tmt/pkg/logger"
 	"tmt/pkg/rabbitmq"
 
+	"github.com/google/uuid"
 	"github.com/streadway/amqp"
 	"google.golang.org/protobuf/proto"
 )
@@ -32,7 +33,7 @@ const (
 type StreamRabbit struct {
 	conn *rabbitmq.Connection
 
-	futureTickChan map[int64]chan *entity.RealTimeFutureTick
+	futureTickChan map[string]chan *entity.RealTimeFutureTick
 	mutex          sync.RWMutex
 
 	allStockMap  map[string]*entity.Stock
@@ -56,7 +57,7 @@ func NewStream() *StreamRabbit {
 
 	return &StreamRabbit{
 		conn:           conn,
-		futureTickChan: make(map[int64]chan *entity.RealTimeFutureTick),
+		futureTickChan: make(map[string]chan *entity.RealTimeFutureTick),
 	}
 }
 
@@ -214,26 +215,26 @@ func (c *StreamRabbit) TickConsumer(stockNum string, tickChan chan *entity.RealT
 }
 
 // AddFutureTickChan -.
-func (c *StreamRabbit) AddFutureTickChan(timestamp int64, tickChan chan *entity.RealTimeFutureTick) {
+func (c *StreamRabbit) AddFutureTickChan(tickChan chan *entity.RealTimeFutureTick) string {
 	defer c.mutex.Unlock()
 	c.mutex.Lock()
-	c.futureTickChan[timestamp] = tickChan
+	id := uuid.New().String()
+	c.futureTickChan[id] = tickChan
+	return id
 }
 
 // RemoveFutureTickChan -.
-func (c *StreamRabbit) RemoveFutureTickChan(timestamp int64) {
+func (c *StreamRabbit) RemoveFutureTickChan(id string) {
 	defer c.mutex.Unlock()
 	c.mutex.Lock()
-	close(c.futureTickChan[timestamp])
-	delete(c.futureTickChan, timestamp)
+	close(c.futureTickChan[id])
+	delete(c.futureTickChan, id)
 }
 
 // FutureTickConsumer -.
 func (c *StreamRabbit) FutureTickConsumer(code string, tickChan chan *entity.RealTimeFutureTick) {
 	c.mutex.Lock()
-	if len(c.futureTickChan) == 0 {
-		c.futureTickChan[time.Now().UnixNano()] = tickChan
-	}
+	c.futureTickChan[uuid.New().String()] = tickChan
 	c.mutex.Unlock()
 	delivery := c.establishDelivery(fmt.Sprintf("%s:%s", routingKeyFutureTick, code))
 	for {

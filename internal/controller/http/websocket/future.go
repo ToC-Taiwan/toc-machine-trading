@@ -51,9 +51,7 @@ func (w *WSRouter) processTrade(clientMsg msg) {
 }
 
 func (w *WSRouter) sendFuture(ctx context.Context) {
-	timestamp := time.Now().UnixNano()
-	tickChan := make(chan *entity.RealTimeFutureTick)
-
+	tickChan, connectionID := w.s.NewFutureRealTimeConnection()
 	snapshot, err := w.s.GetFutureSnapshotByCode(w.s.GetMainFutureCode())
 	if err != nil {
 		w.msgChan <- errMsg{ErrMsg: err.Error()}
@@ -97,10 +95,8 @@ func (w *WSRouter) sendFuture(ctx context.Context) {
 		PctChg:      snapshot.PctChg,
 	}
 	go w.processTickArr(tickChan)
-
-	defer w.s.DeleteFutureRealTimeConnection(timestamp)
-	w.s.NewFutureRealTimeConnection(timestamp, tickChan)
 	<-ctx.Done()
+	w.s.DeleteFutureRealTimeConnection(connectionID)
 }
 
 func (w *WSRouter) processTickArr(tickChan chan *entity.RealTimeFutureTick) {
