@@ -846,6 +846,9 @@ const docTemplate = `{
                 "group_id": {
                     "type": "string"
                 },
+                "manual": {
+                    "type": "boolean"
+                },
                 "order_id": {
                     "type": "string"
                 },
@@ -958,6 +961,9 @@ const docTemplate = `{
                 },
                 "group_id": {
                     "type": "string"
+                },
+                "manual": {
+                    "type": "boolean"
                 },
                 "order_id": {
                     "type": "string"

@@ -153,13 +153,17 @@ func (uc *StreamUseCase) ReceiveOrderStatus(ctx context.Context) {
 			order := <-orderStatusChan
 			switch t := order.(type) {
 			case *entity.StockOrder:
-				if cc.GetOrderByOrderID(t.OrderID) != nil {
-					bus.PublishTopicEvent(event.TopicInsertOrUpdateStockOrder, t)
+				if cc.GetOrderByOrderID(t.OrderID) == nil {
+					t.Manual = true
+					cc.SetOrderByOrderID(t)
 				}
+				bus.PublishTopicEvent(event.TopicInsertOrUpdateStockOrder, t)
 			case *entity.FutureOrder:
-				if cc.GetFutureOrderByOrderID(t.OrderID) != nil {
-					bus.PublishTopicEvent(event.TopicInsertOrUpdateFutureOrder, t)
+				if cc.GetFutureOrderByOrderID(t.OrderID) == nil {
+					t.Manual = true
+					cc.SetFutureOrderByOrderID(t)
 				}
+				bus.PublishTopicEvent(event.TopicInsertOrUpdateFutureOrder, t)
 			}
 		}
 	}()

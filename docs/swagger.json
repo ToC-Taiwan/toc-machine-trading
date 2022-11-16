@@ -837,6 +837,9 @@
                 "group_id": {
                     "type": "string"
                 },
+                "manual": {
+                    "type": "boolean"
+                },
                 "order_id": {
                     "type": "string"
                 },
@@ -949,6 +952,9 @@
                 },
                 "group_id": {
                     "type": "string"
+                },
+                "manual": {
+                    "type": "boolean"
                 },
                 "order_id": {
                     "type": "string"

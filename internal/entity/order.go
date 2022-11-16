@@ -76,16 +76,20 @@ type BaseOrder struct {
 
 // StockOrder -.
 type StockOrder struct {
-	BaseOrder
+	BaseOrder `json:"base_order"`
+
 	StockNum string `json:"stock_num"`
 	Stock    *Stock `json:"stock"`
+	Manual   bool   `json:"manual"`
 }
 
 // FutureOrder -.
 type FutureOrder struct {
-	BaseOrder
+	BaseOrder `json:"base_order"`
+
 	Code   string  `json:"code"`
 	Future *Future `json:"future"`
+	Manual bool    `json:"manual"`
 }
 
 // StockTradeBalance -.

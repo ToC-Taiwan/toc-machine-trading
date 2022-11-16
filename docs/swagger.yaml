@@ -208,6 +208,8 @@ definitions:
         $ref: '#/definitions/entity.Future'
       group_id:
         type: string
+      manual:
+        type: boolean
       order_id:
         type: string
       order_time:
@@ -282,6 +284,8 @@ definitions:
         type: integer
       group_id:
         type: string
+      manual:
+        type: boolean
       order_id:
         type: string
       order_time:

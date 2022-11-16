@@ -306,7 +306,7 @@ func (uc *OrderUseCase) updateStockOrderCacheAndInsertDB(order *entity.StockOrde
 func (uc *OrderUseCase) calculateStockTradeBalance(allOrders []*entity.StockOrder) {
 	var forwardOrder, reverseOrder []*entity.StockOrder
 	for _, v := range allOrders {
-		if v.Status != entity.StatusFilled {
+		if v.Status != entity.StatusFilled || v.Manual {
 			continue
 		}
 
@@ -515,7 +515,7 @@ func (uc *OrderUseCase) CancelFutureOrderID(orderID string) (string, entity.Orde
 func (uc *OrderUseCase) calculateFutureTradeBalance(allOrders []*entity.FutureOrder) {
 	var forwardOrder, reverseOrder []*entity.FutureOrder
 	for _, v := range allOrders {
-		if v.Status != entity.StatusFilled {
+		if v.Status != entity.StatusFilled || v.Manual {
 			continue
 		}
 
@@ -609,4 +609,9 @@ func (uc *OrderUseCase) CalculateSellCost(price float64, quantity int64) int64 {
 // CalculateTradeDiscount -.
 func (uc *OrderUseCase) CalculateTradeDiscount(price float64, quantity int64) int64 {
 	return uc.quota.GetStockTradeFeeDiscount(price, quantity)
+}
+
+// GetFutureOrderStatusByID -.
+func (uc *OrderUseCase) GetFutureOrderStatusByID(orderID string) (*entity.FutureOrder, error) {
+	return uc.repo.QueryFutureOrderByID(context.Background(), orderID)
 }

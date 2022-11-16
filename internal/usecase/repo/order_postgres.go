@@ -40,8 +40,8 @@ func (r *OrderRepo) InsertOrUpdateOrderByOrderID(ctx context.Context, t *entity.
 	var args []interface{}
 
 	if dbOrder == nil {
-		builder := r.Builder.Insert(tableNameTradeStockOrder).Columns("group_id, order_id, status, order_time, tick_time, stock_num, action, price, quantity, trade_time")
-		builder = builder.Values(t.GroupID, t.OrderID, t.Status, t.OrderTime, t.TickTime, t.StockNum, t.Action, t.Price, t.Quantity, t.TradeTime)
+		builder := r.Builder.Insert(tableNameTradeStockOrder).Columns("manual, group_id, order_id, status, order_time, tick_time, stock_num, action, price, quantity, trade_time")
+		builder = builder.Values(t.Manual, t.GroupID, t.OrderID, t.Status, t.OrderTime, t.TickTime, t.StockNum, t.Action, t.Price, t.Quantity, t.TradeTime)
 		if sql, args, err = builder.ToSql(); err != nil {
 			return err
 		} else if _, err = tx.Exec(ctx, sql, args...); err != nil {
@@ -50,6 +50,7 @@ func (r *OrderRepo) InsertOrUpdateOrderByOrderID(ctx context.Context, t *entity.
 	} else if !cmp.Equal(t, dbOrder) {
 		builder := r.Builder.
 			Update(tableNameTradeStockOrder).
+			Set("manual", t.Manual).
 			Set("group_id", t.GroupID).
 			Set("order_id", t.OrderID).
 			Set("status", t.Status).
@@ -73,7 +74,7 @@ func (r *OrderRepo) InsertOrUpdateOrderByOrderID(ctx context.Context, t *entity.
 // QueryStockOrderByID -.
 func (r *OrderRepo) QueryStockOrderByID(ctx context.Context, orderID string) (*entity.StockOrder, error) {
 	sql, arg, err := r.Builder.
-		Select("group_id, order_id, status, order_time, tick_time, stock_num, action, price, quantity, trade_time, number, name, exchange, category, day_trade, last_close, update_date").
+		Select("manual, group_id, order_id, status, order_time, tick_time, stock_num, action, price, quantity, trade_time, number, name, exchange, category, day_trade, last_close, update_date").
 		From(tableNameTradeStockOrder).
 		Where(squirrel.Eq{"order_id": orderID}).
 		Join("basic_stock ON trade_stock_order.stock_num = basic_stock.number").ToSql()
@@ -83,7 +84,7 @@ func (r *OrderRepo) QueryStockOrderByID(ctx context.Context, orderID string) (*e
 
 	row := r.Pool().QueryRow(ctx, sql, arg...)
 	e := entity.StockOrder{Stock: new(entity.Stock)}
-	if err := row.Scan(&e.GroupID, &e.OrderID, &e.Status, &e.OrderTime, &e.TickTime, &e.StockNum, &e.Action, &e.Price, &e.Quantity, &e.TradeTime,
+	if err := row.Scan(&e.Manual, &e.GroupID, &e.OrderID, &e.Status, &e.OrderTime, &e.TickTime, &e.StockNum, &e.Action, &e.Price, &e.Quantity, &e.TradeTime,
 		&e.Stock.Number, &e.Stock.Name, &e.Stock.Exchange, &e.Stock.Category, &e.Stock.DayTrade, &e.Stock.LastClose, &e.Stock.UpdateDate); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, nil
@@ -96,7 +97,7 @@ func (r *OrderRepo) QueryStockOrderByID(ctx context.Context, orderID string) (*e
 // QueryAllStockOrderByDate -.
 func (r *OrderRepo) QueryAllStockOrderByDate(ctx context.Context, timeRange []time.Time) ([]*entity.StockOrder, error) {
 	sql, arg, err := r.Builder.
-		Select("group_id, order_id, status, order_time, tick_time, stock_num, action, price, quantity, trade_time, number, name, exchange, category, day_trade, last_close, update_date").
+		Select("manual, group_id, order_id, status, order_time, tick_time, stock_num, action, price, quantity, trade_time, number, name, exchange, category, day_trade, last_close, update_date").
 		From(tableNameTradeStockOrder).
 		Where(squirrel.GtOrEq{"order_time": timeRange[0]}).
 		Where(squirrel.Lt{"order_time": timeRange[1]}).
@@ -115,7 +116,7 @@ func (r *OrderRepo) QueryAllStockOrderByDate(ctx context.Context, timeRange []ti
 	var result []*entity.StockOrder
 	for rows.Next() {
 		e := entity.StockOrder{Stock: new(entity.Stock)}
-		if err := rows.Scan(&e.GroupID, &e.OrderID, &e.Status, &e.OrderTime, &e.TickTime, &e.StockNum, &e.Action, &e.Price, &e.Quantity, &e.TradeTime,
+		if err := rows.Scan(&e.Manual, &e.GroupID, &e.OrderID, &e.Status, &e.OrderTime, &e.TickTime, &e.StockNum, &e.Action, &e.Price, &e.Quantity, &e.TradeTime,
 			&e.Stock.Number, &e.Stock.Name, &e.Stock.Exchange, &e.Stock.Category, &e.Stock.DayTrade, &e.Stock.LastClose, &e.Stock.UpdateDate); err != nil {
 			return nil, err
 		}
@@ -127,7 +128,7 @@ func (r *OrderRepo) QueryAllStockOrderByDate(ctx context.Context, timeRange []ti
 // QueryAllStockOrder -.
 func (r *OrderRepo) QueryAllStockOrder(ctx context.Context) ([]*entity.StockOrder, error) {
 	sql, _, err := r.Builder.
-		Select("group_id, order_id, status, order_time, tick_time, stock_num, action, price, quantity, trade_time, number, name, exchange, category, day_trade, last_close, update_date").
+		Select("manual, group_id, order_id, status, order_time, tick_time, stock_num, action, price, quantity, trade_time, number, name, exchange, category, day_trade, last_close, update_date").
 		From(tableNameTradeStockOrder).
 		Join("basic_stock ON trade_stock_order.stock_num = basic_stock.number").ToSql()
 	if err != nil {
@@ -143,7 +144,7 @@ func (r *OrderRepo) QueryAllStockOrder(ctx context.Context) ([]*entity.StockOrde
 	var result []*entity.StockOrder
 	for rows.Next() {
 		e := entity.StockOrder{Stock: new(entity.Stock)}
-		if err := rows.Scan(&e.GroupID, &e.OrderID, &e.Status, &e.OrderTime, &e.TickTime, &e.StockNum, &e.Action, &e.Price, &e.Quantity, &e.TradeTime,
+		if err := rows.Scan(&e.Manual, &e.GroupID, &e.OrderID, &e.Status, &e.OrderTime, &e.TickTime, &e.StockNum, &e.Action, &e.Price, &e.Quantity, &e.TradeTime,
 			&e.Stock.Number, &e.Stock.Name, &e.Stock.Exchange, &e.Stock.Category, &e.Stock.DayTrade, &e.Stock.LastClose, &e.Stock.UpdateDate); err != nil {
 			return nil, err
 		}
@@ -280,7 +281,7 @@ func (r *OrderRepo) QueryAllFutureTradeBalance(ctx context.Context) ([]*entity.F
 // QueryFutureOrderByID -.
 func (r *OrderRepo) QueryFutureOrderByID(ctx context.Context, orderID string) (*entity.FutureOrder, error) {
 	sql, arg, err := r.Builder.
-		Select("group_id, order_id, status, order_time, tick_time, trade_future_order.code, action, price, quantity, trade_time, basic_future.code, symbol, name, category, delivery_month, delivery_date, underlying_kind, unit, limit_up, limit_down, reference, update_date").
+		Select("manual, group_id, order_id, status, order_time, tick_time, trade_future_order.code, action, price, quantity, trade_time, basic_future.code, symbol, name, category, delivery_month, delivery_date, underlying_kind, unit, limit_up, limit_down, reference, update_date").
 		From(tableNameTradeFutureOrder).
 		Where(squirrel.Eq{"order_id": orderID}).
 		Join("basic_future ON trade_future_order.code = basic_future.code").ToSql()
@@ -290,7 +291,7 @@ func (r *OrderRepo) QueryFutureOrderByID(ctx context.Context, orderID string) (*
 
 	row := r.Pool().QueryRow(ctx, sql, arg...)
 	e := entity.FutureOrder{Future: new(entity.Future)}
-	if err := row.Scan(&e.GroupID, &e.OrderID, &e.Status, &e.OrderTime, &e.TickTime, &e.Code, &e.Action, &e.Price, &e.Quantity, &e.TradeTime,
+	if err := row.Scan(&e.Manual, &e.GroupID, &e.OrderID, &e.Status, &e.OrderTime, &e.TickTime, &e.Code, &e.Action, &e.Price, &e.Quantity, &e.TradeTime,
 		&e.Future.Code, &e.Future.Symbol, &e.Future.Name, &e.Future.Category, &e.Future.DeliveryMonth, &e.Future.DeliveryDate, &e.Future.UnderlyingKind, &e.Future.Unit, &e.Future.LimitUp, &e.Future.LimitDown, &e.Future.Reference, &e.Future.UpdateDate); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, nil
@@ -316,8 +317,8 @@ func (r *OrderRepo) InsertOrUpdateFutureOrderByOrderID(ctx context.Context, t *e
 	var args []interface{}
 
 	if dbOrder == nil {
-		builder := r.Builder.Insert(tableNameTradeFutureOrder).Columns("group_id, order_id, status, order_time, tick_time, code, action, price, quantity, trade_time")
-		builder = builder.Values(t.GroupID, t.OrderID, t.Status, t.OrderTime, t.TickTime, t.Code, t.Action, t.Price, t.Quantity, t.TradeTime)
+		builder := r.Builder.Insert(tableNameTradeFutureOrder).Columns("manual, group_id, order_id, status, order_time, tick_time, code, action, price, quantity, trade_time")
+		builder = builder.Values(t.Manual, t.GroupID, t.OrderID, t.Status, t.OrderTime, t.TickTime, t.Code, t.Action, t.Price, t.Quantity, t.TradeTime)
 		if sql, args, err = builder.ToSql(); err != nil {
 			return err
 		} else if _, err = tx.Exec(ctx, sql, args...); err != nil {
@@ -326,6 +327,7 @@ func (r *OrderRepo) InsertOrUpdateFutureOrderByOrderID(ctx context.Context, t *e
 	} else if !cmp.Equal(t, dbOrder) {
 		builder := r.Builder.
 			Update(tableNameTradeFutureOrder).
+			Set("manual", t.Manual).
 			Set("group_id", t.GroupID).
 			Set("order_id", t.OrderID).
 			Set("status", t.Status).
@@ -348,7 +350,7 @@ func (r *OrderRepo) InsertOrUpdateFutureOrderByOrderID(ctx context.Context, t *e
 
 func (r *OrderRepo) QueryAllFutureOrder(ctx context.Context) ([]*entity.FutureOrder, error) {
 	sql, _, err := r.Builder.
-		Select("group_id, order_id, status, order_time, tick_time, trade_future_order.code, action, price, quantity, trade_time, basic_future.code, symbol, name, category, delivery_month, delivery_date, underlying_kind, unit, limit_up, limit_down, reference, update_date").
+		Select("manual, group_id, order_id, status, order_time, tick_time, trade_future_order.code, action, price, quantity, trade_time, basic_future.code, symbol, name, category, delivery_month, delivery_date, underlying_kind, unit, limit_up, limit_down, reference, update_date").
 		From(tableNameTradeFutureOrder).
 		OrderBy("order_time ASC").
 		Join("basic_future ON trade_future_order.code = basic_future.code").ToSql()
@@ -365,7 +367,7 @@ func (r *OrderRepo) QueryAllFutureOrder(ctx context.Context) ([]*entity.FutureOr
 	var result []*entity.FutureOrder
 	for rows.Next() {
 		e := entity.FutureOrder{Future: new(entity.Future)}
-		if err := rows.Scan(&e.GroupID, &e.OrderID, &e.Status, &e.OrderTime, &e.TickTime, &e.Code, &e.Action, &e.Price, &e.Quantity, &e.TradeTime,
+		if err := rows.Scan(&e.Manual, &e.GroupID, &e.OrderID, &e.Status, &e.OrderTime, &e.TickTime, &e.Code, &e.Action, &e.Price, &e.Quantity, &e.TradeTime,
 			&e.Future.Code, &e.Future.Symbol, &e.Future.Name, &e.Future.Category, &e.Future.DeliveryMonth, &e.Future.DeliveryDate, &e.Future.UnderlyingKind, &e.Future.Unit, &e.Future.LimitUp, &e.Future.LimitDown, &e.Future.Reference, &e.Future.UpdateDate); err != nil {
 			return nil, err
 		}
@@ -377,7 +379,7 @@ func (r *OrderRepo) QueryAllFutureOrder(ctx context.Context) ([]*entity.FutureOr
 // QueryAllFutureOrderByDate -.
 func (r *OrderRepo) QueryAllFutureOrderByDate(ctx context.Context, timeRange []time.Time) ([]*entity.FutureOrder, error) {
 	sql, arg, err := r.Builder.
-		Select("group_id, order_id, status, order_time, tick_time, trade_future_order.code, action, price, quantity, trade_time, basic_future.code, symbol, name, category, delivery_month, delivery_date, underlying_kind, unit, limit_up, limit_down, reference, update_date").
+		Select("manual, group_id, order_id, status, order_time, tick_time, trade_future_order.code, action, price, quantity, trade_time, basic_future.code, symbol, name, category, delivery_month, delivery_date, underlying_kind, unit, limit_up, limit_down, reference, update_date").
 		From(tableNameTradeFutureOrder).
 		Where(squirrel.GtOrEq{"order_time": timeRange[0]}).
 		Where(squirrel.Lt{"order_time": timeRange[1]}).
@@ -396,7 +398,7 @@ func (r *OrderRepo) QueryAllFutureOrderByDate(ctx context.Context, timeRange []t
 	var result []*entity.FutureOrder
 	for rows.Next() {
 		e := entity.FutureOrder{Future: new(entity.Future)}
-		if err := rows.Scan(&e.GroupID, &e.OrderID, &e.Status, &e.OrderTime, &e.TickTime, &e.Code, &e.Action, &e.Price, &e.Quantity, &e.TradeTime,
+		if err := rows.Scan(&e.Manual, &e.GroupID, &e.OrderID, &e.Status, &e.OrderTime, &e.TickTime, &e.Code, &e.Action, &e.Price, &e.Quantity, &e.TradeTime,
 			&e.Future.Code, &e.Future.Symbol, &e.Future.Name, &e.Future.Category, &e.Future.DeliveryMonth, &e.Future.DeliveryDate, &e.Future.UnderlyingKind, &e.Future.Unit, &e.Future.LimitUp, &e.Future.LimitDown, &e.Future.Reference, &e.Future.UpdateDate); err != nil {
 			return nil, err
 		}

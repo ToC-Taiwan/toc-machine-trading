@@ -37,6 +37,8 @@ type WSRouter struct {
 
 	conn    *websocket.Conn
 	msgChan chan interface{}
+
+	checkOrderChan chan orderIDWithStatus
 }
 
 type msg struct {
@@ -52,9 +54,10 @@ type errMsg struct {
 // NewWSRouter -.
 func NewWSRouter(s usecase.Stream, o usecase.Order) *WSRouter {
 	return &WSRouter{
-		s:       s,
-		o:       o,
-		msgChan: make(chan interface{}),
+		s:              s,
+		o:              o,
+		msgChan:        make(chan interface{}),
+		checkOrderChan: make(chan orderIDWithStatus),
 	}
 }
 
@@ -82,6 +85,7 @@ func (w *WSRouter) Run(gin *gin.Context, wsType WSType) {
 	case WSPickStock:
 		go w.sendPickStockSnapShot(ctx)
 	case WSFuture:
+		go w.checkOrderStatus(ctx)
 		go w.sendFuture(ctx)
 	}
 
@@ -129,7 +133,7 @@ func (w *WSRouter) write() {
 				return
 			}
 
-		case *entity.RealTimeFutureTick, []socketPickStock, *tradeRate:
+		case *entity.RealTimeFutureTick, []socketPickStock, *tradeRate, errMsg, *entity.FutureOrder:
 			serveMsgStr, err := json.Marshal(v)
 			if err != nil {
 				log.Error(err)
