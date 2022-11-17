@@ -1120,6 +1120,51 @@ func (mr *MockStreamMockRecorder) GetMainFutureCode() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMainFutureCode", reflect.TypeOf((*MockStream)(nil).GetMainFutureCode))
 }
 
+// GetNasdaqClose mocks base method.
+func (m *MockStream) GetNasdaqClose() (*entity.YahooPrice, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetNasdaqClose")
+	ret0, _ := ret[0].(*entity.YahooPrice)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetNasdaqClose indicates an expected call of GetNasdaqClose.
+func (mr *MockStreamMockRecorder) GetNasdaqClose() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNasdaqClose", reflect.TypeOf((*MockStream)(nil).GetNasdaqClose))
+}
+
+// GetNasdaqFutureClose mocks base method.
+func (m *MockStream) GetNasdaqFutureClose() (*entity.YahooPrice, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetNasdaqFutureClose")
+	ret0, _ := ret[0].(*entity.YahooPrice)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetNasdaqFutureClose indicates an expected call of GetNasdaqFutureClose.
+func (mr *MockStreamMockRecorder) GetNasdaqFutureClose() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNasdaqFutureClose", reflect.TypeOf((*MockStream)(nil).GetNasdaqFutureClose))
+}
+
+// GetOTCSnapshot mocks base method.
+func (m *MockStream) GetOTCSnapshot(ctx context.Context) (*entity.StockSnapShot, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetOTCSnapshot", ctx)
+	ret0, _ := ret[0].(*entity.StockSnapShot)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetOTCSnapshot indicates an expected call of GetOTCSnapshot.
+func (mr *MockStreamMockRecorder) GetOTCSnapshot(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOTCSnapshot", reflect.TypeOf((*MockStream)(nil).GetOTCSnapshot), ctx)
+}
+
 // GetStockSnapshotByNumArr mocks base method.
 func (m *MockStream) GetStockSnapshotByNumArr(stockNumArr []string) ([]*entity.StockSnapShot, error) {
 	m.ctrl.T.Helper()
@@ -1288,6 +1333,36 @@ func (mr *MockStreamgRPCAPIMockRecorder) GetFutureSnapshotByCode(code interface{
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFutureSnapshotByCode", reflect.TypeOf((*MockStreamgRPCAPI)(nil).GetFutureSnapshotByCode), code)
 }
 
+// GetNasdaq mocks base method.
+func (m *MockStreamgRPCAPI) GetNasdaq() (*pb.YahooFinancePrice, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetNasdaq")
+	ret0, _ := ret[0].(*pb.YahooFinancePrice)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetNasdaq indicates an expected call of GetNasdaq.
+func (mr *MockStreamgRPCAPIMockRecorder) GetNasdaq() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNasdaq", reflect.TypeOf((*MockStreamgRPCAPI)(nil).GetNasdaq))
+}
+
+// GetNasdaqFuture mocks base method.
+func (m *MockStreamgRPCAPI) GetNasdaqFuture() (*pb.YahooFinancePrice, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetNasdaqFuture")
+	ret0, _ := ret[0].(*pb.YahooFinancePrice)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetNasdaqFuture indicates an expected call of GetNasdaqFuture.
+func (mr *MockStreamgRPCAPIMockRecorder) GetNasdaqFuture() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNasdaqFuture", reflect.TypeOf((*MockStreamgRPCAPI)(nil).GetNasdaqFuture))
+}
+
 // GetStockSnapshotByNumArr mocks base method.
 func (m *MockStreamgRPCAPI) GetStockSnapshotByNumArr(stockNumArr []string) ([]*pb.SnapshotMessage, error) {
 	m.ctrl.T.Helper()
@@ -1301,6 +1376,21 @@ func (m *MockStreamgRPCAPI) GetStockSnapshotByNumArr(stockNumArr []string) ([]*p
 func (mr *MockStreamgRPCAPIMockRecorder) GetStockSnapshotByNumArr(stockNumArr interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStockSnapshotByNumArr", reflect.TypeOf((*MockStreamgRPCAPI)(nil).GetStockSnapshotByNumArr), stockNumArr)
+}
+
+// GetStockSnapshotOTC mocks base method.
+func (m *MockStreamgRPCAPI) GetStockSnapshotOTC() (*pb.SnapshotMessage, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetStockSnapshotOTC")
+	ret0, _ := ret[0].(*pb.SnapshotMessage)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetStockSnapshotOTC indicates an expected call of GetStockSnapshotOTC.
+func (mr *MockStreamgRPCAPIMockRecorder) GetStockSnapshotOTC() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStockSnapshotOTC", reflect.TypeOf((*MockStreamgRPCAPI)(nil).GetStockSnapshotOTC))
 }
 
 // GetStockSnapshotTSE mocks base method.

@@ -110,6 +110,7 @@ func (w *WSRouter) sendFuture(ctx context.Context) {
 
 	tickChan := make(chan *entity.RealTimeFutureTick)
 	go w.processTickArr(tickChan)
+	go w.sendTradeIndex(ctx)
 
 	connectionID := uuid.New().String()
 	w.s.NewFutureRealTimeConnection(tickChan, connectionID)
@@ -130,7 +131,7 @@ func (w *WSRouter) processTickArr(tickChan chan *entity.RealTimeFutureTick) {
 
 		var outVolume, inVolume int64
 		for i := len(tickArr) - 1; i >= 0; i-- {
-			if time.Since(tickArr[i].TickTime) > 30*time.Second {
+			if time.Since(tickArr[i].TickTime) > 15*time.Second {
 				tickArr = tickArr[i+1:]
 				break
 			}
@@ -149,4 +150,40 @@ func (w *WSRouter) processTickArr(tickChan chan *entity.RealTimeFutureTick) {
 		}
 		w.msgChan <- tick
 	}
+}
+
+func (w *WSRouter) sendTradeIndex(ctx context.Context) {
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-time.After(5 * time.Second):
+			tse, err := w.s.GetTSESnapshot(ctx)
+			if err != nil {
+				w.msgChan <- errMsg{ErrMsg: err.Error()}
+			}
+
+			otc, err := w.s.GetOTCSnapshot(ctx)
+			if err != nil {
+				w.msgChan <- errMsg{ErrMsg: err.Error()}
+			}
+
+			nasdaq, err := w.s.GetNasdaqClose()
+			if err != nil {
+				w.msgChan <- errMsg{ErrMsg: err.Error()}
+			}
+
+			w.msgChan <- &tradeIndex{
+				TSE:    tse,
+				OTC:    otc,
+				Nasdaq: nasdaq,
+			}
+		}
+	}
+}
+
+type tradeIndex struct {
+	TSE    *entity.StockSnapShot `json:"tse"`
+	OTC    *entity.StockSnapShot `json:"otc"`
+	Nasdaq *entity.YahooPrice    `json:"nasdaq"`
 }

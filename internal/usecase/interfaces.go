@@ -133,8 +133,13 @@ type (
 		ReceiveEvent(ctx context.Context)
 		ReceiveOrderStatus(ctx context.Context)
 		ReceiveStreamData(ctx context.Context, targetArr []*entity.StockTarget)
-		GetTSESnapshot(ctx context.Context) (*entity.StockSnapShot, error)
 		GetStockSnapshotByNumArr(stockNumArr []string) ([]*entity.StockSnapShot, error)
+
+		GetTSESnapshot(ctx context.Context) (*entity.StockSnapShot, error)
+		GetOTCSnapshot(ctx context.Context) (*entity.StockSnapShot, error)
+
+		GetNasdaqClose() (*entity.YahooPrice, error)
+		GetNasdaqFutureClose() (*entity.YahooPrice, error)
 
 		GetMainFutureCode() string
 		GetFutureSnapshotByCode(code string) (*entity.FutureSnapShot, error)
@@ -152,6 +157,10 @@ type (
 		GetAllStockSnapshot() ([]*pb.SnapshotMessage, error)
 		GetStockSnapshotByNumArr(stockNumArr []string) ([]*pb.SnapshotMessage, error)
 		GetStockSnapshotTSE() (*pb.SnapshotMessage, error)
+		GetStockSnapshotOTC() (*pb.SnapshotMessage, error)
+
+		GetNasdaq() (*pb.YahooFinancePrice, error)
+		GetNasdaqFuture() (*pb.YahooFinancePrice, error)
 
 		GetFutureSnapshotByCode(code string) (*pb.SnapshotMessage, error)
 	}

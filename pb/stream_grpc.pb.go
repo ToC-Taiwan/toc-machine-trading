@@ -26,6 +26,9 @@ type StreamDataInterfaceClient interface {
 	GetStockSnapshotByNumArr(ctx context.Context, in *StockNumArr, opts ...grpc.CallOption) (*SnapshotResponse, error)
 	GetAllStockSnapshot(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*SnapshotResponse, error)
 	GetStockSnapshotTSE(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*SnapshotMessage, error)
+	GetStockSnapshotOTC(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*SnapshotMessage, error)
+	GetNasdaq(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*YahooFinancePrice, error)
+	GetNasdaqFuture(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*YahooFinancePrice, error)
 	GetStockVolumeRank(ctx context.Context, in *VolumeRankRequest, opts ...grpc.CallOption) (*StockVolumeRankResponse, error)
 	SubscribeStockTick(ctx context.Context, in *StockNumArr, opts ...grpc.CallOption) (*SubscribeResponse, error)
 	UnSubscribeStockTick(ctx context.Context, in *StockNumArr, opts ...grpc.CallOption) (*SubscribeResponse, error)
@@ -69,6 +72,33 @@ func (c *streamDataInterfaceClient) GetAllStockSnapshot(ctx context.Context, in 
 func (c *streamDataInterfaceClient) GetStockSnapshotTSE(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*SnapshotMessage, error) {
 	out := new(SnapshotMessage)
 	err := c.cc.Invoke(ctx, "/sinopac_forwarder.StreamDataInterface/GetStockSnapshotTSE", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *streamDataInterfaceClient) GetStockSnapshotOTC(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*SnapshotMessage, error) {
+	out := new(SnapshotMessage)
+	err := c.cc.Invoke(ctx, "/sinopac_forwarder.StreamDataInterface/GetStockSnapshotOTC", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *streamDataInterfaceClient) GetNasdaq(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*YahooFinancePrice, error) {
+	out := new(YahooFinancePrice)
+	err := c.cc.Invoke(ctx, "/sinopac_forwarder.StreamDataInterface/GetNasdaq", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *streamDataInterfaceClient) GetNasdaqFuture(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*YahooFinancePrice, error) {
+	out := new(YahooFinancePrice)
+	err := c.cc.Invoke(ctx, "/sinopac_forwarder.StreamDataInterface/GetNasdaqFuture", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -190,6 +220,9 @@ type StreamDataInterfaceServer interface {
 	GetStockSnapshotByNumArr(context.Context, *StockNumArr) (*SnapshotResponse, error)
 	GetAllStockSnapshot(context.Context, *emptypb.Empty) (*SnapshotResponse, error)
 	GetStockSnapshotTSE(context.Context, *emptypb.Empty) (*SnapshotMessage, error)
+	GetStockSnapshotOTC(context.Context, *emptypb.Empty) (*SnapshotMessage, error)
+	GetNasdaq(context.Context, *emptypb.Empty) (*YahooFinancePrice, error)
+	GetNasdaqFuture(context.Context, *emptypb.Empty) (*YahooFinancePrice, error)
 	GetStockVolumeRank(context.Context, *VolumeRankRequest) (*StockVolumeRankResponse, error)
 	SubscribeStockTick(context.Context, *StockNumArr) (*SubscribeResponse, error)
 	UnSubscribeStockTick(context.Context, *StockNumArr) (*SubscribeResponse, error)
@@ -217,6 +250,15 @@ func (UnimplementedStreamDataInterfaceServer) GetAllStockSnapshot(context.Contex
 }
 func (UnimplementedStreamDataInterfaceServer) GetStockSnapshotTSE(context.Context, *emptypb.Empty) (*SnapshotMessage, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetStockSnapshotTSE not implemented")
+}
+func (UnimplementedStreamDataInterfaceServer) GetStockSnapshotOTC(context.Context, *emptypb.Empty) (*SnapshotMessage, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetStockSnapshotOTC not implemented")
+}
+func (UnimplementedStreamDataInterfaceServer) GetNasdaq(context.Context, *emptypb.Empty) (*YahooFinancePrice, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetNasdaq not implemented")
+}
+func (UnimplementedStreamDataInterfaceServer) GetNasdaqFuture(context.Context, *emptypb.Empty) (*YahooFinancePrice, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetNasdaqFuture not implemented")
 }
 func (UnimplementedStreamDataInterfaceServer) GetStockVolumeRank(context.Context, *VolumeRankRequest) (*StockVolumeRankResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetStockVolumeRank not implemented")
@@ -317,6 +359,60 @@ func _StreamDataInterface_GetStockSnapshotTSE_Handler(srv interface{}, ctx conte
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(StreamDataInterfaceServer).GetStockSnapshotTSE(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _StreamDataInterface_GetStockSnapshotOTC_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(StreamDataInterfaceServer).GetStockSnapshotOTC(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/sinopac_forwarder.StreamDataInterface/GetStockSnapshotOTC",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(StreamDataInterfaceServer).GetStockSnapshotOTC(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _StreamDataInterface_GetNasdaq_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(StreamDataInterfaceServer).GetNasdaq(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/sinopac_forwarder.StreamDataInterface/GetNasdaq",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(StreamDataInterfaceServer).GetNasdaq(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _StreamDataInterface_GetNasdaqFuture_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(StreamDataInterfaceServer).GetNasdaqFuture(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/sinopac_forwarder.StreamDataInterface/GetNasdaqFuture",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(StreamDataInterfaceServer).GetNasdaqFuture(ctx, req.(*emptypb.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -555,6 +651,18 @@ var StreamDataInterface_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetStockSnapshotTSE",
 			Handler:    _StreamDataInterface_GetStockSnapshotTSE_Handler,
+		},
+		{
+			MethodName: "GetStockSnapshotOTC",
+			Handler:    _StreamDataInterface_GetStockSnapshotOTC_Handler,
+		},
+		{
+			MethodName: "GetNasdaq",
+			Handler:    _StreamDataInterface_GetNasdaq_Handler,
+		},
+		{
+			MethodName: "GetNasdaqFuture",
+			Handler:    _StreamDataInterface_GetNasdaqFuture_Handler,
 		},
 		{
 			MethodName: "GetStockVolumeRank",

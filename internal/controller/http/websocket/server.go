@@ -129,7 +129,7 @@ func (w *WSRouter) write() {
 				return
 			}
 
-		case *entity.RealTimeFutureTick, []socketPickStock, *tradeRate, errMsg:
+		case *entity.RealTimeFutureTick, []socketPickStock, *tradeRate, errMsg, *tradeIndex:
 			serveMsgStr, err := json.Marshal(v)
 			if err != nil {
 				log.Error(err)

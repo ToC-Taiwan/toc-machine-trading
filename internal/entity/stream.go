@@ -149,3 +149,9 @@ type SnapShotBase struct {
 	YesterdayVolume float64   `json:"yesterday_volume"`
 	VolumeRatio     float64   `json:"volume_ratio"`
 }
+
+// YahooPrice -.
+type YahooPrice struct {
+	Last  float64 `json:"last"`
+	Price float64 `json:"price"`
+}

@@ -204,6 +204,57 @@ func (uc *StreamUseCase) GetTSESnapshot(ctx context.Context) (*entity.StockSnapS
 	}, nil
 }
 
+// GetOTCSnapshot -.
+func (uc *StreamUseCase) GetOTCSnapshot(ctx context.Context) (*entity.StockSnapShot, error) {
+	body, err := uc.grpcapi.GetStockSnapshotOTC()
+	if err != nil {
+		return nil, err
+	}
+	return &entity.StockSnapShot{
+		SnapShotBase: entity.SnapShotBase{
+			SnapTime:        time.Unix(0, body.GetTs()).Add(-8 * time.Hour),
+			Open:            body.GetOpen(),
+			High:            body.GetHigh(),
+			Low:             body.GetLow(),
+			Close:           body.GetClose(),
+			TickType:        body.GetTickType(),
+			PriceChg:        body.GetChangePrice(),
+			PctChg:          body.GetChangeRate(),
+			ChgType:         body.GetChangeType(),
+			Volume:          body.GetVolume(),
+			VolumeSum:       body.GetTotalVolume(),
+			Amount:          body.GetAmount(),
+			AmountSum:       body.GetTotalAmount(),
+			YesterdayVolume: body.GetYesterdayVolume(),
+			VolumeRatio:     body.GetVolumeRatio(),
+		},
+		StockNum: body.GetCode(),
+	}, nil
+}
+
+func (uc *StreamUseCase) GetNasdaqClose() (*entity.YahooPrice, error) {
+	d, err := uc.grpcapi.GetNasdaq()
+	if err != nil {
+		return nil, err
+	}
+
+	return &entity.YahooPrice{
+		Last:  d.GetLast(),
+		Price: d.GetPrice(),
+	}, nil
+}
+
+func (uc *StreamUseCase) GetNasdaqFutureClose() (*entity.YahooPrice, error) {
+	d, err := uc.grpcapi.GetNasdaqFuture()
+	if err != nil {
+		return nil, err
+	}
+	return &entity.YahooPrice{
+		Last:  d.GetLast(),
+		Price: d.GetPrice(),
+	}, nil
+}
+
 // GetStockSnapshotByNumArr -.
 func (uc *StreamUseCase) GetStockSnapshotByNumArr(stockNumArr []string) ([]*entity.StockSnapShot, error) {
 	var fetchArr, stockNotExist []string
