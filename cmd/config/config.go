@@ -4,12 +4,15 @@ package config
 import (
 	"sync"
 
+	"tmt/pkg/logger"
+
 	"github.com/ilyakaznacheev/cleanenv"
 )
 
 var (
 	globalConfig *Config
 	once         sync.Once
+	log          = logger.Get()
 )
 
 // GetConfig -.
@@ -35,6 +38,7 @@ func parseConfigFile() {
 	}
 
 	globalConfig = &newConfig
+	log.Infof("Simulation trade is %v", globalConfig.Simulation)
 }
 
 // Config -.
