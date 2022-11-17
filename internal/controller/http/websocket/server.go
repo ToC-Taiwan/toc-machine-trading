@@ -2,6 +2,7 @@
 package websocket
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -76,7 +77,7 @@ func (w *WSRouter) Run(gin *gin.Context, wsType WSType) {
 	w.conn = c
 	ctx := gin.Request.Context()
 
-	go w.write()
+	go w.write(ctx)
 
 	switch wsType {
 	case WSPickStock:
@@ -116,33 +117,33 @@ func (w *WSRouter) read(c *websocket.Conn) {
 	}
 }
 
-func (w *WSRouter) write() {
+func (w *WSRouter) write(ctx context.Context) {
 	for {
-		cl, ok := <-w.msgChan
-		if !ok {
+		select {
+		case <-ctx.Done():
 			return
-		}
+		case cl := <-w.msgChan:
+			switch v := cl.(type) {
+			case string:
+				if err := w.send([]byte(v)); err != nil {
+					return
+				}
 
-		switch v := cl.(type) {
-		case string:
-			if err := w.send([]byte(v)); err != nil {
-				return
+			case *entity.RealTimeFutureTick, []socketPickStock, *tradeRate, errMsg, *tradeIndex:
+				serveMsgStr, err := json.Marshal(v)
+				if err != nil {
+					log.Error(err)
+					return
+				}
+
+				if err := w.send(serveMsgStr); err != nil {
+					return
+				}
+
+			default:
+				log.Warn("Unknown socket message type")
+				continue
 			}
-
-		case *entity.RealTimeFutureTick, []socketPickStock, *tradeRate, errMsg, *tradeIndex:
-			serveMsgStr, err := json.Marshal(v)
-			if err != nil {
-				log.Error(err)
-				return
-			}
-
-			if err := w.send(serveMsgStr); err != nil {
-				return
-			}
-
-		default:
-			log.Warn("Unknown socket message type")
-			continue
 		}
 	}
 }

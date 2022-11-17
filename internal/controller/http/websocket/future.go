@@ -124,7 +124,6 @@ func (w *WSRouter) processTickArr(tickChan chan *entity.RealTimeFutureTick) {
 	for {
 		tick, ok := <-tickChan
 		if !ok {
-			close(w.msgChan)
 			return
 		}
 		tickArr = append(tickArr, tick)

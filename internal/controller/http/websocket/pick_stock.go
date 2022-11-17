@@ -25,12 +25,9 @@ func (w *WSRouter) sendPickStockSnapShot(ctx context.Context) {
 	for {
 		select {
 		case <-ctx.Done():
-			close(w.msgChan)
 			return
 
-		default:
-			time.Sleep(time.Second)
-
+		case <-time.After(time.Second):
 			w.mutex.Lock()
 			tmpStockArr := w.pickStockArr
 			w.mutex.Unlock()
@@ -63,7 +60,6 @@ func (w *WSRouter) sendPickStockSnapShot(ctx context.Context) {
 					})
 				}
 			}
-
 			w.msgChan <- data
 		}
 	}
