@@ -27,7 +27,9 @@ type OrderUseCase struct {
 	stockTradeDay  tradeday.TradePeriod
 	futureTradeDay tradeday.TradePeriod
 
-	simTrade bool
+	simTrade              bool
+	updateFutureOrderLock sync.Mutex
+	updateStockOrderLock  sync.Mutex
 }
 
 // NewOrder -.
@@ -75,7 +77,7 @@ func (uc *OrderUseCase) updateAllTradeBalance() {
 		}
 	}()
 	go func() {
-		for range time.NewTicker(3 * time.Second).C {
+		for range time.NewTicker(2 * time.Second).C {
 			err := uc.AskOrderUpdate()
 			if err != nil {
 				log.Error(err)
@@ -281,6 +283,9 @@ func (uc *OrderUseCase) CancelOrderID(orderID string) (string, entity.OrderStatu
 }
 
 func (uc *OrderUseCase) updateStockOrderCacheAndInsertDB(order *entity.StockOrder) {
+	defer uc.updateStockOrderLock.Unlock()
+	uc.updateStockOrderLock.Lock()
+
 	// get order from cache
 	cacheOrder := cc.GetOrderByOrderID(order.OrderID)
 	if cacheOrder == nil {
@@ -415,6 +420,9 @@ func (uc *OrderUseCase) cancelFutureOrder(order *entity.FutureOrder) {
 }
 
 func (uc *OrderUseCase) updateFutureOrderCacheAndInsertDB(order *entity.FutureOrder) {
+	defer uc.updateFutureOrderLock.Unlock()
+	uc.updateFutureOrderLock.Lock()
+
 	// get order from cache
 	cacheOrder := cc.GetFutureOrderByOrderID(order.OrderID)
 	if cacheOrder == nil {
