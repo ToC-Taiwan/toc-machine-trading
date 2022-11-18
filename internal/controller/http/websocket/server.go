@@ -43,7 +43,7 @@ type WSRouter struct {
 	msgChan chan interface{}
 
 	futureOrderMap map[string]*entity.FutureOrder
-	orderLock      sync.RWMutex
+	orderLock      sync.Mutex
 }
 
 type msg struct {

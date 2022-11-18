@@ -41,17 +41,26 @@ func (w *WSRouter) cancelOverTimeOrder(ctx context.Context) {
 		case <-ctx.Done():
 			return
 		case <-time.After(time.Second):
-			w.orderLock.RLock()
+			w.orderLock.Lock()
 			for _, order := range w.futureOrderMap {
-				if order.Status != entity.StatusFilled && time.Since(order.TradeTime) > 10*time.Second {
-					_, _, err := w.o.CancelFutureOrderID(order.OrderID)
-					if err != nil {
-						w.msgChan <- errMsg{err.Error()}
-					}
+				if order.Status == entity.StatusFilled || order.Status == entity.StatusCancelled {
+					delete(w.futureOrderMap, order.OrderID)
+					continue
+				}
+
+				if time.Since(order.TradeTime) > 10*time.Second {
+					w.cancelOrderByID(order.OrderID)
 				}
 			}
-			w.orderLock.RUnlock()
+			w.orderLock.Unlock()
 		}
+	}
+}
+
+func (w *WSRouter) cancelOrderByID(orderID string) {
+	_, _, err := w.o.CancelFutureOrderID(orderID)
+	if err != nil {
+		w.msgChan <- errMsg{err.Error()}
 	}
 }
 
