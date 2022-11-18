@@ -33,6 +33,10 @@ type tradeRate struct {
 	InRate  int64 `json:"in_rate"`
 }
 
+type futurePosition struct {
+	Position []*entity.FuturePosition `json:"position"`
+}
+
 func (w *WSRouter) processTrade(clientMsg msg) {
 	if clientMsg.FutureOrder == nil {
 		return
@@ -200,7 +204,7 @@ func (w *WSRouter) sendPosition(ctx context.Context) {
 	if position, err := w.generatePosition(); err != nil {
 		w.msgChan <- errMsg{ErrMsg: err.Error()}
 	} else {
-		w.msgChan <- position
+		w.msgChan <- &futurePosition{position}
 	}
 
 	for {
@@ -211,7 +215,7 @@ func (w *WSRouter) sendPosition(ctx context.Context) {
 			if position, err := w.generatePosition(); err != nil {
 				w.msgChan <- errMsg{ErrMsg: err.Error()}
 			} else {
-				w.msgChan <- position
+				w.msgChan <- &futurePosition{position}
 			}
 		}
 	}
