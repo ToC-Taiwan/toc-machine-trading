@@ -5,8 +5,6 @@ import (
 	"time"
 
 	"tmt/internal/entity"
-
-	"github.com/google/uuid"
 )
 
 type futureOrder struct {
@@ -51,21 +49,28 @@ func (w *WSRouter) processTrade(clientMsg msg) {
 		},
 	}
 
+	var err error
 	switch clientMsg.FutureOrder.Action {
 	case entity.ActionBuy:
-		_, _, err := w.o.BuyFuture(order)
+		order.OrderID, order.Status, err = w.o.BuyFuture(order)
 		if err != nil {
 			w.msgChan <- errMsg{ErrMsg: err.Error()}
 			log.Error(err)
+			return
 		}
 
 	case entity.ActionSell:
-		_, _, err := w.o.SellFuture(order)
+		order.OrderID, order.Status, err = w.o.SellFuture(order)
 		if err != nil {
 			w.msgChan <- errMsg{ErrMsg: err.Error()}
 			log.Error(err)
+			return
 		}
 	}
+
+	w.orderLock.Lock()
+	w.futureOrderMap[order.OrderID] = order
+	w.orderLock.Unlock()
 }
 
 func (w *WSRouter) sendFuture(ctx context.Context) {
@@ -113,15 +118,39 @@ func (w *WSRouter) sendFuture(ctx context.Context) {
 	}
 
 	tickChan := make(chan *entity.RealTimeFutureTick)
+	orderStatusChan := make(chan interface{})
+
+	go w.processOrderStatus(orderStatusChan)
 	go w.processTickArr(tickChan)
 	go w.sendTradeIndex(ctx)
 	go w.sendPosition(ctx)
 
-	connectionID := uuid.New().String()
-	w.s.NewFutureRealTimeConnection(tickChan, connectionID)
+	w.s.NewFutureRealTimeConnection(tickChan, w.connectionID)
+	w.s.NewOrderStatusConnection(orderStatusChan, w.connectionID)
 
 	<-ctx.Done()
-	w.s.DeleteFutureRealTimeConnection(connectionID)
+	w.s.DeleteFutureRealTimeConnection(w.connectionID)
+	w.s.DeleteOrderStatusConnection(w.connectionID)
+}
+
+func (w *WSRouter) processOrderStatus(orderStatusChan chan interface{}) {
+	for {
+		order, ok := <-orderStatusChan
+		if !ok {
+			return
+		}
+
+		if o, ok := order.(*entity.FutureOrder); ok {
+			w.orderLock.Lock()
+			if cache, ok := w.futureOrderMap[o.OrderID]; ok {
+				if cache.Status != o.Status {
+					w.msgChan <- o
+					w.futureOrderMap[o.OrderID] = o
+				}
+			}
+			w.orderLock.Unlock()
+		}
+	}
 }
 
 func (w *WSRouter) processTickArr(tickChan chan *entity.RealTimeFutureTick) {

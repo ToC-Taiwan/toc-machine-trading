@@ -176,6 +176,15 @@ func (uc *StreamUseCase) ReceiveOrderStatus(ctx context.Context) {
 	uc.rabbit.OrderStatusConsumer(orderStatusChan)
 }
 
+// NewOrderStatusConnection -.
+func (uc *StreamUseCase) NewOrderStatusConnection(orderStatusChan chan interface{}, connectionID string) {
+	uc.rabbit.AddOrderStatusChan(orderStatusChan, connectionID)
+}
+
+func (uc *StreamUseCase) DeleteOrderStatusConnection(connectionID string) {
+	uc.rabbit.RemoveOrderStatusChan(connectionID)
+}
+
 // GetTSESnapshot -.
 func (uc *StreamUseCase) GetTSESnapshot(ctx context.Context) (*entity.StockSnapShot, error) {
 	body, err := uc.grpcapi.GetStockSnapshotTSE()

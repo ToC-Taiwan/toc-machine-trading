@@ -33,11 +33,14 @@ const (
 type StreamRabbit struct {
 	conn *rabbitmq.Connection
 
-	futureTickChan map[string]chan *entity.RealTimeFutureTick
-	mutex          sync.RWMutex
-
 	allStockMap  map[string]*entity.Stock
 	allFutureMap map[string]*entity.Future
+
+	futureTickChan map[string]chan *entity.RealTimeFutureTick
+	futureTickLock sync.RWMutex
+
+	orderStatusChan map[string]chan interface{}
+	orderStatusLock sync.RWMutex
 }
 
 // NewStream -.
@@ -107,12 +110,24 @@ func (c *StreamRabbit) EventConsumer(eventChan chan *entity.SinopacEvent) {
 	}
 }
 
+func (c *StreamRabbit) AddOrderStatusChan(orderStatusChan chan interface{}, connectionID string) {
+	defer c.orderStatusLock.Unlock()
+	c.orderStatusLock.Lock()
+	c.orderStatusChan[connectionID] = orderStatusChan
+}
+
+func (c *StreamRabbit) RemoveOrderStatusChan(connectionID string) {
+	defer c.orderStatusLock.Unlock()
+	c.orderStatusLock.Lock()
+	close(c.orderStatusChan[connectionID])
+	delete(c.orderStatusChan, connectionID)
+}
+
 // OrderStatusConsumer OrderStatusConsumer
 func (c *StreamRabbit) OrderStatusConsumer(orderStatusChan chan interface{}) {
 	if len(c.allStockMap) == 0 || len(c.allFutureMap) == 0 {
 		log.Panic("allStockMap or allFutureMap is empty")
 	}
-
 	delivery := c.establishDelivery(routingKeyOrder)
 	for {
 		d, opened := <-delivery
@@ -120,13 +135,11 @@ func (c *StreamRabbit) OrderStatusConsumer(orderStatusChan chan interface{}) {
 			log.Error("OrderStatusConsumer rabbitMQ is closed")
 			return
 		}
-
 		body := pb.StockOrderStatus{}
 		if err := proto.Unmarshal(d.Body, &body); err != nil {
 			log.Error(err)
 			continue
 		}
-
 		actionMap := entity.ActionListMap
 		statusMap := entity.StatusListMap
 		orderTime, err := time.ParseInLocation(common.LongTimeLayout, body.GetOrderTime(), time.Local)
@@ -135,9 +148,10 @@ func (c *StreamRabbit) OrderStatusConsumer(orderStatusChan chan interface{}) {
 			continue
 		}
 
+		var order interface{}
 		switch {
 		case c.allStockMap[body.GetCode()] != nil:
-			orderStatusChan <- &entity.StockOrder{
+			order = &entity.StockOrder{
 				StockNum: body.GetCode(),
 				BaseOrder: entity.BaseOrder{
 					OrderID:   body.GetOrderId(),
@@ -149,7 +163,7 @@ func (c *StreamRabbit) OrderStatusConsumer(orderStatusChan chan interface{}) {
 				},
 			}
 		case c.allFutureMap[body.GetCode()] != nil:
-			orderStatusChan <- &entity.FutureOrder{
+			order = &entity.FutureOrder{
 				Code: body.GetCode(),
 				BaseOrder: entity.BaseOrder{
 					OrderID:   body.GetOrderId(),
@@ -161,6 +175,12 @@ func (c *StreamRabbit) OrderStatusConsumer(orderStatusChan chan interface{}) {
 				},
 			}
 		}
+
+		c.orderStatusLock.RLock()
+		for _, orderStatusChan := range c.orderStatusChan {
+			orderStatusChan <- order
+		}
+		c.orderStatusLock.RUnlock()
 	}
 }
 
@@ -216,24 +236,24 @@ func (c *StreamRabbit) TickConsumer(stockNum string, tickChan chan *entity.RealT
 
 // AddFutureTickChan -.
 func (c *StreamRabbit) AddFutureTickChan(tickChan chan *entity.RealTimeFutureTick, connectionID string) {
-	defer c.mutex.Unlock()
-	c.mutex.Lock()
+	defer c.futureTickLock.Unlock()
+	c.futureTickLock.Lock()
 	c.futureTickChan[connectionID] = tickChan
 }
 
 // RemoveFutureTickChan -.
 func (c *StreamRabbit) RemoveFutureTickChan(connectionID string) {
-	defer c.mutex.Unlock()
-	c.mutex.Lock()
+	defer c.futureTickLock.Unlock()
+	c.futureTickLock.Lock()
 	close(c.futureTickChan[connectionID])
 	delete(c.futureTickChan, connectionID)
 }
 
 // FutureTickConsumer -.
 func (c *StreamRabbit) FutureTickConsumer(code string, tickChan chan *entity.RealTimeFutureTick) {
-	c.mutex.Lock()
+	c.futureTickLock.Lock()
 	c.futureTickChan[uuid.New().String()] = tickChan
-	c.mutex.Unlock()
+	c.futureTickLock.Unlock()
 	delivery := c.establishDelivery(fmt.Sprintf("%s:%s", routingKeyFutureTick, code))
 	for {
 		d, opened := <-delivery
@@ -279,11 +299,11 @@ func (c *StreamRabbit) FutureTickConsumer(code string, tickChan chan *entity.Rea
 			PctChg:          body.GetPctChg(),
 		}
 
-		c.mutex.RLock()
+		c.futureTickLock.RLock()
 		for _, tickChan := range c.futureTickChan {
 			tickChan <- tick
 		}
-		c.mutex.RUnlock()
+		c.futureTickLock.RUnlock()
 	}
 }
 

@@ -13,6 +13,7 @@ import (
 	"tmt/pkg/logger"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 )
 
@@ -30,6 +31,8 @@ const (
 
 // WSRouter -.
 type WSRouter struct {
+	connectionID string
+
 	pickStockArr []string
 	mutex        sync.Mutex
 
@@ -38,6 +41,9 @@ type WSRouter struct {
 
 	conn    *websocket.Conn
 	msgChan chan interface{}
+
+	futureOrderMap map[string]*entity.FutureOrder
+	orderLock      sync.Mutex
 }
 
 type msg struct {
@@ -53,9 +59,10 @@ type errMsg struct {
 // NewWSRouter -.
 func NewWSRouter(s usecase.Stream, o usecase.Order) *WSRouter {
 	return &WSRouter{
-		s:       s,
-		o:       o,
-		msgChan: make(chan interface{}),
+		s:            s,
+		o:            o,
+		connectionID: uuid.New().String(),
+		msgChan:      make(chan interface{}),
 	}
 }
 
@@ -129,7 +136,7 @@ func (w *WSRouter) write(ctx context.Context) {
 					return
 				}
 
-			case *entity.RealTimeFutureTick, []socketPickStock, *tradeRate, errMsg, *tradeIndex, *futurePosition:
+			case *entity.RealTimeFutureTick, []socketPickStock, *tradeRate, errMsg, *tradeIndex, *futurePosition, *entity.FutureOrder:
 				serveMsgStr, err := json.Marshal(v)
 				if err != nil {
 					log.Error(err)

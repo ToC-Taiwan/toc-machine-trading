@@ -1091,6 +1091,18 @@ func (mr *MockStreamMockRecorder) DeleteFutureRealTimeConnection(connectionID in
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteFutureRealTimeConnection", reflect.TypeOf((*MockStream)(nil).DeleteFutureRealTimeConnection), connectionID)
 }
 
+// DeleteOrderStatusConnection mocks base method.
+func (m *MockStream) DeleteOrderStatusConnection(connectionID string) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "DeleteOrderStatusConnection", connectionID)
+}
+
+// DeleteOrderStatusConnection indicates an expected call of DeleteOrderStatusConnection.
+func (mr *MockStreamMockRecorder) DeleteOrderStatusConnection(connectionID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteOrderStatusConnection", reflect.TypeOf((*MockStream)(nil).DeleteOrderStatusConnection), connectionID)
+}
+
 // GetFutureSnapshotByCode mocks base method.
 func (m *MockStream) GetFutureSnapshotByCode(code string) (*entity.FutureSnapShot, error) {
 	m.ctrl.T.Helper()
@@ -1205,6 +1217,18 @@ func (m *MockStream) NewFutureRealTimeConnection(tickChan chan *entity.RealTimeF
 func (mr *MockStreamMockRecorder) NewFutureRealTimeConnection(tickChan, connectionID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NewFutureRealTimeConnection", reflect.TypeOf((*MockStream)(nil).NewFutureRealTimeConnection), tickChan, connectionID)
+}
+
+// NewOrderStatusConnection mocks base method.
+func (m *MockStream) NewOrderStatusConnection(orderStatusChan chan interface{}, connectionID string) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "NewOrderStatusConnection", orderStatusChan, connectionID)
+}
+
+// NewOrderStatusConnection indicates an expected call of NewOrderStatusConnection.
+func (mr *MockStreamMockRecorder) NewOrderStatusConnection(orderStatusChan, connectionID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NewOrderStatusConnection", reflect.TypeOf((*MockStream)(nil).NewOrderStatusConnection), orderStatusChan, connectionID)
 }
 
 // ReceiveEvent mocks base method.
@@ -1443,6 +1467,18 @@ func (mr *MockStreamRabbitMockRecorder) AddFutureTickChan(tickChan, connectionID
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddFutureTickChan", reflect.TypeOf((*MockStreamRabbit)(nil).AddFutureTickChan), tickChan, connectionID)
 }
 
+// AddOrderStatusChan mocks base method.
+func (m *MockStreamRabbit) AddOrderStatusChan(orderStatusChan chan interface{}, connectionID string) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "AddOrderStatusChan", orderStatusChan, connectionID)
+}
+
+// AddOrderStatusChan indicates an expected call of AddOrderStatusChan.
+func (mr *MockStreamRabbitMockRecorder) AddOrderStatusChan(orderStatusChan, connectionID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddOrderStatusChan", reflect.TypeOf((*MockStreamRabbit)(nil).AddOrderStatusChan), orderStatusChan, connectionID)
+}
+
 // EventConsumer mocks base method.
 func (m *MockStreamRabbit) EventConsumer(eventChan chan *entity.SinopacEvent) {
 	m.ctrl.T.Helper()
@@ -1513,6 +1549,18 @@ func (m *MockStreamRabbit) RemoveFutureTickChan(connectionID string) {
 func (mr *MockStreamRabbitMockRecorder) RemoveFutureTickChan(connectionID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RemoveFutureTickChan", reflect.TypeOf((*MockStreamRabbit)(nil).RemoveFutureTickChan), connectionID)
+}
+
+// RemoveOrderStatusChan mocks base method.
+func (m *MockStreamRabbit) RemoveOrderStatusChan(connectionID string) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "RemoveOrderStatusChan", connectionID)
+}
+
+// RemoveOrderStatusChan indicates an expected call of RemoveOrderStatusChan.
+func (mr *MockStreamRabbitMockRecorder) RemoveOrderStatusChan(connectionID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RemoveOrderStatusChan", reflect.TypeOf((*MockStreamRabbit)(nil).RemoveOrderStatusChan), connectionID)
 }
 
 // StockBidAskConsumer mocks base method.

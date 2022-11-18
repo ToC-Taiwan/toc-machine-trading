@@ -143,8 +143,11 @@ type (
 
 		GetMainFutureCode() string
 		GetFutureSnapshotByCode(code string) (*entity.FutureSnapShot, error)
+
 		NewFutureRealTimeConnection(tickChan chan *entity.RealTimeFutureTick, connectionID string)
 		DeleteFutureRealTimeConnection(connectionID string)
+		NewOrderStatusConnection(orderStatusChan chan interface{}, connectionID string)
+		DeleteOrderStatusConnection(connectionID string)
 	}
 
 	// StreamRepo -.
@@ -179,6 +182,8 @@ type (
 
 		AddFutureTickChan(tickChan chan *entity.RealTimeFutureTick, connectionID string)
 		RemoveFutureTickChan(connectionID string)
+		AddOrderStatusChan(orderStatusChan chan interface{}, connectionID string)
+		RemoveOrderStatusChan(connectionID string)
 	}
 )
 
