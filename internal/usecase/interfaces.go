@@ -206,6 +206,7 @@ type (
 		SellFuture(order *entity.FutureOrder) (string, entity.OrderStatus, error)
 		SellFirstFuture(order *entity.FutureOrder) (string, entity.OrderStatus, error)
 		BuyLaterFuture(order *entity.FutureOrder) (string, entity.OrderStatus, error)
+		CancelFutureOrderID(orderID string) (string, entity.OrderStatus, error)
 
 		GetFutureOrderStatusByID(orderID string) (*entity.FutureOrder, error)
 

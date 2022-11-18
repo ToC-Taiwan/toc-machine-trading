@@ -35,6 +35,26 @@ type futurePosition struct {
 	Position []*entity.FuturePosition `json:"position"`
 }
 
+func (w *WSRouter) cancelOverTimeOrder(ctx context.Context) {
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-time.After(time.Second):
+			w.orderLock.RLock()
+			for _, order := range w.futureOrderMap {
+				if order.Status != entity.StatusFilled && time.Since(order.TradeTime) > 10*time.Second {
+					_, _, err := w.o.CancelFutureOrderID(order.OrderID)
+					if err != nil {
+						w.msgChan <- errMsg{err.Error()}
+					}
+				}
+			}
+			w.orderLock.RUnlock()
+		}
+	}
+}
+
 func (w *WSRouter) processTrade(clientMsg msg) {
 	if clientMsg.FutureOrder == nil {
 		return
@@ -69,6 +89,7 @@ func (w *WSRouter) processTrade(clientMsg msg) {
 	}
 
 	w.orderLock.Lock()
+	order.TradeTime = time.Now()
 	w.futureOrderMap[order.OrderID] = order
 	w.orderLock.Unlock()
 }
@@ -124,6 +145,7 @@ func (w *WSRouter) sendFuture(ctx context.Context) {
 	go w.processTickArr(tickChan)
 	go w.sendTradeIndex(ctx)
 	go w.sendPosition(ctx)
+	go w.cancelOverTimeOrder(ctx)
 
 	w.s.NewFutureRealTimeConnection(tickChan, w.connectionID)
 	w.s.NewOrderStatusConnection(orderStatusChan, w.connectionID)
@@ -142,11 +164,9 @@ func (w *WSRouter) processOrderStatus(orderStatusChan chan interface{}) {
 
 		if o, ok := order.(*entity.FutureOrder); ok {
 			w.orderLock.Lock()
-			if cache, ok := w.futureOrderMap[o.OrderID]; ok {
-				if cache.Status != o.Status {
-					w.msgChan <- o
-					w.futureOrderMap[o.OrderID] = o
-				}
+			if cache := w.futureOrderMap[o.OrderID]; cache != nil && cache.Status != o.Status {
+				w.msgChan <- o
+				w.futureOrderMap[o.OrderID] = o
 			}
 			w.orderLock.Unlock()
 		}
