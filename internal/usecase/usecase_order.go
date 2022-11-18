@@ -514,14 +514,8 @@ func (uc *OrderUseCase) CancelFutureOrderID(orderID string) (string, entity.Orde
 // calculateFutureTradeBalance -.
 func (uc *OrderUseCase) calculateFutureTradeBalance(allOrders []*entity.FutureOrder) {
 	var forwardOrder, reverseOrder []*entity.FutureOrder
-	var manualOrder []*entity.FutureOrder
 	for _, v := range allOrders {
-		if v.Status != entity.StatusFilled {
-			continue
-		}
-
-		if v.Manual {
-			manualOrder = append(manualOrder, v)
+		if v.Status != entity.StatusFilled || v.Manual {
 			continue
 		}
 
@@ -532,8 +526,6 @@ func (uc *OrderUseCase) calculateFutureTradeBalance(allOrders []*entity.FutureOr
 			reverseOrder = append(reverseOrder, v)
 		}
 	}
-
-	go uc.calculateManualFutureTradeBalance(manualOrder)
 
 	forwardOrder = forwardOrder[:2*(len(forwardOrder)/2)]
 	reverseOrder = reverseOrder[:2*(len(reverseOrder)/2)]
@@ -620,32 +612,6 @@ func (uc *OrderUseCase) CalculateTradeDiscount(price float64, quantity int64) in
 // GetFutureOrderStatusByID -.
 func (uc *OrderUseCase) GetFutureOrderStatusByID(orderID string) (*entity.FutureOrder, error) {
 	return uc.repo.QueryFutureOrderByID(context.Background(), orderID)
-}
-
-func (uc *OrderUseCase) calculateManualFutureTradeBalance(allOrder []*entity.FutureOrder) {
-	var forwardBalance, revereBalance, tradeCount int64
-	for _, v := range allOrder {
-		switch v.Action {
-		case entity.ActionBuy:
-			tradeCount++
-			forwardBalance -= uc.quota.GetFutureBuyCost(v.Price, v.Quantity)
-		case entity.ActionSell:
-			forwardBalance += uc.quota.GetFutureSellCost(v.Price, v.Quantity)
-		}
-	}
-
-	tmp := &entity.FutureTradeBalance{
-		TradeDay:   uc.futureTradeDay.TradeDay,
-		TradeCount: tradeCount,
-		Forward:    forwardBalance,
-		Reverse:    revereBalance,
-		Total:      forwardBalance + revereBalance,
-	}
-
-	err := uc.repo.InsertOrUpdateFutureTradeBalance(context.Background(), tmp)
-	if err != nil {
-		log.Panic(err)
-	}
 }
 
 // GetFuturePosition .
