@@ -178,12 +178,12 @@ func (w *WSRouter) sendTradeIndex(ctx context.Context) {
 }
 
 func (w *WSRouter) generateTradeIndex(ctx context.Context) (*tradeIndex, error) {
-	tse, err := w.s.GetTSESnapshot(ctx)
+	nf, err := w.s.GetNasdaqFutureClose()
 	if err != nil {
 		return nil, err
 	}
 
-	otc, err := w.s.GetOTCSnapshot(ctx)
+	tse, err := w.s.GetTSESnapshot(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -193,10 +193,16 @@ func (w *WSRouter) generateTradeIndex(ctx context.Context) (*tradeIndex, error) 
 		return nil, err
 	}
 
+	otc, err := w.s.GetOTCSnapshot(ctx)
+	if err != nil {
+		return nil, err
+	}
+
 	return &tradeIndex{
 		TSE:    tse,
 		OTC:    otc,
 		Nasdaq: nasdaq,
+		NF:     nf,
 	}, nil
 }
 
@@ -233,4 +239,5 @@ type tradeIndex struct {
 	TSE    *entity.StockSnapShot `json:"tse"`
 	OTC    *entity.StockSnapShot `json:"otc"`
 	Nasdaq *entity.YahooPrice    `json:"nasdaq"`
+	NF     *entity.YahooPrice    `json:"nf"`
 }
