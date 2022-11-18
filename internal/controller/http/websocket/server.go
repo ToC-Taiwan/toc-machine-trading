@@ -59,10 +59,11 @@ type errMsg struct {
 // NewWSRouter -.
 func NewWSRouter(s usecase.Stream, o usecase.Order) *WSRouter {
 	return &WSRouter{
-		s:            s,
-		o:            o,
-		connectionID: uuid.New().String(),
-		msgChan:      make(chan interface{}),
+		s:              s,
+		o:              o,
+		connectionID:   uuid.New().String(),
+		msgChan:        make(chan interface{}),
+		futureOrderMap: make(map[string]*entity.FutureOrder),
 	}
 }
 
