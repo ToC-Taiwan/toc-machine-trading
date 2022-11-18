@@ -59,8 +59,9 @@ func NewStream() *StreamRabbit {
 	}
 
 	return &StreamRabbit{
-		conn:           conn,
-		futureTickChan: make(map[string]chan *entity.RealTimeFutureTick),
+		conn:            conn,
+		futureTickChan:  make(map[string]chan *entity.RealTimeFutureTick),
+		orderStatusChan: make(map[string]chan interface{}),
 	}
 }
 
