@@ -1725,6 +1725,21 @@ func (mr *MockOrderMockRecorder) GetFutureOrderStatusByID(orderID interface{}) *
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFutureOrderStatusByID", reflect.TypeOf((*MockOrder)(nil).GetFutureOrderStatusByID), orderID)
 }
 
+// GetFuturePosition mocks base method.
+func (m *MockOrder) GetFuturePosition() ([]*entity.FuturePosition, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetFuturePosition")
+	ret0, _ := ret[0].([]*entity.FuturePosition)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetFuturePosition indicates an expected call of GetFuturePosition.
+func (mr *MockOrderMockRecorder) GetFuturePosition() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFuturePosition", reflect.TypeOf((*MockOrder)(nil).GetFuturePosition))
+}
+
 // SellFirstFuture mocks base method.
 func (m *MockOrder) SellFirstFuture(order *entity.FutureOrder) (string, entity.OrderStatus, error) {
 	m.ctrl.T.Helper()
@@ -2067,6 +2082,21 @@ func (m *MockOrdergRPCAPI) CancelStock(orderID string, sim bool) (*pb.TradeResul
 func (mr *MockOrdergRPCAPIMockRecorder) CancelStock(orderID, sim interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CancelStock", reflect.TypeOf((*MockOrdergRPCAPI)(nil).CancelStock), orderID, sim)
+}
+
+// GetFuturePosition mocks base method.
+func (m *MockOrdergRPCAPI) GetFuturePosition() (*pb.FuturePositionArr, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetFuturePosition")
+	ret0, _ := ret[0].(*pb.FuturePositionArr)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetFuturePosition indicates an expected call of GetFuturePosition.
+func (mr *MockOrdergRPCAPIMockRecorder) GetFuturePosition() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFuturePosition", reflect.TypeOf((*MockOrdergRPCAPI)(nil).GetFuturePosition))
 }
 
 // GetNonBlockOrderStatusArr mocks base method.

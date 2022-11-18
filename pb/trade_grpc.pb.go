@@ -34,6 +34,7 @@ type TradeInterfaceClient interface {
 	SellFuture(ctx context.Context, in *FutureOrderDetail, opts ...grpc.CallOption) (*TradeResult, error)
 	SellFirstFuture(ctx context.Context, in *FutureOrderDetail, opts ...grpc.CallOption) (*TradeResult, error)
 	CancelFuture(ctx context.Context, in *FutureOrderID, opts ...grpc.CallOption) (*TradeResult, error)
+	GetFuturePosition(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*FuturePositionArr, error)
 }
 
 type tradeInterfaceClient struct {
@@ -143,6 +144,15 @@ func (c *tradeInterfaceClient) CancelFuture(ctx context.Context, in *FutureOrder
 	return out, nil
 }
 
+func (c *tradeInterfaceClient) GetFuturePosition(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*FuturePositionArr, error) {
+	out := new(FuturePositionArr)
+	err := c.cc.Invoke(ctx, "/sinopac_forwarder.TradeInterface/GetFuturePosition", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // TradeInterfaceServer is the server API for TradeInterface service.
 // All implementations must embed UnimplementedTradeInterfaceServer
 // for forward compatibility
@@ -158,6 +168,7 @@ type TradeInterfaceServer interface {
 	SellFuture(context.Context, *FutureOrderDetail) (*TradeResult, error)
 	SellFirstFuture(context.Context, *FutureOrderDetail) (*TradeResult, error)
 	CancelFuture(context.Context, *FutureOrderID) (*TradeResult, error)
+	GetFuturePosition(context.Context, *emptypb.Empty) (*FuturePositionArr, error)
 	mustEmbedUnimplementedTradeInterfaceServer()
 }
 
@@ -197,6 +208,9 @@ func (UnimplementedTradeInterfaceServer) SellFirstFuture(context.Context, *Futur
 }
 func (UnimplementedTradeInterfaceServer) CancelFuture(context.Context, *FutureOrderID) (*TradeResult, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CancelFuture not implemented")
+}
+func (UnimplementedTradeInterfaceServer) GetFuturePosition(context.Context, *emptypb.Empty) (*FuturePositionArr, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetFuturePosition not implemented")
 }
 func (UnimplementedTradeInterfaceServer) mustEmbedUnimplementedTradeInterfaceServer() {}
 
@@ -409,6 +423,24 @@ func _TradeInterface_CancelFuture_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _TradeInterface_GetFuturePosition_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TradeInterfaceServer).GetFuturePosition(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/sinopac_forwarder.TradeInterface/GetFuturePosition",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TradeInterfaceServer).GetFuturePosition(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // TradeInterface_ServiceDesc is the grpc.ServiceDesc for TradeInterface service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -459,6 +491,10 @@ var TradeInterface_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CancelFuture",
 			Handler:    _TradeInterface_CancelFuture_Handler,
+		},
+		{
+			MethodName: "GetFuturePosition",
+			Handler:    _TradeInterface_GetFuturePosition_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

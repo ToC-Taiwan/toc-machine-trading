@@ -111,6 +111,7 @@ func (w *WSRouter) sendFuture(ctx context.Context) {
 	tickChan := make(chan *entity.RealTimeFutureTick)
 	go w.processTickArr(tickChan)
 	go w.sendTradeIndex(ctx)
+	go w.sendPosition(ctx)
 
 	connectionID := uuid.New().String()
 	w.s.NewFutureRealTimeConnection(tickChan, connectionID)
@@ -152,33 +153,76 @@ func (w *WSRouter) processTickArr(tickChan chan *entity.RealTimeFutureTick) {
 }
 
 func (w *WSRouter) sendTradeIndex(ctx context.Context) {
+	if index, err := w.generateTradeIndex(ctx); err != nil {
+		w.msgChan <- errMsg{ErrMsg: err.Error()}
+	} else {
+		w.msgChan <- index
+	}
+
 	for {
 		select {
 		case <-ctx.Done():
 			return
 		case <-time.After(5 * time.Second):
-			tse, err := w.s.GetTSESnapshot(ctx)
-			if err != nil {
+			if index, err := w.generateTradeIndex(ctx); err != nil {
 				w.msgChan <- errMsg{ErrMsg: err.Error()}
-			}
-
-			otc, err := w.s.GetOTCSnapshot(ctx)
-			if err != nil {
-				w.msgChan <- errMsg{ErrMsg: err.Error()}
-			}
-
-			nasdaq, err := w.s.GetNasdaqClose()
-			if err != nil {
-				w.msgChan <- errMsg{ErrMsg: err.Error()}
-			}
-
-			w.msgChan <- &tradeIndex{
-				TSE:    tse,
-				OTC:    otc,
-				Nasdaq: nasdaq,
+			} else {
+				w.msgChan <- index
 			}
 		}
 	}
+}
+
+func (w *WSRouter) generateTradeIndex(ctx context.Context) (*tradeIndex, error) {
+	tse, err := w.s.GetTSESnapshot(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	otc, err := w.s.GetOTCSnapshot(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	nasdaq, err := w.s.GetNasdaqClose()
+	if err != nil {
+		return nil, err
+	}
+
+	return &tradeIndex{
+		TSE:    tse,
+		OTC:    otc,
+		Nasdaq: nasdaq,
+	}, nil
+}
+
+func (w *WSRouter) sendPosition(ctx context.Context) {
+	if position, err := w.generatePosition(); err != nil {
+		w.msgChan <- errMsg{ErrMsg: err.Error()}
+	} else {
+		w.msgChan <- position
+	}
+
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-time.After(1500 * time.Millisecond):
+			if position, err := w.generatePosition(); err != nil {
+				w.msgChan <- errMsg{ErrMsg: err.Error()}
+			} else {
+				w.msgChan <- position
+			}
+		}
+	}
+}
+
+func (w *WSRouter) generatePosition() ([]*entity.FuturePosition, error) {
+	position, err := w.o.GetFuturePosition()
+	if err != nil {
+		return nil, err
+	}
+	return position, nil
 }
 
 type tradeIndex struct {

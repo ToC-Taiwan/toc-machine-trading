@@ -203,6 +203,8 @@ type (
 		BuyLaterFuture(order *entity.FutureOrder) (string, entity.OrderStatus, error)
 
 		GetFutureOrderStatusByID(orderID string) (*entity.FutureOrder, error)
+
+		GetFuturePosition() ([]*entity.FuturePosition, error)
 	}
 
 	// OrderRepo -.
@@ -228,6 +230,8 @@ type (
 
 	// OrdergRPCAPI -.
 	OrdergRPCAPI interface {
+		GetFuturePosition() (*pb.FuturePositionArr, error)
+
 		BuyStock(order *entity.StockOrder, sim bool) (*pb.TradeResult, error)
 		SellStock(order *entity.StockOrder, sim bool) (*pb.TradeResult, error)
 		SellFirstStock(order *entity.StockOrder, sim bool) (*pb.TradeResult, error)

@@ -319,36 +319,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/order/balance/manual": {
-            "get": {
-                "description": "getAllManualTradeBalance",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "order"
-                ],
-                "summary": "getAllManualTradeBalance",
-                "operationId": "getAllManualTradeBalance",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/v1.tradeBalance"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/v1.response"
-                        }
-                    }
-                }
-            }
-        },
         "/order/day-trade/forward": {
             "get": {
                 "description": "calculateForwardDayTradeBalance",
@@ -911,9 +881,6 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
-                "manual": {
-                    "type": "boolean"
-                },
                 "reverse": {
                     "type": "integer"
                 },
@@ -1117,9 +1084,6 @@ const docTemplate = `{
                 },
                 "id": {
                     "type": "integer"
-                },
-                "manual": {
-                    "type": "boolean"
                 },
                 "original_balance": {
                     "type": "integer"

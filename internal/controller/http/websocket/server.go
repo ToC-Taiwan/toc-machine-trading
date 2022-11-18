@@ -129,7 +129,7 @@ func (w *WSRouter) write(ctx context.Context) {
 					return
 				}
 
-			case *entity.RealTimeFutureTick, []socketPickStock, *tradeRate, errMsg, *tradeIndex:
+			case *entity.RealTimeFutureTick, []socketPickStock, *tradeRate, errMsg, *tradeIndex, []*entity.FuturePosition:
 				serveMsgStr, err := json.Marshal(v)
 				if err != nil {
 					log.Error(err)

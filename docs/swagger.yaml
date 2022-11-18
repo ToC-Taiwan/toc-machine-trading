@@ -231,8 +231,6 @@ definitions:
         type: integer
       id:
         type: integer
-      manual:
-        type: boolean
       reverse:
         type: integer
       total:
@@ -367,8 +365,6 @@ definitions:
         type: integer
       id:
         type: integer
-      manual:
-        type: boolean
       original_balance:
         type: integer
       reverse:
@@ -642,26 +638,6 @@ paths:
           schema:
             $ref: '#/definitions/v1.response'
       summary: getAllTradeBalance
-      tags:
-      - order
-  /order/balance/manual:
-    get:
-      consumes:
-      - application/json
-      description: getAllManualTradeBalance
-      operationId: getAllManualTradeBalance
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/v1.tradeBalance'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/v1.response'
-      summary: getAllManualTradeBalance
       tags:
       - order
   /order/day-trade/forward:

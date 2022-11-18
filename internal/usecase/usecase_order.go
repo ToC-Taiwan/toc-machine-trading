@@ -640,11 +640,30 @@ func (uc *OrderUseCase) calculateManualFutureTradeBalance(allOrder []*entity.Fut
 		Forward:    forwardBalance,
 		Reverse:    revereBalance,
 		Total:      forwardBalance + revereBalance,
-		Manual:     true,
 	}
 
 	err := uc.repo.InsertOrUpdateFutureTradeBalance(context.Background(), tmp)
 	if err != nil {
 		log.Panic(err)
 	}
+}
+
+// GetFuturePosition .
+func (uc *OrderUseCase) GetFuturePosition() ([]*entity.FuturePosition, error) {
+	query, err := uc.gRPCAPI.GetFuturePosition()
+	if err != nil {
+		return nil, err
+	}
+	var result []*entity.FuturePosition
+	for _, v := range query.GetPositionArr() {
+		result = append(result, &entity.FuturePosition{
+			Code:      v.GetCode(),
+			Direction: v.GetDirection(),
+			Quantity:  int64(v.GetQuantity()),
+			Price:     v.GetPrice(),
+			LastPrice: v.GetLastPrice(),
+			Pnl:       v.GetPnl(),
+		})
+	}
+	return result, nil
 }

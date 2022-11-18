@@ -102,7 +102,6 @@ type StockTradeBalance struct {
 	Discount        int64     `json:"discount"`
 	Total           int64     `json:"total"`
 	TradeDay        time.Time `json:"trade_day"`
-	Manual          bool      `json:"manual"`
 }
 
 // FutureTradeBalance -.
@@ -113,5 +112,14 @@ type FutureTradeBalance struct {
 	Reverse    int64     `json:"reverse"`
 	Total      int64     `json:"total"`
 	TradeDay   time.Time `json:"trade_day"`
-	Manual     bool      `json:"manual"`
+}
+
+// FuturePosition -.
+type FuturePosition struct {
+	Code      string  `json:"code"`
+	Direction string  `json:"direction"`
+	Quantity  int64   `json:"quantity"`
+	Price     float64 `json:"price"`
+	LastPrice float64 `json:"last_price"`
+	Pnl       float64 `json:"pnl"`
 }

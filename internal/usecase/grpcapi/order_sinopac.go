@@ -20,6 +20,18 @@ func NewOrder(client *grpc.Connection) *OrdergRPCAPI {
 	return &OrdergRPCAPI{client}
 }
 
+// GetFuturePosition -.
+func (t *OrdergRPCAPI) GetFuturePosition() (*pb.FuturePositionArr, error) {
+	conn := t.conn.GetReadyConn()
+	defer t.conn.PutReadyConn(conn)
+	c := pb.NewTradeInterfaceClient(conn)
+	r, err := c.GetFuturePosition(context.Background(), &emptypb.Empty{})
+	if err != nil {
+		return nil, err
+	}
+	return r, nil
+}
+
 // BuyStock BuyStock
 func (t *OrdergRPCAPI) BuyStock(order *entity.StockOrder, sim bool) (*pb.TradeResult, error) {
 	conn := t.conn.GetReadyConn()
