@@ -211,6 +211,7 @@ type (
 		GetFutureOrderStatusByID(orderID string) (*entity.FutureOrder, error)
 
 		GetFuturePosition() ([]*entity.FuturePosition, error)
+		IsFutureTradeTime() bool
 	}
 
 	// OrderRepo -.

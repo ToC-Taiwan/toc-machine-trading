@@ -1804,6 +1804,20 @@ func (mr *MockOrderMockRecorder) GetFuturePosition() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFuturePosition", reflect.TypeOf((*MockOrder)(nil).GetFuturePosition))
 }
 
+// IsFutureTradeTime mocks base method.
+func (m *MockOrder) IsFutureTradeTime() bool {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "IsFutureTradeTime")
+	ret0, _ := ret[0].(bool)
+	return ret0
+}
+
+// IsFutureTradeTime indicates an expected call of IsFutureTradeTime.
+func (mr *MockOrderMockRecorder) IsFutureTradeTime() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsFutureTradeTime", reflect.TypeOf((*MockOrder)(nil).IsFutureTradeTime))
+}
+
 // SellFirstFuture mocks base method.
 func (m *MockOrder) SellFirstFuture(order *entity.FutureOrder) (string, entity.OrderStatus, error) {
 	m.ctrl.T.Helper()

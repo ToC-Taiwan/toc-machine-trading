@@ -32,22 +32,22 @@ const (
 // WSRouter -.
 type WSRouter struct {
 	connectionID string
+	msgChan      chan interface{}
+	conn         *websocket.Conn
+	s            usecase.Stream
+	o            usecase.Order
+	ctx          context.Context
 
 	pickStockArr []string
 	mutex        sync.Mutex
-
-	s usecase.Stream
-	o usecase.Order
-
-	conn    *websocket.Conn
-	msgChan chan interface{}
 
 	futureOrderMap map[string]*entity.FutureOrder
 	orderLock      sync.Mutex
 }
 
-type msg struct {
-	Topic         string       `json:"topic"`
+type clientMsg struct {
+	Topic string `json:"topic"`
+
 	PickStockList []string     `json:"pick_stock_list"`
 	FutureOrder   *futureOrder `json:"future_order"`
 }
@@ -82,24 +82,25 @@ func (w *WSRouter) Run(gin *gin.Context, wsType WSType) {
 			log.Errorf("Websocket Close error: %s", err)
 		}
 	}()
-	w.conn = c
-	ctx := gin.Request.Context()
 
-	go w.write(ctx)
+	w.conn = c
+	w.ctx = gin.Request.Context()
+
+	go w.write()
 
 	switch wsType {
 	case WSPickStock:
-		go w.sendPickStockSnapShot(ctx)
+		go w.sendPickStockSnapShot()
 	case WSFuture:
-		go w.sendFuture(ctx)
+		go w.sendFuture()
 	}
 
-	w.read(c)
+	w.read()
 }
 
-func (w *WSRouter) read(c *websocket.Conn) {
+func (w *WSRouter) read() {
 	for {
-		_, message, err := c.ReadMessage()
+		_, message, err := w.conn.ReadMessage()
 		if err != nil {
 			return
 		}
@@ -109,27 +110,28 @@ func (w *WSRouter) read(c *websocket.Conn) {
 			continue
 		}
 
-		var clientMsg msg
-		err = json.Unmarshal(message, &clientMsg)
-		if err != nil {
+		var msg clientMsg
+		if err := json.Unmarshal(message, &msg); err != nil {
+			w.msgChan <- errMsg{ErrMsg: err.Error()}
 			log.Error(err)
-			return
+			continue
 		}
 
-		switch clientMsg.Topic {
+		switch msg.Topic {
 		case "pick_stock":
-			w.updatePickStock(clientMsg)
+			w.updatePickStock(msg)
 		case "future_trade":
-			w.processTrade(clientMsg)
+			w.processTrade(msg)
 		}
 	}
 }
 
-func (w *WSRouter) write(ctx context.Context) {
+func (w *WSRouter) write() {
 	for {
 		select {
-		case <-ctx.Done():
+		case <-w.ctx.Done():
 			return
+
 		case cl := <-w.msgChan:
 			switch v := cl.(type) {
 			case string:
@@ -138,19 +140,14 @@ func (w *WSRouter) write(ctx context.Context) {
 				}
 
 			case *entity.RealTimeFutureTick, []socketPickStock, *tradeRate, errMsg, *tradeIndex, *futurePosition, *entity.FutureOrder:
-				serveMsgStr, err := json.Marshal(v)
-				if err != nil {
+				if serveMsgStr, err := json.Marshal(v); err != nil {
 					log.Error(err)
-					return
-				}
-
-				if err := w.send(serveMsgStr); err != nil {
+				} else if err := w.send(serveMsgStr); err != nil {
 					return
 				}
 
 			default:
 				log.Warn("Unknown socket message type")
-				continue
 			}
 		}
 	}

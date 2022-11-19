@@ -1,10 +1,19 @@
 package websocket
 
 import (
-	"context"
+	"errors"
 	"time"
 
 	"tmt/internal/entity"
+)
+
+type AutomationType int
+
+const (
+	// WSPickStock -
+	AutomationByTime AutomationType = iota + 1
+	// WSFuture -
+	AutomationByBalance
 )
 
 type futureOrder struct {
@@ -17,55 +26,29 @@ type futureOrder struct {
 	AutomationType AutomationType `json:"automation_type"`
 }
 
-type AutomationType int
-
-const (
-	// WSPickStock -
-	AutomationByTime AutomationType = iota + 1
-	// WSFuture -
-	AutomationByBalance
-)
-
 type tradeRate struct {
 	OutRate int64 `json:"out_rate"`
 	InRate  int64 `json:"in_rate"`
+}
+
+type tradeIndex struct {
+	TSE    *entity.StockSnapShot `json:"tse"`
+	OTC    *entity.StockSnapShot `json:"otc"`
+	Nasdaq *entity.YahooPrice    `json:"nasdaq"`
+	NF     *entity.YahooPrice    `json:"nf"`
 }
 
 type futurePosition struct {
 	Position []*entity.FuturePosition `json:"position"`
 }
 
-func (w *WSRouter) cancelOverTimeOrder(ctx context.Context) {
-	for {
-		select {
-		case <-ctx.Done():
-			return
-		case <-time.After(time.Second):
-			w.orderLock.Lock()
-			for _, order := range w.futureOrderMap {
-				if order.Status == entity.StatusFilled || order.Status == entity.StatusCancelled {
-					delete(w.futureOrderMap, order.OrderID)
-					continue
-				}
-
-				if time.Since(order.TradeTime) > 10*time.Second {
-					w.cancelOrderByID(order.OrderID)
-				}
-			}
-			w.orderLock.Unlock()
-		}
-	}
-}
-
-func (w *WSRouter) cancelOrderByID(orderID string) {
-	_, _, err := w.o.CancelFutureOrderID(orderID)
-	if err != nil {
-		w.msgChan <- errMsg{err.Error()}
-	}
-}
-
-func (w *WSRouter) processTrade(clientMsg msg) {
+func (w *WSRouter) processTrade(clientMsg clientMsg) {
 	if clientMsg.FutureOrder == nil {
+		return
+	}
+
+	if !w.o.IsFutureTradeTime() {
+		w.msgChan <- errMsg{ErrMsg: "Not trade time"}
 		return
 	}
 
@@ -76,10 +59,11 @@ func (w *WSRouter) processTrade(clientMsg msg) {
 			Quantity: clientMsg.FutureOrder.Qty,
 			Price:    clientMsg.FutureOrder.Price,
 		},
+		Manual: true,
 	}
 
 	var err error
-	switch clientMsg.FutureOrder.Action {
+	switch order.Action {
 	case entity.ActionBuy:
 		order.OrderID, order.Status, err = w.o.BuyFuture(order)
 		if err != nil {
@@ -103,83 +87,30 @@ func (w *WSRouter) processTrade(clientMsg msg) {
 	w.orderLock.Unlock()
 }
 
-func (w *WSRouter) sendFuture(ctx context.Context) {
+func (w *WSRouter) sendFuture() {
 	snapshot, err := w.s.GetFutureSnapshotByCode(w.s.GetMainFutureCode())
 	if err != nil {
 		w.msgChan <- errMsg{ErrMsg: err.Error()}
-	}
-
-	var tickType, chgType int64
-	switch snapshot.TickType {
-	case "Sell":
-		tickType = 1
-	case "Buy":
-		tickType = 2
-	}
-
-	switch snapshot.ChgType {
-	case "LimitUp":
-		chgType = 1
-	case "Up":
-		chgType = 2
-	case "Unchanged":
-		chgType = 3
-	case "Dowm":
-		chgType = 4
-	case "LimitDown":
-		chgType = 5
-	}
-
-	w.msgChan <- &entity.RealTimeFutureTick{
-		Code:        snapshot.Code,
-		TickTime:    snapshot.SnapTime,
-		Open:        snapshot.Open,
-		Close:       snapshot.Close,
-		High:        snapshot.High,
-		Low:         snapshot.Low,
-		Amount:      float64(snapshot.Amount),
-		TotalAmount: float64(snapshot.AmountSum),
-		Volume:      snapshot.Volume,
-		TotalVolume: snapshot.VolumeSum,
-		TickType:    tickType,
-		ChgType:     chgType,
-		PriceChg:    snapshot.PriceChg,
-		PctChg:      snapshot.PctChg,
+	} else {
+		w.msgChan <- snapshot.ToRealTimeFutureTick()
 	}
 
 	tickChan := make(chan *entity.RealTimeFutureTick)
 	orderStatusChan := make(chan interface{})
-
-	go w.processOrderStatus(orderStatusChan)
 	go w.processTickArr(tickChan)
-	go w.sendTradeIndex(ctx)
-	go w.sendPosition(ctx)
-	go w.cancelOverTimeOrder(ctx)
+	go w.processOrderStatus(orderStatusChan)
+
+	go w.sendTradeIndex()
+	go w.sendPosition()
+	go w.cancelOverTimeOrder()
 
 	w.s.NewFutureRealTimeConnection(tickChan, w.connectionID)
 	w.s.NewOrderStatusConnection(orderStatusChan, w.connectionID)
 
-	<-ctx.Done()
+	<-w.ctx.Done()
+
 	w.s.DeleteFutureRealTimeConnection(w.connectionID)
 	w.s.DeleteOrderStatusConnection(w.connectionID)
-}
-
-func (w *WSRouter) processOrderStatus(orderStatusChan chan interface{}) {
-	for {
-		order, ok := <-orderStatusChan
-		if !ok {
-			return
-		}
-
-		if o, ok := order.(*entity.FutureOrder); ok {
-			w.orderLock.Lock()
-			if cache := w.futureOrderMap[o.OrderID]; cache != nil && cache.Status != o.Status {
-				w.msgChan <- o
-				w.futureOrderMap[o.OrderID] = o
-			}
-			w.orderLock.Unlock()
-		}
-	}
 }
 
 func (w *WSRouter) processTickArr(tickChan chan *entity.RealTimeFutureTick) {
@@ -214,8 +145,27 @@ func (w *WSRouter) processTickArr(tickChan chan *entity.RealTimeFutureTick) {
 	}
 }
 
-func (w *WSRouter) sendTradeIndex(ctx context.Context) {
-	if index, err := w.generateTradeIndex(ctx); err != nil {
+func (w *WSRouter) processOrderStatus(orderStatusChan chan interface{}) {
+	for {
+		order, ok := <-orderStatusChan
+		if !ok {
+			return
+		}
+
+		if o, ok := order.(*entity.FutureOrder); ok {
+			w.orderLock.Lock()
+			if cache := w.futureOrderMap[o.OrderID]; cache != nil && cache.Status != o.Status {
+				w.msgChan <- o
+				o.TradeTime = cache.TradeTime
+				w.futureOrderMap[o.OrderID] = o
+			}
+			w.orderLock.Unlock()
+		}
+	}
+}
+
+func (w *WSRouter) sendTradeIndex() {
+	if index, err := w.generateTradeIndex(); err != nil {
 		w.msgChan <- errMsg{ErrMsg: err.Error()}
 	} else {
 		w.msgChan <- index
@@ -223,10 +173,11 @@ func (w *WSRouter) sendTradeIndex(ctx context.Context) {
 
 	for {
 		select {
-		case <-ctx.Done():
+		case <-w.ctx.Done():
 			return
+
 		case <-time.After(5 * time.Second):
-			if index, err := w.generateTradeIndex(ctx); err != nil {
+			if index, err := w.generateTradeIndex(); err != nil {
 				w.msgChan <- errMsg{ErrMsg: err.Error()}
 			} else {
 				w.msgChan <- index
@@ -235,13 +186,75 @@ func (w *WSRouter) sendTradeIndex(ctx context.Context) {
 	}
 }
 
-func (w *WSRouter) generateTradeIndex(ctx context.Context) (*tradeIndex, error) {
+func (w *WSRouter) sendPosition() {
+	if position, err := w.generatePosition(); err != nil {
+		w.msgChan <- errMsg{ErrMsg: err.Error()}
+	} else {
+		w.msgChan <- &futurePosition{position}
+	}
+
+	for {
+		select {
+		case <-w.ctx.Done():
+			return
+
+		case <-time.After(5 * time.Second):
+			if position, err := w.generatePosition(); err != nil {
+				w.msgChan <- errMsg{ErrMsg: err.Error()}
+			} else {
+				w.msgChan <- &futurePosition{position}
+			}
+		}
+	}
+}
+
+func (w *WSRouter) cancelOverTimeOrder() {
+	cancelOrderMap := make(map[string]*entity.FutureOrder)
+	for {
+		select {
+		case <-w.ctx.Done():
+			return
+
+		case <-time.After(time.Second):
+			w.orderLock.Lock()
+			for id, order := range w.futureOrderMap {
+				if !order.Cancellabel() {
+					delete(w.futureOrderMap, id)
+					delete(cancelOrderMap, id)
+					log.Warnf("Order %s is filled or cancelled, delete it", id)
+				} else if time.Since(order.TradeTime) > 10*time.Second && cancelOrderMap[id] == nil {
+					if e := w.cancelOrderByID(id); e != nil {
+						w.msgChan <- errMsg{ErrMsg: e.Error()}
+					}
+					cancelOrderMap[id] = order
+					log.Warnf("Order %s is timeout, cancel it", id)
+				}
+			}
+			w.orderLock.Unlock()
+		}
+	}
+}
+
+func (w *WSRouter) cancelOrderByID(orderID string) error {
+	_, s, err := w.o.CancelFutureOrderID(orderID)
+	if err != nil {
+		return err
+	}
+
+	if s != entity.StatusCancelled {
+		return errors.New("cancel order failed")
+	}
+
+	return nil
+}
+
+func (w *WSRouter) generateTradeIndex() (*tradeIndex, error) {
 	nf, err := w.s.GetNasdaqFutureClose()
 	if err != nil {
 		return nil, err
 	}
 
-	tse, err := w.s.GetTSESnapshot(ctx)
+	tse, err := w.s.GetTSESnapshot(w.ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -251,7 +264,7 @@ func (w *WSRouter) generateTradeIndex(ctx context.Context) (*tradeIndex, error) 
 		return nil, err
 	}
 
-	otc, err := w.s.GetOTCSnapshot(ctx)
+	otc, err := w.s.GetOTCSnapshot(w.ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -264,38 +277,10 @@ func (w *WSRouter) generateTradeIndex(ctx context.Context) (*tradeIndex, error) 
 	}, nil
 }
 
-func (w *WSRouter) sendPosition(ctx context.Context) {
-	if position, err := w.generatePosition(); err != nil {
-		w.msgChan <- errMsg{ErrMsg: err.Error()}
-	} else {
-		w.msgChan <- &futurePosition{position}
-	}
-
-	for {
-		select {
-		case <-ctx.Done():
-			return
-		case <-time.After(1500 * time.Millisecond):
-			if position, err := w.generatePosition(); err != nil {
-				w.msgChan <- errMsg{ErrMsg: err.Error()}
-			} else {
-				w.msgChan <- &futurePosition{position}
-			}
-		}
-	}
-}
-
 func (w *WSRouter) generatePosition() ([]*entity.FuturePosition, error) {
 	position, err := w.o.GetFuturePosition()
 	if err != nil {
 		return nil, err
 	}
 	return position, nil
-}
-
-type tradeIndex struct {
-	TSE    *entity.StockSnapShot `json:"tse"`
-	OTC    *entity.StockSnapShot `json:"otc"`
-	Nasdaq *entity.YahooPrice    `json:"nasdaq"`
-	NF     *entity.YahooPrice    `json:"nf"`
 }

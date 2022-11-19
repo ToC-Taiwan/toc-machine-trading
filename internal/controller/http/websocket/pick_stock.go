@@ -1,7 +1,6 @@
 package websocket
 
 import (
-	"context"
 	"time"
 )
 
@@ -15,16 +14,16 @@ type socketPickStock struct {
 	Wrong           bool    `json:"wrong"`
 }
 
-func (w *WSRouter) updatePickStock(clientMsg msg) {
+func (w *WSRouter) updatePickStock(clientMsg clientMsg) {
 	w.mutex.Lock()
 	w.pickStockArr = clientMsg.PickStockList
 	w.mutex.Unlock()
 }
 
-func (w *WSRouter) sendPickStockSnapShot(ctx context.Context) {
+func (w *WSRouter) sendPickStockSnapShot() {
 	for {
 		select {
-		case <-ctx.Done():
+		case <-w.ctx.Done():
 			return
 
 		case <-time.After(time.Second):

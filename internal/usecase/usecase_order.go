@@ -641,3 +641,19 @@ func (uc *OrderUseCase) GetFuturePosition() ([]*entity.FuturePosition, error) {
 	}
 	return result, nil
 }
+
+func (uc *OrderUseCase) IsFutureTradeTime() bool {
+	firstEndTime := uc.futureTradeDay.StartTime.Add(14 * time.Hour)
+	secondStartTime := uc.futureTradeDay.EndTime.Add(-5 * time.Hour)
+
+	now := time.Now()
+	if now.After(uc.futureTradeDay.StartTime) && now.Before(firstEndTime) {
+		return true
+	}
+
+	if now.After(secondStartTime) && now.Before(uc.futureTradeDay.EndTime) {
+		return true
+	}
+
+	return false
+}

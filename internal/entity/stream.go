@@ -131,6 +131,46 @@ type FutureSnapShot struct {
 	SnapShotBase
 }
 
+func (f *FutureSnapShot) ToRealTimeFutureTick() *RealTimeFutureTick {
+	var tickType, chgType int64
+	switch f.TickType {
+	case "Sell":
+		tickType = 1
+	case "Buy":
+		tickType = 2
+	}
+
+	switch f.ChgType {
+	case "LimitUp":
+		chgType = 1
+	case "Up":
+		chgType = 2
+	case "Unchanged":
+		chgType = 3
+	case "Dowm":
+		chgType = 4
+	case "LimitDown":
+		chgType = 5
+	}
+
+	return &RealTimeFutureTick{
+		Code:        f.Code,
+		TickTime:    f.SnapTime,
+		Open:        f.Open,
+		Close:       f.Close,
+		High:        f.High,
+		Low:         f.Low,
+		Amount:      float64(f.Amount),
+		TotalAmount: float64(f.AmountSum),
+		Volume:      f.Volume,
+		TotalVolume: f.VolumeSum,
+		TickType:    tickType,
+		ChgType:     chgType,
+		PriceChg:    f.PriceChg,
+		PctChg:      f.PctChg,
+	}
+}
+
 // SnapShotBase -.
 type SnapShotBase struct {
 	SnapTime        time.Time `json:"snap_time"`
