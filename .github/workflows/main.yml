@@ -52,6 +52,9 @@ jobs:
         steps:
             - name: Checkout
               uses: actions/checkout@v3
+            - name: Set outputs
+              id: vars
+              run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
             - name: Set up QEMU
               uses: docker/setup-qemu-action@v2
@@ -69,7 +72,9 @@ jobs:
               uses: docker/build-push-action@v3
               with:
                   push: true
-                  tags: ${{ secrets.DOCKERHUB_USERNAME }}/toc-machine-trading:latest
+                  tags: |
+                      ${{ secrets.DOCKERHUB_USERNAME }}/toc-machine-trading:${{ steps.vars.outputs.sha_short }}
+                      ${{ secrets.DOCKERHUB_USERNAME }}/toc-machine-trading:latest
 
     Deployment:
         needs: Build
