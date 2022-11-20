@@ -672,5 +672,18 @@ func (uc *OrderUseCase) GetFutureOrderByTradeDay(ctx context.Context, tradeDay s
 	if err != nil {
 		return nil, err
 	}
-	return uc.repo.QueryAllFutureOrderByDate(ctx, []time.Time{period.StartTime, period.EndTime})
+
+	orders, err := uc.repo.QueryAllFutureOrderByDate(ctx, []time.Time{period.StartTime, period.EndTime})
+	if err != nil {
+		return nil, err
+	}
+
+	var filledOrder []*entity.FutureOrder
+	for _, v := range orders {
+		if v.Status == entity.StatusFilled {
+			filledOrder = append(filledOrder, v)
+		}
+	}
+
+	return filledOrder, nil
 }
