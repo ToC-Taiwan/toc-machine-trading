@@ -92,6 +92,19 @@ type StockOrder struct {
 	Manual   bool   `json:"manual"`
 }
 
+func (s *StockOrder) ToManual() {
+	s.Manual = true
+	s.GroupID = "-"
+
+	// TODO: check sinopac
+	if time.Since(s.OrderTime) > 12*time.Hour {
+		s.OrderTime = time.Now()
+	}
+
+	s.TradeTime = s.OrderTime
+	s.TickTime = s.OrderTime
+}
+
 // FutureOrder -.
 type FutureOrder struct {
 	BaseOrder `json:"base_order"`
@@ -99,6 +112,19 @@ type FutureOrder struct {
 	Code   string  `json:"code"`
 	Future *Future `json:"future"`
 	Manual bool    `json:"manual"`
+}
+
+func (f *FutureOrder) ToManual() {
+	f.Manual = true
+	f.GroupID = "-"
+
+	// TODO: check sinopac
+	if time.Since(f.OrderTime) > 12*time.Hour {
+		f.OrderTime = time.Now()
+	}
+
+	f.TradeTime = f.OrderTime
+	f.TickTime = f.OrderTime
 }
 
 // StockTradeBalance -.
