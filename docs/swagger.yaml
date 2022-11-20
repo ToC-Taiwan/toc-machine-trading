@@ -399,6 +399,25 @@ definitions:
       balance:
         type: integer
     type: object
+  v1.manualInsertFutureOrderRequest:
+    properties:
+      action:
+        type: integer
+      code:
+        type: string
+      order_time:
+        type: string
+      price:
+        type: number
+      quantity:
+        type: integer
+    required:
+    - action
+    - code
+    - order_time
+    - price
+    - quantity
+    type: object
   v1.reborn:
     properties:
       date:
@@ -600,6 +619,31 @@ paths:
       summary: simulateFuture
       tags:
       - history
+  /order:
+    post:
+      consumes:
+      - application/json
+      description: manualInsertFutureOrder
+      operationId: manualInsertFutureOrder
+      parameters:
+      - description: Body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/v1.manualInsertFutureOrderRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+      summary: manualInsertFutureOrder
+      tags:
+      - order
   /order/all:
     get:
       consumes:

@@ -212,6 +212,8 @@ type (
 
 		GetFuturePosition() ([]*entity.FuturePosition, error)
 		IsFutureTradeTime() bool
+
+		ManualInsertFutureOrder(ctx context.Context, order *entity.FutureOrder) error
 	}
 
 	// OrderRepo -.

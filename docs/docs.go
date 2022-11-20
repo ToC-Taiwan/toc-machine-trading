@@ -259,6 +259,44 @@ const docTemplate = `{
                 }
             }
         },
+        "/order": {
+            "post": {
+                "description": "manualInsertFutureOrder",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "order"
+                ],
+                "summary": "manualInsertFutureOrder",
+                "operationId": "manualInsertFutureOrder",
+                "parameters": [
+                    {
+                        "description": "Body",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/v1.manualInsertFutureOrderRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/v1.response"
+                        }
+                    }
+                }
+            }
+        },
         "/order/all": {
             "get": {
                 "description": "getAllOrder",
@@ -1134,6 +1172,33 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "balance": {
+                    "type": "integer"
+                }
+            }
+        },
+        "v1.manualInsertFutureOrderRequest": {
+            "type": "object",
+            "required": [
+                "action",
+                "code",
+                "order_time",
+                "price",
+                "quantity"
+            ],
+            "properties": {
+                "action": {
+                    "type": "integer"
+                },
+                "code": {
+                    "type": "string"
+                },
+                "order_time": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "number"
+                },
+                "quantity": {
                     "type": "integer"
                 }
             }

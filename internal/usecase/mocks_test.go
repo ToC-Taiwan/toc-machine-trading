@@ -1818,6 +1818,20 @@ func (mr *MockOrderMockRecorder) IsFutureTradeTime() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsFutureTradeTime", reflect.TypeOf((*MockOrder)(nil).IsFutureTradeTime))
 }
 
+// ManualInsertFutureOrder mocks base method.
+func (m *MockOrder) ManualInsertFutureOrder(ctx context.Context, order *entity.FutureOrder) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ManualInsertFutureOrder", ctx, order)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// ManualInsertFutureOrder indicates an expected call of ManualInsertFutureOrder.
+func (mr *MockOrderMockRecorder) ManualInsertFutureOrder(ctx, order interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ManualInsertFutureOrder", reflect.TypeOf((*MockOrder)(nil).ManualInsertFutureOrder), ctx, order)
+}
+
 // SellFirstFuture mocks base method.
 func (m *MockOrder) SellFirstFuture(order *entity.FutureOrder) (string, entity.OrderStatus, error) {
 	m.ctrl.T.Helper()

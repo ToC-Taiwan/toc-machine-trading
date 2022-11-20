@@ -3,9 +3,12 @@ package v1
 import (
 	"net/http"
 	"strconv"
+	"time"
 
 	"tmt/internal/entity"
 	"tmt/internal/usecase"
+	"tmt/pkg/common"
+	"tmt/pkg/utils"
 
 	"github.com/gin-gonic/gin"
 )
@@ -21,6 +24,8 @@ func newOrderRoutes(handler *gin.RouterGroup, t usecase.Order) {
 	{
 		h.GET("/all", r.getAllOrder)
 		h.GET("/balance", r.getAllTradeBalance)
+
+		h.POST("", r.manualInsertFutureOrder)
 
 		h.GET("/day-trade/forward", r.calculateForwardDayTradeBalance)
 		h.GET("/day-trade/reverse", r.calculateReverseDayTradeBalance)
@@ -61,6 +66,61 @@ func (r *orderRoutes) getAllOrder(c *gin.Context) {
 		Stock:  stockOrderArr,
 		Future: futureOrderArr,
 	})
+}
+
+type manualInsertFutureOrderRequest struct {
+	Code      string             `json:"code"       binding:"required"`
+	Price     float64            `json:"price"      binding:"required"`
+	Quantity  int64              `json:"quantity"   binding:"required"`
+	OrderTime string             `json:"order_time" binding:"required"`
+	Action    entity.OrderAction `json:"action"     binding:"required"`
+}
+
+// @Summary     manualInsertFutureOrder
+// @Description manualInsertFutureOrder
+// @ID          manualInsertFutureOrder
+// @Tags  	    order
+// @Accept      json
+// @Produce     json
+// @param body body manualInsertFutureOrderRequest{} true "Body"
+// @Success     200
+// @Failure     500 {object} response
+// @Router      /order [post]
+func (r *orderRoutes) manualInsertFutureOrder(c *gin.Context) {
+	body := &manualInsertFutureOrderRequest{}
+	if err := c.BindJSON(body); err != nil {
+		errorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	orderTime, err := time.ParseInLocation(common.LongTimeLayout, body.OrderTime, time.Local)
+	if err != nil {
+		errorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	order := &entity.FutureOrder{
+		BaseOrder: entity.BaseOrder{
+			GroupID:   "-",
+			OrderID:   utils.RandomASCIILowerOctdigitsString(8),
+			Status:    entity.StatusFilled,
+			Action:    body.Action,
+			Price:     body.Price,
+			Quantity:  body.Quantity,
+			TradeTime: orderTime,
+			TickTime:  orderTime,
+			OrderTime: orderTime,
+		},
+		Code:   body.Code,
+		Manual: true,
+	}
+
+	if err := r.t.ManualInsertFutureOrder(c.Request.Context(), order); err != nil {
+		errorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, nil)
 }
 
 type tradeBalance struct {

@@ -311,7 +311,7 @@ func (uc *OrderUseCase) updateStockOrderCacheAndInsertDB(order *entity.StockOrde
 func (uc *OrderUseCase) calculateStockTradeBalance(allOrders []*entity.StockOrder) {
 	var forwardOrder, reverseOrder []*entity.StockOrder
 	for _, v := range allOrders {
-		if v.Status != entity.StatusFilled || v.Manual {
+		if v.Status != entity.StatusFilled {
 			continue
 		}
 
@@ -444,6 +444,18 @@ func (uc *OrderUseCase) updateFutureOrderCacheAndInsertDB(order *entity.FutureOr
 	}
 }
 
+func (uc *OrderUseCase) ManualInsertFutureOrder(ctx context.Context, order *entity.FutureOrder) error {
+	defer uc.updateFutureOrderLock.Unlock()
+	uc.updateFutureOrderLock.Lock()
+
+	// insert or update order to db
+	if err := uc.repo.InsertOrUpdateFutureOrderByOrderID(context.Background(), order); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // BuyFuture -.
 func (uc *OrderUseCase) BuyFuture(order *entity.FutureOrder) (string, entity.OrderStatus, error) {
 	result, err := uc.gRPCAPI.BuyFuture(order, uc.simTrade)
@@ -523,7 +535,7 @@ func (uc *OrderUseCase) CancelFutureOrderID(orderID string) (string, entity.Orde
 func (uc *OrderUseCase) calculateFutureTradeBalance(allOrders []*entity.FutureOrder) {
 	var forwardOrder, reverseOrder []*entity.FutureOrder
 	for _, v := range allOrders {
-		if v.Status != entity.StatusFilled || v.Manual {
+		if v.Status != entity.StatusFilled {
 			continue
 		}
 
