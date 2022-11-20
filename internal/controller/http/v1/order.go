@@ -22,10 +22,10 @@ func newOrderRoutes(handler *gin.RouterGroup, t usecase.Order) {
 
 	h := handler.Group("/order")
 	{
-		h.GET("/all", r.getAllOrder)
-		h.GET("/balance", r.getAllTradeBalance)
-
 		h.POST("", r.manualInsertFutureOrder)
+		h.GET("/all", r.getAllOrder)
+		h.GET("/date/:tradeday", r.getAllOrderByTradeDay)
+		h.GET("/balance", r.getAllTradeBalance)
 
 		h.GET("/day-trade/forward", r.calculateForwardDayTradeBalance)
 		h.GET("/day-trade/reverse", r.calculateReverseDayTradeBalance)
@@ -66,6 +66,35 @@ func (r *orderRoutes) getAllOrder(c *gin.Context) {
 		Stock:  stockOrderArr,
 		Future: futureOrderArr,
 	})
+}
+
+type futureOrders struct {
+	Orders []*entity.FutureOrder `json:"orders"`
+}
+
+// @Summary     getAllOrderByTradeDay
+// @Description getAllOrderByTradeDay
+// @ID          getAllOrderByTradeDay
+// @Tags  	    order
+// @Accept      json
+// @Produce     json
+// @param tradeday path string true "tradeday"
+// @Success     200 {object} futureOrders
+// @Failure     500 {object} response
+// @Router      /order/date/{tradeday} [get]
+func (r *orderRoutes) getAllOrderByTradeDay(c *gin.Context) {
+	tradeDay := c.Param("tradeday")
+	if tradeDay == "" {
+		errorResponse(c, http.StatusInternalServerError, "tradeday is empty")
+		return
+	}
+
+	futureOrderArr, err := r.t.GetFutureOrderByTradeDay(c.Request.Context(), tradeDay)
+	if err != nil {
+		errorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	c.JSON(http.StatusOK, futureOrders{futureOrderArr})
 }
 
 type manualInsertFutureOrderRequest struct {

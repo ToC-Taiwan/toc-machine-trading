@@ -190,17 +190,17 @@ type (
 type (
 	// Order -.
 	Order interface {
-		GetAllStockOrder(ctx context.Context) ([]*entity.StockOrder, error)
-		GetAllFutureOrder(ctx context.Context) ([]*entity.FutureOrder, error)
-
-		GetAllStockTradeBalance(ctx context.Context) ([]*entity.StockTradeBalance, error)
-		GetAllFutureTradeBalance(ctx context.Context) ([]*entity.FutureTradeBalance, error)
+		AskOrderUpdate() error
 
 		CalculateBuyCost(price float64, quantity int64) int64
 		CalculateSellCost(price float64, quantity int64) int64
 		CalculateTradeDiscount(price float64, quantity int64) int64
 
-		AskOrderUpdate() error
+		GetAllStockOrder(ctx context.Context) ([]*entity.StockOrder, error)
+		GetAllFutureOrder(ctx context.Context) ([]*entity.FutureOrder, error)
+		GetAllStockTradeBalance(ctx context.Context) ([]*entity.StockTradeBalance, error)
+		GetAllFutureTradeBalance(ctx context.Context) ([]*entity.FutureTradeBalance, error)
+		GetFutureOrderByTradeDay(ctx context.Context, tradeDay string) ([]*entity.FutureOrder, error)
 
 		BuyFuture(order *entity.FutureOrder) (string, entity.OrderStatus, error)
 		SellFuture(order *entity.FutureOrder) (string, entity.OrderStatus, error)
@@ -208,11 +208,8 @@ type (
 		BuyLaterFuture(order *entity.FutureOrder) (string, entity.OrderStatus, error)
 		CancelFutureOrderID(orderID string) (string, entity.OrderStatus, error)
 
-		GetFutureOrderStatusByID(orderID string) (*entity.FutureOrder, error)
-
 		GetFuturePosition() ([]*entity.FuturePosition, error)
 		IsFutureTradeTime() bool
-
 		ManualInsertFutureOrder(ctx context.Context, order *entity.FutureOrder) error
 	}
 

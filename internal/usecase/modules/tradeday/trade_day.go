@@ -3,6 +3,7 @@ package tradeday
 
 import (
 	"encoding/json"
+	"errors"
 	"os"
 	"time"
 
@@ -89,6 +90,33 @@ func (t *TradeDay) GetFutureTradeDay() TradePeriod {
 	}
 
 	return TradePeriod{startTime, endTime, tradeDay, t}
+}
+
+// GetFutureTradePeriodByDate -.
+func (t *TradeDay) GetFutureTradePeriodByDate(date string) (TradePeriod, error) {
+	d, err := time.ParseInLocation(common.ShortTimeLayout, date, time.Local)
+	if err != nil {
+		return TradePeriod{}, err
+	}
+
+	var startTime, endTime, tradeDay time.Time
+	if t.isTradeDay(d) {
+		tradeDay = d
+		endTime = d.Add(13 * time.Hour).Add(45 * time.Minute)
+	} else {
+		return TradePeriod{}, errors.New("not trade day")
+	}
+
+	d = d.AddDate(0, 0, -1)
+	for {
+		if t.isTradeDay(d) {
+			startTime = d.Add(15 * time.Hour)
+			break
+		}
+		d = d.AddDate(0, 0, -1)
+	}
+
+	return TradePeriod{startTime, endTime, tradeDay, t}, nil
 }
 
 // GetLastNFutureTradeDay -.

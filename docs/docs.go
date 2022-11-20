@@ -357,6 +357,45 @@ const docTemplate = `{
                 }
             }
         },
+        "/order/date/{tradeday}": {
+            "get": {
+                "description": "getAllOrderByTradeDay",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "order"
+                ],
+                "summary": "getAllOrderByTradeDay",
+                "operationId": "getAllOrderByTradeDay",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "tradeday",
+                        "name": "tradeday",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v1.futureOrders"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/v1.response"
+                        }
+                    }
+                }
+            }
+        },
         "/order/day-trade/forward": {
             "get": {
                 "description": "calculateForwardDayTradeBalance",
@@ -1173,6 +1212,17 @@ const docTemplate = `{
             "properties": {
                 "balance": {
                     "type": "integer"
+                }
+            }
+        },
+        "v1.futureOrders": {
+            "type": "object",
+            "properties": {
+                "orders": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entity.FutureOrder"
+                    }
                 }
             }
         },

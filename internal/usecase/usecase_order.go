@@ -24,6 +24,7 @@ type OrderUseCase struct {
 	placeOrderLock       sync.Mutex
 	placeFutureOrderLock sync.Mutex
 
+	tradeDay       *tradeday.TradeDay
 	stockTradeDay  tradeday.TradePeriod
 	futureTradeDay tradeday.TradePeriod
 
@@ -44,6 +45,7 @@ func NewOrder(t OrdergRPCAPI, r OrderRepo) *OrderUseCase {
 		repo:    r,
 		quota:   quota.NewQuota(cfg.Quota),
 
+		tradeDay:       tradeDay,
 		stockTradeDay:  tradeDay.GetStockTradeDay(),
 		futureTradeDay: tradeDay.GetFutureTradeDay(),
 	}
@@ -629,11 +631,6 @@ func (uc *OrderUseCase) CalculateTradeDiscount(price float64, quantity int64) in
 	return uc.quota.GetStockTradeFeeDiscount(price, quantity)
 }
 
-// GetFutureOrderStatusByID -.
-func (uc *OrderUseCase) GetFutureOrderStatusByID(orderID string) (*entity.FutureOrder, error) {
-	return uc.repo.QueryFutureOrderByID(context.Background(), orderID)
-}
-
 // GetFuturePosition .
 func (uc *OrderUseCase) GetFuturePosition() ([]*entity.FuturePosition, error) {
 	query, err := uc.gRPCAPI.GetFuturePosition()
@@ -668,4 +665,12 @@ func (uc *OrderUseCase) IsFutureTradeTime() bool {
 	}
 
 	return false
+}
+
+func (uc *OrderUseCase) GetFutureOrderByTradeDay(ctx context.Context, tradeDay string) ([]*entity.FutureOrder, error) {
+	period, err := uc.tradeDay.GetFutureTradePeriodByDate(tradeDay)
+	if err != nil {
+		return nil, err
+	}
+	return uc.repo.QueryAllFutureOrderByDate(ctx, []time.Time{period.StartTime, period.EndTime})
 }
