@@ -31,13 +31,6 @@ type tradeRate struct {
 	InRate  int64 `json:"in_rate"`
 }
 
-type tradeIndex struct {
-	TSE    *entity.StockSnapShot `json:"tse"`
-	OTC    *entity.StockSnapShot `json:"otc"`
-	Nasdaq *entity.YahooPrice    `json:"nasdaq"`
-	NF     *entity.YahooPrice    `json:"nf"`
-}
-
 type futurePosition struct {
 	Position []*entity.FuturePosition `json:"position"`
 }
@@ -165,11 +158,7 @@ func (w *WSRouter) processOrderStatus(orderStatusChan chan interface{}) {
 }
 
 func (w *WSRouter) sendTradeIndex() {
-	if index, err := w.generateTradeIndex(); err != nil {
-		w.msgChan <- errMsg{ErrMsg: err.Error()}
-	} else {
-		w.msgChan <- index
-	}
+	w.msgChan <- w.generateTradeIndex()
 
 	for {
 		select {
@@ -177,11 +166,7 @@ func (w *WSRouter) sendTradeIndex() {
 			return
 
 		case <-time.After(5 * time.Second):
-			if index, err := w.generateTradeIndex(); err != nil {
-				w.msgChan <- errMsg{ErrMsg: err.Error()}
-			} else {
-				w.msgChan <- index
-			}
+			w.msgChan <- w.generateTradeIndex()
 		}
 	}
 }
@@ -248,33 +233,8 @@ func (w *WSRouter) cancelOrderByID(orderID string) error {
 	return nil
 }
 
-func (w *WSRouter) generateTradeIndex() (*tradeIndex, error) {
-	nf, err := w.s.GetNasdaqFutureClose()
-	if err != nil {
-		return nil, err
-	}
-
-	tse, err := w.s.GetTSESnapshot(w.ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	nasdaq, err := w.s.GetNasdaqClose()
-	if err != nil {
-		return nil, err
-	}
-
-	otc, err := w.s.GetOTCSnapshot(w.ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return &tradeIndex{
-		TSE:    tse,
-		OTC:    otc,
-		Nasdaq: nasdaq,
-		NF:     nf,
-	}, nil
+func (w *WSRouter) generateTradeIndex() *entity.TradeIndex {
+	return w.s.GetTradeIndex()
 }
 
 func (w *WSRouter) generatePosition() ([]*entity.FuturePosition, error) {

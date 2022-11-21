@@ -139,15 +139,12 @@ func (w *WSRouter) write() {
 					return
 				}
 
-			case *entity.RealTimeFutureTick, []socketPickStock, *tradeRate, errMsg, *tradeIndex, *futurePosition, *entity.FutureOrder:
+			default:
 				if serveMsgStr, err := json.Marshal(v); err != nil {
 					log.Error(err)
 				} else if err := w.send(serveMsgStr); err != nil {
 					return
 				}
-
-			default:
-				log.Warn("Unknown socket message type")
 			}
 		}
 	}

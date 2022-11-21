@@ -192,6 +192,14 @@ type SnapShotBase struct {
 
 // YahooPrice -.
 type YahooPrice struct {
-	Last  float64 `json:"last"`
-	Price float64 `json:"price"`
+	Last      float64   `json:"last"`
+	Price     float64   `json:"price"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
+type TradeIndex struct {
+	TSE    *StockSnapShot `json:"tse"`
+	OTC    *StockSnapShot `json:"otc"`
+	Nasdaq *YahooPrice    `json:"nasdaq"`
+	NF     *YahooPrice    `json:"nf"`
 }

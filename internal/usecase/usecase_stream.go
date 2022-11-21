@@ -35,6 +35,7 @@ type StreamUseCase struct {
 	futureTradeInSwitch bool
 
 	mainFutureCode string
+	tradeIndex     *entity.TradeIndex
 }
 
 // NewStream -.
@@ -58,6 +59,7 @@ func NewStream(r StreamRepo, g StreamgRPCAPI, t StreamRabbit) *StreamUseCase {
 
 	go uc.ReceiveEvent(context.Background())
 	go uc.ReceiveOrderStatus(context.Background())
+	go uc.periodUpdateTradeIndex()
 
 	go func() {
 		time.Sleep(time.Until(cc.GetBasicInfo().TradeDay.Add(time.Hour * 9)))
@@ -74,6 +76,48 @@ func NewStream(r StreamRepo, g StreamgRPCAPI, t StreamRabbit) *StreamUseCase {
 	bus.SubscribeTopic(event.TopicStreamFutureTargets, uc.ReceiveFutureStreamData)
 	bus.SubscribeTopic(event.TopicMonitorFutureCode, uc.updateMainFutureCode)
 	return uc
+}
+
+func (uc *StreamUseCase) GetTradeIndex() *entity.TradeIndex {
+	return uc.tradeIndex
+}
+
+func (uc *StreamUseCase) periodUpdateTradeIndex() {
+	for range time.NewTicker(time.Second * 5).C {
+		if uc.tradeIndex == nil {
+			uc.tradeIndex = &entity.TradeIndex{}
+		}
+
+		var err error
+		ctx := context.Background()
+		go func() {
+			uc.tradeIndex.Nasdaq, err = uc.GetNasdaqClose()
+			if err != nil {
+				log.Error(err)
+			}
+		}()
+
+		go func() {
+			uc.tradeIndex.TSE, err = uc.GetTSESnapshot(ctx)
+			if err != nil {
+				log.Error(err)
+			}
+		}()
+
+		go func() {
+			uc.tradeIndex.NF, err = uc.GetNasdaqFutureClose()
+			if err != nil {
+				log.Error(err)
+			}
+		}()
+
+		go func() {
+			uc.tradeIndex.OTC, err = uc.GetOTCSnapshot(ctx)
+			if err != nil {
+				log.Error(err)
+			}
+		}()
+	}
 }
 
 func (uc *StreamUseCase) realTimeAddTargets() error {
@@ -242,8 +286,9 @@ func (uc *StreamUseCase) GetNasdaqClose() (*entity.YahooPrice, error) {
 	}
 
 	return &entity.YahooPrice{
-		Last:  d.GetLast(),
-		Price: d.GetPrice(),
+		Last:      d.GetLast(),
+		Price:     d.GetPrice(),
+		UpdatedAt: time.Now(),
 	}, nil
 }
 
@@ -253,8 +298,9 @@ func (uc *StreamUseCase) GetNasdaqFutureClose() (*entity.YahooPrice, error) {
 		return nil, err
 	}
 	return &entity.YahooPrice{
-		Last:  d.GetLast(),
-		Price: d.GetPrice(),
+		Last:      d.GetLast(),
+		Price:     d.GetPrice(),
+		UpdatedAt: time.Now(),
 	}, nil
 }
 

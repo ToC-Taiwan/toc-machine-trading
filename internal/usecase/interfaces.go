@@ -135,9 +135,9 @@ type (
 		ReceiveStreamData(ctx context.Context, targetArr []*entity.StockTarget)
 		GetStockSnapshotByNumArr(stockNumArr []string) ([]*entity.StockSnapShot, error)
 
+		GetTradeIndex() *entity.TradeIndex
 		GetTSESnapshot(ctx context.Context) (*entity.StockSnapShot, error)
 		GetOTCSnapshot(ctx context.Context) (*entity.StockSnapShot, error)
-
 		GetNasdaqClose() (*entity.YahooPrice, error)
 		GetNasdaqFutureClose() (*entity.YahooPrice, error)
 
