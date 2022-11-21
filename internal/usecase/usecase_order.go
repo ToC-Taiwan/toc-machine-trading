@@ -311,7 +311,7 @@ func (uc *OrderUseCase) updateStockOrderCacheAndInsertDB(order *entity.StockOrde
 
 // calculateStockTradeBalance -.
 func (uc *OrderUseCase) calculateStockTradeBalance(allOrders []*entity.StockOrder) {
-	var forwardOrder, reverseOrder []*entity.StockOrder
+	var forward, reverse entity.StockOrderArr
 	for _, v := range allOrders {
 		if v.Status != entity.StatusFilled {
 			continue
@@ -319,52 +319,92 @@ func (uc *OrderUseCase) calculateStockTradeBalance(allOrders []*entity.StockOrde
 
 		switch v.Action {
 		case entity.ActionBuy, entity.ActionSell:
-			forwardOrder = append(forwardOrder, v)
+			forward = append(forward, v)
 		case entity.ActionSellFirst, entity.ActionBuyLater:
-			reverseOrder = append(reverseOrder, v)
+			reverse = append(reverse, v)
 		}
 	}
 
-	forwardOrder = forwardOrder[:2*(len(forwardOrder)/2)]
-	reverseOrder = reverseOrder[:2*(len(reverseOrder)/2)]
-
-	var forwardBalance, revereBalance, discount, tradeCount int64
-	for _, v := range forwardOrder {
-		switch v.Action {
-		case entity.ActionBuy:
-			tradeCount++
-			forwardBalance -= uc.quota.GetStockBuyCost(v.Price, v.Quantity)
-		case entity.ActionSell:
-			forwardBalance += uc.quota.GetStockSellCost(v.Price, v.Quantity)
-		}
-		discount += uc.quota.GetStockTradeFeeDiscount(v.Price, v.Quantity)
-	}
-
-	for _, v := range reverseOrder {
-		switch v.Action {
-		case entity.ActionSellFirst:
-			tradeCount++
-			revereBalance += uc.quota.GetStockSellCost(v.Price, v.Quantity)
-		case entity.ActionBuyLater:
-			revereBalance -= uc.quota.GetStockBuyCost(v.Price, v.Quantity)
-		}
-		discount += uc.quota.GetStockTradeFeeDiscount(v.Price, v.Quantity)
-	}
-
+	forwardBalance, fDiscount, fTradeCount := uc.calculateForwardStockBalance(forward)
+	revereBalance, rDiscount, rTradeCount := uc.calculateReverseStockBalance(reverse)
 	tmp := &entity.StockTradeBalance{
 		TradeDay:        cc.GetBasicInfo().TradeDay,
-		TradeCount:      tradeCount,
+		TradeCount:      fTradeCount + rTradeCount,
 		Forward:         forwardBalance,
 		Reverse:         revereBalance,
 		OriginalBalance: forwardBalance + revereBalance,
-		Discount:        discount,
-		Total:           forwardBalance + revereBalance + discount,
+		Discount:        fDiscount + rDiscount,
+		Total:           forwardBalance + revereBalance + fDiscount + rDiscount,
 	}
 
 	err := uc.repo.InsertOrUpdateStockTradeBalance(context.Background(), tmp)
 	if err != nil {
 		log.Panic(err)
 	}
+}
+
+func (uc *OrderUseCase) calculateForwardStockBalance(forward entity.StockOrderArr) (int64, int64, int64) {
+	var forwardBalance, tradeCount, discount int64
+	groupOrder, manual := forward.SplitManualAndGroupID()
+	for _, v := range groupOrder {
+		if len(v) != 2 {
+			continue
+		}
+
+		tradeCount += 2
+		forwardBalance -= uc.quota.GetStockBuyCost(v[0].Price, v[0].Quantity)
+		discount += uc.quota.GetStockTradeFeeDiscount(v[0].Price, v[0].Quantity)
+
+		forwardBalance += uc.quota.GetStockSellCost(v[1].Price, v[1].Quantity)
+		discount += uc.quota.GetStockTradeFeeDiscount(v[1].Price, v[1].Quantity)
+	}
+
+	if manual.IsAllDone() {
+		for _, v := range manual {
+			tradeCount++
+
+			switch v.Action {
+			case entity.ActionBuy:
+				forwardBalance -= uc.quota.GetStockBuyCost(v.Price, v.Quantity)
+			case entity.ActionSell:
+				forwardBalance += uc.quota.GetStockSellCost(v.Price, v.Quantity)
+			}
+			discount += uc.quota.GetStockTradeFeeDiscount(v.Price, v.Quantity)
+		}
+	}
+	return forwardBalance, tradeCount, discount
+}
+
+func (uc *OrderUseCase) calculateReverseStockBalance(reverse entity.StockOrderArr) (int64, int64, int64) {
+	var revereBalance, tradeCount, discount int64
+	groupOrder, manual := reverse.SplitManualAndGroupID()
+	for _, v := range groupOrder {
+		if len(v) != 2 {
+			continue
+		}
+
+		tradeCount += 2
+		revereBalance += uc.quota.GetStockSellCost(v[0].Price, v[0].Quantity)
+		discount += uc.quota.GetStockTradeFeeDiscount(v[0].Price, v[0].Quantity)
+
+		revereBalance -= uc.quota.GetStockBuyCost(v[1].Price, v[1].Quantity)
+		discount += uc.quota.GetStockTradeFeeDiscount(v[1].Price, v[1].Quantity)
+	}
+
+	if manual.IsAllDone() {
+		for _, v := range manual {
+			tradeCount++
+
+			switch v.Action {
+			case entity.ActionSellFirst:
+				revereBalance += uc.quota.GetStockSellCost(v.Price, v.Quantity)
+			case entity.ActionBuy:
+				revereBalance -= uc.quota.GetStockBuyCost(v.Price, v.Quantity)
+			}
+			discount += uc.quota.GetStockTradeFeeDiscount(v.Price, v.Quantity)
+		}
+	}
+	return revereBalance, tradeCount, discount
 }
 
 //
@@ -535,7 +575,7 @@ func (uc *OrderUseCase) CancelFutureOrderID(orderID string) (string, entity.Orde
 
 // calculateFutureTradeBalance -.
 func (uc *OrderUseCase) calculateFutureTradeBalance(allOrders []*entity.FutureOrder) {
-	var forwardOrder, reverseOrder []*entity.FutureOrder
+	var forward, reverse entity.FutureOrderArr
 	for _, v := range allOrders {
 		if v.Status != entity.StatusFilled {
 			continue
@@ -543,38 +583,17 @@ func (uc *OrderUseCase) calculateFutureTradeBalance(allOrders []*entity.FutureOr
 
 		switch v.Action {
 		case entity.ActionBuy, entity.ActionSell:
-			forwardOrder = append(forwardOrder, v)
+			forward = append(forward, v)
 		case entity.ActionSellFirst, entity.ActionBuyLater:
-			reverseOrder = append(reverseOrder, v)
+			reverse = append(reverse, v)
 		}
 	}
 
-	forwardOrder = forwardOrder[:2*(len(forwardOrder)/2)]
-	reverseOrder = reverseOrder[:2*(len(reverseOrder)/2)]
-	var forwardBalance, revereBalance, tradeCount int64
-	for _, v := range forwardOrder {
-		switch v.Action {
-		case entity.ActionBuy:
-			tradeCount++
-			forwardBalance -= uc.quota.GetFutureBuyCost(v.Price, v.Quantity)
-		case entity.ActionSell:
-			forwardBalance += uc.quota.GetFutureSellCost(v.Price, v.Quantity)
-		}
-	}
-
-	for _, v := range reverseOrder {
-		switch v.Action {
-		case entity.ActionSellFirst:
-			tradeCount++
-			revereBalance += uc.quota.GetFutureSellCost(v.Price, v.Quantity)
-		case entity.ActionBuyLater:
-			revereBalance -= uc.quota.GetFutureBuyCost(v.Price, v.Quantity)
-		}
-	}
-
+	forwardBalance, forwardCount := uc.calculateForwardFutureBalance(forward)
+	revereBalance, reverseCount := uc.calculateReverseFutureBalance(reverse)
 	tmp := &entity.FutureTradeBalance{
 		TradeDay:   uc.futureTradeDay.TradeDay,
-		TradeCount: tradeCount,
+		TradeCount: forwardCount + reverseCount,
 		Forward:    forwardBalance,
 		Reverse:    revereBalance,
 		Total:      forwardBalance + revereBalance,
@@ -583,6 +602,62 @@ func (uc *OrderUseCase) calculateFutureTradeBalance(allOrders []*entity.FutureOr
 	if err != nil {
 		log.Panic(err)
 	}
+}
+
+func (uc *OrderUseCase) calculateForwardFutureBalance(forward entity.FutureOrderArr) (int64, int64) {
+	var forwardBalance, tradeCount int64
+	groupOrder, manual := forward.SplitManualAndGroupID()
+	for _, v := range groupOrder {
+		if len(v) != 2 {
+			continue
+		}
+
+		tradeCount += 2
+		forwardBalance -= uc.quota.GetFutureBuyCost(v[0].Price, v[0].Quantity)
+		forwardBalance += uc.quota.GetFutureSellCost(v[1].Price, v[1].Quantity)
+	}
+
+	if manual.IsAllDone() {
+		for _, v := range manual {
+			tradeCount++
+
+			switch v.Action {
+			case entity.ActionBuy:
+				forwardBalance -= uc.quota.GetFutureBuyCost(v.Price, v.Quantity)
+			case entity.ActionSell:
+				forwardBalance += uc.quota.GetFutureSellCost(v.Price, v.Quantity)
+			}
+		}
+	}
+	return forwardBalance, tradeCount
+}
+
+func (uc *OrderUseCase) calculateReverseFutureBalance(reverse entity.FutureOrderArr) (int64, int64) {
+	var reverseBalance, tradeCount int64
+	groupOrder, manual := reverse.SplitManualAndGroupID()
+	for _, v := range groupOrder {
+		if len(v) != 2 {
+			continue
+		}
+
+		tradeCount += 2
+		reverseBalance += uc.quota.GetFutureSellCost(v[0].Price, v[0].Quantity)
+		reverseBalance -= uc.quota.GetFutureBuyCost(v[1].Price, v[1].Quantity)
+	}
+
+	if manual.IsAllDone() {
+		for _, v := range manual {
+			tradeCount++
+
+			switch v.Action {
+			case entity.ActionSellFirst:
+				reverseBalance += uc.quota.GetFutureSellCost(v.Price, v.Quantity)
+			case entity.ActionBuyLater:
+				reverseBalance -= uc.quota.GetFutureBuyCost(v.Price, v.Quantity)
+			}
+		}
+	}
+	return reverseBalance, tradeCount
 }
 
 //

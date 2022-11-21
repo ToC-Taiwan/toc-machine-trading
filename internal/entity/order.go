@@ -83,6 +83,42 @@ func (o *BaseOrder) Cancellabel() bool {
 	}
 }
 
+type StockOrderArr []*StockOrder
+
+func (s StockOrderArr) SplitManualAndGroupID() (map[string]StockOrderArr, StockOrderArr) {
+	group := make(map[string]StockOrderArr)
+	var manual StockOrderArr
+	for _, v := range s {
+		if v.Manual {
+			manual = append(manual, v)
+		} else {
+			group[v.OrderID] = append(group[v.OrderID], v)
+		}
+	}
+	return group, manual
+}
+
+func (s StockOrderArr) IsAllDone() bool {
+	var qty int64
+	for _, v := range s {
+		if v.Status != StatusFilled {
+			continue
+		}
+
+		switch v.Action {
+		case ActionBuy:
+			qty += v.Quantity
+		case ActionSell:
+			qty -= v.Quantity
+		case ActionSellFirst:
+			qty -= v.Quantity
+		case ActionBuyLater:
+			qty += v.Quantity
+		}
+	}
+	return qty == 0
+}
+
 // StockOrder -.
 type StockOrder struct {
 	BaseOrder `json:"base_order"`
@@ -92,7 +128,7 @@ type StockOrder struct {
 	Manual   bool   `json:"manual"`
 }
 
-func (s *StockOrder) ToManual() {
+func (s *StockOrder) ToManual() *StockOrder {
 	s.Manual = true
 	s.GroupID = "-"
 
@@ -103,6 +139,43 @@ func (s *StockOrder) ToManual() {
 
 	s.TradeTime = s.OrderTime
 	s.TickTime = s.OrderTime
+	return s
+}
+
+type FutureOrderArr []*FutureOrder
+
+func (s FutureOrderArr) SplitManualAndGroupID() (map[string]FutureOrderArr, FutureOrderArr) {
+	group := make(map[string]FutureOrderArr)
+	var manual FutureOrderArr
+	for _, v := range s {
+		if v.Manual {
+			manual = append(manual, v)
+		} else {
+			group[v.OrderID] = append(group[v.OrderID], v)
+		}
+	}
+	return group, manual
+}
+
+func (s FutureOrderArr) IsAllDone() bool {
+	var qty int64
+	for _, v := range s {
+		if v.Status != StatusFilled {
+			continue
+		}
+
+		switch v.Action {
+		case ActionBuy:
+			qty += v.Quantity
+		case ActionSell:
+			qty -= v.Quantity
+		case ActionSellFirst:
+			qty -= v.Quantity
+		case ActionBuyLater:
+			qty += v.Quantity
+		}
+	}
+	return qty == 0
 }
 
 // FutureOrder -.
@@ -114,7 +187,7 @@ type FutureOrder struct {
 	Manual bool    `json:"manual"`
 }
 
-func (f *FutureOrder) ToManual() {
+func (f *FutureOrder) ToManual() *FutureOrder {
 	f.Manual = true
 	f.GroupID = "-"
 
@@ -125,6 +198,7 @@ func (f *FutureOrder) ToManual() {
 
 	f.TradeTime = f.OrderTime
 	f.TickTime = f.OrderTime
+	return f
 }
 
 // StockTradeBalance -.
