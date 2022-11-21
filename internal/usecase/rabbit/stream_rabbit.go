@@ -39,8 +39,8 @@ type StreamRabbit struct {
 	futureTickChan map[string]chan *entity.RealTimeFutureTick
 	futureTickLock sync.RWMutex
 
-	orderStatusChan map[string]chan interface{}
-	orderStatusLock sync.RWMutex
+	orderStatusChanMap     map[string]chan interface{}
+	orderStatusChanMapLock sync.RWMutex
 }
 
 // NewStream -.
@@ -59,9 +59,9 @@ func NewStream() *StreamRabbit {
 	}
 
 	return &StreamRabbit{
-		conn:            conn,
-		futureTickChan:  make(map[string]chan *entity.RealTimeFutureTick),
-		orderStatusChan: make(map[string]chan interface{}),
+		conn:               conn,
+		futureTickChan:     make(map[string]chan *entity.RealTimeFutureTick),
+		orderStatusChanMap: make(map[string]chan interface{}),
 	}
 }
 
@@ -112,16 +112,16 @@ func (c *StreamRabbit) EventConsumer(eventChan chan *entity.SinopacEvent) {
 }
 
 func (c *StreamRabbit) AddOrderStatusChan(orderStatusChan chan interface{}, connectionID string) {
-	defer c.orderStatusLock.Unlock()
-	c.orderStatusLock.Lock()
-	c.orderStatusChan[connectionID] = orderStatusChan
+	defer c.orderStatusChanMapLock.Unlock()
+	c.orderStatusChanMapLock.Lock()
+	c.orderStatusChanMap[connectionID] = orderStatusChan
 }
 
 func (c *StreamRabbit) RemoveOrderStatusChan(connectionID string) {
-	defer c.orderStatusLock.Unlock()
-	c.orderStatusLock.Lock()
-	close(c.orderStatusChan[connectionID])
-	delete(c.orderStatusChan, connectionID)
+	defer c.orderStatusChanMapLock.Unlock()
+	c.orderStatusChanMapLock.Lock()
+	close(c.orderStatusChanMap[connectionID])
+	delete(c.orderStatusChanMap, connectionID)
 }
 
 // OrderStatusConsumer OrderStatusConsumer
@@ -129,6 +129,9 @@ func (c *StreamRabbit) OrderStatusConsumer(orderStatusChan chan interface{}) {
 	if len(c.allStockMap) == 0 || len(c.allFutureMap) == 0 {
 		log.Panic("allStockMap or allFutureMap is empty")
 	}
+	c.orderStatusChanMapLock.Lock()
+	c.orderStatusChanMap[uuid.New().String()] = orderStatusChan
+	c.orderStatusChanMapLock.Unlock()
 	delivery := c.establishDelivery(routingKeyOrder)
 	for {
 		d, opened := <-delivery
@@ -177,11 +180,11 @@ func (c *StreamRabbit) OrderStatusConsumer(orderStatusChan chan interface{}) {
 			}
 		}
 
-		c.orderStatusLock.RLock()
-		for _, orderStatusChan := range c.orderStatusChan {
+		c.orderStatusChanMapLock.RLock()
+		for _, orderStatusChan := range c.orderStatusChanMap {
 			orderStatusChan <- order
 		}
-		c.orderStatusLock.RUnlock()
+		c.orderStatusChanMapLock.RUnlock()
 	}
 }
 

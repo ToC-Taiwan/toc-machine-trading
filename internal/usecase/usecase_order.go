@@ -472,7 +472,9 @@ func (uc *OrderUseCase) updateFutureOrderCacheAndInsertDB(order *entity.FutureOr
 	}
 
 	cacheOrder.Status = order.Status
-	cacheOrder.OrderTime = order.OrderTime
+	if cacheOrder.OrderTime.IsZero() {
+		cacheOrder.OrderTime = order.OrderTime
+	}
 
 	// qty may not filled with original order, change it by return quantity
 	cacheOrder.Quantity = order.Quantity

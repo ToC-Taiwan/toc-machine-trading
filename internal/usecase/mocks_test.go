@@ -1207,6 +1207,20 @@ func (mr *MockStreamMockRecorder) GetTSESnapshot(ctx interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTSESnapshot", reflect.TypeOf((*MockStream)(nil).GetTSESnapshot), ctx)
 }
 
+// GetTradeIndex mocks base method.
+func (m *MockStream) GetTradeIndex() *entity.TradeIndex {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetTradeIndex")
+	ret0, _ := ret[0].(*entity.TradeIndex)
+	return ret0
+}
+
+// GetTradeIndex indicates an expected call of GetTradeIndex.
+func (mr *MockStreamMockRecorder) GetTradeIndex() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTradeIndex", reflect.TypeOf((*MockStream)(nil).GetTradeIndex))
+}
+
 // NewFutureRealTimeConnection mocks base method.
 func (m *MockStream) NewFutureRealTimeConnection(tickChan chan *entity.RealTimeFutureTick, connectionID string) {
 	m.ctrl.T.Helper()

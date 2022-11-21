@@ -198,14 +198,12 @@ func (uc *StreamUseCase) ReceiveOrderStatus(ctx context.Context) {
 			switch t := order.(type) {
 			case *entity.StockOrder:
 				if cc.GetOrderByOrderID(t.OrderID) == nil {
-					t = t.ToManual()
-					cc.SetOrderByOrderID(t)
+					cc.SetOrderByOrderID(t.ToManual())
 				}
 				bus.PublishTopicEvent(event.TopicInsertOrUpdateStockOrder, t)
 			case *entity.FutureOrder:
 				if cc.GetFutureOrderByOrderID(t.OrderID) == nil {
-					t = t.ToManual()
-					cc.SetFutureOrderByOrderID(t)
+					cc.SetFutureOrderByOrderID(t.ToManual())
 				}
 				bus.PublishTopicEvent(event.TopicInsertOrUpdateFutureOrder, t)
 			}
