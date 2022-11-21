@@ -1,5 +1,5 @@
 name: Workflow
-run-name: ${{ github.actor }} is running TOC MACHINE TRADING Actions 🚀
+run-name: ${{ github.actor }} is running TOC MACHINE TRADING Actions 🐲
 
 concurrency:
     group: production
@@ -53,7 +53,7 @@ jobs:
             - name: Checkout
               uses: actions/checkout@v3
 
-            - name: Set outputs
+            - name: Set Tag
               id: vars
               run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
@@ -82,6 +82,13 @@ jobs:
         runs-on: ubuntu-latest
         environment: production
         steps:
+            - name: Checkout
+              uses: actions/checkout@v3
+
+            - name: Set Tag
+              id: vars
+              run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
             - name: deploying
               uses: appleboy/ssh-action@master
               with:
@@ -91,17 +98,20 @@ jobs:
                   key: ${{ secrets.TRADER_KEY }}
                   script: |
                       docker kill toc-machine-trading || true
-                      docker rmi ${{ secrets.DOCKERHUB_USERNAME }}/toc-machine-trading:latest || true
                       docker system prune --volumes -f
+                      docker rmi $(docker images '${{ secrets.DOCKERHUB_USERNAME }}/toc-machine-trading' -a -q) || true
+                      sleep 10
 
                       rm -rf ~/toc-machine-trading-env && mkdir -p ~/toc-machine-trading-env && touch ~/toc-machine-trading-env/.env
                       rm -rf ~/toc-machine-trading-configs && mkdir -p ~/toc-machine-trading-configs && touch ~/toc-machine-trading-configs/config.yml
                       rm -rf ~/toc-machine-trading-logs
+
                       echo "${{ secrets.MACHINE_TRADING_ENV }}" > ~/toc-machine-trading-env/.env
                       echo "${{ secrets.MACHINE_TRADING_CONFIG }}" > ~/toc-machine-trading-configs/config.yml
 
                       docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
-                      docker pull ${{ secrets.DOCKERHUB_USERNAME }}/toc-machine-trading:latest
+                      docker pull ${{ secrets.DOCKERHUB_USERNAME }}/toc-machine-trading:${{ steps.vars.outputs.sha_short }}
+
                       docker run \
                         --name toc-machine-trading \
                         --network tocvlan \
@@ -111,4 +121,4 @@ jobs:
                         -v ~/toc-machine-trading-logs:/toc-machine-trading/logs \
                         -v ~/toc-machine-trading-env/.env:/toc-machine-trading/.env \
                         -v ~/toc-machine-trading-configs/config.yml:/toc-machine-trading/configs/config.yml \
-                        -dt ${{ secrets.DOCKERHUB_USERNAME }}/toc-machine-trading:latest
+                        -dt ${{ secrets.DOCKERHUB_USERNAME }}/toc-machine-trading:${{ steps.vars.outputs.sha_short }}
