@@ -111,7 +111,7 @@ func (w *WSRouter) sendFuture() {
 
 func (w *WSRouter) processTickArr(tickChan chan *entity.RealTimeFutureTick) {
 	var tickArr []*entity.RealTimeFutureTick
-	var lastTradeRate *tradeRate
+	var lastTradeRate tradeRate
 	for {
 		tick, ok := <-tickChan
 		if !ok {
@@ -139,7 +139,7 @@ func (w *WSRouter) processTickArr(tickChan chan *entity.RealTimeFutureTick) {
 			InRate:  inVolume,
 			InChg:   inVolume - lastTradeRate.InRate,
 		}
-		lastTradeRate = rate
+		lastTradeRate = *rate
 		w.msgChan <- rate
 		w.msgChan <- tick
 	}
