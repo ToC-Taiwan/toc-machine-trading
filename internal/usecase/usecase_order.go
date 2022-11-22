@@ -104,8 +104,6 @@ func (uc *OrderUseCase) AskOrderUpdate() error {
 		if err != nil {
 			return err
 		}
-		actionMap := entity.ActionListMap
-		statusMap := entity.StatusListMap
 		for _, v := range orders {
 			orderTime, err := time.ParseInLocation(common.LongTimeLayout, v.GetOrderTime(), time.Local)
 			if err != nil {
@@ -118,10 +116,10 @@ func (uc *OrderUseCase) AskOrderUpdate() error {
 					StockNum: v.GetCode(),
 					BaseOrder: entity.BaseOrder{
 						OrderID:   v.GetOrderId(),
-						Action:    actionMap[v.GetAction()],
+						Action:    entity.StringToOrderAction(v.GetAction()),
 						Price:     v.GetPrice(),
 						Quantity:  v.GetQuantity(),
-						Status:    statusMap[v.GetStatus()],
+						Status:    entity.StringToOrderStatus(v.GetStatus()),
 						OrderTime: orderTime,
 					},
 				}
@@ -131,10 +129,10 @@ func (uc *OrderUseCase) AskOrderUpdate() error {
 					Code: v.GetCode(),
 					BaseOrder: entity.BaseOrder{
 						OrderID:   v.GetOrderId(),
-						Action:    actionMap[v.GetAction()],
+						Action:    entity.StringToOrderAction(v.GetAction()),
 						Price:     v.GetPrice(),
 						Quantity:  v.GetQuantity(),
-						Status:    statusMap[v.GetStatus()],
+						Status:    entity.StringToOrderStatus(v.GetStatus()),
 						OrderTime: orderTime,
 					},
 				}
@@ -220,8 +218,7 @@ func (uc *OrderUseCase) BuyStock(order *entity.StockOrder) (string, entity.Order
 		return "", entity.StatusUnknow, errors.New(e)
 	}
 
-	statusMap := entity.StatusListMap
-	return result.GetOrderId(), statusMap[result.GetStatus()], nil
+	return result.GetOrderId(), entity.StringToOrderStatus(result.GetStatus()), nil
 }
 
 // SellStock -.
@@ -235,8 +232,7 @@ func (uc *OrderUseCase) SellStock(order *entity.StockOrder) (string, entity.Orde
 		return "", entity.StatusUnknow, errors.New(e)
 	}
 
-	statusMap := entity.StatusListMap
-	return result.GetOrderId(), statusMap[result.GetStatus()], nil
+	return result.GetOrderId(), entity.StringToOrderStatus(result.GetStatus()), nil
 }
 
 // SellFirstStock -.
@@ -250,8 +246,7 @@ func (uc *OrderUseCase) SellFirstStock(order *entity.StockOrder) (string, entity
 		return "", entity.StatusUnknow, errors.New(e)
 	}
 
-	statusMap := entity.StatusListMap
-	return result.GetOrderId(), statusMap[result.GetStatus()], nil
+	return result.GetOrderId(), entity.StringToOrderStatus(result.GetStatus()), nil
 }
 
 // BuyLaterStock -.
@@ -265,8 +260,7 @@ func (uc *OrderUseCase) BuyLaterStock(order *entity.StockOrder) (string, entity.
 		return "", entity.StatusUnknow, errors.New(e)
 	}
 
-	statusMap := entity.StatusListMap
-	return result.GetOrderId(), statusMap[result.GetStatus()], nil
+	return result.GetOrderId(), entity.StringToOrderStatus(result.GetStatus()), nil
 }
 
 // CancelOrderID -.
@@ -280,8 +274,7 @@ func (uc *OrderUseCase) CancelOrderID(orderID string) (string, entity.OrderStatu
 		return "", entity.StatusUnknow, errors.New(e)
 	}
 
-	statusMap := entity.StatusListMap
-	return result.GetOrderId(), statusMap[result.GetStatus()], nil
+	return result.GetOrderId(), entity.StringToOrderStatus(result.GetStatus()), nil
 }
 
 func (uc *OrderUseCase) updateStockOrderCacheAndInsertDB(order *entity.StockOrder) {
@@ -511,8 +504,7 @@ func (uc *OrderUseCase) BuyFuture(order *entity.FutureOrder) (string, entity.Ord
 		return "", entity.StatusUnknow, errors.New(e)
 	}
 
-	statusMap := entity.StatusListMap
-	return result.GetOrderId(), statusMap[result.GetStatus()], nil
+	return result.GetOrderId(), entity.StringToOrderStatus(result.GetStatus()), nil
 }
 
 // SellFuture -.
@@ -526,8 +518,7 @@ func (uc *OrderUseCase) SellFuture(order *entity.FutureOrder) (string, entity.Or
 		return "", entity.StatusUnknow, errors.New(e)
 	}
 
-	statusMap := entity.StatusListMap
-	return result.GetOrderId(), statusMap[result.GetStatus()], nil
+	return result.GetOrderId(), entity.StringToOrderStatus(result.GetStatus()), nil
 }
 
 // SellFirstFuture -.
@@ -541,8 +532,7 @@ func (uc *OrderUseCase) SellFirstFuture(order *entity.FutureOrder) (string, enti
 		return "", entity.StatusUnknow, errors.New(e)
 	}
 
-	statusMap := entity.StatusListMap
-	return result.GetOrderId(), statusMap[result.GetStatus()], nil
+	return result.GetOrderId(), entity.StringToOrderStatus(result.GetStatus()), nil
 }
 
 // BuyLaterFuture -.
@@ -556,8 +546,7 @@ func (uc *OrderUseCase) BuyLaterFuture(order *entity.FutureOrder) (string, entit
 		return "", entity.StatusUnknow, errors.New(e)
 	}
 
-	statusMap := entity.StatusListMap
-	return result.GetOrderId(), statusMap[result.GetStatus()], nil
+	return result.GetOrderId(), entity.StringToOrderStatus(result.GetStatus()), nil
 }
 
 // CancelFutureOrderID -.
@@ -571,8 +560,7 @@ func (uc *OrderUseCase) CancelFutureOrderID(orderID string) (string, entity.Orde
 		return "", entity.StatusUnknow, errors.New(e)
 	}
 
-	statusMap := entity.StatusListMap
-	return result.GetOrderId(), statusMap[result.GetStatus()], nil
+	return result.GetOrderId(), entity.StringToOrderStatus(result.GetStatus()), nil
 }
 
 // calculateFutureTradeBalance -.

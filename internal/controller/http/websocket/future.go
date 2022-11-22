@@ -28,7 +28,9 @@ type futureOrder struct {
 
 type tradeRate struct {
 	OutRate int64 `json:"out_rate"`
+	OutChg  int64 `json:"out_chg"`
 	InRate  int64 `json:"in_rate"`
+	InChg   int64 `json:"in_chg"`
 }
 
 type futurePosition struct {
@@ -77,6 +79,7 @@ func (w *WSRouter) processTrade(clientMsg clientMsg) {
 	w.orderLock.Lock()
 	order.TradeTime = time.Now()
 	w.futureOrderMap[order.OrderID] = order
+	log.Infof("New Order: %s", order.FutureOrderStatusString())
 	w.orderLock.Unlock()
 }
 
@@ -108,6 +111,7 @@ func (w *WSRouter) sendFuture() {
 
 func (w *WSRouter) processTickArr(tickChan chan *entity.RealTimeFutureTick) {
 	var tickArr []*entity.RealTimeFutureTick
+	var lastTradeRate *tradeRate
 	for {
 		tick, ok := <-tickChan
 		if !ok {
@@ -129,11 +133,14 @@ func (w *WSRouter) processTickArr(tickChan chan *entity.RealTimeFutureTick) {
 				inVolume += tickArr[i].Volume
 			}
 		}
-
-		w.msgChan <- &tradeRate{
+		rate := &tradeRate{
 			OutRate: outVolume,
+			OutChg:  outVolume - lastTradeRate.OutRate,
 			InRate:  inVolume,
+			InChg:   inVolume - lastTradeRate.InRate,
 		}
+		lastTradeRate = rate
+		w.msgChan <- rate
 		w.msgChan <- tick
 	}
 }
@@ -206,13 +213,13 @@ func (w *WSRouter) cancelOverTimeOrder() {
 				if !order.Cancellabel() {
 					delete(w.futureOrderMap, id)
 					delete(cancelOrderMap, id)
-					log.Warnf("Order %s is filled or cancelled, delete it", id)
+					log.Warnf("Delete %s", order.FutureOrderStatusString())
 				} else if time.Since(order.TradeTime) > 10*time.Second && cancelOrderMap[id] == nil {
 					if e := w.cancelOrderByID(id); e != nil {
 						w.msgChan <- errMsg{ErrMsg: e.Error()}
 					}
 					cancelOrderMap[id] = order
-					log.Warnf("Order %s is timeout, cancel it", id)
+					log.Warnf("%s timeout, cancel it", order.FutureOrderStatusString())
 				}
 			}
 			w.orderLock.Unlock()

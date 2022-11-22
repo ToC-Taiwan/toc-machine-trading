@@ -1,14 +1,12 @@
 package entity
 
 import (
+	"fmt"
 	"time"
 )
 
 // OrderAction -.
 type OrderAction int64
-
-// OrderStatus -.
-type OrderStatus int64
 
 const (
 	// ActionNone -.
@@ -22,6 +20,9 @@ const (
 	// ActionBuyLater -.
 	ActionBuyLater
 )
+
+// OrderStatus -.
+type OrderStatus int64
 
 const (
 	// StatusUnknow -.
@@ -44,21 +45,108 @@ const (
 	StatusAborted
 )
 
-// ActionListMap ActionListMap
-var ActionListMap = map[string]OrderAction{
-	"Buy":  ActionBuy,
-	"Sell": ActionSell,
+const (
+	ActionSringNone       string = "None"
+	ActionStringBuy       string = "Buy"
+	ActionStringSell      string = "Sell"
+	ActionStringSellFirst string = "SellFirst"
+	ActionStringBuyLater  string = "BuyLater"
+)
+
+const (
+	StatusStringUnknow        = "Unknow"
+	StatusStringPendingSubmit = "PendingSubmit"
+	StatusStringPreSubmitted  = "PreSubmitted"
+	StatusStringSubmitted     = "Submitted"
+	StatusStringFailed        = "Failed"
+	StatusStringCancelled     = "Cancelled"
+	StatusStringFilled        = "Filled"
+	StatusStringFilling       = "Filling"
+	StatusStringAborted       = "Aborted"
+)
+
+func (a OrderAction) String() string {
+	switch a {
+	case ActionNone:
+		return ActionSringNone
+	case ActionBuy:
+		return ActionStringBuy
+	case ActionSell:
+		return ActionStringSell
+	case ActionSellFirst:
+		return ActionStringSellFirst
+	case ActionBuyLater:
+		return ActionStringBuyLater
+	default:
+		return ActionSringNone
+	}
 }
 
-// StatusListMap StatusListMap
-var StatusListMap = map[string]OrderStatus{
-	"PendingSubmit": StatusPendingSubmit, // 傳送中
-	"PreSubmitted":  StatusPreSubmitted,  // 預約單
-	"Submitted":     StatusSubmitted,     // 傳送成功
-	"Failed":        StatusFailed,        // 失敗
-	"Cancelled":     StatusCancelled,     // 已刪除
-	"Filled":        StatusFilled,        // 完全成交
-	"Filling":       StatusFilling,       // 部分成交
+func (s OrderStatus) String() string {
+	switch s {
+	case StatusUnknow:
+		return "Unknow"
+	case StatusPendingSubmit:
+		return "PendingSubmit"
+	case StatusPreSubmitted:
+		return "PreSubmitted"
+	case StatusSubmitted:
+		return "Submitted"
+	case StatusFailed:
+		return "Failed"
+	case StatusCancelled:
+		return "Cancelled"
+	case StatusFilled:
+		return "Filled"
+	case StatusFilling:
+		return "Filling"
+	case StatusAborted:
+		return "Aborted"
+	default:
+		return "Unknow"
+	}
+}
+
+func StringToOrderAction(s string) OrderAction {
+	switch s {
+	case ActionSringNone:
+		return ActionNone
+	case ActionStringBuy:
+		return ActionBuy
+	case ActionStringSell:
+		return ActionSell
+	case ActionStringSellFirst:
+		return ActionSellFirst
+	case ActionStringBuyLater:
+		return ActionBuyLater
+	default:
+		return ActionNone
+	}
+}
+
+func StringToOrderStatus(s string) OrderStatus {
+	switch s {
+	case StatusStringUnknow:
+		return StatusUnknow
+	case StatusStringPendingSubmit:
+		return StatusPendingSubmit
+	case StatusStringPreSubmitted:
+		return StatusPreSubmitted
+	case StatusStringSubmitted:
+		return StatusSubmitted
+	case StatusStringFailed:
+		return StatusFailed
+	case StatusStringCancelled:
+		return StatusCancelled
+	case StatusStringFilled:
+		return StatusFilled
+	case StatusStringFilling:
+		return StatusFilling
+	case StatusStringAborted:
+		return StatusAborted
+	default:
+		return StatusUnknow
+	}
 }
 
 // BaseOrder -.
@@ -128,6 +216,10 @@ type StockOrder struct {
 	Manual   bool   `json:"manual"`
 }
 
+func (s *StockOrder) StockOrderStatusString() string {
+	return fmt.Sprintf("%s %s %s %.0f x %d", s.BaseOrder.Status.String(), s.BaseOrder.Action.String(), s.StockNum, s.BaseOrder.Price, s.BaseOrder.Quantity)
+}
+
 func (s *StockOrder) ToManual() *StockOrder {
 	s.Manual = true
 	s.GroupID = "-"
@@ -185,6 +277,10 @@ type FutureOrder struct {
 	Code   string  `json:"code"`
 	Future *Future `json:"future"`
 	Manual bool    `json:"manual"`
+}
+
+func (f *FutureOrder) FutureOrderStatusString() string {
+	return fmt.Sprintf("%s %s %s %.0f x %d", f.BaseOrder.Status.String(), f.BaseOrder.Action.String(), f.Code, f.BaseOrder.Price, f.BaseOrder.Quantity)
 }
 
 func (f *FutureOrder) ToManual() *FutureOrder {

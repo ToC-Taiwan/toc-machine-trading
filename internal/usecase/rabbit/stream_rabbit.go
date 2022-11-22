@@ -144,8 +144,6 @@ func (c *StreamRabbit) OrderStatusConsumer(orderStatusChan chan interface{}) {
 			log.Error(err)
 			continue
 		}
-		actionMap := entity.ActionListMap
-		statusMap := entity.StatusListMap
 		orderTime, err := time.ParseInLocation(common.LongTimeLayout, body.GetOrderTime(), time.Local)
 		if err != nil {
 			log.Error(err)
@@ -159,10 +157,10 @@ func (c *StreamRabbit) OrderStatusConsumer(orderStatusChan chan interface{}) {
 				StockNum: body.GetCode(),
 				BaseOrder: entity.BaseOrder{
 					OrderID:   body.GetOrderId(),
-					Action:    actionMap[body.GetAction()],
+					Action:    entity.StringToOrderAction(body.GetAction()),
 					Price:     body.GetPrice(),
 					Quantity:  body.GetQuantity(),
-					Status:    statusMap[body.GetStatus()],
+					Status:    entity.StringToOrderStatus(body.GetStatus()),
 					OrderTime: orderTime,
 				},
 			}
@@ -171,10 +169,10 @@ func (c *StreamRabbit) OrderStatusConsumer(orderStatusChan chan interface{}) {
 				Code: body.GetCode(),
 				BaseOrder: entity.BaseOrder{
 					OrderID:   body.GetOrderId(),
-					Action:    actionMap[body.GetAction()],
+					Action:    entity.StringToOrderAction(body.GetAction()),
 					Price:     body.GetPrice(),
 					Quantity:  body.GetQuantity(),
-					Status:    statusMap[body.GetStatus()],
+					Status:    entity.StringToOrderStatus(body.GetStatus()),
 					OrderTime: orderTime,
 				},
 			}
