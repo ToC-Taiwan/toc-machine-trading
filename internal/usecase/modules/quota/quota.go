@@ -80,11 +80,11 @@ func (q *Quota) GetStockTradeFeeDiscount(price float64, qty int64) int64 {
 // GetFutureBuyCost -.
 func (q *Quota) GetFutureBuyCost(price float64, qty int64) int64 {
 	base := price * float64(qty) * 50
-	return int64(math.Ceil(base)+math.Floor(base*futureTradeTaxRatio)) + q.futureTradeFee
+	return int64(math.Ceil(base)+math.Floor(base*futureTradeTaxRatio)) + q.futureTradeFee*qty
 }
 
 // GetFutureSellCost -.
 func (q *Quota) GetFutureSellCost(price float64, qty int64) int64 {
 	base := price * float64(qty) * 50
-	return int64(math.Ceil(base)-math.Floor(base*futureTradeTaxRatio)) - q.futureTradeFee
+	return int64(math.Ceil(base)-math.Floor(base*futureTradeTaxRatio)) - q.futureTradeFee*qty
 }
