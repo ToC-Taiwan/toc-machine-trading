@@ -28,9 +28,7 @@ type futureOrder struct {
 
 type tradeRate struct {
 	OutRate int64 `json:"out_rate"`
-	OutChg  int64 `json:"out_chg"`
 	InRate  int64 `json:"in_rate"`
-	InChg   int64 `json:"in_chg"`
 }
 
 type futurePosition struct {
@@ -111,7 +109,6 @@ func (w *WSRouter) sendFuture() {
 
 func (w *WSRouter) processTickArr(tickChan chan *entity.RealTimeFutureTick) {
 	var tickArr []*entity.RealTimeFutureTick
-	var lastTradeRate tradeRate
 	for {
 		tick, ok := <-tickChan
 		if !ok {
@@ -135,11 +132,8 @@ func (w *WSRouter) processTickArr(tickChan chan *entity.RealTimeFutureTick) {
 		}
 		rate := &tradeRate{
 			OutRate: outVolume,
-			OutChg:  outVolume - lastTradeRate.OutRate,
 			InRate:  inVolume,
-			InChg:   inVolume - lastTradeRate.InRate,
 		}
-		lastTradeRate = *rate
 		w.msgChan <- rate
 		w.msgChan <- tick
 	}
