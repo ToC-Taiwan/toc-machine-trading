@@ -110,32 +110,36 @@ func (w *WSRouter) sendFuture() {
 func (w *WSRouter) processTickArr(tickChan chan *entity.RealTimeFutureTick) {
 	var tickArr []*entity.RealTimeFutureTick
 	for {
-		tick, ok := <-tickChan
-		if !ok {
-			return
-		}
-		tickArr = append(tickArr, tick)
-
-		var outVolume, inVolume int64
-		for i := len(tickArr) - 1; i >= 0; i-- {
-			if time.Since(tickArr[i].TickTime) > 15*time.Second {
-				tickArr = tickArr[i+1:]
-				break
+		select {
+		case tick, ok := <-tickChan:
+			if !ok {
+				return
+			}
+			w.msgChan <- tick
+			tickArr = append(tickArr, tick)
+			for i := len(tickArr) - 1; i >= 0; i-- {
+				if time.Since(tickArr[i].TickTime) > 15*time.Second {
+					tickArr = tickArr[i+1:]
+					break
+				}
 			}
 
-			switch tickArr[i].TickType {
-			case 1:
-				outVolume += tickArr[i].Volume
-			case 2:
-				inVolume += tickArr[i].Volume
+		case <-time.After(time.Second):
+			var outVolume, inVolume int64
+			for i := len(tickArr) - 1; i >= 0; i-- {
+				switch tickArr[i].TickType {
+				case 1:
+					outVolume += tickArr[i].Volume
+				case 2:
+					inVolume += tickArr[i].Volume
+				}
 			}
+			rate := &tradeRate{
+				OutRate: outVolume,
+				InRate:  inVolume,
+			}
+			w.msgChan <- rate
 		}
-		rate := &tradeRate{
-			OutRate: outVolume,
-			InRate:  inVolume,
-		}
-		w.msgChan <- rate
-		w.msgChan <- tick
 	}
 }
 
