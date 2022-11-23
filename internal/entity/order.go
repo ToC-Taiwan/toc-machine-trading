@@ -33,8 +33,8 @@ const (
 	StatusCancelled
 	// StatusFilled -.
 	StatusFilled
-	// StatusFilling -.
-	StatusFilling
+	// StatusPartFilled -.
+	StatusPartFilled
 	// StatusAborted -.
 	StatusAborted
 )
@@ -55,7 +55,7 @@ const (
 	StatusStringFailed        string = "Failed"
 	StatusStringCancelled     string = "Cancelled"
 	StatusStringFilled        string = "Filled"
-	StatusStringFilling       string = "Filling"
+	StatusStringPartFilled    string = "PartFilled"
 	StatusStringAborted       string = "Aborted"
 )
 
@@ -98,8 +98,8 @@ func (s OrderStatus) String() string {
 		return "Cancelled"
 	case StatusFilled:
 		return "Filled"
-	case StatusFilling:
-		return "Filling"
+	case StatusPartFilled:
+		return "PartFilled"
 	case StatusAborted:
 		return "Aborted"
 	default:
@@ -140,8 +140,8 @@ func StringToOrderStatus(s string) OrderStatus {
 		return StatusCancelled
 	case StatusStringFilled:
 		return StatusFilled
-	case StatusStringFilling:
-		return StatusFilling
+	case StatusStringPartFilled:
+		return StatusPartFilled
 	case StatusStringAborted:
 		return StatusAborted
 	default:
@@ -164,7 +164,7 @@ type BaseOrder struct {
 
 func (o *BaseOrder) Cancellabel() bool {
 	switch o.Status {
-	case StatusPendingSubmit, StatusPreSubmitted, StatusSubmitted, StatusFilling:
+	case StatusPendingSubmit, StatusPreSubmitted, StatusSubmitted, StatusPartFilled:
 		return true
 	default:
 		return false
