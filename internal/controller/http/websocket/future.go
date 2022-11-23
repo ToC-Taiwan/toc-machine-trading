@@ -115,18 +115,17 @@ func (w *WSRouter) processTickArr(tickChan chan *entity.RealTimeFutureTick) {
 			if !ok {
 				return
 			}
-			w.msgChan <- tick
 			tickArr = append(tickArr, tick)
+			w.msgChan <- tick
+
+		case <-time.After(time.Second):
+			var outVolume, inVolume int64
 			for i := len(tickArr) - 1; i >= 0; i-- {
 				if time.Since(tickArr[i].TickTime) > 15*time.Second {
 					tickArr = tickArr[i+1:]
 					break
 				}
-			}
 
-		case <-time.After(time.Second):
-			var outVolume, inVolume int64
-			for i := len(tickArr) - 1; i >= 0; i-- {
 				switch tickArr[i].TickType {
 				case 1:
 					outVolume += tickArr[i].Volume
