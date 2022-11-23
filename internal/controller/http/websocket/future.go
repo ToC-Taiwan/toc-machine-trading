@@ -26,9 +26,11 @@ type futureOrder struct {
 	AutomationType AutomationType `json:"automation_type"`
 }
 
-type tradeRate struct {
-	OutRate int64 `json:"out_rate"`
-	InRate  int64 `json:"in_rate"`
+type periodTradeVolume struct {
+	FirstPeriod  entity.OutInVolume `json:"first_period"`
+	SecondPeriod entity.OutInVolume `json:"second_period"`
+	ThirdPeriod  entity.OutInVolume `json:"third_period"`
+	FourthPeriod entity.OutInVolume `json:"fourth_period"`
 }
 
 type futurePosition struct {
@@ -108,34 +110,47 @@ func (w *WSRouter) sendFuture() {
 }
 
 func (w *WSRouter) processTickArr(tickChan chan *entity.RealTimeFutureTick) {
-	var tickArr []*entity.RealTimeFutureTick
+	var tickArr entity.RealTimeFutureTickArr
 	for {
 		tick, ok := <-tickChan
 		if !ok {
 			return
 		}
 		tickArr = append(tickArr, tick)
-
-		var outVolume, inVolume int64
-		for i := len(tickArr) - 1; i >= 0; i-- {
-			if time.Since(tickArr[i].TickTime) > 15*time.Second {
-				tickArr = tickArr[i+1:]
-				break
-			}
-
-			switch tickArr[i].TickType {
-			case 1:
-				outVolume += tickArr[i].Volume
-			case 2:
-				inVolume += tickArr[i].Volume
-			}
-		}
-		rate := &tradeRate{
-			OutRate: outVolume,
-			InRate:  inVolume,
-		}
-		w.msgChan <- rate
 		w.msgChan <- tick
+
+		var firstPeriod, secondPeriod, thirdPeriod, fourthPeriod entity.RealTimeFutureTickArr
+		for i := len(tickArr) - 1; i >= 0; i-- {
+			switch {
+			case time.Since(tickArr[i].TickTime) < 10*time.Second:
+				fourthPeriod = append(fourthPeriod, tickArr[i])
+				thirdPeriod = append(thirdPeriod, tickArr[i])
+				secondPeriod = append(secondPeriod, tickArr[i])
+				firstPeriod = append(firstPeriod, tickArr[i])
+
+			case time.Since(tickArr[i].TickTime) < 20*time.Second:
+				fourthPeriod = append(fourthPeriod, tickArr[i])
+				thirdPeriod = append(thirdPeriod, tickArr[i])
+				secondPeriod = append(secondPeriod, tickArr[i])
+
+			case time.Since(tickArr[i].TickTime) < 30*time.Second:
+				fourthPeriod = append(fourthPeriod, tickArr[i])
+				thirdPeriod = append(thirdPeriod, tickArr[i])
+
+			case time.Since(tickArr[i].TickTime) < 40*time.Second:
+				fourthPeriod = append(fourthPeriod, tickArr[i])
+
+			default:
+				tickArr = tickArr[i+1:]
+			}
+		}
+
+		w.msgChan <- periodTradeVolume{
+			FirstPeriod:  firstPeriod.GetOutInVolume(),
+			SecondPeriod: secondPeriod.GetOutInVolume(),
+			ThirdPeriod:  thirdPeriod.GetOutInVolume(),
+			FourthPeriod: fourthPeriod.GetOutInVolume(),
+		}
 	}
 }
 

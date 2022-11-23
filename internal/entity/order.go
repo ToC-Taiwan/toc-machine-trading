@@ -5,9 +5,6 @@ import (
 	"time"
 )
 
-// OrderAction -.
-type OrderAction int64
-
 const (
 	// ActionNone -.
 	ActionNone OrderAction = iota
@@ -20,9 +17,6 @@ const (
 	// ActionBuyLater -.
 	ActionBuyLater
 )
-
-// OrderStatus -.
-type OrderStatus int64
 
 const (
 	// StatusUnknow -.
@@ -46,7 +40,7 @@ const (
 )
 
 const (
-	ActionSringNone       string = "None"
+	ActionStringNone      string = "None"
 	ActionStringBuy       string = "Buy"
 	ActionStringSell      string = "Sell"
 	ActionStringSellFirst string = "SellFirst"
@@ -54,21 +48,24 @@ const (
 )
 
 const (
-	StatusStringUnknow        = "Unknow"
-	StatusStringPendingSubmit = "PendingSubmit"
-	StatusStringPreSubmitted  = "PreSubmitted"
-	StatusStringSubmitted     = "Submitted"
-	StatusStringFailed        = "Failed"
-	StatusStringCancelled     = "Cancelled"
-	StatusStringFilled        = "Filled"
-	StatusStringFilling       = "Filling"
-	StatusStringAborted       = "Aborted"
+	StatusStringUnknow        string = "Unknow"
+	StatusStringPendingSubmit string = "PendingSubmit"
+	StatusStringPreSubmitted  string = "PreSubmitted"
+	StatusStringSubmitted     string = "Submitted"
+	StatusStringFailed        string = "Failed"
+	StatusStringCancelled     string = "Cancelled"
+	StatusStringFilled        string = "Filled"
+	StatusStringFilling       string = "Filling"
+	StatusStringAborted       string = "Aborted"
 )
+
+// OrderAction -.
+type OrderAction int64
 
 func (a OrderAction) String() string {
 	switch a {
 	case ActionNone:
-		return ActionSringNone
+		return ActionStringNone
 	case ActionBuy:
 		return ActionStringBuy
 	case ActionSell:
@@ -78,9 +75,12 @@ func (a OrderAction) String() string {
 	case ActionBuyLater:
 		return ActionStringBuyLater
 	default:
-		return ActionSringNone
+		return ""
 	}
 }
+
+// OrderStatus -.
+type OrderStatus int64
 
 func (s OrderStatus) String() string {
 	switch s {
@@ -103,13 +103,13 @@ func (s OrderStatus) String() string {
 	case StatusAborted:
 		return "Aborted"
 	default:
-		return "Unknow"
+		return ""
 	}
 }
 
 func StringToOrderAction(s string) OrderAction {
 	switch s {
-	case ActionSringNone:
+	case ActionStringNone:
 		return ActionNone
 	case ActionStringBuy:
 		return ActionBuy
