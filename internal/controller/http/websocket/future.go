@@ -120,28 +120,31 @@ func (w *WSRouter) processTickArr(tickChan chan *entity.RealTimeFutureTick) {
 		w.msgChan <- tick
 
 		var firstPeriod, secondPeriod, thirdPeriod, fourthPeriod entity.RealTimeFutureTickArr
+
+	L:
 		for i := len(tickArr) - 1; i >= 0; i-- {
 			switch {
-			case time.Since(tickArr[i].TickTime) < 10*time.Second:
+			case time.Since(tickArr[i].TickTime) <= 10*time.Second:
 				fourthPeriod = append(fourthPeriod, tickArr[i])
 				thirdPeriod = append(thirdPeriod, tickArr[i])
 				secondPeriod = append(secondPeriod, tickArr[i])
 				firstPeriod = append(firstPeriod, tickArr[i])
 
-			case time.Since(tickArr[i].TickTime) < 20*time.Second:
+			case time.Since(tickArr[i].TickTime) <= 20*time.Second:
 				fourthPeriod = append(fourthPeriod, tickArr[i])
 				thirdPeriod = append(thirdPeriod, tickArr[i])
 				secondPeriod = append(secondPeriod, tickArr[i])
 
-			case time.Since(tickArr[i].TickTime) < 30*time.Second:
+			case time.Since(tickArr[i].TickTime) <= 30*time.Second:
 				fourthPeriod = append(fourthPeriod, tickArr[i])
 				thirdPeriod = append(thirdPeriod, tickArr[i])
 
-			case time.Since(tickArr[i].TickTime) < 40*time.Second:
+			case time.Since(tickArr[i].TickTime) <= 40*time.Second:
 				fourthPeriod = append(fourthPeriod, tickArr[i])
 
 			default:
 				tickArr = tickArr[i+1:]
+				break L
 			}
 		}
 
