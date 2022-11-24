@@ -63,29 +63,31 @@ func NewOrder(t OrdergRPCAPI, r OrderRepo) *OrderUseCase {
 }
 
 func (uc *OrderUseCase) updateAllTradeBalance() {
-	go func() {
-		for range time.NewTicker(20 * time.Second).C {
-			stockOrders, err := uc.repo.QueryAllStockOrderByDate(context.Background(), uc.stockTradeDay.ToStartEndArray())
-			if err != nil {
-				log.Panic(err)
+	for {
+		select {
+		case <-time.After(20 * time.Second):
+			if uc.IsStockTradeTime() {
+				stockOrders, err := uc.repo.QueryAllStockOrderByDate(context.Background(), uc.stockTradeDay.ToStartEndArray())
+				if err != nil {
+					log.Panic(err)
+				}
+				uc.calculateStockTradeBalance(stockOrders)
 			}
-			uc.calculateStockTradeBalance(stockOrders)
 
-			futureOrders, err := uc.repo.QueryAllFutureOrderByDate(context.Background(), uc.futureTradeDay.ToStartEndArray())
-			if err != nil {
-				log.Panic(err)
+			if uc.IsFutureTradeTime() {
+				futureOrders, err := uc.repo.QueryAllFutureOrderByDate(context.Background(), uc.futureTradeDay.ToStartEndArray())
+				if err != nil {
+					log.Panic(err)
+				}
+				uc.calculateFutureTradeBalance(futureOrders)
 			}
-			uc.calculateFutureTradeBalance(futureOrders)
-		}
-	}()
-	go func() {
-		for range time.NewTicker(2 * time.Second).C {
-			err := uc.AskOrderUpdate()
-			if err != nil {
+
+		case <-time.After(750 * time.Millisecond):
+			if err := uc.AskOrderUpdate(); err != nil {
 				log.Error(err)
 			}
 		}
-	}()
+	}
 }
 
 // AskOrderUpdate -.
@@ -283,7 +285,7 @@ func (uc *OrderUseCase) updateStockOrderCacheAndInsertDB(order *entity.StockOrde
 
 	// get order from cache
 	cacheOrder := cc.GetOrderByOrderID(order.OrderID)
-	if cacheOrder == nil {
+	if cacheOrder == nil || cacheOrder.Status == order.Status {
 		return
 	}
 
@@ -460,7 +462,7 @@ func (uc *OrderUseCase) updateFutureOrderCacheAndInsertDB(order *entity.FutureOr
 
 	// get order from cache
 	cacheOrder := cc.GetFutureOrderByOrderID(order.OrderID)
-	if cacheOrder == nil {
+	if cacheOrder == nil || cacheOrder.Status == order.Status {
 		return
 	}
 
@@ -716,20 +718,12 @@ func (uc *OrderUseCase) GetFuturePosition() ([]*entity.FuturePosition, error) {
 	return result, nil
 }
 
+func (uc *OrderUseCase) IsStockTradeTime() bool {
+	return uc.stockTradeDay.IsStockMarketOpenNow()
+}
+
 func (uc *OrderUseCase) IsFutureTradeTime() bool {
-	firstEndTime := uc.futureTradeDay.StartTime.Add(14 * time.Hour)
-	secondStartTime := uc.futureTradeDay.EndTime.Add(-5 * time.Hour)
-
-	now := time.Now()
-	if now.After(uc.futureTradeDay.StartTime) && now.Before(firstEndTime) {
-		return true
-	}
-
-	if now.After(secondStartTime) && now.Before(uc.futureTradeDay.EndTime) {
-		return true
-	}
-
-	return false
+	return uc.futureTradeDay.IsFutureMarketOpenNow()
 }
 
 func (uc *OrderUseCase) GetFutureOrderByTradeDay(ctx context.Context, tradeDay string) ([]*entity.FutureOrder, error) {

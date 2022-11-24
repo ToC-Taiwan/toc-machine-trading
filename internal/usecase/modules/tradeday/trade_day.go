@@ -250,6 +250,27 @@ type TradePeriod struct {
 	base      *TradeDay
 }
 
+func (tp *TradePeriod) IsStockMarketOpenNow() bool {
+	if time.Now().After(tp.StartTime) && time.Now().Before(tp.EndTime) {
+		return true
+	}
+	return false
+}
+
+func (tp *TradePeriod) IsFutureMarketOpenNow() bool {
+	firstEndTime := tp.StartTime.Add(14 * time.Hour)
+	secondStartTime := tp.EndTime.Add(-5 * time.Hour)
+
+	now := time.Now()
+	if now.After(tp.StartTime) && now.Before(firstEndTime) {
+		return true
+	}
+	if now.After(secondStartTime) && now.Before(tp.EndTime) {
+		return true
+	}
+	return false
+}
+
 // ToStartEndArray -.
 func (tp *TradePeriod) ToStartEndArray() []time.Time {
 	return []time.Time{tp.StartTime, tp.EndTime}
