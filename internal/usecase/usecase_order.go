@@ -58,7 +58,7 @@ func NewOrder(t OrdergRPCAPI, r OrderRepo) *OrderUseCase {
 	bus.SubscribeTopic(event.TopicCancelFutureOrder, uc.cancelFutureOrder)
 	bus.SubscribeTopic(event.TopicInsertOrUpdateFutureOrder, uc.updateFutureOrderCacheAndInsertDB)
 
-	uc.updateAllTradeBalance()
+	go uc.updateAllTradeBalance()
 	return uc
 }
 
