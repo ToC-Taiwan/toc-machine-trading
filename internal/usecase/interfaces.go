@@ -148,6 +148,9 @@ type (
 		DeleteFutureRealTimeConnection(connectionID string)
 		NewOrderStatusConnection(orderStatusChan chan interface{}, connectionID string)
 		DeleteOrderStatusConnection(connectionID string)
+
+		TurnFutureTradeSwitch(ctx context.Context, allow bool)
+		GetFutureTradeSwitchStatus(ctx context.Context) bool
 	}
 
 	// StreamRepo -.

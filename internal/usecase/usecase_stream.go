@@ -516,3 +516,11 @@ func (uc *StreamUseCase) checkFutureTradeSwitch() {
 		}
 	}
 }
+
+func (uc *StreamUseCase) TurnFutureTradeSwitch(ctx context.Context, allow bool) {
+	uc.futureTradeSwitchCfg.AllowTrade = allow
+}
+
+func (uc *StreamUseCase) GetFutureTradeSwitchStatus(ctx context.Context) bool {
+	return uc.futureTradeSwitchCfg.AllowTrade
+}

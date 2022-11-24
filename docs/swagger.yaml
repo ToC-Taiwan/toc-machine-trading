@@ -201,7 +201,7 @@ definitions:
   entity.FutureOrder:
     properties:
       action:
-        type: integer
+        $ref: '#/definitions/entity.OrderAction'
       code:
         type: string
       future:
@@ -219,7 +219,7 @@ definitions:
       quantity:
         type: integer
       status:
-        type: integer
+        $ref: '#/definitions/entity.OrderStatus'
       tick_time:
         type: string
       trade_time:
@@ -240,6 +240,42 @@ definitions:
       trade_day:
         type: string
     type: object
+  entity.OrderAction:
+    enum:
+    - 0
+    - 1
+    - 2
+    - 3
+    - 4
+    type: integer
+    x-enum-varnames:
+    - ActionNone
+    - ActionBuy
+    - ActionSell
+    - ActionSellFirst
+    - ActionBuyLater
+  entity.OrderStatus:
+    enum:
+    - 0
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+    - 8
+    type: integer
+    x-enum-varnames:
+    - StatusUnknow
+    - StatusPendingSubmit
+    - StatusPreSubmitted
+    - StatusSubmitted
+    - StatusFailed
+    - StatusCancelled
+    - StatusFilled
+    - StatusPartFilled
+    - StatusAborted
   entity.Stock:
     properties:
       category:
@@ -281,7 +317,7 @@ definitions:
   entity.StockOrder:
     properties:
       action:
-        type: integer
+        $ref: '#/definitions/entity.OrderAction'
       group_id:
         type: string
       manual:
@@ -295,7 +331,7 @@ definitions:
       quantity:
         type: integer
       status:
-        type: integer
+        $ref: '#/definitions/entity.OrderStatus'
       stock:
         $ref: '#/definitions/entity.Stock'
       stock_num:
@@ -406,10 +442,15 @@ definitions:
           $ref: '#/definitions/entity.FutureOrder'
         type: array
     type: object
+  v1.futureSwitch:
+    properties:
+      switch:
+        type: boolean
+    type: object
   v1.manualInsertFutureOrderRequest:
     properties:
       action:
-        type: integer
+        $ref: '#/definitions/entity.OrderAction'
       code:
         type: string
       order_time:
@@ -817,6 +858,50 @@ paths:
       summary: askOrderUpdate
       tags:
       - order
+  /stream/future/switch:
+    get:
+      consumes:
+      - application/json
+      description: getFutureSwitchStatus
+      operationId: getFutureSwitchStatus
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: boolean
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+      summary: getFutureSwitchStatus
+      tags:
+      - stream
+    post:
+      consumes:
+      - application/json
+      description: modifyFutureSwitch
+      operationId: modifyFutureSwitch
+      parameters:
+      - description: Body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/v1.futureSwitch'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+      summary: modifyFutureSwitch
+      tags:
+      - stream
   /stream/tse/snapshot:
     get:
       consumes:

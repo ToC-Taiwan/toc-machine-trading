@@ -67,7 +67,7 @@ future_trade_switch:
     cancel_wait_time: 30 # unit: seccond
     trade_time_range:
         first_part_duration: 0 # duration: minute 04:00:00(780/840)
-        second_part_duration: 75 # duration: minute 13:05:00(260/300)
+        second_part_duration: 150 # duration: minute 13:05:00(260/300)
 
 future_analyze:
     max_hold_time: 5 # unit: minute

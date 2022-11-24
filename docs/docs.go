@@ -543,6 +543,72 @@ const docTemplate = `{
                 }
             }
         },
+        "/stream/future/switch": {
+            "get": {
+                "description": "getFutureSwitchStatus",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "stream"
+                ],
+                "summary": "getFutureSwitchStatus",
+                "operationId": "getFutureSwitchStatus",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/v1.response"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "modifyFutureSwitch",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "stream"
+                ],
+                "summary": "modifyFutureSwitch",
+                "operationId": "modifyFutureSwitch",
+                "parameters": [
+                    {
+                        "description": "Body",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/v1.futureSwitch"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/v1.response"
+                        }
+                    }
+                }
+            }
+        },
         "/stream/tse/snapshot": {
             "get": {
                 "description": "getTSESnapshot",
@@ -912,7 +978,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "action": {
-                    "type": "integer"
+                    "$ref": "#/definitions/entity.OrderAction"
                 },
                 "code": {
                     "type": "string"
@@ -939,7 +1005,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "status": {
-                    "type": "integer"
+                    "$ref": "#/definitions/entity.OrderStatus"
                 },
                 "tick_time": {
                     "type": "string"
@@ -971,6 +1037,48 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
+        },
+        "entity.OrderAction": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2,
+                3,
+                4
+            ],
+            "x-enum-varnames": [
+                "ActionNone",
+                "ActionBuy",
+                "ActionSell",
+                "ActionSellFirst",
+                "ActionBuyLater"
+            ]
+        },
+        "entity.OrderStatus": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8
+            ],
+            "x-enum-varnames": [
+                "StatusUnknow",
+                "StatusPendingSubmit",
+                "StatusPreSubmitted",
+                "StatusSubmitted",
+                "StatusFailed",
+                "StatusCancelled",
+                "StatusFilled",
+                "StatusPartFilled",
+                "StatusAborted"
+            ]
         },
         "entity.Stock": {
             "type": "object",
@@ -1034,7 +1142,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "action": {
-                    "type": "integer"
+                    "$ref": "#/definitions/entity.OrderAction"
                 },
                 "group_id": {
                     "type": "string"
@@ -1055,7 +1163,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "status": {
-                    "type": "integer"
+                    "$ref": "#/definitions/entity.OrderStatus"
                 },
                 "stock": {
                     "$ref": "#/definitions/entity.Stock"
@@ -1226,6 +1334,14 @@ const docTemplate = `{
                 }
             }
         },
+        "v1.futureSwitch": {
+            "type": "object",
+            "properties": {
+                "switch": {
+                    "type": "boolean"
+                }
+            }
+        },
         "v1.manualInsertFutureOrderRequest": {
             "type": "object",
             "required": [
@@ -1237,7 +1353,7 @@ const docTemplate = `{
             ],
             "properties": {
                 "action": {
-                    "type": "integer"
+                    "$ref": "#/definitions/entity.OrderAction"
                 },
                 "code": {
                     "type": "string"

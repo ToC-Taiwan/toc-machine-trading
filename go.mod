@@ -11,7 +11,7 @@ require (
 	github.com/google/go-cmp v0.5.9
 	github.com/google/uuid v1.3.0
 	github.com/gorilla/websocket v1.5.0
-	github.com/ilyakaznacheev/cleanenv v1.4.0
+	github.com/ilyakaznacheev/cleanenv v1.4.1
 	github.com/jackc/pgx/v4 v4.17.2
 	github.com/markcheno/go-talib v0.0.0-20190307022042-cd53a9264d70
 	github.com/patrickmn/go-cache v2.1.0+incompatible
@@ -21,7 +21,7 @@ require (
 	github.com/streadway/amqp v1.0.0
 	github.com/swaggo/files v0.0.0-20220728132757-551d4a08d97a
 	github.com/swaggo/gin-swagger v1.5.3
-	github.com/swaggo/swag v1.8.7
+	github.com/swaggo/swag v1.8.8
 	google.golang.org/grpc v1.51.0
 	google.golang.org/protobuf v1.28.1
 )
