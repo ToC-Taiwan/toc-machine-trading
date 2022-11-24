@@ -7,9 +7,9 @@ import (
 	"os/signal"
 	"syscall"
 
-	"tmt/cmd/config"
 	"tmt/internal/usecase"
 	"tmt/internal/usecase/grpcapi"
+	"tmt/internal/usecase/modules/config"
 	"tmt/internal/usecase/modules/logger"
 	"tmt/internal/usecase/rabbit"
 	"tmt/internal/usecase/repo"

@@ -5,8 +5,8 @@ import (
 	"sort"
 	"time"
 
-	"tmt/cmd/config"
 	"tmt/internal/entity"
+	"tmt/internal/usecase/modules/config"
 	"tmt/internal/usecase/modules/quota"
 	"tmt/internal/usecase/modules/tradeday"
 	"tmt/pkg/common"

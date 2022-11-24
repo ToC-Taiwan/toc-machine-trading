@@ -7,7 +7,7 @@ postgres:
 log:
     log_format: text
     level: info
-    need_caller: true
+    need_caller: false
 
 rabbitmq:
     wait_time: 5

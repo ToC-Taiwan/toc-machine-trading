@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"tmt/cmd/config"
+	"tmt/internal/usecase/modules/config"
 	"tmt/pkg/postgres"
 
 	"github.com/golang-migrate/migrate/v4"

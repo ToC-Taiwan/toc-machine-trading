@@ -6,8 +6,8 @@ import (
 	"sync"
 	"time"
 
-	"tmt/cmd/config"
 	"tmt/internal/entity"
+	"tmt/internal/usecase/modules/config"
 	"tmt/internal/usecase/modules/logger"
 	"tmt/pb"
 	"tmt/pkg/common"

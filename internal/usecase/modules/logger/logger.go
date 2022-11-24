@@ -2,7 +2,7 @@
 package logger
 
 import (
-	"tmt/cmd/config"
+	"tmt/internal/usecase/modules/config"
 	"tmt/pkg/logger"
 )
 

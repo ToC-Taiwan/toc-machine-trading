@@ -7,8 +7,8 @@ import (
 	"sync"
 	"time"
 
-	"tmt/cmd/config"
 	"tmt/internal/entity"
+	"tmt/internal/usecase/modules/config"
 	"tmt/internal/usecase/modules/event"
 	"tmt/internal/usecase/modules/tradeday"
 	"tmt/internal/usecase/modules/trader"
