@@ -63,9 +63,12 @@ func NewOrder(t OrdergRPCAPI, r OrderRepo) *OrderUseCase {
 }
 
 func (uc *OrderUseCase) updateAllTradeBalance() {
+	updateBalanceTimer := time.NewTimer(20 * time.Second)
+	askUpateTimer := time.NewTimer(750 * time.Millisecond)
+
 	for {
 		select {
-		case <-time.After(20 * time.Second):
+		case <-updateBalanceTimer.C:
 			if uc.IsStockTradeTime() {
 				stockOrders, err := uc.repo.QueryAllStockOrderByDate(context.Background(), uc.stockTradeDay.ToStartEndArray())
 				if err != nil {
@@ -81,11 +84,13 @@ func (uc *OrderUseCase) updateAllTradeBalance() {
 				}
 				uc.calculateFutureTradeBalance(futureOrders)
 			}
+			updateBalanceTimer.Reset(20 * time.Second)
 
-		case <-time.After(750 * time.Millisecond):
+		case <-askUpateTimer.C:
 			if err := uc.AskOrderUpdate(); err != nil {
 				log.Error(err)
 			}
+			askUpateTimer.Reset(750 * time.Millisecond)
 		}
 	}
 }
