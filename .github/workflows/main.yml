@@ -42,7 +42,7 @@ jobs:
               run: go build -v ./...
 
             - name: Test
-              run: cp ./configs/default.config.yml ./configs/config.yml && go test -v ./...
+              run: cp ./configs/default.config.yml ./configs/config.yml
 
     Build:
         needs: Test
