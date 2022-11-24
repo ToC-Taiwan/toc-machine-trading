@@ -4,15 +4,12 @@ package config
 import (
 	"sync"
 
-	"tmt/pkg/logger"
-
 	"github.com/ilyakaznacheev/cleanenv"
 )
 
 var (
 	globalConfig *Config
 	once         sync.Once
-	log          = logger.Get()
 )
 
 // GetConfig -.
@@ -38,11 +35,11 @@ func parseConfigFile() {
 	}
 
 	globalConfig = &newConfig
-	log.Infof("Simulation trade is %v", globalConfig.Simulation)
 }
 
 // Config -.
 type Config struct {
+	Log               Log               `json:"log"                 yaml:"log"`
 	HTTP              HTTP              `json:"http"                env-required:"true" yaml:"http"`
 	Postgres          Postgres          `json:"postgres"            env-required:"true" yaml:"postgres"`
 	Sinopac           Sinopac           `json:"sinopac"             env-required:"true" yaml:"sinopac"`
@@ -55,6 +52,12 @@ type Config struct {
 	TargetCond        TargetCond        `json:"target_cond"         env-required:"true" yaml:"target_cond"`
 	StockAnalyze      StockAnalyze      `json:"stock_analyze"       env-required:"true" yaml:"stock_analyze"`
 	FutureAnalyze     FutureAnalyze     `json:"future_analyze"      env-required:"true" yaml:"future_analyze"`
+}
+
+type Log struct {
+	LogFormat  string `json:"log_format"  yaml:"log_format"`
+	Level      string `json:"level"       yaml:"level"`
+	NeedCaller bool   `json:"need_caller" yaml:"need_caller"`
 }
 
 // HTTP -.

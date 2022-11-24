@@ -683,6 +683,9 @@ const docTemplate = `{
                 "http": {
                     "$ref": "#/definitions/config.HTTP"
                 },
+                "log": {
+                    "$ref": "#/definitions/config.Log"
+                },
                 "postgres": {
                     "$ref": "#/definitions/config.Postgres"
                 },
@@ -765,6 +768,20 @@ const docTemplate = `{
                 },
                 "history_tick_period": {
                     "type": "integer"
+                }
+            }
+        },
+        "config.Log": {
+            "type": "object",
+            "properties": {
+                "level": {
+                    "type": "string"
+                },
+                "log_format": {
+                    "type": "string"
+                },
+                "need_caller": {
+                    "type": "boolean"
                 }
             }
         },

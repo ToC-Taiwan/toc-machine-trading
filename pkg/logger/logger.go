@@ -7,16 +7,59 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/rifflock/lfshook"
 	"github.com/sirupsen/logrus"
 )
 
-var (
-	globalLogger *Logger
-	once         sync.Once
+type Format string
+
+const (
+	// LogFormatJSON -.
+	LogFormatJSON Format = "json"
+	// LogFormatText -.
+	LogFormatText Format = "text"
+)
+
+type Level string
+
+const (
+	LogLevelPanic Level = "panic"
+	LogLevelFatal Level = "fatal"
+	LogLevelError Level = "error"
+	LogLevelWarn  Level = "warn"
+	LogLevelInfo  Level = "info"
+	LogLevelDebug Level = "debug"
+	LogLevelTrace Level = "trace"
+)
+
+func (l Level) Level() logrus.Level {
+	switch l {
+	case LogLevelPanic:
+		return logrus.PanicLevel
+	case LogLevelFatal:
+		return logrus.FatalLevel
+	case LogLevelError:
+		return logrus.ErrorLevel
+	case LogLevelWarn:
+		return logrus.WarnLevel
+	case LogLevelInfo:
+		return logrus.InfoLevel
+	case LogLevelDebug:
+		return logrus.DebugLevel
+	case LogLevelTrace:
+		return logrus.TraceLevel
+	default:
+		return logrus.InfoLevel
+	}
+}
+
+const (
+	_defaultLogFormat  = LogFormatText
+	_defaultLogLevel   = LogLevelInfo
+	_defaultNeedCaller = false
+	_defaultTimeFormat = "2006-01-02 15:04:05"
 )
 
 // Logger -.
@@ -24,42 +67,47 @@ type Logger struct {
 	*logrus.Logger
 }
 
-// Get Get
-func Get() *Logger {
-	if globalLogger != nil {
-		return globalLogger
+type loggerConfig struct {
+	timeFormat string
+	format     Format
+	level      Level
+	needCaller bool
+}
+
+func newLoggerConfig(opts ...Option) *loggerConfig {
+	cfg := &loggerConfig{
+		format:     _defaultLogFormat,
+		level:      _defaultLogLevel,
+		needCaller: _defaultNeedCaller,
+		timeFormat: _defaultTimeFormat,
 	}
 
-	once.Do(initLogger)
-	return globalLogger
+	for _, opt := range opts {
+		opt(cfg)
+	}
+
+	return cfg
 }
 
-type logConfig struct {
-	jsonFormat bool
-	isDev      bool
-	logLevel   int
-}
-
-func initLogger() {
-	// Get current path
+// NewLogger -.
+func NewLogger(opts ...Option) *Logger {
 	ex, err := os.Executable()
 	if err != nil {
 		panic(err)
 	}
 	basePath := filepath.Clean(filepath.Dir(ex))
+	cfg := newLoggerConfig(opts...)
 
-	logCfg := parseEnvToLogConfig()
-	newLogger := logrus.New()
-
+	l := logrus.New()
 	jsonFormatter := &logrus.JSONFormatter{
 		DisableHTMLEscape: true,
-		TimestampFormat:   time.RFC3339,
+		TimestampFormat:   cfg.timeFormat,
 		PrettyPrint:       false,
 		CallerPrettyfier:  newCallerPrettyfier(basePath, true),
 	}
 
 	textFormatter := &logrus.TextFormatter{
-		TimestampFormat:  time.RFC3339,
+		TimestampFormat:  cfg.timeFormat,
 		FullTimestamp:    true,
 		QuoteEmptyFields: true,
 		PadLevelText:     false,
@@ -68,26 +116,28 @@ func initLogger() {
 	}
 
 	var formatter logrus.Formatter
-	if logCfg.jsonFormat {
+	if cfg.format == LogFormatJSON {
 		formatter = jsonFormatter
 	} else {
 		formatter = textFormatter
 	}
 
-	if logCfg.isDev {
-		newLogger.SetReportCaller(true)
+	if cfg.needCaller {
+		l.SetReportCaller(true)
 	}
 
-	newLogger.Hooks.Add(fileHook(basePath, jsonFormatter))
-	newLogger.SetFormatter(formatter)
-	newLogger.SetLevel(logrus.Level(logCfg.logLevel))
-	newLogger.SetOutput(os.Stdout)
+	l.Hooks.Add(fileHook(basePath, jsonFormatter, cfg.timeFormat))
+	l.SetFormatter(formatter)
+	l.SetLevel(cfg.level.Level())
+	l.SetOutput(os.Stdout)
 
-	globalLogger = &Logger{newLogger}
+	return &Logger{
+		Logger: l,
+	}
 }
 
-func fileHook(basePath string, formatter logrus.Formatter) *lfshook.LfsHook {
-	date := strings.ReplaceAll(time.Now().Format(time.RFC3339), ":", "")
+func fileHook(basePath string, formatter logrus.Formatter, timeFormat string) *lfshook.LfsHook {
+	date := strings.ReplaceAll(time.Now().Format(timeFormat), ":", "")
 	return lfshook.NewHook(
 		lfshook.PathMap{
 			logrus.PanicLevel: filepath.Join(basePath, fmt.Sprintf("/logs/tmt-%s.log", date)),
@@ -109,53 +159,3 @@ func newCallerPrettyfier(basePath string, isJSON bool) func(*runtime.Frame) (fun
 		return fmt.Sprintf("[%s:%d]", fileName, frame.Line), ""
 	}
 }
-
-func parseEnvToLogConfig() logConfig {
-	var cfg logConfig
-	if mode := os.Getenv("LOG_FORMAT"); mode == "json" {
-		cfg.jsonFormat = true
-	}
-
-	if deployment := os.Getenv("DEPLOYMENT"); deployment == "dev" {
-		cfg.isDev = true
-	}
-
-	logLevelString := os.Getenv("LOG_LEVEL")
-	switch logLevelString {
-	case "panic":
-		cfg.logLevel = PanicLevel
-	case "fatal":
-		cfg.logLevel = FatalLevel
-	case "error":
-		cfg.logLevel = ErrorLevel
-	case "warn":
-		cfg.logLevel = WarnLevel
-	case "info":
-		cfg.logLevel = InfoLevel
-	case "debug":
-		cfg.logLevel = DebugLevel
-	case "trace":
-		cfg.logLevel = TraceLevel
-	default:
-		cfg.logLevel = InfoLevel
-	}
-
-	return cfg
-}
-
-const (
-	// PanicLevel level, highest level of severity. Logs and then calls panic with the
-	PanicLevel int = iota
-	// FatalLevel level. Logs and then calls `os.Exit(1)`. It will exit even if the
-	FatalLevel
-	// ErrorLevel level. Logs. Used for errors that should definitely be noted.
-	ErrorLevel
-	// WarnLevel level. Non-critical entries that deserve eyes.
-	WarnLevel
-	// InfoLevel level. General operational entries about what's going on inside the
-	InfoLevel
-	// DebugLevel level. Usually only enabled when debugging. Very verbose logging.
-	DebugLevel
-	// TraceLevel level. Designates finer-grained informational events than the Debug.
-	TraceLevel
-)

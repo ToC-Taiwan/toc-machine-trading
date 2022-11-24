@@ -41,7 +41,6 @@ func newStreamRoutes(handler *gin.RouterGroup, t usecase.Stream, o usecase.Order
 func (r *streamRoutes) getTSESnapshot(c *gin.Context) {
 	snapshot, err := r.t.GetTSESnapshot(c.Request.Context())
 	if err != nil {
-		log.Error(err)
 		errorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}

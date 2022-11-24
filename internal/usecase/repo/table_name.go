@@ -1,6 +1,6 @@
 package repo
 
-import "tmt/pkg/logger"
+import "tmt/internal/usecase/modules/logger"
 
 var (
 	log           = logger.Get()

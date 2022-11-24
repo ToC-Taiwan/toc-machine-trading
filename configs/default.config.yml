@@ -4,6 +4,11 @@ http:
 postgres:
     pool_max: 80
 
+log:
+    log_format: text
+    level: info
+    need_caller: true
+
 rabbitmq:
     wait_time: 5
     attempts: 10

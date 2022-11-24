@@ -10,11 +10,11 @@ import (
 	"tmt/cmd/config"
 	"tmt/internal/usecase"
 	"tmt/internal/usecase/grpcapi"
+	"tmt/internal/usecase/modules/logger"
 	"tmt/internal/usecase/rabbit"
 	"tmt/internal/usecase/repo"
 	"tmt/pkg/grpc"
 	"tmt/pkg/httpserver"
-	"tmt/pkg/logger"
 	"tmt/pkg/postgres"
 
 	v1 "tmt/internal/controller/http/v1"

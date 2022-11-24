@@ -5,7 +5,7 @@ import (
 	"tmt/internal/usecase/modules/cache"
 	"tmt/internal/usecase/modules/event"
 
-	"tmt/pkg/logger"
+	"tmt/internal/usecase/modules/logger"
 )
 
 var (

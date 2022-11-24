@@ -63,7 +63,6 @@ func (w *WSRouter) processTrade(clientMsg clientMsg) {
 		order.OrderID, order.Status, err = w.o.BuyFuture(order)
 		if err != nil {
 			w.msgChan <- errMsg{ErrMsg: err.Error()}
-			log.Error(err)
 			return
 		}
 
@@ -71,7 +70,6 @@ func (w *WSRouter) processTrade(clientMsg clientMsg) {
 		order.OrderID, order.Status, err = w.o.SellFuture(order)
 		if err != nil {
 			w.msgChan <- errMsg{ErrMsg: err.Error()}
-			log.Error(err)
 			return
 		}
 	}
@@ -79,7 +77,6 @@ func (w *WSRouter) processTrade(clientMsg clientMsg) {
 	w.orderLock.Lock()
 	order.TradeTime = time.Now()
 	w.futureOrderMap[order.OrderID] = order
-	log.Infof("New Order: %s", order.FutureOrderStatusString())
 	w.orderLock.Unlock()
 }
 
@@ -225,13 +222,11 @@ func (w *WSRouter) cancelOverTimeOrder() {
 				if !order.Cancellabel() {
 					delete(w.futureOrderMap, id)
 					delete(cancelOrderMap, id)
-					log.Warnf("Delete %s", order.FutureOrderStatusString())
 				} else if time.Since(order.TradeTime) > 10*time.Second && cancelOrderMap[id] == nil {
 					if e := w.cancelOrderByID(id); e != nil {
 						w.msgChan <- errMsg{ErrMsg: e.Error()}
 					}
 					cancelOrderMap[id] = order
-					log.Warnf("%s timeout, cancel it", order.FutureOrderStatusString())
 				}
 			}
 			w.orderLock.Unlock()

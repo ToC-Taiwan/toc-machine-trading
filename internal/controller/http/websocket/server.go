@@ -4,20 +4,18 @@ package websocket
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"net/http"
 	"sync"
 
 	"tmt/internal/entity"
 	"tmt/internal/usecase"
-	"tmt/pkg/logger"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 )
 
-var log = logger.Get()
+// var log = logger.Get()
 
 // WSType -
 type WSType int
@@ -76,12 +74,9 @@ func (w *WSRouter) Run(gin *gin.Context, wsType WSType) {
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
 	}
+
 	c, _ := upGrader.Upgrade(gin.Writer, gin.Request, nil)
-	defer func() {
-		if err := c.Close(); err != nil {
-			log.Errorf("Websocket Close error: %s", err)
-		}
-	}()
+	defer func() { _ = c.Close() }()
 
 	w.conn = c
 	w.ctx = gin.Request.Context()
@@ -113,7 +108,6 @@ func (w *WSRouter) read() {
 		var msg clientMsg
 		if err := json.Unmarshal(message, &msg); err != nil {
 			w.msgChan <- errMsg{ErrMsg: err.Error()}
-			log.Error(err)
 			continue
 		}
 
@@ -140,10 +134,10 @@ func (w *WSRouter) write() {
 				}
 
 			default:
-				if serveMsgStr, err := json.Marshal(v); err != nil {
-					log.Error(err)
-				} else if err := w.send(serveMsgStr); err != nil {
-					return
+				if serveMsgStr, err := json.Marshal(v); err == nil {
+					if err := w.send(serveMsgStr); err != nil {
+						return
+					}
 				}
 			}
 		}
@@ -152,9 +146,6 @@ func (w *WSRouter) write() {
 
 func (w *WSRouter) send(data []byte) error {
 	if err := w.conn.WriteMessage(websocket.TextMessage, data); err != nil {
-		if !errors.Is(err, websocket.ErrCloseSent) {
-			log.Error(err)
-		}
 		return err
 	}
 	return nil

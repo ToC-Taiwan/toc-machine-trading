@@ -37,7 +37,6 @@ func (w *WSRouter) sendPickStockSnapShot() {
 
 			snapShot, err := w.s.GetStockSnapshotByNumArr(tmpStockArr)
 			if err != nil {
-				log.Error(err)
 				return
 			}
 

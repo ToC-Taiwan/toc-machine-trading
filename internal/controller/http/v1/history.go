@@ -42,14 +42,12 @@ func (r *historyRoutes) getKbarData(c *gin.Context) {
 	stockNum := c.Param("stock")
 	interval, err := strconv.Atoi(c.Param("interval"))
 	if err != nil {
-		log.Error(err)
 		errorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 	startDate := c.Param("start_date")
 	startDateTime, err := time.Parse(common.ShortTimeLayout, startDate)
 	if err != nil {
-		log.Error(err)
 		errorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -84,12 +82,10 @@ func (r *historyRoutes) getKbarData(c *gin.Context) {
 func (r *historyRoutes) simulateFuture(c *gin.Context) {
 	interval, err := strconv.Atoi(c.Param("interval"))
 	if err != nil {
-		log.Error(err)
 		errorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	cond := r.t.GetFutureTradeCond(interval)
-	log.Warnf("Days: %d, Count: %d, Balance: %d", interval, cond.Count, cond.Balance)
 	c.JSON(http.StatusOK, cond)
 }

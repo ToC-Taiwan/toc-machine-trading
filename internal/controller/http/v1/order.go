@@ -51,14 +51,12 @@ type allOrder struct {
 func (r *orderRoutes) getAllOrder(c *gin.Context) {
 	stockOrderArr, err := r.t.GetAllStockOrder(c.Request.Context())
 	if err != nil {
-		log.Error(err)
 		errorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	futureOrderArr, err := r.t.GetAllFutureOrder(c.Request.Context())
 	if err != nil {
-		log.Error(err)
 		errorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -169,14 +167,12 @@ type tradeBalance struct {
 func (r *orderRoutes) getAllTradeBalance(c *gin.Context) {
 	allStockArr, err := r.t.GetAllStockTradeBalance(c.Request.Context())
 	if err != nil {
-		log.Error(err)
 		errorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	allFutureArr, err := r.t.GetAllFutureTradeBalance(c.Request.Context())
 	if err != nil {
-		log.Error(err)
 		errorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -208,14 +204,12 @@ func (r *orderRoutes) calculateForwardDayTradeBalance(c *gin.Context) {
 	buyPriceString := c.Request.Header.Get("buy_price")
 	buyPrice, err := strconv.ParseFloat(buyPriceString, 64)
 	if err != nil {
-		log.Error(err)
 		errorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 	buyQuantityString := c.Request.Header.Get("buy_quantity")
 	buyQuantity, err := strconv.ParseInt(buyQuantityString, 10, 64)
 	if err != nil {
-		log.Error(err)
 		errorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -223,7 +217,6 @@ func (r *orderRoutes) calculateForwardDayTradeBalance(c *gin.Context) {
 	sellPriceString := c.Request.Header.Get("sell_price")
 	sellPrice, err := strconv.ParseFloat(sellPriceString, 64)
 	if err != nil {
-		log.Error(err)
 		errorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -231,7 +224,6 @@ func (r *orderRoutes) calculateForwardDayTradeBalance(c *gin.Context) {
 	sellQuantityString := c.Request.Header.Get("sell_quantity")
 	sellQuantity, err := strconv.ParseInt(sellQuantityString, 10, 64)
 	if err != nil {
-		log.Error(err)
 		errorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -263,7 +255,6 @@ func (r *orderRoutes) calculateReverseDayTradeBalance(c *gin.Context) {
 	sellFirstPriceString := c.Request.Header.Get("sell_first_price")
 	sellFirstPrice, err := strconv.ParseFloat(sellFirstPriceString, 64)
 	if err != nil {
-		log.Error(err)
 		errorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -271,7 +262,6 @@ func (r *orderRoutes) calculateReverseDayTradeBalance(c *gin.Context) {
 	sellFirstQuantityString := c.Request.Header.Get("sell_first_quantity")
 	sellFirstQuantity, err := strconv.ParseInt(sellFirstQuantityString, 10, 64)
 	if err != nil {
-		log.Error(err)
 		errorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -279,14 +269,12 @@ func (r *orderRoutes) calculateReverseDayTradeBalance(c *gin.Context) {
 	buyLaterPriceString := c.Request.Header.Get("buy_later_price")
 	buyLaterPrice, err := strconv.ParseFloat(buyLaterPriceString, 64)
 	if err != nil {
-		log.Error(err)
 		errorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 	buyLaterQuantityString := c.Request.Header.Get("buy_later_quantity")
 	buyLaterQuantity, err := strconv.ParseInt(buyLaterQuantityString, 10, 64)
 	if err != nil {
-		log.Error(err)
 		errorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -312,7 +300,6 @@ func (r *orderRoutes) calculateReverseDayTradeBalance(c *gin.Context) {
 // @Router      /order/status/update [put]
 func (r *orderRoutes) askOrderUpdate(c *gin.Context) {
 	if err := r.t.AskOrderUpdate(); err != nil {
-		log.Error(err)
 		errorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}

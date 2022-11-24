@@ -10,8 +10,8 @@ import (
 	"tmt/internal/usecase/modules/event"
 	"tmt/internal/usecase/modules/trader"
 
+	"tmt/internal/usecase/modules/logger"
 	"tmt/pb"
-	"tmt/pkg/logger"
 )
 
 var (

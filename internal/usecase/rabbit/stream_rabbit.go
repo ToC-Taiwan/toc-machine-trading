@@ -8,9 +8,9 @@ import (
 
 	"tmt/cmd/config"
 	"tmt/internal/entity"
+	"tmt/internal/usecase/modules/logger"
 	"tmt/pb"
 	"tmt/pkg/common"
-	"tmt/pkg/logger"
 	"tmt/pkg/rabbitmq"
 
 	"github.com/google/uuid"

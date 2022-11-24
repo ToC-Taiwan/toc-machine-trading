@@ -4,15 +4,12 @@ package v1
 import (
 	"tmt/docs"
 	"tmt/internal/usecase"
-	"tmt/pkg/logger"
 
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
-
-var log = logger.Get()
 
 // RouterV1 -.
 type RouterV1 struct {
@@ -41,7 +38,9 @@ func NewRouter(handler *gin.Engine) *RouterV1 {
 	// Prometheus metrics
 	handler.GET("/metrics", gin.WrapH(promhttp.Handler()))
 
-	return &RouterV1{handler.Group(prefix)}
+	return &RouterV1{
+		g: handler.Group(prefix),
+	}
 }
 
 // AddBasicRoutes -.

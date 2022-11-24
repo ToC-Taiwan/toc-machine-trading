@@ -9,6 +9,8 @@ definitions:
         $ref: '#/definitions/config.History'
       http:
         $ref: '#/definitions/config.HTTP'
+      log:
+        $ref: '#/definitions/config.Log'
       postgres:
         $ref: '#/definitions/config.Postgres'
       quota:
@@ -63,6 +65,15 @@ definitions:
         type: integer
       history_tick_period:
         type: integer
+    type: object
+  config.Log:
+    properties:
+      level:
+        type: string
+      log_format:
+        type: string
+      need_caller:
+        type: boolean
     type: object
   config.Postgres:
     properties:
