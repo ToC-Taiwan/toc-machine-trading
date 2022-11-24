@@ -561,7 +561,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "boolean"
+                            "$ref": "#/definitions/v1.futureSwitch"
                         }
                     },
                     "500": {

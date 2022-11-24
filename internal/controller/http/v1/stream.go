@@ -48,21 +48,21 @@ func (r *streamRoutes) getTSESnapshot(c *gin.Context) {
 	c.JSON(http.StatusOK, snapshot)
 }
 
+type futureSwitch struct {
+	Switch bool `json:"switch"`
+}
+
 // @Summary     getFutureSwitchStatus
 // @Description getFutureSwitchStatus
 // @ID          getFutureSwitchStatus
 // @Tags  	    stream
 // @Accept      json
 // @Produce     json
-// @Success     200 {object} bool
+// @Success     200 {object} futureSwitch{}
 // @Failure     500 {object} response
 // @Router      /stream/future/switch [get]
 func (r *streamRoutes) getFutureSwitchStatus(c *gin.Context) {
-	c.JSON(http.StatusOK, r.t.GetFutureTradeSwitchStatus(c.Request.Context()))
-}
-
-type futureSwitch struct {
-	Switch bool `json:"switch"`
+	c.JSON(http.StatusOK, futureSwitch{r.t.GetFutureTradeSwitchStatus(c.Request.Context())})
 }
 
 // @Summary     modifyFutureSwitch

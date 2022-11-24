@@ -870,7 +870,7 @@ paths:
         "200":
           description: OK
           schema:
-            type: boolean
+            $ref: '#/definitions/v1.futureSwitch'
         "500":
           description: Internal Server Error
           schema:
