@@ -290,7 +290,7 @@ func (uc *OrderUseCase) updateStockOrderCacheAndInsertDB(order *entity.StockOrde
 
 	// get order from cache
 	cacheOrder := cc.GetOrderByOrderID(order.OrderID)
-	if cacheOrder == nil || cacheOrder.Status == order.Status {
+	if cacheOrder == nil {
 		return
 	}
 
@@ -467,7 +467,7 @@ func (uc *OrderUseCase) updateFutureOrderCacheAndInsertDB(order *entity.FutureOr
 
 	// get order from cache
 	cacheOrder := cc.GetFutureOrderByOrderID(order.OrderID)
-	if cacheOrder == nil || cacheOrder.Status == order.Status {
+	if cacheOrder == nil {
 		return
 	}
 
