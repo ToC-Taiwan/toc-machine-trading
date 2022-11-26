@@ -5,26 +5,10 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
-	"sync"
-
-	"tmt/internal/entity"
-	"tmt/internal/usecase"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
-)
-
-// var log = logger.Get()
-
-// WSType -
-type WSType int
-
-const (
-	// WSPickStock -
-	WSPickStock WSType = iota + 1
-	// WSFuture -
-	WSFuture
 )
 
 // WSRouter -.
@@ -32,41 +16,21 @@ type WSRouter struct {
 	connectionID string
 	msgChan      chan interface{}
 	conn         *websocket.Conn
-	s            usecase.Stream
-	o            usecase.Order
 	ctx          context.Context
-
-	pickStockArr []string
-	mutex        sync.Mutex
-
-	futureOrderMap map[string]*entity.FutureOrder
-	orderLock      sync.Mutex
-}
-
-type clientMsg struct {
-	Topic string `json:"topic"`
-
-	PickStockList []string     `json:"pick_stock_list"`
-	FutureOrder   *futureOrder `json:"future_order"`
-}
-
-type errMsg struct {
-	ErrMsg string `json:"err_msg"`
 }
 
 // NewWSRouter -.
-func NewWSRouter(s usecase.Stream, o usecase.Order) *WSRouter {
-	return &WSRouter{
-		s:              s,
-		o:              o,
-		connectionID:   uuid.New().String(),
-		msgChan:        make(chan interface{}),
-		futureOrderMap: make(map[string]*entity.FutureOrder),
+func NewWSRouter(c *gin.Context) *WSRouter {
+	r := &WSRouter{
+		connectionID: uuid.New().String(),
+		msgChan:      make(chan interface{}),
 	}
+	r.Upgrade(c)
+	return r
 }
 
-// Run -.
-func (w *WSRouter) Run(gin *gin.Context, wsType WSType) {
+// Upgrade -.
+func (w *WSRouter) Upgrade(gin *gin.Context) {
 	upGrader := websocket.Upgrader{
 		CheckOrigin: func(r *http.Request) bool {
 			return true
@@ -82,42 +46,13 @@ func (w *WSRouter) Run(gin *gin.Context, wsType WSType) {
 	w.ctx = gin.Request.Context()
 
 	go w.write()
-
-	switch wsType {
-	case WSPickStock:
-		go w.sendPickStockSnapShot()
-	case WSFuture:
-		go w.sendFuture()
-	}
-
-	w.read()
 }
 
-func (w *WSRouter) read() {
-	for {
-		_, message, err := w.conn.ReadMessage()
-		if err != nil {
-			return
-		}
-
-		if string(message) == "ping" {
-			w.msgChan <- "pong"
-			continue
-		}
-
-		var msg clientMsg
-		if err := json.Unmarshal(message, &msg); err != nil {
-			w.msgChan <- errMsg{ErrMsg: err.Error()}
-			continue
-		}
-
-		switch msg.Topic {
-		case "pick_stock":
-			w.updatePickStock(msg)
-		case "future_trade":
-			w.processTrade(msg)
-		}
+func (w *WSRouter) send(data []byte) error {
+	if err := w.conn.WriteMessage(websocket.TextMessage, data); err != nil {
+		return err
 	}
+	return nil
 }
 
 func (w *WSRouter) write() {
@@ -144,9 +79,21 @@ func (w *WSRouter) write() {
 	}
 }
 
-func (w *WSRouter) send(data []byte) error {
-	if err := w.conn.WriteMessage(websocket.TextMessage, data); err != nil {
-		return err
-	}
-	return nil
+func (w *WSRouter) read(forwardChan chan []byte) {
+	go func() {
+		for {
+			_, message, err := w.conn.ReadMessage()
+			if err != nil {
+				close(forwardChan)
+				return
+			}
+
+			if string(message) == "ping" {
+				w.msgChan <- "pong"
+				continue
+			}
+
+			forwardChan <- message
+		}
+	}()
 }

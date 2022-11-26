@@ -86,11 +86,9 @@ func (r *streamRoutes) modifyFutureSwitch(c *gin.Context) {
 }
 
 func (r *streamRoutes) servePickStockWS(c *gin.Context) {
-	wsRouter := websocket.NewWSRouter(r.t, r.o)
-	wsRouter.Run(c, websocket.WSPickStock)
+	websocket.StartWSPickStock(c, r.t)
 }
 
 func (r *streamRoutes) serveFutureWS(c *gin.Context) {
-	wsRouter := websocket.NewWSRouter(r.t, r.o)
-	wsRouter.Run(c, websocket.WSFuture)
+	websocket.StartWSFutureTrade(c, r.t, r.o)
 }
