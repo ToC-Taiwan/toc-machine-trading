@@ -17,7 +17,6 @@ import (
 
 type WSFutureTrade struct {
 	*websocket.WSRouter
-	// assistTrader *assistTrader
 
 	s usecase.Stream
 	o usecase.Order
@@ -25,20 +24,20 @@ type WSFutureTrade struct {
 	futureOrderMap map[string]*entity.FutureOrder
 	orderLock      sync.Mutex
 
-	assistTraderTickChan     map[string]chan *entity.RealTimeFutureTick
-	assistTraderTickChanLock sync.RWMutex
+	assistTrader         *assistTrader
+	assistTraderTickChan chan *entity.RealTimeFutureTick
 }
 
 // StartWSFutureTrade -.
 func StartWSFutureTrade(c *gin.Context, s usecase.Stream, o usecase.Order) {
 	w := &WSFutureTrade{
-		s:                    s,
-		o:                    o,
-		futureOrderMap:       make(map[string]*entity.FutureOrder),
-		WSRouter:             websocket.NewWSRouter(c),
-		assistTraderTickChan: make(map[string]chan *entity.RealTimeFutureTick),
+		s:              s,
+		o:              o,
+		futureOrderMap: make(map[string]*entity.FutureOrder),
+		WSRouter:       websocket.NewWSRouter(c),
 	}
-	// w.assistTrader = newAssistTrader(w.msgChan)
+	w.assistTrader = newAssistTrader(w.Ctx(), o)
+	w.assistTraderTickChan = w.assistTrader.getTickChan()
 
 	forwardChan := make(chan []byte)
 	go func() {
@@ -66,7 +65,10 @@ func (w *WSFutureTrade) processTrade(clientMsg futureTradeClientMsg) {
 		return
 	}
 
-	// TODO: block if assist trader is running
+	if !w.assistTrader.isAssistDone() {
+		w.SendToClient(errMsg{ErrMsg: "Assist trader is running"})
+		return
+	}
 
 	order := &entity.FutureOrder{
 		Code: clientMsg.Code,
@@ -77,32 +79,37 @@ func (w *WSFutureTrade) processTrade(clientMsg futureTradeClientMsg) {
 		},
 	}
 
+	if e := w.placeOrder(order); e != nil {
+		w.SendToClient(errMsg{ErrMsg: e.Error()})
+		return
+	}
+
+	w.orderLock.Lock()
+	order.TradeTime = time.Now()
+	if clientMsg.Option.AutomationType != AutomationNone {
+		w.assistTrader.addAssistOrder(order, clientMsg.Option)
+	} else {
+		w.futureOrderMap[order.OrderID] = order
+	}
+	w.orderLock.Unlock()
+}
+
+func (w *WSFutureTrade) placeOrder(order *entity.FutureOrder) error {
 	var err error
 	switch order.Action {
 	case entity.ActionBuy:
 		order.OrderID, order.Status, err = w.o.BuyFuture(order)
 		if err != nil {
-			w.SendToClient(errMsg{ErrMsg: err.Error()})
-			return
+			return err
 		}
 
 	case entity.ActionSell:
 		order.OrderID, order.Status, err = w.o.SellFuture(order)
 		if err != nil {
-			w.SendToClient(errMsg{ErrMsg: err.Error()})
-			return
+			return err
 		}
 	}
-
-	w.orderLock.Lock()
-	order.TradeTime = time.Now()
-	// if clientMsg.Option.AutomationType != AutomationNone {
-	// 	tickChan := w.assistTrader.addAssistOrder(order, clientMsg.Option)
-	// 	w.addAssistTrader(order.OrderID, tickChan)
-	// } else {
-	w.futureOrderMap[order.OrderID] = order
-	// }
-	w.orderLock.Unlock()
+	return nil
 }
 
 func (w *WSFutureTrade) sendFuture() {
@@ -136,15 +143,12 @@ func (w *WSFutureTrade) processTickArr(tickChan chan *entity.RealTimeFutureTick)
 	for {
 		tick, ok := <-tickChan
 		if !ok {
+			close(w.assistTraderTickChan)
 			return
 		}
 		tickArr = append(tickArr, tick)
 		w.SendToClient(tick)
-		w.assistTraderTickChanLock.RLock()
-		for _, c := range w.assistTraderTickChan {
-			c <- tick
-		}
-		w.assistTraderTickChanLock.RUnlock()
+		w.assistTraderTickChan <- tick
 
 		var firstPeriod, secondPeriod, thirdPeriod, fourthPeriod entity.RealTimeFutureTickArr
 	L:
@@ -192,17 +196,17 @@ func (w *WSFutureTrade) processOrderStatus(orderStatusChan chan interface{}) {
 
 		if o, ok := order.(*entity.FutureOrder); ok {
 			w.orderLock.Lock()
-			if cache := w.futureOrderMap[o.OrderID]; cache != nil && cache.Status != o.Status {
-				w.SendToClient(o)
-				o.TradeTime = cache.TradeTime
-				w.futureOrderMap[o.OrderID] = o
+			if cache, ok := w.futureOrderMap[o.OrderID]; ok {
+				if cache.Status != o.Status {
+					w.SendToClient(o)
+					o.TradeTime = cache.TradeTime
+					w.futureOrderMap[o.OrderID] = o
+				}
+			} else {
+				if a := w.assistTrader.updateOrderStatus(o); a != nil {
+					w.SendToClient(a)
+				}
 			}
-
-			// if cache := w.assistOrderMap[o.OrderID]; cache != nil && cache.Status != o.Status {
-			// 	w.msgChan <- o
-			// 	o.TradeTime = cache.TradeTime
-			// 	w.futureOrderMap[o.OrderID] = o
-			// }
 			w.orderLock.Unlock()
 		}
 	}
@@ -300,9 +304,3 @@ func (w *WSFutureTrade) generatePosition() ([]*entity.FuturePosition, error) {
 	}
 	return position, nil
 }
-
-// func (w *WSFutureTrade) addAssistTrader(orderID string, tickChan chan *entity.RealTimeFutureTick) {
-// 	w.assistTraderTickChanLock.Lock()
-// 	defer w.assistTraderTickChanLock.Unlock()
-// 	w.assistTraderTickChan[orderID] = tickChan
-// }
