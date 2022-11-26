@@ -3,7 +3,9 @@ package v1
 import (
 	"net/http"
 
-	"tmt/internal/controller/http/websocket"
+	"tmt/internal/controller/http/websocket/future"
+	"tmt/internal/controller/http/websocket/pick"
+
 	"tmt/internal/usecase"
 
 	"github.com/gin-gonic/gin"
@@ -86,9 +88,9 @@ func (r *streamRoutes) modifyFutureSwitch(c *gin.Context) {
 }
 
 func (r *streamRoutes) servePickStockWS(c *gin.Context) {
-	websocket.StartWSPickStock(c, r.t)
+	pick.StartWSPickStock(c, r.t)
 }
 
 func (r *streamRoutes) serveFutureWS(c *gin.Context) {
-	websocket.StartWSFutureTrade(c, r.t, r.o)
+	future.StartWSFutureTrade(c, r.t, r.o)
 }

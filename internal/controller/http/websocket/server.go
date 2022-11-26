@@ -17,7 +17,7 @@ var log = logger.Get()
 
 // WSRouter -.
 type WSRouter struct {
-	connectionID string
+	ConnectionID string
 	msgChan      chan interface{}
 	conn         *websocket.Conn
 	ctx          context.Context
@@ -26,15 +26,15 @@ type WSRouter struct {
 // NewWSRouter -.
 func NewWSRouter(c *gin.Context) *WSRouter {
 	r := &WSRouter{
-		connectionID: uuid.New().String(),
+		ConnectionID: uuid.New().String(),
 		msgChan:      make(chan interface{}),
 	}
-	r.Upgrade(c)
+	r.upgrade(c)
 	return r
 }
 
 // Upgrade -.
-func (w *WSRouter) Upgrade(gin *gin.Context) {
+func (w *WSRouter) upgrade(gin *gin.Context) {
 	upGrader := websocket.Upgrader{
 		CheckOrigin: func(r *http.Request) bool {
 			return true
@@ -86,7 +86,7 @@ func (w *WSRouter) send(data []byte) error {
 	return nil
 }
 
-func (w *WSRouter) read(forwardChan chan []byte) {
+func (w *WSRouter) ReadFromClient(forwardChan chan []byte) {
 	for {
 		_, message, err := w.conn.ReadMessage()
 		if err != nil {
@@ -105,4 +105,12 @@ func (w *WSRouter) read(forwardChan chan []byte) {
 	if err := w.conn.Close(); err != nil {
 		log.Error(err)
 	}
+}
+
+func (w *WSRouter) SendToClient(msg interface{}) {
+	w.msgChan <- msg
+}
+
+func (w *WSRouter) Ctx() context.Context {
+	return w.ctx
 }

@@ -1,17 +1,19 @@
-package websocket
+// Package pick package pick
+package pick
 
 import (
 	"encoding/json"
 	"sync"
 	"time"
 
+	"tmt/internal/controller/http/websocket"
 	"tmt/internal/usecase"
 
 	"github.com/gin-gonic/gin"
 )
 
 type WSPickStock struct {
-	*WSRouter
+	*websocket.WSRouter
 
 	s usecase.Stream
 
@@ -23,7 +25,7 @@ type WSPickStock struct {
 func StartWSPickStock(c *gin.Context, s usecase.Stream) {
 	w := &WSPickStock{
 		s:        s,
-		WSRouter: NewWSRouter(c),
+		WSRouter: websocket.NewWSRouter(c),
 	}
 
 	forwardChan := make(chan []byte)
@@ -36,14 +38,14 @@ func StartWSPickStock(c *gin.Context, s usecase.Stream) {
 
 			var pMsg pickStockClientMsg
 			if err := json.Unmarshal(msg, &pMsg); err != nil {
-				w.msgChan <- errMsg{ErrMsg: err.Error()}
+				w.SendToClient(errMsg{ErrMsg: err.Error()})
 				continue
 			}
 			w.updatePickStock(pMsg)
 		}
 	}()
 	go w.sendPickStockSnapShot()
-	w.read(forwardChan)
+	w.ReadFromClient(forwardChan)
 }
 
 type pickStockClientMsg struct {
@@ -69,7 +71,7 @@ func (w *WSPickStock) updatePickStock(clientMsg pickStockClientMsg) {
 func (w *WSPickStock) sendPickStockSnapShot() {
 	for {
 		select {
-		case <-w.ctx.Done():
+		case <-w.Ctx().Done():
 			return
 
 		case <-time.After(time.Second):
@@ -103,7 +105,7 @@ func (w *WSPickStock) sendPickStockSnapShot() {
 					})
 				}
 			}
-			w.msgChan <- data
+			w.SendToClient(data)
 		}
 	}
 }
