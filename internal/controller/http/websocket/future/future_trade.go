@@ -258,7 +258,7 @@ func (w *WSFutureTrade) cancelOverTimeOrder() {
 		case <-time.After(time.Second):
 			w.orderLock.Lock()
 			for id, order := range w.futureOrderMap {
-				if !order.Cancellabel() {
+				if !order.Cancellable() {
 					delete(w.futureOrderMap, id)
 					delete(cancelOrderMap, id)
 				} else if time.Since(order.TradeTime) > 10*time.Second && cancelOrderMap[id] == nil {

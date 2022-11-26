@@ -162,7 +162,7 @@ type BaseOrder struct {
 	GroupID   string      `json:"group_id"`
 }
 
-func (o *BaseOrder) Cancellabel() bool {
+func (o *BaseOrder) Cancellable() bool {
 	switch o.Status {
 	case StatusPendingSubmit, StatusPreSubmitted, StatusSubmitted, StatusPartFilled:
 		return true

@@ -2,6 +2,7 @@ package future
 
 import (
 	"context"
+	"errors"
 	"sync"
 	"time"
 
@@ -10,23 +11,34 @@ import (
 )
 
 type assistTrader struct {
-	o              usecase.Order
-	ctx            context.Context
-	assistOption   HalfAutomationOption
-	tickChan       chan *entity.RealTimeFutureTick
+	o        usecase.Order
+	ctx      context.Context
+	tickChan chan *entity.RealTimeFutureTick
+
 	assistOrderMap map[string]*entity.FutureOrder
-	orderLock      sync.Mutex
+	orderLock      sync.RWMutex
+
+	assistOption HalfAutomationOption
+	action       entity.OrderAction
+	tradeTime    time.Time
+	code         string
+	qty          int64
+	basePrice    float64
+	needAssist   bool
+	waitingOrder *entity.FutureOrder
 }
 
 func newAssistTrader(ctx context.Context, o usecase.Order) *assistTrader {
 	a := &assistTrader{
-		ctx:            ctx,
-		assistOrderMap: make(map[string]*entity.FutureOrder),
-		tickChan:       make(chan *entity.RealTimeFutureTick),
 		o:              o,
+		ctx:            ctx,
+		tickChan:       make(chan *entity.RealTimeFutureTick),
+		assistOrderMap: make(map[string]*entity.FutureOrder),
 	}
+
 	go a.checkAssistStatus()
 	go a.processTick()
+
 	return a
 }
 
@@ -56,6 +68,7 @@ func (a *assistTrader) checkAssistStatus() {
 
 			if qty == 0 {
 				a.assistOrderMap = make(map[string]*entity.FutureOrder)
+				a.needAssist = false
 			}
 			a.orderLock.Unlock()
 		}
@@ -64,30 +77,152 @@ func (a *assistTrader) checkAssistStatus() {
 
 func (a *assistTrader) processTick() {
 	for {
-		_, ok := <-a.tickChan
+		tick, ok := <-a.tickChan
 		if !ok {
 			return
+		}
+
+		if !a.needAssist || a.waitingOrder != nil {
+			continue
+		}
+
+		switch a.assistOption.AutomationType {
+		case AutomationByBalance:
+			a.cheeckByBalance(tick)
+		case AutomationByTimePeriod:
+			a.cheeckByTime(tick)
+		case AutomationByTimePeriodAndBalance:
+			a.cheeckByTimeAndBalance(tick)
 		}
 	}
 }
 
-// func (a *assistTrader) placeOrder(order *entity.FutureOrder) error {
-// 	var err error
-// 	switch order.Action {
-// 	case entity.ActionBuy:
-// 		order.OrderID, order.Status, err = a.o.BuyFuture(order)
-// 		if err != nil {
-// 			return err
-// 		}
+func (a *assistTrader) cheeckByTime(tick *entity.RealTimeFutureTick) {
+	if time.Since(a.tradeTime) < time.Duration(a.assistOption.ByTimePeriod)*time.Minute {
+		return
+	}
 
-// 	case entity.ActionSell:
-// 		order.OrderID, order.Status, err = a.o.SellFuture(order)
-// 		if err != nil {
-// 			return err
-// 		}
-// 	}
-// 	return nil
-// }
+	order := &entity.FutureOrder{
+		Code: a.code,
+		BaseOrder: entity.BaseOrder{
+			Action:   a.action,
+			Price:    tick.Close,
+			Quantity: a.qty,
+		},
+	}
+
+	if e := a.placeOrder(order); e != nil {
+		return
+	}
+}
+
+func (a *assistTrader) cheeckByBalance(tick *entity.RealTimeFutureTick) {
+	if tick.Close > a.assistOption.ByBalanceLow+a.basePrice && tick.Close < a.assistOption.ByBalanceHigh+a.basePrice {
+		return
+	}
+
+	order := &entity.FutureOrder{
+		Code: a.code,
+		BaseOrder: entity.BaseOrder{
+			Action:   a.action,
+			Price:    tick.Close,
+			Quantity: a.qty,
+		},
+	}
+
+	if e := a.placeOrder(order); e != nil {
+		return
+	}
+}
+
+func (a *assistTrader) cheeckByTimeAndBalance(tick *entity.RealTimeFutureTick) {
+	if tick.Close > a.assistOption.ByBalanceLow+a.basePrice && tick.Close < a.assistOption.ByBalanceHigh+a.basePrice {
+		return
+	}
+
+	if time.Since(a.tradeTime) < time.Duration(a.assistOption.ByTimePeriod)*time.Minute {
+		return
+	}
+
+	order := &entity.FutureOrder{
+		Code: a.code,
+		BaseOrder: entity.BaseOrder{
+			Action:   a.action,
+			Price:    tick.Close,
+			Quantity: a.qty,
+		},
+	}
+
+	if e := a.placeOrder(order); e != nil {
+		return
+	}
+}
+
+func (a *assistTrader) placeOrder(order *entity.FutureOrder) error {
+	var err error
+	switch order.Action {
+	case entity.ActionBuy:
+		order.OrderID, order.Status, err = a.o.BuyFuture(order)
+		if err != nil {
+			return err
+		}
+
+	case entity.ActionSell:
+		order.OrderID, order.Status, err = a.o.SellFuture(order)
+		if err != nil {
+			return err
+		}
+	}
+
+	a.orderLock.Lock()
+	order.TradeTime = time.Now()
+	a.waitingOrder = order
+	a.assistOrderMap[order.OrderID] = order
+	a.orderLock.Unlock()
+
+	go a.checkOrderStatusByID(order.OrderID)
+	return nil
+}
+
+func (a *assistTrader) checkOrderStatusByID(orderID string) {
+	cancelOrderMap := make(map[string]*entity.FutureOrder)
+	for {
+		select {
+		case <-a.ctx.Done():
+			return
+
+		case <-time.After(3 * time.Second):
+			a.orderLock.RLock()
+			order, ok := a.assistOrderMap[orderID]
+			if !ok {
+				a.orderLock.RUnlock()
+				continue
+			}
+
+			if !order.Cancellable() {
+				delete(cancelOrderMap, orderID)
+			} else if time.Since(order.TradeTime) > 10*time.Second && cancelOrderMap[orderID] == nil {
+				if e := a.cancelOrderByID(orderID); e != nil {
+					a.orderLock.RUnlock()
+					continue
+				}
+				cancelOrderMap[orderID] = order
+			}
+			a.orderLock.RUnlock()
+		}
+	}
+}
+
+func (a *assistTrader) cancelOrderByID(orderID string) error {
+	_, s, err := a.o.CancelFutureOrderID(orderID)
+	if err != nil {
+		return err
+	}
+	if s != entity.StatusCancelled {
+		return errors.New("cancel order failed")
+	}
+	return nil
+}
 
 func (a *assistTrader) addAssistOrder(order *entity.FutureOrder, option HalfAutomationOption) {
 	a.orderLock.Lock()
@@ -95,7 +230,22 @@ func (a *assistTrader) addAssistOrder(order *entity.FutureOrder, option HalfAuto
 
 	a.assistOrderMap[order.OrderID] = order
 	a.assistOption = option
-	a.tickChan = make(chan *entity.RealTimeFutureTick)
+
+	a.qty = order.Quantity
+	a.code = order.Code
+
+	switch order.Action {
+	case entity.ActionBuy:
+		a.action = entity.ActionSell
+	case entity.ActionSell:
+		a.action = entity.ActionBuy
+	}
+
+	a.basePrice = order.Price
+	a.tradeTime = order.TradeTime
+
+	a.needAssist = true
+	a.waitingOrder = nil
 }
 
 func (a *assistTrader) updateOrderStatus(o *entity.FutureOrder) *entity.FutureOrder {
@@ -111,7 +261,5 @@ func (a *assistTrader) updateOrderStatus(o *entity.FutureOrder) *entity.FutureOr
 }
 
 func (a *assistTrader) isAssistDone() bool {
-	defer a.orderLock.Unlock()
-	a.orderLock.Lock()
-	return len(a.assistOrderMap) == 0
+	return !a.needAssist
 }
