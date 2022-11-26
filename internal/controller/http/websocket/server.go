@@ -6,10 +6,14 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"tmt/internal/usecase/modules/logger"
+
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 )
+
+var log = logger.Get()
 
 // WSRouter -.
 type WSRouter struct {
@@ -39,20 +43,16 @@ func (w *WSRouter) Upgrade(gin *gin.Context) {
 		WriteBufferSize: 1024,
 	}
 
-	c, _ := upGrader.Upgrade(gin.Writer, gin.Request, nil)
-	defer func() { _ = c.Close() }()
+	c, err := upGrader.Upgrade(gin.Writer, gin.Request, nil)
+	if err != nil {
+		log.Error(err)
+		return
+	}
 
 	w.conn = c
 	w.ctx = gin.Request.Context()
 
 	go w.write()
-}
-
-func (w *WSRouter) send(data []byte) error {
-	if err := w.conn.WriteMessage(websocket.TextMessage, data); err != nil {
-		return err
-	}
-	return nil
 }
 
 func (w *WSRouter) write() {
@@ -79,21 +79,30 @@ func (w *WSRouter) write() {
 	}
 }
 
+func (w *WSRouter) send(data []byte) error {
+	if err := w.conn.WriteMessage(websocket.TextMessage, data); err != nil {
+		return err
+	}
+	return nil
+}
+
 func (w *WSRouter) read(forwardChan chan []byte) {
-	go func() {
-		for {
-			_, message, err := w.conn.ReadMessage()
-			if err != nil {
-				close(forwardChan)
-				return
-			}
-
-			if string(message) == "ping" {
-				w.msgChan <- "pong"
-				continue
-			}
-
-			forwardChan <- message
+	for {
+		_, message, err := w.conn.ReadMessage()
+		if err != nil {
+			close(forwardChan)
+			break
 		}
-	}()
+
+		if string(message) == "ping" {
+			w.msgChan <- "pong"
+			continue
+		}
+
+		forwardChan <- message
+	}
+
+	if err := w.conn.Close(); err != nil {
+		log.Error(err)
+	}
 }

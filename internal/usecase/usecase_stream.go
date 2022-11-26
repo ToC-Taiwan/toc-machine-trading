@@ -54,6 +54,7 @@ func NewStream(r StreamRepo, g StreamgRPCAPI, t StreamRabbit) *StreamUseCase {
 		basic:        *cc.GetBasicInfo(),
 		targetFilter: target.NewFilter(cfg.TargetCond),
 		tradeDay:     tradeday.NewTradeDay(),
+		tradeIndex:   &entity.TradeIndex{},
 	}
 	t.FillAllBasic(uc.basic.AllStocks, uc.basic.AllFutures)
 
@@ -84,10 +85,6 @@ func (uc *StreamUseCase) GetTradeIndex() *entity.TradeIndex {
 
 func (uc *StreamUseCase) periodUpdateTradeIndex() {
 	for range time.NewTicker(time.Second * 5).C {
-		if uc.tradeIndex == nil {
-			uc.tradeIndex = &entity.TradeIndex{}
-		}
-
 		var err error
 		ctx := context.Background()
 		go func() {

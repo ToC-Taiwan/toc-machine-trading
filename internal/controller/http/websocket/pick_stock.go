@@ -42,8 +42,8 @@ func StartWSPickStock(c *gin.Context, s usecase.Stream) {
 			w.updatePickStock(pMsg)
 		}
 	}()
+	go w.sendPickStockSnapShot()
 	w.read(forwardChan)
-	w.sendPickStockSnapShot()
 }
 
 type pickStockClientMsg struct {

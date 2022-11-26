@@ -55,8 +55,8 @@ func StartWSFutureTrade(c *gin.Context, s usecase.Stream, o usecase.Order) {
 			w.processTrade(fMsg)
 		}
 	}()
+	go w.sendFuture()
 	w.read(forwardChan)
-	w.sendFuture()
 }
 
 type futureOrder struct {
@@ -318,7 +318,14 @@ func (w *WSFutureTrade) cancelOrderByID(orderID string) error {
 }
 
 func (w *WSFutureTrade) generateTradeIndex() *entity.TradeIndex {
-	return w.s.GetTradeIndex()
+	t := w.s.GetTradeIndex()
+	switch {
+	case t.Nasdaq == nil, t.NF == nil, t.TSE == nil, t.OTC == nil:
+		time.Sleep(time.Second)
+		return w.generateTradeIndex()
+	default:
+		return t
+	}
 }
 
 func (w *WSFutureTrade) generatePosition() ([]*entity.FuturePosition, error) {
