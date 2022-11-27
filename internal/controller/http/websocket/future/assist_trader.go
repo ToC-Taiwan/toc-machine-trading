@@ -24,7 +24,7 @@ type assistTrader struct {
 	code         string
 	qty          int64
 	basePrice    float64
-	needAssist   bool
+	assisting    bool
 	waitingOrder *entity.FutureOrder
 }
 
@@ -68,7 +68,7 @@ func (a *assistTrader) checkAssistStatus() {
 
 			if qty == 0 {
 				a.assistOrderMap = make(map[string]*entity.FutureOrder)
-				a.needAssist = false
+				a.assisting = false
 			}
 			a.orderLock.Unlock()
 		}
@@ -82,7 +82,7 @@ func (a *assistTrader) processTick() {
 			return
 		}
 
-		if !a.needAssist || a.waitingOrder != nil {
+		if !a.assisting || a.waitingOrder != nil {
 			continue
 		}
 
@@ -244,7 +244,7 @@ func (a *assistTrader) addAssistOrder(order *entity.FutureOrder, option HalfAuto
 	a.basePrice = order.Price
 	a.tradeTime = order.TradeTime
 
-	a.needAssist = true
+	a.assisting = true
 	a.waitingOrder = nil
 }
 
@@ -260,6 +260,6 @@ func (a *assistTrader) updateOrderStatus(o *entity.FutureOrder) *entity.FutureOr
 	return nil
 }
 
-func (a *assistTrader) isAssistDone() bool {
-	return !a.needAssist
+func (a *assistTrader) isAssisting() bool {
+	return a.assisting
 }

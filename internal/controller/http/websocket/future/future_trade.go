@@ -65,7 +65,7 @@ func (w *WSFutureTrade) processTrade(clientMsg futureTradeClientMsg) {
 		return
 	}
 
-	if !w.assistTrader.isAssistDone() {
+	if w.assistTrader.isAssisting() {
 		w.SendToClient(errMsg{ErrMsg: "Assist trader is running"})
 		return
 	}
