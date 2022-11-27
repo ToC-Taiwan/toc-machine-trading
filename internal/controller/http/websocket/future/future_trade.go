@@ -26,6 +26,8 @@ type WSFutureTrade struct {
 
 	assistTrader         *assistTrader
 	assistTraderTickChan chan *entity.RealTimeFutureTick
+
+	processLock sync.Mutex
 }
 
 // StartWSFutureTrade -.
@@ -59,7 +61,41 @@ func StartWSFutureTrade(c *gin.Context, s usecase.Stream, o usecase.Order) {
 	w.ReadFromClient(forwardChan)
 }
 
+func (w *WSFutureTrade) sendFuture() {
+	snapshot, err := w.s.GetFutureSnapshotByCode(w.s.GetMainFutureCode())
+	if err != nil {
+		w.SendToClient(errMsg{ErrMsg: err.Error()})
+	} else {
+		w.SendToClient(snapshot.ToRealTimeFutureTick())
+	}
+
+	tickChan := make(chan *entity.RealTimeFutureTick)
+	orderStatusChan := make(chan interface{})
+	go w.processTickArr(tickChan)
+	go w.processOrderStatus(orderStatusChan)
+
+	go w.sendTradeIndex()
+	go w.sendPosition()
+	go w.cancelOverTimeOrder()
+
+	w.s.NewFutureRealTimeConnection(tickChan, w.ConnectionID)
+	w.s.NewOrderStatusConnection(orderStatusChan, w.ConnectionID)
+
+	<-w.Ctx().Done()
+
+	w.s.DeleteFutureRealTimeConnection(w.ConnectionID)
+	w.s.DeleteOrderStatusConnection(w.ConnectionID)
+}
+
 func (w *WSFutureTrade) processTrade(clientMsg futureTradeClientMsg) {
+	defer w.processLock.Unlock()
+	w.processLock.Lock()
+
+	if clientMsg.Option.AutomationType != AutomationNone && clientMsg.Qty > 1 {
+		w.SendToClient(errMsg{ErrMsg: "assist only support qty = 1"})
+		return
+	}
+
 	if !w.o.IsFutureTradeTime() {
 		w.SendToClient(errMsg{ErrMsg: "Not trade time"})
 		return
@@ -112,32 +148,6 @@ func (w *WSFutureTrade) placeOrder(order *entity.FutureOrder) error {
 	return nil
 }
 
-func (w *WSFutureTrade) sendFuture() {
-	snapshot, err := w.s.GetFutureSnapshotByCode(w.s.GetMainFutureCode())
-	if err != nil {
-		w.SendToClient(errMsg{ErrMsg: err.Error()})
-	} else {
-		w.SendToClient(snapshot.ToRealTimeFutureTick())
-	}
-
-	tickChan := make(chan *entity.RealTimeFutureTick)
-	orderStatusChan := make(chan interface{})
-	go w.processTickArr(tickChan)
-	go w.processOrderStatus(orderStatusChan)
-
-	go w.sendTradeIndex()
-	go w.sendPosition()
-	go w.cancelOverTimeOrder()
-
-	w.s.NewFutureRealTimeConnection(tickChan, w.ConnectionID)
-	w.s.NewOrderStatusConnection(orderStatusChan, w.ConnectionID)
-
-	<-w.Ctx().Done()
-
-	w.s.DeleteFutureRealTimeConnection(w.ConnectionID)
-	w.s.DeleteOrderStatusConnection(w.ConnectionID)
-}
-
 func (w *WSFutureTrade) processTickArr(tickChan chan *entity.RealTimeFutureTick) {
 	var tickArr entity.RealTimeFutureTickArr
 	for {
@@ -150,26 +160,27 @@ func (w *WSFutureTrade) processTickArr(tickChan chan *entity.RealTimeFutureTick)
 		w.SendToClient(tick)
 		w.assistTraderTickChan <- tick
 
+		baseDuration := 10 * time.Second
 		var firstPeriod, secondPeriod, thirdPeriod, fourthPeriod entity.RealTimeFutureTickArr
 	L:
 		for i := len(tickArr) - 1; i >= 0; i-- {
 			switch {
-			case time.Since(tickArr[i].TickTime) <= 10*time.Second:
+			case time.Since(tickArr[i].TickTime) <= baseDuration*1:
 				fourthPeriod = append(fourthPeriod, tickArr[i])
 				thirdPeriod = append(thirdPeriod, tickArr[i])
 				secondPeriod = append(secondPeriod, tickArr[i])
 				firstPeriod = append(firstPeriod, tickArr[i])
 
-			case time.Since(tickArr[i].TickTime) <= 20*time.Second:
+			case time.Since(tickArr[i].TickTime) <= baseDuration*2:
 				fourthPeriod = append(fourthPeriod, tickArr[i])
 				thirdPeriod = append(thirdPeriod, tickArr[i])
 				secondPeriod = append(secondPeriod, tickArr[i])
 
-			case time.Since(tickArr[i].TickTime) <= 30*time.Second:
+			case time.Since(tickArr[i].TickTime) <= baseDuration*3:
 				fourthPeriod = append(fourthPeriod, tickArr[i])
 				thirdPeriod = append(thirdPeriod, tickArr[i])
 
-			case time.Since(tickArr[i].TickTime) <= 40*time.Second:
+			case time.Since(tickArr[i].TickTime) <= baseDuration*4:
 				fourthPeriod = append(fourthPeriod, tickArr[i])
 
 			default:

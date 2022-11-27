@@ -1,6 +1,75 @@
 <a name="unreleased"></a>
 ## [Unreleased]
 
+### Chore
+- **actions:** modify build and push action version
+- **balance:** revert to normal method query future order
+- **naming:** reanme needassist to assisting
+- **pkg:** move config to module
+- **simulation:** add log for user to know is simulation or not
+- **stream:** remove out chg and in chg
+- **websocket:** revert to new channel in websocket router
+
+### Ci
+- **docker:** add git hash to build tag
+- **registry:** move registry from docker to github
+
+### Feat
+- **assist:** finish by balance and by time period assist
+- **assist:** add assist trader in futrue trade ws
+- **balance:** add manual trade balance
+- **balance:** add manual balance router
+- **index:** add otc, tse, nasdaq index to websocket stream
+- **order:** remove order status in websocket, modify manual order group id and trade time
+- **order:** refactor updateAllTradeBalance, increse update order speed
+- **order:** modify new sinopac filling to partfilled
+- **order:** remove ask update api, split update balance and simulate order, product order
+- **order:** add order status stream in websocket
+- **ordertime:** modifiy wrong order time to time now, when in night market from 0:00 to 5:00
+- **postition:** add future postion, remove manual in stock, future balance
+- **router:** add query future order by date api
+- **router:** add manual insert future order api
+- **stream:** modify out in volume to four period
+- **stream:** add out in rate chg, modify order entity
+- **stream:** add period update trade index interal stream usecase
+- **stream:** change method process tick arr
+- **switch:** add change future trade switch router
+- **tick:** cut tick arr in every second in stream
+- **trade:** add manual to order column, check order status in websocket
+- **trade:** add auto cancel in stream trade
+- **websocket:** add nasdaq future to stream
+
+### Fix
+- **ci:** add checkout in deployment to get git hash
+- **ci:** temp remove go test from ci
+- **ci:** add missing config in go test
+- **order:** fix order status chan is not add to rabbit, fix order time is always wrong
+- **order:** modify get order by trade day will send not filled order
+- **order:** use timer and reset to fix balance not insert to db
+- **order:** fix order balance calculate wrong, try fix manual order does not insert to db
+- **order:** fix manual order does not insert to db
+- **order:** add lock for order usecase to update order in postgres
+- **position:** fix websocket future position has no column in json
+- **postgres:** fix redundant manual future trade balance cause panic
+- **router:** fix return body of get future trade switch
+- **stream:** add loop lable to avoid index out of range
+- **stream:** fix last trade rate not initial
+- **stream:** fix map is not initail
+- **stuck:** fix missing go in updateAllTradeBalance
+- **trade:** fix order will be cancel multiple times
+- **trade:** fix order will be cancel before 10 seconds
+- **websocket:** fix send data to close channel
+- **websocket:** fix order map does not initial
+- **ws:** fix ws end abnormal, close connection before gin done
+
+### Refactor
+- **logger:** pack log again
+- **ws:** split pick stock and future to different pkg
+- **ws:** refactor websocket split pick stock and future trade
+
+### Revert
+- **stream:** revert to cut and process in the same loop
+
 
 <a name="v1.5.0"></a>
 ## [v1.5.0] - 2022-11-16

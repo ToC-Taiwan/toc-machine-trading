@@ -171,6 +171,25 @@ func (o *BaseOrder) Cancellable() bool {
 	}
 }
 
+func (o *BaseOrder) FilledQty() int64 {
+	if o.Status != StatusFilled && o.Status != StatusPartFilled {
+		return 0
+	}
+
+	switch o.Action {
+	case ActionBuy:
+		return o.Quantity
+	case ActionSell:
+		return -o.Quantity
+	case ActionSellFirst:
+		return -o.Quantity
+	case ActionBuyLater:
+		return o.Quantity
+	default:
+		return 0
+	}
+}
+
 type StockOrderArr []*StockOrder
 
 func (s StockOrderArr) SplitManualAndGroupID() (map[string]StockOrderArr, StockOrderArr) {

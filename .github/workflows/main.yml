@@ -1,5 +1,5 @@
 name: Workflow
-run-name: ${{ github.actor }} is running TOC MACHINE TRADING Actions 🌏
+run-name: ${{ github.actor }} is running TOC MACHINE TRADING actions 🍀
 
 on:
     workflow_dispatch:
@@ -13,12 +13,12 @@ jobs:
     Lint:
         runs-on: ubuntu-latest
         steps:
-            - name: Setup GO
+            - name: setup golang
               uses: actions/setup-go@v3
               with:
                   go-version: 1.19.3
 
-            - name: Checkout
+            - name: checkout
               uses: actions/checkout@v3
 
             - name: golangci-lint
@@ -30,18 +30,18 @@ jobs:
         needs: Lint
         runs-on: ubuntu-latest
         steps:
-            - name: Setup GO
+            - name: setup golang
               uses: actions/setup-go@v3
               with:
                   go-version: 1.19.3
 
-            - name: Checkout
+            - name: checkout
               uses: actions/checkout@v3
 
-            - name: Build
+            - name: build test
               run: go build -v ./...
 
-            - name: Test
+            - name: go test
               run: cp ./configs/default.config.yml ./configs/config.yml
 
     Build:
@@ -57,17 +57,17 @@ jobs:
                   echo "REPOSITORY_LC=${REPOSITORY,,}" >> ${GITHUB_ENV}
                   echo "SHORT_SHA=$(echo ${SHA} | cut -c1-7)" >> ${GITHUB_ENV}
 
-            - name: Checkout
+            - name: checkout
               uses: actions/checkout@v3
 
-            - name: Log in to the Container registry
+            - name: log in to the Container registry
               uses: docker/login-action@v2
               with:
                   registry: ${{ env.REGISTRY }}
                   username: ${{ github.actor }}
                   password: ${{ secrets.GITHUB_TOKEN }}
 
-            - name: Build and push
+            - name: build and push
               uses: docker/build-push-action@v3
               with:
                   push: true
@@ -88,10 +88,10 @@ jobs:
                   echo "REPOSITORY_LC=${REPOSITORY,,}" >> ${GITHUB_ENV}
                   echo "SHORT_SHA=$(echo ${SHA} | cut -c1-7)" >> ${GITHUB_ENV}
 
-            - name: Checkout
+            - name: checkout
               uses: actions/checkout@v3
 
-            - name: deploying
+            - name: deploy
               uses: appleboy/ssh-action@master
               with:
                   host: ${{ secrets.TRADER_HOST }}

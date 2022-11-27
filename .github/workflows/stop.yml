@@ -18,7 +18,7 @@ jobs:
               run: |
                   echo "REPOSITORY_LC=${REPOSITORY,,}" >> ${GITHUB_ENV}
 
-            - name: deploying
+            - name: stop deploy
               uses: appleboy/ssh-action@master
               with:
                   host: ${{ secrets.TRADER_HOST }}
