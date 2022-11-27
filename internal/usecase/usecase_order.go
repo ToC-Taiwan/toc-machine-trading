@@ -58,63 +58,49 @@ func NewOrder(t OrdergRPCAPI, r OrderRepo) *OrderUseCase {
 	bus.SubscribeTopic(event.TopicCancelFutureOrder, uc.cancelFutureOrder)
 	bus.SubscribeTopic(event.TopicInsertOrUpdateFutureOrder, uc.updateFutureOrderCacheAndInsertDB)
 
+	if uc.simTrade {
+		go uc.askOrderStatusSimulate()
+	} else {
+		go uc.askOrderStatusProd()
+	}
+
 	go uc.updateAllTradeBalance()
 	return uc
 }
 
 func (uc *OrderUseCase) updateAllTradeBalance() {
-	updateBalanceTimer := time.NewTimer(20 * time.Second)
-	askUpateTimer := time.NewTimer(750 * time.Millisecond)
-
-	for {
-		select {
-		case <-updateBalanceTimer.C:
-			if uc.IsStockTradeTime() {
-				stockOrders, err := uc.repo.QueryAllStockOrderByDate(context.Background(), uc.stockTradeDay.ToStartEndArray())
-				if err != nil {
-					log.Panic(err)
-				}
-				uc.calculateStockTradeBalance(stockOrders)
+	for range time.NewTicker(time.Second * 20).C {
+		if uc.IsStockTradeTime() {
+			stockOrders, err := uc.repo.QueryAllStockOrderByDate(context.Background(), uc.stockTradeDay.ToStartEndArray())
+			if err != nil {
+				log.Panic(err)
 			}
+			uc.calculateStockTradeBalance(stockOrders)
+		}
 
-			if uc.IsFutureTradeTime() {
-				futureOrders, err := uc.repo.QueryAllFutureOrderByDate(context.Background(), uc.futureTradeDay.ToStartEndArray())
-				if err != nil {
-					log.Panic(err)
-				}
-				uc.calculateFutureTradeBalance(futureOrders)
+		if uc.IsFutureTradeTime() {
+			futureOrders, err := uc.repo.QueryAllFutureOrderByDate(context.Background(), uc.futureTradeDay.ToStartEndArray())
+			if err != nil {
+				log.Panic(err)
 			}
-			updateBalanceTimer.Reset(20 * time.Second)
-
-		case <-askUpateTimer.C:
-			if err := uc.AskOrderUpdate(); err != nil {
-				log.Error(err)
-			}
-			askUpateTimer.Reset(750 * time.Millisecond)
+			uc.calculateFutureTradeBalance(futureOrders)
 		}
 	}
 }
 
-// AskOrderUpdate -.
-func (uc *OrderUseCase) AskOrderUpdate() error {
-	if !uc.simTrade {
-		msg, err := uc.gRPCAPI.GetNonBlockOrderStatusArr()
-		if err != nil {
-			return err
-		}
-
-		if errMsg := msg.GetErr(); errMsg != "" {
-			return errors.New(errMsg)
-		}
-	} else {
+func (uc *OrderUseCase) askOrderStatusSimulate() {
+	for range time.NewTicker(time.Second).C {
 		orders, err := uc.gRPCAPI.GetOrderStatusArr()
 		if err != nil {
-			return err
+			log.Error(err)
+			continue
 		}
+
 		for _, v := range orders {
 			orderTime, err := time.ParseInLocation(common.LongTimeLayout, v.GetOrderTime(), time.Local)
 			if err != nil {
-				return err
+				log.Error(err)
+				continue
 			}
 
 			switch {
@@ -147,7 +133,22 @@ func (uc *OrderUseCase) AskOrderUpdate() error {
 			}
 		}
 	}
-	return nil
+}
+
+// AskOrderUpdate -.
+func (uc *OrderUseCase) askOrderStatusProd() {
+	for range time.NewTicker(750 * time.Millisecond).C {
+		msg, err := uc.gRPCAPI.GetNonBlockOrderStatusArr()
+		if err != nil {
+			log.Error(err)
+			continue
+		}
+
+		if errMsg := msg.GetErr(); errMsg != "" {
+			log.Error(errMsg)
+			continue
+		}
+	}
 }
 
 func (uc *OrderUseCase) placeStockOrder(order *entity.StockOrder) {

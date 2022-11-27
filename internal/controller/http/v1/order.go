@@ -29,8 +29,6 @@ func newOrderRoutes(handler *gin.RouterGroup, t usecase.Order) {
 
 		h.GET("/day-trade/forward", r.calculateForwardDayTradeBalance)
 		h.GET("/day-trade/reverse", r.calculateReverseDayTradeBalance)
-
-		h.PUT("/status/update", r.askOrderUpdate)
 	}
 }
 
@@ -287,21 +285,4 @@ func (r *orderRoutes) calculateReverseDayTradeBalance(c *gin.Context) {
 	c.JSON(http.StatusOK, dayTradeResult{
 		Balance: firstIn + firstInDiscount - payLater + payLaterDiscount,
 	})
-}
-
-// @Summary     askOrderUpdate
-// @Description askOrderUpdate
-// @ID          askOrderUpdate
-// @Tags  	    order
-// @Accept      json
-// @Produce     json
-// @Success     200
-// @Failure     500 {object} response
-// @Router      /order/status/update [put]
-func (r *orderRoutes) askOrderUpdate(c *gin.Context) {
-	if err := r.t.AskOrderUpdate(); err != nil {
-		errorResponse(c, http.StatusInternalServerError, err.Error())
-		return
-	}
-	c.JSON(http.StatusOK, nil)
 }

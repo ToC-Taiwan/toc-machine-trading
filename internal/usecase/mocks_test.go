@@ -1650,20 +1650,6 @@ func (m *MockOrder) EXPECT() *MockOrderMockRecorder {
 	return m.recorder
 }
 
-// AskOrderUpdate mocks base method.
-func (m *MockOrder) AskOrderUpdate() error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AskOrderUpdate")
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// AskOrderUpdate indicates an expected call of AskOrderUpdate.
-func (mr *MockOrderMockRecorder) AskOrderUpdate() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AskOrderUpdate", reflect.TypeOf((*MockOrder)(nil).AskOrderUpdate))
-}
-
 // BuyFuture mocks base method.
 func (m *MockOrder) BuyFuture(order *entity.FutureOrder) (string, entity.OrderStatus, error) {
 	m.ctrl.T.Helper()

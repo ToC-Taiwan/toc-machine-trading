@@ -193,8 +193,6 @@ type (
 type (
 	// Order -.
 	Order interface {
-		AskOrderUpdate() error
-
 		CalculateBuyCost(price float64, quantity int64) int64
 		CalculateSellCost(price float64, quantity int64) int64
 		CalculateTradeDiscount(price float64, quantity int64) int64
