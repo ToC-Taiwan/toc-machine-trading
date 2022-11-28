@@ -34,15 +34,17 @@ WARN[2022-09-26T01:24:55+08:00] Fetch Date: 2022-09-25, No Data
 ### env file example
 
 ```sh
-echo 'DEPLOYMENT=dev
+echo 'DEPLOYMENT=prod
+LOG_FORMAT=text
+LOG_LEVEL=info
+NEED_CALLER=false
 DISABLE_SWAGGER_HTTP_HANDLER=
 GIN_MODE=release
-SINOPAC_URL=127.0.0.1:56666
-PG_URL=postgres://postgres:asdf0000@127.0.0.1:5432/
-RABBITMQ_URL=amqp://admin:password@127.0.0.1:5672/%2f
+SINOPAC_URL=172.20.10.227:56666
+PG_URL=postgres://postgres:asdf0000@172.20.10.10:5432/
+RABBITMQ_URL=amqp://admin:password@172.20.10.226:5672/%2f
 RABBITMQ_EXCHANGE=toc
-DB_NAME=machine_trade
-' > .env
+DB_NAME=machine_trade' > .env
 ```
 
 ### VSCode Debug Setting

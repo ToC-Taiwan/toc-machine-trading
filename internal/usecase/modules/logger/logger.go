@@ -10,7 +10,7 @@ func Get() *logger.Logger {
 	cfg := config.GetConfig().Log
 	return logger.NewLogger(
 		logger.LogFormat(logger.Format(cfg.LogFormat)),
-		logger.LogLevel(logger.Level(cfg.Level)),
+		logger.LogLevel(logger.Level(cfg.LogLevel)),
 		logger.NeedCaller(cfg.NeedCaller),
 	)
 }

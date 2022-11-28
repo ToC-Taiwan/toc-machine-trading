@@ -55,9 +55,9 @@ type Config struct {
 }
 
 type Log struct {
-	LogFormat  string `json:"log_format"  yaml:"log_format"`
-	Level      string `json:"level"       yaml:"level"`
-	NeedCaller bool   `json:"need_caller" yaml:"need_caller"`
+	LogFormat  string `env:"LOG_FORMAT"`
+	LogLevel   string `env:"LOG_LEVEL"`
+	NeedCaller bool   `env:"NEED_CALLER"`
 }
 
 // HTTP -.
