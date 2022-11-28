@@ -20,7 +20,7 @@ type WSRouter struct {
 	ConnectionID string
 	msgChan      chan interface{}
 	conn         *websocket.Conn
-	ctx          context.Context
+	ginCtx       *gin.Context
 }
 
 // NewWSRouter -.
@@ -28,6 +28,7 @@ func NewWSRouter(c *gin.Context) *WSRouter {
 	r := &WSRouter{
 		ConnectionID: uuid.New().String(),
 		msgChan:      make(chan interface{}),
+		ginCtx:       c,
 	}
 	r.upgrade(c)
 	return r
@@ -50,7 +51,6 @@ func (w *WSRouter) upgrade(gin *gin.Context) {
 	}
 
 	w.conn = c
-	w.ctx = gin.Request.Context()
 
 	go w.write()
 }
@@ -58,7 +58,7 @@ func (w *WSRouter) upgrade(gin *gin.Context) {
 func (w *WSRouter) write() {
 	for {
 		select {
-		case <-w.ctx.Done():
+		case <-w.Ctx().Done():
 			return
 
 		case cl := <-w.msgChan:
@@ -81,6 +81,8 @@ func (w *WSRouter) write() {
 
 func (w *WSRouter) send(data []byte) error {
 	if err := w.conn.WriteMessage(websocket.TextMessage, data); err != nil {
+		log.Errorf("WS send error: %v", err)
+		w.ginCtx.Abort()
 		return err
 	}
 	return nil
@@ -112,5 +114,5 @@ func (w *WSRouter) SendToClient(msg interface{}) {
 }
 
 func (w *WSRouter) Ctx() context.Context {
-	return w.ctx
+	return w.ginCtx.Request.Context()
 }

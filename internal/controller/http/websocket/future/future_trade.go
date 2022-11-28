@@ -92,7 +92,7 @@ func (w *WSFutureTrade) processTrade(clientMsg futureTradeClientMsg) {
 	w.processLock.Lock()
 
 	if clientMsg.Option.AutomationType != AutomationNone && clientMsg.Qty > 1 {
-		w.SendToClient(errMsg{ErrMsg: "assist only support qty = 1"})
+		w.SendToClient(errMsg{ErrMsg: "Assist only support qty = 1"})
 		return
 	}
 
