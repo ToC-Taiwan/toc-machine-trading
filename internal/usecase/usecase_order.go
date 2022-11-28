@@ -75,7 +75,7 @@ func (uc *OrderUseCase) updateAllTradeBalance() {
 			if err != nil {
 				log.Panic(err)
 			}
-			uc.calculateStockTradeBalance(stockOrders)
+			uc.calculateStockTradeBalance(stockOrders, uc.stockTradeDay.TradeDay)
 		}
 
 		if uc.IsFutureTradeTime() {
@@ -83,9 +83,56 @@ func (uc *OrderUseCase) updateAllTradeBalance() {
 			if err != nil {
 				log.Panic(err)
 			}
-			uc.calculateFutureTradeBalance(futureOrders)
+			uc.calculateFutureTradeBalance(futureOrders, uc.futureTradeDay.TradeDay)
 		}
 	}
+}
+
+// UpdateTradeBalanceByTradeDay -.
+func (uc *OrderUseCase) UpdateTradeBalanceByTradeDay(ctx context.Context, date string) error {
+	stockTradePeriod, err := uc.tradeDay.GetStockTradePeriodByDate(date)
+	if err != nil {
+		return err
+	}
+
+	futureTradePeriod, err := uc.tradeDay.GetFutureTradePeriodByDate(date)
+	if err != nil {
+		return err
+	}
+
+	stockOrders, err := uc.repo.QueryAllStockOrderByDate(ctx, stockTradePeriod.ToStartEndArray())
+	if err != nil {
+		return err
+	}
+	uc.calculateStockTradeBalance(stockOrders, stockTradePeriod.TradeDay)
+
+	futureOrders, err := uc.repo.QueryAllFutureOrderByDate(ctx, futureTradePeriod.ToStartEndArray())
+	if err != nil {
+		return err
+	}
+	uc.calculateFutureTradeBalance(futureOrders, futureTradePeriod.TradeDay)
+
+	return nil
+}
+
+func (uc *OrderUseCase) MoveStockOrderToLatestTradeDay(ctx context.Context, orderID string) error {
+	order, err := uc.repo.QueryStockOrderByID(ctx, orderID)
+	if err != nil {
+		return err
+	}
+
+	order.OrderTime = uc.stockTradeDay.StartTime
+	return uc.repo.InsertOrUpdateOrderByOrderID(ctx, order)
+}
+
+func (uc *OrderUseCase) MoveFutureOrderToLatestTradeDay(ctx context.Context, orderID string) error {
+	order, err := uc.repo.QueryFutureOrderByID(ctx, orderID)
+	if err != nil {
+		return err
+	}
+
+	order.OrderTime = uc.futureTradeDay.StartTime
+	return uc.repo.InsertOrUpdateFutureOrderByOrderID(ctx, order)
 }
 
 func (uc *OrderUseCase) askOrderStatusSimulate() {
@@ -311,7 +358,7 @@ func (uc *OrderUseCase) updateStockOrderCacheAndInsertDB(order *entity.StockOrde
 }
 
 // calculateStockTradeBalance -.
-func (uc *OrderUseCase) calculateStockTradeBalance(allOrders []*entity.StockOrder) {
+func (uc *OrderUseCase) calculateStockTradeBalance(allOrders []*entity.StockOrder, tradeDay time.Time) {
 	var forward, reverse entity.StockOrderArr
 	for _, v := range allOrders {
 		if v.Status != entity.StatusFilled {
@@ -329,7 +376,7 @@ func (uc *OrderUseCase) calculateStockTradeBalance(allOrders []*entity.StockOrde
 	forwardBalance, fDiscount, fTradeCount := uc.calculateForwardStockBalance(forward)
 	revereBalance, rDiscount, rTradeCount := uc.calculateReverseStockBalance(reverse)
 	tmp := &entity.StockTradeBalance{
-		TradeDay:        cc.GetBasicInfo().TradeDay,
+		TradeDay:        tradeDay,
 		TradeCount:      fTradeCount + rTradeCount,
 		Forward:         forwardBalance,
 		Reverse:         revereBalance,
@@ -572,7 +619,7 @@ func (uc *OrderUseCase) CancelFutureOrderID(orderID string) (string, entity.Orde
 }
 
 // calculateFutureTradeBalance -.
-func (uc *OrderUseCase) calculateFutureTradeBalance(allOrders []*entity.FutureOrder) {
+func (uc *OrderUseCase) calculateFutureTradeBalance(allOrders []*entity.FutureOrder, tradeDay time.Time) {
 	var forward, reverse entity.FutureOrderArr
 	for _, v := range allOrders {
 		if v.Status != entity.StatusFilled {
@@ -590,7 +637,7 @@ func (uc *OrderUseCase) calculateFutureTradeBalance(allOrders []*entity.FutureOr
 	forwardBalance, forwardCount := uc.calculateForwardFutureBalance(forward)
 	revereBalance, reverseCount := uc.calculateReverseFutureBalance(reverse)
 	tmp := &entity.FutureTradeBalance{
-		TradeDay:   uc.futureTradeDay.TradeDay,
+		TradeDay:   tradeDay,
 		TradeCount: forwardCount + reverseCount,
 		Forward:    forwardBalance,
 		Reverse:    revereBalance,

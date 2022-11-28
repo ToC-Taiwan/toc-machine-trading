@@ -1858,6 +1858,34 @@ func (mr *MockOrderMockRecorder) ManualInsertFutureOrder(ctx, order interface{})
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ManualInsertFutureOrder", reflect.TypeOf((*MockOrder)(nil).ManualInsertFutureOrder), ctx, order)
 }
 
+// MoveFutureOrderToLatestTradeDay mocks base method.
+func (m *MockOrder) MoveFutureOrderToLatestTradeDay(ctx context.Context, orderID string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "MoveFutureOrderToLatestTradeDay", ctx, orderID)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// MoveFutureOrderToLatestTradeDay indicates an expected call of MoveFutureOrderToLatestTradeDay.
+func (mr *MockOrderMockRecorder) MoveFutureOrderToLatestTradeDay(ctx, orderID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "MoveFutureOrderToLatestTradeDay", reflect.TypeOf((*MockOrder)(nil).MoveFutureOrderToLatestTradeDay), ctx, orderID)
+}
+
+// MoveStockOrderToLatestTradeDay mocks base method.
+func (m *MockOrder) MoveStockOrderToLatestTradeDay(ctx context.Context, orderID string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "MoveStockOrderToLatestTradeDay", ctx, orderID)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// MoveStockOrderToLatestTradeDay indicates an expected call of MoveStockOrderToLatestTradeDay.
+func (mr *MockOrderMockRecorder) MoveStockOrderToLatestTradeDay(ctx, orderID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "MoveStockOrderToLatestTradeDay", reflect.TypeOf((*MockOrder)(nil).MoveStockOrderToLatestTradeDay), ctx, orderID)
+}
+
 // SellFirstFuture mocks base method.
 func (m *MockOrder) SellFirstFuture(order *entity.FutureOrder) (string, entity.OrderStatus, error) {
 	m.ctrl.T.Helper()
@@ -1888,6 +1916,20 @@ func (m *MockOrder) SellFuture(order *entity.FutureOrder) (string, entity.OrderS
 func (mr *MockOrderMockRecorder) SellFuture(order interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SellFuture", reflect.TypeOf((*MockOrder)(nil).SellFuture), order)
+}
+
+// UpdateTradeBalanceByTradeDay mocks base method.
+func (m *MockOrder) UpdateTradeBalanceByTradeDay(ctx context.Context, date string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateTradeBalanceByTradeDay", ctx, date)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateTradeBalanceByTradeDay indicates an expected call of UpdateTradeBalanceByTradeDay.
+func (mr *MockOrderMockRecorder) UpdateTradeBalanceByTradeDay(ctx, date interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateTradeBalanceByTradeDay", reflect.TypeOf((*MockOrder)(nil).UpdateTradeBalanceByTradeDay), ctx, date)
 }
 
 // MockOrderRepo is a mock of OrderRepo interface.

@@ -92,6 +92,23 @@ func (t *TradeDay) GetFutureTradeDay() TradePeriod {
 	return TradePeriod{startTime, endTime, tradeDay, t}
 }
 
+// GetStockTradePeriodByDate -.
+func (t *TradeDay) GetStockTradePeriodByDate(date string) (TradePeriod, error) {
+	d, err := time.ParseInLocation(common.ShortTimeLayout, date, time.Local)
+	if err != nil {
+		return TradePeriod{}, err
+	}
+
+	var startTime, endTime time.Time
+	if t.isTradeDay(d) {
+		startTime = d.Add(9 * time.Hour)
+		endTime = startTime.Add(13 * time.Hour).Add(30 * time.Minute)
+	} else {
+		return TradePeriod{}, errors.New("not trade day")
+	}
+	return TradePeriod{startTime, endTime, d, t}, nil
+}
+
 // GetFutureTradePeriodByDate -.
 func (t *TradeDay) GetFutureTradePeriodByDate(date string) (TradePeriod, error) {
 	d, err := time.ParseInLocation(common.ShortTimeLayout, date, time.Local)
@@ -276,8 +293,8 @@ func (tp *TradePeriod) ToStartEndArray() []time.Time {
 	return []time.Time{tp.StartTime, tp.EndTime}
 }
 
-// GetLastTradePeriod -.
-func (tp *TradePeriod) GetLastTradePeriod() TradePeriod {
+// GetLastFutureTradePeriod -.
+func (tp *TradePeriod) GetLastFutureTradePeriod() TradePeriod {
 	firstDay := tp
 	d := firstDay.TradeDay.AddDate(0, 0, -1)
 

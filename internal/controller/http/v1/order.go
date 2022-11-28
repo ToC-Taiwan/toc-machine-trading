@@ -24,8 +24,13 @@ func newOrderRoutes(handler *gin.RouterGroup, t usecase.Order) {
 	{
 		h.POST("", r.manualInsertFutureOrder)
 		h.GET("/all", r.getAllOrder)
-		h.GET("/date/:tradeday", r.getAllOrderByTradeDay)
 		h.GET("/balance", r.getAllTradeBalance)
+
+		h.GET("/date/:tradeday", r.getAllOrderByTradeDay)
+		h.PUT("/date/:tradeday", r.updateTradeBalanceByTradeDay)
+
+		h.PATCH("/stock/:order-id", r.moveStockOrderToLatestTradeDay)
+		h.PATCH("/future/:order-id", r.moveFutureOrderToLatestTradeDay)
 
 		h.GET("/day-trade/forward", r.calculateForwardDayTradeBalance)
 		h.GET("/day-trade/reverse", r.calculateReverseDayTradeBalance)
@@ -91,6 +96,31 @@ func (r *orderRoutes) getAllOrderByTradeDay(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, futureOrders{futureOrderArr})
+}
+
+// @Summary     updateTradeBalanceByTradeDay
+// @Description updateTradeBalanceByTradeDay
+// @ID          updateTradeBalanceByTradeDay
+// @Tags  	    order
+// @Accept      json
+// @Produce     json
+// @param tradeday path string true "tradeday"
+// @Success     200 {object} futureOrders
+// @Failure     500 {object} response
+// @Router      /order/date/{tradeday} [put]
+func (r *orderRoutes) updateTradeBalanceByTradeDay(c *gin.Context) {
+	tradeDay := c.Param("tradeday")
+	if tradeDay == "" {
+		errorResponse(c, http.StatusInternalServerError, "tradeday is empty")
+		return
+	}
+
+	if err := r.t.UpdateTradeBalanceByTradeDay(c.Request.Context(), tradeDay); err != nil {
+		errorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, nil)
 }
 
 type manualInsertFutureOrderRequest struct {
@@ -285,4 +315,52 @@ func (r *orderRoutes) calculateReverseDayTradeBalance(c *gin.Context) {
 	c.JSON(http.StatusOK, dayTradeResult{
 		Balance: firstIn + firstInDiscount - payLater + payLaterDiscount,
 	})
+}
+
+// @Summary     moveFutureOrderToLatestTradeDay
+// @Description moveFutureOrderToLatestTradeDay
+// @ID          moveFutureOrderToLatestTradeDay
+// @Tags  	    order
+// @Accept      json
+// @Produce     json
+// @param order-id path string true "order-id"
+// @Success     200
+// @Failure     500 {object} response
+// @Router      /order/future/{order-id} [patch]
+func (r *orderRoutes) moveFutureOrderToLatestTradeDay(c *gin.Context) {
+	id := c.Param("order-id")
+	if id == "" {
+		errorResponse(c, http.StatusInternalServerError, "order-id is empty")
+		return
+	}
+
+	if e := r.t.MoveFutureOrderToLatestTradeDay(c.Request.Context(), id); e != nil {
+		errorResponse(c, http.StatusInternalServerError, e.Error())
+		return
+	}
+	c.JSON(http.StatusOK, nil)
+}
+
+// @Summary     moveStockOrderToLatestTradeDay
+// @Description moveStockOrderToLatestTradeDay
+// @ID          moveStockOrderToLatestTradeDay
+// @Tags  	    order
+// @Accept      json
+// @Produce     json
+// @param order-id path string true "order-id"
+// @Success     200
+// @Failure     500 {object} response
+// @Router      /order/stock/{order-id} [patch]
+func (r *orderRoutes) moveStockOrderToLatestTradeDay(c *gin.Context) {
+	id := c.Param("order-id")
+	if id == "" {
+		errorResponse(c, http.StatusInternalServerError, "order-id is empty")
+		return
+	}
+
+	if e := r.t.MoveStockOrderToLatestTradeDay(c.Request.Context(), id); e != nil {
+		errorResponse(c, http.StatusInternalServerError, e.Error())
+		return
+	}
+	c.JSON(http.StatusOK, nil)
 }

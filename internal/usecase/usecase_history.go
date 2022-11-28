@@ -653,7 +653,7 @@ func (uc *HistoryUseCase) GetFutureTradeCond(days int) trader.TradeBalance {
 			continue
 		}
 
-		lastPeriod := date.GetLastTradePeriod()
+		lastPeriod := date.GetLastFutureTradePeriod()
 		dbClose, err := uc.findExistFutureHistoryClose(lastPeriod, uc.simulateFutureCode)
 		if err != nil {
 			log.Error(err)

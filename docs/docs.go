@@ -394,6 +394,43 @@ const docTemplate = `{
                         }
                     }
                 }
+            },
+            "put": {
+                "description": "updateTradeBalanceByTradeDay",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "order"
+                ],
+                "summary": "updateTradeBalanceByTradeDay",
+                "operationId": "updateTradeBalanceByTradeDay",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "tradeday",
+                        "name": "tradeday",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v1.futureOrders"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/v1.response"
+                        }
+                    }
+                }
             }
         },
         "/order/day-trade/forward": {
@@ -506,6 +543,78 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/v1.dayTradeResult"
                         }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/v1.response"
+                        }
+                    }
+                }
+            }
+        },
+        "/order/future/{order-id}": {
+            "patch": {
+                "description": "moveFutureOrderToLatestTradeDay",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "order"
+                ],
+                "summary": "moveFutureOrderToLatestTradeDay",
+                "operationId": "moveFutureOrderToLatestTradeDay",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "order-id",
+                        "name": "order-id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/v1.response"
+                        }
+                    }
+                }
+            }
+        },
+        "/order/stock/{order-id}": {
+            "patch": {
+                "description": "moveStockOrderToLatestTradeDay",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "order"
+                ],
+                "summary": "moveStockOrderToLatestTradeDay",
+                "operationId": "moveStockOrderToLatestTradeDay",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "order-id",
+                        "name": "order-id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
                     },
                     "500": {
                         "description": "Internal Server Error",

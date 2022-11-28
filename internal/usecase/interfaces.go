@@ -212,6 +212,9 @@ type (
 		GetFuturePosition() ([]*entity.FuturePosition, error)
 		IsFutureTradeTime() bool
 		ManualInsertFutureOrder(ctx context.Context, order *entity.FutureOrder) error
+		UpdateTradeBalanceByTradeDay(ctx context.Context, date string) error
+		MoveStockOrderToLatestTradeDay(ctx context.Context, orderID string) error
+		MoveFutureOrderToLatestTradeDay(ctx context.Context, orderID string) error
 	}
 
 	// OrderRepo -.
