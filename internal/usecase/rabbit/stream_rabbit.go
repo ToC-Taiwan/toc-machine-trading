@@ -176,8 +176,6 @@ func (c *StreamRabbit) OrderStatusConsumer(orderStatusChan chan interface{}) {
 					OrderTime: orderTime,
 				},
 			}
-		default:
-			log.Warnf("unknown code: %s", body.GetCode())
 		}
 
 		c.orderStatusChanMapLock.RLock()
