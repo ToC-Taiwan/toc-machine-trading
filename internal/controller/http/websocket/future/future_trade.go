@@ -13,6 +13,7 @@ import (
 	"tmt/internal/controller/http/websocket"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type WSFutureTrade struct {
@@ -23,11 +24,7 @@ type WSFutureTrade struct {
 
 	futureOrderMap map[string]*entity.FutureOrder
 	orderLock      sync.Mutex
-
-	assistTrader         *assistTrader
-	assistTraderTickChan chan *entity.RealTimeFutureTick
-
-	processLock sync.Mutex
+	processLock    sync.Mutex
 }
 
 // StartWSFutureTrade -.
@@ -38,8 +35,6 @@ func StartWSFutureTrade(c *gin.Context, s usecase.Stream, o usecase.Order) {
 		futureOrderMap: make(map[string]*entity.FutureOrder),
 		WSRouter:       websocket.NewWSRouter(c),
 	}
-	w.assistTrader = newAssistTrader(w.Ctx(), o)
-	w.assistTraderTickChan = w.assistTrader.getTickChan()
 
 	forwardChan := make(chan []byte)
 	go func() {
@@ -78,31 +73,27 @@ func (w *WSFutureTrade) sendFuture() {
 	go w.sendPosition()
 	go w.cancelOverTimeOrder()
 
-	w.s.NewFutureRealTimeConnection(tickChan, w.ConnectionID)
-	w.s.NewOrderStatusConnection(orderStatusChan, w.ConnectionID)
+	connectionID := uuid.New().String()
+	w.s.NewFutureRealTimeConnection(tickChan, connectionID)
+	w.s.NewOrderStatusConnection(orderStatusChan, connectionID)
 
 	<-w.Ctx().Done()
 
-	w.s.DeleteFutureRealTimeConnection(w.ConnectionID)
-	w.s.DeleteOrderStatusConnection(w.ConnectionID)
+	w.s.DeleteFutureRealTimeConnection(connectionID)
+	w.s.DeleteOrderStatusConnection(connectionID)
 }
 
 func (w *WSFutureTrade) processTrade(clientMsg futureTradeClientMsg) {
 	defer w.processLock.Unlock()
 	w.processLock.Lock()
 
-	if clientMsg.Option.AutomationType != AutomationNone && clientMsg.Qty > 1 {
-		w.SendToClient(errMsg{ErrMsg: "Assist only support qty = 1"})
-		return
-	}
+	// if clientMsg.Option.AutomationType != AutomationNone && clientMsg.Qty > 1 {
+	// 	w.SendToClient(errMsg{ErrMsg: "Assist only support qty = 1"})
+	// 	return
+	// }
 
 	if !w.o.IsFutureTradeTime() {
 		w.SendToClient(errMsg{ErrMsg: "Not trade time"})
-		return
-	}
-
-	if w.assistTrader.isAssisting() {
-		w.SendToClient(errMsg{ErrMsg: "Assist trader is running"})
 		return
 	}
 
@@ -122,11 +113,7 @@ func (w *WSFutureTrade) processTrade(clientMsg futureTradeClientMsg) {
 
 	w.orderLock.Lock()
 	order.TradeTime = time.Now()
-	if clientMsg.Option.AutomationType != AutomationNone {
-		w.assistTrader.addAssistOrder(order, clientMsg.Option)
-	} else {
-		w.futureOrderMap[order.OrderID] = order
-	}
+	w.futureOrderMap[order.OrderID] = order
 	w.orderLock.Unlock()
 }
 
@@ -149,18 +136,16 @@ func (w *WSFutureTrade) placeOrder(order *entity.FutureOrder) error {
 }
 
 func (w *WSFutureTrade) processTickArr(tickChan chan *entity.RealTimeFutureTick) {
+	baseDuration := 10 * time.Second
 	var tickArr entity.RealTimeFutureTickArr
 	for {
 		tick, ok := <-tickChan
 		if !ok {
-			close(w.assistTraderTickChan)
 			return
 		}
-		tickArr = append(tickArr, tick)
-		w.SendToClient(tick)
-		w.assistTraderTickChan <- tick
 
-		baseDuration := 10 * time.Second
+		w.SendToClient(tick)
+		tickArr = append(tickArr, tick)
 		var firstPeriod, secondPeriod, thirdPeriod, fourthPeriod entity.RealTimeFutureTickArr
 	L:
 		for i := len(tickArr) - 1; i >= 0; i-- {
@@ -212,10 +197,6 @@ func (w *WSFutureTrade) processOrderStatus(orderStatusChan chan interface{}) {
 					w.SendToClient(o)
 					o.TradeTime = cache.TradeTime
 					w.futureOrderMap[o.OrderID] = o
-				}
-			} else {
-				if a := w.assistTrader.updateOrderStatus(o); a != nil {
-					w.SendToClient(a)
 				}
 			}
 			w.orderLock.Unlock()

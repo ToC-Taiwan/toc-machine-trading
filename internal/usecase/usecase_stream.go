@@ -209,15 +209,6 @@ func (uc *StreamUseCase) ReceiveOrderStatus(ctx context.Context) {
 	uc.rabbit.OrderStatusConsumer(orderStatusChan)
 }
 
-// NewOrderStatusConnection -.
-func (uc *StreamUseCase) NewOrderStatusConnection(orderStatusChan chan interface{}, connectionID string) {
-	uc.rabbit.AddOrderStatusChan(orderStatusChan, connectionID)
-}
-
-func (uc *StreamUseCase) DeleteOrderStatusConnection(connectionID string) {
-	uc.rabbit.RemoveOrderStatusChan(connectionID)
-}
-
 // GetTSESnapshot -.
 func (uc *StreamUseCase) GetTSESnapshot(ctx context.Context) (*entity.StockSnapShot, error) {
 	body, err := uc.grpcapi.GetStockSnapshotTSE()
@@ -380,16 +371,6 @@ func (uc *StreamUseCase) GetFutureSnapshotByCode(code string) (*entity.FutureSna
 	}, nil
 }
 
-// NewFutureRealTimeConnection -.
-func (uc *StreamUseCase) NewFutureRealTimeConnection(tickChan chan *entity.RealTimeFutureTick, connectionID string) {
-	uc.rabbit.AddFutureTickChan(tickChan, connectionID)
-}
-
-// DeleteFutureRealTimeConnection -.
-func (uc *StreamUseCase) DeleteFutureRealTimeConnection(connectionID string) {
-	uc.rabbit.RemoveFutureTickChan(connectionID)
-}
-
 func (uc *StreamUseCase) updateMainFutureCode(future *entity.Future) {
 	uc.mainFutureCode = future.Code
 }
@@ -520,4 +501,23 @@ func (uc *StreamUseCase) TurnFutureTradeSwitch(ctx context.Context, allow bool) 
 
 func (uc *StreamUseCase) GetFutureTradeSwitchStatus(ctx context.Context) bool {
 	return uc.futureTradeSwitchCfg.AllowTrade
+}
+
+// NewFutureRealTimeConnection -.
+func (uc *StreamUseCase) NewFutureRealTimeConnection(tickChan chan *entity.RealTimeFutureTick, connectionID string) {
+	uc.rabbit.AddFutureTickChan(tickChan, connectionID)
+}
+
+// DeleteFutureRealTimeConnection -.
+func (uc *StreamUseCase) DeleteFutureRealTimeConnection(connectionID string) {
+	uc.rabbit.RemoveFutureTickChan(connectionID)
+}
+
+// NewOrderStatusConnection -.
+func (uc *StreamUseCase) NewOrderStatusConnection(orderStatusChan chan interface{}, connectionID string) {
+	uc.rabbit.AddOrderStatusChan(orderStatusChan, connectionID)
+}
+
+func (uc *StreamUseCase) DeleteOrderStatusConnection(connectionID string) {
+	uc.rabbit.RemoveOrderStatusChan(connectionID)
 }

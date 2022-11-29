@@ -856,13 +856,13 @@ const docTemplate = `{
         "config.Log": {
             "type": "object",
             "properties": {
-                "level": {
+                "logFormat": {
                     "type": "string"
                 },
-                "log_format": {
+                "logLevel": {
                     "type": "string"
                 },
-                "need_caller": {
+                "needCaller": {
                     "type": "boolean"
                 }
             }

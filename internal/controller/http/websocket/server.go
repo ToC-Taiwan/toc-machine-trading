@@ -9,7 +9,6 @@ import (
 	"tmt/internal/usecase/modules/logger"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 )
 
@@ -17,18 +16,16 @@ var log = logger.Get()
 
 // WSRouter -.
 type WSRouter struct {
-	ConnectionID string
-	msgChan      chan interface{}
-	conn         *websocket.Conn
-	ginCtx       *gin.Context
+	msgChan chan interface{}
+	conn    *websocket.Conn
+	ctx     context.Context
 }
 
 // NewWSRouter -.
 func NewWSRouter(c *gin.Context) *WSRouter {
 	r := &WSRouter{
-		ConnectionID: uuid.New().String(),
-		msgChan:      make(chan interface{}),
-		ginCtx:       c,
+		msgChan: make(chan interface{}),
+		ctx:     c.Request.Context(),
 	}
 	r.upgrade(c)
 	return r
@@ -64,28 +61,21 @@ func (w *WSRouter) write() {
 		case cl := <-w.msgChan:
 			switch v := cl.(type) {
 			case string:
-				if err := w.send([]byte(v)); err != nil {
-					return
-				}
+				w.send([]byte(v))
 
 			default:
 				if serveMsgStr, err := json.Marshal(v); err == nil {
-					if err := w.send(serveMsgStr); err != nil {
-						return
-					}
+					w.send(serveMsgStr)
 				}
 			}
 		}
 	}
 }
 
-func (w *WSRouter) send(data []byte) error {
+func (w *WSRouter) send(data []byte) {
 	if err := w.conn.WriteMessage(websocket.TextMessage, data); err != nil {
 		log.Errorf("WS send error: %v", err)
-		w.ginCtx.Abort()
-		return err
 	}
-	return nil
 }
 
 func (w *WSRouter) ReadFromClient(forwardChan chan []byte) {
@@ -114,5 +104,5 @@ func (w *WSRouter) SendToClient(msg interface{}) {
 }
 
 func (w *WSRouter) Ctx() context.Context {
-	return w.ginCtx.Request.Context()
+	return w.ctx
 }

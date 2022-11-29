@@ -36,8 +36,8 @@ type StreamRabbit struct {
 	allStockMap  map[string]*entity.Stock
 	allFutureMap map[string]*entity.Future
 
-	futureTickChan map[string]chan *entity.RealTimeFutureTick
-	futureTickLock sync.RWMutex
+	futureTickChanMap map[string]chan *entity.RealTimeFutureTick
+	futureTickMapLock sync.RWMutex
 
 	orderStatusChanMap     map[string]chan interface{}
 	orderStatusChanMapLock sync.RWMutex
@@ -60,7 +60,7 @@ func NewStream() *StreamRabbit {
 
 	return &StreamRabbit{
 		conn:               conn,
-		futureTickChan:     make(map[string]chan *entity.RealTimeFutureTick),
+		futureTickChanMap:  make(map[string]chan *entity.RealTimeFutureTick),
 		orderStatusChanMap: make(map[string]chan interface{}),
 	}
 }
@@ -109,19 +109,6 @@ func (c *StreamRabbit) EventConsumer(eventChan chan *entity.SinopacEvent) {
 			EventTime: dataTime,
 		}
 	}
-}
-
-func (c *StreamRabbit) AddOrderStatusChan(orderStatusChan chan interface{}, connectionID string) {
-	defer c.orderStatusChanMapLock.Unlock()
-	c.orderStatusChanMapLock.Lock()
-	c.orderStatusChanMap[connectionID] = orderStatusChan
-}
-
-func (c *StreamRabbit) RemoveOrderStatusChan(connectionID string) {
-	defer c.orderStatusChanMapLock.Unlock()
-	c.orderStatusChanMapLock.Lock()
-	close(c.orderStatusChanMap[connectionID])
-	delete(c.orderStatusChanMap, connectionID)
 }
 
 // OrderStatusConsumer OrderStatusConsumer
@@ -179,8 +166,8 @@ func (c *StreamRabbit) OrderStatusConsumer(orderStatusChan chan interface{}) {
 		}
 
 		c.orderStatusChanMapLock.RLock()
-		for _, orderStatusChan := range c.orderStatusChanMap {
-			orderStatusChan <- order
+		for _, t := range c.orderStatusChanMap {
+			t <- order
 		}
 		c.orderStatusChanMapLock.RUnlock()
 	}
@@ -236,26 +223,11 @@ func (c *StreamRabbit) TickConsumer(stockNum string, tickChan chan *entity.RealT
 	}
 }
 
-// AddFutureTickChan -.
-func (c *StreamRabbit) AddFutureTickChan(tickChan chan *entity.RealTimeFutureTick, connectionID string) {
-	defer c.futureTickLock.Unlock()
-	c.futureTickLock.Lock()
-	c.futureTickChan[connectionID] = tickChan
-}
-
-// RemoveFutureTickChan -.
-func (c *StreamRabbit) RemoveFutureTickChan(connectionID string) {
-	defer c.futureTickLock.Unlock()
-	c.futureTickLock.Lock()
-	close(c.futureTickChan[connectionID])
-	delete(c.futureTickChan, connectionID)
-}
-
 // FutureTickConsumer -.
 func (c *StreamRabbit) FutureTickConsumer(code string, tickChan chan *entity.RealTimeFutureTick) {
-	c.futureTickLock.Lock()
-	c.futureTickChan[uuid.New().String()] = tickChan
-	c.futureTickLock.Unlock()
+	c.futureTickMapLock.Lock()
+	c.futureTickChanMap[uuid.New().String()] = tickChan
+	c.futureTickMapLock.Unlock()
 	delivery := c.establishDelivery(fmt.Sprintf("%s:%s", routingKeyFutureTick, code))
 	for {
 		d, opened := <-delivery
@@ -301,11 +273,11 @@ func (c *StreamRabbit) FutureTickConsumer(code string, tickChan chan *entity.Rea
 			PctChg:          body.GetPctChg(),
 		}
 
-		c.futureTickLock.RLock()
-		for _, tickChan := range c.futureTickChan {
-			tickChan <- tick
+		c.futureTickMapLock.RLock()
+		for _, t := range c.futureTickChanMap {
+			t <- tick
 		}
-		c.futureTickLock.RUnlock()
+		c.futureTickMapLock.RUnlock()
 	}
 }
 
@@ -404,4 +376,32 @@ func (c *StreamRabbit) FutureBidAskConsumer(code string, bidAskChan chan *entity
 			FirstDerivedAskVol:   body.GetFirstDerivedAskVol(),
 		}
 	}
+}
+
+// AddFutureTickChan -.
+func (c *StreamRabbit) AddFutureTickChan(tickChan chan *entity.RealTimeFutureTick, connectionID string) {
+	defer c.futureTickMapLock.Unlock()
+	c.futureTickMapLock.Lock()
+	c.futureTickChanMap[connectionID] = tickChan
+}
+
+// RemoveFutureTickChan -.
+func (c *StreamRabbit) RemoveFutureTickChan(connectionID string) {
+	defer c.futureTickMapLock.Unlock()
+	c.futureTickMapLock.Lock()
+	close(c.futureTickChanMap[connectionID])
+	delete(c.futureTickChanMap, connectionID)
+}
+
+func (c *StreamRabbit) AddOrderStatusChan(orderStatusChan chan interface{}, connectionID string) {
+	defer c.orderStatusChanMapLock.Unlock()
+	c.orderStatusChanMapLock.Lock()
+	c.orderStatusChanMap[connectionID] = orderStatusChan
+}
+
+func (c *StreamRabbit) RemoveOrderStatusChan(connectionID string) {
+	defer c.orderStatusChanMapLock.Unlock()
+	c.orderStatusChanMapLock.Lock()
+	close(c.orderStatusChanMap[connectionID])
+	delete(c.orderStatusChanMap, connectionID)
 }

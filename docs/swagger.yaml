@@ -68,11 +68,11 @@ definitions:
     type: object
   config.Log:
     properties:
-      level:
+      logFormat:
         type: string
-      log_format:
+      logLevel:
         type: string
-      need_caller:
+      needCaller:
         type: boolean
     type: object
   config.Postgres:
