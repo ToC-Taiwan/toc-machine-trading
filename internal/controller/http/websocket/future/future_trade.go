@@ -130,7 +130,7 @@ func (w *WSFutureTrade) processClientOrder(client clientOrder) {
 func (w *WSFutureTrade) isAssistingFull() bool {
 	defer w.assistTickChanMapLock.RUnlock()
 	w.assistTickChanMapLock.RLock()
-	return len(w.assistTickChanMap) > 2
+	return len(w.assistTickChanMap) > 0
 }
 
 func (w *WSFutureTrade) closeDoneChan(orderID string) {

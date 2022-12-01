@@ -59,3 +59,11 @@ type periodTradeVolume struct {
 type futurePosition struct {
 	Position []*entity.FuturePosition `json:"position"`
 }
+
+type asssitDoneMessage struct {
+	ConsumeTime int64   `json:"consume_time"`
+	FromAction  string  `json:"from_action"`
+	From        float64 `json:"from"`
+	ToAction    string  `json:"to_action"`
+	To          float64 `json:"to"`
+}
