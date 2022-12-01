@@ -103,6 +103,10 @@ func (w *WSRouter) SendToClient(msg interface{}) {
 	w.msgChan <- msg
 }
 
+func (w *WSRouter) SendErrToClient(err error) {
+	w.msgChan <- err
+}
+
 func (w *WSRouter) Ctx() context.Context {
 	return w.ctx
 }

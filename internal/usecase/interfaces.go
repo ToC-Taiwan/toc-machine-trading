@@ -17,7 +17,7 @@ import (
 var (
 	log = logger.Get()
 	cc  = cache.Get()
-	bus = event.Get()
+	bus = event.Get(false)
 )
 
 //go:generate mockgen -source=interfaces.go -destination=./mocks_test.go -package=usecase_test
@@ -247,7 +247,7 @@ type (
 		SellFirstStock(order *entity.StockOrder, sim bool) (*pb.TradeResult, error)
 		CancelStock(orderID string, sim bool) (*pb.TradeResult, error)
 		GetOrderStatusByID(orderID string, sim bool) (*pb.TradeResult, error)
-		GetOrderStatusArr() ([]*pb.StockOrderStatus, error)
+		GetOrderStatusArrFromMQ() (*pb.ErrorMessage, error)
 		GetNonBlockOrderStatusArr() (*pb.ErrorMessage, error)
 
 		BuyFuture(order *entity.FutureOrder, sim bool) (*pb.TradeResult, error)

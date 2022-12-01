@@ -1,302 +1,160 @@
 package future
 
-// TODO: need to consider partfilled condition
+import (
+	"context"
+	"sync"
+	"time"
 
-// type assistTrader struct {
-// 	o        usecase.Order
-// 	ctx      context.Context
-// 	tickChan chan *entity.RealTimeFutureTick
+	"tmt/internal/entity"
+	"tmt/internal/usecase/modules/event"
+)
 
-// 	assistOrderMap map[string]*entity.FutureOrder
-// 	orderLock      sync.RWMutex
+// assistTarget is the target order to assist
+type assistTarget struct {
+	*WSFutureTrade       // use for place order
+	*entity.FutureOrder  // base order
+	*event.Bus           // use for subscribe topic
+	halfAutomationOption // option for assist trader
+}
 
-// 	assistOption HalfAutomationOption
-// 	action       entity.OrderAction
-// 	tradeTime    time.Time
-// 	code         string
-// 	qty          int64
-// 	basePrice    float64
+// toFinishOrder will return a order to finish the assist order
+func (o *assistTarget) toFinishOrder(price float64) *entity.FutureOrder {
+	order := &entity.FutureOrder{
+		Code: o.Code,
+		BaseOrder: entity.BaseOrder{
+			Quantity: o.Quantity,
+			Price:    price,
+		},
+	}
+	switch o.Action {
+	case entity.ActionBuy:
+		order.Action = entity.ActionSell
+	case entity.ActionSell:
+		order.Action = entity.ActionBuy
+	}
+	return order
+}
 
-// 	assisting    bool
-// 	waitingOrder *entity.FutureOrder
-// }
+// assistTrader is a trader to assist the main order
+type assistTrader struct {
+	*assistTarget                                      // assist target
+	ctx                context.Context                 // context from gin context
+	finishOrderMap     map[string]*entity.FutureOrder  // map of finish order
+	finishOrderMapLock sync.RWMutex                    // lock for finishOrderMap
+	waitingOrder       *entity.FutureOrder             // waiting order
+	tickChan           chan *entity.RealTimeFutureTick // tick channel
+}
 
-// func newAssistTrader(ctx context.Context, o usecase.Order) *assistTrader {
-// 	a := &assistTrader{
-// 		o:              o,
-// 		ctx:            ctx,
-// 		tickChan:       make(chan *entity.RealTimeFutureTick),
-// 		assistOrderMap: make(map[string]*entity.FutureOrder),
-// 	}
-// 	go a.processTick()
-// 	return a
-// }
+// newAssistTrader will return a assist trader
+func newAssistTrader(ctx context.Context, target *assistTarget) *assistTrader {
+	a := &assistTrader{
+		ctx:            ctx,
+		assistTarget:   target,
+		finishOrderMap: make(map[string]*entity.FutureOrder),
+		tickChan:       make(chan *entity.RealTimeFutureTick),
+	}
 
-// func (a *assistTrader) processTick() {
-// 	for {
-// 		tick, ok := <-a.tickChan
-// 		if !ok {
-// 			return
-// 		}
+	go a.processTick()
 
-// 		if !a.assisting || a.waitingOrder != nil {
-// 			continue
-// 		}
+	a.SubscribeTopic(topicOrderStatus, a.updateOrderStatus)
+	return a
+}
 
-// 		switch a.assistOption.AutomationType {
-// 		case AutomationByBalance:
-// 			a.checkByBalance(tick)
-// 		case AutomationByTimePeriod:
-// 			a.checkByTime(tick)
-// 		case AutomationByTimePeriodAndBalance:
-// 			a.checkByTimeAndBalance(tick)
-// 		}
-// 	}
-// }
+// updateOrderStatus will update order status
+func (a *assistTrader) updateOrderStatus(o *entity.FutureOrder) {
+	defer a.finishOrderMapLock.Unlock()
+	a.finishOrderMapLock.Lock()
 
-// func (a *assistTrader) isAssisting() bool {
-// 	return a.assisting
-// }
+	if _, ok := a.finishOrderMap[o.OrderID]; ok {
+		a.finishOrderMap[o.OrderID] = o
+		if a.waitingOrder != nil && !o.Cancellable() && a.waitingOrder.OrderID == o.OrderID {
+			a.waitingOrder = nil
+		}
+	}
+}
 
-// func (a *assistTrader) getTickChan() chan *entity.RealTimeFutureTick {
-// 	return a.tickChan
-// }
+// processTick will process tick
+func (a *assistTrader) processTick() {
+	for {
+		tick, ok := <-a.tickChan
+		if !ok {
+			return
+		}
 
-// func (a *assistTrader) addAssistOrder(order *entity.FutureOrder, option HalfAutomationOption) {
-// 	defer a.orderLock.Unlock()
-// 	a.orderLock.Lock()
+		if a.waitingOrder != nil {
+			continue
+		}
 
-// 	a.assistOrderMap = make(map[string]*entity.FutureOrder)
-// 	a.assistOrderMap[order.OrderID] = order
-// 	a.assistOption = option
-// 	a.code = order.Code
-// 	a.basePrice = order.Price
-// 	a.qty = order.Quantity
-// 	a.tradeTime = order.TradeTime
+		if a.isAssistDone() {
+			return
+		}
 
-// 	switch order.Action {
-// 	case entity.ActionBuy:
-// 		a.action = entity.ActionSell
-// 	case entity.ActionSell:
-// 		a.action = entity.ActionBuy
-// 	}
+		switch a.AutomationType {
+		case AutomationByBalance:
+			a.checkByBalance(tick)
+		case AutomationByTimePeriod:
+			a.checkByTime(tick)
+		case AutomationByTimePeriodAndBalance:
+			a.checkByTimeAndBalance(tick)
+		}
+	}
+}
 
-// 	a.assisting = true
-// 	a.waitingOrder = order
-// 	go a.cancelOverTimeBaseOrder(order.OrderID)
-// 	go a.checkAssistStatus(order.OrderID)
-// }
+func (a *assistTrader) isAssistDone() bool {
+	var endQty int64
+	a.finishOrderMapLock.RLock()
+	for _, o := range a.finishOrderMap {
+		if o.Status == entity.StatusFilled {
+			endQty += o.Quantity
+		}
+	}
+	a.finishOrderMapLock.RUnlock()
 
-// func (a *assistTrader) cancelOverTimeBaseOrder(orderID string) {
-// 	cancelOrderMap := make(map[string]*entity.FutureOrder)
-// 	for {
-// 		select {
-// 		case <-a.ctx.Done():
-// 			return
+	if endQty == a.Quantity {
+		a.UnSubscribeTopic(topicOrderStatus, a.updateOrderStatus)
+		a.PublishTopicEvent(topicAssistDone, a.OrderID)
+		return true
+	}
+	return false
+}
 
-// 		case <-time.After(time.Second):
-// 			a.orderLock.Lock()
-// 			order := a.assistOrderMap[orderID]
+// halfAutomationOption is the option for assist trader
+func (a *assistTrader) checkByTime(tick *entity.RealTimeFutureTick) {
+	if time.Since(a.TradeTime) > time.Duration(a.ByTimePeriod)*time.Minute {
+		a.placeAssistOrder(tick.Close)
+	}
+}
 
-// 			if !order.Cancellable() {
-// 				a.orderLock.Unlock()
-// 				return
-// 			}
+// halfAutomationOption is the option for assist trader
+func (a *assistTrader) checkByBalance(tick *entity.RealTimeFutureTick) {
+	if tick.Close < a.Price+a.ByBalanceLow || tick.Close > a.Price+a.ByBalanceHigh {
+		a.placeAssistOrder(tick.Close)
+	}
+}
 
-// 			if time.Since(order.TradeTime) > 10*time.Second && cancelOrderMap[order.OrderID] == nil {
-// 				if e := a.cancelOrderByID(order.OrderID); e != nil {
-// 					a.orderLock.Unlock()
-// 					continue
-// 				}
-// 				cancelOrderMap[order.OrderID] = order
-// 			}
+// halfAutomationOption is the option for assist trader
+func (a *assistTrader) checkByTimeAndBalance(tick *entity.RealTimeFutureTick) {
+	if tick.Close < a.Price+a.ByBalanceLow || tick.Close > a.Price+a.ByBalanceHigh {
+		a.placeAssistOrder(tick.Close)
+		return
+	}
 
-// 			a.orderLock.Unlock()
-// 		}
-// 	}
-// }
+	if time.Since(a.TradeTime) > time.Duration(a.ByTimePeriod)*time.Minute {
+		a.placeAssistOrder(tick.Close)
+	}
+}
 
-// func (a *assistTrader) checkAssistStatus(orderID string) {
-// 	for {
-// 		select {
-// 		case <-a.ctx.Done():
-// 			return
+// placeAssistOrder will place assist order
+func (a *assistTrader) placeAssistOrder(close float64) {
+	if o := a.placeOrder(a.toFinishOrder(close)); o != nil {
+		a.finishOrderMapLock.Lock()
+		a.finishOrderMap[o.OrderID] = o
+		a.finishOrderMapLock.Unlock()
+		a.PublishTopicEvent(topicPlaceOrder, o)
+	}
+}
 
-// 		case <-time.After(3 * time.Second):
-// 			a.orderLock.Lock()
-// 			order := a.assistOrderMap[orderID]
-
-// 			if order.Status == entity.StatusCancelled {
-// 				a.assisting = false
-// 				a.orderLock.Unlock()
-// 				return
-// 			}
-
-// 			if order.Status == entity.StatusFilled {
-// 				if a.waitingOrder != nil && a.waitingOrder.OrderID == order.OrderID {
-// 					a.waitingOrder = nil
-// 				}
-
-// 				if done := a.assistIsDone(a.assistOrderMap); done {
-// 					a.assisting = false
-// 					a.orderLock.Unlock()
-// 					return
-// 				}
-// 			}
-
-// 			a.orderLock.Unlock()
-// 		}
-// 	}
-// }
-
-// func (a *assistTrader) assistIsDone(orderMap map[string]*entity.FutureOrder) bool {
-// 	var qty int64
-// 	for _, order := range orderMap {
-// 		qty += order.FilledQty()
-// 	}
-
-// 	return qty == 0
-// }
-
-// func (a *assistTrader) placeOrder(order *entity.FutureOrder) error {
-// 	var err error
-// 	switch order.Action {
-// 	case entity.ActionBuy:
-// 		order.OrderID, order.Status, err = a.o.BuyFuture(order)
-// 		if err != nil {
-// 			return err
-// 		}
-
-// 	case entity.ActionSell:
-// 		order.OrderID, order.Status, err = a.o.SellFuture(order)
-// 		if err != nil {
-// 			return err
-// 		}
-// 	}
-
-// 	a.orderLock.Lock()
-// 	order.TradeTime = time.Now()
-// 	a.waitingOrder = order
-// 	a.assistOrderMap[order.OrderID] = order
-// 	a.orderLock.Unlock()
-
-// 	go a.checkOrderStatusByID(order.OrderID)
-// 	return nil
-// }
-
-// func (a *assistTrader) checkOrderStatusByID(orderID string) {
-// 	cancelOrderMap := make(map[string]*entity.FutureOrder)
-// 	for {
-// 		select {
-// 		case <-a.ctx.Done():
-// 			return
-
-// 		case <-time.After(time.Second):
-// 			a.orderLock.RLock()
-// 			order := a.assistOrderMap[orderID]
-// 			if !order.Cancellable() {
-// 				a.waitingOrder = nil
-// 				a.orderLock.RUnlock()
-// 				return
-// 			}
-
-// 			if time.Since(order.TradeTime) > 10*time.Second && cancelOrderMap[orderID] == nil {
-// 				if e := a.cancelOrderByID(orderID); e != nil {
-// 					a.orderLock.RUnlock()
-// 					continue
-// 				}
-// 				cancelOrderMap[orderID] = order
-// 			}
-// 			a.orderLock.RUnlock()
-// 		}
-// 	}
-// }
-
-// func (a *assistTrader) cancelOrderByID(orderID string) error {
-// 	_, s, err := a.o.CancelFutureOrderID(orderID)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	if s != entity.StatusCancelled {
-// 		return errors.New("cancel order failed")
-// 	}
-// 	return nil
-// }
-
-// func (a *assistTrader) checkByTime(tick *entity.RealTimeFutureTick) {
-// 	if time.Since(a.tradeTime) < time.Duration(a.assistOption.ByTimePeriod)*time.Minute {
-// 		return
-// 	}
-
-// 	order := &entity.FutureOrder{
-// 		Code: a.code,
-// 		BaseOrder: entity.BaseOrder{
-// 			Action:   a.action,
-// 			Price:    tick.Close,
-// 			Quantity: a.qty,
-// 		},
-// 	}
-
-// 	if e := a.placeOrder(order); e != nil {
-// 		return
-// 	}
-// }
-
-// func (a *assistTrader) checkByBalance(tick *entity.RealTimeFutureTick) {
-// 	if tick.Close > a.assistOption.ByBalanceLow+a.basePrice && tick.Close < a.assistOption.ByBalanceHigh+a.basePrice {
-// 		return
-// 	}
-
-// 	order := &entity.FutureOrder{
-// 		Code: a.code,
-// 		BaseOrder: entity.BaseOrder{
-// 			Action:   a.action,
-// 			Price:    tick.Close,
-// 			Quantity: a.qty,
-// 		},
-// 	}
-
-// 	if e := a.placeOrder(order); e != nil {
-// 		return
-// 	}
-// }
-
-// func (a *assistTrader) checkByTimeAndBalance(tick *entity.RealTimeFutureTick) {
-// 	var byBalance, byTime bool
-// 	if tick.Close > a.assistOption.ByBalanceLow+a.basePrice && tick.Close < a.assistOption.ByBalanceHigh+a.basePrice {
-// 		byBalance = false
-// 	}
-
-// 	if time.Since(a.tradeTime) < time.Duration(a.assistOption.ByTimePeriod)*time.Minute {
-// 		byTime = false
-// 	}
-
-// 	if !byBalance && !byTime {
-// 		return
-// 	}
-
-// 	order := &entity.FutureOrder{
-// 		Code: a.code,
-// 		BaseOrder: entity.BaseOrder{
-// 			Action:   a.action,
-// 			Price:    tick.Close,
-// 			Quantity: a.qty,
-// 		},
-// 	}
-
-// 	if e := a.placeOrder(order); e != nil {
-// 		return
-// 	}
-// }
-
-// func (a *assistTrader) updateOrderStatus(o *entity.FutureOrder) *entity.FutureOrder {
-// 	defer a.orderLock.Unlock()
-// 	a.orderLock.Lock()
-
-// 	if cache, ok := a.assistOrderMap[o.OrderID]; ok && cache.Status != o.Status {
-// 		o.TradeTime = cache.TradeTime
-// 		a.assistOrderMap[o.OrderID] = o
-// 		return o
-// 	}
-// 	return nil
-// }
+// getTickChan will return tick channel
+func (a *assistTrader) getTickChan() chan *entity.RealTimeFutureTick {
+	return a.tickChan
+}

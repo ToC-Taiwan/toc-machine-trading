@@ -2274,19 +2274,19 @@ func (mr *MockOrdergRPCAPIMockRecorder) GetNonBlockOrderStatusArr() *gomock.Call
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNonBlockOrderStatusArr", reflect.TypeOf((*MockOrdergRPCAPI)(nil).GetNonBlockOrderStatusArr))
 }
 
-// GetOrderStatusArr mocks base method.
-func (m *MockOrdergRPCAPI) GetOrderStatusArr() ([]*pb.StockOrderStatus, error) {
+// GetOrderStatusArrFromMQ mocks base method.
+func (m *MockOrdergRPCAPI) GetOrderStatusArrFromMQ() (*pb.ErrorMessage, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetOrderStatusArr")
-	ret0, _ := ret[0].([]*pb.StockOrderStatus)
+	ret := m.ctrl.Call(m, "GetOrderStatusArrFromMQ")
+	ret0, _ := ret[0].(*pb.ErrorMessage)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetOrderStatusArr indicates an expected call of GetOrderStatusArr.
-func (mr *MockOrdergRPCAPIMockRecorder) GetOrderStatusArr() *gomock.Call {
+// GetOrderStatusArrFromMQ indicates an expected call of GetOrderStatusArrFromMQ.
+func (mr *MockOrdergRPCAPIMockRecorder) GetOrderStatusArrFromMQ() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOrderStatusArr", reflect.TypeOf((*MockOrdergRPCAPI)(nil).GetOrderStatusArr))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOrderStatusArrFromMQ", reflect.TypeOf((*MockOrdergRPCAPI)(nil).GetOrderStatusArrFromMQ))
 }
 
 // GetOrderStatusByID mocks base method.

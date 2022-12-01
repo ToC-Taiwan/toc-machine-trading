@@ -11,7 +11,6 @@ import (
 	"tmt/internal/usecase/modules/event"
 	"tmt/internal/usecase/modules/quota"
 	"tmt/internal/usecase/modules/tradeday"
-	"tmt/pkg/common"
 )
 
 // OrderUseCase -.
@@ -136,48 +135,16 @@ func (uc *OrderUseCase) MoveFutureOrderToLatestTradeDay(ctx context.Context, ord
 }
 
 func (uc *OrderUseCase) askOrderStatusSimulate() {
-	for range time.NewTicker(time.Second).C {
-		orders, err := uc.gRPCAPI.GetOrderStatusArr()
+	for range time.NewTicker(750 * time.Millisecond).C {
+		msg, err := uc.gRPCAPI.GetOrderStatusArrFromMQ()
 		if err != nil {
 			log.Error(err)
 			continue
 		}
 
-		for _, v := range orders {
-			orderTime, err := time.ParseInLocation(common.LongTimeLayout, v.GetOrderTime(), time.Local)
-			if err != nil {
-				log.Error(err)
-				continue
-			}
-
-			switch {
-			case cc.GetOrderByOrderID(v.GetOrderId()) != nil:
-				o := &entity.StockOrder{
-					StockNum: v.GetCode(),
-					BaseOrder: entity.BaseOrder{
-						OrderID:   v.GetOrderId(),
-						Action:    entity.StringToOrderAction(v.GetAction()),
-						Price:     v.GetPrice(),
-						Quantity:  v.GetQuantity(),
-						Status:    entity.StringToOrderStatus(v.GetStatus()),
-						OrderTime: orderTime,
-					},
-				}
-				uc.updateStockOrderCacheAndInsertDB(o)
-			case cc.GetFutureOrderByOrderID(v.GetOrderId()) != nil:
-				o := &entity.FutureOrder{
-					Code: v.GetCode(),
-					BaseOrder: entity.BaseOrder{
-						OrderID:   v.GetOrderId(),
-						Action:    entity.StringToOrderAction(v.GetAction()),
-						Price:     v.GetPrice(),
-						Quantity:  v.GetQuantity(),
-						Status:    entity.StringToOrderStatus(v.GetStatus()),
-						OrderTime: orderTime,
-					},
-				}
-				uc.updateFutureOrderCacheAndInsertDB(o)
-			}
+		if errMsg := msg.GetErr(); errMsg != "" {
+			log.Error(errMsg)
+			continue
 		}
 	}
 }

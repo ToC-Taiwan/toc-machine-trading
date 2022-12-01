@@ -10,8 +10,8 @@ type Bus struct {
 }
 
 // Get -.
-func Get() *Bus {
-	if singletonBus != nil {
+func Get(new bool) *Bus {
+	if singletonBus != nil && !new {
 		return singletonBus
 	}
 
@@ -32,4 +32,9 @@ func (b *Bus) SubscribeTopic(topic string, fn ...interface{}) {
 	for _, f := range fn {
 		b.bus.SubscribeTopic(topic, f)
 	}
+}
+
+// UnSubscribeTopic -.
+func (b *Bus) UnSubscribeTopic(topic string, fn interface{}) {
+	b.bus.UnSubscribeTopic(topic, fn)
 }

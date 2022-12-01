@@ -37,7 +37,7 @@ target_cond:
         - low: 10
           high: 35
 
-simulation: false
+simulation: true
 
 stock_trade_switch:
     allow_trade: false

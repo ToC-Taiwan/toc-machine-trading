@@ -10,6 +10,6 @@ import (
 
 var (
 	cc  = cache.Get()
-	bus = event.Get()
+	bus = event.Get(false)
 	log = logger.Get()
 )

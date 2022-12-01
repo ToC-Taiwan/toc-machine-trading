@@ -29,3 +29,10 @@ func (c *Bus) SubscribeTopic(topic string, fn interface{}) {
 		panic(err)
 	}
 }
+
+func (c *Bus) UnSubscribeTopic(topic string, fn interface{}) {
+	err := c.bus.Unsubscribe(topic, fn)
+	if err != nil {
+		panic(err)
+	}
+}
