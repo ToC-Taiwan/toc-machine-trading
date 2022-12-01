@@ -6,14 +6,12 @@ import (
 	"time"
 
 	"tmt/internal/entity"
-	"tmt/internal/usecase/modules/event"
 )
 
 // assistTarget is the target order to assist
 type assistTarget struct {
 	*WSFutureTrade       // use for place order
 	*entity.FutureOrder  // base order
-	*event.Bus           // use for subscribe topic
 	halfAutomationOption // option for assist trader
 }
 
@@ -43,6 +41,7 @@ type assistTrader struct {
 	finishOrderMapLock sync.RWMutex                    // lock for finishOrderMap
 	waitingOrder       *entity.FutureOrder             // waiting order
 	tickChan           chan *entity.RealTimeFutureTick // tick channel
+	done               bool                            // done flag
 }
 
 // newAssistTrader will return a assist trader
@@ -86,7 +85,7 @@ func (a *assistTrader) processTick() {
 		}
 
 		if a.isAssistDone() {
-			return
+			continue
 		}
 
 		switch a.AutomationType {
@@ -101,6 +100,10 @@ func (a *assistTrader) processTick() {
 }
 
 func (a *assistTrader) isAssistDone() bool {
+	if a.done {
+		return true
+	}
+
 	var endQty int64
 	a.finishOrderMapLock.RLock()
 	for _, o := range a.finishOrderMap {
@@ -113,6 +116,7 @@ func (a *assistTrader) isAssistDone() bool {
 	if endQty == a.Quantity {
 		a.UnSubscribeTopic(topicOrderStatus, a.updateOrderStatus)
 		a.PublishTopicEvent(topicAssistDone, a.OrderID)
+		a.done = true
 		return true
 	}
 	return false
@@ -150,6 +154,7 @@ func (a *assistTrader) placeAssistOrder(close float64) {
 		a.finishOrderMapLock.Lock()
 		a.finishOrderMap[o.OrderID] = o
 		a.finishOrderMapLock.Unlock()
+		a.waitingOrder = o
 		a.PublishTopicEvent(topicPlaceOrder, o)
 	}
 }

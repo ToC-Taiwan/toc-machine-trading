@@ -22,5 +22,5 @@ var (
 	errGetPosition       = &futureTradeError{-6, "get position error"}
 	errPlaceOrder        = &futureTradeError{-7, "place order error"}
 	errCancelOrderFailed = &futureTradeError{-8, "cancel order failed"}
-	errIsAssiting        = &futureTradeError{-9, "is assisting"}
+	errAssitingIsFull    = &futureTradeError{-9, "assisting is full"}
 )

@@ -96,7 +96,7 @@ func (w *WSFutureTrade) processClientOrder(client clientOrder) {
 		w.SendErrToClient(errNotFilled)
 		return
 	case w.isAssistingFull():
-		w.SendErrToClient(errIsAssiting)
+		w.SendErrToClient(errAssitingIsFull)
 		return
 	case client.Option.AutomationType != AutomationNone && client.Qty > 1:
 		w.SendErrToClient(errAssistNotSupport)
@@ -116,7 +116,6 @@ func (w *WSFutureTrade) processClientOrder(client clientOrder) {
 		w.assistTargetWaitingMap[o.OrderID] = &assistTarget{
 			WSFutureTrade:        w,
 			FutureOrder:          o,
-			Bus:                  w.Bus,
 			halfAutomationOption: client.Option,
 		}
 		w.assistTargetWaitingMapLock.Unlock()
@@ -279,7 +278,6 @@ func (w *WSFutureTrade) processOrderStatus(orderStatusChan chan interface{}) {
 			}
 
 			w.updateCacheOrder(o)
-			w.PublishTopicEvent(topicOrderStatus, o) // publish updated order to assist
 
 			if !o.Cancellable() {
 				finishedOrderMap[o.OrderID] = o
@@ -298,11 +296,12 @@ func (w *WSFutureTrade) updateCacheOrder(o *entity.FutureOrder) {
 	w.orderMapLock.Lock()
 	cache, ok := w.orderMap[o.OrderID]
 	if ok {
-		o.TradeTime = cache.TradeTime
 		if cache.Status != o.Status {
 			w.SendToClient(o)
-			w.orderMap[o.OrderID] = o
 		}
+		o.TradeTime = cache.TradeTime
+		w.orderMap[o.OrderID] = o
+		w.PublishTopicEvent(topicOrderStatus, o) // publish updated order to assist
 	}
 	w.orderMapLock.Unlock()
 	if !ok {
@@ -314,11 +313,12 @@ func (w *WSFutureTrade) updateCacheOrder(o *entity.FutureOrder) {
 func (w *WSFutureTrade) updateAssistTargetWaitingOrder(o *entity.FutureOrder) {
 	w.assistTargetWaitingMapLock.Lock()
 	if a, ok := w.assistTargetWaitingMap[o.OrderID]; ok {
-		a.FutureOrder.TradeTime = o.TradeTime
 		if a.Status != o.Status {
 			w.SendToClient(o)
-			w.assistTargetWaitingMap[o.OrderID] = a
 		}
+		o.TradeTime = a.TradeTime
+		a.FutureOrder = o
+		w.assistTargetWaitingMap[o.OrderID] = a
 	}
 	w.assistTargetWaitingMapLock.Unlock()
 }
