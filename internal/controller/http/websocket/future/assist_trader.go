@@ -56,6 +56,8 @@ func newAssistTrader(ctx context.Context, target *assistTarget) *assistTrader {
 	go a.processTick()
 
 	a.SubscribeTopic(topicOrderStatus, a.updateOrderStatus)
+	a.SendToClient(asssitStatus{true})
+
 	return a
 }
 
@@ -105,12 +107,10 @@ func (a *assistTrader) isAssistDone() bool {
 	}
 
 	var endQty int64
-	var endPrice float64
 	a.finishOrderMapLock.RLock()
 	for _, o := range a.finishOrderMap {
 		if o.Status == entity.StatusFilled {
 			endQty += o.Quantity
-			endPrice = o.Price
 		}
 	}
 	a.finishOrderMapLock.RUnlock()
@@ -118,13 +118,7 @@ func (a *assistTrader) isAssistDone() bool {
 	if endQty == a.Quantity {
 		a.UnSubscribeTopic(topicOrderStatus, a.updateOrderStatus)
 		a.PublishTopicEvent(topicAssistDone, a.OrderID)
-		a.SendToClient(asssitDoneMessage{
-			ConsumeTime: int64(time.Since(a.TradeTime).Seconds()),
-			FromAction:  a.Action.String(),
-			From:        a.Price,
-			ToAction:    a.toFinishOrder(endPrice).Action.String(),
-			To:          endPrice,
-		})
+		a.SendToClient(asssitStatus{false})
 		a.done = true
 		return true
 	}
