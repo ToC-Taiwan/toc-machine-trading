@@ -140,16 +140,33 @@ func (a *assistTrader) checkByTime(tick *entity.RealTimeFutureTick) {
 
 // halfAutomationOption is the option for assist trader
 func (a *assistTrader) checkByBalance(tick *entity.RealTimeFutureTick) {
-	if tick.Close < a.Price+a.ByBalanceLow || tick.Close > a.Price+a.ByBalanceHigh {
-		a.placeAssistOrder(tick.Close)
+	switch a.Action {
+	case entity.ActionBuy:
+		if tick.Close < a.Price+a.ByBalanceLow || tick.Close > a.Price+a.ByBalanceHigh {
+			a.placeAssistOrder(tick.Close)
+		}
+
+	case entity.ActionSell:
+		if tick.Close > a.Price-a.ByBalanceLow || tick.Close < a.Price-a.ByBalanceHigh {
+			a.placeAssistOrder(tick.Close)
+		}
 	}
 }
 
 // halfAutomationOption is the option for assist trader
 func (a *assistTrader) checkByTimeAndBalance(tick *entity.RealTimeFutureTick) {
-	if tick.Close < a.Price+a.ByBalanceLow || tick.Close > a.Price+a.ByBalanceHigh {
-		a.placeAssistOrder(tick.Close)
-		return
+	switch a.Action {
+	case entity.ActionBuy:
+		if tick.Close < a.Price+a.ByBalanceLow || tick.Close > a.Price+a.ByBalanceHigh {
+			a.placeAssistOrder(tick.Close)
+			return
+		}
+
+	case entity.ActionSell:
+		if tick.Close > a.Price-a.ByBalanceLow || tick.Close < a.Price-a.ByBalanceHigh {
+			a.placeAssistOrder(tick.Close)
+			return
+		}
 	}
 
 	if time.Since(a.TradeTime) > time.Duration(a.ByTimePeriod)*time.Minute {
