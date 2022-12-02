@@ -1,357 +1,264 @@
-<a name="unreleased"></a>
-## [Unreleased]
+# [](https://github.com/ToC-Taiwan/toc-machine-trading/compare/v1.6.0...v) (2022-12-02)
 
-### Chore
-- **actions:** modify build and push action version
-- **balance:** revert to normal method query future order
-- **naming:** reanme needassist to assisting
-- **pkg:** move config to module
-- **simulation:** add log for user to know is simulation or not
-- **stream:** remove out chg and in chg
-- **websocket:** revert to new channel in websocket router
+## CHANGELOG
 
-### Ci
-- **docker:** add git hash to build tag
-- **registry:** move registry from docker to github
+# [1.6.0](https://github.com/ToC-Taiwan/toc-machine-trading/compare/v1.5.0...v1.6.0) (2022-12-01)
 
-### Feat
-- **assist:** finish by balance and by time period assist
-- **assist:** add assist trader in futrue trade ws
-- **balance:** add manual trade balance
-- **balance:** add manual balance router
-- **index:** add otc, tse, nasdaq index to websocket stream
-- **order:** remove order status in websocket, modify manual order group id and trade time
-- **order:** refactor updateAllTradeBalance, increse update order speed
-- **order:** modify new sinopac filling to partfilled
-- **order:** remove ask update api, split update balance and simulate order, product order
-- **order:** add order status stream in websocket
-- **ordertime:** modifiy wrong order time to time now, when in night market from 0:00 to 5:00
-- **postition:** add future postion, remove manual in stock, future balance
-- **router:** add query future order by date api
-- **router:** add manual insert future order api
-- **stream:** modify out in volume to four period
-- **stream:** add out in rate chg, modify order entity
-- **stream:** add period update trade index interal stream usecase
-- **stream:** change method process tick arr
-- **switch:** add change future trade switch router
-- **tick:** cut tick arr in every second in stream
-- **trade:** add manual to order column, check order status in websocket
-- **trade:** add auto cancel in stream trade
-- **websocket:** add nasdaq future to stream
+### Bug Fixes
 
-### Fix
-- **ci:** add checkout in deployment to get git hash
-- **ci:** temp remove go test from ci
-- **ci:** add missing config in go test
-- **order:** fix order status chan is not add to rabbit, fix order time is always wrong
-- **order:** modify get order by trade day will send not filled order
-- **order:** use timer and reset to fix balance not insert to db
-- **order:** fix order balance calculate wrong, try fix manual order does not insert to db
-- **order:** fix manual order does not insert to db
-- **order:** add lock for order usecase to update order in postgres
-- **position:** fix websocket future position has no column in json
-- **postgres:** fix redundant manual future trade balance cause panic
-- **router:** fix return body of get future trade switch
-- **stream:** add loop lable to avoid index out of range
-- **stream:** fix last trade rate not initial
-- **stream:** fix map is not initail
-- **stuck:** fix missing go in updateAllTradeBalance
-- **trade:** fix order will be cancel multiple times
-- **trade:** fix order will be cancel before 10 seconds
-- **websocket:** fix send data to close channel
-- **websocket:** fix order map does not initial
-- **ws:** fix ws end abnormal, close connection before gin done
+* **assist:** add lock for process trade, fix bugs in assist trader ([2f8568a](https://github.com/ToC-Taiwan/toc-machine-trading/commit/2f8568a63f24c19e0d52d95b14d3ea856d873f75))
+* **assist:** fix assist trader will kill before start ([27beeb0](https://github.com/ToC-Taiwan/toc-machine-trading/commit/27beeb07f16684c92a2ca3e8a3770ffdb6fb1168))
+* **ci:** add checkout in deployment to get git hash ([4f762df](https://github.com/ToC-Taiwan/toc-machine-trading/commit/4f762dfda7bee9f9d14a2cac535c5a8eef7e2f4f))
+* **ci:** add missing config in go test ([131b20b](https://github.com/ToC-Taiwan/toc-machine-trading/commit/131b20bd37795a87387006dd8efc9808d7aaa9fe))
+* **ci:** temp remove go test from ci ([925fe13](https://github.com/ToC-Taiwan/toc-machine-trading/commit/925fe1399d33d47d3ac349b879b9b28ea0d93f82))
+* **log:** remove unknown order code log ([37c4c67](https://github.com/ToC-Taiwan/toc-machine-trading/commit/37c4c673cc75a0ec5622edf42c678473cb9b3462))
+* **order:** add lock for order usecase to update order in postgres ([cef9166](https://github.com/ToC-Taiwan/toc-machine-trading/commit/cef91668ef0f2868a4542fe8cb00564fc640e935))
+* **order:** fix manual order does not insert to db ([f17d517](https://github.com/ToC-Taiwan/toc-machine-trading/commit/f17d517f3fcc7884b30783d41ec54835fb2c9333))
+* **order:** fix order balance calculate wrong, try fix manual order does not insert to db ([74cd1df](https://github.com/ToC-Taiwan/toc-machine-trading/commit/74cd1df5b65c4008016cd081df18aad0bc6b4e2d))
+* **order:** fix order status chan is not add to rabbit, fix order time is always wrong ([c2a6708](https://github.com/ToC-Taiwan/toc-machine-trading/commit/c2a6708b62cfedc6cc0aa31021f7acb15b0e5bfe))
+* **order:** modify get order by trade day will send not filled order ([270f1cb](https://github.com/ToC-Taiwan/toc-machine-trading/commit/270f1cb9fb8f7f34c6e700fdf34c655ee2d589c8))
+* **order:** use timer and reset to fix balance not insert to db ([88311af](https://github.com/ToC-Taiwan/toc-machine-trading/commit/88311af6c577280c414e43bd80517b094faad4f9))
+* **position:** fix websocket future position has no column in json ([5ccfc35](https://github.com/ToC-Taiwan/toc-machine-trading/commit/5ccfc35a02dd1503f7c90bcf7c23cd0a53470b6d))
+* **postgres:** fix redundant manual future trade balance cause panic ([485e750](https://github.com/ToC-Taiwan/toc-machine-trading/commit/485e7502e87b2646d2720537b836148f9ab01519))
+* **router:** fix return body of get future trade switch ([cf89764](https://github.com/ToC-Taiwan/toc-machine-trading/commit/cf89764619e8d7cece824d29d3d8d0fefb08c356))
+* **stream:** add loop lable to avoid index out of range ([5468324](https://github.com/ToC-Taiwan/toc-machine-trading/commit/5468324aae109b8e91ccf823cd6fb7062d1963b2))
+* **stream:** fix last trade rate not initial ([4056324](https://github.com/ToC-Taiwan/toc-machine-trading/commit/4056324d4176ce9e394652601be35e3a76f16741))
+* **stream:** fix map is not initail ([db4f43f](https://github.com/ToC-Taiwan/toc-machine-trading/commit/db4f43f180a0fa50d009ab43a6f6d42d2bbab519))
+* **stuck:** fix missing go in updateAllTradeBalance ([ebdf9e3](https://github.com/ToC-Taiwan/toc-machine-trading/commit/ebdf9e35c8ba7a7e7a6a542b3ddf6af40fb92a34))
+* **trade:** fix order will be cancel before 10 seconds ([f02e740](https://github.com/ToC-Taiwan/toc-machine-trading/commit/f02e740bf9f426b8343bf7f41f76181361ad0943))
+* **trade:** fix order will be cancel multiple times ([5e4a036](https://github.com/ToC-Taiwan/toc-machine-trading/commit/5e4a0369e044558ff5bf5a16d33f694a731659ca))
+* **websocket:** fix order map does not initial ([2236e9a](https://github.com/ToC-Taiwan/toc-machine-trading/commit/2236e9adcadd3d86e250c88a44f619bd0002dc25))
+* **websocket:** fix send data to close channel ([a33b97d](https://github.com/ToC-Taiwan/toc-machine-trading/commit/a33b97dbf64a96460425db2f19a51861a28c1a05))
+* **ws:** fix stuck if client disconnect by abort gin ([3ac3157](https://github.com/ToC-Taiwan/toc-machine-trading/commit/3ac31574cfc7977216fc4bd01c7fd1b407f8ad2b))
+* **ws:** fix ws end abnormal, close connection before gin done ([9afe2ea](https://github.com/ToC-Taiwan/toc-machine-trading/commit/9afe2ea5cfd75d32d3074521bf686a5a9e3befce))
 
-### Refactor
-- **logger:** pack log again
-- **ws:** split pick stock and future to different pkg
-- **ws:** refactor websocket split pick stock and future trade
+### Features
 
-### Revert
-- **stream:** revert to cut and process in the same loop
+* **assist:** add assist done message, limit 1 assist at one time ([30b4449](https://github.com/ToC-Taiwan/toc-machine-trading/commit/30b44496a8b820a175457b8d6a322dff270db827))
+* **assist:** add assist trader in futrue trade ws ([73ce360](https://github.com/ToC-Taiwan/toc-machine-trading/commit/73ce360ca4a8e4ef3cf12889ee255a1899f8db47))
+* **assist:** finish by balance and by time period assist ([8d32cff](https://github.com/ToC-Taiwan/toc-machine-trading/commit/8d32cffbf1297c769999a646cb7c2ee6d1f6b2ae))
+* **assist:** let buy sell has same profit loss automation method ([b429b28](https://github.com/ToC-Taiwan/toc-machine-trading/commit/b429b28628d8c8e3c1a14f12e6d9cd94c31b625e))
+* **assist:** send running status to ws ([96e6efd](https://github.com/ToC-Taiwan/toc-machine-trading/commit/96e6efdd28e4a933249eccd8e8baf62cb91a7e8d))
+* **balance:** add manual balance router ([0c8149e](https://github.com/ToC-Taiwan/toc-machine-trading/commit/0c8149e0d77fd27312c43725e5c708e8ec2d183d))
+* **balance:** add manual trade balance ([6c9f56a](https://github.com/ToC-Taiwan/toc-machine-trading/commit/6c9f56a0441db630d4b2c62ef050b5a91a55982e))
+* **balance:** add move order and recalculate trade balance router ([66340a1](https://github.com/ToC-Taiwan/toc-machine-trading/commit/66340a19fdc70fc7c2f02667cf98c055f7c2d650))
+* **index:** add otc, tse, nasdaq index to websocket stream ([015ce62](https://github.com/ToC-Taiwan/toc-machine-trading/commit/015ce62a99ee526a5d83d7dfadf5dc1cd2f20cee))
+* **log:** move log config to env instead of in config ([67d0429](https://github.com/ToC-Taiwan/toc-machine-trading/commit/67d0429e8b6ef3fbb14b0a01b8c7a31b0ba5f27b))
+* **order:** add order status stream in websocket ([ba6c1c8](https://github.com/ToC-Taiwan/toc-machine-trading/commit/ba6c1c87ec77e16878a85bf9d053b487589c7d36))
+* **order:** modify new sinopac filling to partfilled ([32b7b13](https://github.com/ToC-Taiwan/toc-machine-trading/commit/32b7b1304efdaf986f6a76f77af5a695565ad105))
+* **order:** refactor updateAllTradeBalance, increse update order speed ([878e0e1](https://github.com/ToC-Taiwan/toc-machine-trading/commit/878e0e1d28dac97c20bcacfaee4cf37a77b0a8f0))
+* **order:** remove ask update api, split update balance and simulate order, product order ([5bdf730](https://github.com/ToC-Taiwan/toc-machine-trading/commit/5bdf730346c7ec280283949b78cdb8a272d0bf37))
+* **order:** remove order status in websocket, modify manual order group id and trade time ([85678f4](https://github.com/ToC-Taiwan/toc-machine-trading/commit/85678f43fa7cf5b490d541e0a4473856f3e2e222))
+* **ordertime:** modifiy wrong order time to time now, when in night market from 0:00 to 5:00 ([6982cc2](https://github.com/ToC-Taiwan/toc-machine-trading/commit/6982cc2d7d2e10b3a5539b061da535abe78d562b))
+* **postition:** add future postion, remove manual in stock, future balance ([eaad049](https://github.com/ToC-Taiwan/toc-machine-trading/commit/eaad049a356b0ab2d875b944bb76abb345eed976))
+* **router:** add manual insert future order api ([cceae7f](https://github.com/ToC-Taiwan/toc-machine-trading/commit/cceae7fb811687ca15d5413ed6f258aecac10876))
+* **router:** add query future order by date api ([0091158](https://github.com/ToC-Taiwan/toc-machine-trading/commit/0091158c21ae89e96129eb1016d099a61cfc39ca))
+* **stream:** add out in rate chg, modify order entity ([71c8737](https://github.com/ToC-Taiwan/toc-machine-trading/commit/71c873747c3d8853b58b13d105dc022af6c01bbe))
+* **stream:** add period update trade index interal stream usecase ([6015933](https://github.com/ToC-Taiwan/toc-machine-trading/commit/6015933d1dda40769881897a8d2ccad9a26ecbf7))
+* **stream:** change method process tick arr ([1a001e6](https://github.com/ToC-Taiwan/toc-machine-trading/commit/1a001e648ab1dda508d7fd105733df6859865380))
+* **stream:** modify out in volume to four period ([1957fba](https://github.com/ToC-Taiwan/toc-machine-trading/commit/1957fba4bb3c13d15b2cc35ea29cb7f14f65a4eb))
+* **switch:** add change future trade switch router ([2171c85](https://github.com/ToC-Taiwan/toc-machine-trading/commit/2171c851b0622678c1fc67ade2efde9b863ab100))
+* **tick:** cut tick arr in every second in stream ([e5598f3](https://github.com/ToC-Taiwan/toc-machine-trading/commit/e5598f3dadbb061301d2286121a9a3593a63c58e))
+* **trade:** add auto cancel in stream trade ([3f9cffa](https://github.com/ToC-Taiwan/toc-machine-trading/commit/3f9cffaea69729d4d29a0bf7267b1dc1ff211df8))
+* **trade:** add manual to order column, check order status in websocket ([81af5af](https://github.com/ToC-Taiwan/toc-machine-trading/commit/81af5af9bd945bdb7b4226184aeb4d951927a6c4))
+* **websocket:** add nasdaq future to stream ([208fdff](https://github.com/ToC-Taiwan/toc-machine-trading/commit/208fdff841fe7c40c2fd16883ad5da339ed0a8c5))
 
+### Reverts
 
-<a name="v1.5.0"></a>
-## [v1.5.0] - 2022-11-16
-### Chore
-- **entity:** change db table name to split stock future, modify target stream entity
-- **entity:** split trade balance to stock and future
-- **entity:** modify history entity to split history data and base
-- **global:** remove global pkg, move to common pkg
-- **log:** remove redundant log of websocket
-- **websocket:** add log for unsupport message, remove if v == pong
+* **stream:** revert to cut and process in the same loop ([0342485](https://github.com/ToC-Taiwan/toc-machine-trading/commit/034248531bc401b6dc4e4e729d411aa05371c5d5))
 
-### Feat
-- **action:** use period tick out in ratio to decide action, and add to simulator
-- **history:** add future history close fetch and simulate
-- **holiday:** extend trade year to 2023, update holiday.json
-- **order:** modify all order router to future and stock all order
-- **tick:** modify future tick chan and connection id
-- **trade:** add ws trade
-- **tradeperiod:** add get last 1 trade period for future method
-- **websocket:** modify trade rate content to out, in and period
-- **websocket:** add trade rate in websocket
-- **websocket:** ignore CloseNoStatusReceived error
-- **ws:** add log for new future ws and done log
-- **ws:** modify ws layout, add send snapshot in future stream ws
+# [1.5.0](https://github.com/ToC-Taiwan/toc-machine-trading/compare/v1.4.0...v1.5.0) (2022-11-16)
 
-### Fix
-- **health:** if disconnect from grpc not panic but os exit
-- **migration:** fix wrong table name in migration sql
-- **subscribe:** remove redundant future bidask subscribe
-- **websocket:** remove period to fix out of index
-- **websocket:** add missing socketPickStock
-- **websocket:** fix interface cast bug
-- **websocket:** fix concurrency write websocket
-- **websocket:** fix wrong scoket data type
-- **websocket:** fix wrong calculation of trade rate
-- **websocket:** fix missing format in send websocket data
+### Bug Fixes
 
+* **health:** if disconnect from grpc not panic but os exit ([d72138e](https://github.com/ToC-Taiwan/toc-machine-trading/commit/d72138ed069cf627d783f68d22124dfb5522a7cf))
+* **migration:** fix wrong table name in migration sql ([b903e6c](https://github.com/ToC-Taiwan/toc-machine-trading/commit/b903e6c0b9e336dd01d0dcf305af79ee8f99504e))
+* **subscribe:** remove redundant future bidask subscribe ([4a0002a](https://github.com/ToC-Taiwan/toc-machine-trading/commit/4a0002a06cf137ed05b47e74965a6e70ed2bdcf8))
+* **websocket:** add missing socketPickStock ([c88ddd2](https://github.com/ToC-Taiwan/toc-machine-trading/commit/c88ddd2ada604604d4984f2f7d2c6e760b21cd50))
+* **websocket:** fix concurrency write websocket ([d2f2532](https://github.com/ToC-Taiwan/toc-machine-trading/commit/d2f253252c2e6eeb8c414df970d34548dcfacb0d))
+* **websocket:** fix interface cast bug ([cd1aa7c](https://github.com/ToC-Taiwan/toc-machine-trading/commit/cd1aa7ce00b935e9f5440ecfa0f8c251814c868e))
+* **websocket:** fix missing format in send websocket data ([f784595](https://github.com/ToC-Taiwan/toc-machine-trading/commit/f784595ad24c0afb7b341f0e19f45a42e8428e65))
+* **websocket:** fix wrong calculation of trade rate ([c9e2275](https://github.com/ToC-Taiwan/toc-machine-trading/commit/c9e227518c528919b61615b8ecd1ef8b44faffbf))
+* **websocket:** fix wrong scoket data type ([37993e8](https://github.com/ToC-Taiwan/toc-machine-trading/commit/37993e8514fbcfe0c7be2f82d3c0884b747027c0))
+* **websocket:** remove period to fix out of index ([b3e7362](https://github.com/ToC-Taiwan/toc-machine-trading/commit/b3e7362746a9653683acbed6d20beec936cc5460))
 
-<a name="v1.4.0"></a>
-## [v1.4.0] - 2022-11-06
-### Feat
-- **future:** use rsi to decide trade in, max hold time to trade out
-- **future:** test new method of future trader
-- **future:** modify trade out method
-- **future:** add kbar analyze to trade out of future
-- **router:** add simulate future to history router
-- **simulate:** add simulate future trade proto type
-- **strategy:** modify future trade strategy default config
-- **trader:** add kbar analyze to future trader
+### Features
 
+* **action:** use period tick out in ratio to decide action, and add to simulator ([dfc2a93](https://github.com/ToC-Taiwan/toc-machine-trading/commit/dfc2a93cd511573b29688fc3fd5bf62c91cc3656))
+* **history:** add future history close fetch and simulate ([8cd3bd3](https://github.com/ToC-Taiwan/toc-machine-trading/commit/8cd3bd3139f787bfd7cddbeb62f28f83b96a616d))
+* **holiday:** extend trade year to 2023, update holiday.json ([845e6d6](https://github.com/ToC-Taiwan/toc-machine-trading/commit/845e6d689e7402bacbf94358a47116a40aef188a))
+* **order:** modify all order router to future and stock all order ([f04dda1](https://github.com/ToC-Taiwan/toc-machine-trading/commit/f04dda130f0bc84bb20808161c87219f4b2da96d))
+* **tick:** modify future tick chan and connection id ([7fc5cc2](https://github.com/ToC-Taiwan/toc-machine-trading/commit/7fc5cc28457ab2abb657af6fddd24229cdeb158b))
+* **trade:** add ws trade ([1af30b9](https://github.com/ToC-Taiwan/toc-machine-trading/commit/1af30b92b0763db0b9e3cc5d0a5a9164f9ab1b07))
+* **tradeperiod:** add get last 1 trade period for future method ([16c6101](https://github.com/ToC-Taiwan/toc-machine-trading/commit/16c610115af0667abe3758f8a90b83a3427a9e16))
+* **websocket:** add trade rate in websocket ([1a0c02f](https://github.com/ToC-Taiwan/toc-machine-trading/commit/1a0c02fdf5e8d53b99465012c3ddd370f9c9f69c))
+* **websocket:** ignore CloseNoStatusReceived error ([779a05d](https://github.com/ToC-Taiwan/toc-machine-trading/commit/779a05d3207d1ca571c44ba0dc9222e7c5b3d825))
+* **websocket:** modify trade rate content to out, in and period ([5e219f3](https://github.com/ToC-Taiwan/toc-machine-trading/commit/5e219f34ca80b24147cc73e83aa0ea57268d3be2))
+* **ws:** add log for new future ws and done log ([2c2ef7a](https://github.com/ToC-Taiwan/toc-machine-trading/commit/2c2ef7a151739369f35adb530fc4381f81bfb290))
+* **ws:** modify ws layout, add send snapshot in future stream ws ([ae500b5](https://github.com/ToC-Taiwan/toc-machine-trading/commit/ae500b5998731e1b9758de39364a1d04eda42e76))
 
-<a name="v1.3.0"></a>
-## [v1.3.0] - 2022-10-24
-### Chore
-- **changelog:** modify changelog
-- **changelog:** add git-chglog instead of cz-conventional-changelog
-- **make:** copy default config in every run, modify stock trader
+# [1.4.0](https://github.com/ToC-Taiwan/toc-machine-trading/compare/v1.3.0...v1.4.0) (2022-11-05)
 
-### Feat
-- **balance:** exclude unfinish order in calculate balance, modify topic name
-- **router:** add future trade balance to get balance
-- **strategy:** modify future trader strategy
+### Features
 
+* **future:** add kbar analyze to trade out of future ([6aad294](https://github.com/ToC-Taiwan/toc-machine-trading/commit/6aad294a384426a7892dd842e0b7c5b56a3eb2bf))
+* **future:** modify trade out method ([a65abb2](https://github.com/ToC-Taiwan/toc-machine-trading/commit/a65abb260bc7b2d7a0182e4262c5a92574331280))
+* **future:** test new method of future trader ([88e0fe0](https://github.com/ToC-Taiwan/toc-machine-trading/commit/88e0fe0fa5dcf12071ac74f5a4d0ebd838ab5e3f))
+* **future:** use rsi to decide trade in, max hold time to trade out ([824c97f](https://github.com/ToC-Taiwan/toc-machine-trading/commit/824c97f23db0e68a891129e1171ae002139c1423))
+* **router:** add simulate future to history router ([482e085](https://github.com/ToC-Taiwan/toc-machine-trading/commit/482e0852bc8d9be0d1e624dcb55cad4c7defabbc))
+* **simulate:** add simulate future trade proto type ([91a763d](https://github.com/ToC-Taiwan/toc-machine-trading/commit/91a763ddfd3a1ea3d4502cd339ac9c2e28039cb9))
+* **strategy:** modify future trade strategy default config ([f099326](https://github.com/ToC-Taiwan/toc-machine-trading/commit/f0993266814315f19f22ced31c203483ecf2696d))
+* **trader:** add kbar analyze to future trader ([7d59a77](https://github.com/ToC-Taiwan/toc-machine-trading/commit/7d59a77372d40124074f808324c8356a7a9f1ae2))
 
-<a name="v1.2.0"></a>
-## [v1.2.0] - 2022-10-23
-### Chore
-- **readme:** move tools to contributing doc, add install migrate in go update
+# [1.3.0](https://github.com/ToC-Taiwan/toc-machine-trading/compare/v1.2.0...v1.3.0) (2022-10-24)
 
-### Refactor
-- **trader:** put stock future trader into a module, change the stream usecase
+### Bug Fixes
 
+* **actions:** add reset environment before deployment ([7bcfb88](https://github.com/ToC-Taiwan/toc-machine-trading/commit/7bcfb88a0cfb87677545342756fdaee2130bbcfc))
+* **cancel:** fix cancel fail casue filled order not append to order map, add cancel wait time ([f32a553](https://github.com/ToC-Taiwan/toc-machine-trading/commit/f32a5534566fc436c3e513dec4fc0a37307b16fe))
+* **ci:** fix wrong way to load env file ([27de42a](https://github.com/ToC-Taiwan/toc-machine-trading/commit/27de42a131c33b7530b5e072459dd567b6c37c18))
+* **config:** fix simulate must be true ([1aaccb6](https://github.com/ToC-Taiwan/toc-machine-trading/commit/1aaccb6236cfc86523bb51746be91fb4d85d4b28))
+* **cpu:** fix checkFirstTickArrive cause cpu 100% ([0f43f43](https://github.com/ToC-Taiwan/toc-machine-trading/commit/0f43f435e663e154947c548ca5d6b442ed54b956))
+* **deployment:** fix wrong config path in deployment action ([3458ce4](https://github.com/ToC-Taiwan/toc-machine-trading/commit/3458ce49c135ae929391dc35968b12c2f7d51e6f))
+* **event:** fix missing subscribe bidask ([7f28868](https://github.com/ToC-Taiwan/toc-machine-trading/commit/7f28868cf57f513d3868a27f191d59eee9eb96d1))
+* **future:** fix wrong future trade switch, add future trade fee calculate ([f518906](https://github.com/ToC-Taiwan/toc-machine-trading/commit/f5189063f599101183c12ce4e6a15e62a0c89e15))
+* **future:** fix wrong rsi gap base, rename future trader and stock trader ([7e1565c](https://github.com/ToC-Taiwan/toc-machine-trading/commit/7e1565cb2e14d428c3be11e22201a41c8321f2bd))
+* **history:** fix skip close is 0 in insert db panic ([b31a256](https://github.com/ToC-Taiwan/toc-machine-trading/commit/b31a256682fdab589c1e1fa2008f993cd046bf99))
+* **history:** fix wrong key with new fetch kbar tick ([1d28887](https://github.com/ToC-Taiwan/toc-machine-trading/commit/1d2888765c8bbcd93d2f6b655e6970a9e7895306))
+* **history:** no gorutine when process data to avoid unexpected error ([c033218](https://github.com/ToC-Taiwan/toc-machine-trading/commit/c03321827761adcc3b2905433ed64732e0a3ecb7))
+* **logger:** fix debug missing format function ([a9b5bba](https://github.com/ToC-Taiwan/toc-machine-trading/commit/a9b5bba9d4b17e25ac5482fc35cd37fdd3ebd38e))
+* **logger:** fix wrong use format in log error ([70bc20d](https://github.com/ToC-Taiwan/toc-machine-trading/commit/70bc20dfaf90ba12274080e87f1150539e7b3b13))
+* **open:** fix wrong open change ratio in trade ([4d98dad](https://github.com/ToC-Taiwan/toc-machine-trading/commit/4d98dad3b555d7ec0d001f05abce8aad14f5baf8))
+* **order:** fix empty order time when update, temp extend trade in, out wait time ([9668de5](https://github.com/ToC-Taiwan/toc-machine-trading/commit/9668de54e7563cb9cf0e496218a35928b810dc44))
+* **order:** fix repeat place order and cancel ([c785e22](https://github.com/ToC-Taiwan/toc-machine-trading/commit/c785e22993c17146951e0f04bfbc526ec63f84bb))
+* **order:** fix wrong out in ratio in order generator ([06ddff7](https://github.com/ToC-Taiwan/toc-machine-trading/commit/06ddff771a91230d875f114252e185707c7efa95))
+* **order:** fix wrong status when order updated, add last tick in trader, add lock in cancel order ([b1f307b](https://github.com/ToC-Taiwan/toc-machine-trading/commit/b1f307b366f773ac1b32835dbe0fab827ff60054))
+* **order:** update order in every order status return, no compare ([ecc786b](https://github.com/ToC-Taiwan/toc-machine-trading/commit/ecc786b58819697f93f16eaefc087032a415727c))
+* **order:** using waiting order in tick for, remove uuid, place order fail add status ([949a5b6](https://github.com/ToC-Taiwan/toc-machine-trading/commit/949a5b67f2fc4fc635506d221af9b603800a6164))
+* **path:** modify initial sequence, fix wrong event subscribe callback ([0c4499d](https://github.com/ToC-Taiwan/toc-machine-trading/commit/0c4499d831620cd68140a54f068f9250ef56b704))
+* **quota:** fix wrong calulate quota, check order status is failed, add lock in place order ([efc4dc5](https://github.com/ToC-Taiwan/toc-machine-trading/commit/efc4dc5bb57bf6d380cace1553eb554d3c3d0c9d))
+* **quota:** fix wrong quota when sell or buylater, fix check cancel order wrong tarde time ([40d12fa](https://github.com/ToC-Taiwan/toc-machine-trading/commit/40d12fa27513dd6f9530409e4c5d6a6726adb5e7))
+* **readme:** fix wrong attachment path ([25b2a86](https://github.com/ToC-Taiwan/toc-machine-trading/commit/25b2a86e3c2b19698c6076a6582a48ea8ff12b18))
+* **simulate:** fix wrong orders return, modify default config, add realtime target to 30 secs ([8623d30](https://github.com/ToC-Taiwan/toc-machine-trading/commit/8623d30288aa44892ebb756461df32cdee552157))
+* **snapshot:** fix all snapshot return empty panic, insert all stock from sinopac ([9da88f4](https://github.com/ToC-Taiwan/toc-machine-trading/commit/9da88f4008a848231b0bb2609b2ee55ca43586ec))
+* **status:** fix fetch history done event wrong input function ([01f980a](https://github.com/ToC-Taiwan/toc-machine-trading/commit/01f980aac99975489d794ee268334e94a7881e99))
+* **table:** fix wrong table name fail to create in postgres ([8f72bce](https://github.com/ToC-Taiwan/toc-machine-trading/commit/8f72bce677463a570f27e4692a938bb6fec55cd3))
+* **target:** fix stuck by non async event, add fetch list in history usecase ([12907d0](https://github.com/ToC-Taiwan/toc-machine-trading/commit/12907d0286828741b593e416df4925cfc3fd4677))
+* **target:** fix wrong repo table name when update target ([06798f2](https://github.com/ToC-Taiwan/toc-machine-trading/commit/06798f270a71e6706bd12d4a07a30dc5200c268c))
+* **tradeagent:** fix wrong in out ratio compare ([a48a2e7](https://github.com/ToC-Taiwan/toc-machine-trading/commit/a48a2e755fae16bcc2971a573a367fb91c8aaeac))
+* **trade:** fix wrong analyze tick time, if first tick not arrive no action ([ae4c7c8](https://github.com/ToC-Taiwan/toc-machine-trading/commit/ae4c7c87e19f71c6af29f9e95b6c41a512861481))
 
-<a name="v1.1.0"></a>
-## [v1.1.0] - 2022-10-23
-### Chore
-- **module:** move cache to a new module
-- **trader:** remove redundant bus, rename trade agent to trader
+### Features
 
-### Feat
-- **future:** add auto select r1 mxf future
-- **module:** move event topic to a new event module with bus
-- **module:** move target filter to a new target module
-- **module:** move all trader to trader module, remove simulate stock trader
-- **tradeday:** add new future trade day method, modify query order method to time range
-
-### Fix
-- **future:** fix wrong future trade switch, add future trade fee calculate
-
-
-<a name="v1.0.0"></a>
-## v1.0.0 - 2022-10-23
-### Chore
-- **bidask:** change tick time to bidask time
-- **cache:** rename cache method
-- **config:** modifiy default config
-- **dependency:** update go dependency, protoc version
-- **entity:** move order status map to order entity
-- **event:** change event name from target to fetch history
-- **format:** format all import, add global time format without dash
-- **future:** add new analyze method in future trade
-- **go:** update go version to 1.19
-- **log:** modify usage of logger
-- **logger:** remove reporter in logrus
-- **mod:** change go mod name to tmt
-- **module:** move trade to a new module
-- **module:** add quota module
-- **naming:** rename stock simulate trader file name, add future simulate file
-- **naming:** rename realtime data to trader
-- **port:** change default http port
-- **protobuf:** modify protobuf folder level
-- **readme:** remove old url, add badge in reademe
-- **reorder:** reorder analyze usecase
-- **stream:** remove period get tse snapshot in stream usecase
-
-### Ci
-- **ci:** add dockerfile and gitlab-ci
-- **env:** reset env and config after kill container
-- **migrate:** migrate from gitlab ci to github actions
-- **port:** add machine port in actions
-
-### Docs
-- **changelog:** v0.0.4
-- **changelog:** modify changelog
-- **readme:** add clean arch layers image
-- **script:** modify makefile style, add pre commit, remove callvis install
-
-### Feat
-- **agent:** add new agent method, reanme trade to trade agent
-- **analyze:** split stock, future analyze, fix future order repo, future first tick analyze time
-- **analyze:** add last trade day all ticks cahce, upgrade go to 1.18.4
-- **analyze:** add quater ma to cache
-- **analyze:** add biasrate of history close
-- **analyze:** add history open from kbar, fix wrong routing key of bidask, redesign cache
-- **analyze:** add below quater ma stocks, include api, add history analyze table
-- **analyze:** same way to analyze realtime tick,history tick, order trade time assign in place
-- **api:** add day trade calculator, add config api
-- **balance:** add all trade balance api
-- **balance:** add calculate future order balance, add allow trade in stock, future config
-- **basic:** skip add category is 00 to stock list
-- **basic:** add import holiday from data/holiday.json
-- **basic:** add insert or update stock, remove stock entity id, to number
-- **biasrate:** change the way of biasRate usage, use bidask price to decide trade out price
-- **cache:** add stock detail cache in basic usecase
-- **cache:** refactor cache, add basic info, fix insert sql too many parameters
-- **change-ratio:** consider open change ratio to unsubscribe, and change ratio in stream
-- **config:** add sinopac path to config and env, modify readme env template
-- **config:** add trade about config, change terminate to put
-- **config:** remove redundant config, change default config trade fee discount ratio
-- **config:** add tag for config api, rename most api method
-- **entity:** add base order to distinguish stock order and future order
-- **event:** add eventbus package, rename from stock to basic
-- **event:** add log if event is not about subscribe
-- **event:** remove fetch_history_done event
-- **future:** add future detail, add subscribe future tick
-- **future:** use future gap in 8:45 to decide forward or reverse, add trade day struct
-- **go:** update go to 1.19.1 and remove k8s agent
-- **grpc:** move snapshot from basic to stream, add tse snapshot api, add snapshot entity
-- **heartbeat:** add heartbeat, history entity modify logger initial
-- **history:** add fetch history event lock
-- **history:** add history tick analyze, and use for realtime order generator
-- **history:** add delete before fetch
-- **history:** modify method to check already exist kbar, tick, merge stream tick, bidask processor
-- **history:** add history close fetch, add terminate sionopac api, remove open in history close
-- **history:** add day kbar api, add all usecase router
-- **kbar:** add fetch history kbar
-- **log:** merge all log into one file, and pretty json
-- **logger:** add report logger in dev mode
-- **logger:** add LOG_FORMAT to env file
-- **logger:** add logger struct, modify file log format
-- **logger:** modify log format and check if development to show caller
-- **logger:** add caller func
-- **naming:** make clean arch naming make sense
-- **open:** add limit if open is not equal to last close, then unsubscribe
-- **order:** add column uuid
-- **order:** add order cache, add trade agent in stream to decide action, bus as global
-- **order:** move order repo from stream usecase to order usecase
-- **order:** add all order api
-- **order:** add group id to recognize parent, remove rsi high low to trade out
-- **order:** add realtime data to generate order, order callback to save order
-- **order:** add stock update date, add force trade out in trade agent, qty by biasrate
-- **pickstock:** add check if stock exist in stream pickstock, add query target order by rank
-- **postgres:** add transaction to all repo, add quota, add all orders topic to calculate balance
-- **protobuf:** use new format of protobuf, use subscribe future tick to get gap of night market
-- **qty:** add modify order qty by return order, trade out order qty will depend on it
-- **rabbitmq:** change from grpc stream to rabbitmq, redesign event flow
-- **repo:** add postgres index, relation, modify fetching history log, skip close is 0 in fetch
-- **repo:** add postgres repo relation, add trade day method
-- **rsi:** modify rsi method, add tick time in order, add rsi = 50 as a switch to trade out
-- **rsi:** change method calculate rsi, rsi mininum count use as effective count
-- **simulate:** replace tickarr to pointer to reduce simulate memory cost
-- **simulate:** temp remove one stock trade once limit and quota, fix simulate difference
-- **simulate:** modifiy condition log, default config
-- **simulate:** add simulate api, add one trade per stock a day
-- **sinopac:** implement all sinopac gRPC method
-- **status:** add fetch history done event to control update order status or not
-- **status:** add check if in trade time for update order status
-- **stock:** every time launch, update stock day trade to no, update by latest data
-- **stream:** add stream usecase first part, move pb package to outside
-- **subscribe:** add search targets on trade day, and subscribe ticks, bidask
-- **subscribe:** add subscribe future bidask, modify trade day module
-- **target:** add subscribe or not in target cond
-- **target:** add target cache, add target api, add pgx transaction
-- **target:** remove pre-fetch in target cond, fix wrong target send to analyze
-- **target:** add realtime rank to config, add debug log in development
-- **target:** remove realtime target tag, subscribe first, modify trade in method
-- **target:** only add target in realtime, last trade day target only use for fetch data
-- **target:** add multiple target condition
-- **target:** add realtime targets, add clear all unfinished orders method
-- **target:** timer of add realtime target start from 9:00
-- **target:** add alternative choice to find target when volume rank is empty
-- **target:** add target filter
-- **target:** add target filter struct, modify target cond config
-- **target:** add black stock, black catagory
-- **ticks:** add fetch history ticks, add grpc max message size to 3G
-- **time:** modify trade time unit, add aborted when quota is not enough, waiting will be nil now
-- **trade:** change method to analyze volume pr, add use default config to simulate header
-- **trade:** remove trade once limit
-- **trade:** add future trade agent, temp use the same logic of stock agent
-- **trade:** modify future agent struct, temp modify future order generator
-- **trade:** use low high compare to all tick out-in-ratio to trade in
-- **tradeagent:** add compare with all and period's out in ratio
-- **tradein:** add 0.1 all outinratio or inoutratio
-- **trader:** refactor future trader, and move to modules, new events pkg
-- **trader:** move max hold time from global to each agent, add high frequency trade of rsi
-- **trader:** temp remove decide allow forward or reverse by future gap
-- **tradeswitch:** add check trade switch every 5 seconds
-- **unsubscribe:** add if order canceled, then unsubscribe tick and bidask
-- **unsubscribe:** add event topic to unsubscribe(not implement)
-- **usecase:** add first usecase, include api, grpc, postgres repo
-- **websocket:** add realtime future tick websocket
-- **websocket:** add websocket of pickstock on stream router
-
-### Fix
-- **actions:** add reset environment before deployment
-- **cancel:** fix cancel fail casue filled order not append to order map, add cancel wait time
-- **ci:** fix wrong way to load env file
-- **config:** fix simulate must be true
-- **cpu:** fix checkFirstTickArrive cause cpu 100%
-- **deployment:** fix wrong config path in deployment action
-- **event:** fix missing subscribe bidask
-- **future:** fix wrong rsi gap base, rename future trader and stock trader
-- **history:** no gorutine when process data to avoid unexpected error
-- **history:** fix wrong key with new fetch kbar tick
-- **history:** fix skip close is 0 in insert db panic
-- **logger:** fix debug missing format function
-- **logger:** fix wrong use format in log error
-- **open:** fix wrong open change ratio in trade
-- **order:** fix repeat place order and cancel
-- **order:** fix wrong out in ratio in order generator
-- **order:** update order in every order status return, no compare
-- **order:** using waiting order in tick for, remove uuid, place order fail add status
-- **order:** fix empty order time when update, temp extend trade in, out wait time
-- **order:** fix wrong status when order updated, add last tick in trader, add lock in cancel order
-- **path:** modify initial sequence, fix wrong event subscribe callback
-- **quota:** fix wrong calulate quota, check order status is failed, add lock in place order
-- **quota:** fix wrong quota when sell or buylater, fix check cancel order wrong tarde time
-- **readme:** fix wrong attachment path
-- **simulate:** fix wrong orders return, modify default config, add realtime target to 30 secs
-- **snapshot:** fix all snapshot return empty panic, insert all stock from sinopac
-- **status:** fix fetch history done event wrong input function
-- **table:** fix wrong table name fail to create in postgres
-- **target:** fix wrong repo table name when update target
-- **target:** fix stuck by non async event, add fetch list in history usecase
-- **trade:** fix wrong analyze tick time, if first tick not arrive no action
-- **tradeagent:** fix wrong in out ratio compare
-
-### Refactor
-- **config:** move config pkg to top level between cmd
-- **dependency:** remove logger dependency in all pkg
-- **logger:** remove global basepath set and get, remove global dependency from logger
-- **pkg:** rename sinopac to grpc, move global to top level
-- **pkg:** refactor config, eventbus method
-- **target:** rename subscribe and realtime add to pre-fetch, realtime
-
-### Style
-- **clean:** first commit from clean code layout
-
-
-[Unreleased]: https://github.com/ToC-Taiwan/toc-machine-trading/compare/v1.5.0...HEAD
-[v1.5.0]: https://github.com/ToC-Taiwan/toc-machine-trading/compare/v1.4.0...v1.5.0
-[v1.4.0]: https://github.com/ToC-Taiwan/toc-machine-trading/compare/v1.3.0...v1.4.0
-[v1.3.0]: https://github.com/ToC-Taiwan/toc-machine-trading/compare/v1.2.0...v1.3.0
-[v1.2.0]: https://github.com/ToC-Taiwan/toc-machine-trading/compare/v1.1.0...v1.2.0
-[v1.1.0]: https://github.com/ToC-Taiwan/toc-machine-trading/compare/v1.0.0...v1.1.0
+* **agent:** add new agent method, reanme trade to trade agent ([2d809cf](https://github.com/ToC-Taiwan/toc-machine-trading/commit/2d809cffa790894599af28812e5eb2b4ba1dd39a))
+* **analyze:** add below quater ma stocks, include api, add history analyze table ([4541f76](https://github.com/ToC-Taiwan/toc-machine-trading/commit/4541f760adf59a6b85d70c202cb8b157327801f4))
+* **analyze:** add biasrate of history close ([2aa4c71](https://github.com/ToC-Taiwan/toc-machine-trading/commit/2aa4c71560e9c8c7eb5d479b02a99543d1c2eb85))
+* **analyze:** add history open from kbar, fix wrong routing key of bidask, redesign cache ([6e96deb](https://github.com/ToC-Taiwan/toc-machine-trading/commit/6e96deb46eebcd452e893ee0851df648a18a1f82))
+* **analyze:** add last trade day all ticks cahce, upgrade go to 1.18.4 ([d1bc929](https://github.com/ToC-Taiwan/toc-machine-trading/commit/d1bc929a63494c4d2bc29950d8c3b5f332b3ba36))
+* **analyze:** add quater ma to cache ([d0ff1fa](https://github.com/ToC-Taiwan/toc-machine-trading/commit/d0ff1fa8d21934a56a57b78ef6d58173c1c3f956))
+* **analyze:** same way to analyze realtime tick,history tick, order trade time assign in place ([b5c8a4e](https://github.com/ToC-Taiwan/toc-machine-trading/commit/b5c8a4e028047abd558cc3bb666ba5251c6b9441))
+* **analyze:** split stock, future analyze, fix future order repo, future first tick analyze time ([f4de17d](https://github.com/ToC-Taiwan/toc-machine-trading/commit/f4de17d539761404a409382ec651d5f47aaa6934))
+* **api:** add day trade calculator, add config api ([c6136d8](https://github.com/ToC-Taiwan/toc-machine-trading/commit/c6136d873417409591690f4a3729d4db0d4514b8))
+* **balance:** add all trade balance api ([6f59052](https://github.com/ToC-Taiwan/toc-machine-trading/commit/6f59052a90b421e91dd8ad3cbb1a27e0f95761cf))
+* **balance:** add calculate future order balance, add allow trade in stock, future config ([ccf3dcf](https://github.com/ToC-Taiwan/toc-machine-trading/commit/ccf3dcf18b381ff0bdfa99386c34697e2a29e8de))
+* **balance:** exclude unfinish order in calculate balance, modify topic name ([348d8b1](https://github.com/ToC-Taiwan/toc-machine-trading/commit/348d8b10e2d67b75293b64f456457bc1d49a0800))
+* **basic:** add import holiday from data/holiday.json ([c9ec46e](https://github.com/ToC-Taiwan/toc-machine-trading/commit/c9ec46eae8d25d238c004740db2113621a460a92))
+* **basic:** add insert or update stock, remove stock entity id, to number ([35a2ca0](https://github.com/ToC-Taiwan/toc-machine-trading/commit/35a2ca09a62d98f125418f4d56a8603c42cf8711))
+* **basic:** skip add category is 00 to stock list ([b3c847d](https://github.com/ToC-Taiwan/toc-machine-trading/commit/b3c847df328cc1169edd30f7fb85ffd05ed03df6))
+* **biasrate:** change the way of biasRate usage, use bidask price to decide trade out price ([d5e6818](https://github.com/ToC-Taiwan/toc-machine-trading/commit/d5e6818402e5dfcb086a78b19d5ce61a46b466c9))
+* **cache:** add stock detail cache in basic usecase ([5ef46a0](https://github.com/ToC-Taiwan/toc-machine-trading/commit/5ef46a0b1111c37123b210356b4b083066ef6a6b))
+* **cache:** refactor cache, add basic info, fix insert sql too many parameters ([212d020](https://github.com/ToC-Taiwan/toc-machine-trading/commit/212d02059e4a2b929a9607f0b9b2bb54e06f869b))
+* **change-ratio:** consider open change ratio to unsubscribe, and change ratio in stream ([46d9cbd](https://github.com/ToC-Taiwan/toc-machine-trading/commit/46d9cbdfe9fec702055de47da14d34d526ea71a2))
+* **config:** add sinopac path to config and env, modify readme env template ([42770c5](https://github.com/ToC-Taiwan/toc-machine-trading/commit/42770c5b2b0a22294eb8ce843223984e0f92f950))
+* **config:** add tag for config api, rename most api method ([c705195](https://github.com/ToC-Taiwan/toc-machine-trading/commit/c705195518bc81cc7147c0de24112f6c27335c8a))
+* **config:** add trade about config, change terminate to put ([6793642](https://github.com/ToC-Taiwan/toc-machine-trading/commit/67936420e3513e194f2914d6c672caa74dd87fc8))
+* **config:** remove redundant config, change default config trade fee discount ratio ([600ac2b](https://github.com/ToC-Taiwan/toc-machine-trading/commit/600ac2bf2174b06932d927237a9d00bcda175bb7))
+* **entity:** add base order to distinguish stock order and future order ([1b6934d](https://github.com/ToC-Taiwan/toc-machine-trading/commit/1b6934d701fb7bb4defc021b5ccd0305372c4e88))
+* **event:** add eventbus package, rename from stock to basic ([a66f229](https://github.com/ToC-Taiwan/toc-machine-trading/commit/a66f229ce8fd5a137a613bd34c6485ad80cc7068))
+* **event:** add log if event is not about subscribe ([eb958ea](https://github.com/ToC-Taiwan/toc-machine-trading/commit/eb958ea3ca643bd6c5858f972762e3a00fa646d1))
+* **event:** remove fetch_history_done event ([b459003](https://github.com/ToC-Taiwan/toc-machine-trading/commit/b459003cbc4fe7dc896b474dd7e698b54ab0ffe7))
+* **future:** add auto select r1 mxf future ([2f92baf](https://github.com/ToC-Taiwan/toc-machine-trading/commit/2f92baf0dc4d5fc09ff526752e3bc1ca66a27798))
+* **future:** add future detail, add subscribe future tick ([f7dda97](https://github.com/ToC-Taiwan/toc-machine-trading/commit/f7dda9704d6cb9444e53f7de945023f4c5878e59))
+* **future:** use future gap in 8:45 to decide forward or reverse, add trade day struct ([275cd89](https://github.com/ToC-Taiwan/toc-machine-trading/commit/275cd892ecfa6db0b95a72b55578f975b7643df9))
+* **go:** update go to 1.19.1 and remove k8s agent ([064966e](https://github.com/ToC-Taiwan/toc-machine-trading/commit/064966e708d0d0df06a0887792866fa066395f0e))
+* **grpc:** move snapshot from basic to stream, add tse snapshot api, add snapshot entity ([95ac2bc](https://github.com/ToC-Taiwan/toc-machine-trading/commit/95ac2bc013d37d4e5bc66d7faed3a9b058532ab4))
+* **heartbeat:** add heartbeat, history entity modify logger initial ([ed67784](https://github.com/ToC-Taiwan/toc-machine-trading/commit/ed6778478e670383c23d29dc31b93f0cfa483e7c))
+* **history:** add day kbar api, add all usecase router ([736f467](https://github.com/ToC-Taiwan/toc-machine-trading/commit/736f467d27ec74631bc4ba202b63a5a24dd2171d))
+* **history:** add delete before fetch ([4238a40](https://github.com/ToC-Taiwan/toc-machine-trading/commit/4238a40e362bf6878f6c956809f54a30b2dc0f5f))
+* **history:** add fetch history event lock ([4545426](https://github.com/ToC-Taiwan/toc-machine-trading/commit/4545426be2d948e98e3859b17f27dad66fb7541e))
+* **history:** add history close fetch, add terminate sionopac api, remove open in history close ([5d88611](https://github.com/ToC-Taiwan/toc-machine-trading/commit/5d8861134a1a88075d4f1686bd141dc412854830))
+* **history:** add history tick analyze, and use for realtime order generator ([153dd98](https://github.com/ToC-Taiwan/toc-machine-trading/commit/153dd9838e142b0b52f7699c718e257ed4667e3d))
+* **history:** modify method to check already exist kbar, tick, merge stream tick, bidask processor ([da32966](https://github.com/ToC-Taiwan/toc-machine-trading/commit/da32966751c4b7cdef2e7680959273a5d2180ae8))
+* **kbar:** add fetch history kbar ([17f5ecf](https://github.com/ToC-Taiwan/toc-machine-trading/commit/17f5ecf0ef56dce90adcf393cda961490d81655f))
+* **logger:** add caller func ([94fd4a5](https://github.com/ToC-Taiwan/toc-machine-trading/commit/94fd4a56259d9ca8e7c99417195165358148b2f8))
+* **logger:** add LOG_FORMAT to env file ([6ad3eb7](https://github.com/ToC-Taiwan/toc-machine-trading/commit/6ad3eb7b77198717839e7d3fcd2d69593d029b42))
+* **logger:** add logger struct, modify file log format ([36c55cf](https://github.com/ToC-Taiwan/toc-machine-trading/commit/36c55cf986ab77196db4635fbd6dab0a0532975c))
+* **logger:** add report logger in dev mode ([ae2a7ab](https://github.com/ToC-Taiwan/toc-machine-trading/commit/ae2a7ab59455cd0cc504e16410db83946a002664))
+* **logger:** modify log format and check if development to show caller ([5486025](https://github.com/ToC-Taiwan/toc-machine-trading/commit/54860256a035bc5527b5a4d3900730a638ba8ba4))
+* **log:** merge all log into one file, and pretty json ([4e85e2a](https://github.com/ToC-Taiwan/toc-machine-trading/commit/4e85e2a498a20e5a941d2e0f93322f43ef0d312d))
+* **module:** move all trader to trader module, remove simulate stock trader ([d5da7fa](https://github.com/ToC-Taiwan/toc-machine-trading/commit/d5da7fa964caf316fa5c2078faab564b4eeb8d3d))
+* **module:** move event topic to a new event module with bus ([8ce9fc4](https://github.com/ToC-Taiwan/toc-machine-trading/commit/8ce9fc40ccb19a6917e8e0a7639f0df7942d1e85))
+* **module:** move target filter to a new target module ([976b647](https://github.com/ToC-Taiwan/toc-machine-trading/commit/976b64784a48b78fcb0b13de03088727b215d6c3))
+* **naming:** make clean arch naming make sense ([538eb30](https://github.com/ToC-Taiwan/toc-machine-trading/commit/538eb3051f2719f90b288ef004644591be4b0406))
+* **open:** add limit if open is not equal to last close, then unsubscribe ([f0b87bc](https://github.com/ToC-Taiwan/toc-machine-trading/commit/f0b87bc49de0042c054663809c967f40d088cb18))
+* **order:** add all order api ([c1f6e23](https://github.com/ToC-Taiwan/toc-machine-trading/commit/c1f6e235a0c5b3fe47cba2573e356a12553d096a))
+* **order:** add column uuid ([b597adb](https://github.com/ToC-Taiwan/toc-machine-trading/commit/b597adbd92a3fed6c9e31d2cc71a3d7fd6d11107))
+* **order:** add group id to recognize parent, remove rsi high low to trade out ([9b1d6a0](https://github.com/ToC-Taiwan/toc-machine-trading/commit/9b1d6a0451a8abe3e5bf5812a4acab8c5bfe9638))
+* **order:** add order cache, add trade agent in stream to decide action, bus as global ([418ca05](https://github.com/ToC-Taiwan/toc-machine-trading/commit/418ca05e389b34a47543b5a38674d67888c8099d))
+* **order:** add realtime data to generate order, order callback to save order ([33ac2b9](https://github.com/ToC-Taiwan/toc-machine-trading/commit/33ac2b9d572a162e2081e3b3d0b3f3e18d08a0c2))
+* **order:** add stock update date, add force trade out in trade agent, qty by biasrate ([b14cb16](https://github.com/ToC-Taiwan/toc-machine-trading/commit/b14cb16bcd0c2f2bc73340cc0e27653b7cb31bdd))
+* **order:** move order repo from stream usecase to order usecase ([d0f50ec](https://github.com/ToC-Taiwan/toc-machine-trading/commit/d0f50ec7dd20ca80e678a5d7774596d1073a64d7))
+* **pickstock:** add check if stock exist in stream pickstock, add query target order by rank ([c132fb4](https://github.com/ToC-Taiwan/toc-machine-trading/commit/c132fb4d99d9273ae83ba185536e7055d3c35b67))
+* **postgres:** add transaction to all repo, add quota, add all orders topic to calculate balance ([ef74c35](https://github.com/ToC-Taiwan/toc-machine-trading/commit/ef74c35d41a5487ee4915b53efd890ed27e17fa1))
+* **protobuf:** use new format of protobuf, use subscribe future tick to get gap of night market ([e3956c4](https://github.com/ToC-Taiwan/toc-machine-trading/commit/e3956c407a9f0bb3986e6a6fb2e5db70a9ad7c61))
+* **qty:** add modify order qty by return order, trade out order qty will depend on it ([a158be9](https://github.com/ToC-Taiwan/toc-machine-trading/commit/a158be9e475588de389655dd307cc806a361c651))
+* **rabbitmq:** change from grpc stream to rabbitmq, redesign event flow ([41033e6](https://github.com/ToC-Taiwan/toc-machine-trading/commit/41033e6a05f69acee6bd612de0c1ee6e21035545))
+* **repo:** add postgres index, relation, modify fetching history log, skip close is 0 in fetch ([e03e2cd](https://github.com/ToC-Taiwan/toc-machine-trading/commit/e03e2cd6733819666932924fe79a8830eb4419b7))
+* **repo:** add postgres repo relation, add trade day method ([16494c8](https://github.com/ToC-Taiwan/toc-machine-trading/commit/16494c82984f3bec9b6ef280b9bd133c8926e56e))
+* **router:** add future trade balance to get balance ([9edf5dd](https://github.com/ToC-Taiwan/toc-machine-trading/commit/9edf5ddb7f96848c64cebfe05233ba027c659565))
+* **rsi:** change method calculate rsi, rsi mininum count use as effective count ([7a3c1eb](https://github.com/ToC-Taiwan/toc-machine-trading/commit/7a3c1eb281d5c48d7dd98e951d373d7daef847f7))
+* **rsi:** modify rsi method, add tick time in order, add rsi = 50 as a switch to trade out ([6d4737c](https://github.com/ToC-Taiwan/toc-machine-trading/commit/6d4737cd51edf4292ee38f8fe10722f46722a262))
+* **simulate:** add simulate api, add one trade per stock a day ([3653954](https://github.com/ToC-Taiwan/toc-machine-trading/commit/3653954c8199bf8e323c367eb270916bd7cddd90))
+* **simulate:** modifiy condition log, default config ([b4ba3e4](https://github.com/ToC-Taiwan/toc-machine-trading/commit/b4ba3e4ed5a9b0f899b478add7ebab6679a32251))
+* **simulate:** replace tickarr to pointer to reduce simulate memory cost ([5964c11](https://github.com/ToC-Taiwan/toc-machine-trading/commit/5964c1114b32b645d8ca959d468fb6987d41e291))
+* **simulate:** temp remove one stock trade once limit and quota, fix simulate difference ([edc2383](https://github.com/ToC-Taiwan/toc-machine-trading/commit/edc2383db31fbf5072679f18625fb41f9ff6c6d6))
+* **sinopac:** implement all sinopac gRPC method ([2b868a9](https://github.com/ToC-Taiwan/toc-machine-trading/commit/2b868a96da2aee5f22c0fd4a2c8f974fcc071159))
+* **status:** add check if in trade time for update order status ([4b92d61](https://github.com/ToC-Taiwan/toc-machine-trading/commit/4b92d61b503215e99f9c05377318316a8c290672))
+* **status:** add fetch history done event to control update order status or not ([649d848](https://github.com/ToC-Taiwan/toc-machine-trading/commit/649d848b6e55ac8fc1ea1f1ac39808be5a273c0a))
+* **stock:** every time launch, update stock day trade to no, update by latest data ([dd1c076](https://github.com/ToC-Taiwan/toc-machine-trading/commit/dd1c076eed2d526908ad2ad3c6160542102cc3ae))
+* **strategy:** modify future trader strategy ([0dd6c99](https://github.com/ToC-Taiwan/toc-machine-trading/commit/0dd6c99dab7d107f0a6ed3a30ff4822df9645e9b))
+* **stream:** add stream usecase first part, move pb package to outside ([240b8ee](https://github.com/ToC-Taiwan/toc-machine-trading/commit/240b8ee886cb76486e78735d2cbf4f815fba9f8f))
+* **subscribe:** add search targets on trade day, and subscribe ticks, bidask ([911ef35](https://github.com/ToC-Taiwan/toc-machine-trading/commit/911ef3581007996ec955d745c8ca667d8e4529be))
+* **subscribe:** add subscribe future bidask, modify trade day module ([805fe52](https://github.com/ToC-Taiwan/toc-machine-trading/commit/805fe52f64eb8a79e352004c138c6e16c77bedc7))
+* **target:** add alternative choice to find target when volume rank is empty ([5c318df](https://github.com/ToC-Taiwan/toc-machine-trading/commit/5c318dfaef9044b2604dee03079ac5fd9d28d914))
+* **target:** add black stock, black catagory ([26c6e41](https://github.com/ToC-Taiwan/toc-machine-trading/commit/26c6e412d972066f6b7afe9867391a1db9b26ff4))
+* **target:** add multiple target condition ([fb8e729](https://github.com/ToC-Taiwan/toc-machine-trading/commit/fb8e7290108e69ae2d00e911ad715ff31bcdeaa9))
+* **target:** add realtime rank to config, add debug log in development ([78eec9a](https://github.com/ToC-Taiwan/toc-machine-trading/commit/78eec9a77b57bb9a4a0cca2961deb34397998995))
+* **target:** add realtime targets, add clear all unfinished orders method ([0f8c661](https://github.com/ToC-Taiwan/toc-machine-trading/commit/0f8c6617bbb0c4f0c306d0b5b8e1fb57086f015f))
+* **target:** add subscribe or not in target cond ([eb76287](https://github.com/ToC-Taiwan/toc-machine-trading/commit/eb762870aa8039883c4462346d959b730e52fada))
+* **target:** add target cache, add target api, add pgx transaction ([94ac9e2](https://github.com/ToC-Taiwan/toc-machine-trading/commit/94ac9e2d897481579ff29e0606f3f346601170cd))
+* **target:** add target filter ([49981a4](https://github.com/ToC-Taiwan/toc-machine-trading/commit/49981a4c8ba338c466e17e125df9550a5111e343))
+* **target:** add target filter struct, modify target cond config ([dd809f5](https://github.com/ToC-Taiwan/toc-machine-trading/commit/dd809f5f898dc8d08439f5f5db96265ea61d16ea))
+* **target:** only add target in realtime, last trade day target only use for fetch data ([d884a21](https://github.com/ToC-Taiwan/toc-machine-trading/commit/d884a214530c1d73dd8a81db1d0e601d2b06814f))
+* **target:** remove pre-fetch in target cond, fix wrong target send to analyze ([5ccac3e](https://github.com/ToC-Taiwan/toc-machine-trading/commit/5ccac3ec93314683554454e3e77980c3d7f8301b))
+* **target:** remove realtime target tag, subscribe first, modify trade in method ([6290020](https://github.com/ToC-Taiwan/toc-machine-trading/commit/6290020f1ead9d44fb756d87bac84f4c08f3aa38))
+* **target:** timer of add realtime target start from 9:00 ([385d2a9](https://github.com/ToC-Taiwan/toc-machine-trading/commit/385d2a949b1162a2bc89a4b172db39e79de3348b))
+* **ticks:** add fetch history ticks, add grpc max message size to 3G ([36c908e](https://github.com/ToC-Taiwan/toc-machine-trading/commit/36c908eade6f072d616a63123ada4e31c16f5455))
+* **time:** modify trade time unit, add aborted when quota is not enough, waiting will be nil now ([de9941c](https://github.com/ToC-Taiwan/toc-machine-trading/commit/de9941cccd412f9dc3d00dac92a40cd1be96014e))
+* **trade:** add future trade agent, temp use the same logic of stock agent ([86734a1](https://github.com/ToC-Taiwan/toc-machine-trading/commit/86734a17482c639585851c8afe9fc79cf20509d5))
+* **tradeagent:** add compare with all and period's out in ratio ([3813b0f](https://github.com/ToC-Taiwan/toc-machine-trading/commit/3813b0f59704332862350e34e9a66cd12f940bb6))
+* **trade:** change method to analyze volume pr, add use default config to simulate header ([d0a5883](https://github.com/ToC-Taiwan/toc-machine-trading/commit/d0a5883008455ad3b36be3ffc2c65660ccbb820f))
+* **tradeday:** add new future trade day method, modify query order method to time range ([c7b8d23](https://github.com/ToC-Taiwan/toc-machine-trading/commit/c7b8d2346041070b403df1628189e643f1794a6e))
+* **tradein:** add 0.1 all outinratio or inoutratio ([413617c](https://github.com/ToC-Taiwan/toc-machine-trading/commit/413617c83e87ab993d034969a2f8bfd750084b1b))
+* **trade:** modify future agent struct, temp modify future order generator ([fb4eb01](https://github.com/ToC-Taiwan/toc-machine-trading/commit/fb4eb018997bd7c9dd3f90e5c5b7b8ecd158db23))
+* **trade:** remove trade once limit ([aa2292f](https://github.com/ToC-Taiwan/toc-machine-trading/commit/aa2292fb2ab7022bcce6a1ffea9e183c7a355ef5))
+* **trader:** move max hold time from global to each agent, add high frequency trade of rsi ([d7efb0a](https://github.com/ToC-Taiwan/toc-machine-trading/commit/d7efb0a5352fdd20c260f41ba14c1826580355e3))
+* **trader:** refactor future trader, and move to modules, new events pkg ([8b710c5](https://github.com/ToC-Taiwan/toc-machine-trading/commit/8b710c5b42d1cc3ed3cd349c4b5207f05d894397))
+* **trader:** temp remove decide allow forward or reverse by future gap ([7261d33](https://github.com/ToC-Taiwan/toc-machine-trading/commit/7261d33e681a489688781f55bf2d6cc92ab0740c))
+* **tradeswitch:** add check trade switch every 5 seconds ([2e6fda1](https://github.com/ToC-Taiwan/toc-machine-trading/commit/2e6fda1d2e07132c4205a74742c5a6bb9993a731))
+* **trade:** use low high compare to all tick out-in-ratio to trade in ([fb491ef](https://github.com/ToC-Taiwan/toc-machine-trading/commit/fb491ef3dfc3f32c0f40cca0e6b8b4835e4e1a47))
+* **unsubscribe:** add event topic to unsubscribe(not implement) ([f919d01](https://github.com/ToC-Taiwan/toc-machine-trading/commit/f919d012439a11eacac9a13538557dd278395764))
+* **unsubscribe:** add if order canceled, then unsubscribe tick and bidask ([b09d65a](https://github.com/ToC-Taiwan/toc-machine-trading/commit/b09d65a88b273fb39cb98d07b81c1f02ffa5de21))
+* **usecase:** add first usecase, include api, grpc, postgres repo ([9800f86](https://github.com/ToC-Taiwan/toc-machine-trading/commit/9800f865e3ed0b16afe06f487523c0a3a4d2b9d8))
+* **websocket:** add realtime future tick websocket ([af3468f](https://github.com/ToC-Taiwan/toc-machine-trading/commit/af3468f498d293aff707ea04d03e7c3ba529b536))
+* **websocket:** add websocket of pickstock on stream router ([624c83c](https://github.com/ToC-Taiwan/toc-machine-trading/commit/624c83cd9be9ec504b36c9c29ddb12df3aec61e8))

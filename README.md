@@ -6,16 +6,34 @@
 [![OS](https://img.shields.io/badge/OS-Linux-orange?logo=linux&logoColor=orange)](https://www.linux.org/)
 [![Container](https://img.shields.io/badge/Container-Docker-blue?logo=docker&logoColor=blue)](https://www.docker.com/)
 
-## Layers
+## Structure
 
 ![Example](docs/img/layers.png)
 
-### Migrate Tool
-
-- install
+### Config
 
 ```sh
-go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
+cp ./configs/default.config.yml ./configs/config.yml
+```
+
+### Env
+
+```sh
+cp .env.template .env
+```
+
+### Make
+
+- show help
+
+```sh
+make help
+```
+
+- build
+
+```sh
+make
 ```
 
 ### Dev Note
@@ -29,45 +47,6 @@ WARN[2022-09-26T01:24:19+08:00] Fetch Date: 2022-09-22, FirstTickTime: 2022-09-2
 WARN[2022-09-26T01:24:43+08:00] Fetch Date: 2022-09-23, FirstTickTime: 2022-09-22 15:00:00, LastTickTime: 2022-09-23 13:44:59, Total: 169888
 WARN[2022-09-26T01:24:55+08:00] Fetch Date: 2022-09-24, FirstTickTime: 2022-09-23 15:00:00, LastTickTime: 2022-09-24 04:59:59, Total: 87344
 WARN[2022-09-26T01:24:55+08:00] Fetch Date: 2022-09-25, No Data
-```
-
-### env file example
-
-```sh
-echo 'DEPLOYMENT=prod
-LOG_FORMAT=text
-LOG_LEVEL=info
-NEED_CALLER=false
-DISABLE_SWAGGER_HTTP_HANDLER=
-GIN_MODE=release
-SINOPAC_URL=172.20.10.227:56666
-PG_URL=postgres://postgres:asdf0000@172.20.10.10:5432/
-RABBITMQ_URL=amqp://admin:password@172.20.10.226:5672/%2f
-RABBITMQ_EXCHANGE=toc
-DB_NAME=machine_trade' > .env
-```
-
-### VSCode Debug Setting
-
-```json
-{
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "name": "Debug",
-            "type": "go",
-            "request": "attach",
-            "debugAdapter": "dlv-dap",
-            "processId": "toc-machine-trading",
-        }
-    ]
-}
-```
-
-### Config
-
-```sh
-cp ./configs/default.config.yml ./configs/config.yml
 ```
 
 ## Authors
