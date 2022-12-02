@@ -820,6 +820,9 @@ const docTemplate = `{
                 "quantity": {
                     "type": "integer"
                 },
+                "subscribe": {
+                    "type": "boolean"
+                },
                 "trade_in_wait_time": {
                     "type": "integer"
                 },
@@ -977,6 +980,9 @@ const docTemplate = `{
                 },
                 "hold_time_from_open": {
                     "type": "number"
+                },
+                "subscribe": {
+                    "type": "boolean"
                 },
                 "total_open_time": {
                     "type": "number"

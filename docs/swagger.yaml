@@ -45,6 +45,8 @@ definitions:
         type: integer
       quantity:
         type: integer
+      subscribe:
+        type: boolean
       trade_in_wait_time:
         type: integer
       trade_out_wait_time:
@@ -147,6 +149,8 @@ definitions:
         type: integer
       hold_time_from_open:
         type: number
+      subscribe:
+        type: boolean
       total_open_time:
         type: number
       trade_in_end_time:

@@ -402,7 +402,9 @@ func (uc *StreamUseCase) ReceiveStreamData(ctx context.Context, targetArr []*ent
 			target := targetMap[agent.GetStockNum()]
 			mutex.RUnlock()
 
-			bus.PublishTopicEvent(event.TopicSubscribeStockTickTargets, []*entity.StockTarget{target})
+			if uc.stockTradeSwitchCfg.Subscribe {
+				bus.PublishTopicEvent(event.TopicSubscribeStockTickTargets, []*entity.StockTarget{target})
+			}
 		}
 	}()
 
@@ -436,8 +438,9 @@ func (uc *StreamUseCase) ReceiveFutureStreamData(ctx context.Context, code strin
 	go uc.rabbit.FutureTickConsumer(code, agent.GetTickChan())
 	// go uc.rabbit.FutureBidAskConsumer(code, agent.GetBidAskChan())
 
-	bus.PublishTopicEvent(event.TopicSubscribeFutureTickTargets, code)
-
+	if uc.futureTradeSwitchCfg.Subscribe {
+		bus.PublishTopicEvent(event.TopicSubscribeFutureTickTargets, code)
+	}
 	go uc.checkFutureTradeSwitch()
 }
 
