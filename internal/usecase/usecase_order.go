@@ -136,6 +136,10 @@ func (uc *OrderUseCase) MoveFutureOrderToLatestTradeDay(ctx context.Context, ord
 
 func (uc *OrderUseCase) askOrderStatusSimulate() {
 	for range time.NewTicker(750 * time.Millisecond).C {
+		if !uc.IsFutureTradeTime() && !uc.IsStockTradeTime() {
+			continue
+		}
+
 		msg, err := uc.gRPCAPI.GetOrderStatusArrFromMQ()
 		if err != nil {
 			log.Error(err)
@@ -152,6 +156,10 @@ func (uc *OrderUseCase) askOrderStatusSimulate() {
 // AskOrderUpdate -.
 func (uc *OrderUseCase) askOrderStatusProd() {
 	for range time.NewTicker(750 * time.Millisecond).C {
+		if !uc.IsFutureTradeTime() && !uc.IsStockTradeTime() {
+			continue
+		}
+
 		msg, err := uc.gRPCAPI.GetNonBlockOrderStatusArr()
 		if err != nil {
 			log.Error(err)
