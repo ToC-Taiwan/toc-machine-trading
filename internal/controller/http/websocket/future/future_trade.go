@@ -376,7 +376,7 @@ func (w *WSFutureTrade) sendPosition() {
 		case <-w.Ctx().Done():
 			return
 
-		case <-time.After(5 * time.Second):
+		case <-time.After(time.Second):
 			if position, err := w.generatePosition(); err != nil {
 				w.SendToClient(newErrMessageProto(errGetPosition))
 			} else {
