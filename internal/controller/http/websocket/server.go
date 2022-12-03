@@ -7,9 +7,11 @@ import (
 	"net/http"
 
 	"tmt/internal/usecase/modules/logger"
+	"tmt/pb"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
+	"google.golang.org/protobuf/proto"
 )
 
 var log = logger.Get()
@@ -61,21 +63,28 @@ func (w *WSRouter) write() {
 		case cl := <-w.msgChan:
 			switch v := cl.(type) {
 			case string:
-				w.send([]byte(v))
+				w.sendText([]byte(v))
+
+			case *pb.WSMessage:
+				if serveMsgStr, err := proto.Marshal(v); err == nil {
+					w.sendBinary(serveMsgStr)
+				}
 
 			default:
 				if serveMsgStr, err := json.Marshal(v); err == nil {
-					w.send(serveMsgStr)
+					w.sendText(serveMsgStr)
 				}
 			}
 		}
 	}
 }
 
-func (w *WSRouter) send(data []byte) {
-	if err := w.conn.WriteMessage(websocket.TextMessage, data); err != nil {
-		log.Errorf("WS send error: %v", err)
-	}
+func (w *WSRouter) sendText(data []byte) {
+	_ = w.conn.WriteMessage(websocket.TextMessage, data)
+}
+
+func (w *WSRouter) sendBinary(data []byte) {
+	_ = w.conn.WriteMessage(websocket.BinaryMessage, data)
 }
 
 func (w *WSRouter) ReadFromClient(forwardChan chan []byte) {
@@ -101,10 +110,6 @@ func (w *WSRouter) ReadFromClient(forwardChan chan []byte) {
 
 func (w *WSRouter) SendToClient(msg interface{}) {
 	w.msgChan <- msg
-}
-
-func (w *WSRouter) SendErrToClient(err error) {
-	w.msgChan <- err
 }
 
 func (w *WSRouter) Ctx() context.Context {

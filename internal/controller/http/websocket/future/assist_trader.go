@@ -56,7 +56,7 @@ func newAssistTrader(ctx context.Context, target *assistTarget) *assistTrader {
 	go a.processTick()
 
 	a.SubscribeTopic(topicOrderStatus, a.updateOrderStatus)
-	a.SendToClient(asssitStatus{true})
+	a.SendToClient(newAssistStatusProto(true))
 
 	return a
 }
@@ -118,7 +118,7 @@ func (a *assistTrader) isAssistDone() bool {
 	if endQty == a.Quantity {
 		a.UnSubscribeTopic(topicOrderStatus, a.updateOrderStatus)
 		a.PublishTopicEvent(topicAssistDone, a.OrderID)
-		a.SendToClient(asssitStatus{false})
+		a.SendToClient(newAssistStatusProto(false))
 		a.done = true
 		return true
 	}

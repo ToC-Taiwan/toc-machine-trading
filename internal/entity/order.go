@@ -347,3 +347,5 @@ type FuturePosition struct {
 	LastPrice float64 `json:"last_price"`
 	Pnl       float64 `json:"pnl"`
 }
+
+type FuturePositionArr []*FuturePosition

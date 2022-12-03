@@ -48,18 +48,3 @@ func (f *clientOrder) toFutureOrder() *entity.FutureOrder {
 		},
 	}
 }
-
-type periodTradeVolume struct {
-	FirstPeriod  entity.OutInVolume `json:"first_period"`
-	SecondPeriod entity.OutInVolume `json:"second_period"`
-	ThirdPeriod  entity.OutInVolume `json:"third_period"`
-	FourthPeriod entity.OutInVolume `json:"fourth_period"`
-}
-
-type futurePosition struct {
-	Position []*entity.FuturePosition `json:"position"`
-}
-
-type asssitStatus struct {
-	Running bool `json:"running"`
-}
