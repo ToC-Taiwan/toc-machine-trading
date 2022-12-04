@@ -28,7 +28,7 @@ type TradeInterfaceClient interface {
 	SellFirstStock(ctx context.Context, in *StockOrderDetail, opts ...grpc.CallOption) (*TradeResult, error)
 	CancelStock(ctx context.Context, in *OrderID, opts ...grpc.CallOption) (*TradeResult, error)
 	GetOrderStatusByID(ctx context.Context, in *OrderID, opts ...grpc.CallOption) (*TradeResult, error)
-	GetOrderStatusArrFromMQ(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ErrorMessage, error)
+	GetOrderStatusArrFromMQ(ctx context.Context, in *Simulate, opts ...grpc.CallOption) (*ErrorMessage, error)
 	GetNonBlockOrderStatusArr(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ErrorMessage, error)
 	BuyFuture(ctx context.Context, in *FutureOrderDetail, opts ...grpc.CallOption) (*TradeResult, error)
 	SellFuture(ctx context.Context, in *FutureOrderDetail, opts ...grpc.CallOption) (*TradeResult, error)
@@ -90,7 +90,7 @@ func (c *tradeInterfaceClient) GetOrderStatusByID(ctx context.Context, in *Order
 	return out, nil
 }
 
-func (c *tradeInterfaceClient) GetOrderStatusArrFromMQ(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ErrorMessage, error) {
+func (c *tradeInterfaceClient) GetOrderStatusArrFromMQ(ctx context.Context, in *Simulate, opts ...grpc.CallOption) (*ErrorMessage, error) {
 	out := new(ErrorMessage)
 	err := c.cc.Invoke(ctx, "/sinopac_forwarder.TradeInterface/GetOrderStatusArrFromMQ", in, out, opts...)
 	if err != nil {
@@ -162,7 +162,7 @@ type TradeInterfaceServer interface {
 	SellFirstStock(context.Context, *StockOrderDetail) (*TradeResult, error)
 	CancelStock(context.Context, *OrderID) (*TradeResult, error)
 	GetOrderStatusByID(context.Context, *OrderID) (*TradeResult, error)
-	GetOrderStatusArrFromMQ(context.Context, *emptypb.Empty) (*ErrorMessage, error)
+	GetOrderStatusArrFromMQ(context.Context, *Simulate) (*ErrorMessage, error)
 	GetNonBlockOrderStatusArr(context.Context, *emptypb.Empty) (*ErrorMessage, error)
 	BuyFuture(context.Context, *FutureOrderDetail) (*TradeResult, error)
 	SellFuture(context.Context, *FutureOrderDetail) (*TradeResult, error)
@@ -191,7 +191,7 @@ func (UnimplementedTradeInterfaceServer) CancelStock(context.Context, *OrderID) 
 func (UnimplementedTradeInterfaceServer) GetOrderStatusByID(context.Context, *OrderID) (*TradeResult, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetOrderStatusByID not implemented")
 }
-func (UnimplementedTradeInterfaceServer) GetOrderStatusArrFromMQ(context.Context, *emptypb.Empty) (*ErrorMessage, error) {
+func (UnimplementedTradeInterfaceServer) GetOrderStatusArrFromMQ(context.Context, *Simulate) (*ErrorMessage, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetOrderStatusArrFromMQ not implemented")
 }
 func (UnimplementedTradeInterfaceServer) GetNonBlockOrderStatusArr(context.Context, *emptypb.Empty) (*ErrorMessage, error) {
@@ -316,7 +316,7 @@ func _TradeInterface_GetOrderStatusByID_Handler(srv interface{}, ctx context.Con
 }
 
 func _TradeInterface_GetOrderStatusArrFromMQ_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(emptypb.Empty)
+	in := new(Simulate)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -328,7 +328,7 @@ func _TradeInterface_GetOrderStatusArrFromMQ_Handler(srv interface{}, ctx contex
 		FullMethod: "/sinopac_forwarder.TradeInterface/GetOrderStatusArrFromMQ",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TradeInterfaceServer).GetOrderStatusArrFromMQ(ctx, req.(*emptypb.Empty))
+		return srv.(TradeInterfaceServer).GetOrderStatusArrFromMQ(ctx, req.(*Simulate))
 	}
 	return interceptor(ctx, in, info, handler)
 }

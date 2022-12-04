@@ -114,11 +114,11 @@ func (t *OrdergRPCAPI) GetOrderStatusByID(orderID string, sim bool) (*pb.TradeRe
 }
 
 // GetOrderStatusArrFromMQ -.
-func (t *OrdergRPCAPI) GetOrderStatusArrFromMQ() (*pb.ErrorMessage, error) {
+func (t *OrdergRPCAPI) GetOrderStatusArrFromMQ(sim bool) (*pb.ErrorMessage, error) {
 	conn := t.conn.GetReadyConn()
 	defer t.conn.PutReadyConn(conn)
 	c := pb.NewTradeInterfaceClient(conn)
-	r, err := c.GetOrderStatusArrFromMQ(context.Background(), &emptypb.Empty{})
+	r, err := c.GetOrderStatusArrFromMQ(context.Background(), &pb.Simulate{Simulate: sim})
 	if err != nil {
 		return nil, err
 	}

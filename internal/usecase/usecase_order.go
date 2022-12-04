@@ -140,7 +140,7 @@ func (uc *OrderUseCase) askOrderStatusSimulate() {
 			continue
 		}
 
-		msg, err := uc.gRPCAPI.GetOrderStatusArrFromMQ()
+		msg, err := uc.gRPCAPI.GetOrderStatusArrFromMQ(true)
 		if err != nil {
 			log.Error(err)
 			continue
