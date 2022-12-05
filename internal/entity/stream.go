@@ -175,7 +175,7 @@ func (f *FutureSnapShot) ToRealTimeFutureTick() *RealTimeFutureTick {
 
 	return &RealTimeFutureTick{
 		Code:        f.Code,
-		TickTime:    f.SnapTime.Add(-8 * time.Hour),
+		TickTime:    f.SnapTime,
 		Open:        f.Open,
 		Close:       f.Close,
 		High:        f.High,
