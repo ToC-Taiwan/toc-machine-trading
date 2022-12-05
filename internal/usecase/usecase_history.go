@@ -696,3 +696,40 @@ func (uc *HistoryUseCase) GetFutureTradeCond(days int) trader.TradeBalance {
 		Balance: totalBalance,
 	}
 }
+
+// FetchFutureHistoryKbar -.
+func (uc *HistoryUseCase) FetchFutureHistoryKbar(code string, date time.Time) ([]*entity.FutureHistoryKbar, error) {
+	result := make(map[string][]*entity.FutureHistoryKbar)
+	dataChan := make(chan *entity.FutureHistoryKbar)
+	wait := make(chan struct{})
+	go func() {
+		for {
+			kbar, ok := <-dataChan
+			if !ok {
+				break
+			}
+			// key := fmt.Sprintf("%s:%s", kbar.StockNum, kbar.KbarTime.Format(common.ShortTimeLayout))
+			result[code] = append(result[code], kbar)
+		}
+		close(wait)
+	}()
+
+	kbarArr, err := uc.grpcapi.GetFutureHistoryKbar([]string{code}, date.Format(common.ShortTimeLayout))
+	if err != nil {
+		return nil, err
+	}
+
+	for _, t := range kbarArr {
+		dataChan <- &entity.FutureHistoryKbar{
+			Code: t.GetCode(),
+			HistoryKbarBase: entity.HistoryKbarBase{
+				KbarTime: time.Unix(0, t.GetTs()).Add(-8 * time.Hour),
+				Open:     t.GetOpen(), High: t.GetHigh(), Low: t.GetLow(),
+				Close: t.GetClose(), Volume: t.GetVolume(),
+			},
+		}
+	}
+	close(dataChan)
+	<-wait
+	return result[code], nil
+}

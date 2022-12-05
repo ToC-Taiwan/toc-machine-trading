@@ -49,6 +49,14 @@ type HistoryCloseBase struct {
 	Close float64   `json:"close"`
 }
 
+// FutureHistoryKbar -.
+type FutureHistoryKbar struct {
+	Code   string  `json:"code"`
+	Future *Future `json:"future"`
+	HistoryKbarBase
+}
+
+// StockHistoryKbar -.
 type StockHistoryKbar struct {
 	StockNum string `json:"stock_num"`
 	Stock    *Stock `json:"stock"`

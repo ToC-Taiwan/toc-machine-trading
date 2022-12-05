@@ -87,6 +87,7 @@ type (
 		GetDayKbarByStockNumDate(stockNum string, date time.Time) *entity.StockHistoryKbar
 
 		GetFutureTradeCond(days int) trader.TradeBalance
+		FetchFutureHistoryKbar(code string, date time.Time) ([]*entity.FutureHistoryKbar, error)
 	}
 
 	// HistoryRepo -.

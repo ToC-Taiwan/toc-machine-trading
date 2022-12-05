@@ -602,6 +602,21 @@ func (m *MockHistory) EXPECT() *MockHistoryMockRecorder {
 	return m.recorder
 }
 
+// FetchFutureHistoryKbar mocks base method.
+func (m *MockHistory) FetchFutureHistoryKbar(code string, date time.Time) ([]*entity.FutureHistoryKbar, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FetchFutureHistoryKbar", code, date)
+	ret0, _ := ret[0].([]*entity.FutureHistoryKbar)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FetchFutureHistoryKbar indicates an expected call of FetchFutureHistoryKbar.
+func (mr *MockHistoryMockRecorder) FetchFutureHistoryKbar(code, date interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FetchFutureHistoryKbar", reflect.TypeOf((*MockHistory)(nil).FetchFutureHistoryKbar), code, date)
+}
+
 // GetDayKbarByStockNumDate mocks base method.
 func (m *MockHistory) GetDayKbarByStockNumDate(stockNum string, date time.Time) *entity.StockHistoryKbar {
 	m.ctrl.T.Helper()

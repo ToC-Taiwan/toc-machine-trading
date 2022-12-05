@@ -23,4 +23,5 @@ var (
 	errPlaceOrder        = &futureTradeError{-7, "place order error"}
 	errCancelOrderFailed = &futureTradeError{-8, "cancel order failed"}
 	errAssitingIsFull    = &futureTradeError{-9, "assisting is full"}
+	errGetKbarFail       = &futureTradeError{-10, "get kbar fail"}
 )

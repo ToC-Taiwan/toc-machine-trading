@@ -14,10 +14,11 @@ import (
 type streamRoutes struct {
 	t usecase.Stream
 	o usecase.Order
+	h usecase.History
 }
 
-func newStreamRoutes(handler *gin.RouterGroup, t usecase.Stream, o usecase.Order) {
-	r := &streamRoutes{t, o}
+func newStreamRoutes(handler *gin.RouterGroup, t usecase.Stream, o usecase.Order, history usecase.History) {
+	r := &streamRoutes{t, o, history}
 
 	h := handler.Group("/stream")
 	{
@@ -92,5 +93,5 @@ func (r *streamRoutes) servePickStockWS(c *gin.Context) {
 }
 
 func (r *streamRoutes) serveFutureWS(c *gin.Context) {
-	future.StartWSFutureTrade(c, r.t, r.o)
+	future.StartWSFutureTrade(c, r.t, r.o, r.h)
 }

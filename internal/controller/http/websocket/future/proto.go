@@ -169,3 +169,26 @@ func newErrMessageProto(err *futureTradeError) *pb.WSMessage {
 		},
 	}
 }
+
+func newKbarArrProto(r []*entity.FutureHistoryKbar) *pb.WSMessage {
+	var ret []*pb.Kbar
+	for _, v := range r {
+		ret = append(ret, &pb.Kbar{
+			KbarTime: v.KbarTime.Format(common.LongTimeLayout),
+			Close:    v.Close,
+			Open:     v.Open,
+			High:     v.High,
+			Low:      v.Low,
+			Volume:   v.Volume,
+		})
+	}
+
+	return &pb.WSMessage{
+		Type: pb.WSType_TYPE_KBAR_ARR,
+		Data: &pb.WSMessage_HistoryKbar{
+			HistoryKbar: &pb.WSHistoryKbarMessage{
+				Arr: ret,
+			},
+		},
+	}
+}

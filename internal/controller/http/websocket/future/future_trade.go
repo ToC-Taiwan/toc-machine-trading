@@ -3,6 +3,7 @@ package future
 
 import (
 	"encoding/json"
+	"fmt"
 	"sync"
 	"time"
 
@@ -20,8 +21,9 @@ type WSFutureTrade struct {
 	*websocket.WSRouter // ws router
 	*event.Bus          // event bus
 
-	s usecase.Stream // stream
-	o usecase.Order  // order
+	s usecase.Stream  // stream
+	o usecase.Order   // order
+	h usecase.History // history
 
 	// save tick chan for assist
 	assistTickChanMap     map[string]chan *entity.RealTimeFutureTick
@@ -46,10 +48,11 @@ type WSFutureTrade struct {
 }
 
 // StartWSFutureTrade - Start ws future trade with one time bus
-func StartWSFutureTrade(c *gin.Context, s usecase.Stream, o usecase.Order) {
+func StartWSFutureTrade(c *gin.Context, s usecase.Stream, o usecase.Order, h usecase.History) {
 	w := &WSFutureTrade{
 		s:                      s,
 		o:                      o,
+		h:                      h,
 		assistTickChanMap:      make(map[string]chan *entity.RealTimeFutureTick),
 		assistTargetWaitingMap: make(map[string]*assistTarget),
 		orderMap:               make(map[string]*entity.FutureOrder),
@@ -151,6 +154,7 @@ func (w *WSFutureTrade) sendFuture() {
 		w.SendToClient(newErrMessageProto(errGetSnapshot))
 		return
 	}
+	w.sendLatestKbar()
 
 	tickChan := make(chan *entity.RealTimeFutureTick)
 	orderStatusChan := make(chan interface{})
@@ -403,4 +407,14 @@ func (w *WSFutureTrade) generatePosition() (entity.FuturePositionArr, error) {
 		return nil, err
 	}
 	return position, nil
+}
+
+func (w *WSFutureTrade) sendLatestKbar() {
+	kbarArr, err := w.h.FetchFutureHistoryKbar(w.s.GetMainFutureCode(), time.Now())
+	if err != nil {
+		fmt.Println(err)
+		w.SendToClient(newErrMessageProto(errGetKbarFail))
+		return
+	}
+	w.SendToClient(newKbarArrProto(kbarArr))
 }

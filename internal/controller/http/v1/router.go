@@ -69,6 +69,6 @@ func (r *RouterV1) AddHistoryRoutes(handler *gin.Engine, history *usecase.Histor
 }
 
 // AddStreamRoutes -.
-func (r *RouterV1) AddStreamRoutes(handler *gin.Engine, stream *usecase.StreamUseCase, order usecase.Order) {
-	newStreamRoutes(r.g, stream, order)
+func (r *RouterV1) AddStreamRoutes(handler *gin.Engine, stream *usecase.StreamUseCase, order usecase.Order, history usecase.History) {
+	newStreamRoutes(r.g, stream, order, history)
 }

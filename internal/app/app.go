@@ -56,7 +56,7 @@ func Run(cfg *config.Config) {
 	{
 		r.AddBasicRoutes(handler, basicUseCase)
 		r.AddOrderRoutes(handler, orderUseCase)
-		r.AddStreamRoutes(handler, streamUseCase, orderUseCase)
+		r.AddStreamRoutes(handler, streamUseCase, orderUseCase, historyUseCase)
 		r.AddAnalyzeRoutes(handler, analyzeUseCase)
 		r.AddHistoryRoutes(handler, historyUseCase)
 		r.AddTargetRoutes(handler, targetUseCase)
