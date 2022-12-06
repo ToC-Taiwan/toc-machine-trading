@@ -146,8 +146,8 @@ type StockSnapShot struct {
 
 // FutureSnapShot -.
 type FutureSnapShot struct {
-	Code       string `json:"code"`
-	FutureName string `json:"future_name"`
+	Code   string  `json:"code"`
+	Future *Future `json:"future"`
 	SnapShotBase
 }
 

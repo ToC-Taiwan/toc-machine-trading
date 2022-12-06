@@ -349,8 +349,8 @@ func (uc *StreamUseCase) GetFutureSnapshotByCode(code string) (*entity.FutureSna
 	}
 
 	return &entity.FutureSnapShot{
-		Code:       snapshot.GetCode(),
-		FutureName: cc.GetFutureDetail(code).Name,
+		Code:   snapshot.GetCode(),
+		Future: cc.GetFutureDetail(code),
 		SnapShotBase: entity.SnapShotBase{
 			SnapTime:        time.Unix(0, snapshot.GetTs()).Add(-8 * time.Hour),
 			Open:            snapshot.GetOpen(),
