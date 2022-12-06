@@ -195,7 +195,7 @@ func newKbarArrProto(r []*entity.FutureHistoryKbar) *pb.WSMessage {
 
 func newFutureDetailProto(r *entity.Future) *pb.WSMessage {
 	return &pb.WSMessage{
-		Type: pb.WSType_TYPE_FUTURE_TICK,
+		Type: pb.WSType_TYPE_FUTURE_DETAIL,
 		Data: &pb.WSMessage_FutureDetail{
 			FutureDetail: &pb.WSFutureDetail{
 				Code:           r.Code,
