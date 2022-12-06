@@ -416,5 +416,22 @@ func (w *WSFutureTrade) sendLatestKbar() {
 		w.SendToClient(newErrMessageProto(errGetKbarFail))
 		return
 	}
-	w.SendToClient(newKbarArrProto(kbarArr))
+
+	var splitArr [][]*entity.FutureHistoryKbar
+	var singleArr []*entity.FutureHistoryKbar
+	for i, kbar := range kbarArr {
+		if i == 0 {
+			singleArr = append(singleArr, kbar)
+			continue
+		}
+
+		if kbar.KbarTime.Sub(kbarArr[i-1].KbarTime) > time.Minute {
+			splitArr = append(splitArr, singleArr)
+			singleArr = []*entity.FutureHistoryKbar{kbar}
+		} else {
+			singleArr = append(singleArr, kbar)
+		}
+	}
+
+	w.SendToClient(newKbarArrProto(splitArr[len(splitArr)-1]))
 }
