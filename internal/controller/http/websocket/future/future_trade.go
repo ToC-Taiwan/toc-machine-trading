@@ -3,7 +3,6 @@ package future
 
 import (
 	"encoding/json"
-	"fmt"
 	"sync"
 	"time"
 
@@ -150,11 +149,8 @@ func (w *WSFutureTrade) addOrderFromAssist(o *entity.FutureOrder) {
 }
 
 func (w *WSFutureTrade) sendFuture() {
-	if err := w.sendFutureSnapshot(); err != nil {
-		w.SendToClient(newErrMessageProto(errGetSnapshot))
-		return
-	}
 	w.sendLatestKbar()
+	w.sendFutureSnapshot()
 
 	tickChan := make(chan *entity.RealTimeFutureTick)
 	orderStatusChan := make(chan interface{})
@@ -344,14 +340,13 @@ func (w *WSFutureTrade) sendTickToAssit(tick *entity.RealTimeFutureTick) {
 	w.assistTickChanMapLock.RUnlock()
 }
 
-func (w *WSFutureTrade) sendFutureSnapshot() error {
+func (w *WSFutureTrade) sendFutureSnapshot() {
 	snapshot, err := w.s.GetFutureSnapshotByCode(w.s.GetMainFutureCode())
 	if err != nil {
-		return errGetSnapshot
+		w.SendToClient(newErrMessageProto(errGetSnapshot))
 	} else {
 		w.SendToClient(newFutureTickProto(snapshot.ToRealTimeFutureTick()))
 	}
-	return nil
 }
 
 func (w *WSFutureTrade) sendTradeIndex() {
@@ -410,14 +405,32 @@ func (w *WSFutureTrade) generatePosition() (entity.FuturePositionArr, error) {
 }
 
 func (w *WSFutureTrade) sendLatestKbar() {
+	go func() {
+		if data := w.fetchKbar(); data != nil {
+			w.SendToClient(newKbarArrProto(data))
+		}
+
+		for {
+			select {
+			case <-w.Ctx().Done():
+				return
+
+			case <-time.After(time.Minute):
+				if data := w.fetchKbar(); data != nil {
+					w.SendToClient(newKbarArrProto(data))
+				}
+			}
+		}
+	}()
+}
+
+func (w *WSFutureTrade) fetchKbar() []*entity.FutureHistoryKbar {
 	kbarArr, err := w.h.FetchFutureHistoryKbar(w.s.GetMainFutureCode(), time.Now())
 	if err != nil {
-		fmt.Println(err)
 		w.SendToClient(newErrMessageProto(errGetKbarFail))
-		return
+		return nil
 	}
 
-	var splitArr [][]*entity.FutureHistoryKbar
 	var singleArr []*entity.FutureHistoryKbar
 	for i, kbar := range kbarArr {
 		if i == 0 {
@@ -426,12 +439,9 @@ func (w *WSFutureTrade) sendLatestKbar() {
 		}
 
 		if kbar.KbarTime.Sub(kbarArr[i-1].KbarTime) > time.Minute {
-			splitArr = append(splitArr, singleArr)
-			singleArr = []*entity.FutureHistoryKbar{kbar}
-		} else {
-			singleArr = append(singleArr, kbar)
+			singleArr = []*entity.FutureHistoryKbar{}
 		}
+		singleArr = append(singleArr, kbar)
 	}
-
-	w.SendToClient(newKbarArrProto(splitArr[len(splitArr)-1]))
+	return singleArr
 }
