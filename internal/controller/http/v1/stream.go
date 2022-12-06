@@ -21,7 +21,11 @@ type streamRoutes struct {
 }
 
 func newStreamRoutes(handler *gin.RouterGroup, t usecase.Stream, o usecase.Order, history usecase.History) {
-	r := &streamRoutes{t, o, history}
+	r := &streamRoutes{
+		t: t,
+		o: o,
+		h: history,
+	}
 
 	h := handler.Group("/stream")
 	{
