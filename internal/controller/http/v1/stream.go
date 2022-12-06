@@ -2,6 +2,7 @@ package v1
 
 import (
 	"net/http"
+	"sync"
 
 	"tmt/internal/controller/http/websocket/future"
 	"tmt/internal/controller/http/websocket/pick"
@@ -15,6 +16,8 @@ type streamRoutes struct {
 	t usecase.Stream
 	o usecase.Order
 	h usecase.History
+
+	futureWSLock sync.Mutex
 }
 
 func newStreamRoutes(handler *gin.RouterGroup, t usecase.Stream, o usecase.Order, history usecase.History) {
@@ -93,5 +96,7 @@ func (r *streamRoutes) servePickStockWS(c *gin.Context) {
 }
 
 func (r *streamRoutes) serveFutureWS(c *gin.Context) {
+	defer r.futureWSLock.Unlock()
+	r.futureWSLock.Lock()
 	future.StartWSFutureTrade(c, r.t, r.o, r.h)
 }
