@@ -349,8 +349,8 @@ func (uc *StreamUseCase) GetFutureSnapshotByCode(code string) (*entity.FutureSna
 	}
 
 	return &entity.FutureSnapShot{
-		Code:   snapshot.GetCode(),
-		Future: cc.GetFutureDetail(code),
+		Code:       snapshot.GetCode(),
+		FutureName: cc.GetFutureDetail(code).Name,
 		SnapShotBase: entity.SnapShotBase{
 			SnapTime:        time.Unix(0, snapshot.GetTs()).Add(-8 * time.Hour),
 			Open:            snapshot.GetOpen(),
@@ -375,9 +375,9 @@ func (uc *StreamUseCase) updateMainFutureCode(future *entity.Future) {
 	uc.mainFutureCode = future.Code
 }
 
-// GetMainFutureCode -.
-func (uc *StreamUseCase) GetMainFutureCode() string {
-	return uc.mainFutureCode
+// GetMainFuture -.
+func (uc *StreamUseCase) GetMainFuture() *entity.Future {
+	return cc.GetFutureDetail(uc.mainFutureCode)
 }
 
 // ReceiveStreamData - receive target data, start goroutine to trade

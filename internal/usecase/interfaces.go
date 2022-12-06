@@ -142,7 +142,7 @@ type (
 		GetNasdaqClose() (*entity.YahooPrice, error)
 		GetNasdaqFutureClose() (*entity.YahooPrice, error)
 
-		GetMainFutureCode() string
+		GetMainFuture() *entity.Future
 		GetFutureSnapshotByCode(code string) (*entity.FutureSnapShot, error)
 
 		NewFutureRealTimeConnection(tickChan chan *entity.RealTimeFutureTick, connectionID string)

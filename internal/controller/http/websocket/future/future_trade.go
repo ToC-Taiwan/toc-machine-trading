@@ -149,6 +149,7 @@ func (w *WSFutureTrade) addOrderFromAssist(o *entity.FutureOrder) {
 }
 
 func (w *WSFutureTrade) sendFuture() {
+	w.sendFutureDetail()
 	w.sendLatestKbar()
 	w.sendFutureSnapshot()
 
@@ -340,8 +341,12 @@ func (w *WSFutureTrade) sendTickToAssit(tick *entity.RealTimeFutureTick) {
 	w.assistTickChanMapLock.RUnlock()
 }
 
+func (w *WSFutureTrade) sendFutureDetail() {
+	w.SendToClient(newFutureDetailProto(w.s.GetMainFuture()))
+}
+
 func (w *WSFutureTrade) sendFutureSnapshot() {
-	snapshot, err := w.s.GetFutureSnapshotByCode(w.s.GetMainFutureCode())
+	snapshot, err := w.s.GetFutureSnapshotByCode(w.s.GetMainFuture().Code)
 	if err != nil {
 		w.SendToClient(newErrMessageProto(errGetSnapshot))
 	} else {
@@ -425,7 +430,7 @@ func (w *WSFutureTrade) sendLatestKbar() {
 }
 
 func (w *WSFutureTrade) fetchKbar() []*entity.FutureHistoryKbar {
-	kbarArr, err := w.h.FetchFutureHistoryKbar(w.s.GetMainFutureCode(), time.Now())
+	kbarArr, err := w.h.FetchFutureHistoryKbar(w.s.GetMainFuture().Code, time.Now())
 	if err != nil {
 		w.SendToClient(newErrMessageProto(errGetKbarFail))
 		return nil

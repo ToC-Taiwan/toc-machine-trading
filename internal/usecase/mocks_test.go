@@ -1147,18 +1147,18 @@ func (mr *MockStreamMockRecorder) GetFutureTradeSwitchStatus(ctx interface{}) *g
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFutureTradeSwitchStatus", reflect.TypeOf((*MockStream)(nil).GetFutureTradeSwitchStatus), ctx)
 }
 
-// GetMainFutureCode mocks base method.
-func (m *MockStream) GetMainFutureCode() string {
+// GetMainFuture mocks base method.
+func (m *MockStream) GetMainFuture() *entity.Future {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetMainFutureCode")
-	ret0, _ := ret[0].(string)
+	ret := m.ctrl.Call(m, "GetMainFuture")
+	ret0, _ := ret[0].(*entity.Future)
 	return ret0
 }
 
-// GetMainFutureCode indicates an expected call of GetMainFutureCode.
-func (mr *MockStreamMockRecorder) GetMainFutureCode() *gomock.Call {
+// GetMainFuture indicates an expected call of GetMainFuture.
+func (mr *MockStreamMockRecorder) GetMainFuture() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMainFutureCode", reflect.TypeOf((*MockStream)(nil).GetMainFutureCode))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMainFuture", reflect.TypeOf((*MockStream)(nil).GetMainFuture))
 }
 
 // GetNasdaqClose mocks base method.

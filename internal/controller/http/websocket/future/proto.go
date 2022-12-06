@@ -192,3 +192,25 @@ func newKbarArrProto(r []*entity.FutureHistoryKbar) *pb.WSMessage {
 		},
 	}
 }
+
+func newFutureDetailProto(r *entity.Future) *pb.WSMessage {
+	return &pb.WSMessage{
+		Type: pb.WSType_TYPE_FUTURE_TICK,
+		Data: &pb.WSMessage_FutureDetail{
+			FutureDetail: &pb.WSFutureDetail{
+				Code:           r.Code,
+				Symbol:         r.Symbol,
+				Name:           r.Name,
+				Category:       r.Category,
+				DeliveryMonth:  r.DeliveryMonth,
+				DeliveryDate:   r.DeliveryDate.Format(common.ShortTimeLayout),
+				UnderlyingKind: r.UnderlyingKind,
+				Unit:           r.Unit,
+				LimitUp:        r.LimitUp,
+				LimitDown:      r.LimitDown,
+				Reference:      r.Reference,
+				UpdateDate:     r.UpdateDate.Format(common.ShortTimeLayout),
+			},
+		},
+	}
+}

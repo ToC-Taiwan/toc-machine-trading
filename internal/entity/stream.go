@@ -41,8 +41,7 @@ type RealTimeStockTick struct {
 
 // RealTimeFutureTick -.
 type RealTimeFutureTick struct {
-	Code   string  `json:"code"`
-	Future *Future `json:"future"`
+	Code string `json:"code"`
 
 	TickTime        time.Time `json:"tick_time"`
 	Open            float64   `json:"open"`
@@ -147,8 +146,8 @@ type StockSnapShot struct {
 
 // FutureSnapShot -.
 type FutureSnapShot struct {
-	Code   string  `json:"code"`
-	Future *Future `json:"future"`
+	Code       string `json:"code"`
+	FutureName string `json:"future_name"`
 	SnapShotBase
 }
 
@@ -189,7 +188,6 @@ func (f *FutureSnapShot) ToRealTimeFutureTick() *RealTimeFutureTick {
 		ChgType:     chgType,
 		PriceChg:    f.PriceChg,
 		PctChg:      f.PctChg,
-		Future:      f.Future,
 	}
 }
 
