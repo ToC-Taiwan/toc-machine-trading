@@ -435,16 +435,12 @@ func (w *WSFutureTrade) fetchKbar() []*entity.FutureHistoryKbar {
 	firstTry := time.Now()
 
 	for {
-		kbarArr, err = w.h.FetchFutureHistoryKbar(w.s.GetMainFuture().Code, firstTry)
-		if err != nil {
+		if kbarArr, err = w.h.FetchFutureHistoryKbar(w.s.GetMainFuture().Code, firstTry); err != nil {
 			w.SendToClient(newErrMessageProto(errGetKbarFail))
 			return nil
-		}
-
-		if len(kbarArr) > 0 {
+		} else if len(kbarArr) > 0 {
 			break
 		}
-
 		firstTry = firstTry.Add(-24 * time.Hour)
 	}
 
