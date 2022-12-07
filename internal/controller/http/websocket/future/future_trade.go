@@ -380,7 +380,7 @@ func (w *WSFutureTrade) sendPosition() {
 		case <-w.Ctx().Done():
 			return
 
-		case <-time.After(time.Second):
+		case <-time.After(10 * time.Second):
 			if position, err := w.generatePosition(); err != nil {
 				w.SendToClient(newErrMessageProto(errGetPosition))
 			} else {
@@ -430,10 +430,22 @@ func (w *WSFutureTrade) sendLatestKbar() {
 }
 
 func (w *WSFutureTrade) fetchKbar() []*entity.FutureHistoryKbar {
-	kbarArr, err := w.h.FetchFutureHistoryKbar(w.s.GetMainFuture().Code, time.Now())
-	if err != nil {
-		w.SendToClient(newErrMessageProto(errGetKbarFail))
-		return nil
+	var kbarArr []*entity.FutureHistoryKbar
+	var err error
+	firstTry := time.Now()
+
+	for {
+		kbarArr, err = w.h.FetchFutureHistoryKbar(w.s.GetMainFuture().Code, firstTry)
+		if err != nil {
+			w.SendToClient(newErrMessageProto(errGetKbarFail))
+			return nil
+		}
+
+		if len(kbarArr) > 0 {
+			break
+		}
+
+		firstTry = firstTry.Add(-24 * time.Hour)
 	}
 
 	var singleArr []*entity.FutureHistoryKbar
