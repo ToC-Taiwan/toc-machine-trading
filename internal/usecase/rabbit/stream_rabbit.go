@@ -136,16 +136,11 @@ func (c *StreamRabbit) OrderStatusConsumer() {
 			continue
 		}
 
-		order := c.protoToOrder(body)
-		if order == nil {
+		if order := c.protoToOrder(body); order == nil {
 			continue
+		} else {
+			c.sendOrder(order)
 		}
-
-		c.orderStatusChanMapLock.RLock()
-		for _, t := range c.orderStatusChanMap {
-			t <- order
-		}
-		c.orderStatusChanMapLock.RUnlock()
 	}
 }
 
@@ -166,21 +161,20 @@ func (c *StreamRabbit) OrderStatusArrConsumer() {
 			continue
 		}
 
-		var orderArr []interface{}
 		for _, b := range body.GetData() {
 			if data := c.protoToOrder(b); data != nil {
-				orderArr = append(orderArr, data)
+				c.sendOrder(data)
 			}
 		}
-
-		c.orderStatusChanMapLock.RLock()
-		for _, order := range orderArr {
-			for _, t := range c.orderStatusChanMap {
-				t <- order
-			}
-		}
-		c.orderStatusChanMapLock.RUnlock()
 	}
+}
+
+func (c *StreamRabbit) sendOrder(order interface{}) {
+	c.orderStatusChanMapLock.RLock()
+	for _, t := range c.orderStatusChanMap {
+		t <- order
+	}
+	c.orderStatusChanMapLock.RUnlock()
 }
 
 func (c *StreamRabbit) protoToOrder(proto *pb.OrderStatus) interface{} {
