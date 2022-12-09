@@ -56,32 +56,6 @@ func newFutureOrderProto(f *entity.FutureOrder) *pb.WSMessage {
 	}
 }
 
-func newTradeVolumeProto(firstPeriod, secondPeriod, thirdPeriod, fourthPeriod entity.RealTimeFutureTickArr) *pb.WSMessage {
-	return &pb.WSMessage{
-		Type: pb.WSType_TYPE_PERIOD_TRADE_VOLUME,
-		Data: &pb.WSMessage_PeriodTradeVolume{
-			PeriodTradeVolume: &pb.WSPeriodTradeVolume{
-				FirstPeriod: &pb.OutInVolume{
-					OutVolume: firstPeriod.GetOutInVolume().OutVolume,
-					InVolume:  firstPeriod.GetOutInVolume().InVolume,
-				},
-				SecondPeriod: &pb.OutInVolume{
-					OutVolume: secondPeriod.GetOutInVolume().OutVolume,
-					InVolume:  secondPeriod.GetOutInVolume().InVolume,
-				},
-				ThirdPeriod: &pb.OutInVolume{
-					OutVolume: thirdPeriod.GetOutInVolume().OutVolume,
-					InVolume:  thirdPeriod.GetOutInVolume().InVolume,
-				},
-				FourthPeriod: &pb.OutInVolume{
-					OutVolume: fourthPeriod.GetOutInVolume().OutVolume,
-					InVolume:  fourthPeriod.GetOutInVolume().InVolume,
-				},
-			},
-		},
-	}
-}
-
 func newTradeIndexProto(t *entity.TradeIndex) *pb.WSMessage {
 	return &pb.WSMessage{
 		Type: pb.WSType_TYPE_TRADE_INDEX,

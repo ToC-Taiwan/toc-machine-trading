@@ -218,8 +218,6 @@ func (w *WSFutureTrade) placeOrder(order *entity.FutureOrder) *entity.FutureOrde
 }
 
 func (w *WSFutureTrade) processTickArr(tickChan chan *entity.RealTimeFutureTick) {
-	baseDuration := 10 * time.Second
-	var tickArr entity.RealTimeFutureTickArr
 	for {
 		tick, ok := <-tickChan
 		if !ok {
@@ -227,36 +225,6 @@ func (w *WSFutureTrade) processTickArr(tickChan chan *entity.RealTimeFutureTick)
 		}
 		w.sendTickToAssit(tick)
 		w.SendToClient(newFutureTickProto(tick))
-		tickArr = append(tickArr, tick)
-		var firstPeriod, secondPeriod, thirdPeriod, fourthPeriod entity.RealTimeFutureTickArr
-	L:
-		for i := len(tickArr) - 1; i >= 0; i-- {
-			switch {
-			case time.Since(tickArr[i].TickTime) <= baseDuration*1:
-				fourthPeriod = append(fourthPeriod, tickArr[i])
-				thirdPeriod = append(thirdPeriod, tickArr[i])
-				secondPeriod = append(secondPeriod, tickArr[i])
-				firstPeriod = append(firstPeriod, tickArr[i])
-
-			case time.Since(tickArr[i].TickTime) <= baseDuration*2:
-				fourthPeriod = append(fourthPeriod, tickArr[i])
-				thirdPeriod = append(thirdPeriod, tickArr[i])
-				secondPeriod = append(secondPeriod, tickArr[i])
-
-			case time.Since(tickArr[i].TickTime) <= baseDuration*3:
-				fourthPeriod = append(fourthPeriod, tickArr[i])
-				thirdPeriod = append(thirdPeriod, tickArr[i])
-
-			case time.Since(tickArr[i].TickTime) <= baseDuration*4:
-				fourthPeriod = append(fourthPeriod, tickArr[i])
-
-			default:
-				tickArr = tickArr[i+1:]
-				break L
-			}
-		}
-
-		w.SendToClient(newTradeVolumeProto(firstPeriod, secondPeriod, thirdPeriod, fourthPeriod))
 	}
 }
 
