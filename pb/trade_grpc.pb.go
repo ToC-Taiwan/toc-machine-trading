@@ -27,9 +27,9 @@ type TradeInterfaceClient interface {
 	SellStock(ctx context.Context, in *StockOrderDetail, opts ...grpc.CallOption) (*TradeResult, error)
 	SellFirstStock(ctx context.Context, in *StockOrderDetail, opts ...grpc.CallOption) (*TradeResult, error)
 	CancelStock(ctx context.Context, in *OrderID, opts ...grpc.CallOption) (*TradeResult, error)
-	GetOrderStatusByID(ctx context.Context, in *OrderID, opts ...grpc.CallOption) (*TradeResult, error)
 	GetLocalOrderStatusArr(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	GetSimulateOrderStatusArr(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	GetOrderStatusByID(ctx context.Context, in *OrderID, opts ...grpc.CallOption) (*TradeResult, error)
 	GetNonBlockOrderStatusArr(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ErrorMessage, error)
 	BuyFuture(ctx context.Context, in *FutureOrderDetail, opts ...grpc.CallOption) (*TradeResult, error)
 	SellFuture(ctx context.Context, in *FutureOrderDetail, opts ...grpc.CallOption) (*TradeResult, error)
@@ -82,15 +82,6 @@ func (c *tradeInterfaceClient) CancelStock(ctx context.Context, in *OrderID, opt
 	return out, nil
 }
 
-func (c *tradeInterfaceClient) GetOrderStatusByID(ctx context.Context, in *OrderID, opts ...grpc.CallOption) (*TradeResult, error) {
-	out := new(TradeResult)
-	err := c.cc.Invoke(ctx, "/sinopac_forwarder.TradeInterface/GetOrderStatusByID", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *tradeInterfaceClient) GetLocalOrderStatusArr(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, "/sinopac_forwarder.TradeInterface/GetLocalOrderStatusArr", in, out, opts...)
@@ -103,6 +94,15 @@ func (c *tradeInterfaceClient) GetLocalOrderStatusArr(ctx context.Context, in *e
 func (c *tradeInterfaceClient) GetSimulateOrderStatusArr(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, "/sinopac_forwarder.TradeInterface/GetSimulateOrderStatusArr", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *tradeInterfaceClient) GetOrderStatusByID(ctx context.Context, in *OrderID, opts ...grpc.CallOption) (*TradeResult, error) {
+	out := new(TradeResult)
+	err := c.cc.Invoke(ctx, "/sinopac_forwarder.TradeInterface/GetOrderStatusByID", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -171,9 +171,9 @@ type TradeInterfaceServer interface {
 	SellStock(context.Context, *StockOrderDetail) (*TradeResult, error)
 	SellFirstStock(context.Context, *StockOrderDetail) (*TradeResult, error)
 	CancelStock(context.Context, *OrderID) (*TradeResult, error)
-	GetOrderStatusByID(context.Context, *OrderID) (*TradeResult, error)
 	GetLocalOrderStatusArr(context.Context, *emptypb.Empty) (*emptypb.Empty, error)
 	GetSimulateOrderStatusArr(context.Context, *emptypb.Empty) (*emptypb.Empty, error)
+	GetOrderStatusByID(context.Context, *OrderID) (*TradeResult, error)
 	GetNonBlockOrderStatusArr(context.Context, *emptypb.Empty) (*ErrorMessage, error)
 	BuyFuture(context.Context, *FutureOrderDetail) (*TradeResult, error)
 	SellFuture(context.Context, *FutureOrderDetail) (*TradeResult, error)
@@ -199,14 +199,14 @@ func (UnimplementedTradeInterfaceServer) SellFirstStock(context.Context, *StockO
 func (UnimplementedTradeInterfaceServer) CancelStock(context.Context, *OrderID) (*TradeResult, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CancelStock not implemented")
 }
-func (UnimplementedTradeInterfaceServer) GetOrderStatusByID(context.Context, *OrderID) (*TradeResult, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetOrderStatusByID not implemented")
-}
 func (UnimplementedTradeInterfaceServer) GetLocalOrderStatusArr(context.Context, *emptypb.Empty) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetLocalOrderStatusArr not implemented")
 }
 func (UnimplementedTradeInterfaceServer) GetSimulateOrderStatusArr(context.Context, *emptypb.Empty) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetSimulateOrderStatusArr not implemented")
+}
+func (UnimplementedTradeInterfaceServer) GetOrderStatusByID(context.Context, *OrderID) (*TradeResult, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetOrderStatusByID not implemented")
 }
 func (UnimplementedTradeInterfaceServer) GetNonBlockOrderStatusArr(context.Context, *emptypb.Empty) (*ErrorMessage, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetNonBlockOrderStatusArr not implemented")
@@ -311,24 +311,6 @@ func _TradeInterface_CancelStock_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
-func _TradeInterface_GetOrderStatusByID_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(OrderID)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(TradeInterfaceServer).GetOrderStatusByID(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/sinopac_forwarder.TradeInterface/GetOrderStatusByID",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TradeInterfaceServer).GetOrderStatusByID(ctx, req.(*OrderID))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _TradeInterface_GetLocalOrderStatusArr_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(emptypb.Empty)
 	if err := dec(in); err != nil {
@@ -361,6 +343,24 @@ func _TradeInterface_GetSimulateOrderStatusArr_Handler(srv interface{}, ctx cont
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TradeInterfaceServer).GetSimulateOrderStatusArr(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TradeInterface_GetOrderStatusByID_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(OrderID)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TradeInterfaceServer).GetOrderStatusByID(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/sinopac_forwarder.TradeInterface/GetOrderStatusByID",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TradeInterfaceServer).GetOrderStatusByID(ctx, req.(*OrderID))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -497,16 +497,16 @@ var TradeInterface_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _TradeInterface_CancelStock_Handler,
 		},
 		{
-			MethodName: "GetOrderStatusByID",
-			Handler:    _TradeInterface_GetOrderStatusByID_Handler,
-		},
-		{
 			MethodName: "GetLocalOrderStatusArr",
 			Handler:    _TradeInterface_GetLocalOrderStatusArr_Handler,
 		},
 		{
 			MethodName: "GetSimulateOrderStatusArr",
 			Handler:    _TradeInterface_GetSimulateOrderStatusArr_Handler,
+		},
+		{
+			MethodName: "GetOrderStatusByID",
+			Handler:    _TradeInterface_GetOrderStatusByID_Handler,
 		},
 		{
 			MethodName: "GetNonBlockOrderStatusArr",

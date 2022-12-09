@@ -12,6 +12,8 @@ import (
 	"tmt/internal/usecase/modules/target"
 	"tmt/internal/usecase/modules/tradeday"
 	"tmt/internal/usecase/modules/trader"
+
+	"github.com/google/uuid"
 )
 
 // StreamUseCase -.
@@ -206,7 +208,8 @@ func (uc *StreamUseCase) ReceiveOrderStatus(ctx context.Context) {
 			}
 		}
 	}()
-	uc.rabbit.OrderStatusConsumer(orderStatusChan)
+	uc.rabbit.AddOrderStatusChan(orderStatusChan, uuid.New().String())
+	uc.rabbit.OrderStatusArrConsumer()
 }
 
 // GetTSESnapshot -.

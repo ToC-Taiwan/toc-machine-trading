@@ -23,6 +23,7 @@ var log = logger.Get()
 const (
 	routingKeyEvent        = "event"
 	routingKeyOrder        = "order"
+	routingKeyOrderArr     = "order_arr"
 	routingKeyTick         = "tick"
 	routingKeyFutureTick   = "future_tick"
 	routingKeyBidAsk       = "bid_ask"
@@ -33,8 +34,9 @@ const (
 type StreamRabbit struct {
 	conn *rabbitmq.Connection
 
-	allStockMap  map[string]*entity.Stock
-	allFutureMap map[string]*entity.Future
+	allStockMap   map[string]*entity.Stock
+	allFutureMap  map[string]*entity.Future
+	detailMapLock sync.RWMutex
 
 	futureTickChanMap map[string]chan *entity.RealTimeFutureTick
 	futureTickMapLock sync.RWMutex
@@ -75,8 +77,14 @@ func (c *StreamRabbit) establishDelivery(key string) <-chan amqp.Delivery {
 
 // FillAllBasic -.
 func (c *StreamRabbit) FillAllBasic(allStockMap map[string]*entity.Stock, allFutureMap map[string]*entity.Future) {
+	defer c.detailMapLock.Unlock()
+	c.detailMapLock.Lock()
 	c.allStockMap = allStockMap
 	c.allFutureMap = allFutureMap
+
+	if len(c.allStockMap) == 0 || len(c.allFutureMap) == 0 {
+		log.Panic("allStockMap or allFutureMap is empty")
+	}
 }
 
 // EventConsumer -.
@@ -112,57 +120,25 @@ func (c *StreamRabbit) EventConsumer(eventChan chan *entity.SinopacEvent) {
 }
 
 // OrderStatusConsumer OrderStatusConsumer
-func (c *StreamRabbit) OrderStatusConsumer(orderStatusChan chan interface{}) {
-	if len(c.allStockMap) == 0 || len(c.allFutureMap) == 0 {
-		log.Panic("allStockMap or allFutureMap is empty")
-	}
-	c.orderStatusChanMapLock.Lock()
-	c.orderStatusChanMap[uuid.New().String()] = orderStatusChan
-	c.orderStatusChanMapLock.Unlock()
+func (c *StreamRabbit) OrderStatusConsumer() {
 	delivery := c.establishDelivery(routingKeyOrder)
+
 	for {
 		d, opened := <-delivery
 		if !opened {
 			log.Error("OrderStatusConsumer rabbitMQ is closed")
 			return
 		}
-		body := pb.StockOrderStatus{}
-		if err := proto.Unmarshal(d.Body, &body); err != nil {
-			log.Error(err)
-			continue
-		}
-		orderTime, err := time.ParseInLocation(common.LongTimeLayout, body.GetOrderTime(), time.Local)
-		if err != nil {
+
+		body := &pb.OrderStatus{}
+		if err := proto.Unmarshal(d.Body, body); err != nil {
 			log.Error(err)
 			continue
 		}
 
-		var order interface{}
-		switch {
-		case c.allStockMap[body.GetCode()] != nil:
-			order = &entity.StockOrder{
-				StockNum: body.GetCode(),
-				BaseOrder: entity.BaseOrder{
-					OrderID:   body.GetOrderId(),
-					Action:    entity.StringToOrderAction(body.GetAction()),
-					Price:     body.GetPrice(),
-					Quantity:  body.GetQuantity(),
-					Status:    entity.StringToOrderStatus(body.GetStatus()),
-					OrderTime: orderTime,
-				},
-			}
-		case c.allFutureMap[body.GetCode()] != nil:
-			order = &entity.FutureOrder{
-				Code: body.GetCode(),
-				BaseOrder: entity.BaseOrder{
-					OrderID:   body.GetOrderId(),
-					Action:    entity.StringToOrderAction(body.GetAction()),
-					Price:     body.GetPrice(),
-					Quantity:  body.GetQuantity(),
-					Status:    entity.StringToOrderStatus(body.GetStatus()),
-					OrderTime: orderTime,
-				},
-			}
+		order := c.protoToOrder(body)
+		if order == nil {
+			continue
 		}
 
 		c.orderStatusChanMapLock.RLock()
@@ -170,6 +146,82 @@ func (c *StreamRabbit) OrderStatusConsumer(orderStatusChan chan interface{}) {
 			t <- order
 		}
 		c.orderStatusChanMapLock.RUnlock()
+	}
+}
+
+// OrderStatusArrConsumer -.
+func (c *StreamRabbit) OrderStatusArrConsumer() {
+	go c.OrderStatusConsumer()
+
+	delivery := c.establishDelivery(routingKeyOrderArr)
+	for {
+		d, opened := <-delivery
+		if !opened {
+			log.Error("OrderStatusArrConsumer rabbitMQ is closed")
+			return
+		}
+		body := &pb.OrderStatusArr{}
+		if err := proto.Unmarshal(d.Body, body); err != nil {
+			log.Error(err)
+			continue
+		}
+
+		var orderArr []interface{}
+		for _, b := range body.GetData() {
+			if data := c.protoToOrder(b); data != nil {
+				orderArr = append(orderArr, data)
+			}
+		}
+
+		c.orderStatusChanMapLock.RLock()
+		for _, order := range orderArr {
+			for _, t := range c.orderStatusChanMap {
+				t <- order
+			}
+		}
+		c.orderStatusChanMapLock.RUnlock()
+	}
+}
+
+func (c *StreamRabbit) protoToOrder(proto *pb.OrderStatus) interface{} {
+	defer c.detailMapLock.RUnlock()
+	c.detailMapLock.RLock()
+
+	orderTime, err := time.ParseInLocation(common.LongTimeLayout, proto.GetOrderTime(), time.Local)
+	if err != nil {
+		log.Error(err)
+		return nil
+	}
+
+	switch {
+	case c.allStockMap[proto.GetCode()] != nil:
+		return &entity.StockOrder{
+			StockNum: proto.GetCode(),
+			BaseOrder: entity.BaseOrder{
+				OrderID:   proto.GetOrderId(),
+				Action:    entity.StringToOrderAction(proto.GetAction()),
+				Price:     proto.GetPrice(),
+				Quantity:  proto.GetQuantity(),
+				Status:    entity.StringToOrderStatus(proto.GetStatus()),
+				OrderTime: orderTime,
+			},
+		}
+
+	case c.allFutureMap[proto.GetCode()] != nil:
+		return &entity.FutureOrder{
+			Code: proto.GetCode(),
+			BaseOrder: entity.BaseOrder{
+				OrderID:   proto.GetOrderId(),
+				Action:    entity.StringToOrderAction(proto.GetAction()),
+				Price:     proto.GetPrice(),
+				Quantity:  proto.GetQuantity(),
+				Status:    entity.StringToOrderStatus(proto.GetStatus()),
+				OrderTime: orderTime,
+			},
+		}
+
+	default:
+		return nil
 	}
 }
 

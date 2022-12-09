@@ -177,17 +177,19 @@ type (
 		FillAllBasic(allStockMap map[string]*entity.Stock, allFutureMap map[string]*entity.Future)
 
 		EventConsumer(eventChan chan *entity.SinopacEvent)
-		OrderStatusConsumer(orderStatusChan chan interface{})
+
+		AddOrderStatusChan(orderStatusChan chan interface{}, connectionID string)
+		RemoveOrderStatusChan(connectionID string)
+		OrderStatusConsumer()
+		OrderStatusArrConsumer()
+
 		TickConsumer(stockNum string, tickChan chan *entity.RealTimeStockTick)
 		StockBidAskConsumer(stockNum string, bidAskChan chan *entity.RealTimeStockBidAsk)
 
-		FutureTickConsumer(code string, tickChan chan *entity.RealTimeFutureTick)
-		FutureBidAskConsumer(code string, bidAskChan chan *entity.FutureRealTimeBidAsk)
-
 		AddFutureTickChan(tickChan chan *entity.RealTimeFutureTick, connectionID string)
 		RemoveFutureTickChan(connectionID string)
-		AddOrderStatusChan(orderStatusChan chan interface{}, connectionID string)
-		RemoveOrderStatusChan(connectionID string)
+		FutureTickConsumer(code string, tickChan chan *entity.RealTimeFutureTick)
+		FutureBidAskConsumer(code string, bidAskChan chan *entity.FutureRealTimeBidAsk)
 	}
 )
 
