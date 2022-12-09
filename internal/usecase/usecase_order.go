@@ -57,7 +57,11 @@ func NewOrder(t OrdergRPCAPI, r OrderRepo) *OrderUseCase {
 	bus.SubscribeTopic(event.TopicCancelFutureOrder, uc.cancelFutureOrder)
 	bus.SubscribeTopic(event.TopicInsertOrUpdateFutureOrder, uc.updateFutureOrderCacheAndInsertDB)
 
-	go uc.askOrderStatus(uc.simTrade)
+	if uc.simTrade {
+		go uc.askSimulateOrderStatus()
+	} else {
+		go uc.askOrderStatus()
+	}
 	go uc.updateAllTradeBalance()
 	return uc
 }
@@ -129,14 +133,26 @@ func (uc *OrderUseCase) MoveFutureOrderToLatestTradeDay(ctx context.Context, ord
 	return uc.repo.InsertOrUpdateFutureOrderByOrderID(ctx, order)
 }
 
-func (uc *OrderUseCase) askOrderStatus(sim bool) {
+func (uc *OrderUseCase) askOrderStatus() {
 	for range time.NewTicker(750 * time.Millisecond).C {
 		if !uc.IsFutureTradeTime() && !uc.IsStockTradeTime() {
 			continue
 		}
 
-		_, err := uc.gRPCAPI.GetOrderStatusArrFromMQ(sim)
-		if err != nil {
+		if err := uc.gRPCAPI.GetLocalOrderStatusArr(); err != nil {
+			log.Error(err)
+			continue
+		}
+	}
+}
+
+func (uc *OrderUseCase) askSimulateOrderStatus() {
+	for range time.NewTicker(750 * time.Millisecond).C {
+		if !uc.IsFutureTradeTime() && !uc.IsStockTradeTime() {
+			continue
+		}
+
+		if err := uc.gRPCAPI.GetSimulateOrderStatusArr(); err != nil {
 			log.Error(err)
 			continue
 		}

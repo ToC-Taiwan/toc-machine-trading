@@ -113,16 +113,28 @@ func (t *OrdergRPCAPI) GetOrderStatusByID(orderID string, sim bool) (*pb.TradeRe
 	return r, nil
 }
 
-// GetOrderStatusArrFromMQ -.
-func (t *OrdergRPCAPI) GetOrderStatusArrFromMQ(sim bool) (*pb.ErrorMessage, error) {
+// GetLocalOrderStatusArr -.
+func (t *OrdergRPCAPI) GetLocalOrderStatusArr() error {
 	conn := t.conn.GetReadyConn()
 	defer t.conn.PutReadyConn(conn)
 	c := pb.NewTradeInterfaceClient(conn)
-	r, err := c.GetOrderStatusArrFromMQ(context.Background(), &pb.Simulate{Simulate: sim})
+	_, err := c.GetLocalOrderStatusArr(context.Background(), &emptypb.Empty{})
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return r, nil
+	return nil
+}
+
+// GetSimulateOrderStatusArr -.
+func (t *OrdergRPCAPI) GetSimulateOrderStatusArr() error {
+	conn := t.conn.GetReadyConn()
+	defer t.conn.PutReadyConn(conn)
+	c := pb.NewTradeInterfaceClient(conn)
+	_, err := c.GetSimulateOrderStatusArr(context.Background(), &emptypb.Empty{})
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // GetNonBlockOrderStatusArr GetNonBlockOrderStatusArr
