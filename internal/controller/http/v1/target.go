@@ -17,7 +17,7 @@ func newTargetRoutes(handler *gin.RouterGroup, t usecase.Target) {
 
 	h := handler.Group("/targets")
 	{
-		h.GET("/", r.getTargets)
+		h.GET("", r.getTargets)
 	}
 }
 

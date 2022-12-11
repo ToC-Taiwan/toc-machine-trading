@@ -56,7 +56,6 @@ func NewStream(r StreamRepo, g StreamgRPCAPI, t StreamRabbit) *StreamUseCase {
 		basic:        *cc.GetBasicInfo(),
 		targetFilter: target.NewFilter(cfg.TargetCond),
 		tradeDay:     tradeday.NewTradeDay(),
-		tradeIndex:   &entity.TradeIndex{},
 	}
 	t.FillAllBasic(uc.basic.AllStocks, uc.basic.AllFutures)
 
@@ -86,35 +85,45 @@ func (uc *StreamUseCase) GetTradeIndex() *entity.TradeIndex {
 }
 
 func (uc *StreamUseCase) periodUpdateTradeIndex() {
+	uc.tradeIndex = &entity.TradeIndex{
+		TSE:    entity.NewIndexStatus(),
+		OTC:    entity.NewIndexStatus(),
+		Nasdaq: entity.NewIndexStatus(),
+		NF:     entity.NewIndexStatus(),
+	}
+
 	for range time.NewTicker(time.Second * 5).C {
-		var err error
 		ctx := context.Background()
 		go func() {
-			uc.tradeIndex.Nasdaq, err = uc.GetNasdaqClose()
+			data, err := uc.GetNasdaqClose()
 			if err != nil {
 				log.Error(err)
 			}
+			uc.tradeIndex.Nasdaq.UpdateIndexStatus(data.Price - data.Last)
 		}()
 
 		go func() {
-			uc.tradeIndex.TSE, err = uc.GetTSESnapshot(ctx)
+			data, err := uc.GetTSESnapshot(ctx)
 			if err != nil {
 				log.Error(err)
 			}
+			uc.tradeIndex.TSE.UpdateIndexStatus(data.PriceChg)
 		}()
 
 		go func() {
-			uc.tradeIndex.NF, err = uc.GetNasdaqFutureClose()
+			data, err := uc.GetNasdaqFutureClose()
 			if err != nil {
 				log.Error(err)
 			}
+			uc.tradeIndex.NF.UpdateIndexStatus(data.Price - data.Last)
 		}()
 
 		go func() {
-			uc.tradeIndex.OTC, err = uc.GetOTCSnapshot(ctx)
+			data, err := uc.GetOTCSnapshot(ctx)
 			if err != nil {
 				log.Error(err)
 			}
+			uc.tradeIndex.OTC.UpdateIndexStatus(data.PriceChg)
 		}()
 	}
 }
@@ -437,13 +446,13 @@ func (uc *StreamUseCase) ReceiveFutureStreamData(ctx context.Context, code strin
 	agent := trader.NewFutureTrader(code, uc.futureTradeSwitchCfg, uc.futureAnalyzeCfg)
 
 	go agent.TradingRoom()
-
 	go uc.rabbit.FutureTickConsumer(code, agent.GetTickChan())
 	// go uc.rabbit.FutureBidAskConsumer(code, agent.GetBidAskChan())
 
 	if uc.futureTradeSwitchCfg.Subscribe {
 		bus.PublishTopicEvent(event.TopicSubscribeFutureTickTargets, code)
 	}
+
 	go uc.checkFutureTradeSwitch()
 }
 
@@ -499,14 +508,6 @@ func (uc *StreamUseCase) checkFutureTradeSwitch() {
 			bus.PublishTopicEvent(event.TopicUpdateFutureTradeSwitch, uc.futureTradeInSwitch)
 		}
 	}
-}
-
-func (uc *StreamUseCase) TurnFutureTradeSwitch(ctx context.Context, allow bool) {
-	uc.futureTradeSwitchCfg.AllowTrade = allow
-}
-
-func (uc *StreamUseCase) GetFutureTradeSwitchStatus(ctx context.Context) bool {
-	return uc.futureTradeSwitchCfg.AllowTrade
 }
 
 // NewFutureRealTimeConnection -.

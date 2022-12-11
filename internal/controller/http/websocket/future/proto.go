@@ -61,42 +61,19 @@ func newTradeIndexProto(t *entity.TradeIndex) *pb.WSMessage {
 		Type: pb.WSType_TYPE_TRADE_INDEX,
 		Data: &pb.WSMessage_TradeIndex{
 			TradeIndex: &pb.WSTradeIndex{
-				Tse:    newStockSnapshotProto(t.TSE),
-				Otc:    newStockSnapshotProto(t.OTC),
-				Nasdaq: newYahooPriceProto(t.Nasdaq),
-				Nf:     newYahooPriceProto(t.NF),
+				Tse:    newIndexStatusProto(t.TSE),
+				Otc:    newIndexStatusProto(t.OTC),
+				Nasdaq: newIndexStatusProto(t.Nasdaq),
+				Nf:     newIndexStatusProto(t.NF),
 			},
 		},
 	}
 }
 
-func newYahooPriceProto(y *entity.YahooPrice) *pb.WSYahooPrice {
-	return &pb.WSYahooPrice{
-		Last:      y.Last,
-		Price:     y.Price,
-		UpdatedAt: y.UpdatedAt.Format(common.LongTimeLayout),
-	}
-}
-
-func newStockSnapshotProto(s *entity.StockSnapShot) *pb.WSStockSnapShot {
-	return &pb.WSStockSnapShot{
-		StockNum:        s.StockNum,
-		StockName:       s.StockName,
-		SnapTime:        s.SnapTime.Format(common.LongTimeLayout),
-		Open:            s.Open,
-		High:            s.High,
-		Low:             s.Low,
-		Close:           s.Close,
-		TickType:        s.TickType,
-		PriceChg:        s.PriceChg,
-		PctChg:          s.PctChg,
-		ChgType:         s.ChgType,
-		Volume:          s.Volume,
-		VolumeSum:       s.VolumeSum,
-		Amount:          s.Amount,
-		AmountSum:       s.AmountSum,
-		YesterdayVolume: s.YesterdayVolume,
-		VolumeRatio:     s.VolumeRatio,
+func newIndexStatusProto(status *entity.IndexStatus) *pb.WSIndexStatus {
+	return &pb.WSIndexStatus{
+		BreakCount: status.BreakCount,
+		PriceChg:   status.PriceChg,
 	}
 }
 

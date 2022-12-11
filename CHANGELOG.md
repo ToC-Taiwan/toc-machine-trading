@@ -1,6 +1,36 @@
-# [](https://github.com/ToC-Taiwan/toc-machine-trading/compare/v1.6.0...v) (2022-12-02)
+# [](https://github.com/ToC-Taiwan/toc-machine-trading/compare/v1.7.0...v) (2022-12-10)
 
 ## CHANGELOG
+
+# [1.7.0](https://github.com/ToC-Taiwan/toc-machine-trading/compare/v1.6.0...v1.7.0) (2022-12-09)
+
+### Bug Fixes
+
+* **future:** add missing future detail ([09137b8](https://github.com/ToC-Taiwan/toc-machine-trading/commit/09137b8ec51cfdf62ace20f36148abff12e63cfa))
+* **kbar:** fix wrong time period of stream kbar, add send kbar every minute ([5918db2](https://github.com/ToC-Taiwan/toc-machine-trading/commit/5918db2c250663208413f1d3c39dc7713cb0d3e3))
+* **lint:** fix stream routes lint error ([efef559](https://github.com/ToC-Taiwan/toc-machine-trading/commit/efef559e3937f403263e66039df2f785807d708b))
+* **order:** modify send order sequence to avoid stuck ([3447715](https://github.com/ToC-Taiwan/toc-machine-trading/commit/344771574cc470198ae525ac5e15a0442c88d75a))
+* **tick:** fix wrong tick time from snapshot to tick ([734f89f](https://github.com/ToC-Taiwan/toc-machine-trading/commit/734f89fae60cf2acfe368605dac48606a59b22f7))
+* **trade:** fix wrong first tick time ([3757b1c](https://github.com/ToC-Taiwan/toc-machine-trading/commit/3757b1c299b9519d228d932a2993c935f8e6443c))
+* **ws:** fix wrong ws message type ([9aaea38](https://github.com/ToC-Taiwan/toc-machine-trading/commit/9aaea38a5a4b3ecdc86683feb3a2bcae5dc8d618))
+* **ws:** remove lock for future stream ([e2a5019](https://github.com/ToC-Taiwan/toc-machine-trading/commit/e2a501923ca6118fba8a0e88b0639ec807ca4cbc))
+
+### Features
+
+* **future:** add send future detail in first connect ([fd02f5c](https://github.com/ToC-Taiwan/toc-machine-trading/commit/fd02f5ca78e5338fd05e925e047275956d05222f))
+* **future:** split kbar and send last period to stream ([9a13dc9](https://github.com/ToC-Taiwan/toc-machine-trading/commit/9a13dc95b4d88062a4ad4871647896b66d421f5e))
+* **kbar:** add try last day if kbar is empty, slow down query position ([f66d88b](https://github.com/ToC-Taiwan/toc-machine-trading/commit/f66d88b95d9e8c37145bb765c7a932df886741cd))
+* **order:** add if not stock and not future trade time, cancel update order ([ba05604](https://github.com/ToC-Taiwan/toc-machine-trading/commit/ba056040c4a1c353c7d8666627e83dcb0437e407))
+* **order:** add if simulate mode to get order status from mq ([edb7f2a](https://github.com/ToC-Taiwan/toc-machine-trading/commit/edb7f2a5fb68f4ef7d79265cd89b827799971ada))
+* **order:** add receive order arr from rabbitmq ([3414400](https://github.com/ToC-Taiwan/toc-machine-trading/commit/3414400477ad0b12278b611708a6d5dd4e82d3df))
+* **order:** remove non block order update mode ([f7519be](https://github.com/ToC-Taiwan/toc-machine-trading/commit/f7519be2c574cf99a6de89fa3d8d830a0f998e0b))
+* **order:** split prod and simulate order get method ([92a6132](https://github.com/ToC-Taiwan/toc-machine-trading/commit/92a613209f0891c22f55d1e8e2da523d315b8518))
+* **position:** increase speed of send future position to every second ([80cca93](https://github.com/ToC-Taiwan/toc-machine-trading/commit/80cca93e87926e4a082c40fd7dfae4ca99a66969))
+* **protobuf:** change future trade all json message to proto message ([24c1fec](https://github.com/ToC-Taiwan/toc-machine-trading/commit/24c1feccd55f8079d180219a349e9fbe19973627))
+* **snapshot:** add future detail in future snapshot ([57d2374](https://github.com/ToC-Taiwan/toc-machine-trading/commit/57d23740631925546bb454b8d8e1319264e8d611))
+* **stream:** add kbar in future trade ws ([b8b594b](https://github.com/ToC-Taiwan/toc-machine-trading/commit/b8b594ba5413faed48671a8aeae1152e211e8b69))
+* **subscribe:** add whether subscribe stock or future not ([10102e4](https://github.com/ToC-Taiwan/toc-machine-trading/commit/10102e4d685c24d719e7f153bb37fc035327e43a))
+* **ws:** add lock for future trade ws ([bf33a16](https://github.com/ToC-Taiwan/toc-machine-trading/commit/bf33a16633f6bd81ac74b78da2d54a7f15a878fb))
 
 # [1.6.0](https://github.com/ToC-Taiwan/toc-machine-trading/compare/v1.5.0...v1.6.0) (2022-12-01)
 

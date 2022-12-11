@@ -243,7 +243,6 @@ func (s *StockOrder) ToManual() *StockOrder {
 	s.Manual = true
 	s.GroupID = "-"
 
-	// TODO: check sinopac
 	if time.Since(s.OrderTime) > 12*time.Hour {
 		s.OrderTime = time.Now()
 	}
@@ -306,7 +305,6 @@ func (f *FutureOrder) ToManual() *FutureOrder {
 	f.Manual = true
 	f.GroupID = "-"
 
-	// TODO: check sinopac
 	if time.Since(f.OrderTime) > 12*time.Hour {
 		f.OrderTime = time.Now()
 	}

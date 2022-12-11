@@ -218,8 +218,41 @@ type YahooPrice struct {
 }
 
 type TradeIndex struct {
-	TSE    *StockSnapShot `json:"tse"`
-	OTC    *StockSnapShot `json:"otc"`
-	Nasdaq *YahooPrice    `json:"nasdaq"`
-	NF     *YahooPrice    `json:"nf"`
+	TSE    *IndexStatus `json:"tse"`
+	OTC    *IndexStatus `json:"otc"`
+	Nasdaq *IndexStatus `json:"nasdaq"`
+	NF     *IndexStatus `json:"nf"`
+}
+
+type IndexStatus struct {
+	BreakCount int64   `json:"break_count"`
+	PriceChg   float64 `json:"price_chg"`
+}
+
+func NewIndexStatus() *IndexStatus {
+	return &IndexStatus{
+		BreakCount: 0,
+		PriceChg:   0,
+	}
+}
+
+func (i *IndexStatus) UpdateIndexStatus(priceChange float64) {
+	if i.PriceChg == 0 {
+		i.PriceChg = priceChange
+		return
+	}
+
+	switch {
+	case priceChange > i.PriceChg+0.1:
+		if i.BreakCount < 0 {
+			i.BreakCount = 0
+		}
+		i.BreakCount++
+	case priceChange < i.PriceChg-0.1:
+		if i.BreakCount > 0 {
+			i.BreakCount = 0
+		}
+		i.BreakCount--
+	}
+	i.PriceChg = priceChange
 }

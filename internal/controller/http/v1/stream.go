@@ -28,9 +28,6 @@ func newStreamRoutes(handler *gin.RouterGroup, t usecase.Stream, o usecase.Order
 	{
 		h.GET("/tse/snapshot", r.getTSESnapshot)
 
-		h.GET("/future/switch", r.getFutureSwitchStatus)
-		h.POST("/future/switch", r.modifyFutureSwitch)
-
 		h.GET("/ws/pick-stock", r.servePickStockWS)
 		h.GET("/ws/future", r.serveFutureWS)
 	}
@@ -52,44 +49,6 @@ func (r *streamRoutes) getTSESnapshot(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, snapshot)
-}
-
-type futureSwitch struct {
-	Switch bool `json:"switch"`
-}
-
-// @Summary     getFutureSwitchStatus
-// @Description getFutureSwitchStatus
-// @ID          getFutureSwitchStatus
-// @Tags  	    stream
-// @Accept      json
-// @Produce     json
-// @Success     200 {object} futureSwitch{}
-// @Failure     500 {object} response
-// @Router      /stream/future/switch [get]
-func (r *streamRoutes) getFutureSwitchStatus(c *gin.Context) {
-	c.JSON(http.StatusOK, futureSwitch{r.t.GetFutureTradeSwitchStatus(c.Request.Context())})
-}
-
-// @Summary     modifyFutureSwitch
-// @Description modifyFutureSwitch
-// @ID          modifyFutureSwitch
-// @Tags  	    stream
-// @Accept      json
-// @Produce     json
-// @Param body body futureSwitch{} true "Body"
-// @Success     200
-// @Failure     500 {object} response
-// @Router      /stream/future/switch [post]
-func (r *streamRoutes) modifyFutureSwitch(c *gin.Context) {
-	body := &futureSwitch{}
-	if err := c.BindJSON(body); err != nil {
-		errorResponse(c, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	r.t.TurnFutureTradeSwitch(c.Request.Context(), body.Switch)
-	c.JSON(http.StatusOK, nil)
 }
 
 func (r *streamRoutes) servePickStockWS(c *gin.Context) {

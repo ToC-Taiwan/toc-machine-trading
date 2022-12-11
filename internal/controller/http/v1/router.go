@@ -2,6 +2,8 @@
 package v1
 
 import (
+	"net/http"
+
 	"tmt/docs"
 	"tmt/internal/usecase"
 
@@ -38,6 +40,9 @@ func NewRouter(handler *gin.Engine) *RouterV1 {
 	// Prometheus metrics
 	handler.GET("/metrics", gin.WrapH(promhttp.Handler()))
 
+	// Prometheus metrics
+	handler.GET("/-/health", healthCheck)
+
 	return &RouterV1{
 		g: handler.Group(prefix),
 	}
@@ -71,4 +76,16 @@ func (r *RouterV1) AddHistoryRoutes(handler *gin.Engine, history *usecase.Histor
 // AddStreamRoutes -.
 func (r *RouterV1) AddStreamRoutes(handler *gin.Engine, stream *usecase.StreamUseCase, order usecase.Order, history usecase.History) {
 	newStreamRoutes(r.g, stream, order, history)
+}
+
+// @Summary     healthCheck
+// @Description healthCheck
+// @ID          healthCheck
+// @Tags  	    healthCheck
+// @Accept      json
+// @Produce     json
+// @Success     200 {string} string
+// @Router      /-/health [get]
+func healthCheck(c *gin.Context) {
+	c.JSON(http.StatusOK, "OK")
 }

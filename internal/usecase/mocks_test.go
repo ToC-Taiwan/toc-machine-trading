@@ -1133,20 +1133,6 @@ func (mr *MockStreamMockRecorder) GetFutureSnapshotByCode(code interface{}) *gom
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFutureSnapshotByCode", reflect.TypeOf((*MockStream)(nil).GetFutureSnapshotByCode), code)
 }
 
-// GetFutureTradeSwitchStatus mocks base method.
-func (m *MockStream) GetFutureTradeSwitchStatus(ctx context.Context) bool {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetFutureTradeSwitchStatus", ctx)
-	ret0, _ := ret[0].(bool)
-	return ret0
-}
-
-// GetFutureTradeSwitchStatus indicates an expected call of GetFutureTradeSwitchStatus.
-func (mr *MockStreamMockRecorder) GetFutureTradeSwitchStatus(ctx interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFutureTradeSwitchStatus", reflect.TypeOf((*MockStream)(nil).GetFutureTradeSwitchStatus), ctx)
-}
-
 // GetMainFuture mocks base method.
 func (m *MockStream) GetMainFuture() *entity.Future {
 	m.ctrl.T.Helper()
@@ -1308,18 +1294,6 @@ func (m *MockStream) ReceiveStreamData(ctx context.Context, targetArr []*entity.
 func (mr *MockStreamMockRecorder) ReceiveStreamData(ctx, targetArr interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReceiveStreamData", reflect.TypeOf((*MockStream)(nil).ReceiveStreamData), ctx, targetArr)
-}
-
-// TurnFutureTradeSwitch mocks base method.
-func (m *MockStream) TurnFutureTradeSwitch(ctx context.Context, allow bool) {
-	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "TurnFutureTradeSwitch", ctx, allow)
-}
-
-// TurnFutureTradeSwitch indicates an expected call of TurnFutureTradeSwitch.
-func (mr *MockStreamMockRecorder) TurnFutureTradeSwitch(ctx, allow interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "TurnFutureTradeSwitch", reflect.TypeOf((*MockStream)(nil).TurnFutureTradeSwitch), ctx, allow)
 }
 
 // MockStreamRepo is a mock of StreamRepo interface.

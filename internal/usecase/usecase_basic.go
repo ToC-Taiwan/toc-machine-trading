@@ -28,12 +28,11 @@ type BasicUseCase struct {
 
 // NewBasic -.
 func NewBasic(r BasicRepo, t BasicgRPCAPI) *BasicUseCase {
-	cfg := config.GetConfig()
 	uc := &BasicUseCase{
 		repo:     r,
 		gRPCAPI:  t,
 		tradeDay: tradeday.NewTradeDay(),
-		cfg:      cfg,
+		cfg:      config.GetConfig(),
 	}
 
 	go uc.HealthCheck()
@@ -41,17 +40,14 @@ func NewBasic(r BasicRepo, t BasicgRPCAPI) *BasicUseCase {
 	if err := uc.importCalendarDate(context.Background()); err != nil {
 		log.Panic(err)
 	}
-
 	if _, err := uc.GetAllSinopacStockAndUpdateRepo(context.Background()); err != nil {
 		log.Panic(err)
 	}
-
 	if _, err := uc.GetAllSinopacFutureAndUpdateRepo(context.Background()); err != nil {
 		log.Panic(err)
 	}
 
 	uc.fillBasicInfo()
-
 	bus.SubscribeTopic(event.TopicQueryMonitorFutureCode, uc.pubMonitorFutureCode)
 	return uc
 }

@@ -16,7 +16,7 @@ func (f *futureTradeError) Error() string {
 var (
 	errNotTradeTime      = &futureTradeError{-1, "not trade time"}
 	errNotFilled         = &futureTradeError{-2, "please wait for previous order to be filled"}
-	errAssistNotSupport  = &futureTradeError{-3, "assist only support qty = 1"}
+	errAssistNotSupport  = &futureTradeError{-3, "assist only support qty <= 4"}
 	errUnmarshal         = &futureTradeError{-4, "unmarshal error"}
 	errGetSnapshot       = &futureTradeError{-5, "get snapshot error"}
 	errGetPosition       = &futureTradeError{-6, "get position error"}

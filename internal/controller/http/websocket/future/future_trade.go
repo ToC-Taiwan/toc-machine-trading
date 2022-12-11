@@ -100,7 +100,7 @@ func (w *WSFutureTrade) processClientOrder(client clientOrder) {
 	case w.isAssistingFull():
 		w.SendToClient(newErrMessageProto(errAssitingIsFull))
 		return
-	case client.Option.AutomationType != AutomationNone && client.Qty > 1:
+	case client.Option.AutomationType != AutomationNone && client.Qty > 4:
 		w.SendToClient(newErrMessageProto(errAssistNotSupport))
 		return
 	}
@@ -359,14 +359,7 @@ func (w *WSFutureTrade) sendPosition() {
 }
 
 func (w *WSFutureTrade) generateTradeIndex() *entity.TradeIndex {
-	t := w.s.GetTradeIndex()
-	switch {
-	case t.Nasdaq == nil, t.NF == nil, t.TSE == nil, t.OTC == nil:
-		time.Sleep(time.Second)
-		return w.generateTradeIndex()
-	default:
-		return t
-	}
+	return w.s.GetTradeIndex()
 }
 
 func (w *WSFutureTrade) generatePosition() (entity.FuturePositionArr, error) {

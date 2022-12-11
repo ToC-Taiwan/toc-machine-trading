@@ -457,11 +457,6 @@ definitions:
           $ref: '#/definitions/entity.FutureOrder'
         type: array
     type: object
-  v1.futureSwitch:
-    properties:
-      switch:
-        type: boolean
-    type: object
   v1.manualInsertFutureOrderRequest:
     properties:
       action:
@@ -522,6 +517,22 @@ info:
   title: TOC MACHINE TRADING
   version: 0.0.1
 paths:
+  /-/health:
+    get:
+      consumes:
+      - application/json
+      description: healthCheck
+      operationId: healthCheck
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: healthCheck
+      tags:
+      - healthCheck
   /analyze/reborn:
     get:
       consumes:
@@ -928,50 +939,6 @@ paths:
       summary: moveStockOrderToLatestTradeDay
       tags:
       - order
-  /stream/future/switch:
-    get:
-      consumes:
-      - application/json
-      description: getFutureSwitchStatus
-      operationId: getFutureSwitchStatus
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/v1.futureSwitch'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/v1.response'
-      summary: getFutureSwitchStatus
-      tags:
-      - stream
-    post:
-      consumes:
-      - application/json
-      description: modifyFutureSwitch
-      operationId: modifyFutureSwitch
-      parameters:
-      - description: Body
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/v1.futureSwitch'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/v1.response'
-      summary: modifyFutureSwitch
-      tags:
-      - stream
   /stream/tse/snapshot:
     get:
       consumes:

@@ -20,6 +20,30 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/-/health": {
+            "get": {
+                "description": "healthCheck",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "healthCheck"
+                ],
+                "summary": "healthCheck",
+                "operationId": "healthCheck",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/analyze/reborn": {
             "get": {
                 "description": "getRebornTargets",
@@ -610,72 +634,6 @@ const docTemplate = `{
                         "name": "order-id",
                         "in": "path",
                         "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/v1.response"
-                        }
-                    }
-                }
-            }
-        },
-        "/stream/future/switch": {
-            "get": {
-                "description": "getFutureSwitchStatus",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "stream"
-                ],
-                "summary": "getFutureSwitchStatus",
-                "operationId": "getFutureSwitchStatus",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/v1.futureSwitch"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/v1.response"
-                        }
-                    }
-                }
-            },
-            "post": {
-                "description": "modifyFutureSwitch",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "stream"
-                ],
-                "summary": "modifyFutureSwitch",
-                "operationId": "modifyFutureSwitch",
-                "parameters": [
-                    {
-                        "description": "Body",
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/v1.futureSwitch"
-                        }
                     }
                 ],
                 "responses": {
@@ -1436,14 +1394,6 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/entity.FutureOrder"
                     }
-                }
-            }
-        },
-        "v1.futureSwitch": {
-            "type": "object",
-            "properties": {
-                "switch": {
-                    "type": "boolean"
                 }
             }
         },
