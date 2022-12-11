@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"errors"
 	"sort"
 	"sync"
 	"time"
@@ -92,38 +93,38 @@ func (uc *StreamUseCase) periodUpdateTradeIndex() {
 		NF:     entity.NewIndexStatus(),
 	}
 
+	ctx := context.Background()
 	for range time.NewTicker(time.Second * 5).C {
-		ctx := context.Background()
 		go func() {
-			data, err := uc.GetNasdaqClose()
-			if err != nil {
+			if data, err := uc.GetNasdaqClose(); err != nil {
 				log.Error(err)
+			} else if data != nil {
+				uc.tradeIndex.Nasdaq.UpdateIndexStatus(data.Price - data.Last)
 			}
-			uc.tradeIndex.Nasdaq.UpdateIndexStatus(data.Price - data.Last)
 		}()
 
 		go func() {
-			data, err := uc.GetTSESnapshot(ctx)
-			if err != nil {
+			if data, err := uc.GetTSESnapshot(ctx); err != nil {
 				log.Error(err)
+			} else if data != nil {
+				uc.tradeIndex.TSE.UpdateIndexStatus(data.PriceChg)
 			}
-			uc.tradeIndex.TSE.UpdateIndexStatus(data.PriceChg)
 		}()
 
 		go func() {
-			data, err := uc.GetNasdaqFutureClose()
-			if err != nil {
+			if data, err := uc.GetNasdaqFutureClose(); err != nil {
 				log.Error(err)
+			} else if data != nil {
+				uc.tradeIndex.NF.UpdateIndexStatus(data.Price - data.Last)
 			}
-			uc.tradeIndex.NF.UpdateIndexStatus(data.Price - data.Last)
 		}()
 
 		go func() {
-			data, err := uc.GetOTCSnapshot(ctx)
-			if err != nil {
+			if data, err := uc.GetOTCSnapshot(ctx); err != nil {
 				log.Error(err)
+			} else if data != nil {
+				uc.tradeIndex.OTC.UpdateIndexStatus(data.PriceChg)
 			}
-			uc.tradeIndex.OTC.UpdateIndexStatus(data.PriceChg)
 		}()
 	}
 }
@@ -283,6 +284,10 @@ func (uc *StreamUseCase) GetNasdaqClose() (*entity.YahooPrice, error) {
 		return nil, err
 	}
 
+	if d.GetLast() == 0 || d.GetPrice() == 0 {
+		return nil, errors.New("nasdaq last or price is 0")
+	}
+
 	return &entity.YahooPrice{
 		Last:      d.GetLast(),
 		Price:     d.GetPrice(),
@@ -295,6 +300,11 @@ func (uc *StreamUseCase) GetNasdaqFutureClose() (*entity.YahooPrice, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	if d.GetLast() == 0 || d.GetPrice() == 0 {
+		return nil, errors.New("nf last or price is 0")
+	}
+
 	return &entity.YahooPrice{
 		Last:      d.GetLast(),
 		Price:     d.GetPrice(),
