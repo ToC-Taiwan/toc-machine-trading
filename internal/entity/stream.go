@@ -243,12 +243,12 @@ func (i *IndexStatus) UpdateIndexStatus(priceChange float64) {
 	}
 
 	switch {
-	case priceChange > i.PriceChg+0.1:
+	case priceChange > i.PriceChg:
 		if i.BreakCount < 0 {
 			i.BreakCount = 0
 		}
 		i.BreakCount++
-	case priceChange < i.PriceChg-0.1:
+	case priceChange < i.PriceChg:
 		if i.BreakCount > 0 {
 			i.BreakCount = 0
 		}
