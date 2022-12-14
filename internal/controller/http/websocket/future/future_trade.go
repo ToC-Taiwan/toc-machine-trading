@@ -349,6 +349,10 @@ func (w *WSFutureTrade) sendPosition() {
 			return
 
 		case <-time.After(10 * time.Second):
+			if !w.o.IsFutureTradeTime() {
+				return
+			}
+
 			if position, err := w.generatePosition(); err != nil {
 				w.SendToClient(newErrMessageProto(errGetPosition))
 			} else {
