@@ -2,6 +2,7 @@
 package v1
 
 import (
+	"fmt"
 	"net/http"
 
 	"tmt/docs"
@@ -41,7 +42,7 @@ func NewRouter(handler *gin.Engine) *RouterV1 {
 	handler.GET("/metrics", gin.WrapH(promhttp.Handler()))
 
 	// Prometheus metrics
-	handler.GET("/-/health", healthCheck)
+	handler.GET(fmt.Sprintf("%s/-/health", prefix), healthCheck)
 
 	return &RouterV1{
 		g: handler.Group(prefix),

@@ -76,7 +76,7 @@ func (r *historyRoutes) getKbarData(c *gin.Context) {
 // @Accept      json
 // @Produce     json
 // @param interval path string true "interval"
-// @success 200 {object} trader.TradeBalance
+// @success 200 {object} trader.SimulateBalance
 // @Failure     500 {object} response
 // @Router      /history/simulate/{interval} [get]
 func (r *historyRoutes) simulateFuture(c *gin.Context) {

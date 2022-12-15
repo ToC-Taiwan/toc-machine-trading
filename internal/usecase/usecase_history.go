@@ -643,9 +643,9 @@ func (uc *HistoryUseCase) findExistFutureHistoryClose(date tradeday.TradePeriod,
 	return dbClose, nil
 }
 
-func (uc *HistoryUseCase) GetFutureTradeCond(days int) trader.TradeBalance {
+func (uc *HistoryUseCase) GetFutureTradeCond(days int) trader.SimulateBalance {
 	simulateDateArr := uc.tradeDay.GetLastNFutureTradeDay(days)
-	var balanceArr []trader.TradeBalance
+	var balanceArr []trader.SimulateBalance
 	for _, date := range simulateDateArr {
 		dbTickArrArr, err := uc.findExistFutureHistoryTick(date, uc.simulateFutureCode)
 		if err != nil {
@@ -661,9 +661,7 @@ func (uc *HistoryUseCase) GetFutureTradeCond(days int) trader.TradeBalance {
 		}
 
 		cond := config.FutureAnalyze{
-			MaxHoldTime:         5,
-			TickArrAnalyzeCount: 5,
-			TickArrAnalyzeUnit:  25,
+			MaxHoldTime: 20,
 		}
 
 		log.Infof("Simulating %s %s, last close: %.0f", uc.simulateFutureCode, date.TradeDay.Format(common.ShortTimeLayout), dbClose.Close)
@@ -691,7 +689,7 @@ func (uc *HistoryUseCase) GetFutureTradeCond(days int) trader.TradeBalance {
 		totalBalance += balance.Balance
 	}
 
-	return trader.TradeBalance{
+	return trader.SimulateBalance{
 		Count:   totalCount,
 		Balance: totalBalance,
 	}

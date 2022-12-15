@@ -31,8 +31,6 @@ func (c realTimeStockTickArr) getOutInRatio() float64 {
 			outVolume += v.Volume
 		case 2:
 			inVolume += v.Volume
-		default:
-			continue
 		}
 	}
 
@@ -57,82 +55,65 @@ func (c realTimeStockTickArr) getRSIByTickTime(preTime time.Time, count int) flo
 // realTimeFutureTickArr -.
 type realTimeFutureTickArr []*entity.RealTimeFutureTick
 
-func (c realTimeFutureTickArr) getActionByPeriodOutInRatioTrend(count, unit int) entity.OrderAction {
-	if len(c) == 0 || len(c) < count*unit {
-		return entity.ActionNone
+func (c realTimeFutureTickArr) appendKbar(originalArr *kbarArr) int {
+	if len(c) < 2 {
+		return 0
 	}
 
-	period := []realTimeFutureTickArr{}
-	single := realTimeFutureTickArr{}
-	for i := len(c) - 1; i >= 0; i-- {
-		v := c[i]
-		single = append(single, v)
+	k := kbar{
+		open:     c[0].Close,
+		high:     c[0].Close,
+		low:      c[0].Close,
+		close:    c[0].Close,
+		volume:   c[0].Volume,
+		kbarTime: c[0].TickTime,
+	}
 
-		if len(single)%unit == 0 {
-			period = append(period, single)
+	for i, v := range c[1:] {
+		if v.Close > k.high {
+			k.high = v.Close
 		}
 
-		if len(period) == count {
-			break
+		if v.Close < k.low {
+			k.low = v.Close
+		}
+
+		k.close = v.Close
+		k.volume += v.Volume
+
+		if v.TickTime.Minute() != k.kbarTime.Minute() {
+			k.kbarTime = time.Date(
+				v.TickTime.Year(),
+				v.TickTime.Month(),
+				v.TickTime.Day(),
+				v.TickTime.Hour(),
+				v.TickTime.Minute(),
+				0,
+				0,
+				v.TickTime.Location(),
+			)
+
+			if k.close < k.open {
+				k.kbarType = kbarTypeGreen
+			} else {
+				k.kbarType = kbarTypeRed
+			}
+
+			*originalArr = append(*originalArr, k)
+			return i + 1
 		}
 	}
 
-	arr := outInRatioArr{}
-	for _, v := range period {
-		arr = append(arr, v.getOutInRatio())
-	}
-
-	return arr.getAction(count)
+	return 0
 }
 
-type outInRatioArr []float64
-
-func (o outInRatioArr) getAction(count int) entity.OrderAction {
-	if count%2 != 1 {
-		return entity.ActionNone
+func (c realTimeFutureTickArr) getTotalVolume() int64 {
+	var volume int64
+	for _, v := range c {
+		volume += v.Volume
 	}
-
-	// TODO: out in ratio should come from config
-	middle := count / 2
-	switch {
-	case o[0] > o[middle] && o[middle] > o[count-1] && o[0] < 40:
-		return entity.ActionBuy
-	case o[0] < o[middle] && o[middle] < o[count-1] && o[0] > 60:
-		return entity.ActionSellFirst
-	}
-	return entity.ActionNone
+	return volume
 }
-
-// func (c realTimeFutureTickArr) splitBySecond(last int) []realTimeFutureTickArr {
-// 	if len(c) < 2 {
-// 		return nil
-// 	}
-
-// 	var result []realTimeFutureTickArr
-// 	var tmp realTimeFutureTickArr
-// 	for i := len(c) - 2; i >= 1; i-- {
-// 		if len(result) == last {
-// 			return result
-// 		}
-
-// 		if c[i].TickTime.Second() == c[i-1].TickTime.Second() {
-// 			tmp = append(tmp, c[i])
-// 		} else {
-// 			result = append(result, tmp)
-// 			tmp = realTimeFutureTickArr{c[i]}
-// 		}
-// 	}
-
-// 	return nil
-// }
-
-// func (c realTimeFutureTickArr) getTotalVolume() int64 {
-// 	var volume int64
-// 	for _, v := range c {
-// 		volume += v.Volume
-// 	}
-// 	return volume
-// }
 
 func (c realTimeFutureTickArr) getOutInRatio() float64 {
 	if len(c) == 0 {
@@ -147,14 +128,73 @@ func (c realTimeFutureTickArr) getOutInRatio() float64 {
 		case 2:
 			inVolume += v.Volume
 		default:
-			continue
+			outVolume += v.Volume
 		}
 	}
 	return 100 * float64(outVolume) / float64(outVolume+inVolume)
 }
 
-// TradeBalance -.
-type TradeBalance struct {
-	Count   int64 `json:"count"   yaml:"count"`
-	Balance int64 `json:"balance" yaml:"balance"`
+// func (c realTimeFutureTickArr) splitToMultiPeriod(baseDurtion time.Duration, count int) []realTimeFutureTickArr {
+// 	var duration []time.Duration
+// 	var periodArr []realTimeFutureTickArr
+// 	for i := 1; i <= count; i++ {
+// 		duration = append(duration, baseDurtion*time.Duration(i))
+// 		periodArr = append(periodArr, realTimeFutureTickArr{})
+// 	}
+
+// 	startTime := c[len(c)-1].TickTime
+// 	for _, v := range c {
+// 		gap := startTime.Sub(v.TickTime)
+// 		for i, p := range duration {
+// 			if gap <= p {
+// 				periodArr[i] = append(periodArr[i], v)
+// 			}
+// 		}
+// 	}
+
+// 	return periodArr
+// }
+
+// SimulateBalance -.
+type SimulateBalance struct {
+	Count   int64 `json:"count"`
+	Balance int64 `json:"balance"`
+}
+
+type kbarType int
+
+const (
+	kbarTypeRed kbarType = iota + 1
+	kbarTypeGreen
+)
+
+type kbar struct {
+	kbarType
+	kbarTime time.Time
+	open     float64
+	high     float64
+	low      float64
+	close    float64
+	volume   int64
+}
+
+type kbarArr []kbar
+
+func (k kbarArr) isStable(count, limit int) bool {
+	if len(k) < count {
+		return false
+	}
+
+	var diff float64
+	var try int
+	start := k[len(k)-1].close
+	for i := len(k) - 2; i >= 0; i-- {
+		diff += k[i].close - start
+		try++
+		if try >= count {
+			break
+		}
+	}
+
+	return diff < float64(limit) && diff > 0
 }

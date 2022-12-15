@@ -18,22 +18,26 @@ import (
 type FutureSimulator struct {
 	code          string
 	orderQuantity int64
+	tickChan      chan *entity.RealTimeFutureTick
 
-	orderMap map[entity.OrderAction][]*entity.FutureOrder
+	orderMap           map[entity.OrderAction][]*entity.FutureOrder
+	lastPlaceOrderTime time.Time
+	tradeOutPrice      float64
 
 	quota *quota.Quota
 
-	tickArr realTimeFutureTickArr
-
+	tickArr  realTimeFutureTickArr
+	kbarArr  kbarArr
 	lastTick *entity.RealTimeFutureTick
-	tickChan chan *entity.RealTimeFutureTick
 
 	analyzeCfg config.FutureAnalyze
-
-	simDone bool
+	simDone    bool
 
 	firstTradePeriod  []time.Time
 	secondTradePeriod []time.Time
+
+	tradeRate  float64
+	checkPoint time.Time
 }
 
 // NewFutureSimulator -.
@@ -41,7 +45,7 @@ func NewFutureSimulator(code string, analyzeCfg config.FutureAnalyze, period tra
 	cfg := config.GetConfig()
 	t := &FutureSimulator{
 		code:              code,
-		orderQuantity:     2,
+		orderQuantity:     1,
 		orderMap:          make(map[entity.OrderAction][]*entity.FutureOrder),
 		tickChan:          make(chan *entity.RealTimeFutureTick),
 		analyzeCfg:        analyzeCfg,
@@ -54,6 +58,11 @@ func NewFutureSimulator(code string, analyzeCfg config.FutureAnalyze, period tra
 	return t
 }
 
+// GetTickChan -.
+func (o *FutureSimulator) GetTickChan() chan *entity.RealTimeFutureTick {
+	return o.tickChan
+}
+
 // SimulateRoom -.
 func (o *FutureSimulator) SimulateRoom() {
 	for {
@@ -62,6 +71,16 @@ func (o *FutureSimulator) SimulateRoom() {
 		if len(o.tickArr) == 2 {
 			o.tickArr = o.tickArr[1:]
 			o.lastTick = tick
+			o.checkPoint = time.Date(
+				tick.TickTime.Year(),
+				tick.TickTime.Month(),
+				tick.TickTime.Day(),
+				tick.TickTime.Hour(),
+				tick.TickTime.Minute(),
+				tick.TickTime.Second(),
+				0,
+				tick.TickTime.Location(),
+			)
 			break
 		}
 	}
@@ -73,12 +92,13 @@ func (o *FutureSimulator) SimulateRoom() {
 			break
 		}
 
-		if tick.TickTime.Minute() != o.lastTick.TickTime.Minute() {
-			o.placeFutureOrder(o.generateOrder())
-		}
-
 		o.lastTick = tick
 		o.tickArr = append(o.tickArr, tick)
+		o.tickArr = o.tickArr[o.tickArr.appendKbar(&o.kbarArr):]
+		if o.checkPoint.Before(tick.TickTime) {
+			o.checkPoint = o.checkPoint.Add(time.Second)
+			o.placeFutureOrder(o.generateOrder())
+		}
 	}
 }
 
@@ -87,7 +107,24 @@ func (o *FutureSimulator) generateOrder() *entity.FutureOrder {
 		return o.generateTradeOutOrder(postOrderAction, preOrder)
 	}
 
-	act := o.tickArr.getActionByPeriodOutInRatioTrend(o.analyzeCfg.TickArrAnalyzeCount, o.analyzeCfg.TickArrAnalyzeUnit)
+	act := entity.ActionNone
+	ratio, rate := o.getTradeRate()
+	if o.kbarArr.isStable(5, 3) && o.lastTick.TickTime.After(o.lastPlaceOrderTime.Add(time.Minute)) {
+		if rate/o.tradeRate > 5 {
+			switch {
+			case ratio > 55:
+				act = entity.ActionBuy
+				o.tradeOutPrice = o.lastTick.Close
+				o.lastPlaceOrderTime = o.lastTick.TickTime
+			case ratio < 45:
+				act = entity.ActionSellFirst
+				o.tradeOutPrice = o.lastTick.Close
+				o.lastPlaceOrderTime = o.lastTick.TickTime
+			}
+		}
+	}
+	o.tradeRate = rate
+
 	if act == entity.ActionNone {
 		return nil
 	}
@@ -104,6 +141,17 @@ func (o *FutureSimulator) generateOrder() *entity.FutureOrder {
 	}
 }
 
+func (o *FutureSimulator) getTradeRate() (float64, float64) {
+	var tmp realTimeFutureTickArr
+	for i := len(o.tickArr) - 1; i >= 0; i-- {
+		if o.tickArr[i].TickTime.Before(o.checkPoint.Add(-10 * time.Second)) {
+			break
+		}
+		tmp = append(tmp, o.tickArr[i])
+	}
+	return tmp.getOutInRatio(), float64(tmp.getTotalVolume()) / 10
+}
+
 func (o *FutureSimulator) generateTradeOutOrder(postOrderAction entity.OrderAction, preOrder *entity.FutureOrder) *entity.FutureOrder {
 	order := &entity.FutureOrder{
 		Code: o.code,
@@ -118,6 +166,28 @@ func (o *FutureSimulator) generateTradeOutOrder(postOrderAction entity.OrderActi
 
 	if o.lastTick.TickTime.After(preOrder.TickTime.Add(time.Duration(o.analyzeCfg.MaxHoldTime) * time.Minute)) {
 		return order
+	}
+
+	switch postOrderAction {
+	case entity.ActionSell:
+		if order.Price > o.tradeOutPrice {
+			return nil
+		}
+		o.tradeOutPrice = order.Price
+
+		if order.Price > preOrder.Price+2 || order.Price < preOrder.Price-1 {
+			return order
+		}
+
+	case entity.ActionBuyLater:
+		if order.Price < o.tradeOutPrice {
+			return nil
+		}
+		o.tradeOutPrice = order.Price
+
+		if order.Price < preOrder.Price-2 || order.Price > preOrder.Price+1 {
+			return order
+		}
 	}
 
 	return nil
@@ -140,11 +210,6 @@ func (o *FutureSimulator) placeFutureOrder(order *entity.FutureOrder) {
 	o.orderMap[order.Action] = append(o.orderMap[order.Action], order)
 }
 
-// GetTickChan -.
-func (o *FutureSimulator) GetTickChan() chan *entity.RealTimeFutureTick {
-	return o.tickChan
-}
-
 func (o *FutureSimulator) checkNeededPost() (entity.OrderAction, *entity.FutureOrder) {
 	if len(o.orderMap[entity.ActionBuy]) > len(o.orderMap[entity.ActionSell]) {
 		return entity.ActionSell, o.orderMap[entity.ActionBuy][len(o.orderMap[entity.ActionSell])]
@@ -158,7 +223,7 @@ func (o *FutureSimulator) checkNeededPost() (entity.OrderAction, *entity.FutureO
 }
 
 // CalculateFutureTradeBalance -.
-func (o *FutureSimulator) CalculateFutureTradeBalance() TradeBalance {
+func (o *FutureSimulator) CalculateFutureTradeBalance() SimulateBalance {
 	for {
 		if o.simDone {
 			break
@@ -172,7 +237,7 @@ func (o *FutureSimulator) CalculateFutureTradeBalance() TradeBalance {
 	}
 
 	if len(orderList) == 0 {
-		return TradeBalance{}
+		return SimulateBalance{}
 	}
 
 	sort.Slice(orderList, func(i, j int) bool {
@@ -204,7 +269,7 @@ func (o *FutureSimulator) CalculateFutureTradeBalance() TradeBalance {
 	}
 
 	log.Warnf("#%3d Total: %d", tradeCount+1, forwardBalance+revereBalance)
-	return TradeBalance{
+	return SimulateBalance{
 		Count:   tradeCount,
 		Balance: forwardBalance + revereBalance,
 	}

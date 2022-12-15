@@ -62,30 +62,11 @@ type RealTimeFutureTick struct {
 	PctChg          float64   `json:"pct_chg"`
 }
 
-type RealTimeFutureTickArr []*RealTimeFutureTick
-
-func (r RealTimeFutureTickArr) GetOutInVolume() OutInVolume {
-	var outInVolume OutInVolume
-	for _, tick := range r {
-		switch tick.TickType {
-		case 1:
-			outInVolume.OutVolume += tick.Volume
-		case 2:
-			outInVolume.InVolume += tick.Volume
-		}
-	}
-	return outInVolume
-}
-
-type OutInVolume struct {
-	OutVolume int64 `json:"out_volume"`
-	InVolume  int64 `json:"in_volume"`
-}
-
 // RealTimeStockBidAsk -.
 type RealTimeStockBidAsk struct {
 	StockNum string `json:"stock_num"`
 	Stock    *Stock `json:"stock"`
+
 	BidAskBase
 }
 
@@ -99,6 +80,7 @@ type FutureRealTimeBidAsk struct {
 	FirstDerivedAskPrice float64 `json:"first_derived_ask_price"`
 	FirstDerivedBidVol   int64   `json:"first_derived_bid_vol"`
 	FirstDerivedAskVol   int64   `json:"first_derived_ask_vol"`
+
 	BidAskBase
 }
 
@@ -141,6 +123,7 @@ type BidAskBase struct {
 type StockSnapShot struct {
 	StockNum  string `json:"stock_num"`
 	StockName string `json:"stock_name"`
+
 	SnapShotBase
 }
 
@@ -148,6 +131,7 @@ type StockSnapShot struct {
 type FutureSnapShot struct {
 	Code       string `json:"code"`
 	FutureName string `json:"future_name"`
+
 	SnapShotBase
 }
 
@@ -217,13 +201,6 @@ type YahooPrice struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
-type TradeIndex struct {
-	TSE    *IndexStatus `json:"tse"`
-	OTC    *IndexStatus `json:"otc"`
-	Nasdaq *IndexStatus `json:"nasdaq"`
-	NF     *IndexStatus `json:"nf"`
-}
-
 type IndexStatus struct {
 	BreakCount int64   `json:"break_count"`
 	PriceChg   float64 `json:"price_chg"`
@@ -234,6 +211,13 @@ func NewIndexStatus() *IndexStatus {
 		BreakCount: 0,
 		PriceChg:   0,
 	}
+}
+
+type TradeIndex struct {
+	TSE    *IndexStatus `json:"tse"`
+	OTC    *IndexStatus `json:"otc"`
+	Nasdaq *IndexStatus `json:"nasdaq"`
+	NF     *IndexStatus `json:"nf"`
 }
 
 func (i *IndexStatus) UpdateIndexStatus(priceChange float64) {

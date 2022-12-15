@@ -17,12 +17,15 @@ type FutureTrader struct {
 	code          string
 	orderQuantity int64
 
-	orderMapLock sync.RWMutex
-	orderMap     map[entity.OrderAction][]*entity.FutureOrder
+	orderMapLock       sync.RWMutex
+	orderMap           map[entity.OrderAction][]*entity.FutureOrder
+	lastPlaceOrderTime time.Time
+	tradeOutPrice      float64
 
 	waitingOrder *entity.FutureOrder
 
 	tickArr  realTimeFutureTickArr
+	kbarArr  kbarArr
 	lastTick *entity.RealTimeFutureTick
 	// lastBidAsk *entity.FutureRealTimeBidAsk
 
@@ -35,6 +38,9 @@ type FutureTrader struct {
 	futureTradeInSwitch bool
 
 	tradeOutRecord map[string]int
+
+	tradeRate  float64
+	checkPoint time.Time
 }
 
 // NewFutureTrader -.
@@ -83,6 +89,16 @@ func (o *FutureTrader) TradingRoom() {
 		if len(o.tickArr) == 2 {
 			o.tickArr = o.tickArr[1:]
 			o.lastTick = tick
+			o.checkPoint = time.Date(
+				tick.TickTime.Year(),
+				tick.TickTime.Month(),
+				tick.TickTime.Day(),
+				tick.TickTime.Hour(),
+				tick.TickTime.Minute(),
+				tick.TickTime.Second(),
+				0,
+				tick.TickTime.Location(),
+			)
 			break
 		}
 	}
@@ -95,6 +111,11 @@ func (o *FutureTrader) TradingRoom() {
 
 		o.lastTick = tick
 		o.tickArr = append(o.tickArr, tick)
+		o.tickArr = o.tickArr[o.tickArr.appendKbar(&o.kbarArr):]
+		if o.checkPoint.Before(tick.TickTime) {
+			o.checkPoint = o.checkPoint.Add(time.Second)
+			o.placeFutureOrder(o.generateOrder())
+		}
 	}
 }
 
@@ -107,7 +128,24 @@ func (o *FutureTrader) generateOrder() *entity.FutureOrder {
 		return o.generateTradeOutOrder(postOrderAction, preOrder)
 	}
 
-	act := o.tickArr.getActionByPeriodOutInRatioTrend(o.analyzeCfg.TickArrAnalyzeCount, o.analyzeCfg.TickArrAnalyzeUnit)
+	act := entity.ActionNone
+	ratio, rate := o.getTradeRate()
+	if o.kbarArr.isStable(5, 3) && o.lastTick.TickTime.After(o.lastPlaceOrderTime.Add(time.Minute)) {
+		if rate/o.tradeRate > 5 {
+			switch {
+			case ratio > 55:
+				act = entity.ActionBuy
+				o.tradeOutPrice = o.lastTick.Close
+				o.lastPlaceOrderTime = o.lastTick.TickTime
+			case ratio < 45:
+				act = entity.ActionSellFirst
+				o.tradeOutPrice = o.lastTick.Close
+				o.lastPlaceOrderTime = o.lastTick.TickTime
+			}
+		}
+	}
+	o.tradeRate = rate
+
 	if act == entity.ActionNone {
 		return nil
 	}
@@ -125,6 +163,17 @@ func (o *FutureTrader) generateOrder() *entity.FutureOrder {
 	}
 }
 
+func (o *FutureTrader) getTradeRate() (float64, float64) {
+	var tmp realTimeFutureTickArr
+	for i := len(o.tickArr) - 1; i >= 0; i-- {
+		if o.tickArr[i].TickTime.Before(o.checkPoint.Add(-10 * time.Second)) {
+			break
+		}
+		tmp = append(tmp, o.tickArr[i])
+	}
+	return tmp.getOutInRatio(), float64(tmp.getTotalVolume()) / 10
+}
+
 func (o *FutureTrader) generateTradeOutOrder(postOrderAction entity.OrderAction, preOrder *entity.FutureOrder) *entity.FutureOrder {
 	order := &entity.FutureOrder{
 		Code: o.code,
@@ -140,6 +189,28 @@ func (o *FutureTrader) generateTradeOutOrder(postOrderAction entity.OrderAction,
 
 	if o.lastTick.TickTime.After(preOrder.TickTime.Add(time.Duration(o.analyzeCfg.MaxHoldTime) * time.Minute)) {
 		return order
+	}
+
+	switch postOrderAction {
+	case entity.ActionSell:
+		if order.Price > o.tradeOutPrice {
+			return nil
+		}
+		o.tradeOutPrice = order.Price
+
+		if order.Price > preOrder.Price+2 || order.Price < preOrder.Price-1 {
+			return order
+		}
+
+	case entity.ActionBuyLater:
+		if order.Price < o.tradeOutPrice {
+			return nil
+		}
+		o.tradeOutPrice = order.Price
+
+		if order.Price < preOrder.Price-2 || order.Price > preOrder.Price+1 {
+			return order
+		}
 	}
 
 	return nil

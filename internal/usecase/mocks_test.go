@@ -632,10 +632,10 @@ func (mr *MockHistoryMockRecorder) GetDayKbarByStockNumDate(stockNum, date inter
 }
 
 // GetFutureTradeCond mocks base method.
-func (m *MockHistory) GetFutureTradeCond(days int) trader.TradeBalance {
+func (m *MockHistory) GetFutureTradeCond(days int) trader.SimulateBalance {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetFutureTradeCond", days)
-	ret0, _ := ret[0].(trader.TradeBalance)
+	ret0, _ := ret[0].(trader.SimulateBalance)
 	return ret0
 }
 

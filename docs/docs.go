@@ -271,7 +271,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/trader.TradeBalance"
+                            "$ref": "#/definitions/trader.SimulateBalance"
                         }
                     },
                     "500": {
@@ -757,12 +757,6 @@ const docTemplate = `{
             "properties": {
                 "max_hold_time": {
                     "type": "number"
-                },
-                "tick_arr_analyze_count": {
-                    "type": "integer"
-                },
-                "tick_arr_analyze_unit": {
-                    "type": "integer"
                 }
             }
         },
@@ -1350,7 +1344,7 @@ const docTemplate = `{
                 }
             }
         },
-        "trader.TradeBalance": {
+        "trader.SimulateBalance": {
             "type": "object",
             "properties": {
                 "balance": {

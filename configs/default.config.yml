@@ -37,7 +37,7 @@ target_cond:
         - low: 10
           high: 35
 
-simulation: false
+simulation: true
 
 stock_trade_switch:
     allow_trade: false
@@ -62,16 +62,14 @@ stock_analyze:
 
 future_trade_switch:
     allow_trade: false
-    subscribe: true
+    subscribe: false
     quantity: 1
     trade_in_wait_time: 10 # unit: seccond
     trade_out_wait_time: 20 # unit: seccond
     cancel_wait_time: 30 # unit: seccond
     trade_time_range:
-        first_part_duration: 0 # duration: minute 04:00:00(780/840)
-        second_part_duration: 150 # duration: minute 13:05:00(260/300)
+        first_part_duration: 780 # duration: minute 04:00:00(780/840)
+        second_part_duration: 260 # duration: minute 13:05:00(260/300)
 
 future_analyze:
     max_hold_time: 5 # unit: minute
-    tick_arr_analyze_count: 5
-    tick_arr_analyze_unit: 25
