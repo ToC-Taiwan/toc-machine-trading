@@ -42,6 +42,7 @@ type assistTrader struct {
 	waitingOrder       *entity.FutureOrder             // waiting order
 	tickChan           chan *entity.RealTimeFutureTick // tick channel
 	done               bool                            // done flag
+	tradeOutPrice      float64                         // trade out price
 }
 
 // newAssistTrader will return a assist trader
@@ -51,6 +52,7 @@ func newAssistTrader(ctx context.Context, target *assistTarget) *assistTrader {
 		assistTarget:   target,
 		finishOrderMap: make(map[string]*entity.FutureOrder),
 		tickChan:       make(chan *entity.RealTimeFutureTick),
+		tradeOutPrice:  target.Price,
 	}
 
 	go a.processTick()
@@ -134,13 +136,25 @@ func (a *assistTrader) checkByTime(tick *entity.RealTimeFutureTick) {
 
 // halfAutomationOption is the option for assist trader
 func (a *assistTrader) checkByBalance(tick *entity.RealTimeFutureTick) {
+	defer func() {
+		a.tradeOutPrice = tick.Close
+	}()
+
 	switch a.Action {
 	case entity.ActionBuy:
+		if tick.Close > a.tradeOutPrice {
+			return
+		}
+
 		if tick.Close <= a.Price+a.ByBalanceLow || tick.Close >= a.Price+a.ByBalanceHigh {
 			a.placeAssistOrder(tick.Close)
 		}
 
 	case entity.ActionSell:
+		if tick.Close < a.tradeOutPrice {
+			return
+		}
+
 		if tick.Close >= a.Price-a.ByBalanceLow || tick.Close <= a.Price-a.ByBalanceHigh {
 			a.placeAssistOrder(tick.Close)
 		}
@@ -149,14 +163,26 @@ func (a *assistTrader) checkByBalance(tick *entity.RealTimeFutureTick) {
 
 // halfAutomationOption is the option for assist trader
 func (a *assistTrader) checkByTimeAndBalance(tick *entity.RealTimeFutureTick) {
+	defer func() {
+		a.tradeOutPrice = tick.Close
+	}()
+
 	switch a.Action {
 	case entity.ActionBuy:
+		if tick.Close > a.tradeOutPrice {
+			return
+		}
+
 		if tick.Close <= a.Price+a.ByBalanceLow || tick.Close >= a.Price+a.ByBalanceHigh {
 			a.placeAssistOrder(tick.Close)
 			return
 		}
 
 	case entity.ActionSell:
+		if tick.Close < a.tradeOutPrice {
+			return
+		}
+
 		if tick.Close >= a.Price-a.ByBalanceLow || tick.Close <= a.Price-a.ByBalanceHigh {
 			a.placeAssistOrder(tick.Close)
 			return
