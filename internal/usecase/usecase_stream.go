@@ -59,10 +59,10 @@ func NewStream(r StreamRepo, g StreamgRPCAPI, t StreamRabbit) *StreamUseCase {
 		tradeDay:     tradeday.NewTradeDay(),
 	}
 	t.FillAllBasic(uc.basic.AllStocks, uc.basic.AllFutures)
+	uc.periodUpdateTradeIndex()
 
 	go uc.ReceiveEvent(context.Background())
 	go uc.ReceiveOrderStatus(context.Background())
-	go uc.periodUpdateTradeIndex()
 
 	go func() {
 		time.Sleep(time.Until(cc.GetBasicInfo().TradeDay.Add(time.Hour * 9)))
@@ -93,25 +93,44 @@ func (uc *StreamUseCase) periodUpdateTradeIndex() {
 		NF:     entity.NewIndexStatus(),
 	}
 
+	go uc.updateNasdaqIndex()
+	go uc.updateNFIndex()
+	go uc.updateTSEIndex()
+	go uc.updateOTCIndex()
+}
+
+func (uc *StreamUseCase) updateNasdaqIndex() {
 	for range time.NewTicker(time.Second * 5).C {
 		if data, err := uc.GetNasdaqClose(); err != nil && !errors.Is(err, errNasdaqPriceAbnormal) {
 			log.Error(err)
 		} else if data != nil {
 			uc.tradeIndex.Nasdaq.UpdateIndexStatus(data.Price - data.Last)
 		}
+	}
+}
 
-		if data, err := uc.GetTSESnapshot(context.Background()); err != nil {
-			log.Error(err)
-		} else {
-			uc.tradeIndex.TSE.UpdateIndexStatus(data.PriceChg)
-		}
-
+func (uc *StreamUseCase) updateNFIndex() {
+	for range time.NewTicker(time.Second * 5).C {
 		if data, err := uc.GetNasdaqFutureClose(); err != nil && !errors.Is(err, errNFQPriceAbnormal) {
 			log.Error(err)
 		} else if data != nil {
 			uc.tradeIndex.NF.UpdateIndexStatus(data.Price - data.Last)
 		}
+	}
+}
 
+func (uc *StreamUseCase) updateTSEIndex() {
+	for range time.NewTicker(time.Second * 3).C {
+		if data, err := uc.GetTSESnapshot(context.Background()); err != nil {
+			log.Error(err)
+		} else {
+			uc.tradeIndex.TSE.UpdateIndexStatus(data.PriceChg)
+		}
+	}
+}
+
+func (uc *StreamUseCase) updateOTCIndex() {
+	for range time.NewTicker(time.Second * 3).C {
 		if data, err := uc.GetOTCSnapshot(context.Background()); err != nil {
 			log.Error(err)
 		} else {
