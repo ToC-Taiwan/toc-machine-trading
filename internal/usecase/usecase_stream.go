@@ -96,7 +96,7 @@ func (uc *StreamUseCase) periodUpdateTradeIndex() {
 	for range time.NewTicker(time.Second * 5).C {
 		if data, err := uc.GetNasdaqClose(); err != nil && !errors.Is(err, errNasdaqPriceAbnormal) {
 			log.Error(err)
-		} else {
+		} else if data != nil {
 			uc.tradeIndex.Nasdaq.UpdateIndexStatus(data.Price - data.Last)
 		}
 
@@ -108,7 +108,7 @@ func (uc *StreamUseCase) periodUpdateTradeIndex() {
 
 		if data, err := uc.GetNasdaqFutureClose(); err != nil && !errors.Is(err, errNFQPriceAbnormal) {
 			log.Error(err)
-		} else {
+		} else if data != nil {
 			uc.tradeIndex.NF.UpdateIndexStatus(data.Price - data.Last)
 		}
 
