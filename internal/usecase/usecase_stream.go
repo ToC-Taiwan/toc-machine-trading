@@ -93,39 +93,30 @@ func (uc *StreamUseCase) periodUpdateTradeIndex() {
 		NF:     entity.NewIndexStatus(),
 	}
 
-	ctx := context.Background()
 	for range time.NewTicker(time.Second * 5).C {
-		go func() {
-			if data, err := uc.GetNasdaqClose(); err != nil {
-				log.Error(err)
-			} else if data != nil {
-				uc.tradeIndex.Nasdaq.UpdateIndexStatus(data.Price - data.Last)
-			}
-		}()
+		if data, err := uc.GetNasdaqClose(); err != nil && !errors.Is(err, errNasdaqPriceAbnormal) {
+			log.Error(err)
+		} else {
+			uc.tradeIndex.Nasdaq.UpdateIndexStatus(data.Price - data.Last)
+		}
 
-		go func() {
-			if data, err := uc.GetTSESnapshot(ctx); err != nil {
-				log.Error(err)
-			} else if data != nil {
-				uc.tradeIndex.TSE.UpdateIndexStatus(data.PriceChg)
-			}
-		}()
+		if data, err := uc.GetTSESnapshot(context.Background()); err != nil {
+			log.Error(err)
+		} else {
+			uc.tradeIndex.TSE.UpdateIndexStatus(data.PriceChg)
+		}
 
-		go func() {
-			if data, err := uc.GetNasdaqFutureClose(); err != nil {
-				log.Error(err)
-			} else if data != nil {
-				uc.tradeIndex.NF.UpdateIndexStatus(data.Price - data.Last)
-			}
-		}()
+		if data, err := uc.GetNasdaqFutureClose(); err != nil && !errors.Is(err, errNFQPriceAbnormal) {
+			log.Error(err)
+		} else {
+			uc.tradeIndex.NF.UpdateIndexStatus(data.Price - data.Last)
+		}
 
-		go func() {
-			if data, err := uc.GetOTCSnapshot(ctx); err != nil {
-				log.Error(err)
-			} else if data != nil {
-				uc.tradeIndex.OTC.UpdateIndexStatus(data.PriceChg)
-			}
-		}()
+		if data, err := uc.GetOTCSnapshot(context.Background()); err != nil {
+			log.Error(err)
+		} else {
+			uc.tradeIndex.OTC.UpdateIndexStatus(data.PriceChg)
+		}
 	}
 }
 
@@ -278,6 +269,11 @@ func (uc *StreamUseCase) GetOTCSnapshot(ctx context.Context) (*entity.StockSnapS
 	}, nil
 }
 
+var (
+	errNasdaqPriceAbnormal error = errors.New("nasdaq price abnormal")
+	errNFQPriceAbnormal    error = errors.New("nfq price abnormal")
+)
+
 func (uc *StreamUseCase) GetNasdaqClose() (*entity.YahooPrice, error) {
 	d, err := uc.grpcapi.GetNasdaq()
 	if err != nil {
@@ -285,7 +281,7 @@ func (uc *StreamUseCase) GetNasdaqClose() (*entity.YahooPrice, error) {
 	}
 
 	if d.GetLast() == 0 || d.GetPrice() == 0 {
-		return nil, errors.New("nasdaq last or price is 0")
+		return nil, errNasdaqPriceAbnormal
 	}
 
 	return &entity.YahooPrice{
@@ -302,7 +298,7 @@ func (uc *StreamUseCase) GetNasdaqFutureClose() (*entity.YahooPrice, error) {
 	}
 
 	if d.GetLast() == 0 || d.GetPrice() == 0 {
-		return nil, errors.New("nf last or price is 0")
+		return nil, errNFQPriceAbnormal
 	}
 
 	return &entity.YahooPrice{
