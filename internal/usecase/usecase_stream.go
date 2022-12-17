@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"errors"
 	"sort"
 	"sync"
 	"time"
@@ -284,8 +285,7 @@ func (uc *StreamUseCase) GetNasdaqClose() (*entity.YahooPrice, error) {
 	}
 
 	if d.GetLast() == 0 || d.GetPrice() == 0 {
-		log.Warn("nasdaq last or price is 0")
-		return nil, nil
+		return nil, errors.New("nasdaq last or price is 0")
 	}
 
 	return &entity.YahooPrice{
@@ -302,8 +302,7 @@ func (uc *StreamUseCase) GetNasdaqFutureClose() (*entity.YahooPrice, error) {
 	}
 
 	if d.GetLast() == 0 || d.GetPrice() == 0 {
-		log.Warn("nf last or price is 0")
-		return nil, nil
+		return nil, errors.New("nf last or price is 0")
 	}
 
 	return &entity.YahooPrice{
