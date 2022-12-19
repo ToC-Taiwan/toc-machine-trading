@@ -14,14 +14,14 @@ func (f *futureTradeError) Error() string {
 }
 
 var (
-	errNotTradeTime      = &futureTradeError{-1, "not trade time"}
-	errNotFilled         = &futureTradeError{-2, "please wait for previous order to be filled"}
-	errAssistNotSupport  = &futureTradeError{-3, "assist only support qty <= 4"}
-	errUnmarshal         = &futureTradeError{-4, "unmarshal error"}
-	errGetSnapshot       = &futureTradeError{-5, "get snapshot error"}
-	errGetPosition       = &futureTradeError{-6, "get position error"}
-	errPlaceOrder        = &futureTradeError{-7, "place order error"}
-	errCancelOrderFailed = &futureTradeError{-8, "cancel order failed"}
-	errAssitingIsFull    = &futureTradeError{-9, "assisting is full"}
-	errGetKbarFail       = &futureTradeError{-10, "get kbar fail"}
+	errNotTradeTime          = &futureTradeError{-1, "not trade time"}
+	errNotFilled             = &futureTradeError{-2, "please wait for previous order to be filled"}
+	errAssistNotSupport      = &futureTradeError{-3, "assist only support qty <= 4"}
+	errUnmarshal             = &futureTradeError{-4, "unmarshal error"}
+	errGetSnapshot           = &futureTradeError{-5, "get snapshot error"}
+	errGetPosition           = &futureTradeError{-6, "get position error"}
+	errPlaceOrder            = &futureTradeError{-7, "place order error"}
+	errCancelOrderFailed     = &futureTradeError{-8, "cancel order failed"}
+	errAssitingIsNotFinished = &futureTradeError{-9, "assist is not finished"}
+	errGetKbarFail           = &futureTradeError{-10, "get kbar fail"}
 )

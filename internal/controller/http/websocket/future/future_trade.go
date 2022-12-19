@@ -29,7 +29,7 @@ type WSFutureTrade struct {
 	assistTickChanMapLock sync.RWMutex
 
 	// if waiting manual is not nil, will not accept new order
-	waitingManualOrder *entity.FutureOrder
+	waitingList *waitingList
 
 	// save manual order or order from assist
 	orderMap           map[string]*entity.FutureOrder
@@ -58,6 +58,7 @@ func StartWSFutureTrade(c *gin.Context, s usecase.Stream, o usecase.Order, h use
 		cancelOrderMap:         make(map[string]*entity.FutureOrder),
 		WSRouter:               websocket.NewWSRouter(c),
 		Bus:                    event.Get(true),
+		waitingList:            newWaitingList(),
 	}
 
 	forwardChan := make(chan []byte)
@@ -94,45 +95,46 @@ func (w *WSFutureTrade) processClientOrder(client clientOrder) {
 	case !w.o.IsFutureTradeTime():
 		w.SendToClient(newErrMessageProto(errNotTradeTime))
 		return
-	case w.waitingManualOrder != nil:
+	case !w.waitingList.empty():
 		w.SendToClient(newErrMessageProto(errNotFilled))
 		return
-	case w.isAssistingFull():
-		w.SendToClient(newErrMessageProto(errAssitingIsFull))
+	case !w.isAssistingFinish():
+		w.SendToClient(newErrMessageProto(errAssitingIsNotFinished))
 		return
 	case client.Option.AutomationType != AutomationNone && client.Qty > 4:
 		w.SendToClient(newErrMessageProto(errAssistNotSupport))
 		return
 	}
 
-	o := w.placeOrder(client.toFutureOrder())
-	if o == nil {
-		w.SendToClient(newErrMessageProto(errPlaceOrder))
-		return
-	}
-	w.waitingManualOrder = o
-
-	if client.Option.AutomationType != AutomationNone {
-		// save assist target, wait for order status update
-		w.assistTargetWaitingMapLock.Lock()
-		w.assistTargetWaitingMap[o.OrderID] = &assistTarget{
-			WSFutureTrade:        w,
-			FutureOrder:          o,
-			halfAutomationOption: client.Option,
+	for _, order := range client.toFutureOrderArr() {
+		o := w.placeOrder(order)
+		if o == nil {
+			w.SendToClient(newErrMessageProto(errPlaceOrder))
+			return
 		}
-		w.assistTargetWaitingMapLock.Unlock()
-	} else {
-		// save manual order, it has timeout
-		w.orderMapLock.Lock()
-		w.orderMap[o.OrderID] = o
-		w.orderMapLock.Unlock()
+		w.waitingList.add(o)
+		if client.Option.AutomationType != AutomationNone {
+			// save assist target, wait for order status update
+			w.assistTargetWaitingMapLock.Lock()
+			w.assistTargetWaitingMap[o.OrderID] = &assistTarget{
+				WSFutureTrade:        w,
+				FutureOrder:          o,
+				halfAutomationOption: client.Option,
+			}
+			w.assistTargetWaitingMapLock.Unlock()
+		} else {
+			// save manual order, it has timeout
+			w.orderMapLock.Lock()
+			w.orderMap[o.OrderID] = o
+			w.orderMapLock.Unlock()
+		}
 	}
 }
 
-func (w *WSFutureTrade) isAssistingFull() bool {
+func (w *WSFutureTrade) isAssistingFinish() bool {
 	defer w.assistTickChanMapLock.RUnlock()
 	w.assistTickChanMapLock.RLock()
-	return len(w.assistTickChanMap) > 0
+	return len(w.assistTickChanMap) == 0
 }
 
 func (w *WSFutureTrade) closeDoneChan(orderID string) {
@@ -177,7 +179,7 @@ func (w *WSFutureTrade) checkAssistTargetStatus() {
 		case <-w.Ctx().Done():
 			return
 
-		case <-time.After(1 * time.Second):
+		case <-time.After(500 * time.Millisecond):
 			w.assistTargetWaitingMapLock.Lock()
 			for orderID, a := range w.assistTargetWaitingMap {
 				if a.Status == entity.StatusFilled {
@@ -242,11 +244,10 @@ func (w *WSFutureTrade) processOrderStatus(orderStatusChan chan interface{}) {
 			}
 
 			w.updateCacheOrder(o)
-
 			if !o.Cancellable() {
 				finishedOrderMap[o.OrderID] = o
-				if w.waitingManualOrder != nil && w.waitingManualOrder.OrderID == o.OrderID {
-					w.waitingManualOrder = nil
+				if w.waitingList.orderIDExist(o.OrderID) {
+					w.waitingList.remove(o.OrderID)
 				}
 			} else {
 				w.cancelOverTimeOrder(o)
