@@ -291,7 +291,7 @@ func (w *WSFutureTrade) cancelOverTimeOrder(o *entity.FutureOrder) {
 	defer w.cancelOrderMapLock.Unlock()
 	w.cancelOrderMapLock.Lock()
 
-	if o.Cancellable() && time.Since(o.TradeTime) > 10*time.Second && w.cancelOrderMap[o.OrderID] == nil {
+	if o.Cancellable() && time.Since(o.TradeTime) > 5*time.Second && w.cancelOrderMap[o.OrderID] == nil {
 		id, s, err := w.o.CancelFutureOrderID(o.OrderID)
 		if err != nil || s != entity.StatusCancelled || id == "" {
 			w.SendToClient(newErrMessageProto(errCancelOrderFailed))
