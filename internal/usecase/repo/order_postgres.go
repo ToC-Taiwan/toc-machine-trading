@@ -248,6 +248,28 @@ func (r *OrderRepo) QueryAllStockTradeBalance(ctx context.Context) ([]*entity.St
 	return result, nil
 }
 
+func (r *OrderRepo) QueryLastStockTradeBalance(ctx context.Context) (*entity.StockTradeBalance, error) {
+	sql, arg, err := r.Builder.
+		Select("trade_count, forward, reverse, original_balance, discount, total, trade_day").
+		From(tableNameTradeStockBalance).
+		OrderBy("trade_day DESC").
+		Limit(1).
+		ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	row := r.Pool().QueryRow(ctx, sql, arg...)
+	e := entity.StockTradeBalance{}
+	if err := row.Scan(&e.TradeCount, &e.Forward, &e.Reverse, &e.OriginalBalance, &e.Discount, &e.Total, &e.TradeDay); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &e, nil
+}
+
 // QueryAllFutureTradeBalance -.
 func (r *OrderRepo) QueryAllFutureTradeBalance(ctx context.Context) ([]*entity.FutureTradeBalance, error) {
 	sql, _, err := r.Builder.
@@ -276,6 +298,28 @@ func (r *OrderRepo) QueryAllFutureTradeBalance(ctx context.Context) ([]*entity.F
 		result = append(result, &e)
 	}
 	return result, nil
+}
+
+func (r *OrderRepo) QueryLastFutureTradeBalance(ctx context.Context) (*entity.FutureTradeBalance, error) {
+	sql, arg, err := r.Builder.
+		Select("trade_count, forward, reverse, total, trade_day").
+		From(tableNameFutureTradeBalance).
+		OrderBy("trade_day DESC").
+		Limit(1).
+		ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	row := r.Pool().QueryRow(ctx, sql, arg...)
+	e := entity.FutureTradeBalance{}
+	if err := row.Scan(&e.TradeCount, &e.Forward, &e.Reverse, &e.Total, &e.TradeDay); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &e, nil
 }
 
 // QueryFutureOrderByID -.

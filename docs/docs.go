@@ -381,6 +381,66 @@ const docTemplate = `{
                 }
             }
         },
+        "/order/balance/future/last": {
+            "get": {
+                "description": "getLastFutureTradeBalance",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "order"
+                ],
+                "summary": "getLastFutureTradeBalance",
+                "operationId": "getLastFutureTradeBalance",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/entity.FutureTradeBalance"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/v1.response"
+                        }
+                    }
+                }
+            }
+        },
+        "/order/balance/stock/last": {
+            "get": {
+                "description": "getLastStockTradeBalance",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "order"
+                ],
+                "summary": "getLastStockTradeBalance",
+                "operationId": "getLastStockTradeBalance",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/entity.StockTradeBalance"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/v1.response"
+                        }
+                    }
+                }
+            }
+        },
         "/order/date/{tradeday}": {
             "get": {
                 "description": "getAllOrderByTradeDay",
@@ -990,6 +1050,38 @@ const docTemplate = `{
                 }
             }
         },
+        "entity.BaseOrder": {
+            "type": "object",
+            "properties": {
+                "action": {
+                    "$ref": "#/definitions/entity.OrderAction"
+                },
+                "group_id": {
+                    "type": "string"
+                },
+                "order_id": {
+                    "type": "string"
+                },
+                "order_time": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "number"
+                },
+                "quantity": {
+                    "type": "integer"
+                },
+                "status": {
+                    "$ref": "#/definitions/entity.OrderStatus"
+                },
+                "tick_time": {
+                    "type": "string"
+                },
+                "trade_time": {
+                    "type": "string"
+                }
+            }
+        },
         "entity.Future": {
             "type": "object",
             "properties": {
@@ -1034,8 +1126,8 @@ const docTemplate = `{
         "entity.FutureOrder": {
             "type": "object",
             "properties": {
-                "action": {
-                    "$ref": "#/definitions/entity.OrderAction"
+                "base_order": {
+                    "$ref": "#/definitions/entity.BaseOrder"
                 },
                 "code": {
                     "type": "string"
@@ -1043,32 +1135,8 @@ const docTemplate = `{
                 "future": {
                     "$ref": "#/definitions/entity.Future"
                 },
-                "group_id": {
-                    "type": "string"
-                },
                 "manual": {
                     "type": "boolean"
-                },
-                "order_id": {
-                    "type": "string"
-                },
-                "order_time": {
-                    "type": "string"
-                },
-                "price": {
-                    "type": "number"
-                },
-                "quantity": {
-                    "type": "integer"
-                },
-                "status": {
-                    "$ref": "#/definitions/entity.OrderStatus"
-                },
-                "tick_time": {
-                    "type": "string"
-                },
-                "trade_time": {
-                    "type": "string"
                 }
             }
         },
@@ -1198,40 +1266,16 @@ const docTemplate = `{
         "entity.StockOrder": {
             "type": "object",
             "properties": {
-                "action": {
-                    "$ref": "#/definitions/entity.OrderAction"
-                },
-                "group_id": {
-                    "type": "string"
+                "base_order": {
+                    "$ref": "#/definitions/entity.BaseOrder"
                 },
                 "manual": {
                     "type": "boolean"
-                },
-                "order_id": {
-                    "type": "string"
-                },
-                "order_time": {
-                    "type": "string"
-                },
-                "price": {
-                    "type": "number"
-                },
-                "quantity": {
-                    "type": "integer"
-                },
-                "status": {
-                    "$ref": "#/definitions/entity.OrderStatus"
                 },
                 "stock": {
                     "$ref": "#/definitions/entity.Stock"
                 },
                 "stock_num": {
-                    "type": "string"
-                },
-                "tick_time": {
-                    "type": "string"
-                },
-                "trade_time": {
                     "type": "string"
                 }
             }

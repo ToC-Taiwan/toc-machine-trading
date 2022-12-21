@@ -8,18 +8,6 @@ import (
 
 type AutomationType int
 
-func (a AutomationType) String() string {
-	switch a {
-	case AutomationByBalance:
-		return "By balance"
-	case AutomationByTimePeriod:
-		return "By time period"
-	case AutomationByTimePeriodAndBalance:
-		return "By time period and balance"
-	}
-	return "unknown"
-}
-
 const (
 	AutomationNone AutomationType = iota
 	AutomationByBalance

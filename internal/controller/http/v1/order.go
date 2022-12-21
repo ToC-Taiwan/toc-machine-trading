@@ -25,6 +25,8 @@ func newOrderRoutes(handler *gin.RouterGroup, t usecase.Order) {
 		h.POST("", r.manualInsertFutureOrder)
 		h.GET("/all", r.getAllOrder)
 		h.GET("/balance", r.getAllTradeBalance)
+		h.GET("/balance/stock/last", r.getLastStockTradeBalance)
+		h.GET("/balance/future/last", r.getLastFutureTradeBalance)
 
 		h.GET("/date/:tradeday", r.getAllOrderByTradeDay)
 		h.PUT("/date/:tradeday", r.updateTradeBalanceByTradeDay)
@@ -209,6 +211,44 @@ func (r *orderRoutes) getAllTradeBalance(c *gin.Context) {
 		Stock:  allStockArr,
 		Future: allFutureArr,
 	})
+}
+
+// @Summary     getLastStockTradeBalance
+// @Description getLastStockTradeBalance
+// @ID          getLastStockTradeBalance
+// @Tags  	    order
+// @Accept      json
+// @Produce     json
+// @Success     200 {object} entity.StockTradeBalance
+// @Failure     500 {object} response
+// @Router      /order/balance/stock/last [get]
+func (r *orderRoutes) getLastStockTradeBalance(c *gin.Context) {
+	balance, err := r.t.GetLastStockTradeBalance(c.Request.Context())
+	if err != nil {
+		errorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, balance)
+}
+
+// @Summary     getLastFutureTradeBalance
+// @Description getLastFutureTradeBalance
+// @ID          getLastFutureTradeBalance
+// @Tags  	    order
+// @Accept      json
+// @Produce     json
+// @Success     200 {object} entity.FutureTradeBalance
+// @Failure     500 {object} response
+// @Router      /order/balance/future/last [get]
+func (r *orderRoutes) getLastFutureTradeBalance(c *gin.Context) {
+	balance, err := r.t.GetLastFutureTradeBalance(c.Request.Context())
+	if err != nil {
+		errorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, balance)
 }
 
 type dayTradeResult struct {

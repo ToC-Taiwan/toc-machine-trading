@@ -182,6 +182,27 @@ definitions:
       second_part_duration:
         type: integer
     type: object
+  entity.BaseOrder:
+    properties:
+      action:
+        $ref: '#/definitions/entity.OrderAction'
+      group_id:
+        type: string
+      order_id:
+        type: string
+      order_time:
+        type: string
+      price:
+        type: number
+      quantity:
+        type: integer
+      status:
+        $ref: '#/definitions/entity.OrderStatus'
+      tick_time:
+        type: string
+      trade_time:
+        type: string
+    type: object
   entity.Future:
     properties:
       category:
@@ -211,30 +232,14 @@ definitions:
     type: object
   entity.FutureOrder:
     properties:
-      action:
-        $ref: '#/definitions/entity.OrderAction'
+      base_order:
+        $ref: '#/definitions/entity.BaseOrder'
       code:
         type: string
       future:
         $ref: '#/definitions/entity.Future'
-      group_id:
-        type: string
       manual:
         type: boolean
-      order_id:
-        type: string
-      order_time:
-        type: string
-      price:
-        type: number
-      quantity:
-        type: integer
-      status:
-        $ref: '#/definitions/entity.OrderStatus'
-      tick_time:
-        type: string
-      trade_time:
-        type: string
     type: object
   entity.FutureTradeBalance:
     properties:
@@ -327,29 +332,13 @@ definitions:
     type: object
   entity.StockOrder:
     properties:
-      action:
-        $ref: '#/definitions/entity.OrderAction'
-      group_id:
-        type: string
+      base_order:
+        $ref: '#/definitions/entity.BaseOrder'
       manual:
         type: boolean
-      order_id:
-        type: string
-      order_time:
-        type: string
-      price:
-        type: number
-      quantity:
-        type: integer
-      status:
-        $ref: '#/definitions/entity.OrderStatus'
       stock:
         $ref: '#/definitions/entity.Stock'
       stock_num:
-        type: string
-      tick_time:
-        type: string
-      trade_time:
         type: string
     type: object
   entity.StockSnapShot:
@@ -752,6 +741,46 @@ paths:
           schema:
             $ref: '#/definitions/v1.response'
       summary: getAllTradeBalance
+      tags:
+      - order
+  /order/balance/future/last:
+    get:
+      consumes:
+      - application/json
+      description: getLastFutureTradeBalance
+      operationId: getLastFutureTradeBalance
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.FutureTradeBalance'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+      summary: getLastFutureTradeBalance
+      tags:
+      - order
+  /order/balance/stock/last:
+    get:
+      consumes:
+      - application/json
+      description: getLastStockTradeBalance
+      operationId: getLastStockTradeBalance
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.StockTradeBalance'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+      summary: getLastStockTradeBalance
       tags:
       - order
   /order/date/{tradeday}:

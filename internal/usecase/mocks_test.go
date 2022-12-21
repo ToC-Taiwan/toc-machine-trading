@@ -1831,6 +1831,36 @@ func (mr *MockOrderMockRecorder) GetFuturePosition() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFuturePosition", reflect.TypeOf((*MockOrder)(nil).GetFuturePosition))
 }
 
+// GetLastFutureTradeBalance mocks base method.
+func (m *MockOrder) GetLastFutureTradeBalance(ctx context.Context) (*entity.FutureTradeBalance, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetLastFutureTradeBalance", ctx)
+	ret0, _ := ret[0].(*entity.FutureTradeBalance)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetLastFutureTradeBalance indicates an expected call of GetLastFutureTradeBalance.
+func (mr *MockOrderMockRecorder) GetLastFutureTradeBalance(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetLastFutureTradeBalance", reflect.TypeOf((*MockOrder)(nil).GetLastFutureTradeBalance), ctx)
+}
+
+// GetLastStockTradeBalance mocks base method.
+func (m *MockOrder) GetLastStockTradeBalance(ctx context.Context) (*entity.StockTradeBalance, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetLastStockTradeBalance", ctx)
+	ret0, _ := ret[0].(*entity.StockTradeBalance)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetLastStockTradeBalance indicates an expected call of GetLastStockTradeBalance.
+func (mr *MockOrderMockRecorder) GetLastStockTradeBalance(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetLastStockTradeBalance", reflect.TypeOf((*MockOrder)(nil).GetLastStockTradeBalance), ctx)
+}
+
 // IsFutureTradeTime mocks base method.
 func (m *MockOrder) IsFutureTradeTime() bool {
 	m.ctrl.T.Helper()
@@ -2130,6 +2160,36 @@ func (m *MockOrderRepo) QueryFutureTradeBalanceByDate(ctx context.Context, date 
 func (mr *MockOrderRepoMockRecorder) QueryFutureTradeBalanceByDate(ctx, date interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryFutureTradeBalanceByDate", reflect.TypeOf((*MockOrderRepo)(nil).QueryFutureTradeBalanceByDate), ctx, date)
+}
+
+// QueryLastFutureTradeBalance mocks base method.
+func (m *MockOrderRepo) QueryLastFutureTradeBalance(ctx context.Context) (*entity.FutureTradeBalance, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "QueryLastFutureTradeBalance", ctx)
+	ret0, _ := ret[0].(*entity.FutureTradeBalance)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// QueryLastFutureTradeBalance indicates an expected call of QueryLastFutureTradeBalance.
+func (mr *MockOrderRepoMockRecorder) QueryLastFutureTradeBalance(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryLastFutureTradeBalance", reflect.TypeOf((*MockOrderRepo)(nil).QueryLastFutureTradeBalance), ctx)
+}
+
+// QueryLastStockTradeBalance mocks base method.
+func (m *MockOrderRepo) QueryLastStockTradeBalance(ctx context.Context) (*entity.StockTradeBalance, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "QueryLastStockTradeBalance", ctx)
+	ret0, _ := ret[0].(*entity.StockTradeBalance)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// QueryLastStockTradeBalance indicates an expected call of QueryLastStockTradeBalance.
+func (mr *MockOrderRepoMockRecorder) QueryLastStockTradeBalance(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryLastStockTradeBalance", reflect.TypeOf((*MockOrderRepo)(nil).QueryLastStockTradeBalance), ctx)
 }
 
 // QueryStockOrderByID mocks base method.

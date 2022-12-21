@@ -201,6 +201,9 @@ type (
 		GetAllFutureOrder(ctx context.Context) ([]*entity.FutureOrder, error)
 		GetAllStockTradeBalance(ctx context.Context) ([]*entity.StockTradeBalance, error)
 		GetAllFutureTradeBalance(ctx context.Context) ([]*entity.FutureTradeBalance, error)
+		GetLastStockTradeBalance(ctx context.Context) (*entity.StockTradeBalance, error)
+		GetLastFutureTradeBalance(ctx context.Context) (*entity.FutureTradeBalance, error)
+
 		GetFutureOrderByTradeDay(ctx context.Context, tradeDay string) ([]*entity.FutureOrder, error)
 
 		BuyFuture(order *entity.FutureOrder) (string, entity.OrderStatus, error)
@@ -220,10 +223,12 @@ type (
 	// OrderRepo -.
 	OrderRepo interface {
 		QueryAllStockTradeBalance(ctx context.Context) ([]*entity.StockTradeBalance, error)
+		QueryLastStockTradeBalance(ctx context.Context) (*entity.StockTradeBalance, error)
 		QueryStockTradeBalanceByDate(ctx context.Context, date time.Time) (*entity.StockTradeBalance, error)
 		InsertOrUpdateStockTradeBalance(ctx context.Context, t *entity.StockTradeBalance) error
 
 		QueryAllFutureTradeBalance(ctx context.Context) ([]*entity.FutureTradeBalance, error)
+		QueryLastFutureTradeBalance(ctx context.Context) (*entity.FutureTradeBalance, error)
 		QueryFutureTradeBalanceByDate(ctx context.Context, date time.Time) (*entity.FutureTradeBalance, error)
 		InsertOrUpdateFutureTradeBalance(ctx context.Context, t *entity.FutureTradeBalance) error
 
