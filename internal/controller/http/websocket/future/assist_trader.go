@@ -142,7 +142,7 @@ func (a *assistTrader) checkByBalance(tick *entity.RealTimeFutureTick) {
 
 	switch a.Action {
 	case entity.ActionBuy:
-		if tick.Close > a.tradeOutPrice {
+		if tick.Close >= a.tradeOutPrice {
 			return
 		}
 
@@ -151,7 +151,7 @@ func (a *assistTrader) checkByBalance(tick *entity.RealTimeFutureTick) {
 		}
 
 	case entity.ActionSell:
-		if tick.Close < a.tradeOutPrice {
+		if tick.Close <= a.tradeOutPrice {
 			return
 		}
 
