@@ -53,11 +53,26 @@ func NewBasic(r BasicRepo, t BasicgRPCAPI) *BasicUseCase {
 }
 
 func (uc *BasicUseCase) HealthCheck() {
+	defer func() {
+		if r := recover(); r != nil {
+			var err error
+			switch x := r.(type) {
+			case string:
+				err = errors.New(x)
+			case error:
+				err = x
+			default:
+				err = errors.New("unknown panic")
+			}
+			log.Error(err)
+			os.Exit(0)
+		}
+	}()
+
 	err := uc.gRPCAPI.Heartbeat()
 	if err != nil {
 		if errors.Is(err, io.EOF) {
 			log.Warn("gRPC server is not ready, terminate")
-			os.Exit(0)
 		}
 		log.Panic(err)
 	}
