@@ -54,7 +54,7 @@ func newAssistTrader(ctx context.Context, target *assistTarget) *assistTrader {
 		finishOrderMap: make(map[string]*entity.FutureOrder),
 		tickChan:       make(chan *entity.RealTimeFutureTick),
 		tradeOutPrice:  target.Price,
-		holdTimes:      3,
+		holdTimes:      8,
 	}
 
 	go a.processTick()

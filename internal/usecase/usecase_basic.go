@@ -2,8 +2,6 @@ package usecase
 
 import (
 	"context"
-	"errors"
-	"io"
 	"os"
 	"time"
 
@@ -53,30 +51,10 @@ func NewBasic(r BasicRepo, t BasicgRPCAPI) *BasicUseCase {
 }
 
 func (uc *BasicUseCase) HealthCheck() {
-	defer func() {
-		if r := recover(); r != nil {
-			var err error
-			switch x := r.(type) {
-			case error:
-				err = x
-			case string:
-				err = errors.New(x)
-			default:
-				err = errors.New("unknown panic")
-			}
-
-			if errors.Is(err, io.EOF) {
-				log.Warn("gRPC server is not ready, terminate")
-			} else {
-				log.Error(err)
-			}
-			os.Exit(0)
-		}
-	}()
-
 	err := uc.gRPCAPI.Heartbeat()
 	if err != nil {
-		log.Panic(err)
+		log.Warn("healthcheck fail, terminate")
+		os.Exit(0)
 	}
 }
 
