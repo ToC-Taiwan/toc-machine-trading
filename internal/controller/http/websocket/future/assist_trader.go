@@ -144,12 +144,13 @@ func (a *assistTrader) checkByBalance(tick *entity.RealTimeFutureTick) {
 
 	switch a.Action {
 	case entity.ActionBuy:
+		if tick.Close >= a.tradeOutPrice && a.holdTimes > 0 {
+			a.holdTimes--
+			return
+		}
+
 		switch {
 		case tick.Close >= a.Price+a.ByBalanceHigh:
-			if tick.Close >= a.tradeOutPrice && a.holdTimes > 0 {
-				a.holdTimes--
-				return
-			}
 			a.placeAssistOrder(tick.Close)
 
 		case tick.Close <= a.Price+a.ByBalanceLow:
@@ -157,12 +158,13 @@ func (a *assistTrader) checkByBalance(tick *entity.RealTimeFutureTick) {
 		}
 
 	case entity.ActionSell:
+		if tick.Close <= a.tradeOutPrice && a.holdTimes > 0 {
+			a.holdTimes--
+			return
+		}
+
 		switch {
 		case tick.Close <= a.Price-a.ByBalanceHigh:
-			if tick.Close <= a.tradeOutPrice && a.holdTimes > 0 {
-				a.holdTimes--
-				return
-			}
 			a.placeAssistOrder(tick.Close)
 
 		case tick.Close >= a.Price-a.ByBalanceLow:
