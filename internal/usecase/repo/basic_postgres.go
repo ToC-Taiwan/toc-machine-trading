@@ -215,10 +215,10 @@ func (r *BasicRepo) InsertOrUpdatetFutureArr(ctx context.Context, t []*entity.Fu
 	var insert, update int
 	builder := r.Builder.Insert(tableNameFuture).Columns("code, symbol, name, category, delivery_month, delivery_date, underlying_kind, unit, limit_up, limit_down, reference, update_date")
 	for _, v := range t {
-		if _, ok := inDBFuture[v.Symbol]; !ok {
+		if _, ok := inDBFuture[v.Code]; !ok {
 			insert++
 			builder = builder.Values(v.Code, v.Symbol, v.Name, v.Category, v.DeliveryMonth, v.DeliveryDate, v.UnderlyingKind, v.Unit, v.LimitUp, v.LimitDown, v.Reference, v.UpdateDate)
-		} else if !cmp.Equal(v, inDBFuture[v.Symbol]) {
+		} else if !cmp.Equal(v, inDBFuture[v.Code]) {
 			update++
 			b := r.Builder.
 				Update(tableNameFuture).
@@ -275,7 +275,7 @@ func (r *BasicRepo) QueryAllFuture(ctx context.Context) (map[string]*entity.Futu
 		if err = rows.Scan(&e.Code, &e.Symbol, &e.Name, &e.Category, &e.DeliveryMonth, &e.DeliveryDate, &e.UnderlyingKind, &e.Unit, &e.LimitUp, &e.LimitDown, &e.Reference, &e.UpdateDate); err != nil {
 			return nil, err
 		}
-		entities[e.Symbol] = &e
+		entities[e.Code] = &e
 	}
 	return entities, nil
 }
