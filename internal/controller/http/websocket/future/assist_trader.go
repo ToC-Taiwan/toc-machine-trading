@@ -54,7 +54,7 @@ func newAssistTrader(ctx context.Context, target *assistTarget) *assistTrader {
 		finishOrderMap: make(map[string]*entity.FutureOrder),
 		tickChan:       make(chan *entity.RealTimeFutureTick),
 		tradeOutPrice:  target.Price,
-		holdTimes:      8,
+		holdTimes:      6,
 	}
 
 	go a.processTick()
@@ -144,13 +144,16 @@ func (a *assistTrader) checkByBalance(tick *entity.RealTimeFutureTick) {
 
 	switch a.Action {
 	case entity.ActionBuy:
-		if tick.Close >= a.tradeOutPrice && a.holdTimes > 0 {
+		if tick.Close >= a.tradeOutPrice {
 			a.holdTimes--
 			return
 		}
 
 		switch {
 		case tick.Close >= a.Price+a.ByBalanceHigh:
+			if a.holdTimes > 0 {
+				return
+			}
 			a.placeAssistOrder(tick.Close)
 
 		case tick.Close <= a.Price+a.ByBalanceLow:
@@ -158,13 +161,16 @@ func (a *assistTrader) checkByBalance(tick *entity.RealTimeFutureTick) {
 		}
 
 	case entity.ActionSell:
-		if tick.Close <= a.tradeOutPrice && a.holdTimes > 0 {
+		if tick.Close <= a.tradeOutPrice {
 			a.holdTimes--
 			return
 		}
 
 		switch {
 		case tick.Close <= a.Price-a.ByBalanceHigh:
+			if a.holdTimes > 0 {
+				return
+			}
 			a.placeAssistOrder(tick.Close)
 
 		case tick.Close >= a.Price-a.ByBalanceLow:
