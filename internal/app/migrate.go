@@ -4,9 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"time"
 
-	"tmt/internal/usecase/modules/config"
+	"tmt/cmd/config"
 	"tmt/pkg/postgres"
 
 	"github.com/golang-migrate/migrate/v4"
@@ -24,9 +25,9 @@ const (
 
 // MigrateDB -.
 func MigrateDB(cfg *config.Config) {
-	createErr := tryCreateDB(cfg.Postgres.DBName)
+	createErr := tryCreateDB(cfg.Database.DBName)
 	if createErr != nil {
-		log.Panic(createErr)
+		logger.Panic(createErr)
 	}
 
 	var (
@@ -35,14 +36,14 @@ func MigrateDB(cfg *config.Config) {
 		m        *migrate.Migrate
 	)
 
-	dbPath := fmt.Sprintf("%s%s%s", cfg.Postgres.URL, cfg.Postgres.DBName, "?sslmode=disable")
+	dbPath := fmt.Sprintf("%s%s%s", cfg.Database.URL, cfg.Database.DBName, "?sslmode=disable")
 	for attempts > 0 {
 		m, err = migrate.New("file://migrations", dbPath)
 		if err == nil {
 			break
 		}
 
-		log.Infof("Migrate: postgres is trying to connect, attempts left: %d", attempts)
+		logger.Infof("Migrate: postgres is trying to connect, attempts left: %d", attempts)
 		time.Sleep(_defaultTimeout)
 		attempts--
 	}
@@ -57,21 +58,21 @@ func MigrateDB(cfg *config.Config) {
 	}()
 
 	if err != nil && !errors.Is(err, migrate.ErrNoChange) {
-		log.Infof("Migrate: up error: %s", err)
+		logger.Infof("Migrate: up error: %s", err)
 		return
 	}
 
 	if errors.Is(err, migrate.ErrNoChange) {
-		log.Info("Migrate: no change")
+		logger.Info("Migrate: no change")
 		return
 	}
 
-	log.Info("Migrate: up success")
+	logger.Info("Migrate: up success")
 }
 
 func tryCreateDB(dbName string) error {
 	cfg := config.GetConfig()
-	pg, err := postgres.New(cfg.Postgres.URL, postgres.MaxPoolSize(cfg.Postgres.PoolMax))
+	pg, err := postgres.New(cfg.Database.URL, postgres.MaxPoolSize(cfg.Database.PoolMax))
 	if err != nil {
 		return err
 	}

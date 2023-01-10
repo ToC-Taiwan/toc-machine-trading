@@ -9,15 +9,15 @@ import (
 	"tmt/internal/usecase/modules/cache"
 	"tmt/internal/usecase/modules/event"
 	"tmt/internal/usecase/modules/trader"
+	"tmt/pkg/log"
 
-	"tmt/internal/usecase/modules/logger"
 	"tmt/pb"
 )
 
 var (
-	log = logger.Get()
-	cc  = cache.Get()
-	bus = event.Get(false)
+	logger = log.Get()
+	cc     = cache.Get()
+	bus    = event.Get(false)
 )
 
 //go:generate mockgen -source=interfaces.go -destination=./mocks_test.go -package=usecase_test

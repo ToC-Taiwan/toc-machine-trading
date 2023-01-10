@@ -7,31 +7,30 @@ import (
 	"os/signal"
 	"syscall"
 
+	"tmt/cmd/config"
+	v1 "tmt/internal/controller/http/v1"
 	"tmt/internal/usecase"
 	"tmt/internal/usecase/grpcapi"
-	"tmt/internal/usecase/modules/config"
-	"tmt/internal/usecase/modules/logger"
 	"tmt/internal/usecase/rabbit"
 	"tmt/internal/usecase/repo"
 	"tmt/pkg/grpc"
 	"tmt/pkg/httpserver"
+	"tmt/pkg/log"
 	"tmt/pkg/postgres"
-
-	v1 "tmt/internal/controller/http/v1"
 
 	"github.com/gin-gonic/gin"
 )
 
-var log = logger.Get()
+var logger = log.Get()
 
 // Run -.
 func Run(cfg *config.Config) {
 	pg, err := postgres.New(
-		fmt.Sprintf("%s%s", cfg.Postgres.URL, cfg.Postgres.DBName),
-		postgres.MaxPoolSize(cfg.Postgres.PoolMax),
+		fmt.Sprintf("%s%s", cfg.Database.URL, cfg.Database.DBName),
+		postgres.MaxPoolSize(cfg.Database.PoolMax),
 	)
 	if err != nil {
-		log.Panic(err)
+		logger.Panic(err)
 	}
 	defer pg.Close()
 
@@ -40,7 +39,7 @@ func Run(cfg *config.Config) {
 		grpc.MaxPoolSize(cfg.Sinopac.PoolMax),
 	)
 	if err != nil {
-		log.Panic(err)
+		logger.Panic(err)
 	}
 
 	basicUseCase := usecase.NewBasic(repo.NewBasic(pg), grpcapi.NewBasic(sc))
@@ -61,21 +60,21 @@ func Run(cfg *config.Config) {
 		r.AddHistoryRoutes(handler, historyUseCase)
 		r.AddTargetRoutes(handler, targetUseCase)
 	}
-	httpServer := httpserver.New(handler, httpserver.Port(cfg.HTTP.Port))
+	httpServer := httpserver.New(handler, httpserver.Port(cfg.Server.HTTP))
 
 	// Waiting signal
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
 	select {
 	case s := <-interrupt:
-		log.Info(s.String())
+		logger.Info(s.String())
 	case err = <-httpServer.Notify():
-		log.Error(err)
+		logger.Error(err)
 	}
 
 	// Shutdown
 	err = httpServer.Shutdown()
 	if err != nil {
-		log.Error(err)
+		logger.Error(err)
 	}
 }

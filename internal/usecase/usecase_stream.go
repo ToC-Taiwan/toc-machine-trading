@@ -7,8 +7,8 @@ import (
 	"sync"
 	"time"
 
+	"tmt/cmd/config"
 	"tmt/internal/entity"
-	"tmt/internal/usecase/modules/config"
 	"tmt/internal/usecase/modules/event"
 	"tmt/internal/usecase/modules/target"
 	"tmt/internal/usecase/modules/tradeday"
@@ -69,7 +69,7 @@ func NewStream(r StreamRepo, g StreamgRPCAPI, t StreamRabbit) *StreamUseCase {
 		for range time.NewTicker(time.Second * 60).C {
 			if uc.stockTradeInSwitch {
 				if err := uc.realTimeAddTargets(); err != nil {
-					log.Panic(err)
+					logger.Panic(err)
 				}
 			}
 		}
@@ -102,7 +102,7 @@ func (uc *StreamUseCase) periodUpdateTradeIndex() {
 func (uc *StreamUseCase) updateNasdaqIndex() {
 	for range time.NewTicker(time.Second * 5).C {
 		if data, err := uc.GetNasdaqClose(); err != nil && !errors.Is(err, errNasdaqPriceAbnormal) {
-			log.Error(err)
+			logger.Error(err)
 		} else if data != nil {
 			uc.tradeIndex.Nasdaq.UpdateIndexStatus(data.Price - data.Last)
 		}
@@ -112,7 +112,7 @@ func (uc *StreamUseCase) updateNasdaqIndex() {
 func (uc *StreamUseCase) updateNFIndex() {
 	for range time.NewTicker(time.Second * 5).C {
 		if data, err := uc.GetNasdaqFutureClose(); err != nil && !errors.Is(err, errNFQPriceAbnormal) {
-			log.Error(err)
+			logger.Error(err)
 		} else if data != nil {
 			uc.tradeIndex.NF.UpdateIndexStatus(data.Price - data.Last)
 		}
@@ -122,7 +122,7 @@ func (uc *StreamUseCase) updateNFIndex() {
 func (uc *StreamUseCase) updateTSEIndex() {
 	for range time.NewTicker(time.Second * 3).C {
 		if data, err := uc.GetTSESnapshot(context.Background()); err != nil {
-			log.Error(err)
+			logger.Error(err)
 		} else {
 			uc.tradeIndex.TSE.UpdateIndexStatus(data.PriceChg)
 		}
@@ -132,7 +132,7 @@ func (uc *StreamUseCase) updateTSEIndex() {
 func (uc *StreamUseCase) updateOTCIndex() {
 	for range time.NewTicker(time.Second * 3).C {
 		if data, err := uc.GetOTCSnapshot(context.Background()); err != nil {
-			log.Error(err)
+			logger.Error(err)
 		} else {
 			uc.tradeIndex.OTC.UpdateIndexStatus(data.PriceChg)
 		}
@@ -147,7 +147,7 @@ func (uc *StreamUseCase) realTimeAddTargets() error {
 
 	// at least 200 snapshot to rank volume
 	if len(data) < 200 {
-		log.Warnf("stock snapshot len is not enough: %d", len(data))
+		logger.Warnf("stock snapshot len is not enough: %d", len(data))
 		return nil
 	}
 
@@ -197,11 +197,11 @@ func (uc *StreamUseCase) ReceiveEvent(ctx context.Context) {
 		for {
 			event := <-eventChan
 			if err := uc.repo.InsertEvent(ctx, event); err != nil {
-				log.Error(err)
+				logger.Error(err)
 			}
 
 			if event.EventCode != 16 {
-				log.Warnf("EventCode: %d, Event: %s, ResoCode: %d, Info: %s", event.EventCode, event.Event, event.Response, event.Info)
+				logger.Warnf("EventCode: %d, Event: %s, ResoCode: %d, Info: %s", event.EventCode, event.Event, event.Response, event.Info)
 			}
 		}
 	}()

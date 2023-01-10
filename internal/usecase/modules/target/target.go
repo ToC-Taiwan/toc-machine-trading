@@ -4,8 +4,8 @@ package target
 import (
 	"sync"
 
+	"tmt/cmd/config"
 	"tmt/internal/entity"
-	"tmt/internal/usecase/modules/config"
 )
 
 // Filter -.

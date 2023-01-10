@@ -1,9 +1,9 @@
 package repo
 
-import "tmt/internal/usecase/modules/logger"
+import "tmt/pkg/log"
 
 var (
-	log           = logger.Get()
+	logger        = log.Get()
 	batchSize int = 2000
 )
 

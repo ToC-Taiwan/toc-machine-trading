@@ -5,8 +5,8 @@ import (
 	"os"
 	"time"
 
+	"tmt/cmd/config"
 	"tmt/internal/entity"
-	"tmt/internal/usecase/modules/config"
 	"tmt/internal/usecase/modules/event"
 	"tmt/internal/usecase/modules/tradeday"
 	"tmt/pkg/common"
@@ -36,13 +36,13 @@ func NewBasic(r BasicRepo, t BasicgRPCAPI) *BasicUseCase {
 	go uc.HealthCheck()
 
 	if err := uc.importCalendarDate(context.Background()); err != nil {
-		log.Panic(err)
+		logger.Panic(err)
 	}
 	if _, err := uc.GetAllSinopacStockAndUpdateRepo(context.Background()); err != nil {
-		log.Panic(err)
+		logger.Panic(err)
 	}
 	if _, err := uc.GetAllSinopacFutureAndUpdateRepo(context.Background()); err != nil {
-		log.Panic(err)
+		logger.Panic(err)
 	}
 
 	uc.fillBasicInfo()
@@ -53,7 +53,7 @@ func NewBasic(r BasicRepo, t BasicgRPCAPI) *BasicUseCase {
 func (uc *BasicUseCase) HealthCheck() {
 	err := uc.gRPCAPI.Heartbeat()
 	if err != nil {
-		log.Warn("healthcheck fail, terminate")
+		logger.Warn("healthcheck fail, terminate")
 		os.Exit(0)
 	}
 }
@@ -150,7 +150,7 @@ func (uc *BasicUseCase) GetAllSinopacFutureAndUpdateRepo(ctx context.Context) ([
 			uc.allFutureDetail = append(uc.allFutureDetail, future)
 			cc.SetFutureDetail(future)
 		} else {
-			log.Warnf("Dupl future code: %s %s", v.Code, v.Name)
+			logger.Warnf("Dupl future code: %s %s", v.Code, v.Name)
 		}
 	}
 
@@ -218,7 +218,7 @@ func (uc *BasicUseCase) fillBasicInfo() {
 func (uc *BasicUseCase) pubMonitorFutureCode() {
 	futures, err := uc.repo.QueryAllMXFFuture(context.Background())
 	if err != nil {
-		log.Panic(err)
+		logger.Panic(err)
 	}
 
 	for _, v := range futures {

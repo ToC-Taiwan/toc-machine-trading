@@ -48,7 +48,7 @@ func (uc *AnalyzeUseCase) findBelowQuaterMATargets(ctx context.Context, targetAr
 	for _, t := range targetArr {
 		maMap, err := uc.repo.QueryAllQuaterMAByStockNum(ctx, t.StockNum)
 		if err != nil {
-			log.Panic(err)
+			logger.Panic(err)
 		}
 
 		basicInfo := cc.GetBasicInfo()
@@ -64,7 +64,7 @@ func (uc *AnalyzeUseCase) findBelowQuaterMATargets(ctx context.Context, targetAr
 			}
 		}
 	}
-	log.Info("Find below quaterMA targets done")
+	logger.Info("Find below quaterMA targets done")
 }
 
 // GetRebornMap -.

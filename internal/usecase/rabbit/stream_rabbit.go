@@ -6,11 +6,11 @@ import (
 	"sync"
 	"time"
 
+	"tmt/cmd/config"
 	"tmt/internal/entity"
-	"tmt/internal/usecase/modules/config"
-	"tmt/internal/usecase/modules/logger"
 	"tmt/pb"
 	"tmt/pkg/common"
+	"tmt/pkg/log"
 	"tmt/pkg/rabbitmq"
 
 	"github.com/google/uuid"
@@ -18,7 +18,7 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-var log = logger.Get()
+var logger = log.Get()
 
 const (
 	routingKeyEvent        = "event"
@@ -57,7 +57,7 @@ func NewStream() *StreamRabbit {
 	)
 
 	if err := conn.AttemptConnect(); err != nil {
-		log.Error(err)
+		logger.Error(err)
 	}
 
 	return &StreamRabbit{
@@ -70,7 +70,7 @@ func NewStream() *StreamRabbit {
 func (c *StreamRabbit) establishDelivery(key string) <-chan amqp.Delivery {
 	delivery, err := c.conn.BindAndConsume(key)
 	if err != nil {
-		log.Panic(err)
+		logger.Panic(err)
 	}
 	return delivery
 }
@@ -83,7 +83,7 @@ func (c *StreamRabbit) FillAllBasic(allStockMap map[string]*entity.Stock, allFut
 	c.allFutureMap = allFutureMap
 
 	if len(c.allStockMap) == 0 || len(c.allFutureMap) == 0 {
-		log.Panic("allStockMap or allFutureMap is empty")
+		logger.Panic("allStockMap or allFutureMap is empty")
 	}
 }
 
@@ -93,19 +93,19 @@ func (c *StreamRabbit) EventConsumer(eventChan chan *entity.SinopacEvent) {
 	for {
 		d, opened := <-delivery
 		if !opened {
-			log.Error("EventConsumer rabbitMQ is closed")
+			logger.Error("EventConsumer rabbitMQ is closed")
 			return
 		}
 
 		body := pb.EventMessage{}
 		if err := proto.Unmarshal(d.Body, &body); err != nil {
-			log.Error(err)
+			logger.Error(err)
 			continue
 		}
 
 		dataTime, err := time.ParseInLocation(common.LongTimeLayout, body.GetEventTime(), time.Local)
 		if err != nil {
-			log.Error(err)
+			logger.Error(err)
 			continue
 		}
 
@@ -126,13 +126,13 @@ func (c *StreamRabbit) OrderStatusConsumer() {
 	for {
 		d, opened := <-delivery
 		if !opened {
-			log.Error("OrderStatusConsumer rabbitMQ is closed")
+			logger.Error("OrderStatusConsumer rabbitMQ is closed")
 			return
 		}
 
 		body := &pb.OrderStatus{}
 		if err := proto.Unmarshal(d.Body, body); err != nil {
-			log.Error(err)
+			logger.Error(err)
 			continue
 		}
 
@@ -152,12 +152,12 @@ func (c *StreamRabbit) OrderStatusArrConsumer() {
 	for {
 		d, opened := <-delivery
 		if !opened {
-			log.Error("OrderStatusArrConsumer rabbitMQ is closed")
+			logger.Error("OrderStatusArrConsumer rabbitMQ is closed")
 			return
 		}
 		body := &pb.OrderStatusArr{}
 		if err := proto.Unmarshal(d.Body, body); err != nil {
-			log.Error(err)
+			logger.Error(err)
 			continue
 		}
 
@@ -183,7 +183,7 @@ func (c *StreamRabbit) protoToOrder(proto *pb.OrderStatus) interface{} {
 
 	orderTime, err := time.ParseInLocation(common.LongTimeLayout, proto.GetOrderTime(), time.Local)
 	if err != nil {
-		log.Error(err)
+		logger.Error(err)
 		return nil
 	}
 
@@ -225,19 +225,19 @@ func (c *StreamRabbit) TickConsumer(stockNum string, tickChan chan *entity.RealT
 	for {
 		d, opened := <-delivery
 		if !opened {
-			log.Errorf("TickConsumer:%s rabbitMQ is closed", stockNum)
+			logger.Errorf("TickConsumer:%s rabbitMQ is closed", stockNum)
 			return
 		}
 
 		body := pb.StockRealTimeTickMessage{}
 		if err := proto.Unmarshal(d.Body, &body); err != nil {
-			log.Error(err)
+			logger.Error(err)
 			continue
 		}
 
 		dataTime, err := time.ParseInLocation(common.LongTimeLayout, body.GetDateTime(), time.Local)
 		if err != nil {
-			log.Error(err)
+			logger.Error(err)
 			continue
 		}
 
@@ -278,19 +278,19 @@ func (c *StreamRabbit) FutureTickConsumer(code string, tickChan chan *entity.Rea
 	for {
 		d, opened := <-delivery
 		if !opened {
-			log.Errorf("FutureTickConsumer:%s rabbitMQ is closed", code)
+			logger.Errorf("FutureTickConsumer:%s rabbitMQ is closed", code)
 			return
 		}
 
 		body := pb.FutureRealTimeTickMessage{}
 		if err := proto.Unmarshal(d.Body, &body); err != nil {
-			log.Error(err)
+			logger.Error(err)
 			continue
 		}
 
 		dataTime, err := time.ParseInLocation(common.LongTimeLayout, body.GetDateTime(), time.Local)
 		if err != nil {
-			log.Error(err)
+			logger.Error(err)
 			continue
 		}
 
@@ -333,19 +333,19 @@ func (c *StreamRabbit) StockBidAskConsumer(stockNum string, bidAskChan chan *ent
 	for {
 		d, opened := <-delivery
 		if !opened {
-			log.Errorf("BidAskConsumer:%s rabbitMQ is closed", stockNum)
+			logger.Errorf("BidAskConsumer:%s rabbitMQ is closed", stockNum)
 			return
 		}
 
 		body := pb.StockRealTimeBidAskMessage{}
 		if err := proto.Unmarshal(d.Body, &body); err != nil {
-			log.Error(err)
+			logger.Error(err)
 			continue
 		}
 
 		dataTime, err := time.ParseInLocation(common.LongTimeLayout, body.GetDateTime(), time.Local)
 		if err != nil {
-			log.Error(err)
+			logger.Error(err)
 			continue
 		}
 
@@ -378,19 +378,19 @@ func (c *StreamRabbit) FutureBidAskConsumer(code string, bidAskChan chan *entity
 	for {
 		d, opened := <-delivery
 		if !opened {
-			log.Errorf("FutureBidAskConsumer:%s rabbitMQ is closed", code)
+			logger.Errorf("FutureBidAskConsumer:%s rabbitMQ is closed", code)
 			return
 		}
 
 		body := pb.FutureRealTimeBidAskMessage{}
 		if err := proto.Unmarshal(d.Body, &body); err != nil {
-			log.Error(err)
+			logger.Error(err)
 			continue
 		}
 
 		dataTime, err := time.ParseInLocation(common.LongTimeLayout, body.GetDateTime(), time.Local)
 		if err != nil {
-			log.Error(err)
+			logger.Error(err)
 			continue
 		}
 

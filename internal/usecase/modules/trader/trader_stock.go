@@ -6,8 +6,8 @@ import (
 	"sync"
 	"time"
 
+	"tmt/cmd/config"
 	"tmt/internal/entity"
-	"tmt/internal/usecase/modules/config"
 	"tmt/internal/usecase/modules/event"
 
 	"github.com/google/uuid"
@@ -106,7 +106,7 @@ func (o *StockTrader) placeOrder(order *entity.StockOrder) {
 	}
 
 	if order.Price == 0 {
-		log.Errorf("%s Order price is 0", order.StockNum)
+		logger.Errorf("%s Order price is 0", order.StockNum)
 		return
 	}
 
@@ -235,7 +235,7 @@ func (o *StockTrader) checkPlaceOrderStatus(order *entity.StockOrder) {
 			o.orderMapLock.Unlock()
 
 			o.waitingOrder = nil
-			log.Warnf("Order Filled -> Stock: %s, Action: %d, Price: %.2f, Qty: %d", order.StockNum, order.Action, order.Price, order.Quantity)
+			logger.Warnf("Order Filled -> Stock: %s, Action: %d, Price: %.2f, Qty: %d", order.StockNum, order.Action, order.Price, order.Quantity)
 			return
 		} else if order.TradeTime.Add(timeout).Before(time.Now()) {
 			break
@@ -252,7 +252,7 @@ func (o *StockTrader) checkPlaceOrderStatus(order *entity.StockOrder) {
 		return
 	}
 
-	log.Error("check place order status raise unknown error")
+	logger.Error("check place order status raise unknown error")
 }
 
 func (o *StockTrader) cancelOrder(order *entity.StockOrder) {
@@ -267,7 +267,7 @@ func (o *StockTrader) cancelOrder(order *entity.StockOrder) {
 			}
 
 			if order.Status == entity.StatusCancelled {
-				log.Warnf("Order Canceled -> Stock: %s, Action: %d, Price: %.2f, Qty: %d", order.StockNum, order.Action, order.Price, order.Quantity)
+				logger.Warnf("Order Canceled -> Stock: %s, Action: %d, Price: %.2f, Qty: %d", order.StockNum, order.Action, order.Price, order.Quantity)
 				if order.Action == entity.ActionBuy || order.Action == entity.ActionSellFirst {
 					bus.PublishTopicEvent(event.TopicUnSubscribeStockTickTargets, order.StockNum)
 					return
@@ -275,7 +275,7 @@ func (o *StockTrader) cancelOrder(order *entity.StockOrder) {
 				o.waitingOrder = nil
 				return
 			} else if order.TradeTime.Add(o.cancelWaitTime).Before(time.Now()) {
-				log.Warnf("Try Cancel Order Again -> Stock: %s, Action: %d, Price: %.2f, Qty: %d", order.StockNum, order.Action, order.Price, order.Quantity)
+				logger.Warnf("Try Cancel Order Again -> Stock: %s, Action: %d, Price: %.2f, Qty: %d", order.StockNum, order.Action, order.Price, order.Quantity)
 				go o.checkPlaceOrderStatus(order)
 				return
 			}
@@ -311,7 +311,7 @@ func (o *StockTrader) checkFirstTickArrive() {
 
 			// if firstTick.Open != lastClose {
 			// 	bus.PublishTopicEvent(topicUnSubscribeTickTargets, o.stockNum)
-			// 	log.Warnf("Not open from last close, unsubscribe %s", o.stockNum)
+			// 	logger.Warnf("Not open from last close, unsubscribe %s", o.stockNum)
 			// 	break
 			// }
 

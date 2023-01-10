@@ -7,8 +7,8 @@ import (
 	"sync"
 	"time"
 
+	"tmt/cmd/config"
 	"tmt/internal/entity"
-	"tmt/internal/usecase/modules/config"
 	"tmt/internal/usecase/modules/event"
 	"tmt/internal/usecase/modules/tradeday"
 	"tmt/internal/usecase/modules/trader"
@@ -84,17 +84,17 @@ func (uc *HistoryUseCase) FetchHistory(ctx context.Context, targetArr []*entity.
 
 	err := uc.fetchHistoryKbar(fetchArr)
 	if err != nil {
-		log.Panic(err)
+		logger.Panic(err)
 	}
 
 	err = uc.fetchHistoryTick(fetchArr)
 	if err != nil {
-		log.Panic(err)
+		logger.Panic(err)
 	}
 
 	err = uc.fetchHistoryClose(fetchArr)
 	if err != nil {
-		log.Panic(err)
+		logger.Panic(err)
 	}
 
 	bus.PublishTopicEvent(event.TopicAnalyzeStockTargets, ctx, fetchArr)
@@ -111,8 +111,8 @@ func (uc *HistoryUseCase) fetchHistoryClose(targetArr []*entity.StockTarget) err
 	if err != nil {
 		return err
 	}
-	defer log.Info("Fetching History Close Done")
-	log.Infof("Fetching History Close -> Count: %d", total)
+	defer logger.Info("Fetching History Close Done")
+	logger.Infof("Fetching History Close -> Count: %d", total)
 	result := make(map[string][]*entity.StockHistoryClose)
 	dataChan := make(chan *entity.StockHistoryClose)
 	wait := make(chan struct{})
@@ -134,7 +134,7 @@ func (uc *HistoryUseCase) fetchHistoryClose(targetArr []*entity.StockTarget) err
 		date := d
 		closeArr, err := uc.grpcapi.GetStockHistoryClose(stockArr, date.Format(common.ShortTimeLayout))
 		if err != nil {
-			log.Error(err)
+			logger.Error(err)
 		}
 		for _, close := range closeArr {
 			dataChan <- &entity.StockHistoryClose{
@@ -149,7 +149,7 @@ func (uc *HistoryUseCase) fetchHistoryClose(targetArr []*entity.StockTarget) err
 	close(dataChan)
 	<-wait
 	if len(result) != 0 {
-		log.Info("Inserting History Close")
+		logger.Info("Inserting History Close")
 		for _, v := range result {
 			uc.processCloseArr(v)
 			if err := uc.repo.InsertHistoryCloseArr(context.Background(), v); err != nil {
@@ -162,7 +162,7 @@ func (uc *HistoryUseCase) fetchHistoryClose(targetArr []*entity.StockTarget) err
 }
 
 func (uc *HistoryUseCase) findExistHistoryClose(fetchTradeDayArr []time.Time, stockNumArr []string) (map[time.Time][]string, int64, error) {
-	log.Info("Query Exist History Close")
+	logger.Info("Query Exist History Close")
 	result := make(map[time.Time][]string)
 	dbCloseMap := make(map[string][]*entity.StockHistoryClose)
 	var total int64
@@ -185,7 +185,7 @@ func (uc *HistoryUseCase) findExistHistoryClose(fetchTradeDayArr []time.Time, st
 		if len(stockNumArrInDay) != 0 {
 			dErr := uc.repo.DeleteHistoryCloseByStockAndDate(context.Background(), stockNumArrInDay, d)
 			if dErr != nil {
-				log.Panic(dErr)
+				logger.Panic(dErr)
 			}
 			result[d] = stockNumArrInDay
 		}
@@ -208,8 +208,8 @@ func (uc *HistoryUseCase) fetchHistoryTick(targetArr []*entity.StockTarget) erro
 	if err != nil {
 		return err
 	}
-	defer log.Info("Fetching History Tick Done")
-	log.Infof("Fetching History Tick -> Count: %d", total)
+	defer logger.Info("Fetching History Tick Done")
+	logger.Infof("Fetching History Tick -> Count: %d", total)
 	result := make(map[string][]*entity.StockHistoryTick)
 	dataChan := make(chan *entity.StockHistoryTick)
 	wait := make(chan struct{})
@@ -232,7 +232,7 @@ func (uc *HistoryUseCase) fetchHistoryTick(targetArr []*entity.StockTarget) erro
 		date := d
 		tickArr, err := uc.grpcapi.GetStockHistoryTick(stockArr, date.Format(common.ShortTimeLayout))
 		if err != nil {
-			log.Error(err)
+			logger.Error(err)
 		}
 		for _, t := range tickArr {
 			dataChan <- &entity.StockHistoryTick{
@@ -249,7 +249,7 @@ func (uc *HistoryUseCase) fetchHistoryTick(targetArr []*entity.StockTarget) erro
 	close(dataChan)
 	<-wait
 	if len(result) != 0 {
-		log.Info("Inserting History Tick")
+		logger.Info("Inserting History Tick")
 		for _, v := range result {
 			uc.processTickArr(v)
 			if err := uc.repo.InsertHistoryTickArr(context.Background(), v); err != nil {
@@ -261,7 +261,7 @@ func (uc *HistoryUseCase) fetchHistoryTick(targetArr []*entity.StockTarget) erro
 }
 
 func (uc *HistoryUseCase) findExistStockHistoryTick(fetchTradeDayArr []time.Time, stockNumArr []string) (map[time.Time][]string, int64, error) {
-	log.Info("Query Exist History Tick")
+	logger.Info("Query Exist History Tick")
 	result := make(map[time.Time][]string)
 	var total int64
 	for _, d := range fetchTradeDayArr {
@@ -283,7 +283,7 @@ func (uc *HistoryUseCase) findExistStockHistoryTick(fetchTradeDayArr []time.Time
 		if len(stockNumArrInDay) != 0 {
 			dErr := uc.repo.DeleteHistoryTickByStockAndDate(context.Background(), stockNumArrInDay, d)
 			if dErr != nil {
-				log.Panic(dErr)
+				logger.Panic(dErr)
 			}
 			result[d] = stockNumArrInDay
 		}
@@ -302,8 +302,8 @@ func (uc *HistoryUseCase) fetchHistoryKbar(targetArr []*entity.StockTarget) erro
 	if err != nil {
 		return err
 	}
-	defer log.Info("Fetching History Kbar Done")
-	log.Infof("Fetching History Kbar -> Count: %d", total)
+	defer logger.Info("Fetching History Kbar Done")
+	logger.Infof("Fetching History Kbar -> Count: %d", total)
 	result := make(map[string][]*entity.StockHistoryKbar)
 	dataChan := make(chan *entity.StockHistoryKbar)
 	wait := make(chan struct{})
@@ -326,7 +326,7 @@ func (uc *HistoryUseCase) fetchHistoryKbar(targetArr []*entity.StockTarget) erro
 		date := d
 		tickArr, err := uc.grpcapi.GetStockHistoryKbar(stockArr, date.Format(common.ShortTimeLayout))
 		if err != nil {
-			log.Error(err)
+			logger.Error(err)
 		}
 		for _, t := range tickArr {
 			dataChan <- &entity.StockHistoryKbar{
@@ -342,7 +342,7 @@ func (uc *HistoryUseCase) fetchHistoryKbar(targetArr []*entity.StockTarget) erro
 	close(dataChan)
 	<-wait
 	if len(result) != 0 {
-		log.Info("Inserting History Kbar")
+		logger.Info("Inserting History Kbar")
 		for _, v := range result {
 			uc.processKbarArr(v)
 			if err := uc.repo.InsertHistoryKbarArr(context.Background(), v); err != nil {
@@ -354,7 +354,7 @@ func (uc *HistoryUseCase) fetchHistoryKbar(targetArr []*entity.StockTarget) erro
 }
 
 func (uc *HistoryUseCase) findExistHistoryKbar(fetchTradeDayArr []time.Time, stockNumArr []string) (map[time.Time][]string, int64, error) {
-	log.Info("Query Exist History Kbar")
+	logger.Info("Query Exist History Kbar")
 	result := make(map[time.Time][]string)
 	var total int64
 	for _, d := range fetchTradeDayArr {
@@ -376,7 +376,7 @@ func (uc *HistoryUseCase) findExistHistoryKbar(fetchTradeDayArr []time.Time, sto
 		if len(stockNumArrInDay) != 0 {
 			dErr := uc.repo.DeleteHistoryKbarByStockAndDate(context.Background(), stockNumArrInDay, d)
 			if dErr != nil {
-				log.Panic(dErr)
+				logger.Panic(dErr)
 			}
 			result[d] = stockNumArrInDay
 		}
@@ -420,7 +420,7 @@ func (uc *HistoryUseCase) processCloseArr(arr []*entity.StockHistoryClose) {
 				QuaterMA: utils.Round(ma, 2),
 			},
 		}); err != nil {
-			log.Error(err)
+			logger.Error(err)
 		}
 		i++
 	}
@@ -538,7 +538,7 @@ func (uc *HistoryUseCase) FetchFutureHistoryTick(code string, date time.Time) []
 	}()
 	tickArr, err := uc.grpcapi.GetFutureHistoryTick([]string{code}, date.Format(common.ShortTimeLayout))
 	if err != nil {
-		log.Error(err)
+		logger.Error(err)
 	}
 	for _, t := range tickArr {
 		dataChan <- &entity.FutureHistoryTick{
@@ -604,7 +604,7 @@ func (uc *HistoryUseCase) fetchFutureHistoryClose(code string, date time.Time) *
 	}()
 	closeArr, err := uc.grpcapi.GetFutureHistoryClose([]string{code}, date.Format(common.ShortTimeLayout))
 	if err != nil {
-		log.Error(err)
+		logger.Error(err)
 	}
 	for _, close := range closeArr {
 		dataChan <- &entity.FutureHistoryClose{
@@ -649,14 +649,14 @@ func (uc *HistoryUseCase) GetFutureTradeCond(days int) trader.SimulateBalance {
 	for _, date := range simulateDateArr {
 		dbTickArrArr, err := uc.findExistFutureHistoryTick(date, uc.simulateFutureCode)
 		if err != nil {
-			log.Error(err)
+			logger.Error(err)
 			continue
 		}
 
 		lastPeriod := date.GetLastFutureTradePeriod()
 		dbClose, err := uc.findExistFutureHistoryClose(lastPeriod, uc.simulateFutureCode)
 		if err != nil {
-			log.Error(err)
+			logger.Error(err)
 			continue
 		}
 
@@ -664,7 +664,7 @@ func (uc *HistoryUseCase) GetFutureTradeCond(days int) trader.SimulateBalance {
 			MaxHoldTime: 20,
 		}
 
-		log.Infof("Simulating %s %s, last close: %.0f", uc.simulateFutureCode, date.TradeDay.Format(common.ShortTimeLayout), dbClose.Close)
+		logger.Infof("Simulating %s %s, last close: %.0f", uc.simulateFutureCode, date.TradeDay.Format(common.ShortTimeLayout), dbClose.Close)
 		for _, dbTickArr := range dbTickArrArr {
 			simulator := trader.NewFutureSimulator(uc.simulateFutureCode, cond, date)
 			tickChan := simulator.GetTickChan()

@@ -4,8 +4,8 @@ package quota
 import (
 	"math"
 
+	"tmt/cmd/config"
 	"tmt/internal/entity"
-	"tmt/internal/usecase/modules/config"
 )
 
 const (

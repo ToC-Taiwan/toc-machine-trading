@@ -1,15 +1,4 @@
-http:
-    port: 26670
-
-postgres:
-    pool_max: 80
-
-rabbitmq:
-    wait_time: 5
-    attempts: 10
-
-sinopac:
-    pool_max: 20
+simulation: false
 
 history:
     history_close_period: 65 # unit: day
@@ -36,8 +25,6 @@ target_cond:
     price_limit:
         - low: 10
           high: 35
-
-simulation: false
 
 stock_trade_switch:
     allow_trade: false

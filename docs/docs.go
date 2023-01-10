@@ -771,29 +771,26 @@ const docTemplate = `{
         "config.Config": {
             "type": "object",
             "properties": {
-                "future_analyze": {
+                "database": {
+                    "$ref": "#/definitions/config.Database"
+                },
+                "futureAnalyze": {
                     "$ref": "#/definitions/config.FutureAnalyze"
                 },
-                "future_trade_switch": {
+                "futureTradeSwitch": {
                     "$ref": "#/definitions/config.FutureTradeSwitch"
                 },
                 "history": {
                     "$ref": "#/definitions/config.History"
                 },
-                "http": {
-                    "$ref": "#/definitions/config.HTTP"
-                },
-                "log": {
-                    "$ref": "#/definitions/config.Log"
-                },
-                "postgres": {
-                    "$ref": "#/definitions/config.Postgres"
-                },
                 "quota": {
                     "$ref": "#/definitions/config.Quota"
                 },
-                "rabbitmq": {
+                "rabbitMQ": {
                     "$ref": "#/definitions/config.RabbitMQ"
+                },
+                "server": {
+                    "$ref": "#/definitions/config.Server"
                 },
                 "simulation": {
                     "type": "boolean"
@@ -801,14 +798,28 @@ const docTemplate = `{
                 "sinopac": {
                     "$ref": "#/definitions/config.Sinopac"
                 },
-                "stock_analyze": {
+                "stockAnalyze": {
                     "$ref": "#/definitions/config.StockAnalyze"
                 },
-                "stock_trade_switch": {
+                "stockTradeSwitch": {
                     "$ref": "#/definitions/config.StockTradeSwitch"
                 },
-                "target_cond": {
+                "targetCond": {
                     "$ref": "#/definitions/config.TargetCond"
+                }
+            }
+        },
+        "config.Database": {
+            "type": "object",
+            "properties": {
+                "dbname": {
+                    "type": "string"
+                },
+                "poolMax": {
+                    "type": "integer"
+                },
+                "url": {
+                    "type": "string"
                 }
             }
         },
@@ -846,14 +857,6 @@ const docTemplate = `{
                 }
             }
         },
-        "config.HTTP": {
-            "type": "object",
-            "properties": {
-                "port": {
-                    "type": "string"
-                }
-            }
-        },
         "config.History": {
             "type": "object",
             "properties": {
@@ -865,34 +868,6 @@ const docTemplate = `{
                 },
                 "history_tick_period": {
                     "type": "integer"
-                }
-            }
-        },
-        "config.Log": {
-            "type": "object",
-            "properties": {
-                "logFormat": {
-                    "type": "string"
-                },
-                "logLevel": {
-                    "type": "string"
-                },
-                "needCaller": {
-                    "type": "boolean"
-                }
-            }
-        },
-        "config.Postgres": {
-            "type": "object",
-            "properties": {
-                "db_name": {
-                    "type": "string"
-                },
-                "pool_max": {
-                    "type": "integer"
-                },
-                "url": {
-                    "type": "string"
                 }
             }
         },
@@ -933,15 +908,29 @@ const docTemplate = `{
                 "url": {
                     "type": "string"
                 },
-                "wait_time": {
+                "waitTime": {
                     "type": "integer"
+                }
+            }
+        },
+        "config.Server": {
+            "type": "object",
+            "properties": {
+                "disableSwaggerHTTPHandler": {
+                    "type": "string"
+                },
+                "http": {
+                    "type": "string"
+                },
+                "routerDebugMode": {
+                    "type": "string"
                 }
             }
         },
         "config.Sinopac": {
             "type": "object",
             "properties": {
-                "pool_max": {
+                "poolMax": {
                     "type": "integer"
                 },
                 "url": {

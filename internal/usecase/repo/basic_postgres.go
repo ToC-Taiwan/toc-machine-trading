@@ -71,7 +71,7 @@ func (r *BasicRepo) InsertOrUpdatetStockArr(ctx context.Context, t []*entity.Sto
 			return err
 		}
 	}
-	log.Infof("Insert Stock -> Exist: %d, Insert: %d, Update: %d", len(t)-update-insert, insert, update)
+	logger.Infof("Insert Stock -> Exist: %d, Insert: %d, Update: %d", len(t)-update-insert, insert, update)
 	return nil
 }
 
@@ -166,7 +166,7 @@ func (r *BasicRepo) InsertOrUpdatetCalendarDateArr(ctx context.Context, t []*ent
 			return err
 		}
 	}
-	log.Infof("Insert Calendar -> Exist: %d, Insert: %d, Update: %d", len(t)-update-insert, insert, update)
+	logger.Infof("Insert Calendar -> Exist: %d, Insert: %d, Update: %d", len(t)-update-insert, insert, update)
 	return nil
 }
 
@@ -250,7 +250,7 @@ func (r *BasicRepo) InsertOrUpdatetFutureArr(ctx context.Context, t []*entity.Fu
 			return err
 		}
 	}
-	log.Infof("Insert Future -> Exist: %d, Insert: %d, Update: %d", len(t)-update-insert, insert, update)
+	logger.Infof("Insert Future -> Exist: %d, Insert: %d, Update: %d", len(t)-update-insert, insert, update)
 	return nil
 }
 

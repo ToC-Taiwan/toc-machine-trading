@@ -7,8 +7,8 @@ import (
 	"sort"
 	"time"
 
+	"tmt/cmd/config"
 	"tmt/internal/entity"
-	"tmt/internal/usecase/modules/config"
 	"tmt/internal/usecase/modules/event"
 	"tmt/internal/usecase/modules/target"
 	"tmt/pkg/common"
@@ -42,26 +42,26 @@ func NewTarget(r TargetRepo, t TargetgRPCAPI, s StreamgRPCAPI) *TargetUseCase {
 
 	// unsubscriba all first
 	if err := uc.UnSubscribeAll(context.Background()); err != nil {
-		log.Panic("unsubscribe all fail")
+		logger.Panic("unsubscribe all fail")
 	}
 
 	// query targets from db
 	tradeDay := cc.GetBasicInfo().TradeDay
 	targetArr, err := uc.repo.QueryTargetsByTradeDay(context.Background(), tradeDay)
 	if err != nil {
-		log.Panic(err)
+		logger.Panic(err)
 	}
 
 	// db has no targets, find targets from gRPC
 	if len(targetArr) == 0 {
 		targetArr, err = uc.SearchTradeDayTargets(context.Background(), tradeDay)
 		if err != nil {
-			log.Panic(err)
+			logger.Panic(err)
 		}
 
 		if len(targetArr) == 0 {
 			stuck := make(chan struct{})
-			log.Error("no targets")
+			logger.Error("no targets")
 			<-stuck
 		}
 	}
@@ -85,7 +85,7 @@ func (uc *TargetUseCase) fillMonitorFutureCode(future *entity.Future) {
 func (uc *TargetUseCase) publishNewTargets(targetArr []*entity.StockTarget) {
 	err := uc.repo.InsertOrUpdateTargetArr(context.Background(), targetArr)
 	if err != nil {
-		log.Panic(err)
+		logger.Panic(err)
 	}
 
 	cc.AppendTargets(targetArr)
@@ -112,7 +112,7 @@ func (uc *TargetUseCase) SearchTradeDayTargets(ctx context.Context, tradeDay tim
 	}
 
 	if len(t) == 0 && time.Now().Before(cc.GetBasicInfo().TradeDay.Add(8*time.Hour)) {
-		log.Warn("VolumeRank is empty, search from all snapshot")
+		logger.Warn("VolumeRank is empty, search from all snapshot")
 		return uc.SearchTradeDayTargetsFromAllSnapshot(tradeDay)
 	}
 

@@ -3,9 +3,9 @@ package v1
 import (
 	"net/http"
 
+	"tmt/cmd/config"
 	"tmt/internal/entity"
 	"tmt/internal/usecase"
-	"tmt/internal/usecase/modules/config"
 
 	"github.com/gin-gonic/gin"
 )

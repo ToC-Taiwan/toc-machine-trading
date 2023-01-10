@@ -5,8 +5,8 @@ import (
 	"sync"
 	"time"
 
+	"tmt/cmd/config"
 	"tmt/internal/entity"
-	"tmt/internal/usecase/modules/config"
 	"tmt/internal/usecase/modules/event"
 
 	"github.com/google/uuid"
@@ -222,7 +222,7 @@ func (o *FutureTrader) placeFutureOrder(order *entity.FutureOrder) {
 	}
 
 	if order.Price == 0 {
-		log.Errorf("%s Future Order price is 0", order.Code)
+		logger.Errorf("%s Future Order price is 0", order.Code)
 		return
 	}
 
@@ -257,7 +257,7 @@ func (o *FutureTrader) checkPlaceOrderStatus(order *entity.FutureOrder) {
 			o.orderMapLock.Unlock()
 
 			o.waitingOrder = nil
-			log.Infof("Future Order Filled -> Future: %s, Action: %d, Price: %.2f, Qty: %d", order.Code, order.Action, order.Price, order.Quantity)
+			logger.Infof("Future Order Filled -> Future: %s, Action: %d, Price: %.2f, Qty: %d", order.Code, order.Action, order.Price, order.Quantity)
 			return
 		} else if order.TradeTime.Add(timeout).Before(time.Now()) {
 			break
@@ -274,7 +274,7 @@ func (o *FutureTrader) checkPlaceOrderStatus(order *entity.FutureOrder) {
 		return
 	}
 
-	log.Error("check place order status raise unknown error")
+	logger.Error("check place order status raise unknown error")
 }
 
 func (o *FutureTrader) cancelOrder(order *entity.FutureOrder) {
@@ -289,11 +289,11 @@ func (o *FutureTrader) cancelOrder(order *entity.FutureOrder) {
 			}
 
 			if order.Status == entity.StatusCancelled {
-				log.Infof("Future Order Canceled -> Future: %s, Action: %d, Price: %.2f, Qty: %d", order.Code, order.Action, order.Price, order.Quantity)
+				logger.Infof("Future Order Canceled -> Future: %s, Action: %d, Price: %.2f, Qty: %d", order.Code, order.Action, order.Price, order.Quantity)
 				o.waitingOrder = nil
 				return
 			} else if order.TradeTime.Add(time.Duration(o.tradeSwitch.CancelWaitTime) * time.Second).Before(time.Now()) {
-				log.Warnf("Try Cancel Future Order Again -> Future: %s, Action: %d, Price: %.2f, Qty: %d", order.Code, order.Action, order.Price, order.Quantity)
+				logger.Warnf("Try Cancel Future Order Again -> Future: %s, Action: %d, Price: %.2f, Qty: %d", order.Code, order.Action, order.Price, order.Quantity)
 				go o.checkPlaceOrderStatus(order)
 				return
 			}

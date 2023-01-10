@@ -1,8 +1,8 @@
 package main
 
 import (
+	"tmt/cmd/config"
 	"tmt/internal/app"
-	"tmt/internal/usecase/modules/config"
 )
 
 func main() {

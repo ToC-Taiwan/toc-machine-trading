@@ -1,32 +1,39 @@
 definitions:
   config.Config:
     properties:
-      future_analyze:
+      database:
+        $ref: '#/definitions/config.Database'
+      futureAnalyze:
         $ref: '#/definitions/config.FutureAnalyze'
-      future_trade_switch:
+      futureTradeSwitch:
         $ref: '#/definitions/config.FutureTradeSwitch'
       history:
         $ref: '#/definitions/config.History'
-      http:
-        $ref: '#/definitions/config.HTTP'
-      log:
-        $ref: '#/definitions/config.Log'
-      postgres:
-        $ref: '#/definitions/config.Postgres'
       quota:
         $ref: '#/definitions/config.Quota'
-      rabbitmq:
+      rabbitMQ:
         $ref: '#/definitions/config.RabbitMQ'
+      server:
+        $ref: '#/definitions/config.Server'
       simulation:
         type: boolean
       sinopac:
         $ref: '#/definitions/config.Sinopac'
-      stock_analyze:
+      stockAnalyze:
         $ref: '#/definitions/config.StockAnalyze'
-      stock_trade_switch:
+      stockTradeSwitch:
         $ref: '#/definitions/config.StockTradeSwitch'
-      target_cond:
+      targetCond:
         $ref: '#/definitions/config.TargetCond'
+    type: object
+  config.Database:
+    properties:
+      dbname:
+        type: string
+      poolMax:
+        type: integer
+      url:
+        type: string
     type: object
   config.FutureAnalyze:
     properties:
@@ -50,11 +57,6 @@ definitions:
       trade_time_range:
         $ref: '#/definitions/config.TradeTimeRange'
     type: object
-  config.HTTP:
-    properties:
-      port:
-        type: string
-    type: object
   config.History:
     properties:
       history_close_period:
@@ -63,24 +65,6 @@ definitions:
         type: integer
       history_tick_period:
         type: integer
-    type: object
-  config.Log:
-    properties:
-      logFormat:
-        type: string
-      logLevel:
-        type: string
-      needCaller:
-        type: boolean
-    type: object
-  config.Postgres:
-    properties:
-      db_name:
-        type: string
-      pool_max:
-        type: integer
-      url:
-        type: string
     type: object
   config.PriceLimit:
     properties:
@@ -106,12 +90,21 @@ definitions:
         type: string
       url:
         type: string
-      wait_time:
+      waitTime:
         type: integer
+    type: object
+  config.Server:
+    properties:
+      disableSwaggerHTTPHandler:
+        type: string
+      http:
+        type: string
+      routerDebugMode:
+        type: string
     type: object
   config.Sinopac:
     properties:
-      pool_max:
+      poolMax:
         type: integer
       url:
         type: string

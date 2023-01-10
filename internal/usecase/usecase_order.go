@@ -6,8 +6,8 @@ import (
 	"sync"
 	"time"
 
+	"tmt/cmd/config"
 	"tmt/internal/entity"
-	"tmt/internal/usecase/modules/config"
 	"tmt/internal/usecase/modules/event"
 	"tmt/internal/usecase/modules/quota"
 	"tmt/internal/usecase/modules/tradeday"
@@ -71,7 +71,7 @@ func (uc *OrderUseCase) updateAllTradeBalance() {
 		if uc.IsStockTradeTime() {
 			stockOrders, err := uc.repo.QueryAllStockOrderByDate(context.Background(), uc.stockTradeDay.ToStartEndArray())
 			if err != nil {
-				log.Panic(err)
+				logger.Panic(err)
 			}
 			uc.calculateStockTradeBalance(stockOrders, uc.stockTradeDay.TradeDay)
 		}
@@ -79,7 +79,7 @@ func (uc *OrderUseCase) updateAllTradeBalance() {
 		if uc.IsFutureTradeTime() {
 			futureOrders, err := uc.repo.QueryAllFutureOrderByDate(context.Background(), uc.futureTradeDay.ToStartEndArray())
 			if err != nil {
-				log.Panic(err)
+				logger.Panic(err)
 			}
 			uc.calculateFutureTradeBalance(futureOrders, uc.futureTradeDay.TradeDay)
 		}
@@ -140,7 +140,7 @@ func (uc *OrderUseCase) askOrderStatus() {
 		}
 
 		if err := uc.gRPCAPI.GetLocalOrderStatusArr(); err != nil {
-			log.Error(err)
+			logger.Error(err)
 			continue
 		}
 	}
@@ -153,7 +153,7 @@ func (uc *OrderUseCase) askSimulateOrderStatus() {
 		}
 
 		if err := uc.gRPCAPI.GetSimulateOrderStatusArr(); err != nil {
-			log.Error(err)
+			logger.Error(err)
 			continue
 		}
 	}
@@ -168,12 +168,12 @@ func (uc *OrderUseCase) askSimulateOrderStatus() {
 
 // 		msg, err := uc.gRPCAPI.GetNonBlockOrderStatusArr()
 // 		if err != nil {
-// 			log.Error(err)
+// 			logger.Error(err)
 // 			continue
 // 		}
 
 // 		if errMsg := msg.GetErr(); errMsg != "" {
-// 			log.Error(errMsg)
+// 			logger.Error(errMsg)
 // 			continue
 // 		}
 // 	}
@@ -201,7 +201,7 @@ func (uc *OrderUseCase) placeStockOrder(order *entity.StockOrder) {
 		orderID, status, err = uc.SellFirstStock(order)
 	}
 	if err != nil {
-		log.Error(err)
+		logger.Error(err)
 		order.Status = entity.StatusFailed
 		return
 	}
@@ -220,7 +220,7 @@ func (uc *OrderUseCase) placeStockOrder(order *entity.StockOrder) {
 	order.TradeTime = time.Now()
 	cc.SetOrderByOrderID(order)
 
-	log.Infof("Place Stock Order -> Stock: %s, Action: %d, Price: %.2f, Qty: %d, Quota: %d", order.StockNum, order.Action, order.Price, order.Quantity, uc.quota.GetCurrentQuota())
+	logger.Infof("Place Stock Order -> Stock: %s, Action: %d, Price: %.2f, Qty: %d, Quota: %d", order.StockNum, order.Action, order.Price, order.Quantity, uc.quota.GetCurrentQuota())
 }
 
 func (uc *OrderUseCase) cancelStockOrder(order *entity.StockOrder) {
@@ -228,18 +228,18 @@ func (uc *OrderUseCase) cancelStockOrder(order *entity.StockOrder) {
 	uc.placeOrderLock.Lock()
 
 	order.TradeTime = time.Now()
-	log.Infof("Cancel Stock Order -> Stock: %s, Action: %d, Price: %.2f, Qty: %d", order.StockNum, order.Action, order.Price, order.Quantity)
+	logger.Infof("Cancel Stock Order -> Stock: %s, Action: %d, Price: %.2f, Qty: %d", order.StockNum, order.Action, order.Price, order.Quantity)
 
 	// result will return instantly
 	_, _, err := uc.CancelOrderID(order.OrderID)
 	if err != nil {
-		log.Error(err)
+		logger.Error(err)
 		return
 	}
 
 	if cosumeQuota := uc.quota.CalculateOriginalOrderCost(order); cosumeQuota > 0 {
 		uc.quota.BackQuota(cosumeQuota)
-		log.Infof("Quota Back: %d", uc.quota.GetCurrentQuota())
+		logger.Infof("Quota Back: %d", uc.quota.GetCurrentQuota())
 	}
 }
 
@@ -334,7 +334,7 @@ func (uc *OrderUseCase) updateStockOrderCacheAndInsertDB(order *entity.StockOrde
 
 	// insert or update order to db
 	if err := uc.repo.InsertOrUpdateOrderByOrderID(context.Background(), cacheOrder); err != nil {
-		log.Panic(err)
+		logger.Panic(err)
 	}
 }
 
@@ -368,7 +368,7 @@ func (uc *OrderUseCase) calculateStockTradeBalance(allOrders []*entity.StockOrde
 
 	err := uc.repo.InsertOrUpdateStockTradeBalance(context.Background(), tmp)
 	if err != nil {
-		log.Panic(err)
+		logger.Panic(err)
 	}
 }
 
@@ -456,7 +456,7 @@ func (uc *OrderUseCase) placeFutureOrder(order *entity.FutureOrder) {
 		orderID, status, err = uc.SellFirstFuture(order)
 	}
 	if err != nil {
-		log.Error(err)
+		logger.Error(err)
 		order.Status = entity.StatusFailed
 		return
 	}
@@ -472,7 +472,7 @@ func (uc *OrderUseCase) placeFutureOrder(order *entity.FutureOrder) {
 	order.TradeTime = time.Now()
 	cc.SetFutureOrderByOrderID(order)
 
-	log.Infof("Place Future Order -> Future: %s, Action: %d, Price: %.0f, Qty: %d", order.Code, order.Action, order.Price, order.Quantity)
+	logger.Infof("Place Future Order -> Future: %s, Action: %d, Price: %.0f, Qty: %d", order.Code, order.Action, order.Price, order.Quantity)
 }
 
 func (uc *OrderUseCase) cancelFutureOrder(order *entity.FutureOrder) {
@@ -480,12 +480,12 @@ func (uc *OrderUseCase) cancelFutureOrder(order *entity.FutureOrder) {
 	uc.placeFutureOrderLock.Lock()
 
 	order.TradeTime = time.Now()
-	log.Infof("Cancel Future Order -> Future: %s, Action: %d, Price: %.0f, Qty: %d", order.Code, order.Action, order.Price, order.Quantity)
+	logger.Infof("Cancel Future Order -> Future: %s, Action: %d, Price: %.0f, Qty: %d", order.Code, order.Action, order.Price, order.Quantity)
 
 	// result will return instantly
 	_, _, err := uc.CancelFutureOrderID(order.OrderID)
 	if err != nil {
-		log.Error(err)
+		logger.Error(err)
 		return
 	}
 }
@@ -513,7 +513,7 @@ func (uc *OrderUseCase) updateFutureOrderCacheAndInsertDB(order *entity.FutureOr
 
 	// insert or update order to db
 	if err := uc.repo.InsertOrUpdateFutureOrderByOrderID(context.Background(), cacheOrder); err != nil {
-		log.Panic(err)
+		logger.Panic(err)
 	}
 }
 
@@ -626,7 +626,7 @@ func (uc *OrderUseCase) calculateFutureTradeBalance(allOrders []*entity.FutureOr
 	}
 	err := uc.repo.InsertOrUpdateFutureTradeBalance(context.Background(), tmp)
 	if err != nil {
-		log.Panic(err)
+		logger.Panic(err)
 	}
 }
 

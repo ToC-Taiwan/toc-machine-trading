@@ -6,15 +6,15 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"tmt/internal/usecase/modules/logger"
 	"tmt/pb"
+	"tmt/pkg/log"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"google.golang.org/protobuf/proto"
 )
 
-var log = logger.Get()
+var logger = log.Get()
 
 // WSRouter -.
 type WSRouter struct {
@@ -45,7 +45,7 @@ func (w *WSRouter) upgrade(gin *gin.Context) {
 
 	c, err := upGrader.Upgrade(gin.Writer, gin.Request, nil)
 	if err != nil {
-		log.Error(err)
+		logger.Error(err)
 		return
 	}
 
@@ -104,7 +104,7 @@ func (w *WSRouter) ReadFromClient(forwardChan chan []byte) {
 	}
 
 	if err := w.conn.Close(); err != nil {
-		log.Error(err)
+		logger.Error(err)
 	}
 }
 
