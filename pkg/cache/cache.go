@@ -7,52 +7,43 @@ import (
 	"github.com/patrickmn/go-cache"
 )
 
-// Cache Cache
 type Cache struct {
-	CacheMap map[string]*cache.Cache
-	lock     sync.RWMutex
+	dict map[string]*cache.Cache
+	lock sync.RWMutex
 }
 
-// Category -.
-type Category string
-
-func (c Category) string() string {
-	return string(c)
-}
-
-// Key Key
-type Key struct {
-	Category Category
-	ID       string
-}
-
-// New -.
 func New() *Cache {
-	newCache := &Cache{}
-	newCache.CacheMap = make(map[string]*cache.Cache)
-	return newCache
-}
-
-func (c *Cache) getOrNewCache(category string) *cache.Cache {
-	c.lock.RLock()
-	cc := c.CacheMap[category]
-	c.lock.RUnlock()
-
-	if cc == nil {
-		cc = cache.New(0, 0)
-		c.lock.Lock()
-		c.CacheMap[category] = cc
-		c.lock.Unlock()
+	return &Cache{
+		dict: make(map[string]*cache.Cache),
 	}
-	return cc
 }
 
-// Set -.
-func (c *Cache) Set(k Key, x interface{}) {
-	c.getOrNewCache(k.Category.string()).Set(k.ID, x, 0)
+func (c *Cache) Set(k *Key, x interface{}) {
+	if cc := c.getCacher(k); cc != nil {
+		cc.Set(k.String(), x, 0)
+		return
+	}
+
+	cc := cache.New(0, 0)
+	cc.Set(k.String(), x, 0)
+	c.addCacher(k, cc)
 }
 
-// Get -.
-func (c *Cache) Get(k Key) (interface{}, bool) {
-	return c.getOrNewCache(k.Category.string()).Get(k.ID)
+func (c *Cache) Get(k *Key) (interface{}, bool) {
+	if cc := c.getCacher(k); cc != nil {
+		return cc.Get(k.String())
+	}
+	return nil, false
+}
+
+func (c *Cache) getCacher(key *Key) *cache.Cache {
+	c.lock.RLock()
+	defer c.lock.RUnlock()
+	return c.dict[key.category]
+}
+
+func (c *Cache) addCacher(key *Key, cc *cache.Cache) {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+	c.dict[key.category] = cc
 }

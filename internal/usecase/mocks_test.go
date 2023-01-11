@@ -9,7 +9,7 @@ import (
 	reflect "reflect"
 	time "time"
 	entity "tmt/internal/entity"
-	trader "tmt/internal/usecase/modules/trader"
+	trader "tmt/internal/usecase/module/trader"
 	pb "tmt/pb"
 
 	gomock "github.com/golang/mock/gomock"

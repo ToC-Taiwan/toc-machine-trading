@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"tmt/internal/entity"
-	"tmt/internal/usecase/modules/cache"
-	"tmt/internal/usecase/modules/trader"
+	"tmt/internal/usecase/cache"
+	"tmt/internal/usecase/module/trader"
 	"tmt/pkg/eventbus"
 	"tmt/pkg/log"
 

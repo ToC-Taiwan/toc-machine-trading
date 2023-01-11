@@ -2,7 +2,7 @@
 package trader
 
 import (
-	"tmt/internal/usecase/modules/cache"
+	"tmt/internal/usecase/cache"
 	"tmt/pkg/eventbus"
 	"tmt/pkg/log"
 )

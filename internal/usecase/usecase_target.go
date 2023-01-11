@@ -10,7 +10,7 @@ import (
 	"tmt/cmd/config"
 	"tmt/internal/entity"
 	"tmt/internal/usecase/event"
-	"tmt/internal/usecase/modules/target"
+	"tmt/internal/usecase/module/target"
 	"tmt/pkg/common"
 )
 

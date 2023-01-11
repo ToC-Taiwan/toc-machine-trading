@@ -10,9 +10,9 @@ import (
 	"tmt/cmd/config"
 	"tmt/internal/entity"
 	"tmt/internal/usecase/event"
-	"tmt/internal/usecase/modules/target"
-	"tmt/internal/usecase/modules/tradeday"
-	"tmt/internal/usecase/modules/trader"
+	"tmt/internal/usecase/module/target"
+	"tmt/internal/usecase/module/tradeday"
+	"tmt/internal/usecase/module/trader"
 
 	"github.com/google/uuid"
 )

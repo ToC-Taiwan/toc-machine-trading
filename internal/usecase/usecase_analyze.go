@@ -7,7 +7,7 @@ import (
 
 	"tmt/internal/entity"
 	"tmt/internal/usecase/event"
-	"tmt/internal/usecase/modules/tradeday"
+	"tmt/internal/usecase/module/tradeday"
 )
 
 // AnalyzeUseCase -.

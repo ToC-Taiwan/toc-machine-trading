@@ -8,7 +8,7 @@ import (
 	"tmt/pkg/cache"
 )
 
-var singleInstance *Cache
+var singleton *Cache
 
 // Cache -.
 type Cache struct {
@@ -17,15 +17,15 @@ type Cache struct {
 
 // Get -.
 func Get() *Cache {
-	if singleInstance != nil {
-		return singleInstance
+	if singleton != nil {
+		return singleton
 	}
 
-	singleInstance = &Cache{
+	singleton = &Cache{
 		Cache: cache.New(),
 	}
 
-	return singleInstance
+	return singleton
 }
 
 // SetStockDetail -.
@@ -69,12 +69,12 @@ func (c *Cache) GetBasicInfo() *entity.BasicInfo {
 
 // SetOrderByOrderID -.
 func (c *Cache) SetOrderByOrderID(order *entity.StockOrder) {
-	c.Set(c.orderKey(order.OrderID), order)
+	c.Set(c.stockOrderKey(order.OrderID), order)
 }
 
 // GetOrderByOrderID -.
 func (c *Cache) GetOrderByOrderID(orderID string) *entity.StockOrder {
-	if value, ok := c.Get(c.orderKey(orderID)); ok {
+	if value, ok := c.Get(c.stockOrderKey(orderID)); ok {
 		return value.(*entity.StockOrder)
 	}
 	return nil

@@ -10,8 +10,8 @@ import (
 	"tmt/cmd/config"
 	"tmt/internal/entity"
 	"tmt/internal/usecase/event"
-	"tmt/internal/usecase/modules/tradeday"
-	"tmt/internal/usecase/modules/trader"
+	"tmt/internal/usecase/module/tradeday"
+	"tmt/internal/usecase/module/trader"
 	"tmt/pkg/common"
 	"tmt/pkg/utils"
 )

@@ -7,8 +7,8 @@ import (
 
 	"tmt/cmd/config"
 	"tmt/internal/entity"
-	"tmt/internal/usecase/modules/quota"
-	"tmt/internal/usecase/modules/tradeday"
+	"tmt/internal/usecase/module/quota"
+	"tmt/internal/usecase/module/tradeday"
 	"tmt/pkg/common"
 
 	"github.com/google/uuid"
