@@ -8,7 +8,7 @@ import (
 
 	"tmt/internal/entity"
 	"tmt/internal/usecase"
-	"tmt/internal/usecase/modules/event"
+	"tmt/pkg/eventbus"
 
 	"tmt/internal/controller/http/websocket"
 
@@ -18,7 +18,7 @@ import (
 
 type WSFutureTrade struct {
 	*websocket.WSRouter // ws router
-	*event.Bus          // event bus
+	*eventbus.Bus       // event bus
 
 	s usecase.Stream  // stream
 	o usecase.Order   // order
@@ -57,7 +57,7 @@ func StartWSFutureTrade(c *gin.Context, s usecase.Stream, o usecase.Order, h use
 		orderMap:               make(map[string]*entity.FutureOrder),
 		cancelOrderMap:         make(map[string]*entity.FutureOrder),
 		WSRouter:               websocket.NewWSRouter(c),
-		Bus:                    event.Get(true),
+		Bus:                    eventbus.Get(uuid.NewString()),
 		waitingList:            newWaitingList(),
 	}
 

@@ -5,28 +5,51 @@ import (
 	"github.com/asaskevich/EventBus"
 )
 
+var (
+	singleton *Bus
+	terminal  *busTerminal = newBusTerminal()
+)
+
 // Bus Bus
 type Bus struct {
 	bus EventBus.Bus
 }
 
-// New New
-func New() *Bus {
-	return &Bus{
-		bus: EventBus.New(),
+func Get(route ...string) *Bus {
+	if singleton == nil {
+		singleton = &Bus{
+			bus: EventBus.New(),
+		}
+	}
+
+	switch len(route) {
+	case 0:
+		return singleton
+	case 1:
+		if v := terminal.getBus(route[0]); v != nil {
+			return v
+		}
+
+		bus := &Bus{
+			bus: EventBus.New(),
+		}
+		terminal.addBus(route[0], bus)
+		return bus
+	default:
+		panic("route length must be 0 or 1")
 	}
 }
 
-// PublishTopicEvent PublishTopicEvent
 func (c *Bus) PublishTopicEvent(topic string, arg ...interface{}) {
-	go c.bus.Publish(topic, arg...)
+	c.bus.Publish(topic, arg...)
 }
 
-// SubscribeTopic SubscribeTopic
-func (c *Bus) SubscribeTopic(topic string, fn interface{}) {
-	err := c.bus.SubscribeAsync(topic, fn, false)
-	if err != nil {
-		panic(err)
+func (c *Bus) SubscribeTopic(topic string, fn ...interface{}) {
+	for _, f := range fn {
+		err := c.bus.SubscribeAsync(topic, f, true)
+		if err != nil {
+			panic(err)
+		}
 	}
 }
 

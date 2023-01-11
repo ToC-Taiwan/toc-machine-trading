@@ -7,8 +7,8 @@ import (
 
 	"tmt/internal/entity"
 	"tmt/internal/usecase/modules/cache"
-	"tmt/internal/usecase/modules/event"
 	"tmt/internal/usecase/modules/trader"
+	"tmt/pkg/eventbus"
 	"tmt/pkg/log"
 
 	"tmt/pb"
@@ -17,7 +17,7 @@ import (
 var (
 	logger = log.Get()
 	cc     = cache.Get()
-	bus    = event.Get(false)
+	bus    = eventbus.Get()
 )
 
 //go:generate mockgen -source=interfaces.go -destination=./mocks_test.go -package=usecase_test

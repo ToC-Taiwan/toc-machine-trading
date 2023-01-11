@@ -7,7 +7,7 @@ import (
 
 	"tmt/cmd/config"
 	"tmt/internal/entity"
-	"tmt/internal/usecase/modules/event"
+	"tmt/internal/usecase/event"
 	"tmt/internal/usecase/modules/tradeday"
 	"tmt/pkg/common"
 )
