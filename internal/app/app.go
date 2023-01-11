@@ -23,8 +23,7 @@ import (
 
 var logger = log.Get()
 
-// Run -.
-func Run(cfg *config.Config) {
+func RunApp(cfg *config.Config) {
 	pg, err := postgres.New(
 		fmt.Sprintf("%s%s", cfg.Database.URL, cfg.Database.DBName),
 		postgres.MaxPoolSize(cfg.Database.PoolMax),

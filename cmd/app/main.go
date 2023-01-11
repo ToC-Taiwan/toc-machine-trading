@@ -8,6 +8,6 @@ import (
 func main() {
 	cfg := config.GetConfig()
 
-	app.MigrateDB(cfg)
-	app.Run(cfg)
+	app.InitDB(cfg.Database)
+	app.RunApp(cfg)
 }

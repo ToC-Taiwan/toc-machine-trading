@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"time"
 
 	"tmt/cmd/config"
@@ -23,22 +22,20 @@ const (
 	_defaultTimeout  = time.Second
 )
 
+// InitDB -.
+func InitDB(cfg config.Database) {
+	TryCreateDB(cfg)
+	MigrateDB(cfg)
+}
+
 // MigrateDB -.
-func MigrateDB(cfg *config.Config) {
-	createErr := tryCreateDB(cfg.Database.DBName)
-	if createErr != nil {
-		logger.Panic(createErr)
-	}
-
-	var (
-		attempts = _defaultAttempts
-		err      error
-		m        *migrate.Migrate
-	)
-
-	dbPath := fmt.Sprintf("%s%s%s", cfg.Database.URL, cfg.Database.DBName, "?sslmode=disable")
+func MigrateDB(dbConfig config.Database) {
+	m := &migrate.Migrate{}
+	path := fmt.Sprintf("%s%s%s", dbConfig.URL, dbConfig.DBName, "?sslmode=disable")
+	attempts := _defaultAttempts
+	var err error
 	for attempts > 0 {
-		m, err = migrate.New("file://migrations", dbPath)
+		m, err = migrate.New("file://migrations", path)
 		if err == nil {
 			break
 		}
@@ -49,7 +46,7 @@ func MigrateDB(cfg *config.Config) {
 	}
 
 	if err != nil {
-		log.Fatalf("Migrate: postgres connect error: %s", err)
+		logger.Panic(fmt.Errorf("postgres connect error in migrate: %s", err))
 	}
 
 	err = m.Up()
@@ -70,25 +67,23 @@ func MigrateDB(cfg *config.Config) {
 	logger.Info("Migrate: up success")
 }
 
-func tryCreateDB(dbName string) error {
-	cfg := config.GetConfig()
-	pg, err := postgres.New(cfg.Database.URL, postgres.MaxPoolSize(cfg.Database.PoolMax))
+// TryCreateDB -.
+func TryCreateDB(cfg config.Database) {
+	pg, err := postgres.New(cfg.URL, postgres.MaxPoolSize(cfg.PoolMax))
 	if err != nil {
-		return err
+		logger.Panic(err)
 	}
 	defer pg.Close()
 
 	var name string
-	err = pg.Pool().QueryRow(context.Background(), "SELECT datname FROM pg_catalog.pg_database WHERE datname = $1", dbName).Scan(&name)
-	if err != nil {
+	if err := pg.Pool().QueryRow(context.Background(), "SELECT datname FROM pg_catalog.pg_database WHERE datname = $1", cfg.DBName).Scan(&name); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			_, err = pg.Pool().Exec(context.Background(), fmt.Sprintf("CREATE DATABASE %s", dbName))
+			_, err = pg.Pool().Exec(context.Background(), fmt.Sprintf("CREATE DATABASE %s", cfg.DBName))
 			if err != nil {
-				return err
+				logger.Panic(err)
 			}
-			return nil
+			return
 		}
-		return err
+		logger.Panic(err)
 	}
-	return nil
 }
