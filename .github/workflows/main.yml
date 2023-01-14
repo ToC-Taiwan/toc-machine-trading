@@ -16,7 +16,7 @@ jobs:
             - name: setup golang
               uses: actions/setup-go@v3
               with:
-                  go-version: 1.19.4
+                  go-version: 1.19.5
 
             - name: checkout
               uses: actions/checkout@v3
@@ -33,7 +33,7 @@ jobs:
             - name: setup golang
               uses: actions/setup-go@v3
               with:
-                  go-version: 1.19.4
+                  go-version: 1.19.5
 
             - name: checkout
               uses: actions/checkout@v3
@@ -75,52 +75,15 @@ jobs:
                       ${{ env.REGISTRY }}/${{ env.REPOSITORY_LC }}:${{ env.SHORT_SHA }}
                       ${{ env.REGISTRY }}/${{ env.REPOSITORY_LC }}:latest
 
-    Deployment:
+    Trigger-Deployment:
         needs: Build
         runs-on: ubuntu-latest
-        env:
-            REPOSITORY: "${{ github.repository }}"
-            SHA: ${{ github.sha }}
-
         steps:
-            - name: set local env
+            - name: Trigger
               run: |
-                  echo "REPOSITORY_LC=${REPOSITORY,,}" >> ${GITHUB_ENV}
-                  echo "SHORT_SHA=$(echo ${SHA} | cut -c1-7)" >> ${GITHUB_ENV}
-
-            - name: checkout
-              uses: actions/checkout@v3
-
-            - name: deploy
-              uses: appleboy/ssh-action@master
-              with:
-                  host: ${{ secrets.TRADER_HOST }}
-                  port: ${{ secrets.TRADER_PORT }}
-                  username: ${{ secrets.TRADER_USERNAME }}
-                  key: ${{ secrets.TRADER_KEY }}
-                  script: |
-                      docker kill toc-machine-trading || true
-                      docker system prune --volumes -f
-                      docker rmi $(docker images '${{ env.REGISTRY }}/${{ env.REPOSITORY_LC }}' -a -q) || true
-                      sleep 10
-
-                      rm -rf ~/toc-machine-trading-env && mkdir -p ~/toc-machine-trading-env && touch ~/toc-machine-trading-env/.env
-                      rm -rf ~/toc-machine-trading-configs && mkdir -p ~/toc-machine-trading-configs && touch ~/toc-machine-trading-configs/config.yml
-                      rm -rf ~/toc-machine-trading-logs
-
-                      echo "${{ secrets.MACHINE_TRADING_ENV }}" > ~/toc-machine-trading-env/.env
-                      echo "${{ secrets.MACHINE_TRADING_CONFIG }}" > ~/toc-machine-trading-configs/config.yml
-
-                      docker login ${{ env.REGISTRY }} -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
-                      docker pull ${{ env.REGISTRY }}/${{ env.REPOSITORY_LC }}:${{ env.SHORT_SHA }}
-
-                      docker run \
-                        --name toc-machine-trading \
-                        --network tocvlan \
-                        --ip=172.20.10.228 \
-                        --restart always \
-                        -e TZ="Asia/Taipei" \
-                        -v ~/toc-machine-trading-logs:/toc-machine-trading/logs \
-                        -v ~/toc-machine-trading-env/.env:/toc-machine-trading/.env \
-                        -v ~/toc-machine-trading-configs/config.yml:/toc-machine-trading/configs/config.yml \
-                        -dt ${{ env.REGISTRY }}/${{ env.REPOSITORY_LC }}:${{ env.SHORT_SHA }}
+                  curl -X POST \
+                      -H "Accept: application/vnd.github+json" \
+                      -H "Authorization: Bearer ${{ secrets.ACTIONS_KEY }}"\
+                      https://api.github.com/repos/ToC-Taiwan/ansible-machine/dispatches \
+                      -d '{"event_type":"deploy-trader"}'
+            - uses: actions/checkout@v3
