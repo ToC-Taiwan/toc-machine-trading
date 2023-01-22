@@ -45,7 +45,7 @@ func NewHistoryDataInterfaceClient(cc grpc.ClientConnInterface) HistoryDataInter
 
 func (c *historyDataInterfaceClient) GetStockHistoryTick(ctx context.Context, in *StockNumArrWithDate, opts ...grpc.CallOption) (*HistoryTickResponse, error) {
 	out := new(HistoryTickResponse)
-	err := c.cc.Invoke(ctx, "/sinopac_forwarder.HistoryDataInterface/GetStockHistoryTick", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/toc_python_forwarder.HistoryDataInterface/GetStockHistoryTick", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -54,7 +54,7 @@ func (c *historyDataInterfaceClient) GetStockHistoryTick(ctx context.Context, in
 
 func (c *historyDataInterfaceClient) GetStockHistoryKbar(ctx context.Context, in *StockNumArrWithDate, opts ...grpc.CallOption) (*HistoryKbarResponse, error) {
 	out := new(HistoryKbarResponse)
-	err := c.cc.Invoke(ctx, "/sinopac_forwarder.HistoryDataInterface/GetStockHistoryKbar", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/toc_python_forwarder.HistoryDataInterface/GetStockHistoryKbar", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -63,7 +63,7 @@ func (c *historyDataInterfaceClient) GetStockHistoryKbar(ctx context.Context, in
 
 func (c *historyDataInterfaceClient) GetStockHistoryClose(ctx context.Context, in *StockNumArrWithDate, opts ...grpc.CallOption) (*HistoryCloseResponse, error) {
 	out := new(HistoryCloseResponse)
-	err := c.cc.Invoke(ctx, "/sinopac_forwarder.HistoryDataInterface/GetStockHistoryClose", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/toc_python_forwarder.HistoryDataInterface/GetStockHistoryClose", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -72,7 +72,7 @@ func (c *historyDataInterfaceClient) GetStockHistoryClose(ctx context.Context, i
 
 func (c *historyDataInterfaceClient) GetStockHistoryCloseByDateArr(ctx context.Context, in *StockNumArrWithDateArr, opts ...grpc.CallOption) (*HistoryCloseResponse, error) {
 	out := new(HistoryCloseResponse)
-	err := c.cc.Invoke(ctx, "/sinopac_forwarder.HistoryDataInterface/GetStockHistoryCloseByDateArr", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/toc_python_forwarder.HistoryDataInterface/GetStockHistoryCloseByDateArr", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -81,7 +81,7 @@ func (c *historyDataInterfaceClient) GetStockHistoryCloseByDateArr(ctx context.C
 
 func (c *historyDataInterfaceClient) GetStockTSEHistoryTick(ctx context.Context, in *Date, opts ...grpc.CallOption) (*HistoryTickResponse, error) {
 	out := new(HistoryTickResponse)
-	err := c.cc.Invoke(ctx, "/sinopac_forwarder.HistoryDataInterface/GetStockTSEHistoryTick", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/toc_python_forwarder.HistoryDataInterface/GetStockTSEHistoryTick", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -90,7 +90,7 @@ func (c *historyDataInterfaceClient) GetStockTSEHistoryTick(ctx context.Context,
 
 func (c *historyDataInterfaceClient) GetStockTSEHistoryKbar(ctx context.Context, in *Date, opts ...grpc.CallOption) (*HistoryKbarResponse, error) {
 	out := new(HistoryKbarResponse)
-	err := c.cc.Invoke(ctx, "/sinopac_forwarder.HistoryDataInterface/GetStockTSEHistoryKbar", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/toc_python_forwarder.HistoryDataInterface/GetStockTSEHistoryKbar", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -99,7 +99,7 @@ func (c *historyDataInterfaceClient) GetStockTSEHistoryKbar(ctx context.Context,
 
 func (c *historyDataInterfaceClient) GetStockTSEHistoryClose(ctx context.Context, in *Date, opts ...grpc.CallOption) (*HistoryCloseResponse, error) {
 	out := new(HistoryCloseResponse)
-	err := c.cc.Invoke(ctx, "/sinopac_forwarder.HistoryDataInterface/GetStockTSEHistoryClose", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/toc_python_forwarder.HistoryDataInterface/GetStockTSEHistoryClose", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -108,7 +108,7 @@ func (c *historyDataInterfaceClient) GetStockTSEHistoryClose(ctx context.Context
 
 func (c *historyDataInterfaceClient) GetOTCHistoryKbar(ctx context.Context, in *Date, opts ...grpc.CallOption) (*HistoryKbarResponse, error) {
 	out := new(HistoryKbarResponse)
-	err := c.cc.Invoke(ctx, "/sinopac_forwarder.HistoryDataInterface/GetOTCHistoryKbar", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/toc_python_forwarder.HistoryDataInterface/GetOTCHistoryKbar", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -117,7 +117,7 @@ func (c *historyDataInterfaceClient) GetOTCHistoryKbar(ctx context.Context, in *
 
 func (c *historyDataInterfaceClient) GetFutureHistoryTick(ctx context.Context, in *FutureCodeArrWithDate, opts ...grpc.CallOption) (*HistoryTickResponse, error) {
 	out := new(HistoryTickResponse)
-	err := c.cc.Invoke(ctx, "/sinopac_forwarder.HistoryDataInterface/GetFutureHistoryTick", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/toc_python_forwarder.HistoryDataInterface/GetFutureHistoryTick", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -126,7 +126,7 @@ func (c *historyDataInterfaceClient) GetFutureHistoryTick(ctx context.Context, i
 
 func (c *historyDataInterfaceClient) GetFutureHistoryClose(ctx context.Context, in *FutureCodeArrWithDate, opts ...grpc.CallOption) (*HistoryCloseResponse, error) {
 	out := new(HistoryCloseResponse)
-	err := c.cc.Invoke(ctx, "/sinopac_forwarder.HistoryDataInterface/GetFutureHistoryClose", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/toc_python_forwarder.HistoryDataInterface/GetFutureHistoryClose", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -135,7 +135,7 @@ func (c *historyDataInterfaceClient) GetFutureHistoryClose(ctx context.Context, 
 
 func (c *historyDataInterfaceClient) GetFutureHistoryKbar(ctx context.Context, in *FutureCodeArrWithDate, opts ...grpc.CallOption) (*HistoryKbarResponse, error) {
 	out := new(HistoryKbarResponse)
-	err := c.cc.Invoke(ctx, "/sinopac_forwarder.HistoryDataInterface/GetFutureHistoryKbar", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/toc_python_forwarder.HistoryDataInterface/GetFutureHistoryKbar", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -220,7 +220,7 @@ func _HistoryDataInterface_GetStockHistoryTick_Handler(srv interface{}, ctx cont
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/sinopac_forwarder.HistoryDataInterface/GetStockHistoryTick",
+		FullMethod: "/toc_python_forwarder.HistoryDataInterface/GetStockHistoryTick",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(HistoryDataInterfaceServer).GetStockHistoryTick(ctx, req.(*StockNumArrWithDate))
@@ -238,7 +238,7 @@ func _HistoryDataInterface_GetStockHistoryKbar_Handler(srv interface{}, ctx cont
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/sinopac_forwarder.HistoryDataInterface/GetStockHistoryKbar",
+		FullMethod: "/toc_python_forwarder.HistoryDataInterface/GetStockHistoryKbar",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(HistoryDataInterfaceServer).GetStockHistoryKbar(ctx, req.(*StockNumArrWithDate))
@@ -256,7 +256,7 @@ func _HistoryDataInterface_GetStockHistoryClose_Handler(srv interface{}, ctx con
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/sinopac_forwarder.HistoryDataInterface/GetStockHistoryClose",
+		FullMethod: "/toc_python_forwarder.HistoryDataInterface/GetStockHistoryClose",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(HistoryDataInterfaceServer).GetStockHistoryClose(ctx, req.(*StockNumArrWithDate))
@@ -274,7 +274,7 @@ func _HistoryDataInterface_GetStockHistoryCloseByDateArr_Handler(srv interface{}
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/sinopac_forwarder.HistoryDataInterface/GetStockHistoryCloseByDateArr",
+		FullMethod: "/toc_python_forwarder.HistoryDataInterface/GetStockHistoryCloseByDateArr",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(HistoryDataInterfaceServer).GetStockHistoryCloseByDateArr(ctx, req.(*StockNumArrWithDateArr))
@@ -292,7 +292,7 @@ func _HistoryDataInterface_GetStockTSEHistoryTick_Handler(srv interface{}, ctx c
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/sinopac_forwarder.HistoryDataInterface/GetStockTSEHistoryTick",
+		FullMethod: "/toc_python_forwarder.HistoryDataInterface/GetStockTSEHistoryTick",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(HistoryDataInterfaceServer).GetStockTSEHistoryTick(ctx, req.(*Date))
@@ -310,7 +310,7 @@ func _HistoryDataInterface_GetStockTSEHistoryKbar_Handler(srv interface{}, ctx c
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/sinopac_forwarder.HistoryDataInterface/GetStockTSEHistoryKbar",
+		FullMethod: "/toc_python_forwarder.HistoryDataInterface/GetStockTSEHistoryKbar",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(HistoryDataInterfaceServer).GetStockTSEHistoryKbar(ctx, req.(*Date))
@@ -328,7 +328,7 @@ func _HistoryDataInterface_GetStockTSEHistoryClose_Handler(srv interface{}, ctx 
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/sinopac_forwarder.HistoryDataInterface/GetStockTSEHistoryClose",
+		FullMethod: "/toc_python_forwarder.HistoryDataInterface/GetStockTSEHistoryClose",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(HistoryDataInterfaceServer).GetStockTSEHistoryClose(ctx, req.(*Date))
@@ -346,7 +346,7 @@ func _HistoryDataInterface_GetOTCHistoryKbar_Handler(srv interface{}, ctx contex
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/sinopac_forwarder.HistoryDataInterface/GetOTCHistoryKbar",
+		FullMethod: "/toc_python_forwarder.HistoryDataInterface/GetOTCHistoryKbar",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(HistoryDataInterfaceServer).GetOTCHistoryKbar(ctx, req.(*Date))
@@ -364,7 +364,7 @@ func _HistoryDataInterface_GetFutureHistoryTick_Handler(srv interface{}, ctx con
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/sinopac_forwarder.HistoryDataInterface/GetFutureHistoryTick",
+		FullMethod: "/toc_python_forwarder.HistoryDataInterface/GetFutureHistoryTick",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(HistoryDataInterfaceServer).GetFutureHistoryTick(ctx, req.(*FutureCodeArrWithDate))
@@ -382,7 +382,7 @@ func _HistoryDataInterface_GetFutureHistoryClose_Handler(srv interface{}, ctx co
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/sinopac_forwarder.HistoryDataInterface/GetFutureHistoryClose",
+		FullMethod: "/toc_python_forwarder.HistoryDataInterface/GetFutureHistoryClose",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(HistoryDataInterfaceServer).GetFutureHistoryClose(ctx, req.(*FutureCodeArrWithDate))
@@ -400,7 +400,7 @@ func _HistoryDataInterface_GetFutureHistoryKbar_Handler(srv interface{}, ctx con
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/sinopac_forwarder.HistoryDataInterface/GetFutureHistoryKbar",
+		FullMethod: "/toc_python_forwarder.HistoryDataInterface/GetFutureHistoryKbar",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(HistoryDataInterfaceServer).GetFutureHistoryKbar(ctx, req.(*FutureCodeArrWithDate))
@@ -412,7 +412,7 @@ func _HistoryDataInterface_GetFutureHistoryKbar_Handler(srv interface{}, ctx con
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var HistoryDataInterface_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "sinopac_forwarder.HistoryDataInterface",
+	ServiceName: "toc_python_forwarder.HistoryDataInterface",
 	HandlerType: (*HistoryDataInterfaceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{

@@ -48,7 +48,7 @@ func NewTradeInterfaceClient(cc grpc.ClientConnInterface) TradeInterfaceClient {
 
 func (c *tradeInterfaceClient) BuyStock(ctx context.Context, in *StockOrderDetail, opts ...grpc.CallOption) (*TradeResult, error) {
 	out := new(TradeResult)
-	err := c.cc.Invoke(ctx, "/sinopac_forwarder.TradeInterface/BuyStock", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/toc_python_forwarder.TradeInterface/BuyStock", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -57,7 +57,7 @@ func (c *tradeInterfaceClient) BuyStock(ctx context.Context, in *StockOrderDetai
 
 func (c *tradeInterfaceClient) SellStock(ctx context.Context, in *StockOrderDetail, opts ...grpc.CallOption) (*TradeResult, error) {
 	out := new(TradeResult)
-	err := c.cc.Invoke(ctx, "/sinopac_forwarder.TradeInterface/SellStock", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/toc_python_forwarder.TradeInterface/SellStock", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +66,7 @@ func (c *tradeInterfaceClient) SellStock(ctx context.Context, in *StockOrderDeta
 
 func (c *tradeInterfaceClient) SellFirstStock(ctx context.Context, in *StockOrderDetail, opts ...grpc.CallOption) (*TradeResult, error) {
 	out := new(TradeResult)
-	err := c.cc.Invoke(ctx, "/sinopac_forwarder.TradeInterface/SellFirstStock", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/toc_python_forwarder.TradeInterface/SellFirstStock", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -75,7 +75,7 @@ func (c *tradeInterfaceClient) SellFirstStock(ctx context.Context, in *StockOrde
 
 func (c *tradeInterfaceClient) CancelStock(ctx context.Context, in *OrderID, opts ...grpc.CallOption) (*TradeResult, error) {
 	out := new(TradeResult)
-	err := c.cc.Invoke(ctx, "/sinopac_forwarder.TradeInterface/CancelStock", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/toc_python_forwarder.TradeInterface/CancelStock", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -84,7 +84,7 @@ func (c *tradeInterfaceClient) CancelStock(ctx context.Context, in *OrderID, opt
 
 func (c *tradeInterfaceClient) GetLocalOrderStatusArr(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, "/sinopac_forwarder.TradeInterface/GetLocalOrderStatusArr", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/toc_python_forwarder.TradeInterface/GetLocalOrderStatusArr", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -93,7 +93,7 @@ func (c *tradeInterfaceClient) GetLocalOrderStatusArr(ctx context.Context, in *e
 
 func (c *tradeInterfaceClient) GetSimulateOrderStatusArr(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, "/sinopac_forwarder.TradeInterface/GetSimulateOrderStatusArr", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/toc_python_forwarder.TradeInterface/GetSimulateOrderStatusArr", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -102,7 +102,7 @@ func (c *tradeInterfaceClient) GetSimulateOrderStatusArr(ctx context.Context, in
 
 func (c *tradeInterfaceClient) GetOrderStatusByID(ctx context.Context, in *OrderID, opts ...grpc.CallOption) (*TradeResult, error) {
 	out := new(TradeResult)
-	err := c.cc.Invoke(ctx, "/sinopac_forwarder.TradeInterface/GetOrderStatusByID", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/toc_python_forwarder.TradeInterface/GetOrderStatusByID", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -111,7 +111,7 @@ func (c *tradeInterfaceClient) GetOrderStatusByID(ctx context.Context, in *Order
 
 func (c *tradeInterfaceClient) GetNonBlockOrderStatusArr(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ErrorMessage, error) {
 	out := new(ErrorMessage)
-	err := c.cc.Invoke(ctx, "/sinopac_forwarder.TradeInterface/GetNonBlockOrderStatusArr", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/toc_python_forwarder.TradeInterface/GetNonBlockOrderStatusArr", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -120,7 +120,7 @@ func (c *tradeInterfaceClient) GetNonBlockOrderStatusArr(ctx context.Context, in
 
 func (c *tradeInterfaceClient) BuyFuture(ctx context.Context, in *FutureOrderDetail, opts ...grpc.CallOption) (*TradeResult, error) {
 	out := new(TradeResult)
-	err := c.cc.Invoke(ctx, "/sinopac_forwarder.TradeInterface/BuyFuture", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/toc_python_forwarder.TradeInterface/BuyFuture", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -129,7 +129,7 @@ func (c *tradeInterfaceClient) BuyFuture(ctx context.Context, in *FutureOrderDet
 
 func (c *tradeInterfaceClient) SellFuture(ctx context.Context, in *FutureOrderDetail, opts ...grpc.CallOption) (*TradeResult, error) {
 	out := new(TradeResult)
-	err := c.cc.Invoke(ctx, "/sinopac_forwarder.TradeInterface/SellFuture", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/toc_python_forwarder.TradeInterface/SellFuture", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -138,7 +138,7 @@ func (c *tradeInterfaceClient) SellFuture(ctx context.Context, in *FutureOrderDe
 
 func (c *tradeInterfaceClient) SellFirstFuture(ctx context.Context, in *FutureOrderDetail, opts ...grpc.CallOption) (*TradeResult, error) {
 	out := new(TradeResult)
-	err := c.cc.Invoke(ctx, "/sinopac_forwarder.TradeInterface/SellFirstFuture", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/toc_python_forwarder.TradeInterface/SellFirstFuture", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -147,7 +147,7 @@ func (c *tradeInterfaceClient) SellFirstFuture(ctx context.Context, in *FutureOr
 
 func (c *tradeInterfaceClient) CancelFuture(ctx context.Context, in *FutureOrderID, opts ...grpc.CallOption) (*TradeResult, error) {
 	out := new(TradeResult)
-	err := c.cc.Invoke(ctx, "/sinopac_forwarder.TradeInterface/CancelFuture", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/toc_python_forwarder.TradeInterface/CancelFuture", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -156,7 +156,7 @@ func (c *tradeInterfaceClient) CancelFuture(ctx context.Context, in *FutureOrder
 
 func (c *tradeInterfaceClient) GetFuturePosition(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*FuturePositionArr, error) {
 	out := new(FuturePositionArr)
-	err := c.cc.Invoke(ctx, "/sinopac_forwarder.TradeInterface/GetFuturePosition", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/toc_python_forwarder.TradeInterface/GetFuturePosition", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -249,7 +249,7 @@ func _TradeInterface_BuyStock_Handler(srv interface{}, ctx context.Context, dec 
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/sinopac_forwarder.TradeInterface/BuyStock",
+		FullMethod: "/toc_python_forwarder.TradeInterface/BuyStock",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TradeInterfaceServer).BuyStock(ctx, req.(*StockOrderDetail))
@@ -267,7 +267,7 @@ func _TradeInterface_SellStock_Handler(srv interface{}, ctx context.Context, dec
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/sinopac_forwarder.TradeInterface/SellStock",
+		FullMethod: "/toc_python_forwarder.TradeInterface/SellStock",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TradeInterfaceServer).SellStock(ctx, req.(*StockOrderDetail))
@@ -285,7 +285,7 @@ func _TradeInterface_SellFirstStock_Handler(srv interface{}, ctx context.Context
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/sinopac_forwarder.TradeInterface/SellFirstStock",
+		FullMethod: "/toc_python_forwarder.TradeInterface/SellFirstStock",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TradeInterfaceServer).SellFirstStock(ctx, req.(*StockOrderDetail))
@@ -303,7 +303,7 @@ func _TradeInterface_CancelStock_Handler(srv interface{}, ctx context.Context, d
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/sinopac_forwarder.TradeInterface/CancelStock",
+		FullMethod: "/toc_python_forwarder.TradeInterface/CancelStock",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TradeInterfaceServer).CancelStock(ctx, req.(*OrderID))
@@ -321,7 +321,7 @@ func _TradeInterface_GetLocalOrderStatusArr_Handler(srv interface{}, ctx context
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/sinopac_forwarder.TradeInterface/GetLocalOrderStatusArr",
+		FullMethod: "/toc_python_forwarder.TradeInterface/GetLocalOrderStatusArr",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TradeInterfaceServer).GetLocalOrderStatusArr(ctx, req.(*emptypb.Empty))
@@ -339,7 +339,7 @@ func _TradeInterface_GetSimulateOrderStatusArr_Handler(srv interface{}, ctx cont
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/sinopac_forwarder.TradeInterface/GetSimulateOrderStatusArr",
+		FullMethod: "/toc_python_forwarder.TradeInterface/GetSimulateOrderStatusArr",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TradeInterfaceServer).GetSimulateOrderStatusArr(ctx, req.(*emptypb.Empty))
@@ -357,7 +357,7 @@ func _TradeInterface_GetOrderStatusByID_Handler(srv interface{}, ctx context.Con
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/sinopac_forwarder.TradeInterface/GetOrderStatusByID",
+		FullMethod: "/toc_python_forwarder.TradeInterface/GetOrderStatusByID",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TradeInterfaceServer).GetOrderStatusByID(ctx, req.(*OrderID))
@@ -375,7 +375,7 @@ func _TradeInterface_GetNonBlockOrderStatusArr_Handler(srv interface{}, ctx cont
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/sinopac_forwarder.TradeInterface/GetNonBlockOrderStatusArr",
+		FullMethod: "/toc_python_forwarder.TradeInterface/GetNonBlockOrderStatusArr",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TradeInterfaceServer).GetNonBlockOrderStatusArr(ctx, req.(*emptypb.Empty))
@@ -393,7 +393,7 @@ func _TradeInterface_BuyFuture_Handler(srv interface{}, ctx context.Context, dec
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/sinopac_forwarder.TradeInterface/BuyFuture",
+		FullMethod: "/toc_python_forwarder.TradeInterface/BuyFuture",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TradeInterfaceServer).BuyFuture(ctx, req.(*FutureOrderDetail))
@@ -411,7 +411,7 @@ func _TradeInterface_SellFuture_Handler(srv interface{}, ctx context.Context, de
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/sinopac_forwarder.TradeInterface/SellFuture",
+		FullMethod: "/toc_python_forwarder.TradeInterface/SellFuture",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TradeInterfaceServer).SellFuture(ctx, req.(*FutureOrderDetail))
@@ -429,7 +429,7 @@ func _TradeInterface_SellFirstFuture_Handler(srv interface{}, ctx context.Contex
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/sinopac_forwarder.TradeInterface/SellFirstFuture",
+		FullMethod: "/toc_python_forwarder.TradeInterface/SellFirstFuture",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TradeInterfaceServer).SellFirstFuture(ctx, req.(*FutureOrderDetail))
@@ -447,7 +447,7 @@ func _TradeInterface_CancelFuture_Handler(srv interface{}, ctx context.Context, 
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/sinopac_forwarder.TradeInterface/CancelFuture",
+		FullMethod: "/toc_python_forwarder.TradeInterface/CancelFuture",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TradeInterfaceServer).CancelFuture(ctx, req.(*FutureOrderID))
@@ -465,7 +465,7 @@ func _TradeInterface_GetFuturePosition_Handler(srv interface{}, ctx context.Cont
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/sinopac_forwarder.TradeInterface/GetFuturePosition",
+		FullMethod: "/toc_python_forwarder.TradeInterface/GetFuturePosition",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TradeInterfaceServer).GetFuturePosition(ctx, req.(*emptypb.Empty))
@@ -477,7 +477,7 @@ func _TradeInterface_GetFuturePosition_Handler(srv interface{}, ctx context.Cont
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var TradeInterface_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "sinopac_forwarder.TradeInterface",
+	ServiceName: "toc_python_forwarder.TradeInterface",
 	HandlerType: (*TradeInterfaceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{

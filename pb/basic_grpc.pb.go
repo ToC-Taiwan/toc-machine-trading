@@ -37,7 +37,7 @@ func NewBasicDataInterfaceClient(cc grpc.ClientConnInterface) BasicDataInterface
 
 func (c *basicDataInterfaceClient) GetAllStockDetail(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*StockDetailResponse, error) {
 	out := new(StockDetailResponse)
-	err := c.cc.Invoke(ctx, "/sinopac_forwarder.BasicDataInterface/GetAllStockDetail", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/toc_python_forwarder.BasicDataInterface/GetAllStockDetail", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +46,7 @@ func (c *basicDataInterfaceClient) GetAllStockDetail(ctx context.Context, in *em
 
 func (c *basicDataInterfaceClient) GetAllFutureDetail(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*FutureDetailResponse, error) {
 	out := new(FutureDetailResponse)
-	err := c.cc.Invoke(ctx, "/sinopac_forwarder.BasicDataInterface/GetAllFutureDetail", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/toc_python_forwarder.BasicDataInterface/GetAllFutureDetail", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -95,7 +95,7 @@ func _BasicDataInterface_GetAllStockDetail_Handler(srv interface{}, ctx context.
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/sinopac_forwarder.BasicDataInterface/GetAllStockDetail",
+		FullMethod: "/toc_python_forwarder.BasicDataInterface/GetAllStockDetail",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(BasicDataInterfaceServer).GetAllStockDetail(ctx, req.(*emptypb.Empty))
@@ -113,7 +113,7 @@ func _BasicDataInterface_GetAllFutureDetail_Handler(srv interface{}, ctx context
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/sinopac_forwarder.BasicDataInterface/GetAllFutureDetail",
+		FullMethod: "/toc_python_forwarder.BasicDataInterface/GetAllFutureDetail",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(BasicDataInterfaceServer).GetAllFutureDetail(ctx, req.(*emptypb.Empty))
@@ -125,7 +125,7 @@ func _BasicDataInterface_GetAllFutureDetail_Handler(srv interface{}, ctx context
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var BasicDataInterface_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "sinopac_forwarder.BasicDataInterface",
+	ServiceName: "toc_python_forwarder.BasicDataInterface",
 	HandlerType: (*BasicDataInterfaceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{

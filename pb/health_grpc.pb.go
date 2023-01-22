@@ -36,7 +36,7 @@ func NewHealthCheckInterfaceClient(cc grpc.ClientConnInterface) HealthCheckInter
 }
 
 func (c *healthCheckInterfaceClient) Heartbeat(ctx context.Context, opts ...grpc.CallOption) (HealthCheckInterface_HeartbeatClient, error) {
-	stream, err := c.cc.NewStream(ctx, &HealthCheckInterface_ServiceDesc.Streams[0], "/sinopac_forwarder.HealthCheckInterface/Heartbeat", opts...)
+	stream, err := c.cc.NewStream(ctx, &HealthCheckInterface_ServiceDesc.Streams[0], "/toc_python_forwarder.HealthCheckInterface/Heartbeat", opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -68,7 +68,7 @@ func (x *healthCheckInterfaceHeartbeatClient) Recv() (*BeatMessage, error) {
 
 func (c *healthCheckInterfaceClient) Terminate(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, "/sinopac_forwarder.HealthCheckInterface/Terminate", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/toc_python_forwarder.HealthCheckInterface/Terminate", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -143,7 +143,7 @@ func _HealthCheckInterface_Terminate_Handler(srv interface{}, ctx context.Contex
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/sinopac_forwarder.HealthCheckInterface/Terminate",
+		FullMethod: "/toc_python_forwarder.HealthCheckInterface/Terminate",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(HealthCheckInterfaceServer).Terminate(ctx, req.(*emptypb.Empty))
@@ -155,7 +155,7 @@ func _HealthCheckInterface_Terminate_Handler(srv interface{}, ctx context.Contex
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var HealthCheckInterface_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "sinopac_forwarder.HealthCheckInterface",
+	ServiceName: "toc_python_forwarder.HealthCheckInterface",
 	HandlerType: (*HealthCheckInterfaceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
