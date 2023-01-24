@@ -1,4 +1,5 @@
-package grpcapi
+// Package sinopac package sinopac
+package sinopac
 
 import (
 	"context"

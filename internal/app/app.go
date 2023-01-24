@@ -10,7 +10,7 @@ import (
 	"tmt/cmd/config"
 	v1 "tmt/internal/controller/http/v1"
 	"tmt/internal/usecase"
-	"tmt/internal/usecase/grpcapi"
+	"tmt/internal/usecase/grpcapi/sinopac"
 	"tmt/internal/usecase/rabbit"
 	"tmt/internal/usecase/repo"
 	"tmt/pkg/grpc"
@@ -41,12 +41,12 @@ func RunApp(cfg *config.Config) {
 		logger.Panic(err)
 	}
 
-	basicUseCase := usecase.NewBasic(repo.NewBasic(pg), grpcapi.NewBasic(sc))
-	orderUseCase := usecase.NewOrder(grpcapi.NewOrder(sc), repo.NewOrder(pg))
-	streamUseCase := usecase.NewStream(repo.NewStream(pg), grpcapi.NewStream(sc), rabbit.NewStream())
+	basicUseCase := usecase.NewBasic(repo.NewBasic(pg), sinopac.NewBasic(sc))
+	orderUseCase := usecase.NewOrder(sinopac.NewOrder(sc), repo.NewOrder(pg))
+	streamUseCase := usecase.NewStream(repo.NewStream(pg), sinopac.NewStream(sc), rabbit.NewStream())
 	analyzeUseCase := usecase.NewAnalyze(repo.NewHistory(pg))
-	historyUseCase := usecase.NewHistory(repo.NewHistory(pg), grpcapi.NewHistory(sc))
-	targetUseCase := usecase.NewTarget(repo.NewTarget(pg), grpcapi.NewTarget(sc), grpcapi.NewStream(sc))
+	historyUseCase := usecase.NewHistory(repo.NewHistory(pg), sinopac.NewHistory(sc))
+	targetUseCase := usecase.NewTarget(repo.NewTarget(pg), sinopac.NewTarget(sc), sinopac.NewStream(sc))
 
 	// HTTP Server
 	handler := gin.New()
