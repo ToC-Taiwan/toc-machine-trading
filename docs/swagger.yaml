@@ -3,6 +3,8 @@ definitions:
     properties:
       database:
         $ref: '#/definitions/config.Database'
+      fugle:
+        $ref: '#/definitions/config.Fugle'
       futureAnalyze:
         $ref: '#/definitions/config.FutureAnalyze'
       futureTradeSwitch:
@@ -30,6 +32,13 @@ definitions:
     properties:
       dbname:
         type: string
+      poolMax:
+        type: integer
+      url:
+        type: string
+    type: object
+  config.Fugle:
+    properties:
       poolMax:
         type: integer
       url:

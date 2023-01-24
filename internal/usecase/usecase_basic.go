@@ -14,8 +14,9 @@ import (
 
 // BasicUseCase -.
 type BasicUseCase struct {
-	repo    BasicRepo
-	gRPCAPI BasicgRPCAPI
+	repo BasicRepo
+	sc   BasicgRPCAPI
+	fg   BasicgRPCAPI
 
 	cfg      *config.Config
 	tradeDay *tradeday.TradeDay
@@ -25,15 +26,17 @@ type BasicUseCase struct {
 }
 
 // NewBasic -.
-func NewBasic(r BasicRepo, t BasicgRPCAPI) *BasicUseCase {
+func NewBasic(r BasicRepo, t, fugle BasicgRPCAPI) *BasicUseCase {
 	uc := &BasicUseCase{
 		repo:     r,
-		gRPCAPI:  t,
+		sc:       t,
+		fg:       fugle,
 		tradeDay: tradeday.NewTradeDay(),
 		cfg:      config.GetConfig(),
 	}
 
-	go uc.HealthCheck()
+	go uc.HealthCheckforSinopac()
+	go uc.HealthCheckforFugle()
 
 	if err := uc.importCalendarDate(context.Background()); err != nil {
 		logger.Panic(err)
@@ -50,8 +53,16 @@ func NewBasic(r BasicRepo, t BasicgRPCAPI) *BasicUseCase {
 	return uc
 }
 
-func (uc *BasicUseCase) HealthCheck() {
-	err := uc.gRPCAPI.Heartbeat()
+func (uc *BasicUseCase) HealthCheckforSinopac() {
+	err := uc.sc.Heartbeat()
+	if err != nil {
+		logger.Warn("healthcheck fail, terminate")
+		os.Exit(0)
+	}
+}
+
+func (uc *BasicUseCase) HealthCheckforFugle() {
+	err := uc.fg.Heartbeat()
 	if err != nil {
 		logger.Warn("healthcheck fail, terminate")
 		os.Exit(0)
@@ -60,12 +71,17 @@ func (uc *BasicUseCase) HealthCheck() {
 
 // TerminateSinopac -.
 func (uc *BasicUseCase) TerminateSinopac(ctx context.Context) error {
-	return uc.gRPCAPI.Terminate()
+	return uc.sc.Terminate()
+}
+
+// TerminateFugle -.
+func (uc *BasicUseCase) TerminateFugle(ctx context.Context) error {
+	return uc.fg.Terminate()
 }
 
 // GetAllSinopacStockAndUpdateRepo -.
 func (uc *BasicUseCase) GetAllSinopacStockAndUpdateRepo(ctx context.Context) ([]*entity.Stock, error) {
-	stockArr, err := uc.gRPCAPI.GetAllStockDetail()
+	stockArr, err := uc.sc.GetAllStockDetail()
 	if err != nil {
 		return []*entity.Stock{}, err
 	}
@@ -109,7 +125,7 @@ func (uc *BasicUseCase) GetAllSinopacStockAndUpdateRepo(ctx context.Context) ([]
 
 // GetAllSinopacFutureAndUpdateRepo -.
 func (uc *BasicUseCase) GetAllSinopacFutureAndUpdateRepo(ctx context.Context) ([]*entity.Future, error) {
-	futureArr, err := uc.gRPCAPI.GetAllFutureDetail()
+	futureArr, err := uc.sc.GetAllFutureDetail()
 	if err != nil {
 		return []*entity.Future{}, err
 	}

@@ -20,6 +20,7 @@ type Config struct {
 	Database Database
 	Server   Server
 	Sinopac  Sinopac
+	Fugle    Fugle
 	RabbitMQ RabbitMQ
 
 	StockTradeSwitch  StockTradeSwitch  `yaml:"stock_trade_switch"`

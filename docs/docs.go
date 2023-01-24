@@ -774,6 +774,9 @@ const docTemplate = `{
                 "database": {
                     "$ref": "#/definitions/config.Database"
                 },
+                "fugle": {
+                    "$ref": "#/definitions/config.Fugle"
+                },
                 "futureAnalyze": {
                     "$ref": "#/definitions/config.FutureAnalyze"
                 },
@@ -815,6 +818,17 @@ const docTemplate = `{
                 "dbname": {
                     "type": "string"
                 },
+                "poolMax": {
+                    "type": "integer"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
+        "config.Fugle": {
+            "type": "object",
+            "properties": {
                 "poolMax": {
                     "type": "integer"
                 },

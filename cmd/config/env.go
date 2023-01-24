@@ -18,6 +18,12 @@ type Sinopac struct {
 	URL     string `env:"SINOPAC_URL" env-required:"true"`
 }
 
+// Fugle -.
+type Fugle struct {
+	PoolMax int    `env:"FUGLE_POOL_MAX" env-required:"true"`
+	URL     string `env:"FUGLE_URL" env-required:"true"`
+}
+
 // RabbitMQ -.
 type RabbitMQ struct {
 	URL      string `env:"RABBITMQ_URL" env-required:"true"`

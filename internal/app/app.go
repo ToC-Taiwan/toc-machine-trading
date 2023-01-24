@@ -10,7 +10,7 @@ import (
 	"tmt/cmd/config"
 	v1 "tmt/internal/controller/http/v1"
 	"tmt/internal/usecase"
-	"tmt/internal/usecase/grpcapi/sinopac"
+	"tmt/internal/usecase/grpcapi"
 	"tmt/internal/usecase/rabbit"
 	"tmt/internal/usecase/repo"
 	"tmt/pkg/grpc"
@@ -23,7 +23,13 @@ import (
 
 var logger = log.Get()
 
-func RunApp(cfg *config.Config) {
+type app struct {
+	pg *postgres.Postgres
+	sc *grpc.Connection
+	fg *grpc.Connection
+}
+
+func newApp(cfg *config.Config) *app {
 	pg, err := postgres.New(
 		fmt.Sprintf("%s%s", cfg.Database.URL, cfg.Database.DBName),
 		postgres.MaxPoolSize(cfg.Database.PoolMax),
@@ -31,7 +37,6 @@ func RunApp(cfg *config.Config) {
 	if err != nil {
 		logger.Panic(err)
 	}
-	defer pg.Close()
 
 	sc, err := grpc.New(
 		cfg.Sinopac.URL,
@@ -41,12 +46,31 @@ func RunApp(cfg *config.Config) {
 		logger.Panic(err)
 	}
 
-	basicUseCase := usecase.NewBasic(repo.NewBasic(pg), sinopac.NewBasic(sc))
-	orderUseCase := usecase.NewOrder(sinopac.NewOrder(sc), repo.NewOrder(pg))
-	streamUseCase := usecase.NewStream(repo.NewStream(pg), sinopac.NewStream(sc), rabbit.NewStream())
-	analyzeUseCase := usecase.NewAnalyze(repo.NewHistory(pg))
-	historyUseCase := usecase.NewHistory(repo.NewHistory(pg), sinopac.NewHistory(sc))
-	targetUseCase := usecase.NewTarget(repo.NewTarget(pg), sinopac.NewTarget(sc), sinopac.NewStream(sc))
+	fg, err := grpc.New(
+		cfg.Fugle.URL,
+		grpc.MaxPoolSize(cfg.Fugle.PoolMax),
+	)
+	if err != nil {
+		logger.Panic(err)
+	}
+
+	return &app{
+		pg: pg,
+		sc: sc,
+		fg: fg,
+	}
+}
+
+func RunApp(cfg *config.Config) {
+	app := newApp(cfg)
+	defer app.pg.Close()
+
+	basicUseCase := usecase.NewBasic(repo.NewBasic(app.pg), grpcapi.NewBasic(app.sc), grpcapi.NewBasic(app.fg))
+	orderUseCase := usecase.NewOrder(grpcapi.NewOrder(app.sc), grpcapi.NewOrder(app.fg), repo.NewOrder(app.pg))
+	streamUseCase := usecase.NewStream(repo.NewStream(app.pg), grpcapi.NewStream(app.sc), rabbit.NewStream())
+	analyzeUseCase := usecase.NewAnalyze(repo.NewHistory(app.pg))
+	historyUseCase := usecase.NewHistory(repo.NewHistory(app.pg), grpcapi.NewHistory(app.sc))
+	targetUseCase := usecase.NewTarget(repo.NewTarget(app.pg), grpcapi.NewTarget(app.sc), grpcapi.NewStream(app.sc))
 
 	// HTTP Server
 	handler := gin.New()
@@ -67,13 +91,12 @@ func RunApp(cfg *config.Config) {
 	select {
 	case s := <-interrupt:
 		logger.Info(s.String())
-	case err = <-httpServer.Notify():
+	case err := <-httpServer.Notify():
 		logger.Error(err)
 	}
 
 	// Shutdown
-	err = httpServer.Shutdown()
-	if err != nil {
+	if err := httpServer.Shutdown(); err != nil {
 		logger.Error(err)
 	}
 }

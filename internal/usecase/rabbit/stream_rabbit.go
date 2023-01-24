@@ -172,7 +172,6 @@ func (c *StreamRabbit) OrderStatusArrConsumer() {
 func (c *StreamRabbit) sendOrder(order interface{}) {
 	c.orderStatusChanMapLock.RLock()
 	for _, t := range c.orderStatusChanMap {
-		// TODO: need distinguish sinopac or fugle
 		t <- order
 	}
 	c.orderStatusChanMapLock.RUnlock()

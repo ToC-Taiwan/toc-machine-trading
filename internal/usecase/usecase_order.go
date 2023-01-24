@@ -15,8 +15,9 @@ import (
 
 // OrderUseCase -.
 type OrderUseCase struct {
-	gRPCAPI OrdergRPCAPI
-	repo    OrderRepo
+	sc   OrdergRPCAPI
+	fg   OrdergRPCAPI
+	repo OrderRepo
 
 	quota *quota.Quota
 
@@ -33,16 +34,17 @@ type OrderUseCase struct {
 }
 
 // NewOrder -.
-func NewOrder(t OrdergRPCAPI, r OrderRepo) *OrderUseCase {
+func NewOrder(t, fugle OrdergRPCAPI, r OrderRepo) *OrderUseCase {
 	cfg := config.GetConfig()
 	tradeDay := tradeday.NewTradeDay()
 
 	uc := &OrderUseCase{
 		simTrade: cfg.Simulation,
 
-		gRPCAPI: t,
-		repo:    r,
-		quota:   quota.NewQuota(cfg.Quota),
+		sc:    t,
+		fg:    fugle,
+		repo:  r,
+		quota: quota.NewQuota(cfg.Quota),
 
 		tradeDay:       tradeDay,
 		stockTradeDay:  tradeDay.GetStockTradeDay(),
@@ -139,7 +141,12 @@ func (uc *OrderUseCase) askOrderStatus() {
 			continue
 		}
 
-		if err := uc.gRPCAPI.GetLocalOrderStatusArr(); err != nil {
+		if err := uc.sc.GetLocalOrderStatusArr(); err != nil {
+			logger.Error(err)
+			continue
+		}
+
+		if err := uc.fg.GetLocalOrderStatusArr(); err != nil {
 			logger.Error(err)
 			continue
 		}
@@ -152,32 +159,17 @@ func (uc *OrderUseCase) askSimulateOrderStatus() {
 			continue
 		}
 
-		if err := uc.gRPCAPI.GetSimulateOrderStatusArr(); err != nil {
+		if err := uc.sc.GetSimulateOrderStatusArr(); err != nil {
+			logger.Error(err)
+			continue
+		}
+
+		if err := uc.fg.GetSimulateOrderStatusArr(); err != nil {
 			logger.Error(err)
 			continue
 		}
 	}
 }
-
-// AskOrderUpdate -.
-// func (uc *OrderUseCase) askOrderStatusProd() {
-// 	for range time.NewTicker(750 * time.Millisecond).C {
-// 		if !uc.IsFutureTradeTime() && !uc.IsStockTradeTime() {
-// 			continue
-// 		}
-
-// 		msg, err := uc.gRPCAPI.GetNonBlockOrderStatusArr()
-// 		if err != nil {
-// 			logger.Error(err)
-// 			continue
-// 		}
-
-// 		if errMsg := msg.GetErr(); errMsg != "" {
-// 			logger.Error(errMsg)
-// 			continue
-// 		}
-// 	}
-// }
 
 func (uc *OrderUseCase) placeStockOrder(order *entity.StockOrder) {
 	defer uc.placeOrderLock.Unlock()
@@ -245,7 +237,7 @@ func (uc *OrderUseCase) cancelStockOrder(order *entity.StockOrder) {
 
 // BuyStock -.
 func (uc *OrderUseCase) BuyStock(order *entity.StockOrder) (string, entity.OrderStatus, error) {
-	result, err := uc.gRPCAPI.BuyStock(order, uc.simTrade)
+	result, err := uc.sc.BuyStock(order, uc.simTrade)
 	if err != nil {
 		return "", entity.StatusUnknow, err
 	}
@@ -259,7 +251,7 @@ func (uc *OrderUseCase) BuyStock(order *entity.StockOrder) (string, entity.Order
 
 // SellStock -.
 func (uc *OrderUseCase) SellStock(order *entity.StockOrder) (string, entity.OrderStatus, error) {
-	result, err := uc.gRPCAPI.SellStock(order, uc.simTrade)
+	result, err := uc.sc.SellStock(order, uc.simTrade)
 	if err != nil {
 		return "", entity.StatusUnknow, err
 	}
@@ -273,7 +265,7 @@ func (uc *OrderUseCase) SellStock(order *entity.StockOrder) (string, entity.Orde
 
 // SellFirstStock -.
 func (uc *OrderUseCase) SellFirstStock(order *entity.StockOrder) (string, entity.OrderStatus, error) {
-	result, err := uc.gRPCAPI.SellFirstStock(order, uc.simTrade)
+	result, err := uc.sc.SellFirstStock(order, uc.simTrade)
 	if err != nil {
 		return "", entity.StatusUnknow, err
 	}
@@ -287,7 +279,7 @@ func (uc *OrderUseCase) SellFirstStock(order *entity.StockOrder) (string, entity
 
 // BuyLaterStock -.
 func (uc *OrderUseCase) BuyLaterStock(order *entity.StockOrder) (string, entity.OrderStatus, error) {
-	result, err := uc.gRPCAPI.BuyStock(order, uc.simTrade)
+	result, err := uc.sc.BuyStock(order, uc.simTrade)
 	if err != nil {
 		return "", entity.StatusUnknow, err
 	}
@@ -301,7 +293,7 @@ func (uc *OrderUseCase) BuyLaterStock(order *entity.StockOrder) (string, entity.
 
 // CancelOrderID -.
 func (uc *OrderUseCase) CancelOrderID(orderID string) (string, entity.OrderStatus, error) {
-	result, err := uc.gRPCAPI.CancelStock(orderID, uc.simTrade)
+	result, err := uc.sc.CancelStock(orderID, uc.simTrade)
 	if err != nil {
 		return "", entity.StatusUnknow, err
 	}
@@ -531,7 +523,7 @@ func (uc *OrderUseCase) ManualInsertFutureOrder(ctx context.Context, order *enti
 
 // BuyFuture -.
 func (uc *OrderUseCase) BuyFuture(order *entity.FutureOrder) (string, entity.OrderStatus, error) {
-	result, err := uc.gRPCAPI.BuyFuture(order, uc.simTrade)
+	result, err := uc.sc.BuyFuture(order, uc.simTrade)
 	if err != nil {
 		return "", entity.StatusUnknow, err
 	}
@@ -545,7 +537,7 @@ func (uc *OrderUseCase) BuyFuture(order *entity.FutureOrder) (string, entity.Ord
 
 // SellFuture -.
 func (uc *OrderUseCase) SellFuture(order *entity.FutureOrder) (string, entity.OrderStatus, error) {
-	result, err := uc.gRPCAPI.SellFuture(order, uc.simTrade)
+	result, err := uc.sc.SellFuture(order, uc.simTrade)
 	if err != nil {
 		return "", entity.StatusUnknow, err
 	}
@@ -559,7 +551,7 @@ func (uc *OrderUseCase) SellFuture(order *entity.FutureOrder) (string, entity.Or
 
 // SellFirstFuture -.
 func (uc *OrderUseCase) SellFirstFuture(order *entity.FutureOrder) (string, entity.OrderStatus, error) {
-	result, err := uc.gRPCAPI.SellFirstFuture(order, uc.simTrade)
+	result, err := uc.sc.SellFirstFuture(order, uc.simTrade)
 	if err != nil {
 		return "", entity.StatusUnknow, err
 	}
@@ -573,7 +565,7 @@ func (uc *OrderUseCase) SellFirstFuture(order *entity.FutureOrder) (string, enti
 
 // BuyLaterFuture -.
 func (uc *OrderUseCase) BuyLaterFuture(order *entity.FutureOrder) (string, entity.OrderStatus, error) {
-	result, err := uc.gRPCAPI.BuyFuture(order, uc.simTrade)
+	result, err := uc.sc.BuyFuture(order, uc.simTrade)
 	if err != nil {
 		return "", entity.StatusUnknow, err
 	}
@@ -587,7 +579,7 @@ func (uc *OrderUseCase) BuyLaterFuture(order *entity.FutureOrder) (string, entit
 
 // CancelFutureOrderID -.
 func (uc *OrderUseCase) CancelFutureOrderID(orderID string) (string, entity.OrderStatus, error) {
-	result, err := uc.gRPCAPI.CancelFuture(orderID, uc.simTrade)
+	result, err := uc.sc.CancelFuture(orderID, uc.simTrade)
 	if err != nil {
 		return "", entity.StatusUnknow, err
 	}
@@ -742,7 +734,7 @@ func (uc *OrderUseCase) CalculateTradeDiscount(price float64, quantity int64) in
 
 // GetFuturePosition .
 func (uc *OrderUseCase) GetFuturePosition() ([]*entity.FuturePosition, error) {
-	query, err := uc.gRPCAPI.GetFuturePosition()
+	query, err := uc.sc.GetFuturePosition()
 	if err != nil {
 		return nil, err
 	}
