@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"tmt/internal/entity"
+	"tmt/internal/usecase"
 	"tmt/pkg/postgres"
 )
 
@@ -14,7 +15,7 @@ type TargetRepo struct {
 }
 
 // NewTarget -.
-func NewTarget(pg *postgres.Postgres) *TargetRepo {
+func NewTarget(pg *postgres.Postgres) usecase.TargetRepo {
 	return &TargetRepo{pg}
 }
 

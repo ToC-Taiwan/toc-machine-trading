@@ -4,6 +4,7 @@ package grpcapi
 import (
 	"context"
 
+	"tmt/internal/usecase"
 	"tmt/pb"
 	"tmt/pkg/grpc"
 
@@ -16,7 +17,7 @@ type TargetgRPCAPI struct {
 }
 
 // NewTarget -.
-func NewTarget(client *grpc.Connection) *TargetgRPCAPI {
+func NewTarget(client *grpc.Connection) usecase.TargetgRPCAPI {
 	return &TargetgRPCAPI{client}
 }
 

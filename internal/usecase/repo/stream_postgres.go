@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"tmt/internal/entity"
+	"tmt/internal/usecase"
 	"tmt/pkg/postgres"
 )
 
@@ -13,7 +14,7 @@ type StreamRepo struct {
 }
 
 // NewStream -.
-func NewStream(pg *postgres.Postgres) *StreamRepo {
+func NewStream(pg *postgres.Postgres) usecase.StreamRepo {
 	return &StreamRepo{pg}
 }
 

@@ -5,6 +5,7 @@ import (
 	"context"
 
 	"tmt/internal/entity"
+	"tmt/internal/usecase"
 	"tmt/pb"
 	"tmt/pkg/grpc"
 
@@ -17,7 +18,7 @@ type OrdergRPCAPI struct {
 }
 
 // NewOrder -.
-func NewOrder(client *grpc.Connection) *OrdergRPCAPI {
+func NewOrder(client *grpc.Connection) usecase.OrdergRPCAPI {
 	return &OrdergRPCAPI{client}
 }
 

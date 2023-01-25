@@ -4,6 +4,7 @@ package grpcapi
 import (
 	"context"
 
+	"tmt/internal/usecase"
 	"tmt/pb"
 	"tmt/pkg/grpc"
 )
@@ -14,7 +15,7 @@ type HistorygRPCAPI struct {
 }
 
 // NewHistory -.
-func NewHistory(client *grpc.Connection) *HistorygRPCAPI {
+func NewHistory(client *grpc.Connection) usecase.HistorygRPCAPI {
 	return &HistorygRPCAPI{client}
 }
 

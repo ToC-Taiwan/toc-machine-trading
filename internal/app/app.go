@@ -11,7 +11,7 @@ import (
 	v1 "tmt/internal/controller/http/v1"
 	"tmt/internal/usecase"
 	"tmt/internal/usecase/grpcapi"
-	"tmt/internal/usecase/rabbit"
+	"tmt/internal/usecase/mq"
 	"tmt/internal/usecase/repo"
 	"tmt/pkg/grpc"
 	"tmt/pkg/httpserver"
@@ -69,7 +69,7 @@ func RunApp(cfg *config.Config) {
 
 	basicUseCase := usecase.NewBasic(repo.NewBasic(app.pg), grpcapi.NewBasic(app.sc), grpcapi.NewBasic(app.fg))
 	orderUseCase := usecase.NewOrder(grpcapi.NewOrder(app.sc), grpcapi.NewOrder(app.fg), repo.NewOrder(app.pg))
-	streamUseCase := usecase.NewStream(repo.NewStream(app.pg), grpcapi.NewStream(app.sc), rabbit.NewStream())
+	streamUseCase := usecase.NewStream(repo.NewStream(app.pg), grpcapi.NewStream(app.sc), mq.NewStream())
 	analyzeUseCase := usecase.NewAnalyze(repo.NewHistory(app.pg))
 	historyUseCase := usecase.NewHistory(repo.NewHistory(app.pg), grpcapi.NewHistory(app.sc))
 	targetUseCase := usecase.NewTarget(repo.NewTarget(app.pg), grpcapi.NewTarget(app.sc), grpcapi.NewStream(app.sc))

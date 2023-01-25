@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 
+	"tmt/internal/usecase"
 	"tmt/pb"
 	"tmt/pkg/grpc"
 
@@ -17,7 +18,7 @@ type StreamgRPCAPI struct {
 }
 
 // NewStream -.
-func NewStream(client *grpc.Connection) *StreamgRPCAPI {
+func NewStream(client *grpc.Connection) usecase.StreamgRPCAPI {
 	return &StreamgRPCAPI{client}
 }
 

@@ -1,5 +1,5 @@
-// Package rabbit package rabbit
-package rabbit
+// Package mq package mq
+package mq
 
 import (
 	"fmt"
@@ -8,6 +8,7 @@ import (
 
 	"tmt/cmd/config"
 	"tmt/internal/entity"
+	"tmt/internal/usecase"
 	"tmt/pb"
 	"tmt/pkg/common"
 	"tmt/pkg/log"
@@ -19,16 +20,6 @@ import (
 )
 
 var logger = log.Get()
-
-const (
-	routingKeyEvent        = "event"
-	routingKeyOrder        = "order"
-	routingKeyOrderArr     = "order_arr"
-	routingKeyTick         = "tick"
-	routingKeyFutureTick   = "future_tick"
-	routingKeyBidAsk       = "bid_ask"
-	routingKeyFutureBidAsk = "future_bid_ask"
-)
 
 // StreamRabbit -.
 type StreamRabbit struct {
@@ -46,7 +37,7 @@ type StreamRabbit struct {
 }
 
 // NewStream -.
-func NewStream() *StreamRabbit {
+func NewStream() usecase.StreamRabbit {
 	allConfig := config.GetConfig()
 
 	conn := rabbitmq.NewConnection(

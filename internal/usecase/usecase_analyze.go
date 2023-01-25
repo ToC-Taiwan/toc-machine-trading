@@ -23,7 +23,7 @@ type AnalyzeUseCase struct {
 }
 
 // NewAnalyze -.
-func NewAnalyze(r HistoryRepo) *AnalyzeUseCase {
+func NewAnalyze(r HistoryRepo) Analyze {
 	uc := &AnalyzeUseCase{
 		repo:             r,
 		lastBelowMAStock: make(map[string]*entity.StockHistoryAnalyze),

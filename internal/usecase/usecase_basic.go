@@ -27,7 +27,7 @@ type BasicUseCase struct {
 }
 
 // NewBasic -.
-func NewBasic(r BasicRepo, t, fugle BasicgRPCAPI) *BasicUseCase {
+func NewBasic(r BasicRepo, t, fugle BasicgRPCAPI) Basic {
 	uc := &BasicUseCase{
 		repo:     r,
 		sc:       t,

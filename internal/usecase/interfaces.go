@@ -14,22 +14,21 @@ import (
 	"tmt/pb"
 )
 
+//go:generate mockgen -source=interfaces.go -destination=./mocks_test.go -package=usecase_test
+
 var (
 	logger = log.Get()
 	cc     = cache.Get()
 	bus    = eventbus.Get()
 )
 
-//go:generate mockgen -source=interfaces.go -destination=./mocks_test.go -package=usecase_test
 type (
-	// Basic -.
 	Basic interface {
 		GetAllSinopacStockAndUpdateRepo(ctx context.Context) ([]*entity.Stock, error)
 		GetAllRepoStock(ctx context.Context) ([]*entity.Stock, error)
 		TerminateSinopac(ctx context.Context) error
 	}
 
-	// BasicRepo -.
 	BasicRepo interface {
 		QueryAllStock(ctx context.Context) (map[string]*entity.Stock, error)
 		InsertOrUpdatetStockArr(ctx context.Context, t []*entity.Stock) error
@@ -42,7 +41,6 @@ type (
 		QueryAllMXFFuture(ctx context.Context) ([]*entity.Future, error)
 	}
 
-	// BasicgRPCAPI -.
 	BasicgRPCAPI interface {
 		Heartbeat() error
 		Terminate() error
@@ -52,18 +50,15 @@ type (
 )
 
 type (
-	// Target -.
 	Target interface {
 		GetTargets(ctx context.Context) []*entity.StockTarget
 	}
 
-	// TargetRepo -.
 	TargetRepo interface {
 		InsertOrUpdateTargetArr(ctx context.Context, t []*entity.StockTarget) error
 		QueryTargetsByTradeDay(ctx context.Context, tradeDay time.Time) ([]*entity.StockTarget, error)
 	}
 
-	// TargetgRPCAPI -.
 	TargetgRPCAPI interface {
 		GetStockVolumeRank(date string) ([]*pb.StockVolumeRankMessage, error)
 		SubscribeStockTick(stockNumArr []string) ([]string, error)
@@ -81,7 +76,6 @@ type (
 )
 
 type (
-	// History -.
 	History interface {
 		GetTradeDay() time.Time
 		GetDayKbarByStockNumDate(stockNum string, date time.Time) *entity.StockHistoryKbar
@@ -90,7 +84,6 @@ type (
 		FetchFutureHistoryKbar(code string, date time.Time) ([]*entity.FutureHistoryKbar, error)
 	}
 
-	// HistoryRepo -.
 	HistoryRepo interface {
 		InsertHistoryCloseArr(ctx context.Context, t []*entity.StockHistoryClose) error
 		QueryMutltiStockCloseByDate(ctx context.Context, stockNumArr []string, date time.Time) (map[string]*entity.StockHistoryClose, error)
@@ -111,7 +104,6 @@ type (
 		QueryFutureHistoryCloseByDate(ctx context.Context, code string, tradeDay time.Time) (*entity.FutureHistoryClose, error)
 	}
 
-	// HistorygRPCAPI -.
 	HistorygRPCAPI interface {
 		GetStockHistoryTick(stockNumArr []string, date string) ([]*pb.HistoryTickMessage, error)
 		GetStockHistoryKbar(stockNumArr []string, date string) ([]*pb.HistoryKbarMessage, error)
@@ -129,7 +121,6 @@ type (
 )
 
 type (
-	// Stream -.
 	Stream interface {
 		ReceiveEvent(ctx context.Context)
 		ReceiveOrderStatus(ctx context.Context)
@@ -151,12 +142,10 @@ type (
 		DeleteOrderStatusConnection(connectionID string)
 	}
 
-	// StreamRepo -.
 	StreamRepo interface {
 		InsertEvent(ctx context.Context, t *entity.SinopacEvent) error
 	}
 
-	// StreamgRPCAPI -.
 	StreamgRPCAPI interface {
 		GetAllStockSnapshot() ([]*pb.SnapshotMessage, error)
 		GetStockSnapshotByNumArr(stockNumArr []string) ([]*pb.SnapshotMessage, error)
@@ -169,7 +158,6 @@ type (
 		GetFutureSnapshotByCode(code string) (*pb.SnapshotMessage, error)
 	}
 
-	// StreamRabbit -.
 	StreamRabbit interface {
 		FillAllBasic(allStockMap map[string]*entity.Stock, allFutureMap map[string]*entity.Future)
 
@@ -191,7 +179,6 @@ type (
 )
 
 type (
-	// Order -.
 	Order interface {
 		CalculateBuyCost(price float64, quantity int64) int64
 		CalculateSellCost(price float64, quantity int64) int64
@@ -220,7 +207,6 @@ type (
 		MoveFutureOrderToLatestTradeDay(ctx context.Context, orderID string) error
 	}
 
-	// OrderRepo -.
 	OrderRepo interface {
 		QueryAllStockTradeBalance(ctx context.Context) ([]*entity.StockTradeBalance, error)
 		QueryLastStockTradeBalance(ctx context.Context) (*entity.StockTradeBalance, error)
@@ -243,7 +229,6 @@ type (
 		QueryAllFutureOrderByDate(ctx context.Context, timeTange []time.Time) ([]*entity.FutureOrder, error)
 	}
 
-	// OrdergRPCAPI -.
 	OrdergRPCAPI interface {
 		GetFuturePosition() (*pb.FuturePositionArr, error)
 
@@ -265,7 +250,6 @@ type (
 )
 
 type (
-	// Analyze -.
 	Analyze interface {
 		GetRebornMap(ctx context.Context) map[time.Time][]entity.Stock
 	}

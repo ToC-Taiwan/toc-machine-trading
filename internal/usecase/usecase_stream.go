@@ -42,7 +42,7 @@ type StreamUseCase struct {
 }
 
 // NewStream -.
-func NewStream(r StreamRepo, g StreamgRPCAPI, t StreamRabbit) *StreamUseCase {
+func NewStream(r StreamRepo, g StreamgRPCAPI, t StreamRabbit) Stream {
 	cfg := config.GetConfig()
 	uc := &StreamUseCase{
 		repo:    r,

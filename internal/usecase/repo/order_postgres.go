@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"tmt/internal/entity"
+	"tmt/internal/usecase"
 	"tmt/pkg/postgres"
 
 	"github.com/Masterminds/squirrel"
@@ -20,7 +21,7 @@ type OrderRepo struct {
 }
 
 // NewOrder -.
-func NewOrder(pg *postgres.Postgres) *OrderRepo {
+func NewOrder(pg *postgres.Postgres) usecase.OrderRepo {
 	return &OrderRepo{pg}
 }
 

@@ -34,7 +34,7 @@ type HistoryUseCase struct {
 }
 
 // NewHistory -.
-func NewHistory(r HistoryRepo, t HistorygRPCAPI) *HistoryUseCase {
+func NewHistory(r HistoryRepo, t HistorygRPCAPI) History {
 	uc := &HistoryUseCase{
 		repo:      r,
 		grpcapi:   t,

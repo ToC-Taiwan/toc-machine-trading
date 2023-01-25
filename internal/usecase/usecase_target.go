@@ -26,7 +26,7 @@ type TargetUseCase struct {
 }
 
 // NewTarget -.
-func NewTarget(r TargetRepo, t TargetgRPCAPI, s StreamgRPCAPI) *TargetUseCase {
+func NewTarget(r TargetRepo, t TargetgRPCAPI, s StreamgRPCAPI) Target {
 	cfg := config.GetConfig()
 	uc := &TargetUseCase{
 		repo:              r,

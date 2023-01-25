@@ -34,7 +34,7 @@ type OrderUseCase struct {
 }
 
 // NewOrder -.
-func NewOrder(t, fugle OrdergRPCAPI, r OrderRepo) *OrderUseCase {
+func NewOrder(t, fugle OrdergRPCAPI, r OrderRepo) Order {
 	cfg := config.GetConfig()
 	tradeDay := tradeday.NewTradeDay()
 

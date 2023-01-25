@@ -8,6 +8,7 @@ import (
 	"os"
 	"time"
 
+	"tmt/internal/usecase"
 	"tmt/pb"
 	"tmt/pkg/grpc"
 
@@ -21,7 +22,7 @@ type BasicgRPCAPI struct {
 }
 
 // NewBasic -.
-func NewBasic(client *grpc.Connection) *BasicgRPCAPI {
+func NewBasic(client *grpc.Connection) usecase.BasicgRPCAPI {
 	instance := &BasicgRPCAPI{
 		conn:         client,
 		heartbeatMsg: "beat",
