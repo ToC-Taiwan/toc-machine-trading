@@ -38,20 +38,22 @@ func newApp(cfg *config.Config) *app {
 		logger.Panic(err)
 	}
 
+	logger.Info("Connecting to sinopac gRPC server")
 	sc, err := grpc.New(
 		cfg.Sinopac.URL,
 		grpc.MaxPoolSize(cfg.Sinopac.PoolMax),
 	)
 	if err != nil {
-		logger.Panic(err)
+		logger.Fatal(err)
 	}
 
+	logger.Info("Connecting to fugle gRPC server")
 	fg, err := grpc.New(
 		cfg.Fugle.URL,
 		grpc.MaxPoolSize(cfg.Fugle.PoolMax),
 	)
 	if err != nil {
-		logger.Panic(err)
+		logger.Fatal(err)
 	}
 
 	return &app{

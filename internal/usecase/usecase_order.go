@@ -8,9 +8,9 @@ import (
 
 	"tmt/cmd/config"
 	"tmt/internal/entity"
-	"tmt/internal/usecase/event"
 	"tmt/internal/usecase/module/quota"
 	"tmt/internal/usecase/module/tradeday"
+	"tmt/internal/usecase/topic"
 )
 
 // OrderUseCase -.
@@ -51,13 +51,13 @@ func NewOrder(t, fugle OrdergRPCAPI, r OrderRepo) *OrderUseCase {
 		futureTradeDay: tradeDay.GetFutureTradeDay(),
 	}
 
-	bus.SubscribeTopic(event.TopicPlaceStockOrder, uc.placeStockOrder)
-	bus.SubscribeTopic(event.TopicCancelStockOrder, uc.cancelStockOrder)
-	bus.SubscribeTopic(event.TopicInsertOrUpdateStockOrder, uc.updateStockOrderCacheAndInsertDB)
+	bus.SubscribeTopic(topic.TopicPlaceStockOrder, uc.placeStockOrder)
+	bus.SubscribeTopic(topic.TopicCancelStockOrder, uc.cancelStockOrder)
+	bus.SubscribeTopic(topic.TopicInsertOrUpdateStockOrder, uc.updateStockOrderCacheAndInsertDB)
 
-	bus.SubscribeTopic(event.TopicPlaceFutureOrder, uc.placeFutureOrder)
-	bus.SubscribeTopic(event.TopicCancelFutureOrder, uc.cancelFutureOrder)
-	bus.SubscribeTopic(event.TopicInsertOrUpdateFutureOrder, uc.updateFutureOrderCacheAndInsertDB)
+	bus.SubscribeTopic(topic.TopicPlaceFutureOrder, uc.placeFutureOrder)
+	bus.SubscribeTopic(topic.TopicCancelFutureOrder, uc.cancelFutureOrder)
+	bus.SubscribeTopic(topic.TopicInsertOrUpdateFutureOrder, uc.updateFutureOrderCacheAndInsertDB)
 
 	if uc.simTrade {
 		go uc.askSimulateOrderStatus()
@@ -143,12 +143,10 @@ func (uc *OrderUseCase) askOrderStatus() {
 
 		if err := uc.sc.GetLocalOrderStatusArr(); err != nil {
 			logger.Error(err)
-			continue
 		}
 
 		if err := uc.fg.GetLocalOrderStatusArr(); err != nil {
 			logger.Error(err)
-			continue
 		}
 	}
 }
@@ -161,12 +159,10 @@ func (uc *OrderUseCase) askSimulateOrderStatus() {
 
 		if err := uc.sc.GetSimulateOrderStatusArr(); err != nil {
 			logger.Error(err)
-			continue
 		}
 
 		if err := uc.fg.GetSimulateOrderStatusArr(); err != nil {
 			logger.Error(err)
-			continue
 		}
 	}
 }

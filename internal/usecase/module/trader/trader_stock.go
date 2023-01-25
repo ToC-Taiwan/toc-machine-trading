@@ -8,7 +8,7 @@ import (
 
 	"tmt/cmd/config"
 	"tmt/internal/entity"
-	"tmt/internal/usecase/event"
+	"tmt/internal/usecase/topic"
 
 	"github.com/google/uuid"
 )
@@ -69,7 +69,7 @@ func NewStockTrader(stockNum string, tradeSwitch config.StockTradeSwitch, stockA
 
 	go new.checkFirstTickArrive()
 
-	bus.SubscribeTopic(event.TopicUpdateStockTradeSwitch, new.updateStockTradeSwitch)
+	bus.SubscribeTopic(topic.TopicUpdateStockTradeSwitch, new.updateStockTradeSwitch)
 	return new
 }
 
@@ -119,7 +119,7 @@ func (o *StockTrader) placeOrder(order *entity.StockOrder) {
 		return
 	}
 
-	bus.PublishTopicEvent(event.TopicPlaceStockOrder, order)
+	bus.PublishTopicEvent(topic.TopicPlaceStockOrder, order)
 	go o.checkPlaceOrderStatus(order)
 }
 
@@ -257,7 +257,7 @@ func (o *StockTrader) checkPlaceOrderStatus(order *entity.StockOrder) {
 
 func (o *StockTrader) cancelOrder(order *entity.StockOrder) {
 	order.TradeTime = time.Time{}
-	bus.PublishTopicEvent(event.TopicCancelStockOrder, order)
+	bus.PublishTopicEvent(topic.TopicCancelStockOrder, order)
 
 	go func() {
 		for {
@@ -269,7 +269,7 @@ func (o *StockTrader) cancelOrder(order *entity.StockOrder) {
 			if order.Status == entity.StatusCancelled {
 				logger.Warnf("Order Canceled -> Stock: %s, Action: %d, Price: %.2f, Qty: %d", order.StockNum, order.Action, order.Price, order.Quantity)
 				if order.Action == entity.ActionBuy || order.Action == entity.ActionSellFirst {
-					bus.PublishTopicEvent(event.TopicUnSubscribeStockTickTargets, order.StockNum)
+					bus.PublishTopicEvent(topic.TopicUnSubscribeStockTickTargets, order.StockNum)
 					return
 				}
 				o.waitingOrder = nil

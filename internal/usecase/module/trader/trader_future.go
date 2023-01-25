@@ -7,7 +7,7 @@ import (
 
 	"tmt/cmd/config"
 	"tmt/internal/entity"
-	"tmt/internal/usecase/event"
+	"tmt/internal/usecase/topic"
 
 	"github.com/google/uuid"
 )
@@ -57,7 +57,7 @@ func NewFutureTrader(code string, tradeSwitch config.FutureTradeSwitch, analyzeC
 		tradeOutRecord:      make(map[string]int),
 	}
 
-	bus.SubscribeTopic(event.TopicUpdateFutureTradeSwitch, t.updateAllowTrade)
+	bus.SubscribeTopic(topic.TopicUpdateFutureTradeSwitch, t.updateAllowTrade)
 	return t
 }
 
@@ -233,7 +233,7 @@ func (o *FutureTrader) placeFutureOrder(order *entity.FutureOrder) {
 
 	o.waitingOrder = order
 	go o.checkPlaceOrderStatus(order)
-	bus.PublishTopicEvent(event.TopicPlaceFutureOrder, order)
+	bus.PublishTopicEvent(topic.TopicPlaceFutureOrder, order)
 }
 
 func (o *FutureTrader) checkPlaceOrderStatus(order *entity.FutureOrder) {
@@ -279,7 +279,7 @@ func (o *FutureTrader) checkPlaceOrderStatus(order *entity.FutureOrder) {
 
 func (o *FutureTrader) cancelOrder(order *entity.FutureOrder) {
 	order.TradeTime = time.Time{}
-	bus.PublishTopicEvent(event.TopicCancelFutureOrder, order)
+	bus.PublishTopicEvent(topic.TopicCancelFutureOrder, order)
 
 	go func() {
 		for {

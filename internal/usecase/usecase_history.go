@@ -9,9 +9,9 @@ import (
 
 	"tmt/cmd/config"
 	"tmt/internal/entity"
-	"tmt/internal/usecase/event"
 	"tmt/internal/usecase/module/tradeday"
 	"tmt/internal/usecase/module/trader"
+	"tmt/internal/usecase/topic"
 	"tmt/pkg/common"
 	"tmt/pkg/utils"
 )
@@ -46,8 +46,8 @@ func NewHistory(r HistoryRepo, t HistorygRPCAPI) *HistoryUseCase {
 	uc.stockAnalyzeCfg = cfg.StockAnalyze
 	uc.basic = *cc.GetBasicInfo()
 
-	bus.SubscribeTopic(event.TopicFetchStockHistory, uc.FetchHistory)
-	bus.SubscribeTopic(event.TopicMonitorFutureCode, uc.updateSimulateFutureCode)
+	bus.SubscribeTopic(topic.TopicFetchStockHistory, uc.FetchHistory)
+	bus.SubscribeTopic(topic.TopicMonitorFutureCode, uc.updateSimulateFutureCode)
 	return uc
 }
 
@@ -97,7 +97,7 @@ func (uc *HistoryUseCase) FetchHistory(ctx context.Context, targetArr []*entity.
 		logger.Panic(err)
 	}
 
-	bus.PublishTopicEvent(event.TopicAnalyzeStockTargets, ctx, fetchArr)
+	bus.PublishTopicEvent(topic.TopicAnalyzeStockTargets, ctx, fetchArr)
 }
 
 func (uc *HistoryUseCase) fetchHistoryClose(targetArr []*entity.StockTarget) error {

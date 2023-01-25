@@ -2,10 +2,13 @@
 package grpc
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"time"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/connectivity"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
@@ -33,21 +36,19 @@ func New(url string, opts ...Option) (*Connection, error) {
 		connTimeout:  _defaultConnTimeout,
 	}
 
-	// Custom options
 	for _, opt := range opts {
 		opt(conn)
 	}
 
 	conn.ReadyConn = make(chan *grpc.ClientConn, conn.maxPoolSize)
-
-	var newConn *grpc.ClientConn
-	var err error
 	for conn.connAttempts > 0 {
 		if len(conn.pool) == conn.maxPoolSize {
-			err = nil
 			break
 		}
-		newConn, err = grpc.Dial(
+
+		ctx, cancel := context.WithTimeout(context.Background(), conn.connTimeout)
+		newConn, err := grpc.DialContext(
+			ctx,
 			url,
 			grpc.WithTransportCredentials(insecure.NewCredentials()),
 			grpc.WithBlock(),
@@ -56,19 +57,24 @@ func New(url string, opts ...Option) (*Connection, error) {
 				grpc.MaxCallSendMsgSize(1024*1024*1024),
 			),
 		)
-		if err == nil && newConn != nil {
-			conn.pool = append(conn.pool, newConn)
-			conn.ReadyConn <- newConn
-			continue
+		cancel()
+		if err != nil {
+			conn.connAttempts--
+			if errors.Is(err, context.DeadlineExceeded) {
+				fmt.Printf("gRPC connection timeout, attempts left: %d\n", conn.connAttempts)
+				continue
+			}
+			return nil, err
 		}
 
-		fmt.Printf("gRPC trying connect, attempts left: %d\n", conn.connAttempts)
-		time.Sleep(conn.connTimeout)
-		conn.connAttempts--
+		if newConn.GetState() == connectivity.Ready {
+			conn.pool = append(conn.pool, newConn)
+			conn.ReadyConn <- newConn
+		}
 	}
 
-	if err != nil {
-		return nil, err
+	if len(conn.pool) != conn.maxPoolSize {
+		return nil, fmt.Errorf("gRPC connection failed")
 	}
 
 	return conn, nil

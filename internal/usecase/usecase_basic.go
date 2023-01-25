@@ -7,8 +7,9 @@ import (
 
 	"tmt/cmd/config"
 	"tmt/internal/entity"
-	"tmt/internal/usecase/event"
+
 	"tmt/internal/usecase/module/tradeday"
+	"tmt/internal/usecase/topic"
 	"tmt/pkg/common"
 )
 
@@ -49,14 +50,14 @@ func NewBasic(r BasicRepo, t, fugle BasicgRPCAPI) *BasicUseCase {
 	}
 
 	uc.fillBasicInfo()
-	bus.SubscribeTopic(event.TopicQueryMonitorFutureCode, uc.pubMonitorFutureCode)
+	bus.SubscribeTopic(topic.TopicQueryMonitorFutureCode, uc.pubMonitorFutureCode)
 	return uc
 }
 
 func (uc *BasicUseCase) HealthCheckforSinopac() {
 	err := uc.sc.Heartbeat()
 	if err != nil {
-		logger.Warn("healthcheck fail, terminate")
+		logger.Warn("sinopac healthcheck fail, terminate")
 		os.Exit(0)
 	}
 }
@@ -64,7 +65,7 @@ func (uc *BasicUseCase) HealthCheckforSinopac() {
 func (uc *BasicUseCase) HealthCheckforFugle() {
 	err := uc.fg.Heartbeat()
 	if err != nil {
-		logger.Warn("healthcheck fail, terminate")
+		logger.Warn("fugle healthcheck fail, terminate")
 		os.Exit(0)
 	}
 }
@@ -243,7 +244,7 @@ func (uc *BasicUseCase) pubMonitorFutureCode() {
 		}
 
 		if time.Now().Before(v.DeliveryDate) {
-			bus.PublishTopicEvent(event.TopicMonitorFutureCode, v)
+			bus.PublishTopicEvent(topic.TopicMonitorFutureCode, v)
 			return
 		}
 	}

@@ -1,5 +1,5 @@
-// Package event package event
-package event
+// Package topic package topic
+package topic
 
 const (
 	TopicNewTargets string = "new_targets"

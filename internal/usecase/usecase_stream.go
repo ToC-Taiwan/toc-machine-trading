@@ -9,10 +9,10 @@ import (
 
 	"tmt/cmd/config"
 	"tmt/internal/entity"
-	"tmt/internal/usecase/event"
 	"tmt/internal/usecase/module/target"
 	"tmt/internal/usecase/module/tradeday"
 	"tmt/internal/usecase/module/trader"
+	"tmt/internal/usecase/topic"
 
 	"github.com/google/uuid"
 )
@@ -75,9 +75,9 @@ func NewStream(r StreamRepo, g StreamgRPCAPI, t StreamRabbit) *StreamUseCase {
 		}
 	}()
 
-	bus.SubscribeTopic(event.TopicStreamStockTargets, uc.ReceiveStreamData)
-	bus.SubscribeTopic(event.TopicStreamFutureTargets, uc.ReceiveFutureStreamData)
-	bus.SubscribeTopic(event.TopicMonitorFutureCode, uc.updateMainFutureCode)
+	bus.SubscribeTopic(topic.TopicStreamStockTargets, uc.ReceiveStreamData)
+	bus.SubscribeTopic(topic.TopicStreamFutureTargets, uc.ReceiveFutureStreamData)
+	bus.SubscribeTopic(topic.TopicMonitorFutureCode, uc.updateMainFutureCode)
 	return uc
 }
 
@@ -185,7 +185,7 @@ func (uc *StreamUseCase) realTimeAddTargets() error {
 	}
 
 	if len(newTargets) != 0 {
-		bus.PublishTopicEvent(event.TopicNewTargets, newTargets)
+		bus.PublishTopicEvent(topic.TopicNewTargets, newTargets)
 	}
 	return nil
 }
@@ -219,12 +219,12 @@ func (uc *StreamUseCase) ReceiveOrderStatus(ctx context.Context) {
 				if cc.GetOrderByOrderID(t.OrderID) == nil {
 					cc.SetOrderByOrderID(t.ToManual())
 				}
-				bus.PublishTopicEvent(event.TopicInsertOrUpdateStockOrder, t)
+				bus.PublishTopicEvent(topic.TopicInsertOrUpdateStockOrder, t)
 			case *entity.FutureOrder:
 				if cc.GetFutureOrderByOrderID(t.OrderID) == nil {
 					cc.SetFutureOrderByOrderID(t.ToManual())
 				}
-				bus.PublishTopicEvent(event.TopicInsertOrUpdateFutureOrder, t)
+				bus.PublishTopicEvent(topic.TopicInsertOrUpdateFutureOrder, t)
 			}
 		}
 	}()
@@ -440,7 +440,7 @@ func (uc *StreamUseCase) ReceiveStreamData(ctx context.Context, targetArr []*ent
 			mutex.RUnlock()
 
 			if uc.stockTradeSwitchCfg.Subscribe {
-				bus.PublishTopicEvent(event.TopicSubscribeStockTickTargets, []*entity.StockTarget{target})
+				bus.PublishTopicEvent(topic.TopicSubscribeStockTickTargets, []*entity.StockTarget{target})
 			}
 		}
 	}()
@@ -475,7 +475,7 @@ func (uc *StreamUseCase) ReceiveFutureStreamData(ctx context.Context, code strin
 	// go uc.rabbit.FutureBidAskConsumer(code, agent.GetBidAskChan())
 
 	if uc.futureTradeSwitchCfg.Subscribe {
-		bus.PublishTopicEvent(event.TopicSubscribeFutureTickTargets, code)
+		bus.PublishTopicEvent(topic.TopicSubscribeFutureTickTargets, code)
 	}
 
 	go uc.checkFutureTradeSwitch()
@@ -501,7 +501,7 @@ func (uc *StreamUseCase) checkStockTradeSwitch() {
 
 		if uc.stockTradeInSwitch != tempSwitch {
 			uc.stockTradeInSwitch = tempSwitch
-			bus.PublishTopicEvent(event.TopicUpdateStockTradeSwitch, uc.stockTradeInSwitch)
+			bus.PublishTopicEvent(topic.TopicUpdateStockTradeSwitch, uc.stockTradeInSwitch)
 		}
 	}
 }
@@ -530,7 +530,7 @@ func (uc *StreamUseCase) checkFutureTradeSwitch() {
 
 		if uc.futureTradeInSwitch != tempSwitch {
 			uc.futureTradeInSwitch = tempSwitch
-			bus.PublishTopicEvent(event.TopicUpdateFutureTradeSwitch, uc.futureTradeInSwitch)
+			bus.PublishTopicEvent(topic.TopicUpdateFutureTradeSwitch, uc.futureTradeInSwitch)
 		}
 	}
 }
