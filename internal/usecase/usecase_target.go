@@ -42,21 +42,21 @@ func NewTarget(r TargetRepo, t TargetgRPCAPI, s StreamgRPCAPI) Target {
 
 	// unsubscriba all first
 	if err := uc.UnSubscribeAll(context.Background()); err != nil {
-		logger.Panic("unsubscribe all fail")
+		logger.Fatal("unsubscribe all fail")
 	}
 
 	// query targets from db
 	tradeDay := cc.GetBasicInfo().TradeDay
 	targetArr, err := uc.repo.QueryTargetsByTradeDay(context.Background(), tradeDay)
 	if err != nil {
-		logger.Panic(err)
+		logger.Fatal(err)
 	}
 
 	// db has no targets, find targets from gRPC
 	if len(targetArr) == 0 {
 		targetArr, err = uc.SearchTradeDayTargets(context.Background(), tradeDay)
 		if err != nil {
-			logger.Panic(err)
+			logger.Fatal(err)
 		}
 
 		if len(targetArr) == 0 {
@@ -85,7 +85,7 @@ func (uc *TargetUseCase) fillMonitorFutureCode(future *entity.Future) {
 func (uc *TargetUseCase) publishNewTargets(targetArr []*entity.StockTarget) {
 	err := uc.repo.InsertOrUpdateTargetArr(context.Background(), targetArr)
 	if err != nil {
-		logger.Panic(err)
+		logger.Fatal(err)
 	}
 
 	cc.AppendTargets(targetArr)

@@ -61,7 +61,7 @@ func NewStream() usecase.StreamRabbit {
 func (c *StreamRabbit) establishDelivery(key string) <-chan amqp.Delivery {
 	delivery, err := c.conn.BindAndConsume(key)
 	if err != nil {
-		logger.Panic(err)
+		logger.Fatal(err)
 	}
 	return delivery
 }
@@ -74,7 +74,7 @@ func (c *StreamRabbit) FillAllBasic(allStockMap map[string]*entity.Stock, allFut
 	c.allFutureMap = allFutureMap
 
 	if len(c.allStockMap) == 0 || len(c.allFutureMap) == 0 {
-		logger.Panic("allStockMap or allFutureMap is empty")
+		logger.Fatal("allStockMap or allFutureMap is empty")
 	}
 }
 

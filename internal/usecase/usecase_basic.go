@@ -40,13 +40,13 @@ func NewBasic(r BasicRepo, t, fugle BasicgRPCAPI) Basic {
 	go uc.HealthCheckforFugle()
 
 	if err := uc.importCalendarDate(context.Background()); err != nil {
-		logger.Panic(err)
+		logger.Fatal(err)
 	}
 	if _, err := uc.GetAllSinopacStockAndUpdateRepo(context.Background()); err != nil {
-		logger.Panic(err)
+		logger.Fatal(err)
 	}
 	if _, err := uc.GetAllSinopacFutureAndUpdateRepo(context.Background()); err != nil {
-		logger.Panic(err)
+		logger.Fatal(err)
 	}
 
 	uc.fillBasicInfo()
@@ -235,7 +235,7 @@ func (uc *BasicUseCase) fillBasicInfo() {
 func (uc *BasicUseCase) pubMonitorFutureCode() {
 	futures, err := uc.repo.QueryAllMXFFuture(context.Background())
 	if err != nil {
-		logger.Panic(err)
+		logger.Fatal(err)
 	}
 
 	for _, v := range futures {

@@ -35,7 +35,7 @@ func newApp(cfg *config.Config) *app {
 		postgres.MaxPoolSize(cfg.Database.PoolMax),
 	)
 	if err != nil {
-		logger.Panic(err)
+		logger.Fatal(err)
 	}
 
 	logger.Info("Connecting to sinopac gRPC server")

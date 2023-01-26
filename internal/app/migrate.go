@@ -46,7 +46,7 @@ func MigrateDB(dbConfig config.Database) {
 	}
 
 	if err != nil {
-		logger.Panic(fmt.Errorf("postgres connect error in migrate: %s", err))
+		logger.Fatal(fmt.Errorf("postgres connect error in migrate: %s", err))
 	}
 
 	err = m.Up()
@@ -71,7 +71,7 @@ func MigrateDB(dbConfig config.Database) {
 func TryCreateDB(cfg config.Database) {
 	pg, err := postgres.New(cfg.URL, postgres.MaxPoolSize(cfg.PoolMax))
 	if err != nil {
-		logger.Panic(err)
+		logger.Fatal(err)
 	}
 	defer pg.Close()
 
@@ -80,10 +80,10 @@ func TryCreateDB(cfg config.Database) {
 		if errors.Is(err, pgx.ErrNoRows) {
 			_, err = pg.Pool().Exec(context.Background(), fmt.Sprintf("CREATE DATABASE %s", cfg.DBName))
 			if err != nil {
-				logger.Panic(err)
+				logger.Fatal(err)
 			}
 			return
 		}
-		logger.Panic(err)
+		logger.Fatal(err)
 	}
 }

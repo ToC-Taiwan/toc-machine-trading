@@ -69,7 +69,7 @@ func NewStream(r StreamRepo, g StreamgRPCAPI, t StreamRabbit) Stream {
 		for range time.NewTicker(time.Second * 60).C {
 			if uc.stockTradeInSwitch {
 				if err := uc.realTimeAddTargets(); err != nil {
-					logger.Panic(err)
+					logger.Fatal(err)
 				}
 			}
 		}

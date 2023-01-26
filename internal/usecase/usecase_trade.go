@@ -72,7 +72,7 @@ func (uc *TradeUseCase) updateAllTradeBalance() {
 		if uc.IsStockTradeTime() {
 			stockOrders, err := uc.repo.QueryAllStockOrderByDate(context.Background(), uc.stockTradeDay.ToStartEndArray())
 			if err != nil {
-				logger.Panic(err)
+				logger.Fatal(err)
 			}
 			uc.calculateStockTradeBalance(stockOrders, uc.stockTradeDay.TradeDay)
 		}
@@ -80,7 +80,7 @@ func (uc *TradeUseCase) updateAllTradeBalance() {
 		if uc.IsFutureTradeTime() {
 			futureOrders, err := uc.repo.QueryAllFutureOrderByDate(context.Background(), uc.futureTradeDay.ToStartEndArray())
 			if err != nil {
-				logger.Panic(err)
+				logger.Fatal(err)
 			}
 			uc.calculateFutureTradeBalance(futureOrders, uc.futureTradeDay.TradeDay)
 		}
@@ -321,7 +321,7 @@ func (uc *TradeUseCase) updateStockOrderCacheAndInsertDB(order *entity.StockOrde
 
 	// insert or update order to db
 	if err := uc.repo.InsertOrUpdateOrderByOrderID(context.Background(), cacheOrder); err != nil {
-		logger.Panic(err)
+		logger.Fatal(err)
 	}
 }
 
@@ -355,7 +355,7 @@ func (uc *TradeUseCase) calculateStockTradeBalance(allOrders []*entity.StockOrde
 
 	err := uc.repo.InsertOrUpdateStockTradeBalance(context.Background(), tmp)
 	if err != nil {
-		logger.Panic(err)
+		logger.Fatal(err)
 	}
 }
 
@@ -500,7 +500,7 @@ func (uc *TradeUseCase) updateFutureOrderCacheAndInsertDB(order *entity.FutureOr
 
 	// insert or update order to db
 	if err := uc.repo.InsertOrUpdateFutureOrderByOrderID(context.Background(), cacheOrder); err != nil {
-		logger.Panic(err)
+		logger.Fatal(err)
 	}
 }
 
@@ -613,7 +613,7 @@ func (uc *TradeUseCase) calculateFutureTradeBalance(allOrders []*entity.FutureOr
 	}
 	err := uc.repo.InsertOrUpdateFutureTradeBalance(context.Background(), tmp)
 	if err != nil {
-		logger.Panic(err)
+		logger.Fatal(err)
 	}
 }
 

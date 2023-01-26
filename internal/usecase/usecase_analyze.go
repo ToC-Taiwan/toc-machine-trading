@@ -48,7 +48,7 @@ func (uc *AnalyzeUseCase) findBelowQuaterMATargets(ctx context.Context, targetAr
 	for _, t := range targetArr {
 		maMap, err := uc.repo.QueryAllQuaterMAByStockNum(ctx, t.StockNum)
 		if err != nil {
-			logger.Panic(err)
+			logger.Fatal(err)
 		}
 
 		basicInfo := cc.GetBasicInfo()

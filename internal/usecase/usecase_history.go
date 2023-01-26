@@ -84,17 +84,17 @@ func (uc *HistoryUseCase) FetchHistory(ctx context.Context, targetArr []*entity.
 
 	err := uc.fetchHistoryKbar(fetchArr)
 	if err != nil {
-		logger.Panic(err)
+		logger.Fatal(err)
 	}
 
 	err = uc.fetchHistoryTick(fetchArr)
 	if err != nil {
-		logger.Panic(err)
+		logger.Fatal(err)
 	}
 
 	err = uc.fetchHistoryClose(fetchArr)
 	if err != nil {
-		logger.Panic(err)
+		logger.Fatal(err)
 	}
 
 	bus.PublishTopicEvent(topic.TopicAnalyzeStockTargets, ctx, fetchArr)
@@ -185,7 +185,7 @@ func (uc *HistoryUseCase) findExistHistoryClose(fetchTradeDayArr []time.Time, st
 		if len(stockNumArrInDay) != 0 {
 			dErr := uc.repo.DeleteHistoryCloseByStockAndDate(context.Background(), stockNumArrInDay, d)
 			if dErr != nil {
-				logger.Panic(dErr)
+				logger.Fatal(dErr)
 			}
 			result[d] = stockNumArrInDay
 		}
@@ -283,7 +283,7 @@ func (uc *HistoryUseCase) findExistStockHistoryTick(fetchTradeDayArr []time.Time
 		if len(stockNumArrInDay) != 0 {
 			dErr := uc.repo.DeleteHistoryTickByStockAndDate(context.Background(), stockNumArrInDay, d)
 			if dErr != nil {
-				logger.Panic(dErr)
+				logger.Fatal(dErr)
 			}
 			result[d] = stockNumArrInDay
 		}
@@ -376,7 +376,7 @@ func (uc *HistoryUseCase) findExistHistoryKbar(fetchTradeDayArr []time.Time, sto
 		if len(stockNumArrInDay) != 0 {
 			dErr := uc.repo.DeleteHistoryKbarByStockAndDate(context.Background(), stockNumArrInDay, d)
 			if dErr != nil {
-				logger.Panic(dErr)
+				logger.Fatal(dErr)
 			}
 			result[d] = stockNumArrInDay
 		}
