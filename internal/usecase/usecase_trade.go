@@ -13,11 +13,11 @@ import (
 	"tmt/internal/usecase/topic"
 )
 
-// OrderUseCase -.
-type OrderUseCase struct {
-	sc   OrdergRPCAPI
-	fg   OrdergRPCAPI
-	repo OrderRepo
+// TradeUseCase -.
+type TradeUseCase struct {
+	sc   TradegRPCAPI
+	fg   TradegRPCAPI
+	repo TradeRepo
 
 	quota *quota.Quota
 
@@ -33,12 +33,11 @@ type OrderUseCase struct {
 	updateStockOrderLock  sync.Mutex
 }
 
-// NewOrder -.
-func NewOrder(t, fugle OrdergRPCAPI, r OrderRepo) Order {
+func NewTrade(t, fugle TradegRPCAPI, r TradeRepo) Trade {
 	cfg := config.GetConfig()
 	tradeDay := tradeday.NewTradeDay()
 
-	uc := &OrderUseCase{
+	uc := &TradeUseCase{
 		simTrade: cfg.Simulation,
 
 		sc:    t,
@@ -68,7 +67,7 @@ func NewOrder(t, fugle OrdergRPCAPI, r OrderRepo) Order {
 	return uc
 }
 
-func (uc *OrderUseCase) updateAllTradeBalance() {
+func (uc *TradeUseCase) updateAllTradeBalance() {
 	for range time.NewTicker(time.Second * 20).C {
 		if uc.IsStockTradeTime() {
 			stockOrders, err := uc.repo.QueryAllStockOrderByDate(context.Background(), uc.stockTradeDay.ToStartEndArray())
@@ -89,7 +88,7 @@ func (uc *OrderUseCase) updateAllTradeBalance() {
 }
 
 // UpdateTradeBalanceByTradeDay -.
-func (uc *OrderUseCase) UpdateTradeBalanceByTradeDay(ctx context.Context, date string) error {
+func (uc *TradeUseCase) UpdateTradeBalanceByTradeDay(ctx context.Context, date string) error {
 	stockTradePeriod, err := uc.tradeDay.GetStockTradePeriodByDate(date)
 	if err != nil {
 		return err
@@ -115,7 +114,7 @@ func (uc *OrderUseCase) UpdateTradeBalanceByTradeDay(ctx context.Context, date s
 	return nil
 }
 
-func (uc *OrderUseCase) MoveStockOrderToLatestTradeDay(ctx context.Context, orderID string) error {
+func (uc *TradeUseCase) MoveStockOrderToLatestTradeDay(ctx context.Context, orderID string) error {
 	order, err := uc.repo.QueryStockOrderByID(ctx, orderID)
 	if err != nil {
 		return err
@@ -125,7 +124,7 @@ func (uc *OrderUseCase) MoveStockOrderToLatestTradeDay(ctx context.Context, orde
 	return uc.repo.InsertOrUpdateOrderByOrderID(ctx, order)
 }
 
-func (uc *OrderUseCase) MoveFutureOrderToLatestTradeDay(ctx context.Context, orderID string) error {
+func (uc *TradeUseCase) MoveFutureOrderToLatestTradeDay(ctx context.Context, orderID string) error {
 	order, err := uc.repo.QueryFutureOrderByID(ctx, orderID)
 	if err != nil {
 		return err
@@ -135,7 +134,7 @@ func (uc *OrderUseCase) MoveFutureOrderToLatestTradeDay(ctx context.Context, ord
 	return uc.repo.InsertOrUpdateFutureOrderByOrderID(ctx, order)
 }
 
-func (uc *OrderUseCase) askOrderStatus() {
+func (uc *TradeUseCase) askOrderStatus() {
 	for range time.NewTicker(750 * time.Millisecond).C {
 		if !uc.IsFutureTradeTime() && !uc.IsStockTradeTime() {
 			continue
@@ -151,7 +150,7 @@ func (uc *OrderUseCase) askOrderStatus() {
 	}
 }
 
-func (uc *OrderUseCase) askSimulateOrderStatus() {
+func (uc *TradeUseCase) askSimulateOrderStatus() {
 	for range time.NewTicker(750 * time.Millisecond).C {
 		if !uc.IsFutureTradeTime() && !uc.IsStockTradeTime() {
 			continue
@@ -167,7 +166,7 @@ func (uc *OrderUseCase) askSimulateOrderStatus() {
 	}
 }
 
-func (uc *OrderUseCase) placeStockOrder(order *entity.StockOrder) {
+func (uc *TradeUseCase) placeStockOrder(order *entity.StockOrder) {
 	defer uc.placeOrderLock.Unlock()
 	uc.placeOrderLock.Lock()
 
@@ -211,7 +210,7 @@ func (uc *OrderUseCase) placeStockOrder(order *entity.StockOrder) {
 	logger.Infof("Place Stock Order -> Stock: %s, Action: %d, Price: %.2f, Qty: %d, Quota: %d", order.StockNum, order.Action, order.Price, order.Quantity, uc.quota.GetCurrentQuota())
 }
 
-func (uc *OrderUseCase) cancelStockOrder(order *entity.StockOrder) {
+func (uc *TradeUseCase) cancelStockOrder(order *entity.StockOrder) {
 	defer uc.placeOrderLock.Unlock()
 	uc.placeOrderLock.Lock()
 
@@ -232,7 +231,7 @@ func (uc *OrderUseCase) cancelStockOrder(order *entity.StockOrder) {
 }
 
 // BuyStock -.
-func (uc *OrderUseCase) BuyStock(order *entity.StockOrder) (string, entity.OrderStatus, error) {
+func (uc *TradeUseCase) BuyStock(order *entity.StockOrder) (string, entity.OrderStatus, error) {
 	result, err := uc.sc.BuyStock(order, uc.simTrade)
 	if err != nil {
 		return "", entity.StatusUnknow, err
@@ -246,7 +245,7 @@ func (uc *OrderUseCase) BuyStock(order *entity.StockOrder) (string, entity.Order
 }
 
 // SellStock -.
-func (uc *OrderUseCase) SellStock(order *entity.StockOrder) (string, entity.OrderStatus, error) {
+func (uc *TradeUseCase) SellStock(order *entity.StockOrder) (string, entity.OrderStatus, error) {
 	result, err := uc.sc.SellStock(order, uc.simTrade)
 	if err != nil {
 		return "", entity.StatusUnknow, err
@@ -260,7 +259,7 @@ func (uc *OrderUseCase) SellStock(order *entity.StockOrder) (string, entity.Orde
 }
 
 // SellFirstStock -.
-func (uc *OrderUseCase) SellFirstStock(order *entity.StockOrder) (string, entity.OrderStatus, error) {
+func (uc *TradeUseCase) SellFirstStock(order *entity.StockOrder) (string, entity.OrderStatus, error) {
 	result, err := uc.sc.SellFirstStock(order, uc.simTrade)
 	if err != nil {
 		return "", entity.StatusUnknow, err
@@ -274,7 +273,7 @@ func (uc *OrderUseCase) SellFirstStock(order *entity.StockOrder) (string, entity
 }
 
 // BuyLaterStock -.
-func (uc *OrderUseCase) BuyLaterStock(order *entity.StockOrder) (string, entity.OrderStatus, error) {
+func (uc *TradeUseCase) BuyLaterStock(order *entity.StockOrder) (string, entity.OrderStatus, error) {
 	result, err := uc.sc.BuyStock(order, uc.simTrade)
 	if err != nil {
 		return "", entity.StatusUnknow, err
@@ -288,7 +287,7 @@ func (uc *OrderUseCase) BuyLaterStock(order *entity.StockOrder) (string, entity.
 }
 
 // CancelOrderID -.
-func (uc *OrderUseCase) CancelOrderID(orderID string) (string, entity.OrderStatus, error) {
+func (uc *TradeUseCase) CancelOrderID(orderID string) (string, entity.OrderStatus, error) {
 	result, err := uc.sc.CancelStock(orderID, uc.simTrade)
 	if err != nil {
 		return "", entity.StatusUnknow, err
@@ -301,7 +300,7 @@ func (uc *OrderUseCase) CancelOrderID(orderID string) (string, entity.OrderStatu
 	return result.GetOrderId(), entity.StringToOrderStatus(result.GetStatus()), nil
 }
 
-func (uc *OrderUseCase) updateStockOrderCacheAndInsertDB(order *entity.StockOrder) {
+func (uc *TradeUseCase) updateStockOrderCacheAndInsertDB(order *entity.StockOrder) {
 	defer uc.updateStockOrderLock.Unlock()
 	uc.updateStockOrderLock.Lock()
 
@@ -327,7 +326,7 @@ func (uc *OrderUseCase) updateStockOrderCacheAndInsertDB(order *entity.StockOrde
 }
 
 // calculateStockTradeBalance -.
-func (uc *OrderUseCase) calculateStockTradeBalance(allOrders []*entity.StockOrder, tradeDay time.Time) {
+func (uc *TradeUseCase) calculateStockTradeBalance(allOrders []*entity.StockOrder, tradeDay time.Time) {
 	var forward, reverse entity.StockOrderArr
 	for _, v := range allOrders {
 		if v.Status != entity.StatusFilled {
@@ -360,7 +359,7 @@ func (uc *OrderUseCase) calculateStockTradeBalance(allOrders []*entity.StockOrde
 	}
 }
 
-func (uc *OrderUseCase) calculateForwardStockBalance(forward entity.StockOrderArr) (int64, int64, int64) {
+func (uc *TradeUseCase) calculateForwardStockBalance(forward entity.StockOrderArr) (int64, int64, int64) {
 	var forwardBalance, tradeCount, discount int64
 	groupOrder, manual := forward.SplitManualAndGroupID()
 	for _, v := range groupOrder {
@@ -392,7 +391,7 @@ func (uc *OrderUseCase) calculateForwardStockBalance(forward entity.StockOrderAr
 	return forwardBalance, tradeCount, discount
 }
 
-func (uc *OrderUseCase) calculateReverseStockBalance(reverse entity.StockOrderArr) (int64, int64, int64) {
+func (uc *TradeUseCase) calculateReverseStockBalance(reverse entity.StockOrderArr) (int64, int64, int64) {
 	var revereBalance, tradeCount, discount int64
 	groupOrder, manual := reverse.SplitManualAndGroupID()
 	for _, v := range groupOrder {
@@ -428,7 +427,7 @@ func (uc *OrderUseCase) calculateReverseStockBalance(reverse entity.StockOrderAr
 // below is future trade
 //
 
-func (uc *OrderUseCase) placeFutureOrder(order *entity.FutureOrder) {
+func (uc *TradeUseCase) placeFutureOrder(order *entity.FutureOrder) {
 	defer uc.placeFutureOrderLock.Unlock()
 	uc.placeFutureOrderLock.Lock()
 
@@ -463,7 +462,7 @@ func (uc *OrderUseCase) placeFutureOrder(order *entity.FutureOrder) {
 	logger.Infof("Place Future Order -> Future: %s, Action: %d, Price: %.0f, Qty: %d", order.Code, order.Action, order.Price, order.Quantity)
 }
 
-func (uc *OrderUseCase) cancelFutureOrder(order *entity.FutureOrder) {
+func (uc *TradeUseCase) cancelFutureOrder(order *entity.FutureOrder) {
 	defer uc.placeFutureOrderLock.Unlock()
 	uc.placeFutureOrderLock.Lock()
 
@@ -478,7 +477,7 @@ func (uc *OrderUseCase) cancelFutureOrder(order *entity.FutureOrder) {
 	}
 }
 
-func (uc *OrderUseCase) updateFutureOrderCacheAndInsertDB(order *entity.FutureOrder) {
+func (uc *TradeUseCase) updateFutureOrderCacheAndInsertDB(order *entity.FutureOrder) {
 	defer uc.updateFutureOrderLock.Unlock()
 	uc.updateFutureOrderLock.Lock()
 
@@ -505,7 +504,7 @@ func (uc *OrderUseCase) updateFutureOrderCacheAndInsertDB(order *entity.FutureOr
 	}
 }
 
-func (uc *OrderUseCase) ManualInsertFutureOrder(ctx context.Context, order *entity.FutureOrder) error {
+func (uc *TradeUseCase) ManualInsertFutureOrder(ctx context.Context, order *entity.FutureOrder) error {
 	defer uc.updateFutureOrderLock.Unlock()
 	uc.updateFutureOrderLock.Lock()
 
@@ -518,7 +517,7 @@ func (uc *OrderUseCase) ManualInsertFutureOrder(ctx context.Context, order *enti
 }
 
 // BuyFuture -.
-func (uc *OrderUseCase) BuyFuture(order *entity.FutureOrder) (string, entity.OrderStatus, error) {
+func (uc *TradeUseCase) BuyFuture(order *entity.FutureOrder) (string, entity.OrderStatus, error) {
 	result, err := uc.sc.BuyFuture(order, uc.simTrade)
 	if err != nil {
 		return "", entity.StatusUnknow, err
@@ -532,7 +531,7 @@ func (uc *OrderUseCase) BuyFuture(order *entity.FutureOrder) (string, entity.Ord
 }
 
 // SellFuture -.
-func (uc *OrderUseCase) SellFuture(order *entity.FutureOrder) (string, entity.OrderStatus, error) {
+func (uc *TradeUseCase) SellFuture(order *entity.FutureOrder) (string, entity.OrderStatus, error) {
 	result, err := uc.sc.SellFuture(order, uc.simTrade)
 	if err != nil {
 		return "", entity.StatusUnknow, err
@@ -546,7 +545,7 @@ func (uc *OrderUseCase) SellFuture(order *entity.FutureOrder) (string, entity.Or
 }
 
 // SellFirstFuture -.
-func (uc *OrderUseCase) SellFirstFuture(order *entity.FutureOrder) (string, entity.OrderStatus, error) {
+func (uc *TradeUseCase) SellFirstFuture(order *entity.FutureOrder) (string, entity.OrderStatus, error) {
 	result, err := uc.sc.SellFirstFuture(order, uc.simTrade)
 	if err != nil {
 		return "", entity.StatusUnknow, err
@@ -560,7 +559,7 @@ func (uc *OrderUseCase) SellFirstFuture(order *entity.FutureOrder) (string, enti
 }
 
 // BuyLaterFuture -.
-func (uc *OrderUseCase) BuyLaterFuture(order *entity.FutureOrder) (string, entity.OrderStatus, error) {
+func (uc *TradeUseCase) BuyLaterFuture(order *entity.FutureOrder) (string, entity.OrderStatus, error) {
 	result, err := uc.sc.BuyFuture(order, uc.simTrade)
 	if err != nil {
 		return "", entity.StatusUnknow, err
@@ -574,7 +573,7 @@ func (uc *OrderUseCase) BuyLaterFuture(order *entity.FutureOrder) (string, entit
 }
 
 // CancelFutureOrderID -.
-func (uc *OrderUseCase) CancelFutureOrderID(orderID string) (string, entity.OrderStatus, error) {
+func (uc *TradeUseCase) CancelFutureOrderID(orderID string) (string, entity.OrderStatus, error) {
 	result, err := uc.sc.CancelFuture(orderID, uc.simTrade)
 	if err != nil {
 		return "", entity.StatusUnknow, err
@@ -588,7 +587,7 @@ func (uc *OrderUseCase) CancelFutureOrderID(orderID string) (string, entity.Orde
 }
 
 // calculateFutureTradeBalance -.
-func (uc *OrderUseCase) calculateFutureTradeBalance(allOrders []*entity.FutureOrder, tradeDay time.Time) {
+func (uc *TradeUseCase) calculateFutureTradeBalance(allOrders []*entity.FutureOrder, tradeDay time.Time) {
 	var forward, reverse entity.FutureOrderArr
 	for _, v := range allOrders {
 		if v.Status != entity.StatusFilled {
@@ -618,7 +617,7 @@ func (uc *OrderUseCase) calculateFutureTradeBalance(allOrders []*entity.FutureOr
 	}
 }
 
-func (uc *OrderUseCase) calculateForwardFutureBalance(forward entity.FutureOrderArr) (int64, int64) {
+func (uc *TradeUseCase) calculateForwardFutureBalance(forward entity.FutureOrderArr) (int64, int64) {
 	var forwardBalance, tradeCount int64
 	groupOrder, manual := forward.SplitManualAndGroupID()
 	for _, v := range groupOrder {
@@ -646,7 +645,7 @@ func (uc *OrderUseCase) calculateForwardFutureBalance(forward entity.FutureOrder
 	return forwardBalance, tradeCount
 }
 
-func (uc *OrderUseCase) calculateReverseFutureBalance(reverse entity.FutureOrderArr) (int64, int64) {
+func (uc *TradeUseCase) calculateReverseFutureBalance(reverse entity.FutureOrderArr) (int64, int64) {
 	var reverseBalance, tradeCount int64
 	groupOrder, manual := reverse.SplitManualAndGroupID()
 	for _, v := range groupOrder {
@@ -679,16 +678,16 @@ func (uc *OrderUseCase) calculateReverseFutureBalance(reverse entity.FutureOrder
 //
 
 // GetAllStockOrder -.
-func (uc *OrderUseCase) GetAllStockOrder(ctx context.Context) ([]*entity.StockOrder, error) {
+func (uc *TradeUseCase) GetAllStockOrder(ctx context.Context) ([]*entity.StockOrder, error) {
 	return uc.repo.QueryAllStockOrder(ctx)
 }
 
-func (uc *OrderUseCase) GetAllFutureOrder(ctx context.Context) ([]*entity.FutureOrder, error) {
+func (uc *TradeUseCase) GetAllFutureOrder(ctx context.Context) ([]*entity.FutureOrder, error) {
 	return uc.repo.QueryAllFutureOrder(ctx)
 }
 
 // GetAllStockTradeBalance -.
-func (uc *OrderUseCase) GetAllStockTradeBalance(ctx context.Context) ([]*entity.StockTradeBalance, error) {
+func (uc *TradeUseCase) GetAllStockTradeBalance(ctx context.Context) ([]*entity.StockTradeBalance, error) {
 	tradeBalanceArr, err := uc.repo.QueryAllStockTradeBalance(ctx)
 	if err != nil {
 		return nil, err
@@ -697,7 +696,7 @@ func (uc *OrderUseCase) GetAllStockTradeBalance(ctx context.Context) ([]*entity.
 }
 
 // GetAllFutureTradeBalance -.
-func (uc *OrderUseCase) GetAllFutureTradeBalance(ctx context.Context) ([]*entity.FutureTradeBalance, error) {
+func (uc *TradeUseCase) GetAllFutureTradeBalance(ctx context.Context) ([]*entity.FutureTradeBalance, error) {
 	tradeBalanceArr, err := uc.repo.QueryAllFutureTradeBalance(ctx)
 	if err != nil {
 		return nil, err
@@ -705,31 +704,31 @@ func (uc *OrderUseCase) GetAllFutureTradeBalance(ctx context.Context) ([]*entity
 	return tradeBalanceArr, nil
 }
 
-func (uc *OrderUseCase) GetLastStockTradeBalance(ctx context.Context) (*entity.StockTradeBalance, error) {
+func (uc *TradeUseCase) GetLastStockTradeBalance(ctx context.Context) (*entity.StockTradeBalance, error) {
 	return uc.repo.QueryLastStockTradeBalance(ctx)
 }
 
-func (uc *OrderUseCase) GetLastFutureTradeBalance(ctx context.Context) (*entity.FutureTradeBalance, error) {
+func (uc *TradeUseCase) GetLastFutureTradeBalance(ctx context.Context) (*entity.FutureTradeBalance, error) {
 	return uc.repo.QueryLastFutureTradeBalance(ctx)
 }
 
 // CalculateBuyCost -.
-func (uc *OrderUseCase) CalculateBuyCost(price float64, quantity int64) int64 {
+func (uc *TradeUseCase) CalculateBuyCost(price float64, quantity int64) int64 {
 	return uc.quota.GetStockBuyCost(price, quantity)
 }
 
 // CalculateSellCost -.
-func (uc *OrderUseCase) CalculateSellCost(price float64, quantity int64) int64 {
+func (uc *TradeUseCase) CalculateSellCost(price float64, quantity int64) int64 {
 	return uc.quota.GetStockSellCost(price, quantity)
 }
 
 // CalculateTradeDiscount -.
-func (uc *OrderUseCase) CalculateTradeDiscount(price float64, quantity int64) int64 {
+func (uc *TradeUseCase) CalculateTradeDiscount(price float64, quantity int64) int64 {
 	return uc.quota.GetStockTradeFeeDiscount(price, quantity)
 }
 
 // GetFuturePosition .
-func (uc *OrderUseCase) GetFuturePosition() ([]*entity.FuturePosition, error) {
+func (uc *TradeUseCase) GetFuturePosition() ([]*entity.FuturePosition, error) {
 	query, err := uc.sc.GetFuturePosition()
 	if err != nil {
 		return nil, err
@@ -748,15 +747,15 @@ func (uc *OrderUseCase) GetFuturePosition() ([]*entity.FuturePosition, error) {
 	return result, nil
 }
 
-func (uc *OrderUseCase) IsStockTradeTime() bool {
+func (uc *TradeUseCase) IsStockTradeTime() bool {
 	return uc.stockTradeDay.IsStockMarketOpenNow()
 }
 
-func (uc *OrderUseCase) IsFutureTradeTime() bool {
+func (uc *TradeUseCase) IsFutureTradeTime() bool {
 	return uc.futureTradeDay.IsFutureMarketOpenNow()
 }
 
-func (uc *OrderUseCase) GetFutureOrderByTradeDay(ctx context.Context, tradeDay string) ([]*entity.FutureOrder, error) {
+func (uc *TradeUseCase) GetFutureOrderByTradeDay(ctx context.Context, tradeDay string) ([]*entity.FutureOrder, error) {
 	period, err := uc.tradeDay.GetFutureTradePeriodByDate(tradeDay)
 	if err != nil {
 		return nil, err

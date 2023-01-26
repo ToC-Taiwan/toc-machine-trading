@@ -13,11 +13,11 @@ import (
 
 type streamRoutes struct {
 	t usecase.Stream
-	o usecase.Order
+	o usecase.Trade
 	h usecase.History
 }
 
-func newStreamRoutes(handler *gin.RouterGroup, t usecase.Stream, o usecase.Order, history usecase.History) {
+func newStreamRoutes(handler *gin.RouterGroup, t usecase.Stream, o usecase.Trade, history usecase.History) {
 	r := &streamRoutes{
 		t: t,
 		o: o,

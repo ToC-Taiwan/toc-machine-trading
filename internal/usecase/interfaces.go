@@ -179,7 +179,7 @@ type (
 )
 
 type (
-	Order interface {
+	Trade interface {
 		CalculateBuyCost(price float64, quantity int64) int64
 		CalculateSellCost(price float64, quantity int64) int64
 		CalculateTradeDiscount(price float64, quantity int64) int64
@@ -207,7 +207,7 @@ type (
 		MoveFutureOrderToLatestTradeDay(ctx context.Context, orderID string) error
 	}
 
-	OrderRepo interface {
+	TradeRepo interface {
 		QueryAllStockTradeBalance(ctx context.Context) ([]*entity.StockTradeBalance, error)
 		QueryLastStockTradeBalance(ctx context.Context) (*entity.StockTradeBalance, error)
 		QueryStockTradeBalanceByDate(ctx context.Context, date time.Time) (*entity.StockTradeBalance, error)
@@ -229,7 +229,7 @@ type (
 		QueryAllFutureOrderByDate(ctx context.Context, timeTange []time.Time) ([]*entity.FutureOrder, error)
 	}
 
-	OrdergRPCAPI interface {
+	TradegRPCAPI interface {
 		GetFuturePosition() (*pb.FuturePositionArr, error)
 
 		BuyStock(order *entity.StockOrder, sim bool) (*pb.TradeResult, error)

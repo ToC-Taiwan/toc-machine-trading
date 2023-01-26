@@ -68,7 +68,7 @@ func RunApp(cfg *config.Config) {
 	defer app.pg.Close()
 
 	basicUseCase := usecase.NewBasic(repo.NewBasic(app.pg), grpcapi.NewBasic(app.sc), grpcapi.NewBasic(app.fg))
-	orderUseCase := usecase.NewOrder(grpcapi.NewOrder(app.sc), grpcapi.NewOrder(app.fg), repo.NewOrder(app.pg))
+	tradeUseCase := usecase.NewTrade(grpcapi.NewTrade(app.sc), grpcapi.NewTrade(app.fg), repo.NewTrade(app.pg))
 	streamUseCase := usecase.NewStream(repo.NewStream(app.pg), grpcapi.NewStream(app.sc), mq.NewStream())
 	analyzeUseCase := usecase.NewAnalyze(repo.NewHistory(app.pg))
 	historyUseCase := usecase.NewHistory(repo.NewHistory(app.pg), grpcapi.NewHistory(app.sc))
@@ -79,8 +79,8 @@ func RunApp(cfg *config.Config) {
 	r := v1.NewRouter(handler)
 	{
 		r.AddBasicRoutes(handler, basicUseCase)
-		r.AddOrderRoutes(handler, orderUseCase)
-		r.AddStreamRoutes(handler, streamUseCase, orderUseCase, historyUseCase)
+		r.AddTradeRoutes(handler, tradeUseCase)
+		r.AddStreamRoutes(handler, streamUseCase, tradeUseCase, historyUseCase)
 		r.AddAnalyzeRoutes(handler, analyzeUseCase)
 		r.AddHistoryRoutes(handler, historyUseCase)
 		r.AddTargetRoutes(handler, targetUseCase)

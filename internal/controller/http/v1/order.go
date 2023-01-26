@@ -14,10 +14,10 @@ import (
 )
 
 type orderRoutes struct {
-	t usecase.Order
+	t usecase.Trade
 }
 
-func newOrderRoutes(handler *gin.RouterGroup, t usecase.Order) {
+func newOrderRoutes(handler *gin.RouterGroup, t usecase.Trade) {
 	r := &orderRoutes{t}
 
 	h := handler.Group("/order")

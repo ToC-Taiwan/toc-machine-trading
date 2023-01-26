@@ -12,18 +12,16 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
-// OrdergRPCAPI -.
-type OrdergRPCAPI struct {
+type TradegRPCAPI struct {
 	conn *grpc.Connection
 }
 
-// NewOrder -.
-func NewOrder(client *grpc.Connection) usecase.OrdergRPCAPI {
-	return &OrdergRPCAPI{client}
+func NewTrade(client *grpc.Connection) usecase.TradegRPCAPI {
+	return &TradegRPCAPI{client}
 }
 
 // GetFuturePosition -.
-func (t *OrdergRPCAPI) GetFuturePosition() (*pb.FuturePositionArr, error) {
+func (t *TradegRPCAPI) GetFuturePosition() (*pb.FuturePositionArr, error) {
 	conn := t.conn.GetReadyConn()
 	defer t.conn.PutReadyConn(conn)
 	c := pb.NewTradeInterfaceClient(conn)
@@ -35,7 +33,7 @@ func (t *OrdergRPCAPI) GetFuturePosition() (*pb.FuturePositionArr, error) {
 }
 
 // BuyStock BuyStock
-func (t *OrdergRPCAPI) BuyStock(order *entity.StockOrder, sim bool) (*pb.TradeResult, error) {
+func (t *TradegRPCAPI) BuyStock(order *entity.StockOrder, sim bool) (*pb.TradeResult, error) {
 	conn := t.conn.GetReadyConn()
 	defer t.conn.PutReadyConn(conn)
 	c := pb.NewTradeInterfaceClient(conn)
@@ -52,7 +50,7 @@ func (t *OrdergRPCAPI) BuyStock(order *entity.StockOrder, sim bool) (*pb.TradeRe
 }
 
 // SellStock SellStock
-func (t *OrdergRPCAPI) SellStock(order *entity.StockOrder, sim bool) (*pb.TradeResult, error) {
+func (t *TradegRPCAPI) SellStock(order *entity.StockOrder, sim bool) (*pb.TradeResult, error) {
 	conn := t.conn.GetReadyConn()
 	defer t.conn.PutReadyConn(conn)
 	c := pb.NewTradeInterfaceClient(conn)
@@ -69,7 +67,7 @@ func (t *OrdergRPCAPI) SellStock(order *entity.StockOrder, sim bool) (*pb.TradeR
 }
 
 // SellFirstStock SellFirstStock
-func (t *OrdergRPCAPI) SellFirstStock(order *entity.StockOrder, sim bool) (*pb.TradeResult, error) {
+func (t *TradegRPCAPI) SellFirstStock(order *entity.StockOrder, sim bool) (*pb.TradeResult, error) {
 	conn := t.conn.GetReadyConn()
 	defer t.conn.PutReadyConn(conn)
 	c := pb.NewTradeInterfaceClient(conn)
@@ -86,7 +84,7 @@ func (t *OrdergRPCAPI) SellFirstStock(order *entity.StockOrder, sim bool) (*pb.T
 }
 
 // CancelStock CancelStock
-func (t *OrdergRPCAPI) CancelStock(orderID string, sim bool) (*pb.TradeResult, error) {
+func (t *TradegRPCAPI) CancelStock(orderID string, sim bool) (*pb.TradeResult, error) {
 	conn := t.conn.GetReadyConn()
 	defer t.conn.PutReadyConn(conn)
 	c := pb.NewTradeInterfaceClient(conn)
@@ -101,7 +99,7 @@ func (t *OrdergRPCAPI) CancelStock(orderID string, sim bool) (*pb.TradeResult, e
 }
 
 // GetOrderStatusByID GetOrderStatusByID
-func (t *OrdergRPCAPI) GetOrderStatusByID(orderID string, sim bool) (*pb.TradeResult, error) {
+func (t *TradegRPCAPI) GetOrderStatusByID(orderID string, sim bool) (*pb.TradeResult, error) {
 	conn := t.conn.GetReadyConn()
 	defer t.conn.PutReadyConn(conn)
 	c := pb.NewTradeInterfaceClient(conn)
@@ -116,7 +114,7 @@ func (t *OrdergRPCAPI) GetOrderStatusByID(orderID string, sim bool) (*pb.TradeRe
 }
 
 // GetLocalOrderStatusArr -.
-func (t *OrdergRPCAPI) GetLocalOrderStatusArr() error {
+func (t *TradegRPCAPI) GetLocalOrderStatusArr() error {
 	conn := t.conn.GetReadyConn()
 	defer t.conn.PutReadyConn(conn)
 	c := pb.NewTradeInterfaceClient(conn)
@@ -128,7 +126,7 @@ func (t *OrdergRPCAPI) GetLocalOrderStatusArr() error {
 }
 
 // GetSimulateOrderStatusArr -.
-func (t *OrdergRPCAPI) GetSimulateOrderStatusArr() error {
+func (t *TradegRPCAPI) GetSimulateOrderStatusArr() error {
 	conn := t.conn.GetReadyConn()
 	defer t.conn.PutReadyConn(conn)
 	c := pb.NewTradeInterfaceClient(conn)
@@ -140,7 +138,7 @@ func (t *OrdergRPCAPI) GetSimulateOrderStatusArr() error {
 }
 
 // GetNonBlockOrderStatusArr GetNonBlockOrderStatusArr
-func (t *OrdergRPCAPI) GetNonBlockOrderStatusArr() (*pb.ErrorMessage, error) {
+func (t *TradegRPCAPI) GetNonBlockOrderStatusArr() (*pb.ErrorMessage, error) {
 	conn := t.conn.GetReadyConn()
 	defer t.conn.PutReadyConn(conn)
 	c := pb.NewTradeInterfaceClient(conn)
@@ -152,7 +150,7 @@ func (t *OrdergRPCAPI) GetNonBlockOrderStatusArr() (*pb.ErrorMessage, error) {
 }
 
 // BuyFuture -.
-func (t *OrdergRPCAPI) BuyFuture(order *entity.FutureOrder, sim bool) (*pb.TradeResult, error) {
+func (t *TradegRPCAPI) BuyFuture(order *entity.FutureOrder, sim bool) (*pb.TradeResult, error) {
 	conn := t.conn.GetReadyConn()
 	defer t.conn.PutReadyConn(conn)
 	c := pb.NewTradeInterfaceClient(conn)
@@ -169,7 +167,7 @@ func (t *OrdergRPCAPI) BuyFuture(order *entity.FutureOrder, sim bool) (*pb.Trade
 }
 
 // SellFuture -.
-func (t *OrdergRPCAPI) SellFuture(order *entity.FutureOrder, sim bool) (*pb.TradeResult, error) {
+func (t *TradegRPCAPI) SellFuture(order *entity.FutureOrder, sim bool) (*pb.TradeResult, error) {
 	conn := t.conn.GetReadyConn()
 	defer t.conn.PutReadyConn(conn)
 	c := pb.NewTradeInterfaceClient(conn)
@@ -186,7 +184,7 @@ func (t *OrdergRPCAPI) SellFuture(order *entity.FutureOrder, sim bool) (*pb.Trad
 }
 
 // SellFirstFuture -.
-func (t *OrdergRPCAPI) SellFirstFuture(order *entity.FutureOrder, sim bool) (*pb.TradeResult, error) {
+func (t *TradegRPCAPI) SellFirstFuture(order *entity.FutureOrder, sim bool) (*pb.TradeResult, error) {
 	conn := t.conn.GetReadyConn()
 	defer t.conn.PutReadyConn(conn)
 	c := pb.NewTradeInterfaceClient(conn)
@@ -203,7 +201,7 @@ func (t *OrdergRPCAPI) SellFirstFuture(order *entity.FutureOrder, sim bool) (*pb
 }
 
 // CancelFuture -.
-func (t *OrdergRPCAPI) CancelFuture(orderID string, sim bool) (*pb.TradeResult, error) {
+func (t *TradegRPCAPI) CancelFuture(orderID string, sim bool) (*pb.TradeResult, error) {
 	conn := t.conn.GetReadyConn()
 	defer t.conn.PutReadyConn(conn)
 	c := pb.NewTradeInterfaceClient(conn)

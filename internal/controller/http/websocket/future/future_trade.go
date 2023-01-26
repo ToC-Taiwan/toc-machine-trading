@@ -21,7 +21,7 @@ type WSFutureTrade struct {
 	*eventbus.Bus       // event bus
 
 	s usecase.Stream  // stream
-	o usecase.Order   // order
+	o usecase.Trade   // order
 	h usecase.History // history
 
 	// save tick chan for assist
@@ -47,7 +47,7 @@ type WSFutureTrade struct {
 }
 
 // StartWSFutureTrade - Start ws future trade with one time bus
-func StartWSFutureTrade(c *gin.Context, s usecase.Stream, o usecase.Order, h usecase.History) {
+func StartWSFutureTrade(c *gin.Context, s usecase.Stream, o usecase.Trade, h usecase.History) {
 	w := &WSFutureTrade{
 		s:                      s,
 		o:                      o,

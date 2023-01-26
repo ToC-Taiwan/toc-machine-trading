@@ -64,8 +64,8 @@ func (r *RouterV1) AddTargetRoutes(handler *gin.Engine, target usecase.Target) {
 	newTargetRoutes(r.g, target)
 }
 
-// AddOrderRoutes -.
-func (r *RouterV1) AddOrderRoutes(handler *gin.Engine, order usecase.Order) {
+// AddTradeRoutes -.
+func (r *RouterV1) AddTradeRoutes(handler *gin.Engine, order usecase.Trade) {
 	newOrderRoutes(r.g, order)
 }
 
@@ -75,7 +75,7 @@ func (r *RouterV1) AddHistoryRoutes(handler *gin.Engine, history usecase.History
 }
 
 // AddStreamRoutes -.
-func (r *RouterV1) AddStreamRoutes(handler *gin.Engine, stream usecase.Stream, order usecase.Order, history usecase.History) {
+func (r *RouterV1) AddStreamRoutes(handler *gin.Engine, stream usecase.Stream, order usecase.Trade, history usecase.History) {
 	newStreamRoutes(r.g, stream, order, history)
 }
 
