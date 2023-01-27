@@ -29,8 +29,8 @@ type HistoryUseCase struct {
 
 	biasRateArr []float64
 
-	tradeDay           *tradeday.TradeDay
-	simulateFutureCode string
+	tradeDay       *tradeday.TradeDay
+	mainFutureCode string
 }
 
 // NewHistory -.
@@ -47,12 +47,12 @@ func NewHistory(r HistoryRepo, t HistorygRPCAPI) History {
 	uc.basic = *cc.GetBasicInfo()
 
 	bus.SubscribeTopic(topic.TopicFetchStockHistory, uc.FetchHistory)
-	bus.SubscribeTopic(topic.TopicMonitorFutureCode, uc.updateSimulateFutureCode)
+	bus.SubscribeTopic(topic.TopicStreamFutureTargets, uc.updateMainFutureCode)
 	return uc
 }
 
-func (uc *HistoryUseCase) updateSimulateFutureCode(future *entity.Future) {
-	uc.simulateFutureCode = future.Code
+func (uc *HistoryUseCase) updateMainFutureCode(ctx context.Context, code string) {
+	uc.mainFutureCode = code
 }
 
 // GetTradeDay -.
@@ -647,14 +647,14 @@ func (uc *HistoryUseCase) GetFutureTradeCond(days int) trader.SimulateBalance {
 	simulateDateArr := uc.tradeDay.GetLastNFutureTradeDay(days)
 	var balanceArr []trader.SimulateBalance
 	for _, date := range simulateDateArr {
-		dbTickArrArr, err := uc.findExistFutureHistoryTick(date, uc.simulateFutureCode)
+		dbTickArrArr, err := uc.findExistFutureHistoryTick(date, uc.mainFutureCode)
 		if err != nil {
 			logger.Error(err)
 			continue
 		}
 
 		lastPeriod := date.GetLastFutureTradePeriod()
-		dbClose, err := uc.findExistFutureHistoryClose(lastPeriod, uc.simulateFutureCode)
+		dbClose, err := uc.findExistFutureHistoryClose(lastPeriod, uc.mainFutureCode)
 		if err != nil {
 			logger.Error(err)
 			continue
@@ -664,13 +664,13 @@ func (uc *HistoryUseCase) GetFutureTradeCond(days int) trader.SimulateBalance {
 			MaxHoldTime: 20,
 		}
 
-		logger.Infof("Simulating %s %s, last close: %.0f", uc.simulateFutureCode, date.TradeDay.Format(common.ShortTimeLayout), dbClose.Close)
+		logger.Infof("Simulating %s %s, last close: %.0f", uc.mainFutureCode, date.TradeDay.Format(common.ShortTimeLayout), dbClose.Close)
 		for _, dbTickArr := range dbTickArrArr {
-			simulator := trader.NewFutureSimulator(uc.simulateFutureCode, cond, date)
+			simulator := trader.NewFutureSimulator(uc.mainFutureCode, cond, date)
 			tickChan := simulator.GetTickChan()
 			for _, tick := range dbTickArr {
 				tickChan <- &entity.RealTimeFutureTick{
-					Code:     uc.simulateFutureCode,
+					Code:     uc.mainFutureCode,
 					TickTime: tick.TickTime,
 					Close:    tick.Close,
 					Volume:   tick.Volume,

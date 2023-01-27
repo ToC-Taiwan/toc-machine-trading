@@ -2,7 +2,7 @@
 package topic
 
 const (
-	TopicNewTargets string = "new_targets"
+	TopicNewStockTargets string = "new_targets"
 )
 
 const (
@@ -24,6 +24,4 @@ const (
 	TopicCancelFutureOrder          string = "cancel_future_order"
 	TopicInsertOrUpdateFutureOrder  string = "insert_or_update_future_order"
 	TopicUpdateFutureTradeSwitch    string = "update_future_trade_switch"
-	TopicQueryMonitorFutureCode     string = "query_monitor_future_code"
-	TopicMonitorFutureCode          string = "monitor_future_code"
 )

@@ -53,33 +53,32 @@ func (mr *MockBasicMockRecorder) GetAllRepoStock(ctx interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllRepoStock", reflect.TypeOf((*MockBasic)(nil).GetAllRepoStock), ctx)
 }
 
-// GetAllSinopacStockAndUpdateRepo mocks base method.
-func (m *MockBasic) GetAllSinopacStockAndUpdateRepo(ctx context.Context) ([]*entity.Stock, error) {
+// TerminateFugle mocks base method.
+func (m *MockBasic) TerminateFugle() error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetAllSinopacStockAndUpdateRepo", ctx)
-	ret0, _ := ret[0].([]*entity.Stock)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret := m.ctrl.Call(m, "TerminateFugle")
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
-// GetAllSinopacStockAndUpdateRepo indicates an expected call of GetAllSinopacStockAndUpdateRepo.
-func (mr *MockBasicMockRecorder) GetAllSinopacStockAndUpdateRepo(ctx interface{}) *gomock.Call {
+// TerminateFugle indicates an expected call of TerminateFugle.
+func (mr *MockBasicMockRecorder) TerminateFugle() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllSinopacStockAndUpdateRepo", reflect.TypeOf((*MockBasic)(nil).GetAllSinopacStockAndUpdateRepo), ctx)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "TerminateFugle", reflect.TypeOf((*MockBasic)(nil).TerminateFugle))
 }
 
 // TerminateSinopac mocks base method.
-func (m *MockBasic) TerminateSinopac(ctx context.Context) error {
+func (m *MockBasic) TerminateSinopac() error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "TerminateSinopac", ctx)
+	ret := m.ctrl.Call(m, "TerminateSinopac")
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // TerminateSinopac indicates an expected call of TerminateSinopac.
-func (mr *MockBasicMockRecorder) TerminateSinopac(ctx interface{}) *gomock.Call {
+func (mr *MockBasicMockRecorder) TerminateSinopac() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "TerminateSinopac", reflect.TypeOf((*MockBasic)(nil).TerminateSinopac), ctx)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "TerminateSinopac", reflect.TypeOf((*MockBasic)(nil).TerminateSinopac))
 }
 
 // MockBasicRepo is a mock of BasicRepo interface.
@@ -175,21 +174,6 @@ func (m *MockBasicRepo) QueryAllFuture(ctx context.Context) (map[string]*entity.
 func (mr *MockBasicRepoMockRecorder) QueryAllFuture(ctx interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryAllFuture", reflect.TypeOf((*MockBasicRepo)(nil).QueryAllFuture), ctx)
-}
-
-// QueryAllMXFFuture mocks base method.
-func (m *MockBasicRepo) QueryAllMXFFuture(ctx context.Context) ([]*entity.Future, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "QueryAllMXFFuture", ctx)
-	ret0, _ := ret[0].([]*entity.Future)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// QueryAllMXFFuture indicates an expected call of QueryAllMXFFuture.
-func (mr *MockBasicRepoMockRecorder) QueryAllMXFFuture(ctx interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryAllMXFFuture", reflect.TypeOf((*MockBasicRepo)(nil).QueryAllMXFFuture), ctx)
 }
 
 // QueryAllStock mocks base method.
@@ -374,6 +358,21 @@ func (m *MockTargetRepo) InsertOrUpdateTargetArr(ctx context.Context, t []*entit
 func (mr *MockTargetRepoMockRecorder) InsertOrUpdateTargetArr(ctx, t interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertOrUpdateTargetArr", reflect.TypeOf((*MockTargetRepo)(nil).InsertOrUpdateTargetArr), ctx, t)
+}
+
+// QueryAllMXFFuture mocks base method.
+func (m *MockTargetRepo) QueryAllMXFFuture(ctx context.Context) ([]*entity.Future, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "QueryAllMXFFuture", ctx)
+	ret0, _ := ret[0].([]*entity.Future)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// QueryAllMXFFuture indicates an expected call of QueryAllMXFFuture.
+func (mr *MockTargetRepoMockRecorder) QueryAllMXFFuture(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryAllMXFFuture", reflect.TypeOf((*MockTargetRepo)(nil).QueryAllMXFFuture), ctx)
 }
 
 // QueryTargetsByTradeDay mocks base method.

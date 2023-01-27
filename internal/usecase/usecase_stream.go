@@ -23,41 +23,32 @@ type StreamUseCase struct {
 	rabbit  StreamRabbit
 	grpcapi StreamgRPCAPI
 
-	basic entity.BasicInfo
-
-	stockTradeSwitchCfg  config.StockTradeSwitch
-	futureTradeSwitchCfg config.FutureTradeSwitch
-
-	stockAnalyzeCfg  config.StockAnalyze
-	futureAnalyzeCfg config.FutureAnalyze
-
+	basic        entity.BasicInfo
+	cfg          *config.Config
 	targetFilter *target.Filter
 	tradeDay     *tradeday.TradeDay
 
 	stockTradeInSwitch  bool
 	futureTradeInSwitch bool
+	tradeIndex          *entity.TradeIndex
 
 	mainFutureCode string
-	tradeIndex     *entity.TradeIndex
 }
 
 // NewStream -.
 func NewStream(r StreamRepo, g StreamgRPCAPI, t StreamRabbit) Stream {
 	cfg := config.GetConfig()
+
 	uc := &StreamUseCase{
-		repo:    r,
-		rabbit:  t,
-		grpcapi: g,
-
-		stockTradeSwitchCfg:  cfg.StockTradeSwitch,
-		futureTradeSwitchCfg: cfg.FutureTradeSwitch,
-		stockAnalyzeCfg:      cfg.StockAnalyze,
-		futureAnalyzeCfg:     cfg.FutureAnalyze,
-
+		repo:         r,
+		rabbit:       t,
+		grpcapi:      g,
+		cfg:          cfg,
 		basic:        *cc.GetBasicInfo(),
 		targetFilter: target.NewFilter(cfg.TargetCond),
 		tradeDay:     tradeday.NewTradeDay(),
 	}
+
 	t.FillAllBasic(uc.basic.AllStocks, uc.basic.AllFutures)
 	uc.periodUpdateTradeIndex()
 
@@ -77,7 +68,7 @@ func NewStream(r StreamRepo, g StreamgRPCAPI, t StreamRabbit) Stream {
 
 	bus.SubscribeTopic(topic.TopicStreamStockTargets, uc.ReceiveStreamData)
 	bus.SubscribeTopic(topic.TopicStreamFutureTargets, uc.ReceiveFutureStreamData)
-	bus.SubscribeTopic(topic.TopicMonitorFutureCode, uc.updateMainFutureCode)
+
 	return uc
 }
 
@@ -156,7 +147,7 @@ func (uc *StreamUseCase) realTimeAddTargets() error {
 	})
 	data = data[:uc.targetFilter.RealTimeRank]
 
-	currentTargets := cc.GetTargets()
+	currentTargets := cc.GetStockTargets()
 	targetsMap := make(map[string]*entity.StockTarget)
 	for _, t := range currentTargets {
 		targetsMap[t.StockNum] = t
@@ -185,7 +176,7 @@ func (uc *StreamUseCase) realTimeAddTargets() error {
 	}
 
 	if len(newTargets) != 0 {
-		bus.PublishTopicEvent(topic.TopicNewTargets, newTargets)
+		bus.PublishTopicEvent(topic.TopicNewStockTargets, newTargets)
 	}
 	return nil
 }
@@ -408,10 +399,6 @@ func (uc *StreamUseCase) GetFutureSnapshotByCode(code string) (*entity.FutureSna
 	}, nil
 }
 
-func (uc *StreamUseCase) updateMainFutureCode(future *entity.Future) {
-	uc.mainFutureCode = future.Code
-}
-
 // GetMainFuture -.
 func (uc *StreamUseCase) GetMainFuture() *entity.Future {
 	return cc.GetFutureDetail(uc.mainFutureCode)
@@ -439,7 +426,7 @@ func (uc *StreamUseCase) ReceiveStreamData(ctx context.Context, targetArr []*ent
 			target := targetMap[agent.GetStockNum()]
 			mutex.RUnlock()
 
-			if uc.stockTradeSwitchCfg.Subscribe {
+			if uc.cfg.StockTradeSwitch.Subscribe {
 				bus.PublishTopicEvent(topic.TopicSubscribeStockTickTargets, []*entity.StockTarget{target})
 			}
 		}
@@ -455,7 +442,7 @@ func (uc *StreamUseCase) ReceiveStreamData(ctx context.Context, targetArr []*ent
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			agent := trader.NewStockTrader(target.StockNum, uc.stockTradeSwitchCfg, uc.stockAnalyzeCfg)
+			agent := trader.NewStockTrader(target.StockNum, uc.cfg.StockTradeSwitch, uc.cfg.StockAnalyze)
 			agentChan <- agent
 		}()
 	}
@@ -468,13 +455,14 @@ func (uc *StreamUseCase) ReceiveStreamData(ctx context.Context, targetArr []*ent
 
 // ReceiveFutureStreamData -.
 func (uc *StreamUseCase) ReceiveFutureStreamData(ctx context.Context, code string) {
-	agent := trader.NewFutureTrader(code, uc.futureTradeSwitchCfg, uc.futureAnalyzeCfg)
+	uc.mainFutureCode = code
+	agent := trader.NewFutureTrader(code, uc.cfg.FutureTradeSwitch, uc.cfg.FutureAnalyze)
 
 	go agent.TradingRoom()
 	go uc.rabbit.FutureTickConsumer(code, agent.GetTickChan())
 	// go uc.rabbit.FutureBidAskConsumer(code, agent.GetBidAskChan())
 
-	if uc.futureTradeSwitchCfg.Subscribe {
+	if uc.cfg.FutureTradeSwitch.Subscribe {
 		bus.PublishTopicEvent(topic.TopicSubscribeFutureTickTargets, code)
 	}
 
@@ -482,7 +470,7 @@ func (uc *StreamUseCase) ReceiveFutureStreamData(ctx context.Context, code strin
 }
 
 func (uc *StreamUseCase) checkStockTradeSwitch() {
-	if !uc.stockTradeSwitchCfg.AllowTrade {
+	if !uc.cfg.StockTradeSwitch.AllowTrade {
 		return
 	}
 
@@ -507,7 +495,7 @@ func (uc *StreamUseCase) checkStockTradeSwitch() {
 }
 
 func (uc *StreamUseCase) checkFutureTradeSwitch() {
-	if !uc.futureTradeSwitchCfg.AllowTrade {
+	if !uc.cfg.FutureTradeSwitch.AllowTrade {
 		return
 	}
 
@@ -516,8 +504,8 @@ func (uc *StreamUseCase) checkFutureTradeSwitch() {
 	firstStart := futureTradeDay.StartTime
 	secondStart := futureTradeDay.EndTime.Add(-300 * time.Minute)
 
-	timeRange = append(timeRange, []time.Time{firstStart, firstStart.Add(time.Duration(uc.futureTradeSwitchCfg.TradeTimeRange.FirstPartDuration) * time.Minute)})
-	timeRange = append(timeRange, []time.Time{secondStart, secondStart.Add(time.Duration(uc.futureTradeSwitchCfg.TradeTimeRange.SecondPartDuration) * time.Minute)})
+	timeRange = append(timeRange, []time.Time{firstStart, firstStart.Add(time.Duration(uc.cfg.FutureTradeSwitch.TradeTimeRange.FirstPartDuration) * time.Minute)})
+	timeRange = append(timeRange, []time.Time{secondStart, secondStart.Add(time.Duration(uc.cfg.FutureTradeSwitch.TradeTimeRange.SecondPartDuration) * time.Minute)})
 
 	for range time.NewTicker(2500 * time.Millisecond).C {
 		now := time.Now()

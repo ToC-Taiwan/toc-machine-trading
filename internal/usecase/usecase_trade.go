@@ -63,6 +63,7 @@ func NewTrade(t, fugle TradegRPCAPI, r TradeRepo) Trade {
 	} else {
 		go uc.askOrderStatus()
 	}
+
 	go uc.updateAllTradeBalance()
 	return uc
 }

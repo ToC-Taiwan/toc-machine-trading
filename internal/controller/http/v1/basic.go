@@ -20,10 +20,9 @@ func newBasicRoutes(handler *gin.RouterGroup, t usecase.Basic) {
 	h := handler.Group("/basic")
 	{
 		h.GET("/stock", r.getAllRepoStock)
-		h.GET("/stock/sinopac-to-repo", r.getAllSinopacStockAndUpdateRepo)
 		h.GET("/config", r.getAllConfig)
-
-		h.PUT("/system/terminate", r.terminateSinopac)
+		h.PUT("/system/terminate/sinopac", r.terminateSinopac)
+		h.PUT("/system/terminate/fugle", r.terminateFugle)
 	}
 }
 
@@ -52,27 +51,6 @@ func (r *basicRoutes) getAllRepoStock(c *gin.Context) {
 	})
 }
 
-// @Summary     getAllSinopacStockAndUpdateRepo
-// @Description getAllSinopacStockAndUpdateRepo
-// @ID          getAllSinopacStockAndUpdateRepo
-// @Tags  	    basic
-// @Accept      json
-// @Produce     json
-// @Success     200 {object} stockDetailResponse
-// @Failure     500 {object} response
-// @Router      /basic/stock/sinopac-to-repo [get]
-func (r *basicRoutes) getAllSinopacStockAndUpdateRepo(c *gin.Context) {
-	stockDetail, err := r.t.GetAllSinopacStockAndUpdateRepo(c.Request.Context())
-	if err != nil {
-		errorResponse(c, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	c.JSON(http.StatusOK, stockDetailResponse{
-		StockDetail: stockDetail,
-	})
-}
-
 // @Summary     getAllConfig
 // @Description getAllConfig
 // @ID          getAllConfig
@@ -83,8 +61,7 @@ func (r *basicRoutes) getAllSinopacStockAndUpdateRepo(c *gin.Context) {
 // @Failure     500 {object} response
 // @Router      /basic/config [get]
 func (r *basicRoutes) getAllConfig(c *gin.Context) {
-	cfg := config.GetConfig()
-	c.JSON(http.StatusOK, cfg)
+	c.JSON(http.StatusOK, config.GetConfig())
 }
 
 // @Summary     terminateSinopac
@@ -95,9 +72,28 @@ func (r *basicRoutes) getAllConfig(c *gin.Context) {
 // @Produce     json
 // @Success     200
 // @Failure     500 {object} response
-// @Router      /basic/system/terminate [put]
+// @Router      /basic/system/terminate/sinopac [put]
 func (r *basicRoutes) terminateSinopac(c *gin.Context) {
-	err := r.t.TerminateSinopac(c.Request.Context())
+	err := r.t.TerminateSinopac()
+	if err != nil {
+		errorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, nil)
+}
+
+// @Summary     terminateFugle
+// @Description terminateFugle
+// @ID          terminateFugle
+// @Tags  	    system
+// @Accept      json
+// @Produce     json
+// @Success     200
+// @Failure     500 {object} response
+// @Router      /basic/system/terminate/fugle [put]
+func (r *basicRoutes) terminateFugle(c *gin.Context) {
+	err := r.t.TerminateFugle()
 	if err != nil {
 		errorResponse(c, http.StatusInternalServerError, err.Error())
 		return

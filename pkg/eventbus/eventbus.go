@@ -45,8 +45,8 @@ func (c *Bus) PublishTopicEvent(topic string, arg ...interface{}) {
 }
 
 func (c *Bus) SubscribeTopic(topic string, fn ...interface{}) {
-	for _, f := range fn {
-		err := c.bus.SubscribeAsync(topic, f, true)
+	for i := len(fn) - 1; i >= 0; i-- {
+		err := c.bus.SubscribeAsync(topic, fn[i], true)
 		if err != nil {
 			panic(err)
 		}

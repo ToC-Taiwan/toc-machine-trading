@@ -9,15 +9,15 @@ import (
 	"tmt/internal/entity"
 
 	"tmt/internal/usecase/module/tradeday"
-	"tmt/internal/usecase/topic"
 	"tmt/pkg/common"
 )
 
 // BasicUseCase -.
 type BasicUseCase struct {
 	repo BasicRepo
-	sc   BasicgRPCAPI
-	fg   BasicgRPCAPI
+
+	sc BasicgRPCAPI
+	fg BasicgRPCAPI
 
 	cfg      *config.Config
 	tradeDay *tradeday.TradeDay
@@ -36,25 +36,84 @@ func NewBasic(r BasicRepo, t, fugle BasicgRPCAPI) Basic {
 		cfg:      config.GetConfig(),
 	}
 
-	go uc.HealthCheckforSinopac()
-	go uc.HealthCheckforFugle()
+	go uc.healthCheckforSinopac()
+	go uc.healthCheckforFugle()
 
 	if err := uc.importCalendarDate(context.Background()); err != nil {
 		logger.Fatal(err)
 	}
-	if _, err := uc.GetAllSinopacStockAndUpdateRepo(context.Background()); err != nil {
+
+	if _, err := uc.updateRepoStock(); err != nil {
 		logger.Fatal(err)
 	}
-	if _, err := uc.GetAllSinopacFutureAndUpdateRepo(context.Background()); err != nil {
+
+	if _, err := uc.updateRepoFuture(); err != nil {
 		logger.Fatal(err)
 	}
 
 	uc.fillBasicInfo()
-	bus.SubscribeTopic(topic.TopicQueryMonitorFutureCode, uc.pubMonitorFutureCode)
+
 	return uc
 }
 
-func (uc *BasicUseCase) HealthCheckforSinopac() {
+// GetAllRepoStock -.
+func (uc *BasicUseCase) GetAllRepoStock(ctx context.Context) ([]*entity.Stock, error) {
+	data, err := uc.repo.QueryAllStock(context.Background())
+	if err != nil {
+		return []*entity.Stock{}, err
+	}
+
+	var result []*entity.Stock
+	for _, v := range data {
+		result = append(result, v)
+	}
+	return result, nil
+}
+
+// TerminateSinopac -.
+func (uc *BasicUseCase) TerminateSinopac() error {
+	return uc.sc.Terminate()
+}
+
+// TerminateFugle -.
+func (uc *BasicUseCase) TerminateFugle() error {
+	return uc.fg.Terminate()
+}
+
+func (uc *BasicUseCase) fillBasicInfo() {
+	tradeDay := uc.tradeDay.GetStockTradeDay().TradeDay
+	openTime := 9 * time.Hour
+	lastTradeDayArr := uc.tradeDay.GetLastNTradeDayByDate(2, tradeDay)
+
+	basic := &entity.BasicInfo{
+		TradeDay:           tradeDay,
+		LastTradeDay:       lastTradeDayArr[0],
+		BefroeLastTradeDay: lastTradeDayArr[1],
+
+		OpenTime:       tradeDay.Add(openTime).Add(time.Duration(uc.cfg.StockTradeSwitch.HoldTimeFromOpen) * time.Second),
+		TradeInEndTime: tradeDay.Add(openTime).Add(time.Duration(uc.cfg.StockTradeSwitch.TradeInEndTime) * time.Minute),
+		EndTime:        tradeDay.Add(openTime).Add(time.Duration(uc.cfg.StockTradeSwitch.TotalOpenTime) * time.Minute),
+
+		HistoryCloseRange: uc.tradeDay.GetLastNTradeDayByDate(uc.cfg.History.HistoryClosePeriod, tradeDay),
+		HistoryKbarRange:  uc.tradeDay.GetLastNTradeDayByDate(uc.cfg.History.HistoryKbarPeriod, tradeDay),
+		HistoryTickRange:  uc.tradeDay.GetLastNTradeDayByDate(uc.cfg.History.HistoryTickPeriod, tradeDay),
+
+		AllStocks:  make(map[string]*entity.Stock),
+		AllFutures: make(map[string]*entity.Future),
+	}
+
+	for _, s := range uc.allStockDetail {
+		basic.AllStocks[s.Number] = s
+	}
+
+	for _, f := range uc.allFutureDetail {
+		basic.AllFutures[f.Code] = f
+	}
+
+	cc.SetBasicInfo(basic)
+}
+
+func (uc *BasicUseCase) healthCheckforSinopac() {
 	err := uc.sc.Heartbeat()
 	if err != nil {
 		logger.Warn("sinopac healthcheck fail, terminate")
@@ -62,7 +121,7 @@ func (uc *BasicUseCase) HealthCheckforSinopac() {
 	}
 }
 
-func (uc *BasicUseCase) HealthCheckforFugle() {
+func (uc *BasicUseCase) healthCheckforFugle() {
 	err := uc.fg.Heartbeat()
 	if err != nil {
 		logger.Warn("fugle healthcheck fail, terminate")
@@ -70,18 +129,7 @@ func (uc *BasicUseCase) HealthCheckforFugle() {
 	}
 }
 
-// TerminateSinopac -.
-func (uc *BasicUseCase) TerminateSinopac(ctx context.Context) error {
-	return uc.sc.Terminate()
-}
-
-// TerminateFugle -.
-func (uc *BasicUseCase) TerminateFugle(ctx context.Context) error {
-	return uc.fg.Terminate()
-}
-
-// GetAllSinopacStockAndUpdateRepo -.
-func (uc *BasicUseCase) GetAllSinopacStockAndUpdateRepo(ctx context.Context) ([]*entity.Stock, error) {
+func (uc *BasicUseCase) updateRepoStock() ([]*entity.Stock, error) {
 	stockArr, err := uc.sc.GetAllStockDetail()
 	if err != nil {
 		return []*entity.Stock{}, err
@@ -124,8 +172,7 @@ func (uc *BasicUseCase) GetAllSinopacStockAndUpdateRepo(ctx context.Context) ([]
 	return uc.allStockDetail, nil
 }
 
-// GetAllSinopacFutureAndUpdateRepo -.
-func (uc *BasicUseCase) GetAllSinopacFutureAndUpdateRepo(ctx context.Context) ([]*entity.Future, error) {
+func (uc *BasicUseCase) updateRepoFuture() ([]*entity.Future, error) {
 	futureArr, err := uc.sc.GetAllFutureDetail()
 	if err != nil {
 		return []*entity.Future{}, err
@@ -178,74 +225,9 @@ func (uc *BasicUseCase) GetAllSinopacFutureAndUpdateRepo(ctx context.Context) ([
 	return uc.allFutureDetail, nil
 }
 
-// GetAllRepoStock -.
-func (uc *BasicUseCase) GetAllRepoStock(ctx context.Context) ([]*entity.Stock, error) {
-	data, err := uc.repo.QueryAllStock(context.Background())
-	if err != nil {
-		return []*entity.Stock{}, err
-	}
-
-	var result []*entity.Stock
-	for _, v := range data {
-		result = append(result, v)
-	}
-	return result, nil
-}
-
 func (uc *BasicUseCase) importCalendarDate(ctx context.Context) error {
 	if err := uc.repo.InsertOrUpdatetCalendarDateArr(ctx, uc.tradeDay.GetAllCalendar()); err != nil {
 		return err
 	}
 	return nil
-}
-
-func (uc *BasicUseCase) fillBasicInfo() {
-	tradeDay := uc.tradeDay.GetStockTradeDay().TradeDay
-	openTime := 9 * time.Hour
-	lastTradeDayArr := uc.tradeDay.GetLastNTradeDayByDate(2, tradeDay)
-
-	basic := &entity.BasicInfo{
-		TradeDay:           tradeDay,
-		LastTradeDay:       lastTradeDayArr[0],
-		BefroeLastTradeDay: lastTradeDayArr[1],
-
-		OpenTime:       tradeDay.Add(openTime).Add(time.Duration(uc.cfg.StockTradeSwitch.HoldTimeFromOpen) * time.Second),
-		TradeInEndTime: tradeDay.Add(openTime).Add(time.Duration(uc.cfg.StockTradeSwitch.TradeInEndTime) * time.Minute),
-		EndTime:        tradeDay.Add(openTime).Add(time.Duration(uc.cfg.StockTradeSwitch.TotalOpenTime) * time.Minute),
-
-		HistoryCloseRange: uc.tradeDay.GetLastNTradeDayByDate(uc.cfg.History.HistoryClosePeriod, tradeDay),
-		HistoryKbarRange:  uc.tradeDay.GetLastNTradeDayByDate(uc.cfg.History.HistoryKbarPeriod, tradeDay),
-		HistoryTickRange:  uc.tradeDay.GetLastNTradeDayByDate(uc.cfg.History.HistoryTickPeriod, tradeDay),
-
-		AllStocks:  make(map[string]*entity.Stock),
-		AllFutures: make(map[string]*entity.Future),
-	}
-
-	for _, s := range uc.allStockDetail {
-		basic.AllStocks[s.Number] = s
-	}
-
-	for _, f := range uc.allFutureDetail {
-		basic.AllFutures[f.Code] = f
-	}
-
-	cc.SetBasicInfo(basic)
-}
-
-func (uc *BasicUseCase) pubMonitorFutureCode() {
-	futures, err := uc.repo.QueryAllMXFFuture(context.Background())
-	if err != nil {
-		logger.Fatal(err)
-	}
-
-	for _, v := range futures {
-		if v.Code == "MXFR1" || v.Code == "MXFR2" {
-			continue
-		}
-
-		if time.Now().Before(v.DeliveryDate) {
-			bus.PublishTopicEvent(topic.TopicMonitorFutureCode, v)
-			return
-		}
-	}
 }

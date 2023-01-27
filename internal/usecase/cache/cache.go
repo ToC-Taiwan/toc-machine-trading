@@ -158,19 +158,19 @@ func (c *Cache) GetLowBiasRate() float64 {
 	return 0
 }
 
-// AppendTargets -.
-func (c *Cache) AppendTargets(targets []*entity.StockTarget) {
-	original := c.GetTargets()
+// AppendStockTargets -.
+func (c *Cache) AppendStockTargets(targets []*entity.StockTarget) {
+	original := c.GetStockTargets()
 	original = append(original, targets...)
-	c.setTargets(original)
+	c.setStockTargets(original)
 }
 
-func (c *Cache) setTargets(targets []*entity.StockTarget) {
+func (c *Cache) setStockTargets(targets []*entity.StockTarget) {
 	c.Set(c.targetsKey(), targets)
 }
 
-// GetTargets -.
-func (c *Cache) GetTargets() []*entity.StockTarget {
+// GetStockTargets -.
+func (c *Cache) GetStockTargets() []*entity.StockTarget {
 	if value, ok := c.Get(c.targetsKey()); ok {
 		return value.([]*entity.StockTarget)
 	}

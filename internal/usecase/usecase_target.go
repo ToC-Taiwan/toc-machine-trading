@@ -20,25 +20,18 @@ type TargetUseCase struct {
 	gRPCAPI       TargetgRPCAPI
 	streamgRPCAPI StreamgRPCAPI
 
-	targetFilter      *target.Filter
-	monitorFutureCode string
-	waitMonitorFuture chan struct{}
+	targetFilter *target.Filter
 }
 
 // NewTarget -.
 func NewTarget(r TargetRepo, t TargetgRPCAPI, s StreamgRPCAPI) Target {
 	cfg := config.GetConfig()
 	uc := &TargetUseCase{
-		repo:              r,
-		gRPCAPI:           t,
-		streamgRPCAPI:     s,
-		targetFilter:      target.NewFilter(cfg.TargetCond),
-		waitMonitorFuture: make(chan struct{}),
+		repo:          r,
+		gRPCAPI:       t,
+		streamgRPCAPI: s,
+		targetFilter:  target.NewFilter(cfg.TargetCond),
 	}
-
-	bus.SubscribeTopic(topic.TopicMonitorFutureCode, uc.fillMonitorFutureCode)
-	bus.PublishTopicEvent(topic.TopicQueryMonitorFutureCode)
-	<-uc.waitMonitorFuture
 
 	// unsubscriba all first
 	if err := uc.UnSubscribeAll(context.Background()); err != nil {
@@ -66,10 +59,12 @@ func NewTarget(r TargetRepo, t TargetgRPCAPI, s StreamgRPCAPI) Target {
 		}
 	}
 
-	uc.publishNewTargets(targetArr)
+	cc.AppendStockTargets(targetArr)
+	uc.publishNewStockTargets(targetArr)
+	uc.publishNewFutureTargets()
 
 	// sub events
-	bus.SubscribeTopic(topic.TopicNewTargets, uc.publishNewTargets)
+	bus.SubscribeTopic(topic.TopicNewStockTargets, uc.publishNewStockTargets)
 	bus.SubscribeTopic(topic.TopicSubscribeStockTickTargets, uc.SubscribeStockTick, uc.SubscribeStockBidAsk)
 	bus.SubscribeTopic(topic.TopicUnSubscribeStockTickTargets, uc.UnSubscribeStockTick, uc.UnSubscribeStockBidAsk)
 	bus.SubscribeTopic(topic.TopicSubscribeFutureTickTargets, uc.SubscribeFutureTick)
@@ -77,30 +72,48 @@ func NewTarget(r TargetRepo, t TargetgRPCAPI, s StreamgRPCAPI) Target {
 	return uc
 }
 
-func (uc *TargetUseCase) fillMonitorFutureCode(future *entity.Future) {
-	uc.monitorFutureCode = future.Code
-	close(uc.waitMonitorFuture)
-}
-
-func (uc *TargetUseCase) publishNewTargets(targetArr []*entity.StockTarget) {
-	err := uc.repo.InsertOrUpdateTargetArr(context.Background(), targetArr)
-	if err != nil {
+func (uc *TargetUseCase) publishNewStockTargets(targetArr []*entity.StockTarget) {
+	ctx := context.Background()
+	if err := uc.repo.InsertOrUpdateTargetArr(ctx, targetArr); err != nil {
 		logger.Fatal(err)
 	}
 
-	cc.AppendTargets(targetArr)
-
 	// stock
-	bus.PublishTopicEvent(topic.TopicFetchStockHistory, context.Background(), targetArr)
-	bus.PublishTopicEvent(topic.TopicStreamStockTargets, context.Background(), targetArr)
+	bus.PublishTopicEvent(topic.TopicFetchStockHistory, ctx, targetArr)
+	bus.PublishTopicEvent(topic.TopicStreamStockTargets, ctx, targetArr)
+}
 
-	// future
-	bus.PublishTopicEvent(topic.TopicStreamFutureTargets, context.Background(), uc.monitorFutureCode)
+func (uc *TargetUseCase) publishNewFutureTargets() {
+	ctx := context.Background()
+	if futureTarget, err := uc.getFutureTarget(); err != nil {
+		logger.Fatal(err)
+	} else {
+		bus.PublishTopicEvent(topic.TopicStreamFutureTargets, ctx, futureTarget)
+	}
 }
 
 // GetTargets - get targets from cache
 func (uc *TargetUseCase) GetTargets(ctx context.Context) []*entity.StockTarget {
-	return cc.GetTargets()
+	return cc.GetStockTargets()
+}
+
+func (uc *TargetUseCase) getFutureTarget() (string, error) {
+	futures, err := uc.repo.QueryAllMXFFuture(context.Background())
+	if err != nil {
+		return "", err
+	}
+
+	for _, v := range futures {
+		if v.Code == "MXFR1" || v.Code == "MXFR2" {
+			continue
+		}
+
+		if time.Now().Before(v.DeliveryDate) {
+			return v.Code, nil
+		}
+	}
+
+	return "", errors.New("no future")
 }
 
 // SearchTradeDayTargets - search targets by trade day

@@ -131,9 +131,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/basic/stock/sinopac-to-repo": {
-            "get": {
-                "description": "getAllSinopacStockAndUpdateRepo",
+        "/basic/system/terminate/fugle": {
+            "put": {
+                "description": "terminateFugle",
                 "consumes": [
                     "application/json"
                 ],
@@ -141,16 +141,13 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "basic"
+                    "system"
                 ],
-                "summary": "getAllSinopacStockAndUpdateRepo",
-                "operationId": "getAllSinopacStockAndUpdateRepo",
+                "summary": "terminateFugle",
+                "operationId": "terminateFugle",
                 "responses": {
                     "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/v1.stockDetailResponse"
-                        }
+                        "description": "OK"
                     },
                     "500": {
                         "description": "Internal Server Error",
@@ -161,7 +158,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/basic/system/terminate": {
+        "/basic/system/terminate/sinopac": {
             "put": {
                 "description": "terminateSinopac",
                 "consumes": [

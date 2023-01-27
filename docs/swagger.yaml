@@ -578,27 +578,25 @@ paths:
       summary: getAllRepoStock
       tags:
       - basic
-  /basic/stock/sinopac-to-repo:
-    get:
+  /basic/system/terminate/fugle:
+    put:
       consumes:
       - application/json
-      description: getAllSinopacStockAndUpdateRepo
-      operationId: getAllSinopacStockAndUpdateRepo
+      description: terminateFugle
+      operationId: terminateFugle
       produces:
       - application/json
       responses:
         "200":
           description: OK
-          schema:
-            $ref: '#/definitions/v1.stockDetailResponse'
         "500":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/v1.response'
-      summary: getAllSinopacStockAndUpdateRepo
+      summary: terminateFugle
       tags:
-      - basic
-  /basic/system/terminate:
+      - system
+  /basic/system/terminate/sinopac:
     put:
       consumes:
       - application/json
