@@ -55,8 +55,7 @@ type TargetRepo interface {
 	QueryAllMXFFuture(ctx context.Context) ([]*entity.Future, error)
 }
 
-type TargetgRPCAPI interface {
-	GetStockVolumeRank(date string) ([]*pb.StockVolumeRankMessage, error)
+type SubscribegRPCAPI interface {
 	SubscribeStockTick(stockNumArr []string) ([]string, error)
 	UnSubscribeStockTick(stockNumArr []string) ([]string, error)
 	UnSubscribeStockAllTick() (*pb.ErrorMessage, error)
@@ -107,10 +106,10 @@ type HistorygRPCAPI interface {
 	GetFutureHistoryClose(codeArr []string, date string) ([]*pb.HistoryCloseMessage, error)
 }
 
-type Stream interface {
+type RealTime interface {
 	ReceiveEvent(ctx context.Context)
 	ReceiveOrderStatus(ctx context.Context)
-	ReceiveStreamData(ctx context.Context, targetArr []*entity.StockTarget)
+	ReceiveStreamData(targetArr []*entity.StockTarget)
 	GetStockSnapshotByNumArr(stockNumArr []string) ([]*entity.StockSnapShot, error)
 	GetTradeIndex() *entity.TradeIndex
 	GetTSESnapshot(ctx context.Context) (*entity.StockSnapShot, error)
@@ -125,21 +124,22 @@ type Stream interface {
 	DeleteOrderStatusConnection(connectionID string)
 }
 
-type StreamRepo interface {
+type RealTimeRepo interface {
 	InsertEvent(ctx context.Context, t *entity.SinopacEvent) error
 }
 
-type StreamgRPCAPI interface {
+type RealTimegRPCAPI interface {
 	GetAllStockSnapshot() ([]*pb.SnapshotMessage, error)
 	GetStockSnapshotByNumArr(stockNumArr []string) ([]*pb.SnapshotMessage, error)
 	GetStockSnapshotTSE() (*pb.SnapshotMessage, error)
 	GetStockSnapshotOTC() (*pb.SnapshotMessage, error)
 	GetNasdaq() (*pb.YahooFinancePrice, error)
 	GetNasdaqFuture() (*pb.YahooFinancePrice, error)
+	GetStockVolumeRank(date string) ([]*pb.StockVolumeRankMessage, error)
 	GetFutureSnapshotByCode(code string) (*pb.SnapshotMessage, error)
 }
 
-type StreamRabbit interface {
+type Rabbit interface {
 	FillAllBasic(allStockMap map[string]*entity.Stock, allFutureMap map[string]*entity.Future)
 	EventConsumer(eventChan chan *entity.SinopacEvent)
 	OrderStatusConsumer()

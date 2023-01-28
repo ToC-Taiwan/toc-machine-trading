@@ -11,14 +11,14 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type streamRoutes struct {
-	t usecase.Stream
+type realTimeRoutes struct {
+	t usecase.RealTime
 	o usecase.Trade
 	h usecase.History
 }
 
-func newStreamRoutes(handler *gin.RouterGroup, t usecase.Stream, o usecase.Trade, history usecase.History) {
-	r := &streamRoutes{
+func newRealTimeRoutes(handler *gin.RouterGroup, t usecase.RealTime, o usecase.Trade, history usecase.History) {
+	r := &realTimeRoutes{
 		t: t,
 		o: o,
 		h: history,
@@ -42,7 +42,7 @@ func newStreamRoutes(handler *gin.RouterGroup, t usecase.Stream, o usecase.Trade
 // @Success     200 {object} entity.StockSnapShot
 // @Failure     500 {object} response
 // @Router      /stream/tse/snapshot [get]
-func (r *streamRoutes) getTSESnapshot(c *gin.Context) {
+func (r *realTimeRoutes) getTSESnapshot(c *gin.Context) {
 	snapshot, err := r.t.GetTSESnapshot(c.Request.Context())
 	if err != nil {
 		errorResponse(c, http.StatusInternalServerError, err.Error())
@@ -51,10 +51,10 @@ func (r *streamRoutes) getTSESnapshot(c *gin.Context) {
 	c.JSON(http.StatusOK, snapshot)
 }
 
-func (r *streamRoutes) servePickStockWS(c *gin.Context) {
+func (r *realTimeRoutes) servePickStockWS(c *gin.Context) {
 	pick.StartWSPickStock(c, r.t)
 }
 
-func (r *streamRoutes) serveFutureWS(c *gin.Context) {
+func (r *realTimeRoutes) serveFutureWS(c *gin.Context) {
 	future.StartWSFutureTrade(c, r.t, r.o, r.h)
 }

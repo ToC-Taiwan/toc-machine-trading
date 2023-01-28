@@ -22,17 +22,26 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type HistoryDataInterfaceClient interface {
+	// GetStockHistoryTick
 	GetStockHistoryTick(ctx context.Context, in *StockNumArrWithDate, opts ...grpc.CallOption) (*HistoryTickResponse, error)
+	// GetStockHistoryKbar
 	GetStockHistoryKbar(ctx context.Context, in *StockNumArrWithDate, opts ...grpc.CallOption) (*HistoryKbarResponse, error)
+	// GetStockHistoryClose
 	GetStockHistoryClose(ctx context.Context, in *StockNumArrWithDate, opts ...grpc.CallOption) (*HistoryCloseResponse, error)
+	// GetStockHistoryCloseByDateArr
 	GetStockHistoryCloseByDateArr(ctx context.Context, in *StockNumArrWithDateArr, opts ...grpc.CallOption) (*HistoryCloseResponse, error)
-	GetStockTSEHistoryTick(ctx context.Context, in *Date, opts ...grpc.CallOption) (*HistoryTickResponse, error)
-	GetStockTSEHistoryKbar(ctx context.Context, in *Date, opts ...grpc.CallOption) (*HistoryKbarResponse, error)
-	GetStockTSEHistoryClose(ctx context.Context, in *Date, opts ...grpc.CallOption) (*HistoryCloseResponse, error)
-	GetOTCHistoryKbar(ctx context.Context, in *Date, opts ...grpc.CallOption) (*HistoryKbarResponse, error)
+	// GetFutureHistoryTick
 	GetFutureHistoryTick(ctx context.Context, in *FutureCodeArrWithDate, opts ...grpc.CallOption) (*HistoryTickResponse, error)
-	GetFutureHistoryClose(ctx context.Context, in *FutureCodeArrWithDate, opts ...grpc.CallOption) (*HistoryCloseResponse, error)
+	// GetFutureHistoryKbar
 	GetFutureHistoryKbar(ctx context.Context, in *FutureCodeArrWithDate, opts ...grpc.CallOption) (*HistoryKbarResponse, error)
+	// GetFutureHistoryClose
+	GetFutureHistoryClose(ctx context.Context, in *FutureCodeArrWithDate, opts ...grpc.CallOption) (*HistoryCloseResponse, error)
+	// GetStockTSEHistoryTick
+	GetStockTSEHistoryTick(ctx context.Context, in *Date, opts ...grpc.CallOption) (*HistoryTickResponse, error)
+	// GetStockTSEHistoryKbar
+	GetStockTSEHistoryKbar(ctx context.Context, in *Date, opts ...grpc.CallOption) (*HistoryKbarResponse, error)
+	// GetStockTSEHistoryClose
+	GetStockTSEHistoryClose(ctx context.Context, in *Date, opts ...grpc.CallOption) (*HistoryCloseResponse, error)
 }
 
 type historyDataInterfaceClient struct {
@@ -79,6 +88,33 @@ func (c *historyDataInterfaceClient) GetStockHistoryCloseByDateArr(ctx context.C
 	return out, nil
 }
 
+func (c *historyDataInterfaceClient) GetFutureHistoryTick(ctx context.Context, in *FutureCodeArrWithDate, opts ...grpc.CallOption) (*HistoryTickResponse, error) {
+	out := new(HistoryTickResponse)
+	err := c.cc.Invoke(ctx, "/toc_python_forwarder.HistoryDataInterface/GetFutureHistoryTick", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *historyDataInterfaceClient) GetFutureHistoryKbar(ctx context.Context, in *FutureCodeArrWithDate, opts ...grpc.CallOption) (*HistoryKbarResponse, error) {
+	out := new(HistoryKbarResponse)
+	err := c.cc.Invoke(ctx, "/toc_python_forwarder.HistoryDataInterface/GetFutureHistoryKbar", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *historyDataInterfaceClient) GetFutureHistoryClose(ctx context.Context, in *FutureCodeArrWithDate, opts ...grpc.CallOption) (*HistoryCloseResponse, error) {
+	out := new(HistoryCloseResponse)
+	err := c.cc.Invoke(ctx, "/toc_python_forwarder.HistoryDataInterface/GetFutureHistoryClose", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *historyDataInterfaceClient) GetStockTSEHistoryTick(ctx context.Context, in *Date, opts ...grpc.CallOption) (*HistoryTickResponse, error) {
 	out := new(HistoryTickResponse)
 	err := c.cc.Invoke(ctx, "/toc_python_forwarder.HistoryDataInterface/GetStockTSEHistoryTick", in, out, opts...)
@@ -106,57 +142,30 @@ func (c *historyDataInterfaceClient) GetStockTSEHistoryClose(ctx context.Context
 	return out, nil
 }
 
-func (c *historyDataInterfaceClient) GetOTCHistoryKbar(ctx context.Context, in *Date, opts ...grpc.CallOption) (*HistoryKbarResponse, error) {
-	out := new(HistoryKbarResponse)
-	err := c.cc.Invoke(ctx, "/toc_python_forwarder.HistoryDataInterface/GetOTCHistoryKbar", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *historyDataInterfaceClient) GetFutureHistoryTick(ctx context.Context, in *FutureCodeArrWithDate, opts ...grpc.CallOption) (*HistoryTickResponse, error) {
-	out := new(HistoryTickResponse)
-	err := c.cc.Invoke(ctx, "/toc_python_forwarder.HistoryDataInterface/GetFutureHistoryTick", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *historyDataInterfaceClient) GetFutureHistoryClose(ctx context.Context, in *FutureCodeArrWithDate, opts ...grpc.CallOption) (*HistoryCloseResponse, error) {
-	out := new(HistoryCloseResponse)
-	err := c.cc.Invoke(ctx, "/toc_python_forwarder.HistoryDataInterface/GetFutureHistoryClose", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *historyDataInterfaceClient) GetFutureHistoryKbar(ctx context.Context, in *FutureCodeArrWithDate, opts ...grpc.CallOption) (*HistoryKbarResponse, error) {
-	out := new(HistoryKbarResponse)
-	err := c.cc.Invoke(ctx, "/toc_python_forwarder.HistoryDataInterface/GetFutureHistoryKbar", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // HistoryDataInterfaceServer is the server API for HistoryDataInterface service.
 // All implementations must embed UnimplementedHistoryDataInterfaceServer
 // for forward compatibility
 type HistoryDataInterfaceServer interface {
+	// GetStockHistoryTick
 	GetStockHistoryTick(context.Context, *StockNumArrWithDate) (*HistoryTickResponse, error)
+	// GetStockHistoryKbar
 	GetStockHistoryKbar(context.Context, *StockNumArrWithDate) (*HistoryKbarResponse, error)
+	// GetStockHistoryClose
 	GetStockHistoryClose(context.Context, *StockNumArrWithDate) (*HistoryCloseResponse, error)
+	// GetStockHistoryCloseByDateArr
 	GetStockHistoryCloseByDateArr(context.Context, *StockNumArrWithDateArr) (*HistoryCloseResponse, error)
-	GetStockTSEHistoryTick(context.Context, *Date) (*HistoryTickResponse, error)
-	GetStockTSEHistoryKbar(context.Context, *Date) (*HistoryKbarResponse, error)
-	GetStockTSEHistoryClose(context.Context, *Date) (*HistoryCloseResponse, error)
-	GetOTCHistoryKbar(context.Context, *Date) (*HistoryKbarResponse, error)
+	// GetFutureHistoryTick
 	GetFutureHistoryTick(context.Context, *FutureCodeArrWithDate) (*HistoryTickResponse, error)
-	GetFutureHistoryClose(context.Context, *FutureCodeArrWithDate) (*HistoryCloseResponse, error)
+	// GetFutureHistoryKbar
 	GetFutureHistoryKbar(context.Context, *FutureCodeArrWithDate) (*HistoryKbarResponse, error)
+	// GetFutureHistoryClose
+	GetFutureHistoryClose(context.Context, *FutureCodeArrWithDate) (*HistoryCloseResponse, error)
+	// GetStockTSEHistoryTick
+	GetStockTSEHistoryTick(context.Context, *Date) (*HistoryTickResponse, error)
+	// GetStockTSEHistoryKbar
+	GetStockTSEHistoryKbar(context.Context, *Date) (*HistoryKbarResponse, error)
+	// GetStockTSEHistoryClose
+	GetStockTSEHistoryClose(context.Context, *Date) (*HistoryCloseResponse, error)
 	mustEmbedUnimplementedHistoryDataInterfaceServer()
 }
 
@@ -176,6 +185,15 @@ func (UnimplementedHistoryDataInterfaceServer) GetStockHistoryClose(context.Cont
 func (UnimplementedHistoryDataInterfaceServer) GetStockHistoryCloseByDateArr(context.Context, *StockNumArrWithDateArr) (*HistoryCloseResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetStockHistoryCloseByDateArr not implemented")
 }
+func (UnimplementedHistoryDataInterfaceServer) GetFutureHistoryTick(context.Context, *FutureCodeArrWithDate) (*HistoryTickResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetFutureHistoryTick not implemented")
+}
+func (UnimplementedHistoryDataInterfaceServer) GetFutureHistoryKbar(context.Context, *FutureCodeArrWithDate) (*HistoryKbarResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetFutureHistoryKbar not implemented")
+}
+func (UnimplementedHistoryDataInterfaceServer) GetFutureHistoryClose(context.Context, *FutureCodeArrWithDate) (*HistoryCloseResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetFutureHistoryClose not implemented")
+}
 func (UnimplementedHistoryDataInterfaceServer) GetStockTSEHistoryTick(context.Context, *Date) (*HistoryTickResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetStockTSEHistoryTick not implemented")
 }
@@ -184,18 +202,6 @@ func (UnimplementedHistoryDataInterfaceServer) GetStockTSEHistoryKbar(context.Co
 }
 func (UnimplementedHistoryDataInterfaceServer) GetStockTSEHistoryClose(context.Context, *Date) (*HistoryCloseResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetStockTSEHistoryClose not implemented")
-}
-func (UnimplementedHistoryDataInterfaceServer) GetOTCHistoryKbar(context.Context, *Date) (*HistoryKbarResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetOTCHistoryKbar not implemented")
-}
-func (UnimplementedHistoryDataInterfaceServer) GetFutureHistoryTick(context.Context, *FutureCodeArrWithDate) (*HistoryTickResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetFutureHistoryTick not implemented")
-}
-func (UnimplementedHistoryDataInterfaceServer) GetFutureHistoryClose(context.Context, *FutureCodeArrWithDate) (*HistoryCloseResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetFutureHistoryClose not implemented")
-}
-func (UnimplementedHistoryDataInterfaceServer) GetFutureHistoryKbar(context.Context, *FutureCodeArrWithDate) (*HistoryKbarResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetFutureHistoryKbar not implemented")
 }
 func (UnimplementedHistoryDataInterfaceServer) mustEmbedUnimplementedHistoryDataInterfaceServer() {}
 
@@ -282,6 +288,60 @@ func _HistoryDataInterface_GetStockHistoryCloseByDateArr_Handler(srv interface{}
 	return interceptor(ctx, in, info, handler)
 }
 
+func _HistoryDataInterface_GetFutureHistoryTick_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(FutureCodeArrWithDate)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(HistoryDataInterfaceServer).GetFutureHistoryTick(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/toc_python_forwarder.HistoryDataInterface/GetFutureHistoryTick",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(HistoryDataInterfaceServer).GetFutureHistoryTick(ctx, req.(*FutureCodeArrWithDate))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _HistoryDataInterface_GetFutureHistoryKbar_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(FutureCodeArrWithDate)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(HistoryDataInterfaceServer).GetFutureHistoryKbar(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/toc_python_forwarder.HistoryDataInterface/GetFutureHistoryKbar",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(HistoryDataInterfaceServer).GetFutureHistoryKbar(ctx, req.(*FutureCodeArrWithDate))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _HistoryDataInterface_GetFutureHistoryClose_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(FutureCodeArrWithDate)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(HistoryDataInterfaceServer).GetFutureHistoryClose(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/toc_python_forwarder.HistoryDataInterface/GetFutureHistoryClose",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(HistoryDataInterfaceServer).GetFutureHistoryClose(ctx, req.(*FutureCodeArrWithDate))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _HistoryDataInterface_GetStockTSEHistoryTick_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Date)
 	if err := dec(in); err != nil {
@@ -336,78 +396,6 @@ func _HistoryDataInterface_GetStockTSEHistoryClose_Handler(srv interface{}, ctx 
 	return interceptor(ctx, in, info, handler)
 }
 
-func _HistoryDataInterface_GetOTCHistoryKbar_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Date)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(HistoryDataInterfaceServer).GetOTCHistoryKbar(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/toc_python_forwarder.HistoryDataInterface/GetOTCHistoryKbar",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(HistoryDataInterfaceServer).GetOTCHistoryKbar(ctx, req.(*Date))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _HistoryDataInterface_GetFutureHistoryTick_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(FutureCodeArrWithDate)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(HistoryDataInterfaceServer).GetFutureHistoryTick(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/toc_python_forwarder.HistoryDataInterface/GetFutureHistoryTick",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(HistoryDataInterfaceServer).GetFutureHistoryTick(ctx, req.(*FutureCodeArrWithDate))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _HistoryDataInterface_GetFutureHistoryClose_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(FutureCodeArrWithDate)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(HistoryDataInterfaceServer).GetFutureHistoryClose(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/toc_python_forwarder.HistoryDataInterface/GetFutureHistoryClose",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(HistoryDataInterfaceServer).GetFutureHistoryClose(ctx, req.(*FutureCodeArrWithDate))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _HistoryDataInterface_GetFutureHistoryKbar_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(FutureCodeArrWithDate)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(HistoryDataInterfaceServer).GetFutureHistoryKbar(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/toc_python_forwarder.HistoryDataInterface/GetFutureHistoryKbar",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(HistoryDataInterfaceServer).GetFutureHistoryKbar(ctx, req.(*FutureCodeArrWithDate))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 // HistoryDataInterface_ServiceDesc is the grpc.ServiceDesc for HistoryDataInterface service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -432,6 +420,18 @@ var HistoryDataInterface_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _HistoryDataInterface_GetStockHistoryCloseByDateArr_Handler,
 		},
 		{
+			MethodName: "GetFutureHistoryTick",
+			Handler:    _HistoryDataInterface_GetFutureHistoryTick_Handler,
+		},
+		{
+			MethodName: "GetFutureHistoryKbar",
+			Handler:    _HistoryDataInterface_GetFutureHistoryKbar_Handler,
+		},
+		{
+			MethodName: "GetFutureHistoryClose",
+			Handler:    _HistoryDataInterface_GetFutureHistoryClose_Handler,
+		},
+		{
 			MethodName: "GetStockTSEHistoryTick",
 			Handler:    _HistoryDataInterface_GetStockTSEHistoryTick_Handler,
 		},
@@ -442,22 +442,6 @@ var HistoryDataInterface_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetStockTSEHistoryClose",
 			Handler:    _HistoryDataInterface_GetStockTSEHistoryClose_Handler,
-		},
-		{
-			MethodName: "GetOTCHistoryKbar",
-			Handler:    _HistoryDataInterface_GetOTCHistoryKbar_Handler,
-		},
-		{
-			MethodName: "GetFutureHistoryTick",
-			Handler:    _HistoryDataInterface_GetFutureHistoryTick_Handler,
-		},
-		{
-			MethodName: "GetFutureHistoryClose",
-			Handler:    _HistoryDataInterface_GetFutureHistoryClose_Handler,
-		},
-		{
-			MethodName: "GetFutureHistoryKbar",
-			Handler:    _HistoryDataInterface_GetFutureHistoryKbar_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

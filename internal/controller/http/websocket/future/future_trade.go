@@ -20,9 +20,9 @@ type WSFutureTrade struct {
 	*websocket.WSRouter // ws router
 	*eventbus.Bus       // event bus
 
-	s usecase.Stream  // stream
-	o usecase.Trade   // order
-	h usecase.History // history
+	s usecase.RealTime // RealTime
+	o usecase.Trade    // order
+	h usecase.History  // history
 
 	// save tick chan for assist
 	assistTickChanMap     map[string]chan *entity.RealTimeFutureTick
@@ -47,7 +47,7 @@ type WSFutureTrade struct {
 }
 
 // StartWSFutureTrade - Start ws future trade with one time bus
-func StartWSFutureTrade(c *gin.Context, s usecase.Stream, o usecase.Trade, h usecase.History) {
+func StartWSFutureTrade(c *gin.Context, s usecase.RealTime, o usecase.Trade, h usecase.History) {
 	w := &WSFutureTrade{
 		s:                      s,
 		o:                      o,
