@@ -142,14 +142,10 @@ func (uc *TargetUseCase) GetTargets(ctx context.Context) []*entity.StockTarget {
 }
 
 func (uc *TargetUseCase) publishNewStockTargets(targetArr []*entity.StockTarget) {
-	ctx := context.Background()
-	if err := uc.repo.InsertOrUpdateTargetArr(ctx, targetArr); err != nil {
+	if err := uc.repo.InsertOrUpdateTargetArr(context.Background(), targetArr); err != nil {
 		logger.Fatal(err)
 	}
-
-	// stock
 	bus.PublishTopicEvent(topic.TopicFetchStockHistory, targetArr)
-	bus.PublishTopicEvent(topic.TopicSubscribeStockTickTargets, targetArr)
 }
 
 func (uc *TargetUseCase) publishNewFutureTargets() {

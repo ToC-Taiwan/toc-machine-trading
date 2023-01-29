@@ -19,16 +19,17 @@ type TradeUseCase struct {
 	fg   TradegRPCAPI
 	repo TradeRepo
 
-	quota *quota.Quota
+	quota    *quota.Quota
+	tradeDay *tradeday.TradeDay
 
 	placeOrderLock       sync.Mutex
 	placeFutureOrderLock sync.Mutex
 
-	tradeDay       *tradeday.TradeDay
 	stockTradeDay  tradeday.TradePeriod
 	futureTradeDay tradeday.TradePeriod
 
-	simTrade              bool
+	simTrade bool
+
 	updateFutureOrderLock sync.Mutex
 	updateStockOrderLock  sync.Mutex
 }
@@ -219,7 +220,7 @@ func (uc *TradeUseCase) cancelStockOrder(order *entity.StockOrder) {
 	logger.Infof("Cancel Stock Order -> Stock: %s, Action: %d, Price: %.2f, Qty: %d", order.StockNum, order.Action, order.Price, order.Quantity)
 
 	// result will return instantly
-	_, _, err := uc.CancelOrderID(order.OrderID)
+	_, _, err := uc.CancelStockOrderByID(order.OrderID)
 	if err != nil {
 		logger.Error(err)
 		return
@@ -287,8 +288,8 @@ func (uc *TradeUseCase) BuyLaterStock(order *entity.StockOrder) (string, entity.
 	return result.GetOrderId(), entity.StringToOrderStatus(result.GetStatus()), nil
 }
 
-// CancelOrderID -.
-func (uc *TradeUseCase) CancelOrderID(orderID string) (string, entity.OrderStatus, error) {
+// CancelStockOrderByID -.
+func (uc *TradeUseCase) CancelStockOrderByID(orderID string) (string, entity.OrderStatus, error) {
 	result, err := uc.sc.CancelStock(orderID, uc.simTrade)
 	if err != nil {
 		return "", entity.StatusUnknow, err
@@ -471,7 +472,7 @@ func (uc *TradeUseCase) cancelFutureOrder(order *entity.FutureOrder) {
 	logger.Infof("Cancel Future Order -> Future: %s, Action: %d, Price: %.0f, Qty: %d", order.Code, order.Action, order.Price, order.Quantity)
 
 	// result will return instantly
-	_, _, err := uc.CancelFutureOrderID(order.OrderID)
+	_, _, err := uc.CancelFutureOrderByID(order.OrderID)
 	if err != nil {
 		logger.Error(err)
 		return
@@ -573,8 +574,8 @@ func (uc *TradeUseCase) BuyLaterFuture(order *entity.FutureOrder) (string, entit
 	return result.GetOrderId(), entity.StringToOrderStatus(result.GetStatus()), nil
 }
 
-// CancelFutureOrderID -.
-func (uc *TradeUseCase) CancelFutureOrderID(orderID string) (string, entity.OrderStatus, error) {
+// CancelFutureOrderByID -.
+func (uc *TradeUseCase) CancelFutureOrderByID(orderID string) (string, entity.OrderStatus, error) {
 	result, err := uc.sc.CancelFuture(orderID, uc.simTrade)
 	if err != nil {
 		return "", entity.StatusUnknow, err
@@ -612,6 +613,7 @@ func (uc *TradeUseCase) calculateFutureTradeBalance(allOrders []*entity.FutureOr
 		Reverse:    revereBalance,
 		Total:      forwardBalance + revereBalance,
 	}
+
 	err := uc.repo.InsertOrUpdateFutureTradeBalance(context.Background(), tmp)
 	if err != nil {
 		logger.Fatal(err)
@@ -673,10 +675,6 @@ func (uc *TradeUseCase) calculateReverseFutureBalance(reverse entity.FutureOrder
 	}
 	return reverseBalance, tradeCount
 }
-
-//
-// Usecase below
-//
 
 // GetAllStockOrder -.
 func (uc *TradeUseCase) GetAllStockOrder(ctx context.Context) ([]*entity.StockOrder, error) {

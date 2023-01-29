@@ -380,6 +380,7 @@ func (uc *RealTimeUseCase) ReceiveStockSubscribeData(targetArr []*entity.StockTa
 
 	wg.Wait()
 	close(agentChan)
+	logger.Info("Stock trade room all start")
 }
 
 // ReceiveFutureSubscribeData -.
@@ -392,6 +393,7 @@ func (uc *RealTimeUseCase) ReceiveFutureSubscribeData(code string) {
 	r := mq.NewRabbit()
 	go r.FutureTickConsumer(code, agent.GetTickChan())
 	// go r.FutureBidAskConsumer(code, agent.GetBidAskChan())
+	logger.Info("Future trade room start")
 }
 
 // NewFutureRealTimeConnection -.

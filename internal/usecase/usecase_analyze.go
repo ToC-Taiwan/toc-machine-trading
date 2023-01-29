@@ -77,5 +77,6 @@ func (uc *AnalyzeUseCase) findBelowQuaterMATargets(targetArr []*entity.StockTarg
 			}
 		}
 	}
+	bus.PublishTopicEvent(topic.TopicSubscribeStockTickTargets, targetArr)
 	logger.Info("Find below quaterMA targets done")
 }

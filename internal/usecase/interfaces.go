@@ -170,7 +170,7 @@ type Trade interface {
 	SellFuture(order *entity.FutureOrder) (string, entity.OrderStatus, error)
 	SellFirstFuture(order *entity.FutureOrder) (string, entity.OrderStatus, error)
 	BuyLaterFuture(order *entity.FutureOrder) (string, entity.OrderStatus, error)
-	CancelFutureOrderID(orderID string) (string, entity.OrderStatus, error)
+	CancelFutureOrderByID(orderID string) (string, entity.OrderStatus, error)
 	GetFuturePosition() ([]*entity.FuturePosition, error)
 	IsFutureTradeTime() bool
 	ManualInsertFutureOrder(ctx context.Context, order *entity.FutureOrder) error

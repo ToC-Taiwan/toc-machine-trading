@@ -1736,20 +1736,20 @@ func (mr *MockTradeMockRecorder) CalculateTradeDiscount(price, quantity interfac
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CalculateTradeDiscount", reflect.TypeOf((*MockTrade)(nil).CalculateTradeDiscount), price, quantity)
 }
 
-// CancelFutureOrderID mocks base method.
-func (m *MockTrade) CancelFutureOrderID(orderID string) (string, entity.OrderStatus, error) {
+// CancelFutureOrderByID mocks base method.
+func (m *MockTrade) CancelFutureOrderByID(orderID string) (string, entity.OrderStatus, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CancelFutureOrderID", orderID)
+	ret := m.ctrl.Call(m, "CancelFutureOrderByID", orderID)
 	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(entity.OrderStatus)
 	ret2, _ := ret[2].(error)
 	return ret0, ret1, ret2
 }
 
-// CancelFutureOrderID indicates an expected call of CancelFutureOrderID.
-func (mr *MockTradeMockRecorder) CancelFutureOrderID(orderID interface{}) *gomock.Call {
+// CancelFutureOrderByID indicates an expected call of CancelFutureOrderByID.
+func (mr *MockTradeMockRecorder) CancelFutureOrderByID(orderID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CancelFutureOrderID", reflect.TypeOf((*MockTrade)(nil).CancelFutureOrderID), orderID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CancelFutureOrderByID", reflect.TypeOf((*MockTrade)(nil).CancelFutureOrderByID), orderID)
 }
 
 // GetAllFutureOrder mocks base method.
