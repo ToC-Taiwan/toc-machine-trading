@@ -1,5 +1,5 @@
-// Package mq package mq
-package mq
+// Package rabbit package rabbit
+package rabbit
 
 import (
 	"fmt"
@@ -14,7 +14,6 @@ import (
 	"tmt/pkg/rabbitmq"
 
 	"github.com/google/uuid"
-	"github.com/streadway/amqp"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -56,14 +55,6 @@ func NewRabbit() *Rabbit {
 	}
 }
 
-func (c *Rabbit) establishDelivery(key string) <-chan amqp.Delivery {
-	delivery, err := c.conn.BindAndConsume(key)
-	if err != nil {
-		logger.Fatal(err)
-	}
-	return delivery
-}
-
 // FillAllBasic -.
 func (c *Rabbit) FillAllBasic(allStockMap map[string]*entity.Stock, allFutureMap map[string]*entity.Future) {
 	defer c.detailMapLock.Unlock()
@@ -82,7 +73,6 @@ func (c *Rabbit) EventConsumer(eventChan chan *entity.SinopacEvent) {
 	for {
 		d, opened := <-delivery
 		if !opened {
-			logger.Error("EventConsumer rabbitMQ is closed")
 			return
 		}
 
@@ -103,7 +93,7 @@ func (c *Rabbit) EventConsumer(eventChan chan *entity.SinopacEvent) {
 			EventCode: body.GetEventCode(),
 			Info:      body.GetInfo(),
 			Response:  body.GetRespCode(),
-			EventTime: dataTime,
+			EventTime: dataTime.Add(8 * time.Hour),
 		}
 	}
 }
@@ -111,11 +101,9 @@ func (c *Rabbit) EventConsumer(eventChan chan *entity.SinopacEvent) {
 // OrderStatusConsumer OrderStatusConsumer
 func (c *Rabbit) OrderStatusConsumer() {
 	delivery := c.establishDelivery(routingKeyOrder)
-
 	for {
 		d, opened := <-delivery
 		if !opened {
-			logger.Error("OrderStatusConsumer rabbitMQ is closed")
 			return
 		}
 
@@ -135,13 +123,10 @@ func (c *Rabbit) OrderStatusConsumer() {
 
 // OrderStatusArrConsumer -.
 func (c *Rabbit) OrderStatusArrConsumer() {
-	go c.OrderStatusConsumer()
-
 	delivery := c.establishDelivery(routingKeyOrderArr)
 	for {
 		d, opened := <-delivery
 		if !opened {
-			logger.Error("OrderStatusArrConsumer rabbitMQ is closed")
 			return
 		}
 		body := &pb.OrderStatusArr{}
@@ -214,7 +199,6 @@ func (c *Rabbit) StockTickConsumer(stockNum string, tickChan chan *entity.RealTi
 	for {
 		d, opened := <-delivery
 		if !opened {
-			logger.Errorf("TickConsumer:%s rabbitMQ is closed", stockNum)
 			return
 		}
 
@@ -267,7 +251,6 @@ func (c *Rabbit) FutureTickConsumer(code string, tickChan chan *entity.RealTimeF
 	for {
 		d, opened := <-delivery
 		if !opened {
-			logger.Errorf("FutureTickConsumer:%s rabbitMQ is closed", code)
 			return
 		}
 
@@ -322,7 +305,6 @@ func (c *Rabbit) StockBidAskConsumer(stockNum string, bidAskChan chan *entity.Re
 	for {
 		d, opened := <-delivery
 		if !opened {
-			logger.Errorf("BidAskConsumer:%s rabbitMQ is closed", stockNum)
 			return
 		}
 
@@ -367,7 +349,6 @@ func (c *Rabbit) FutureBidAskConsumer(code string, bidAskChan chan *entity.Futur
 	for {
 		d, opened := <-delivery
 		if !opened {
-			logger.Errorf("FutureBidAskConsumer:%s rabbitMQ is closed", code)
 			return
 		}
 

@@ -11,7 +11,7 @@ import (
 	"tmt/internal/entity"
 	"tmt/internal/usecase/module/target"
 	"tmt/internal/usecase/module/trader"
-	"tmt/internal/usecase/mq"
+	"tmt/internal/usecase/rabbit"
 	"tmt/internal/usecase/topic"
 
 	"github.com/google/uuid"
@@ -26,8 +26,8 @@ type RealTimeUseCase struct {
 
 	cfg          *config.Config
 	targetFilter *target.Filter
+	tradeIndex   *entity.TradeIndex
 
-	tradeIndex     *entity.TradeIndex
 	mainFutureCode string
 }
 
@@ -35,7 +35,7 @@ func NewRealTime(r RealTimeRepo, g RealTimegRPCAPI, s SubscribegRPCAPI) RealTime
 	cfg := config.GetConfig()
 	uc := &RealTimeUseCase{
 		repo:         r,
-		rabbit:       mq.NewRabbit(),
+		rabbit:       rabbit.NewRabbit(),
 		grpcapi:      g,
 		subgRPCAPI:   s,
 		cfg:          cfg,
@@ -158,7 +158,8 @@ func (uc *RealTimeUseCase) ReceiveOrderStatus(ctx context.Context) {
 		}
 	}()
 	uc.rabbit.AddOrderStatusChan(orderStatusChan, uuid.New().String())
-	uc.rabbit.OrderStatusArrConsumer()
+	go uc.rabbit.OrderStatusConsumer()
+	go uc.rabbit.OrderStatusArrConsumer()
 }
 
 // GetTSESnapshot -.
@@ -357,7 +358,7 @@ func (uc *RealTimeUseCase) ReceiveStockSubscribeData(targetArr []*entity.StockTa
 			go agent.TradingRoom()
 
 			// send tick, bidask to trade room's channel
-			r := mq.NewRabbit()
+			r := rabbit.NewRabbit()
 			go r.StockTickConsumer(agent.GetStockNum(), agent.GetTickChan())
 			// go r.StockBidAskConsumer(agent.GetStockNum(), agent.GetBidAskChan())
 		}
@@ -390,7 +391,7 @@ func (uc *RealTimeUseCase) ReceiveFutureSubscribeData(code string) {
 
 	go agent.TradingRoom()
 
-	r := mq.NewRabbit()
+	r := rabbit.NewRabbit()
 	go r.FutureTickConsumer(code, agent.GetTickChan())
 	// go r.FutureBidAskConsumer(code, agent.GetBidAskChan())
 	logger.Info("Future trade room start")

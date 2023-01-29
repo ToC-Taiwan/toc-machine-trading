@@ -30,6 +30,7 @@ func NewConnection(exchange string, url string, waitTime int64, attempts int) *C
 
 // AttemptConnect -.
 func (c *Connection) AttemptConnect() error {
+	// TODO: attempts not working
 	var err error
 	for i := c.Attempts; i > 0; i-- {
 		if err = c.connect(); err == nil {
