@@ -473,6 +473,36 @@ func (mr *MockSubscribegRPCAPIMockRecorder) SubscribeStockTick(stockNumArr inter
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SubscribeStockTick", reflect.TypeOf((*MockSubscribegRPCAPI)(nil).SubscribeStockTick), stockNumArr)
 }
 
+// UnSubscribeAllBidAsk mocks base method.
+func (m *MockSubscribegRPCAPI) UnSubscribeAllBidAsk() (*pb.ErrorMessage, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UnSubscribeAllBidAsk")
+	ret0, _ := ret[0].(*pb.ErrorMessage)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UnSubscribeAllBidAsk indicates an expected call of UnSubscribeAllBidAsk.
+func (mr *MockSubscribegRPCAPIMockRecorder) UnSubscribeAllBidAsk() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UnSubscribeAllBidAsk", reflect.TypeOf((*MockSubscribegRPCAPI)(nil).UnSubscribeAllBidAsk))
+}
+
+// UnSubscribeAllTick mocks base method.
+func (m *MockSubscribegRPCAPI) UnSubscribeAllTick() (*pb.ErrorMessage, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UnSubscribeAllTick")
+	ret0, _ := ret[0].(*pb.ErrorMessage)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UnSubscribeAllTick indicates an expected call of UnSubscribeAllTick.
+func (mr *MockSubscribegRPCAPIMockRecorder) UnSubscribeAllTick() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UnSubscribeAllTick", reflect.TypeOf((*MockSubscribegRPCAPI)(nil).UnSubscribeAllTick))
+}
+
 // UnSubscribeFutureBidAsk mocks base method.
 func (m *MockSubscribegRPCAPI) UnSubscribeFutureBidAsk(codeArr []string) ([]string, error) {
 	m.ctrl.T.Helper()
@@ -501,36 +531,6 @@ func (m *MockSubscribegRPCAPI) UnSubscribeFutureTick(codeArr []string) ([]string
 func (mr *MockSubscribegRPCAPIMockRecorder) UnSubscribeFutureTick(codeArr interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UnSubscribeFutureTick", reflect.TypeOf((*MockSubscribegRPCAPI)(nil).UnSubscribeFutureTick), codeArr)
-}
-
-// UnSubscribeStockAllBidAsk mocks base method.
-func (m *MockSubscribegRPCAPI) UnSubscribeStockAllBidAsk() (*pb.ErrorMessage, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UnSubscribeStockAllBidAsk")
-	ret0, _ := ret[0].(*pb.ErrorMessage)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// UnSubscribeStockAllBidAsk indicates an expected call of UnSubscribeStockAllBidAsk.
-func (mr *MockSubscribegRPCAPIMockRecorder) UnSubscribeStockAllBidAsk() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UnSubscribeStockAllBidAsk", reflect.TypeOf((*MockSubscribegRPCAPI)(nil).UnSubscribeStockAllBidAsk))
-}
-
-// UnSubscribeStockAllTick mocks base method.
-func (m *MockSubscribegRPCAPI) UnSubscribeStockAllTick() (*pb.ErrorMessage, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UnSubscribeStockAllTick")
-	ret0, _ := ret[0].(*pb.ErrorMessage)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// UnSubscribeStockAllTick indicates an expected call of UnSubscribeStockAllTick.
-func (mr *MockSubscribegRPCAPIMockRecorder) UnSubscribeStockAllTick() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UnSubscribeStockAllTick", reflect.TypeOf((*MockSubscribegRPCAPI)(nil).UnSubscribeStockAllTick))
 }
 
 // UnSubscribeStockBidAsk mocks base method.
@@ -1627,16 +1627,16 @@ func (mr *MockRabbitMockRecorder) StockBidAskConsumer(stockNum, bidAskChan inter
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "StockBidAskConsumer", reflect.TypeOf((*MockRabbit)(nil).StockBidAskConsumer), stockNum, bidAskChan)
 }
 
-// TickConsumer mocks base method.
-func (m *MockRabbit) TickConsumer(stockNum string, tickChan chan *entity.RealTimeStockTick) {
+// StockTickConsumer mocks base method.
+func (m *MockRabbit) StockTickConsumer(stockNum string, tickChan chan *entity.RealTimeStockTick) {
 	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "TickConsumer", stockNum, tickChan)
+	m.ctrl.Call(m, "StockTickConsumer", stockNum, tickChan)
 }
 
-// TickConsumer indicates an expected call of TickConsumer.
-func (mr *MockRabbitMockRecorder) TickConsumer(stockNum, tickChan interface{}) *gomock.Call {
+// StockTickConsumer indicates an expected call of StockTickConsumer.
+func (mr *MockRabbitMockRecorder) StockTickConsumer(stockNum, tickChan interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "TickConsumer", reflect.TypeOf((*MockRabbit)(nil).TickConsumer), stockNum, tickChan)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "StockTickConsumer", reflect.TypeOf((*MockRabbit)(nil).StockTickConsumer), stockNum, tickChan)
 }
 
 // MockTrade is a mock of Trade interface.

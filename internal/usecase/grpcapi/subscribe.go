@@ -44,12 +44,12 @@ func (t *SubscribegRPCAPI) UnSubscribeStockTick(stockNumArr []string) ([]string,
 	return r.GetFailArr(), nil
 }
 
-// UnSubscribeStockAllTick -.
-func (t *SubscribegRPCAPI) UnSubscribeStockAllTick() (*pb.ErrorMessage, error) {
+// UnSubscribeAllTick -.
+func (t *SubscribegRPCAPI) UnSubscribeAllTick() (*pb.ErrorMessage, error) {
 	conn := t.conn.GetReadyConn()
 	defer t.conn.PutReadyConn(conn)
 	c := pb.NewSubscribeDataInterfaceClient(conn)
-	r, err := c.UnSubscribeStockAllTick(context.Background(), &emptypb.Empty{})
+	r, err := c.UnSubscribeAllTick(context.Background(), &emptypb.Empty{})
 	if err != nil {
 		return nil, err
 	}
@@ -80,12 +80,12 @@ func (t *SubscribegRPCAPI) UnSubscribeStockBidAsk(stockNumArr []string) ([]strin
 	return r.GetFailArr(), nil
 }
 
-// UnSubscribeStockAllBidAsk -.
-func (t *SubscribegRPCAPI) UnSubscribeStockAllBidAsk() (*pb.ErrorMessage, error) {
+// UnSubscribeAllBidAsk -.
+func (t *SubscribegRPCAPI) UnSubscribeAllBidAsk() (*pb.ErrorMessage, error) {
 	conn := t.conn.GetReadyConn()
 	defer t.conn.PutReadyConn(conn)
 	c := pb.NewSubscribeDataInterfaceClient(conn)
-	r, err := c.UnSubscribeStockAllBidAsk(context.Background(), &emptypb.Empty{})
+	r, err := c.UnSubscribeAllBidAsk(context.Background(), &emptypb.Empty{})
 	if err != nil {
 		return nil, err
 	}

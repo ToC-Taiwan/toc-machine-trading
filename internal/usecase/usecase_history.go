@@ -22,12 +22,10 @@ type HistoryUseCase struct {
 	grpcapi HistorygRPCAPI
 
 	stockAnalyzeCfg config.StockAnalyze
-	basic           entity.BasicInfo
+	basic           *entity.BasicInfo
 
 	fetchList map[string]*entity.StockTarget
 	mutex     sync.Mutex
-
-	biasRateArr []float64
 
 	tradeDay       *tradeday.TradeDay
 	mainFutureCode string
@@ -44,15 +42,11 @@ func NewHistory(r HistoryRepo, t HistorygRPCAPI) History {
 
 	cfg := config.GetConfig()
 	uc.stockAnalyzeCfg = cfg.StockAnalyze
-	uc.basic = *cc.GetBasicInfo()
+	uc.basic = cc.GetBasicInfo()
 
 	bus.SubscribeTopic(topic.TopicFetchStockHistory, uc.FetchHistory)
 	bus.SubscribeTopic(topic.TopicSubscribeFutureTickTargets, uc.updateMainFutureCode)
 	return uc
-}
-
-func (uc *HistoryUseCase) updateMainFutureCode(code string) {
-	uc.mainFutureCode = code
 }
 
 // GetTradeDay -.
@@ -157,7 +151,6 @@ func (uc *HistoryUseCase) fetchHistoryClose(targetArr []*entity.StockTarget) err
 			}
 		}
 	}
-	uc.processBiasRate()
 	return nil
 }
 
@@ -396,16 +389,6 @@ func (uc *HistoryUseCase) processCloseArr(arr []*entity.StockHistoryClose) {
 		cc.SetHistoryClose(stockNum, v.Date, v.Close)
 	}
 
-	biasRate, err := utils.GetBiasRateByCloseArr(closeArr)
-	if err != nil {
-		return
-	}
-
-	if biasRate != 0 {
-		uc.biasRateArr = append(uc.biasRateArr, biasRate)
-		cc.SetBiasRate(stockNum, biasRate)
-	}
-
 	i := 0
 	for {
 		if i+int(uc.stockAnalyzeCfg.MAPeriod) > len(closeArr) {
@@ -424,16 +407,6 @@ func (uc *HistoryUseCase) processCloseArr(arr []*entity.StockHistoryClose) {
 		}
 		i++
 	}
-}
-
-func (uc *HistoryUseCase) processBiasRate() {
-	sort.Slice(uc.biasRateArr, func(i, j int) bool {
-		return uc.biasRateArr[i] > uc.biasRateArr[j]
-	})
-
-	total := len(uc.biasRateArr)
-	cc.SetHighBiasRate(uc.biasRateArr[total/4])
-	cc.SetLowBiasRate(uc.biasRateArr[3*total/4])
 }
 
 func (uc *HistoryUseCase) processTickArr(arr []*entity.StockHistoryTick) {
@@ -730,4 +703,8 @@ func (uc *HistoryUseCase) FetchFutureHistoryKbar(code string, date time.Time) ([
 	close(dataChan)
 	<-wait
 	return result[code], nil
+}
+
+func (uc *HistoryUseCase) updateMainFutureCode(code string) {
+	uc.mainFutureCode = code
 }

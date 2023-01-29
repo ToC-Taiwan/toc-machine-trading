@@ -11,7 +11,8 @@ const (
 	TopicPlaceStockOrder          string = "place_stock_order"
 	TopicCancelStockOrder         string = "cancel_stock_order"
 	TopicInsertOrUpdateStockOrder string = "insert_or_update_order"
-	TopicUpdateStockTradeSwitch   string = "update_stock_trade_switch"
+
+	TopicUpdateStockTradeSwitch string = "update_stock_trade_switch"
 )
 
 const (
@@ -20,5 +21,6 @@ const (
 	TopicPlaceFutureOrder          string = "place_future_order"
 	TopicCancelFutureOrder         string = "cancel_future_order"
 	TopicInsertOrUpdateFutureOrder string = "insert_or_update_future_order"
-	TopicUpdateFutureTradeSwitch   string = "update_future_trade_switch"
+
+	TopicUpdateFutureTradeSwitch string = "update_future_trade_switch"
 )

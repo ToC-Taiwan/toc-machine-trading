@@ -31,12 +31,11 @@ type RealTimeUseCase struct {
 	mainFutureCode string
 }
 
-func NewRealTime(r RealTimeRepo, g RealTimegRPCAPI, s SubscribegRPCAPI, t Rabbit) RealTime {
+func NewRealTime(r RealTimeRepo, g RealTimegRPCAPI, s SubscribegRPCAPI) RealTime {
 	cfg := config.GetConfig()
-
 	uc := &RealTimeUseCase{
 		repo:         r,
-		rabbit:       t,
+		rabbit:       mq.NewRabbit(),
 		grpcapi:      g,
 		subgRPCAPI:   s,
 		cfg:          cfg,
@@ -49,13 +48,13 @@ func NewRealTime(r RealTimeRepo, g RealTimegRPCAPI, s SubscribegRPCAPI, t Rabbit
 	}
 
 	basic := cc.GetBasicInfo()
-	t.FillAllBasic(basic.AllStocks, basic.AllFutures)
+	uc.rabbit.FillAllBasic(basic.AllStocks, basic.AllFutures)
 	uc.periodUpdateTradeIndex()
 
 	go uc.ReceiveEvent(context.Background())
 	go uc.ReceiveOrderStatus(context.Background())
 
-	bus.SubscribeTopic(topic.TopicSubscribeStockTickTargets, uc.ReceiveStockSubscribeData, uc.SubscribeStockTick, uc.SubscribeStockBidAsk)
+	bus.SubscribeTopic(topic.TopicSubscribeStockTickTargets, uc.ReceiveStockSubscribeData, uc.SubscribeStockTick)
 	bus.SubscribeTopic(topic.TopicUnSubscribeStockTickTargets, uc.UnSubscribeStockTick, uc.UnSubscribeStockBidAsk)
 	bus.SubscribeTopic(topic.TopicSubscribeFutureTickTargets, uc.ReceiveFutureSubscribeData, uc.SubscribeFutureTick)
 
@@ -359,12 +358,8 @@ func (uc *RealTimeUseCase) ReceiveStockSubscribeData(targetArr []*entity.StockTa
 
 			// send tick, bidask to trade room's channel
 			r := mq.NewRabbit()
-			go r.TickConsumer(agent.GetStockNum(), agent.GetTickChan())
-			go r.StockBidAskConsumer(agent.GetStockNum(), agent.GetBidAskChan())
-
-			// mutex.RLock()
-			// target := targetMap[agent.GetStockNum()]
-			// mutex.RUnlock()
+			go r.StockTickConsumer(agent.GetStockNum(), agent.GetTickChan())
+			// go r.StockBidAskConsumer(agent.GetStockNum(), agent.GetBidAskChan())
 		}
 	}()
 
@@ -420,21 +415,21 @@ func (uc *RealTimeUseCase) DeleteOrderStatusConnection(connectionID string) {
 
 // UnSubscribeAll -.
 func (uc *RealTimeUseCase) UnSubscribeAll() error {
-	failMessge, err := uc.subgRPCAPI.UnSubscribeStockAllTick()
+	result, err := uc.subgRPCAPI.UnSubscribeAllTick()
 	if err != nil {
 		return err
 	}
 
-	if m := failMessge.GetErr(); m != "" {
+	if m := result.GetErr(); m != "" {
 		return errors.New(m)
 	}
 
-	failMessge, err = uc.subgRPCAPI.UnSubscribeStockAllBidAsk()
+	result, err = uc.subgRPCAPI.UnSubscribeAllBidAsk()
 	if err != nil {
 		return err
 	}
 
-	if m := failMessge.GetErr(); m != "" {
+	if m := result.GetErr(); m != "" {
 		return errors.New(m)
 	}
 

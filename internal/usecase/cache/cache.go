@@ -119,45 +119,6 @@ func (c *Cache) GetHistoryClose(stockNum string, date time.Time) float64 {
 	return 0
 }
 
-// SetBiasRate -.
-func (c *Cache) SetBiasRate(stockNum string, biasRate float64) {
-	c.Set(c.biasRateKey(stockNum), biasRate)
-}
-
-// GetBiasRate -.
-func (c *Cache) GetBiasRate(stockNum string) float64 {
-	if value, ok := c.Get(c.biasRateKey(stockNum)); ok {
-		return value.(float64)
-	}
-	return 0
-}
-
-// SetHighBiasRate -.
-func (c *Cache) SetHighBiasRate(biasRate float64) {
-	c.Set(c.highBiasRateKey(), biasRate)
-}
-
-// GetHighBiasRate -.
-func (c *Cache) GetHighBiasRate() float64 {
-	if value, ok := c.Get(c.highBiasRateKey()); ok {
-		return value.(float64)
-	}
-	return 0
-}
-
-// SetLowBiasRate -.
-func (c *Cache) SetLowBiasRate(biasRate float64) {
-	c.Set(c.lowBiasRateKey(), biasRate)
-}
-
-// GetLowBiasRate -.
-func (c *Cache) GetLowBiasRate() float64 {
-	if value, ok := c.Get(c.lowBiasRateKey()); ok {
-		return value.(float64)
-	}
-	return 0
-}
-
 // AppendStockTargets -.
 func (c *Cache) AppendStockTargets(targets []*entity.StockTarget) {
 	original := c.GetStockTargets()

@@ -31,13 +31,26 @@ func NewAnalyze(r HistoryRepo) Analyze {
 		tradeDay:         tradeday.NewTradeDay(),
 	}
 
-	bus.SubscribeTopic(topic.TopicAnalyzeStockTargets, uc.AnalyzeAll)
+	bus.SubscribeTopic(topic.TopicAnalyzeStockTargets, uc.findBelowQuaterMATargets)
 	return uc
 }
 
-// AnalyzeAll -.
-func (uc *AnalyzeUseCase) AnalyzeAll(targetArr []*entity.StockTarget) {
-	uc.findBelowQuaterMATargets(targetArr)
+// GetRebornMap -.
+func (uc *AnalyzeUseCase) GetRebornMap(ctx context.Context) map[time.Time][]entity.Stock {
+	uc.rebornLock.Lock()
+	basicInfo := cc.GetBasicInfo()
+	if len(uc.lastBelowMAStock) != 0 {
+		for _, s := range uc.lastBelowMAStock {
+			if open := cc.GetHistoryOpen(s.Stock.Number, basicInfo.TradeDay); open != 0 {
+				if open > s.QuaterMA {
+					uc.rebornMap[s.Date] = append(uc.rebornMap[s.Date], *s.Stock)
+				}
+				delete(uc.lastBelowMAStock, s.Stock.Number)
+			}
+		}
+	}
+	uc.rebornLock.Unlock()
+	return uc.rebornMap
 }
 
 func (uc *AnalyzeUseCase) findBelowQuaterMATargets(targetArr []*entity.StockTarget) {
@@ -65,22 +78,4 @@ func (uc *AnalyzeUseCase) findBelowQuaterMATargets(targetArr []*entity.StockTarg
 		}
 	}
 	logger.Info("Find below quaterMA targets done")
-}
-
-// GetRebornMap -.
-func (uc *AnalyzeUseCase) GetRebornMap(ctx context.Context) map[time.Time][]entity.Stock {
-	uc.rebornLock.Lock()
-	basicInfo := cc.GetBasicInfo()
-	if len(uc.lastBelowMAStock) != 0 {
-		for _, s := range uc.lastBelowMAStock {
-			if open := cc.GetHistoryOpen(s.Stock.Number, basicInfo.TradeDay); open != 0 {
-				if open > s.QuaterMA {
-					uc.rebornMap[s.Date] = append(uc.rebornMap[s.Date], *s.Stock)
-				}
-				delete(uc.lastBelowMAStock, s.Stock.Number)
-			}
-		}
-	}
-	uc.rebornLock.Unlock()
-	return uc.rebornMap
 }

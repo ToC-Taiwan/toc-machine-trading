@@ -61,18 +61,6 @@ func (c *Cache) historyCloseKey(stockNum string, date time.Time) *cache.Key {
 	return cache.NewKey(cacheCatagoryHistoryClose, cacheIndexStockNum).ExtendIndex(stockNum, date.Format(common.ShortTimeLayout))
 }
 
-func (c *Cache) biasRateKey(stockNum string) *cache.Key {
-	return cache.NewKey(cacheCatagoryBiasRate, cacheIndexStockNum).ExtendIndex(stockNum)
-}
-
-func (c *Cache) highBiasRateKey() *cache.Key {
-	return cache.NewKey(cacheCatagoryBiasRate, "high")
-}
-
-func (c *Cache) lowBiasRateKey() *cache.Key {
-	return cache.NewKey(cacheCatagoryBiasRate, "low")
-}
-
 func (c *Cache) historyTickAnalyzeKey(stockNum string) *cache.Key {
 	return cache.NewKey(cacheCatagoryHistoryTickAnalyze, cacheIndexStockNum).ExtendIndex(stockNum)
 }

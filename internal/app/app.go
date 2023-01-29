@@ -11,7 +11,6 @@ import (
 	v1 "tmt/internal/controller/http/v1"
 	"tmt/internal/usecase"
 	"tmt/internal/usecase/grpcapi"
-	"tmt/internal/usecase/mq"
 	"tmt/internal/usecase/repo"
 	"tmt/pkg/grpc"
 	"tmt/pkg/httpserver"
@@ -71,7 +70,7 @@ func RunApp(cfg *config.Config) {
 	tradeUseCase := usecase.NewTrade(grpcapi.NewTrade(app.sc), grpcapi.NewTrade(app.fg), repo.NewTrade(app.pg))
 	analyzeUseCase := usecase.NewAnalyze(repo.NewHistory(app.pg))
 	historyUseCase := usecase.NewHistory(repo.NewHistory(app.pg), grpcapi.NewHistory(app.sc))
-	realTimeUseCase := usecase.NewRealTime(repo.NewRealTime(app.pg), grpcapi.NewRealTime(app.sc), grpcapi.NewSubscribe(app.sc), mq.NewRabbit())
+	realTimeUseCase := usecase.NewRealTime(repo.NewRealTime(app.pg), grpcapi.NewRealTime(app.sc), grpcapi.NewSubscribe(app.sc))
 	targetUseCase := usecase.NewTarget(repo.NewTarget(app.pg), grpcapi.NewRealTime(app.sc))
 
 	// HTTP Server

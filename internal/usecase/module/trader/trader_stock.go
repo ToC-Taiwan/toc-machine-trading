@@ -44,11 +44,6 @@ type StockTrader struct {
 
 // NewStockTrader -.
 func NewStockTrader(stockNum string, tradeSwitch config.StockTradeSwitch, stockAnalyzeCfg config.StockAnalyze) *StockTrader {
-	var quantity int64 = 1
-	if biasRate := cc.GetBiasRate(stockNum); biasRate > cc.GetHighBiasRate() || biasRate < cc.GetLowBiasRate() {
-		quantity = 2
-	}
-
 	arr := cc.GetHistoryTickAnalyze(stockNum)
 	sort.Slice(arr, func(i, j int) bool {
 		return arr[i] > arr[j]
@@ -56,7 +51,7 @@ func NewStockTrader(stockNum string, tradeSwitch config.StockTradeSwitch, stockA
 
 	new := &StockTrader{
 		stockNum:           stockNum,
-		orderQuantity:      quantity,
+		orderQuantity:      1,
 		orderMap:           make(map[entity.OrderAction][]*entity.StockOrder),
 		tickChan:           make(chan *entity.RealTimeStockTick),
 		bidAskChan:         make(chan *entity.RealTimeStockBidAsk),

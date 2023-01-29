@@ -208,8 +208,8 @@ func (c *Rabbit) protoToOrder(proto *pb.OrderStatus) interface{} {
 	}
 }
 
-// TickConsumer -.
-func (c *Rabbit) TickConsumer(stockNum string, tickChan chan *entity.RealTimeStockTick) {
+// StockTickConsumer -.
+func (c *Rabbit) StockTickConsumer(stockNum string, tickChan chan *entity.RealTimeStockTick) {
 	delivery := c.establishDelivery(fmt.Sprintf("%s:%s", routingKeyTick, stockNum))
 	for {
 		d, opened := <-delivery

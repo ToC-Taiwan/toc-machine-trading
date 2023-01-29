@@ -39,10 +39,10 @@ type SubscribeDataInterfaceClient interface {
 	SubscribeFutureBidAsk(ctx context.Context, in *FutureCodeArr, opts ...grpc.CallOption) (*SubscribeResponse, error)
 	// UnSubscribeFutureBidAsk is the interface for unsubscribe stock all bid ask
 	UnSubscribeFutureBidAsk(ctx context.Context, in *FutureCodeArr, opts ...grpc.CallOption) (*SubscribeResponse, error)
-	// UnSubscribeStockAllTick is the interface for unsubscribe stock all tick
-	UnSubscribeStockAllTick(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ErrorMessage, error)
+	// UnSubscribeAllTick is the interface for unsubscribe stock all tick
+	UnSubscribeAllTick(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ErrorMessage, error)
 	// UnSubscribeStockAllBidAsk is the interface for unsubscribe stock all bid ask
-	UnSubscribeStockAllBidAsk(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ErrorMessage, error)
+	UnSubscribeAllBidAsk(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ErrorMessage, error)
 }
 
 type subscribeDataInterfaceClient struct {
@@ -125,18 +125,18 @@ func (c *subscribeDataInterfaceClient) UnSubscribeFutureBidAsk(ctx context.Conte
 	return out, nil
 }
 
-func (c *subscribeDataInterfaceClient) UnSubscribeStockAllTick(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ErrorMessage, error) {
+func (c *subscribeDataInterfaceClient) UnSubscribeAllTick(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ErrorMessage, error) {
 	out := new(ErrorMessage)
-	err := c.cc.Invoke(ctx, "/toc_python_forwarder.SubscribeDataInterface/UnSubscribeStockAllTick", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/toc_python_forwarder.SubscribeDataInterface/UnSubscribeAllTick", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *subscribeDataInterfaceClient) UnSubscribeStockAllBidAsk(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ErrorMessage, error) {
+func (c *subscribeDataInterfaceClient) UnSubscribeAllBidAsk(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ErrorMessage, error) {
 	out := new(ErrorMessage)
-	err := c.cc.Invoke(ctx, "/toc_python_forwarder.SubscribeDataInterface/UnSubscribeStockAllBidAsk", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/toc_python_forwarder.SubscribeDataInterface/UnSubscribeAllBidAsk", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -163,10 +163,10 @@ type SubscribeDataInterfaceServer interface {
 	SubscribeFutureBidAsk(context.Context, *FutureCodeArr) (*SubscribeResponse, error)
 	// UnSubscribeFutureBidAsk is the interface for unsubscribe stock all bid ask
 	UnSubscribeFutureBidAsk(context.Context, *FutureCodeArr) (*SubscribeResponse, error)
-	// UnSubscribeStockAllTick is the interface for unsubscribe stock all tick
-	UnSubscribeStockAllTick(context.Context, *emptypb.Empty) (*ErrorMessage, error)
+	// UnSubscribeAllTick is the interface for unsubscribe stock all tick
+	UnSubscribeAllTick(context.Context, *emptypb.Empty) (*ErrorMessage, error)
 	// UnSubscribeStockAllBidAsk is the interface for unsubscribe stock all bid ask
-	UnSubscribeStockAllBidAsk(context.Context, *emptypb.Empty) (*ErrorMessage, error)
+	UnSubscribeAllBidAsk(context.Context, *emptypb.Empty) (*ErrorMessage, error)
 	mustEmbedUnimplementedSubscribeDataInterfaceServer()
 }
 
@@ -198,11 +198,11 @@ func (UnimplementedSubscribeDataInterfaceServer) SubscribeFutureBidAsk(context.C
 func (UnimplementedSubscribeDataInterfaceServer) UnSubscribeFutureBidAsk(context.Context, *FutureCodeArr) (*SubscribeResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UnSubscribeFutureBidAsk not implemented")
 }
-func (UnimplementedSubscribeDataInterfaceServer) UnSubscribeStockAllTick(context.Context, *emptypb.Empty) (*ErrorMessage, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method UnSubscribeStockAllTick not implemented")
+func (UnimplementedSubscribeDataInterfaceServer) UnSubscribeAllTick(context.Context, *emptypb.Empty) (*ErrorMessage, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UnSubscribeAllTick not implemented")
 }
-func (UnimplementedSubscribeDataInterfaceServer) UnSubscribeStockAllBidAsk(context.Context, *emptypb.Empty) (*ErrorMessage, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method UnSubscribeStockAllBidAsk not implemented")
+func (UnimplementedSubscribeDataInterfaceServer) UnSubscribeAllBidAsk(context.Context, *emptypb.Empty) (*ErrorMessage, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UnSubscribeAllBidAsk not implemented")
 }
 func (UnimplementedSubscribeDataInterfaceServer) mustEmbedUnimplementedSubscribeDataInterfaceServer() {
 }
@@ -362,38 +362,38 @@ func _SubscribeDataInterface_UnSubscribeFutureBidAsk_Handler(srv interface{}, ct
 	return interceptor(ctx, in, info, handler)
 }
 
-func _SubscribeDataInterface_UnSubscribeStockAllTick_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _SubscribeDataInterface_UnSubscribeAllTick_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(emptypb.Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(SubscribeDataInterfaceServer).UnSubscribeStockAllTick(ctx, in)
+		return srv.(SubscribeDataInterfaceServer).UnSubscribeAllTick(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/toc_python_forwarder.SubscribeDataInterface/UnSubscribeStockAllTick",
+		FullMethod: "/toc_python_forwarder.SubscribeDataInterface/UnSubscribeAllTick",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SubscribeDataInterfaceServer).UnSubscribeStockAllTick(ctx, req.(*emptypb.Empty))
+		return srv.(SubscribeDataInterfaceServer).UnSubscribeAllTick(ctx, req.(*emptypb.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _SubscribeDataInterface_UnSubscribeStockAllBidAsk_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _SubscribeDataInterface_UnSubscribeAllBidAsk_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(emptypb.Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(SubscribeDataInterfaceServer).UnSubscribeStockAllBidAsk(ctx, in)
+		return srv.(SubscribeDataInterfaceServer).UnSubscribeAllBidAsk(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/toc_python_forwarder.SubscribeDataInterface/UnSubscribeStockAllBidAsk",
+		FullMethod: "/toc_python_forwarder.SubscribeDataInterface/UnSubscribeAllBidAsk",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SubscribeDataInterfaceServer).UnSubscribeStockAllBidAsk(ctx, req.(*emptypb.Empty))
+		return srv.(SubscribeDataInterfaceServer).UnSubscribeAllBidAsk(ctx, req.(*emptypb.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -438,12 +438,12 @@ var SubscribeDataInterface_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _SubscribeDataInterface_UnSubscribeFutureBidAsk_Handler,
 		},
 		{
-			MethodName: "UnSubscribeStockAllTick",
-			Handler:    _SubscribeDataInterface_UnSubscribeStockAllTick_Handler,
+			MethodName: "UnSubscribeAllTick",
+			Handler:    _SubscribeDataInterface_UnSubscribeAllTick_Handler,
 		},
 		{
-			MethodName: "UnSubscribeStockAllBidAsk",
-			Handler:    _SubscribeDataInterface_UnSubscribeStockAllBidAsk_Handler,
+			MethodName: "UnSubscribeAllBidAsk",
+			Handler:    _SubscribeDataInterface_UnSubscribeAllBidAsk_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
