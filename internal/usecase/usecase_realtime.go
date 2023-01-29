@@ -11,6 +11,7 @@ import (
 	"tmt/internal/entity"
 	"tmt/internal/usecase/module/target"
 	"tmt/internal/usecase/module/trader"
+	"tmt/internal/usecase/mq"
 	"tmt/internal/usecase/topic"
 
 	"github.com/google/uuid"
@@ -54,9 +55,9 @@ func NewRealTime(r RealTimeRepo, g RealTimegRPCAPI, s SubscribegRPCAPI, t Rabbit
 	go uc.ReceiveEvent(context.Background())
 	go uc.ReceiveOrderStatus(context.Background())
 
-	bus.SubscribeTopic(topic.TopicSubscribeStockTickTargets, uc.ReceiveStreamData, uc.SubscribeStockTick, uc.SubscribeStockBidAsk)
+	bus.SubscribeTopic(topic.TopicSubscribeStockTickTargets, uc.ReceiveStockSubscribeData, uc.SubscribeStockTick, uc.SubscribeStockBidAsk)
 	bus.SubscribeTopic(topic.TopicUnSubscribeStockTickTargets, uc.UnSubscribeStockTick, uc.UnSubscribeStockBidAsk)
-	bus.SubscribeTopic(topic.TopicSubscribeFutureTickTargets, uc.ReceiveFutureStreamData, uc.SubscribeFutureTick)
+	bus.SubscribeTopic(topic.TopicSubscribeFutureTickTargets, uc.ReceiveFutureSubscribeData, uc.SubscribeFutureTick)
 
 	return uc
 }
@@ -342,8 +343,8 @@ func (uc *RealTimeUseCase) GetMainFuture() *entity.Future {
 	return cc.GetFutureDetail(uc.mainFutureCode)
 }
 
-// ReceiveStreamData - receive target data, start goroutine to trade
-func (uc *RealTimeUseCase) ReceiveStreamData(targetArr []*entity.StockTarget) {
+// ReceiveStockSubscribeData - receive target data, start goroutine to trade
+func (uc *RealTimeUseCase) ReceiveStockSubscribeData(targetArr []*entity.StockTarget) {
 	agentChan := make(chan *trader.StockTrader)
 	targetMap := make(map[string]*entity.StockTarget)
 	mutex := sync.RWMutex{}
@@ -357,8 +358,9 @@ func (uc *RealTimeUseCase) ReceiveStreamData(targetArr []*entity.StockTarget) {
 			go agent.TradingRoom()
 
 			// send tick, bidask to trade room's channel
-			go uc.rabbit.TickConsumer(agent.GetStockNum(), agent.GetTickChan())
-			go uc.rabbit.StockBidAskConsumer(agent.GetStockNum(), agent.GetBidAskChan())
+			r := mq.NewRabbit()
+			go r.TickConsumer(agent.GetStockNum(), agent.GetTickChan())
+			go r.StockBidAskConsumer(agent.GetStockNum(), agent.GetBidAskChan())
 
 			// mutex.RLock()
 			// target := targetMap[agent.GetStockNum()]
@@ -385,14 +387,16 @@ func (uc *RealTimeUseCase) ReceiveStreamData(targetArr []*entity.StockTarget) {
 	close(agentChan)
 }
 
-// ReceiveFutureStreamData -.
-func (uc *RealTimeUseCase) ReceiveFutureStreamData(code string) {
+// ReceiveFutureSubscribeData -.
+func (uc *RealTimeUseCase) ReceiveFutureSubscribeData(code string) {
 	uc.mainFutureCode = code
 	agent := trader.NewFutureTrader(code, uc.cfg.FutureTradeSwitch, uc.cfg.FutureAnalyze)
 
 	go agent.TradingRoom()
-	go uc.rabbit.FutureTickConsumer(code, agent.GetTickChan())
-	// go uc.rabbit.FutureBidAskConsumer(code, agent.GetBidAskChan())
+
+	r := mq.NewRabbit()
+	go r.FutureTickConsumer(code, agent.GetTickChan())
+	// go r.FutureBidAskConsumer(code, agent.GetBidAskChan())
 }
 
 // NewFutureRealTimeConnection -.

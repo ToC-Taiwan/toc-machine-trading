@@ -109,7 +109,8 @@ type HistorygRPCAPI interface {
 type RealTime interface {
 	ReceiveEvent(ctx context.Context)
 	ReceiveOrderStatus(ctx context.Context)
-	ReceiveStreamData(targetArr []*entity.StockTarget)
+	ReceiveStockSubscribeData(targetArr []*entity.StockTarget)
+	ReceiveFutureSubscribeData(code string)
 	GetStockSnapshotByNumArr(stockNumArr []string) ([]*entity.StockSnapShot, error)
 	GetTradeIndex() *entity.TradeIndex
 	GetTSESnapshot(ctx context.Context) (*entity.StockSnapShot, error)

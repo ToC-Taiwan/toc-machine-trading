@@ -8,7 +8,6 @@ import (
 
 	"tmt/cmd/config"
 	"tmt/internal/entity"
-	"tmt/internal/usecase"
 	"tmt/pb"
 	"tmt/pkg/common"
 	"tmt/pkg/log"
@@ -36,7 +35,7 @@ type Rabbit struct {
 	orderStatusChanMapLock sync.RWMutex
 }
 
-func NewRabbit() usecase.Rabbit {
+func NewRabbit() *Rabbit {
 	allConfig := config.GetConfig()
 
 	conn := rabbitmq.NewConnection(

@@ -1256,6 +1256,18 @@ func (mr *MockRealTimeMockRecorder) ReceiveEvent(ctx interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReceiveEvent", reflect.TypeOf((*MockRealTime)(nil).ReceiveEvent), ctx)
 }
 
+// ReceiveFutureSubscribeData mocks base method.
+func (m *MockRealTime) ReceiveFutureSubscribeData(code string) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "ReceiveFutureSubscribeData", code)
+}
+
+// ReceiveFutureSubscribeData indicates an expected call of ReceiveFutureSubscribeData.
+func (mr *MockRealTimeMockRecorder) ReceiveFutureSubscribeData(code interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReceiveFutureSubscribeData", reflect.TypeOf((*MockRealTime)(nil).ReceiveFutureSubscribeData), code)
+}
+
 // ReceiveOrderStatus mocks base method.
 func (m *MockRealTime) ReceiveOrderStatus(ctx context.Context) {
 	m.ctrl.T.Helper()
@@ -1268,16 +1280,16 @@ func (mr *MockRealTimeMockRecorder) ReceiveOrderStatus(ctx interface{}) *gomock.
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReceiveOrderStatus", reflect.TypeOf((*MockRealTime)(nil).ReceiveOrderStatus), ctx)
 }
 
-// ReceiveStreamData mocks base method.
-func (m *MockRealTime) ReceiveStreamData(targetArr []*entity.StockTarget) {
+// ReceiveStockSubscribeData mocks base method.
+func (m *MockRealTime) ReceiveStockSubscribeData(targetArr []*entity.StockTarget) {
 	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "ReceiveStreamData", targetArr)
+	m.ctrl.Call(m, "ReceiveStockSubscribeData", targetArr)
 }
 
-// ReceiveStreamData indicates an expected call of ReceiveStreamData.
-func (mr *MockRealTimeMockRecorder) ReceiveStreamData(targetArr interface{}) *gomock.Call {
+// ReceiveStockSubscribeData indicates an expected call of ReceiveStockSubscribeData.
+func (mr *MockRealTimeMockRecorder) ReceiveStockSubscribeData(targetArr interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReceiveStreamData", reflect.TypeOf((*MockRealTime)(nil).ReceiveStreamData), targetArr)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReceiveStockSubscribeData", reflect.TypeOf((*MockRealTime)(nil).ReceiveStockSubscribeData), targetArr)
 }
 
 // MockRealTimeRepo is a mock of RealTimeRepo interface.

@@ -28,7 +28,7 @@ target_cond:
 
 stock_trade_switch:
     allow_trade: false
-    subscribe: false
+    subscribe: true
     hold_time_from_open: 45 # unit: second
     total_open_time: 270 # unit: minute
     trade_in_end_time: 90 # unit: minute
