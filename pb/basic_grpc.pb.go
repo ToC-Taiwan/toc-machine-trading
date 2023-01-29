@@ -23,7 +23,13 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type BasicDataInterfaceClient interface {
+	// Heartbeat is the heartbeat function
+	Heartbeat(ctx context.Context, opts ...grpc.CallOption) (BasicDataInterface_HeartbeatClient, error)
+	// Terminate is the terminate function
+	Terminate(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	// GetAllStockDetail is the function to get stock detail
 	GetAllStockDetail(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*StockDetailResponse, error)
+	// GetAllFutureDetail is the function to get future detail
 	GetAllFutureDetail(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*FutureDetailResponse, error)
 }
 
@@ -33,6 +39,46 @@ type basicDataInterfaceClient struct {
 
 func NewBasicDataInterfaceClient(cc grpc.ClientConnInterface) BasicDataInterfaceClient {
 	return &basicDataInterfaceClient{cc}
+}
+
+func (c *basicDataInterfaceClient) Heartbeat(ctx context.Context, opts ...grpc.CallOption) (BasicDataInterface_HeartbeatClient, error) {
+	stream, err := c.cc.NewStream(ctx, &BasicDataInterface_ServiceDesc.Streams[0], "/toc_python_forwarder.BasicDataInterface/Heartbeat", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &basicDataInterfaceHeartbeatClient{stream}
+	return x, nil
+}
+
+type BasicDataInterface_HeartbeatClient interface {
+	Send(*BeatMessage) error
+	Recv() (*BeatMessage, error)
+	grpc.ClientStream
+}
+
+type basicDataInterfaceHeartbeatClient struct {
+	grpc.ClientStream
+}
+
+func (x *basicDataInterfaceHeartbeatClient) Send(m *BeatMessage) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *basicDataInterfaceHeartbeatClient) Recv() (*BeatMessage, error) {
+	m := new(BeatMessage)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func (c *basicDataInterfaceClient) Terminate(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/toc_python_forwarder.BasicDataInterface/Terminate", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *basicDataInterfaceClient) GetAllStockDetail(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*StockDetailResponse, error) {
@@ -57,7 +103,13 @@ func (c *basicDataInterfaceClient) GetAllFutureDetail(ctx context.Context, in *e
 // All implementations must embed UnimplementedBasicDataInterfaceServer
 // for forward compatibility
 type BasicDataInterfaceServer interface {
+	// Heartbeat is the heartbeat function
+	Heartbeat(BasicDataInterface_HeartbeatServer) error
+	// Terminate is the terminate function
+	Terminate(context.Context, *emptypb.Empty) (*emptypb.Empty, error)
+	// GetAllStockDetail is the function to get stock detail
 	GetAllStockDetail(context.Context, *emptypb.Empty) (*StockDetailResponse, error)
+	// GetAllFutureDetail is the function to get future detail
 	GetAllFutureDetail(context.Context, *emptypb.Empty) (*FutureDetailResponse, error)
 	mustEmbedUnimplementedBasicDataInterfaceServer()
 }
@@ -66,6 +118,12 @@ type BasicDataInterfaceServer interface {
 type UnimplementedBasicDataInterfaceServer struct {
 }
 
+func (UnimplementedBasicDataInterfaceServer) Heartbeat(BasicDataInterface_HeartbeatServer) error {
+	return status.Errorf(codes.Unimplemented, "method Heartbeat not implemented")
+}
+func (UnimplementedBasicDataInterfaceServer) Terminate(context.Context, *emptypb.Empty) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Terminate not implemented")
+}
 func (UnimplementedBasicDataInterfaceServer) GetAllStockDetail(context.Context, *emptypb.Empty) (*StockDetailResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAllStockDetail not implemented")
 }
@@ -83,6 +141,50 @@ type UnsafeBasicDataInterfaceServer interface {
 
 func RegisterBasicDataInterfaceServer(s grpc.ServiceRegistrar, srv BasicDataInterfaceServer) {
 	s.RegisterService(&BasicDataInterface_ServiceDesc, srv)
+}
+
+func _BasicDataInterface_Heartbeat_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(BasicDataInterfaceServer).Heartbeat(&basicDataInterfaceHeartbeatServer{stream})
+}
+
+type BasicDataInterface_HeartbeatServer interface {
+	Send(*BeatMessage) error
+	Recv() (*BeatMessage, error)
+	grpc.ServerStream
+}
+
+type basicDataInterfaceHeartbeatServer struct {
+	grpc.ServerStream
+}
+
+func (x *basicDataInterfaceHeartbeatServer) Send(m *BeatMessage) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func (x *basicDataInterfaceHeartbeatServer) Recv() (*BeatMessage, error) {
+	m := new(BeatMessage)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func _BasicDataInterface_Terminate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BasicDataInterfaceServer).Terminate(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/toc_python_forwarder.BasicDataInterface/Terminate",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BasicDataInterfaceServer).Terminate(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _BasicDataInterface_GetAllStockDetail_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -129,6 +231,10 @@ var BasicDataInterface_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*BasicDataInterfaceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
+			MethodName: "Terminate",
+			Handler:    _BasicDataInterface_Terminate_Handler,
+		},
+		{
 			MethodName: "GetAllStockDetail",
 			Handler:    _BasicDataInterface_GetAllStockDetail_Handler,
 		},
@@ -137,6 +243,13 @@ var BasicDataInterface_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _BasicDataInterface_GetAllFutureDetail_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "Heartbeat",
+			Handler:       _BasicDataInterface_Heartbeat_Handler,
+			ServerStreams: true,
+			ClientStreams: true,
+		},
+	},
 	Metadata: "basic.proto",
 }

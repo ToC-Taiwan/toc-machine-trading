@@ -3,51 +3,56 @@ package usecase
 import (
 	"context"
 	"errors"
-	"fmt"
 	"sort"
 	"time"
 
 	"tmt/cmd/config"
 	"tmt/internal/entity"
 	"tmt/internal/usecase/module/target"
+	"tmt/internal/usecase/module/tradeday"
 	"tmt/internal/usecase/topic"
 	"tmt/pkg/common"
 )
 
 // TargetUseCase -.
 type TargetUseCase struct {
-	repo          TargetRepo
-	gRPCAPI       TargetgRPCAPI
-	streamgRPCAPI StreamgRPCAPI
+	repo    TargetRepo
+	gRPCAPI RealTimegRPCAPI
 
 	targetFilter *target.Filter
+	cfg          *config.Config
+	basic        *entity.BasicInfo
+	tradeDay     *tradeday.TradeDay
+
+	stockTradeInSwitch  bool
+	futureTradeInSwitch bool
 }
 
 // NewTarget -.
-func NewTarget(r TargetRepo, t TargetgRPCAPI, s StreamgRPCAPI) Target {
+func NewTarget(r TargetRepo, t RealTimegRPCAPI) Target {
 	cfg := config.GetConfig()
+	basic := cc.GetBasicInfo()
 	uc := &TargetUseCase{
-		repo:          r,
-		gRPCAPI:       t,
-		streamgRPCAPI: s,
-		targetFilter:  target.NewFilter(cfg.TargetCond),
+		repo:         r,
+		gRPCAPI:      t,
+		cfg:          cfg,
+		basic:        basic,
+		tradeDay:     tradeday.NewTradeDay(),
+		targetFilter: target.NewFilter(cfg.TargetCond),
 	}
 
-	// unsubscriba all first
-	if err := uc.UnSubscribeAll(context.Background()); err != nil {
-		logger.Fatal("unsubscribe all fail")
-	}
+	go uc.checkStockTradeSwitch()
+	go uc.checkFutureTradeSwitch()
 
 	// query targets from db
-	tradeDay := cc.GetBasicInfo().TradeDay
-	targetArr, err := uc.repo.QueryTargetsByTradeDay(context.Background(), tradeDay)
+	targetArr, err := uc.repo.QueryTargetsByTradeDay(context.Background(), uc.basic.TradeDay)
 	if err != nil {
 		logger.Fatal(err)
 	}
 
 	// db has no targets, find targets from gRPC
 	if len(targetArr) == 0 {
-		targetArr, err = uc.SearchTradeDayTargets(context.Background(), tradeDay)
+		targetArr, err = uc.searchTradeDayTargets(uc.basic.TradeDay)
 		if err != nil {
 			logger.Fatal(err)
 		}
@@ -63,13 +68,77 @@ func NewTarget(r TargetRepo, t TargetgRPCAPI, s StreamgRPCAPI) Target {
 	uc.publishNewStockTargets(targetArr)
 	uc.publishNewFutureTargets()
 
-	// sub events
-	bus.SubscribeTopic(topic.TopicNewStockTargets, uc.publishNewStockTargets)
-	bus.SubscribeTopic(topic.TopicSubscribeStockTickTargets, uc.SubscribeStockTick, uc.SubscribeStockBidAsk)
-	bus.SubscribeTopic(topic.TopicUnSubscribeStockTickTargets, uc.UnSubscribeStockTick, uc.UnSubscribeStockBidAsk)
-	bus.SubscribeTopic(topic.TopicSubscribeFutureTickTargets, uc.SubscribeFutureTick)
+	go func() {
+		time.Sleep(time.Until(basic.TradeDay.Add(time.Hour * 9)))
+		for range time.NewTicker(time.Second * 60).C {
+			if uc.stockTradeInSwitch {
+				if err := uc.realTimeAddTargets(); err != nil {
+					logger.Fatal(err)
+				}
+			}
+		}
+	}()
 
 	return uc
+}
+
+func (uc *TargetUseCase) checkStockTradeSwitch() {
+	if !uc.cfg.StockTradeSwitch.AllowTrade {
+		return
+	}
+
+	openTime := uc.basic.OpenTime
+	tradeInEndTime := uc.basic.TradeInEndTime
+
+	for range time.NewTicker(2500 * time.Millisecond).C {
+		now := time.Now()
+		var tempSwitch bool
+		switch {
+		case now.Before(openTime) || now.After(tradeInEndTime):
+			tempSwitch = false
+		case now.After(openTime) && now.Before(tradeInEndTime):
+			tempSwitch = true
+		}
+
+		if uc.stockTradeInSwitch != tempSwitch {
+			uc.stockTradeInSwitch = tempSwitch
+			bus.PublishTopicEvent(topic.TopicUpdateStockTradeSwitch, uc.stockTradeInSwitch)
+		}
+	}
+}
+
+func (uc *TargetUseCase) checkFutureTradeSwitch() {
+	if !uc.cfg.FutureTradeSwitch.AllowTrade {
+		return
+	}
+
+	futureTradeDay := uc.tradeDay.GetFutureTradeDay()
+	timeRange := [][]time.Time{}
+	firstStart := futureTradeDay.StartTime
+	secondStart := futureTradeDay.EndTime.Add(-300 * time.Minute)
+
+	timeRange = append(timeRange, []time.Time{firstStart, firstStart.Add(time.Duration(uc.cfg.FutureTradeSwitch.TradeTimeRange.FirstPartDuration) * time.Minute)})
+	timeRange = append(timeRange, []time.Time{secondStart, secondStart.Add(time.Duration(uc.cfg.FutureTradeSwitch.TradeTimeRange.SecondPartDuration) * time.Minute)})
+
+	for range time.NewTicker(2500 * time.Millisecond).C {
+		now := time.Now()
+		var tempSwitch bool
+		for _, rangeTime := range timeRange {
+			if now.After(rangeTime[0]) && now.Before(rangeTime[1]) {
+				tempSwitch = true
+			}
+		}
+
+		if uc.futureTradeInSwitch != tempSwitch {
+			uc.futureTradeInSwitch = tempSwitch
+			bus.PublishTopicEvent(topic.TopicUpdateFutureTradeSwitch, uc.futureTradeInSwitch)
+		}
+	}
+}
+
+// GetTargets - get targets from cache
+func (uc *TargetUseCase) GetTargets(ctx context.Context) []*entity.StockTarget {
+	return cc.GetStockTargets()
 }
 
 func (uc *TargetUseCase) publishNewStockTargets(targetArr []*entity.StockTarget) {
@@ -79,22 +148,16 @@ func (uc *TargetUseCase) publishNewStockTargets(targetArr []*entity.StockTarget)
 	}
 
 	// stock
-	bus.PublishTopicEvent(topic.TopicFetchStockHistory, ctx, targetArr)
-	bus.PublishTopicEvent(topic.TopicStreamStockTargets, ctx, targetArr)
+	bus.PublishTopicEvent(topic.TopicFetchStockHistory, targetArr)
+	bus.PublishTopicEvent(topic.TopicSubscribeStockTickTargets, targetArr)
 }
 
 func (uc *TargetUseCase) publishNewFutureTargets() {
-	ctx := context.Background()
 	if futureTarget, err := uc.getFutureTarget(); err != nil {
 		logger.Fatal(err)
 	} else {
-		bus.PublishTopicEvent(topic.TopicStreamFutureTargets, ctx, futureTarget)
+		bus.PublishTopicEvent(topic.TopicSubscribeFutureTickTargets, futureTarget)
 	}
-}
-
-// GetTargets - get targets from cache
-func (uc *TargetUseCase) GetTargets(ctx context.Context) []*entity.StockTarget {
-	return cc.GetStockTargets()
 }
 
 func (uc *TargetUseCase) getFutureTarget() (string, error) {
@@ -116,8 +179,7 @@ func (uc *TargetUseCase) getFutureTarget() (string, error) {
 	return "", errors.New("no future")
 }
 
-// SearchTradeDayTargets - search targets by trade day
-func (uc *TargetUseCase) SearchTradeDayTargets(ctx context.Context, tradeDay time.Time) ([]*entity.StockTarget, error) {
+func (uc *TargetUseCase) searchTradeDayTargets(tradeDay time.Time) ([]*entity.StockTarget, error) {
 	lastTradeDay := cc.GetBasicInfo().LastTradeDay
 	t, err := uc.gRPCAPI.GetStockVolumeRank(lastTradeDay.Format(common.ShortTimeLayout))
 	if err != nil {
@@ -126,7 +188,7 @@ func (uc *TargetUseCase) SearchTradeDayTargets(ctx context.Context, tradeDay tim
 
 	if len(t) == 0 && time.Now().Before(cc.GetBasicInfo().TradeDay.Add(8*time.Hour)) {
 		logger.Warn("VolumeRank is empty, search from all snapshot")
-		return uc.SearchTradeDayTargetsFromAllSnapshot(tradeDay)
+		return uc.searchTradeDayTargetsFromAllSnapshot(tradeDay)
 	}
 
 	var result []*entity.StockTarget
@@ -151,9 +213,8 @@ func (uc *TargetUseCase) SearchTradeDayTargets(ctx context.Context, tradeDay tim
 	return result, nil
 }
 
-// SearchTradeDayTargetsFromAllSnapshot -.
-func (uc *TargetUseCase) SearchTradeDayTargetsFromAllSnapshot(tradeDay time.Time) ([]*entity.StockTarget, error) {
-	data, err := uc.streamgRPCAPI.GetAllStockSnapshot()
+func (uc *TargetUseCase) searchTradeDayTargetsFromAllSnapshot(tradeDay time.Time) ([]*entity.StockTarget, error) {
+	data, err := uc.gRPCAPI.GetAllStockSnapshot()
 	if err != nil {
 		return []*entity.StockTarget{}, err
 	}
@@ -188,119 +249,54 @@ func (uc *TargetUseCase) SearchTradeDayTargetsFromAllSnapshot(tradeDay time.Time
 	return result, nil
 }
 
-// UnSubscribeAll -.
-func (uc *TargetUseCase) UnSubscribeAll(ctx context.Context) error {
-	failMessge, err := uc.gRPCAPI.UnSubscribeStockAllTick()
+func (uc *TargetUseCase) realTimeAddTargets() error {
+	data, err := uc.gRPCAPI.GetAllStockSnapshot()
 	if err != nil {
 		return err
 	}
 
-	if m := failMessge.GetErr(); m != "" {
-		return errors.New(m)
+	// at least 200 snapshot to rank volume
+	if len(data) < 200 {
+		logger.Warnf("stock snapshot len is not enough: %d", len(data))
+		return nil
 	}
 
-	failMessge, err = uc.gRPCAPI.UnSubscribeStockAllBidAsk()
-	if err != nil {
-		return err
+	sort.Slice(data, func(i, j int) bool {
+		return data[i].GetTotalVolume() > data[j].GetTotalVolume()
+	})
+	data = data[:uc.targetFilter.RealTimeRank]
+
+	currentTargets := cc.GetStockTargets()
+	targetsMap := make(map[string]*entity.StockTarget)
+	for _, t := range currentTargets {
+		targetsMap[t.StockNum] = t
 	}
 
-	if m := failMessge.GetErr(); m != "" {
-		return errors.New(m)
+	var newTargets []*entity.StockTarget
+	for i, d := range data {
+		stock := cc.GetStockDetail(d.GetCode())
+		if stock == nil {
+			continue
+		}
+
+		if !uc.targetFilter.IsTarget(stock, d.GetClose()) {
+			continue
+		}
+
+		if targetsMap[d.GetCode()] == nil {
+			newTargets = append(newTargets, &entity.StockTarget{
+				Rank:     100 + i + 1,
+				StockNum: d.GetCode(),
+				Volume:   d.GetTotalVolume(),
+				TradeDay: uc.basic.TradeDay,
+				Stock:    stock,
+			})
+		}
 	}
 
-	return nil
-}
-
-// SubscribeStockTick -.
-func (uc *TargetUseCase) SubscribeStockTick(targetArr []*entity.StockTarget) error {
-	var subArr []string
-	for _, v := range targetArr {
-		subArr = append(subArr, v.StockNum)
+	if len(newTargets) != 0 {
+		cc.AppendStockTargets(newTargets)
+		uc.publishNewStockTargets(newTargets)
 	}
-
-	failSubNumArr, err := uc.gRPCAPI.SubscribeStockTick(subArr)
-	if err != nil {
-		return err
-	}
-
-	if len(failSubNumArr) != 0 {
-		return fmt.Errorf("subscribe fail %v", failSubNumArr)
-	}
-
-	return nil
-}
-
-// SubscribeStockBidAsk -.
-func (uc *TargetUseCase) SubscribeStockBidAsk(targetArr []*entity.StockTarget) error {
-	var subArr []string
-	for _, v := range targetArr {
-		subArr = append(subArr, v.StockNum)
-	}
-
-	failSubNumArr, err := uc.gRPCAPI.SubscribeStockBidAsk(subArr)
-	if err != nil {
-		return err
-	}
-
-	if len(failSubNumArr) != 0 {
-		return fmt.Errorf("subscribe fail %v", failSubNumArr)
-	}
-
-	return nil
-}
-
-// UnSubscribeStockTick -.
-func (uc *TargetUseCase) UnSubscribeStockTick(stockNum string) error {
-	failUnSubNumArr, err := uc.gRPCAPI.UnSubscribeStockTick([]string{stockNum})
-	if err != nil {
-		return err
-	}
-
-	if len(failUnSubNumArr) != 0 {
-		return fmt.Errorf("unsubscribe fail %v", failUnSubNumArr)
-	}
-
-	return nil
-}
-
-// UnSubscribeStockBidAsk -.
-func (uc *TargetUseCase) UnSubscribeStockBidAsk(stockNum string) error {
-	failUnSubNumArr, err := uc.gRPCAPI.UnSubscribeStockBidAsk([]string{stockNum})
-	if err != nil {
-		return err
-	}
-
-	if len(failUnSubNumArr) != 0 {
-		return fmt.Errorf("unsubscribe fail %v", failUnSubNumArr)
-	}
-
-	return nil
-}
-
-// SubscribeFutureTick -.
-func (uc *TargetUseCase) SubscribeFutureTick(code string) error {
-	failSubNumArr, err := uc.gRPCAPI.SubscribeFutureTick([]string{code})
-	if err != nil {
-		return err
-	}
-
-	if len(failSubNumArr) != 0 {
-		return fmt.Errorf("subscribe future fail %v", failSubNumArr)
-	}
-
-	return nil
-}
-
-// SubscribeFutureBidAsk -.
-func (uc *TargetUseCase) SubscribeFutureBidAsk(code string) error {
-	failSubNumArr, err := uc.gRPCAPI.SubscribeFutureBidAsk([]string{code})
-	if err != nil {
-		return err
-	}
-
-	if len(failSubNumArr) != 0 {
-		return fmt.Errorf("subscribe future fail %v", failSubNumArr)
-	}
-
 	return nil
 }

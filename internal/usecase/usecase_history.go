@@ -47,11 +47,11 @@ func NewHistory(r HistoryRepo, t HistorygRPCAPI) History {
 	uc.basic = *cc.GetBasicInfo()
 
 	bus.SubscribeTopic(topic.TopicFetchStockHistory, uc.FetchHistory)
-	bus.SubscribeTopic(topic.TopicStreamFutureTargets, uc.updateMainFutureCode)
+	bus.SubscribeTopic(topic.TopicSubscribeFutureTickTargets, uc.updateMainFutureCode)
 	return uc
 }
 
-func (uc *HistoryUseCase) updateMainFutureCode(ctx context.Context, code string) {
+func (uc *HistoryUseCase) updateMainFutureCode(code string) {
 	uc.mainFutureCode = code
 }
 
@@ -66,7 +66,7 @@ func (uc *HistoryUseCase) GetDayKbarByStockNumDate(stockNum string, date time.Ti
 }
 
 // FetchHistory FetchHistory
-func (uc *HistoryUseCase) FetchHistory(ctx context.Context, targetArr []*entity.StockTarget) {
+func (uc *HistoryUseCase) FetchHistory(targetArr []*entity.StockTarget) {
 	defer uc.mutex.Unlock()
 	uc.mutex.Lock()
 
@@ -97,7 +97,7 @@ func (uc *HistoryUseCase) FetchHistory(ctx context.Context, targetArr []*entity.
 		logger.Fatal(err)
 	}
 
-	bus.PublishTopicEvent(topic.TopicAnalyzeStockTargets, ctx, fetchArr)
+	bus.PublishTopicEvent(topic.TopicAnalyzeStockTargets, fetchArr)
 }
 
 func (uc *HistoryUseCase) fetchHistoryClose(targetArr []*entity.StockTarget) error {

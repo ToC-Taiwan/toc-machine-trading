@@ -39,7 +39,7 @@ func NewBasic(client *grpc.Connection) usecase.BasicgRPCAPI {
 func (t *BasicgRPCAPI) Heartbeat() error {
 	conn := t.conn.GetReadyConn()
 	defer t.conn.PutReadyConn(conn)
-	c := pb.NewHealthCheckInterfaceClient(conn)
+	c := pb.NewBasicDataInterfaceClient(conn)
 	stream, err := c.Heartbeat(context.Background())
 	if err != nil {
 		return err
@@ -70,7 +70,7 @@ func (t *BasicgRPCAPI) Heartbeat() error {
 func (t *BasicgRPCAPI) Terminate() error {
 	conn := t.conn.GetReadyConn()
 	defer t.conn.PutReadyConn(conn)
-	c := pb.NewHealthCheckInterfaceClient(conn)
+	c := pb.NewBasicDataInterfaceClient(conn)
 	_, err := c.Terminate(context.Background(), &emptypb.Empty{})
 	if err != nil {
 		return err

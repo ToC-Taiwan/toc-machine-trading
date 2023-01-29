@@ -3,80 +3,70 @@ package usecase
 import (
 	"context"
 	"errors"
-	"sort"
+	"fmt"
 	"sync"
 	"time"
 
 	"tmt/cmd/config"
 	"tmt/internal/entity"
 	"tmt/internal/usecase/module/target"
-	"tmt/internal/usecase/module/tradeday"
 	"tmt/internal/usecase/module/trader"
+	"tmt/internal/usecase/mq"
 	"tmt/internal/usecase/topic"
 
 	"github.com/google/uuid"
 )
 
-// StreamUseCase -.
-type StreamUseCase struct {
-	repo    StreamRepo
-	rabbit  StreamRabbit
-	grpcapi StreamgRPCAPI
+// RealTimeUseCase -.
+type RealTimeUseCase struct {
+	repo       RealTimeRepo
+	grpcapi    RealTimegRPCAPI
+	subgRPCAPI SubscribegRPCAPI
+	rabbit     Rabbit
 
-	basic        entity.BasicInfo
 	cfg          *config.Config
 	targetFilter *target.Filter
-	tradeDay     *tradeday.TradeDay
 
-	stockTradeInSwitch  bool
-	futureTradeInSwitch bool
-	tradeIndex          *entity.TradeIndex
-
+	tradeIndex     *entity.TradeIndex
 	mainFutureCode string
 }
 
-// NewStream -.
-func NewStream(r StreamRepo, g StreamgRPCAPI, t StreamRabbit) Stream {
+func NewRealTime(r RealTimeRepo, g RealTimegRPCAPI, s SubscribegRPCAPI, t Rabbit) RealTime {
 	cfg := config.GetConfig()
 
-	uc := &StreamUseCase{
+	uc := &RealTimeUseCase{
 		repo:         r,
 		rabbit:       t,
 		grpcapi:      g,
+		subgRPCAPI:   s,
 		cfg:          cfg,
-		basic:        *cc.GetBasicInfo(),
 		targetFilter: target.NewFilter(cfg.TargetCond),
-		tradeDay:     tradeday.NewTradeDay(),
 	}
 
-	t.FillAllBasic(uc.basic.AllStocks, uc.basic.AllFutures)
+	// unsubscriba all first
+	if e := uc.UnSubscribeAll(); e != nil {
+		logger.Fatal(e)
+	}
+
+	basic := cc.GetBasicInfo()
+	t.FillAllBasic(basic.AllStocks, basic.AllFutures)
 	uc.periodUpdateTradeIndex()
 
 	go uc.ReceiveEvent(context.Background())
 	go uc.ReceiveOrderStatus(context.Background())
 
-	go func() {
-		time.Sleep(time.Until(cc.GetBasicInfo().TradeDay.Add(time.Hour * 9)))
-		for range time.NewTicker(time.Second * 60).C {
-			if uc.stockTradeInSwitch {
-				if err := uc.realTimeAddTargets(); err != nil {
-					logger.Fatal(err)
-				}
-			}
-		}
-	}()
-
-	bus.SubscribeTopic(topic.TopicStreamStockTargets, uc.ReceiveStreamData)
-	bus.SubscribeTopic(topic.TopicStreamFutureTargets, uc.ReceiveFutureStreamData)
+	bus.SubscribeTopic(topic.TopicSubscribeStockTickTargets, uc.ReceiveStockSubscribeData, uc.SubscribeStockTick, uc.SubscribeStockBidAsk)
+	bus.SubscribeTopic(topic.TopicUnSubscribeStockTickTargets, uc.UnSubscribeStockTick, uc.UnSubscribeStockBidAsk)
+	bus.SubscribeTopic(topic.TopicSubscribeFutureTickTargets, uc.ReceiveFutureSubscribeData, uc.SubscribeFutureTick)
 
 	return uc
 }
 
-func (uc *StreamUseCase) GetTradeIndex() *entity.TradeIndex {
+func (uc *RealTimeUseCase) GetTradeIndex() *entity.TradeIndex {
 	return uc.tradeIndex
 }
 
-func (uc *StreamUseCase) periodUpdateTradeIndex() {
+func (uc *RealTimeUseCase) periodUpdateTradeIndex() {
 	uc.tradeIndex = &entity.TradeIndex{
 		TSE:    entity.NewIndexStatus(),
 		OTC:    entity.NewIndexStatus(),
@@ -90,7 +80,7 @@ func (uc *StreamUseCase) periodUpdateTradeIndex() {
 	go uc.updateOTCIndex()
 }
 
-func (uc *StreamUseCase) updateNasdaqIndex() {
+func (uc *RealTimeUseCase) updateNasdaqIndex() {
 	for range time.NewTicker(time.Second * 5).C {
 		if data, err := uc.GetNasdaqClose(); err != nil && !errors.Is(err, errNasdaqPriceAbnormal) {
 			logger.Error(err)
@@ -100,7 +90,7 @@ func (uc *StreamUseCase) updateNasdaqIndex() {
 	}
 }
 
-func (uc *StreamUseCase) updateNFIndex() {
+func (uc *RealTimeUseCase) updateNFIndex() {
 	for range time.NewTicker(time.Second * 5).C {
 		if data, err := uc.GetNasdaqFutureClose(); err != nil && !errors.Is(err, errNFQPriceAbnormal) {
 			logger.Error(err)
@@ -110,7 +100,7 @@ func (uc *StreamUseCase) updateNFIndex() {
 	}
 }
 
-func (uc *StreamUseCase) updateTSEIndex() {
+func (uc *RealTimeUseCase) updateTSEIndex() {
 	for range time.NewTicker(time.Second * 3).C {
 		if data, err := uc.GetTSESnapshot(context.Background()); err != nil {
 			logger.Error(err)
@@ -120,7 +110,7 @@ func (uc *StreamUseCase) updateTSEIndex() {
 	}
 }
 
-func (uc *StreamUseCase) updateOTCIndex() {
+func (uc *RealTimeUseCase) updateOTCIndex() {
 	for range time.NewTicker(time.Second * 3).C {
 		if data, err := uc.GetOTCSnapshot(context.Background()); err != nil {
 			logger.Error(err)
@@ -130,59 +120,8 @@ func (uc *StreamUseCase) updateOTCIndex() {
 	}
 }
 
-func (uc *StreamUseCase) realTimeAddTargets() error {
-	data, err := uc.grpcapi.GetAllStockSnapshot()
-	if err != nil {
-		return err
-	}
-
-	// at least 200 snapshot to rank volume
-	if len(data) < 200 {
-		logger.Warnf("stock snapshot len is not enough: %d", len(data))
-		return nil
-	}
-
-	sort.Slice(data, func(i, j int) bool {
-		return data[i].GetTotalVolume() > data[j].GetTotalVolume()
-	})
-	data = data[:uc.targetFilter.RealTimeRank]
-
-	currentTargets := cc.GetStockTargets()
-	targetsMap := make(map[string]*entity.StockTarget)
-	for _, t := range currentTargets {
-		targetsMap[t.StockNum] = t
-	}
-
-	var newTargets []*entity.StockTarget
-	for i, d := range data {
-		stock := cc.GetStockDetail(d.GetCode())
-		if stock == nil {
-			continue
-		}
-
-		if !uc.targetFilter.IsTarget(stock, d.GetClose()) {
-			continue
-		}
-
-		if targetsMap[d.GetCode()] == nil {
-			newTargets = append(newTargets, &entity.StockTarget{
-				Rank:     100 + i + 1,
-				StockNum: d.GetCode(),
-				Volume:   d.GetTotalVolume(),
-				TradeDay: uc.basic.TradeDay,
-				Stock:    stock,
-			})
-		}
-	}
-
-	if len(newTargets) != 0 {
-		bus.PublishTopicEvent(topic.TopicNewStockTargets, newTargets)
-	}
-	return nil
-}
-
 // ReceiveEvent -.
-func (uc *StreamUseCase) ReceiveEvent(ctx context.Context) {
+func (uc *RealTimeUseCase) ReceiveEvent(ctx context.Context) {
 	eventChan := make(chan *entity.SinopacEvent)
 	go func() {
 		for {
@@ -200,7 +139,7 @@ func (uc *StreamUseCase) ReceiveEvent(ctx context.Context) {
 }
 
 // ReceiveOrderStatus -.
-func (uc *StreamUseCase) ReceiveOrderStatus(ctx context.Context) {
+func (uc *RealTimeUseCase) ReceiveOrderStatus(ctx context.Context) {
 	orderStatusChan := make(chan interface{})
 	go func() {
 		for {
@@ -224,7 +163,7 @@ func (uc *StreamUseCase) ReceiveOrderStatus(ctx context.Context) {
 }
 
 // GetTSESnapshot -.
-func (uc *StreamUseCase) GetTSESnapshot(ctx context.Context) (*entity.StockSnapShot, error) {
+func (uc *RealTimeUseCase) GetTSESnapshot(ctx context.Context) (*entity.StockSnapShot, error) {
 	body, err := uc.grpcapi.GetStockSnapshotTSE()
 	if err != nil {
 		return nil, err
@@ -252,7 +191,7 @@ func (uc *StreamUseCase) GetTSESnapshot(ctx context.Context) (*entity.StockSnapS
 }
 
 // GetOTCSnapshot -.
-func (uc *StreamUseCase) GetOTCSnapshot(ctx context.Context) (*entity.StockSnapShot, error) {
+func (uc *RealTimeUseCase) GetOTCSnapshot(ctx context.Context) (*entity.StockSnapShot, error) {
 	body, err := uc.grpcapi.GetStockSnapshotOTC()
 	if err != nil {
 		return nil, err
@@ -284,7 +223,7 @@ var (
 	errNFQPriceAbnormal    error = errors.New("nfq price abnormal")
 )
 
-func (uc *StreamUseCase) GetNasdaqClose() (*entity.YahooPrice, error) {
+func (uc *RealTimeUseCase) GetNasdaqClose() (*entity.YahooPrice, error) {
 	d, err := uc.grpcapi.GetNasdaq()
 	if err != nil {
 		return nil, err
@@ -301,7 +240,7 @@ func (uc *StreamUseCase) GetNasdaqClose() (*entity.YahooPrice, error) {
 	}, nil
 }
 
-func (uc *StreamUseCase) GetNasdaqFutureClose() (*entity.YahooPrice, error) {
+func (uc *RealTimeUseCase) GetNasdaqFutureClose() (*entity.YahooPrice, error) {
 	d, err := uc.grpcapi.GetNasdaqFuture()
 	if err != nil {
 		return nil, err
@@ -319,7 +258,7 @@ func (uc *StreamUseCase) GetNasdaqFutureClose() (*entity.YahooPrice, error) {
 }
 
 // GetStockSnapshotByNumArr -.
-func (uc *StreamUseCase) GetStockSnapshotByNumArr(stockNumArr []string) ([]*entity.StockSnapShot, error) {
+func (uc *RealTimeUseCase) GetStockSnapshotByNumArr(stockNumArr []string) ([]*entity.StockSnapShot, error) {
 	var fetchArr, stockNotExist []string
 	for _, s := range stockNumArr {
 		if cc.GetStockDetail(s) == nil {
@@ -370,7 +309,7 @@ func (uc *StreamUseCase) GetStockSnapshotByNumArr(stockNumArr []string) ([]*enti
 }
 
 // GetFutureSnapshotByCode -.
-func (uc *StreamUseCase) GetFutureSnapshotByCode(code string) (*entity.FutureSnapShot, error) {
+func (uc *RealTimeUseCase) GetFutureSnapshotByCode(code string) (*entity.FutureSnapShot, error) {
 	snapshot, err := uc.grpcapi.GetFutureSnapshotByCode(code)
 	if err != nil {
 		return nil, err
@@ -400,12 +339,12 @@ func (uc *StreamUseCase) GetFutureSnapshotByCode(code string) (*entity.FutureSna
 }
 
 // GetMainFuture -.
-func (uc *StreamUseCase) GetMainFuture() *entity.Future {
+func (uc *RealTimeUseCase) GetMainFuture() *entity.Future {
 	return cc.GetFutureDetail(uc.mainFutureCode)
 }
 
-// ReceiveStreamData - receive target data, start goroutine to trade
-func (uc *StreamUseCase) ReceiveStreamData(ctx context.Context, targetArr []*entity.StockTarget) {
+// ReceiveStockSubscribeData - receive target data, start goroutine to trade
+func (uc *RealTimeUseCase) ReceiveStockSubscribeData(targetArr []*entity.StockTarget) {
 	agentChan := make(chan *trader.StockTrader)
 	targetMap := make(map[string]*entity.StockTarget)
 	mutex := sync.RWMutex{}
@@ -419,16 +358,13 @@ func (uc *StreamUseCase) ReceiveStreamData(ctx context.Context, targetArr []*ent
 			go agent.TradingRoom()
 
 			// send tick, bidask to trade room's channel
-			go uc.rabbit.TickConsumer(agent.GetStockNum(), agent.GetTickChan())
-			go uc.rabbit.StockBidAskConsumer(agent.GetStockNum(), agent.GetBidAskChan())
+			r := mq.NewRabbit()
+			go r.TickConsumer(agent.GetStockNum(), agent.GetTickChan())
+			go r.StockBidAskConsumer(agent.GetStockNum(), agent.GetBidAskChan())
 
-			mutex.RLock()
-			target := targetMap[agent.GetStockNum()]
-			mutex.RUnlock()
-
-			if uc.cfg.StockTradeSwitch.Subscribe {
-				bus.PublishTopicEvent(topic.TopicSubscribeStockTickTargets, []*entity.StockTarget{target})
-			}
+			// mutex.RLock()
+			// target := targetMap[agent.GetStockNum()]
+			// mutex.RUnlock()
 		}
 	}()
 
@@ -449,95 +385,164 @@ func (uc *StreamUseCase) ReceiveStreamData(ctx context.Context, targetArr []*ent
 
 	wg.Wait()
 	close(agentChan)
-
-	go uc.checkStockTradeSwitch()
 }
 
-// ReceiveFutureStreamData -.
-func (uc *StreamUseCase) ReceiveFutureStreamData(ctx context.Context, code string) {
+// ReceiveFutureSubscribeData -.
+func (uc *RealTimeUseCase) ReceiveFutureSubscribeData(code string) {
 	uc.mainFutureCode = code
 	agent := trader.NewFutureTrader(code, uc.cfg.FutureTradeSwitch, uc.cfg.FutureAnalyze)
 
 	go agent.TradingRoom()
-	go uc.rabbit.FutureTickConsumer(code, agent.GetTickChan())
-	// go uc.rabbit.FutureBidAskConsumer(code, agent.GetBidAskChan())
 
-	if uc.cfg.FutureTradeSwitch.Subscribe {
-		bus.PublishTopicEvent(topic.TopicSubscribeFutureTickTargets, code)
-	}
-
-	go uc.checkFutureTradeSwitch()
-}
-
-func (uc *StreamUseCase) checkStockTradeSwitch() {
-	if !uc.cfg.StockTradeSwitch.AllowTrade {
-		return
-	}
-
-	openTime := uc.basic.OpenTime
-	tradeInEndTime := uc.basic.TradeInEndTime
-
-	for range time.NewTicker(2500 * time.Millisecond).C {
-		now := time.Now()
-		var tempSwitch bool
-		switch {
-		case now.Before(openTime) || now.After(tradeInEndTime):
-			tempSwitch = false
-		case now.After(openTime) && now.Before(tradeInEndTime):
-			tempSwitch = true
-		}
-
-		if uc.stockTradeInSwitch != tempSwitch {
-			uc.stockTradeInSwitch = tempSwitch
-			bus.PublishTopicEvent(topic.TopicUpdateStockTradeSwitch, uc.stockTradeInSwitch)
-		}
-	}
-}
-
-func (uc *StreamUseCase) checkFutureTradeSwitch() {
-	if !uc.cfg.FutureTradeSwitch.AllowTrade {
-		return
-	}
-
-	futureTradeDay := uc.tradeDay.GetFutureTradeDay()
-	timeRange := [][]time.Time{}
-	firstStart := futureTradeDay.StartTime
-	secondStart := futureTradeDay.EndTime.Add(-300 * time.Minute)
-
-	timeRange = append(timeRange, []time.Time{firstStart, firstStart.Add(time.Duration(uc.cfg.FutureTradeSwitch.TradeTimeRange.FirstPartDuration) * time.Minute)})
-	timeRange = append(timeRange, []time.Time{secondStart, secondStart.Add(time.Duration(uc.cfg.FutureTradeSwitch.TradeTimeRange.SecondPartDuration) * time.Minute)})
-
-	for range time.NewTicker(2500 * time.Millisecond).C {
-		now := time.Now()
-		var tempSwitch bool
-		for _, rangeTime := range timeRange {
-			if now.After(rangeTime[0]) && now.Before(rangeTime[1]) {
-				tempSwitch = true
-			}
-		}
-
-		if uc.futureTradeInSwitch != tempSwitch {
-			uc.futureTradeInSwitch = tempSwitch
-			bus.PublishTopicEvent(topic.TopicUpdateFutureTradeSwitch, uc.futureTradeInSwitch)
-		}
-	}
+	r := mq.NewRabbit()
+	go r.FutureTickConsumer(code, agent.GetTickChan())
+	// go r.FutureBidAskConsumer(code, agent.GetBidAskChan())
 }
 
 // NewFutureRealTimeConnection -.
-func (uc *StreamUseCase) NewFutureRealTimeConnection(tickChan chan *entity.RealTimeFutureTick, connectionID string) {
+func (uc *RealTimeUseCase) NewFutureRealTimeConnection(tickChan chan *entity.RealTimeFutureTick, connectionID string) {
 	uc.rabbit.AddFutureTickChan(tickChan, connectionID)
 }
 
 // DeleteFutureRealTimeConnection -.
-func (uc *StreamUseCase) DeleteFutureRealTimeConnection(connectionID string) {
+func (uc *RealTimeUseCase) DeleteFutureRealTimeConnection(connectionID string) {
 	uc.rabbit.RemoveFutureTickChan(connectionID)
 }
 
 // NewOrderStatusConnection -.
-func (uc *StreamUseCase) NewOrderStatusConnection(orderStatusChan chan interface{}, connectionID string) {
+func (uc *RealTimeUseCase) NewOrderStatusConnection(orderStatusChan chan interface{}, connectionID string) {
 	uc.rabbit.AddOrderStatusChan(orderStatusChan, connectionID)
 }
 
-func (uc *StreamUseCase) DeleteOrderStatusConnection(connectionID string) {
+func (uc *RealTimeUseCase) DeleteOrderStatusConnection(connectionID string) {
 	uc.rabbit.RemoveOrderStatusChan(connectionID)
+}
+
+// UnSubscribeAll -.
+func (uc *RealTimeUseCase) UnSubscribeAll() error {
+	failMessge, err := uc.subgRPCAPI.UnSubscribeStockAllTick()
+	if err != nil {
+		return err
+	}
+
+	if m := failMessge.GetErr(); m != "" {
+		return errors.New(m)
+	}
+
+	failMessge, err = uc.subgRPCAPI.UnSubscribeStockAllBidAsk()
+	if err != nil {
+		return err
+	}
+
+	if m := failMessge.GetErr(); m != "" {
+		return errors.New(m)
+	}
+
+	return nil
+}
+
+// SubscribeStockTick -.
+func (uc *RealTimeUseCase) SubscribeStockTick(targetArr []*entity.StockTarget) error {
+	if !uc.cfg.StockTradeSwitch.Subscribe {
+		return nil
+	}
+
+	var subArr []string
+	for _, v := range targetArr {
+		subArr = append(subArr, v.StockNum)
+	}
+
+	failSubNumArr, err := uc.subgRPCAPI.SubscribeStockTick(subArr)
+	if err != nil {
+		return err
+	}
+
+	if len(failSubNumArr) != 0 {
+		return fmt.Errorf("subscribe fail %v", failSubNumArr)
+	}
+
+	return nil
+}
+
+// SubscribeStockBidAsk -.
+func (uc *RealTimeUseCase) SubscribeStockBidAsk(targetArr []*entity.StockTarget) error {
+	if !uc.cfg.StockTradeSwitch.Subscribe {
+		return nil
+	}
+
+	var subArr []string
+	for _, v := range targetArr {
+		subArr = append(subArr, v.StockNum)
+	}
+
+	failSubNumArr, err := uc.subgRPCAPI.SubscribeStockBidAsk(subArr)
+	if err != nil {
+		return err
+	}
+
+	if len(failSubNumArr) != 0 {
+		return fmt.Errorf("subscribe fail %v", failSubNumArr)
+	}
+
+	return nil
+}
+
+// UnSubscribeStockTick -.
+func (uc *RealTimeUseCase) UnSubscribeStockTick(stockNum string) error {
+	failUnSubNumArr, err := uc.subgRPCAPI.UnSubscribeStockTick([]string{stockNum})
+	if err != nil {
+		return err
+	}
+
+	if len(failUnSubNumArr) != 0 {
+		return fmt.Errorf("unsubscribe fail %v", failUnSubNumArr)
+	}
+
+	return nil
+}
+
+// UnSubscribeStockBidAsk -.
+func (uc *RealTimeUseCase) UnSubscribeStockBidAsk(stockNum string) error {
+	failUnSubNumArr, err := uc.subgRPCAPI.UnSubscribeStockBidAsk([]string{stockNum})
+	if err != nil {
+		return err
+	}
+
+	if len(failUnSubNumArr) != 0 {
+		return fmt.Errorf("unsubscribe fail %v", failUnSubNumArr)
+	}
+
+	return nil
+}
+
+// SubscribeFutureTick -.
+func (uc *RealTimeUseCase) SubscribeFutureTick(code string) error {
+	if !uc.cfg.FutureTradeSwitch.Subscribe {
+		return nil
+	}
+
+	failSubNumArr, err := uc.subgRPCAPI.SubscribeFutureTick([]string{code})
+	if err != nil {
+		return err
+	}
+
+	if len(failSubNumArr) != 0 {
+		return fmt.Errorf("subscribe future fail %v", failSubNumArr)
+	}
+
+	return nil
+}
+
+// SubscribeFutureBidAsk -.
+func (uc *RealTimeUseCase) SubscribeFutureBidAsk(code string) error {
+	failSubNumArr, err := uc.subgRPCAPI.SubscribeFutureBidAsk([]string{code})
+	if err != nil {
+		return err
+	}
+
+	if len(failSubNumArr) != 0 {
+		return fmt.Errorf("subscribe future fail %v", failSubNumArr)
+	}
+
+	return nil
 }

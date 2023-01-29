@@ -8,7 +8,6 @@ import (
 
 	"tmt/cmd/config"
 	"tmt/internal/entity"
-	"tmt/internal/usecase"
 	"tmt/pb"
 	"tmt/pkg/common"
 	"tmt/pkg/log"
@@ -21,8 +20,8 @@ import (
 
 var logger = log.Get()
 
-// StreamRabbit -.
-type StreamRabbit struct {
+// Rabbit -.
+type Rabbit struct {
 	conn *rabbitmq.Connection
 
 	allStockMap   map[string]*entity.Stock
@@ -36,8 +35,7 @@ type StreamRabbit struct {
 	orderStatusChanMapLock sync.RWMutex
 }
 
-// NewStream -.
-func NewStream() usecase.StreamRabbit {
+func NewRabbit() *Rabbit {
 	allConfig := config.GetConfig()
 
 	conn := rabbitmq.NewConnection(
@@ -51,14 +49,14 @@ func NewStream() usecase.StreamRabbit {
 		logger.Error(err)
 	}
 
-	return &StreamRabbit{
+	return &Rabbit{
 		conn:               conn,
 		futureTickChanMap:  make(map[string]chan *entity.RealTimeFutureTick),
 		orderStatusChanMap: make(map[string]chan interface{}),
 	}
 }
 
-func (c *StreamRabbit) establishDelivery(key string) <-chan amqp.Delivery {
+func (c *Rabbit) establishDelivery(key string) <-chan amqp.Delivery {
 	delivery, err := c.conn.BindAndConsume(key)
 	if err != nil {
 		logger.Fatal(err)
@@ -67,7 +65,7 @@ func (c *StreamRabbit) establishDelivery(key string) <-chan amqp.Delivery {
 }
 
 // FillAllBasic -.
-func (c *StreamRabbit) FillAllBasic(allStockMap map[string]*entity.Stock, allFutureMap map[string]*entity.Future) {
+func (c *Rabbit) FillAllBasic(allStockMap map[string]*entity.Stock, allFutureMap map[string]*entity.Future) {
 	defer c.detailMapLock.Unlock()
 	c.detailMapLock.Lock()
 	c.allStockMap = allStockMap
@@ -79,7 +77,7 @@ func (c *StreamRabbit) FillAllBasic(allStockMap map[string]*entity.Stock, allFut
 }
 
 // EventConsumer -.
-func (c *StreamRabbit) EventConsumer(eventChan chan *entity.SinopacEvent) {
+func (c *Rabbit) EventConsumer(eventChan chan *entity.SinopacEvent) {
 	delivery := c.establishDelivery(routingKeyEvent)
 	for {
 		d, opened := <-delivery
@@ -111,7 +109,7 @@ func (c *StreamRabbit) EventConsumer(eventChan chan *entity.SinopacEvent) {
 }
 
 // OrderStatusConsumer OrderStatusConsumer
-func (c *StreamRabbit) OrderStatusConsumer() {
+func (c *Rabbit) OrderStatusConsumer() {
 	delivery := c.establishDelivery(routingKeyOrder)
 
 	for {
@@ -136,7 +134,7 @@ func (c *StreamRabbit) OrderStatusConsumer() {
 }
 
 // OrderStatusArrConsumer -.
-func (c *StreamRabbit) OrderStatusArrConsumer() {
+func (c *Rabbit) OrderStatusArrConsumer() {
 	go c.OrderStatusConsumer()
 
 	delivery := c.establishDelivery(routingKeyOrderArr)
@@ -160,7 +158,7 @@ func (c *StreamRabbit) OrderStatusArrConsumer() {
 	}
 }
 
-func (c *StreamRabbit) sendOrder(order interface{}) {
+func (c *Rabbit) sendOrder(order interface{}) {
 	c.orderStatusChanMapLock.RLock()
 	for _, t := range c.orderStatusChanMap {
 		t <- order
@@ -168,7 +166,7 @@ func (c *StreamRabbit) sendOrder(order interface{}) {
 	c.orderStatusChanMapLock.RUnlock()
 }
 
-func (c *StreamRabbit) protoToOrder(proto *pb.OrderStatus) interface{} {
+func (c *Rabbit) protoToOrder(proto *pb.OrderStatus) interface{} {
 	defer c.detailMapLock.RUnlock()
 	c.detailMapLock.RLock()
 
@@ -211,7 +209,7 @@ func (c *StreamRabbit) protoToOrder(proto *pb.OrderStatus) interface{} {
 }
 
 // TickConsumer -.
-func (c *StreamRabbit) TickConsumer(stockNum string, tickChan chan *entity.RealTimeStockTick) {
+func (c *Rabbit) TickConsumer(stockNum string, tickChan chan *entity.RealTimeStockTick) {
 	delivery := c.establishDelivery(fmt.Sprintf("%s:%s", routingKeyTick, stockNum))
 	for {
 		d, opened := <-delivery
@@ -261,7 +259,7 @@ func (c *StreamRabbit) TickConsumer(stockNum string, tickChan chan *entity.RealT
 }
 
 // FutureTickConsumer -.
-func (c *StreamRabbit) FutureTickConsumer(code string, tickChan chan *entity.RealTimeFutureTick) {
+func (c *Rabbit) FutureTickConsumer(code string, tickChan chan *entity.RealTimeFutureTick) {
 	c.futureTickMapLock.Lock()
 	c.futureTickChanMap[uuid.New().String()] = tickChan
 	c.futureTickMapLock.Unlock()
@@ -319,7 +317,7 @@ func (c *StreamRabbit) FutureTickConsumer(code string, tickChan chan *entity.Rea
 }
 
 // StockBidAskConsumer -.
-func (c *StreamRabbit) StockBidAskConsumer(stockNum string, bidAskChan chan *entity.RealTimeStockBidAsk) {
+func (c *Rabbit) StockBidAskConsumer(stockNum string, bidAskChan chan *entity.RealTimeStockBidAsk) {
 	delivery := c.establishDelivery(fmt.Sprintf("%s:%s", routingKeyBidAsk, stockNum))
 	for {
 		d, opened := <-delivery
@@ -364,7 +362,7 @@ func (c *StreamRabbit) StockBidAskConsumer(stockNum string, bidAskChan chan *ent
 }
 
 // FutureBidAskConsumer -.
-func (c *StreamRabbit) FutureBidAskConsumer(code string, bidAskChan chan *entity.FutureRealTimeBidAsk) {
+func (c *Rabbit) FutureBidAskConsumer(code string, bidAskChan chan *entity.FutureRealTimeBidAsk) {
 	delivery := c.establishDelivery(fmt.Sprintf("%s:%s", routingKeyFutureBidAsk, code))
 	for {
 		d, opened := <-delivery
@@ -416,27 +414,27 @@ func (c *StreamRabbit) FutureBidAskConsumer(code string, bidAskChan chan *entity
 }
 
 // AddFutureTickChan -.
-func (c *StreamRabbit) AddFutureTickChan(tickChan chan *entity.RealTimeFutureTick, connectionID string) {
+func (c *Rabbit) AddFutureTickChan(tickChan chan *entity.RealTimeFutureTick, connectionID string) {
 	defer c.futureTickMapLock.Unlock()
 	c.futureTickMapLock.Lock()
 	c.futureTickChanMap[connectionID] = tickChan
 }
 
 // RemoveFutureTickChan -.
-func (c *StreamRabbit) RemoveFutureTickChan(connectionID string) {
+func (c *Rabbit) RemoveFutureTickChan(connectionID string) {
 	defer c.futureTickMapLock.Unlock()
 	c.futureTickMapLock.Lock()
 	close(c.futureTickChanMap[connectionID])
 	delete(c.futureTickChanMap, connectionID)
 }
 
-func (c *StreamRabbit) AddOrderStatusChan(orderStatusChan chan interface{}, connectionID string) {
+func (c *Rabbit) AddOrderStatusChan(orderStatusChan chan interface{}, connectionID string) {
 	defer c.orderStatusChanMapLock.Unlock()
 	c.orderStatusChanMapLock.Lock()
 	c.orderStatusChanMap[connectionID] = orderStatusChan
 }
 
-func (c *StreamRabbit) RemoveOrderStatusChan(connectionID string) {
+func (c *Rabbit) RemoveOrderStatusChan(connectionID string) {
 	defer c.orderStatusChanMapLock.Unlock()
 	c.orderStatusChanMapLock.Lock()
 	close(c.orderStatusChanMap[connectionID])

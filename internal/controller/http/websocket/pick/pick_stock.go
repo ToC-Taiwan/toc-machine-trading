@@ -15,14 +15,14 @@ import (
 type WSPickStock struct {
 	*websocket.WSRouter
 
-	s usecase.Stream
+	s usecase.RealTime
 
 	pickStockArr []string
 	mutex        sync.Mutex
 }
 
 // StartWSPickStock -.
-func StartWSPickStock(c *gin.Context, s usecase.Stream) {
+func StartWSPickStock(c *gin.Context, s usecase.RealTime) {
 	w := &WSPickStock{
 		s:        s,
 		WSRouter: websocket.NewWSRouter(c),

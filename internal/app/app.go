@@ -69,10 +69,10 @@ func RunApp(cfg *config.Config) {
 
 	basicUseCase := usecase.NewBasic(repo.NewBasic(app.pg), grpcapi.NewBasic(app.sc), grpcapi.NewBasic(app.fg))
 	tradeUseCase := usecase.NewTrade(grpcapi.NewTrade(app.sc), grpcapi.NewTrade(app.fg), repo.NewTrade(app.pg))
-	streamUseCase := usecase.NewStream(repo.NewStream(app.pg), grpcapi.NewStream(app.sc), mq.NewStream())
 	analyzeUseCase := usecase.NewAnalyze(repo.NewHistory(app.pg))
 	historyUseCase := usecase.NewHistory(repo.NewHistory(app.pg), grpcapi.NewHistory(app.sc))
-	targetUseCase := usecase.NewTarget(repo.NewTarget(app.pg), grpcapi.NewTarget(app.sc), grpcapi.NewStream(app.sc))
+	realTimeUseCase := usecase.NewRealTime(repo.NewRealTime(app.pg), grpcapi.NewRealTime(app.sc), grpcapi.NewSubscribe(app.sc), mq.NewRabbit())
+	targetUseCase := usecase.NewTarget(repo.NewTarget(app.pg), grpcapi.NewRealTime(app.sc))
 
 	// HTTP Server
 	handler := gin.New()
@@ -80,7 +80,7 @@ func RunApp(cfg *config.Config) {
 	{
 		r.AddBasicRoutes(handler, basicUseCase)
 		r.AddTradeRoutes(handler, tradeUseCase)
-		r.AddStreamRoutes(handler, streamUseCase, tradeUseCase, historyUseCase)
+		r.AddRealTimeRoutes(handler, realTimeUseCase, tradeUseCase, historyUseCase)
 		r.AddAnalyzeRoutes(handler, analyzeUseCase)
 		r.AddHistoryRoutes(handler, historyUseCase)
 		r.AddTargetRoutes(handler, targetUseCase)

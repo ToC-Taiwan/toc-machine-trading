@@ -17,7 +17,7 @@ type orderRoutes struct {
 	t usecase.Trade
 }
 
-func newOrderRoutes(handler *gin.RouterGroup, t usecase.Trade) {
+func newTradeRoutes(handler *gin.RouterGroup, t usecase.Trade) {
 	r := &orderRoutes{t}
 
 	h := handler.Group("/order")

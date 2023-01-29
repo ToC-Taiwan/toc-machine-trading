@@ -36,17 +36,17 @@ func NewAnalyze(r HistoryRepo) Analyze {
 }
 
 // AnalyzeAll -.
-func (uc *AnalyzeUseCase) AnalyzeAll(ctx context.Context, targetArr []*entity.StockTarget) {
-	uc.findBelowQuaterMATargets(ctx, targetArr)
+func (uc *AnalyzeUseCase) AnalyzeAll(targetArr []*entity.StockTarget) {
+	uc.findBelowQuaterMATargets(targetArr)
 }
 
-func (uc *AnalyzeUseCase) findBelowQuaterMATargets(ctx context.Context, targetArr []*entity.StockTarget) {
+func (uc *AnalyzeUseCase) findBelowQuaterMATargets(targetArr []*entity.StockTarget) {
 	defer uc.rebornLock.Unlock()
 	uc.rebornLock.Lock()
 	uc.targetArr = append(uc.targetArr, targetArr...)
 
 	for _, t := range targetArr {
-		maMap, err := uc.repo.QueryAllQuaterMAByStockNum(ctx, t.StockNum)
+		maMap, err := uc.repo.QueryAllQuaterMAByStockNum(context.Background(), t.StockNum)
 		if err != nil {
 			logger.Fatal(err)
 		}

@@ -65,8 +65,8 @@ func (r *RouterV1) AddTargetRoutes(handler *gin.Engine, target usecase.Target) {
 }
 
 // AddTradeRoutes -.
-func (r *RouterV1) AddTradeRoutes(handler *gin.Engine, order usecase.Trade) {
-	newOrderRoutes(r.g, order)
+func (r *RouterV1) AddTradeRoutes(handler *gin.Engine, trade usecase.Trade) {
+	newTradeRoutes(r.g, trade)
 }
 
 // AddHistoryRoutes -.
@@ -74,9 +74,9 @@ func (r *RouterV1) AddHistoryRoutes(handler *gin.Engine, history usecase.History
 	newHistoryRoutes(r.g, history)
 }
 
-// AddStreamRoutes -.
-func (r *RouterV1) AddStreamRoutes(handler *gin.Engine, stream usecase.Stream, order usecase.Trade, history usecase.History) {
-	newStreamRoutes(r.g, stream, order, history)
+// AddRealTimeRoutes -.
+func (r *RouterV1) AddRealTimeRoutes(handler *gin.Engine, realTime usecase.RealTime, trade usecase.Trade, history usecase.History) {
+	newRealTimeRoutes(r.g, realTime, trade, history)
 }
 
 // @Summary     healthCheck

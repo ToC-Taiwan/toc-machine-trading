@@ -8,18 +8,17 @@ import (
 	"tmt/pkg/postgres"
 )
 
-// StreamRepo -.
-type StreamRepo struct {
+// RealTimeRepo -.
+type RealTimeRepo struct {
 	*postgres.Postgres
 }
 
-// NewStream -.
-func NewStream(pg *postgres.Postgres) usecase.StreamRepo {
-	return &StreamRepo{pg}
+func NewRealTime(pg *postgres.Postgres) usecase.RealTimeRepo {
+	return &RealTimeRepo{pg}
 }
 
 // InsertEvent -.
-func (r *StreamRepo) InsertEvent(ctx context.Context, t *entity.SinopacEvent) error {
+func (r *RealTimeRepo) InsertEvent(ctx context.Context, t *entity.SinopacEvent) error {
 	builder := r.Builder.Insert(tableNameEvent).
 		Columns("event, event_code, info, response, event_time").
 		Values(t.Event, t.EventCode, t.Info, t.Response, t.EventTime)
