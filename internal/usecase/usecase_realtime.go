@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"sync"
 	"time"
 
 	"tmt/cmd/config"
@@ -347,42 +346,12 @@ func (uc *RealTimeUseCase) GetMainFuture() *entity.Future {
 
 // ReceiveStockSubscribeData - receive target data, start goroutine to trade
 func (uc *RealTimeUseCase) ReceiveStockSubscribeData(targetArr []*entity.StockTarget) {
-	agentChan := make(chan *trader.StockTrader)
-	targetMap := make(map[string]*entity.StockTarget)
-	mutex := sync.RWMutex{}
-
-	go func() {
-		for {
-			agent, ok := <-agentChan
-			if !ok {
-				break
-			}
-			go agent.TradingRoom()
-
-			// send tick, bidask to trade room's channel
-			r := rabbit.NewRabbit()
-			go r.StockTickConsumer(agent.GetStockNum(), agent.GetTickChan())
-			// go r.StockBidAskConsumer(agent.GetStockNum(), agent.GetBidAskChan())
-		}
-	}()
-
-	var wg sync.WaitGroup
 	for _, t := range targetArr {
-		target := t
-		mutex.Lock()
-		targetMap[target.StockNum] = target
-		mutex.Unlock()
-
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			agent := trader.NewStockTrader(target.StockNum, uc.cfg.StockTradeSwitch, uc.cfg.StockAnalyze)
-			agentChan <- agent
-		}()
+		agent := trader.NewStockTrader(t.StockNum, uc.cfg.StockTradeSwitch, uc.cfg.StockAnalyze)
+		r := rabbit.NewRabbit()
+		go agent.TradingRoom()
+		go r.StockTickConsumer(agent.GetStockNum(), agent.GetTickChan())
 	}
-
-	wg.Wait()
-	close(agentChan)
 	logger.Info("Stock trade room all start")
 }
 
@@ -390,13 +359,8 @@ func (uc *RealTimeUseCase) ReceiveStockSubscribeData(targetArr []*entity.StockTa
 func (uc *RealTimeUseCase) ReceiveFutureSubscribeData(code string) {
 	uc.mainFutureCode = code
 	agent := trader.NewFutureTrader(code, uc.cfg.FutureTradeSwitch, uc.cfg.FutureAnalyze)
-
 	go agent.TradingRoom()
-
 	go uc.futureRabbit.FutureTickConsumer(code, agent.GetTickChan())
-	// r := rabbit.NewRabbit()
-	// go r.FutureTickConsumer(code, agent.GetTickChan())
-	// go r.FutureBidAskConsumer(code, agent.GetBidAskChan())
 	logger.Info("Future trade room start")
 }
 
