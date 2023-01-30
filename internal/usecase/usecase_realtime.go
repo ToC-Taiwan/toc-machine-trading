@@ -19,10 +19,11 @@ import (
 
 // RealTimeUseCase -.
 type RealTimeUseCase struct {
-	repo       RealTimeRepo
-	grpcapi    RealTimegRPCAPI
-	subgRPCAPI SubscribegRPCAPI
-	rabbit     Rabbit
+	repo         RealTimeRepo
+	grpcapi      RealTimegRPCAPI
+	subgRPCAPI   SubscribegRPCAPI
+	commonRabbit Rabbit
+	futureRabbit Rabbit
 
 	cfg          *config.Config
 	targetFilter *target.Filter
@@ -35,7 +36,8 @@ func NewRealTime(r RealTimeRepo, g RealTimegRPCAPI, s SubscribegRPCAPI) RealTime
 	cfg := config.GetConfig()
 	uc := &RealTimeUseCase{
 		repo:         r,
-		rabbit:       rabbit.NewRabbit(),
+		commonRabbit: rabbit.NewRabbit(),
+		futureRabbit: rabbit.NewRabbit(),
 		grpcapi:      g,
 		subgRPCAPI:   s,
 		cfg:          cfg,
@@ -48,7 +50,7 @@ func NewRealTime(r RealTimeRepo, g RealTimegRPCAPI, s SubscribegRPCAPI) RealTime
 	}
 
 	basic := cc.GetBasicInfo()
-	uc.rabbit.FillAllBasic(basic.AllStocks, basic.AllFutures)
+	uc.commonRabbit.FillAllBasic(basic.AllStocks, basic.AllFutures)
 	uc.periodUpdateTradeIndex()
 
 	go uc.ReceiveEvent(context.Background())
@@ -134,7 +136,7 @@ func (uc *RealTimeUseCase) ReceiveEvent(ctx context.Context) {
 			}
 		}
 	}()
-	uc.rabbit.EventConsumer(eventChan)
+	uc.commonRabbit.EventConsumer(eventChan)
 }
 
 // ReceiveOrderStatus -.
@@ -157,9 +159,9 @@ func (uc *RealTimeUseCase) ReceiveOrderStatus(ctx context.Context) {
 			}
 		}
 	}()
-	uc.rabbit.AddOrderStatusChan(orderStatusChan, uuid.New().String())
-	go uc.rabbit.OrderStatusConsumer()
-	go uc.rabbit.OrderStatusArrConsumer()
+	uc.commonRabbit.AddOrderStatusChan(orderStatusChan, uuid.New().String())
+	go uc.commonRabbit.OrderStatusConsumer()
+	go uc.commonRabbit.OrderStatusArrConsumer()
 }
 
 // GetTSESnapshot -.
@@ -391,29 +393,30 @@ func (uc *RealTimeUseCase) ReceiveFutureSubscribeData(code string) {
 
 	go agent.TradingRoom()
 
-	r := rabbit.NewRabbit()
-	go r.FutureTickConsumer(code, agent.GetTickChan())
+	go uc.futureRabbit.FutureTickConsumer(code, agent.GetTickChan())
+	// r := rabbit.NewRabbit()
+	// go r.FutureTickConsumer(code, agent.GetTickChan())
 	// go r.FutureBidAskConsumer(code, agent.GetBidAskChan())
 	logger.Info("Future trade room start")
 }
 
 // NewFutureRealTimeConnection -.
 func (uc *RealTimeUseCase) NewFutureRealTimeConnection(tickChan chan *entity.RealTimeFutureTick, connectionID string) {
-	uc.rabbit.AddFutureTickChan(tickChan, connectionID)
+	uc.futureRabbit.AddFutureTickChan(tickChan, connectionID)
 }
 
 // DeleteFutureRealTimeConnection -.
 func (uc *RealTimeUseCase) DeleteFutureRealTimeConnection(connectionID string) {
-	uc.rabbit.RemoveFutureTickChan(connectionID)
+	uc.futureRabbit.RemoveFutureTickChan(connectionID)
 }
 
 // NewOrderStatusConnection -.
 func (uc *RealTimeUseCase) NewOrderStatusConnection(orderStatusChan chan interface{}, connectionID string) {
-	uc.rabbit.AddOrderStatusChan(orderStatusChan, connectionID)
+	uc.futureRabbit.AddOrderStatusChan(orderStatusChan, connectionID)
 }
 
 func (uc *RealTimeUseCase) DeleteOrderStatusConnection(connectionID string) {
-	uc.rabbit.RemoveOrderStatusChan(connectionID)
+	uc.futureRabbit.RemoveOrderStatusChan(connectionID)
 }
 
 // UnSubscribeAll -.
