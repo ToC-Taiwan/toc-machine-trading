@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"tmt/internal/entity"
-	"tmt/internal/usecase"
 	"tmt/pkg/postgres"
 
 	"github.com/Masterminds/squirrel"
@@ -19,7 +18,7 @@ type HistoryRepo struct {
 }
 
 // NewHistory -.
-func NewHistory(pg *postgres.Postgres) usecase.HistoryRepo {
+func NewHistory(pg *postgres.Postgres) *HistoryRepo {
 	return &HistoryRepo{pg}
 }
 

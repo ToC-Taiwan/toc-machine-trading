@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"tmt/internal/entity"
-	"tmt/internal/usecase"
 	"tmt/pkg/postgres"
 
 	"github.com/Masterminds/squirrel"
@@ -19,7 +18,7 @@ type TradeRepo struct {
 	*postgres.Postgres
 }
 
-func NewTrade(pg *postgres.Postgres) usecase.TradeRepo {
+func NewTrade(pg *postgres.Postgres) *TradeRepo {
 	return &TradeRepo{pg}
 }
 

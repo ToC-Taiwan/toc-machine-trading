@@ -10,7 +10,6 @@ import (
 	"tmt/cmd/config"
 	"tmt/internal/entity"
 	"tmt/internal/usecase/module/tradeday"
-	"tmt/internal/usecase/module/trader"
 	"tmt/internal/usecase/topic"
 	"tmt/pkg/common"
 	"tmt/pkg/utils"
@@ -29,24 +28,6 @@ type HistoryUseCase struct {
 
 	tradeDay       *tradeday.TradeDay
 	mainFutureCode string
-}
-
-// NewHistory -.
-func NewHistory(r HistoryRepo, t HistorygRPCAPI) History {
-	uc := &HistoryUseCase{
-		repo:      r,
-		grpcapi:   t,
-		fetchList: make(map[string]*entity.StockTarget),
-		tradeDay:  tradeday.NewTradeDay(),
-	}
-
-	cfg := config.GetConfig()
-	uc.stockAnalyzeCfg = cfg.StockAnalyze
-	uc.basic = cc.GetBasicInfo()
-
-	bus.SubscribeTopic(topic.TopicFetchStockHistory, uc.FetchHistory)
-	bus.SubscribeTopic(topic.TopicSubscribeFutureTickTargets, uc.updateMainFutureCode)
-	return uc
 }
 
 // GetTradeDay -.
@@ -527,145 +508,6 @@ func (uc *HistoryUseCase) FetchFutureHistoryTick(code string, date time.Time) []
 	close(dataChan)
 	<-wait
 	return result[code]
-}
-
-func (uc *HistoryUseCase) findExistFutureHistoryTick(date tradeday.TradePeriod, code string) ([][]*entity.FutureHistoryTick, error) {
-	dbTickArr, err := uc.repo.QueryFutureHistoryTickArrByTime(context.Background(), code, date.StartTime, date.EndTime)
-	if err != nil {
-		return nil, err
-	}
-
-	if len(dbTickArr) == 0 {
-		dbTickArr = uc.FetchFutureHistoryTick(code, date.TradeDay)
-		if dbTickArr == nil {
-			return nil, fmt.Errorf("fetch %s tick failed", date.TradeDay.Format(common.ShortTimeLayout))
-		}
-
-		err = uc.repo.InsertFutureHistoryTickArr(context.Background(), dbTickArr)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	var cut int
-	for i, v := range dbTickArr {
-		if v.TickTime.After(date.StartTime.Add(14 * time.Hour)) {
-			cut = i
-			break
-		}
-	}
-
-	firstPart := dbTickArr[:cut]
-	secondPart := dbTickArr[cut:]
-
-	return [][]*entity.FutureHistoryTick{firstPart, secondPart}, nil
-}
-
-func (uc *HistoryUseCase) fetchFutureHistoryClose(code string, date time.Time) *entity.FutureHistoryClose {
-	result := make(map[string]*entity.FutureHistoryClose)
-	dataChan := make(chan *entity.FutureHistoryClose)
-	wait := make(chan struct{})
-	go func() {
-		for {
-			close, ok := <-dataChan
-			if !ok {
-				break
-			}
-			result[close.Code] = close
-		}
-		close(wait)
-	}()
-	closeArr, err := uc.grpcapi.GetFutureHistoryClose([]string{code}, date.Format(common.ShortTimeLayout))
-	if err != nil {
-		logger.Error(err)
-	}
-	for _, close := range closeArr {
-		dataChan <- &entity.FutureHistoryClose{
-			Code: close.GetCode(),
-			HistoryCloseBase: entity.HistoryCloseBase{
-				Date:  date,
-				Close: close.GetClose(),
-			},
-		}
-	}
-	close(dataChan)
-	<-wait
-	if len(result) != 0 {
-		return result[code]
-	}
-	return nil
-}
-
-func (uc *HistoryUseCase) findExistFutureHistoryClose(date tradeday.TradePeriod, code string) (*entity.FutureHistoryClose, error) {
-	dbClose, err := uc.repo.QueryFutureHistoryCloseByDate(context.Background(), code, date.TradeDay)
-	if err != nil {
-		return nil, err
-	}
-
-	if dbClose.Close == 0 {
-		dbClose = uc.fetchFutureHistoryClose(code, date.TradeDay)
-		if dbClose == nil {
-			return nil, fmt.Errorf("fetch %s close failed", date.TradeDay.Format(common.ShortTimeLayout))
-		}
-
-		err = uc.repo.InsertFutureHistoryClose(context.Background(), dbClose)
-		if err != nil {
-			return nil, err
-		}
-	}
-	return dbClose, nil
-}
-
-func (uc *HistoryUseCase) GetFutureTradeCond(days int) trader.SimulateBalance {
-	simulateDateArr := uc.tradeDay.GetLastNFutureTradeDay(days)
-	var balanceArr []trader.SimulateBalance
-	for _, date := range simulateDateArr {
-		dbTickArrArr, err := uc.findExistFutureHistoryTick(date, uc.mainFutureCode)
-		if err != nil {
-			logger.Error(err)
-			continue
-		}
-
-		lastPeriod := date.GetLastFutureTradePeriod()
-		dbClose, err := uc.findExistFutureHistoryClose(lastPeriod, uc.mainFutureCode)
-		if err != nil {
-			logger.Error(err)
-			continue
-		}
-
-		cond := config.FutureAnalyze{
-			MaxHoldTime: 20,
-		}
-
-		logger.Infof("Simulating %s %s, last close: %.0f", uc.mainFutureCode, date.TradeDay.Format(common.ShortTimeLayout), dbClose.Close)
-		for _, dbTickArr := range dbTickArrArr {
-			simulator := trader.NewFutureSimulator(uc.mainFutureCode, cond, date)
-			tickChan := simulator.GetTickChan()
-			for _, tick := range dbTickArr {
-				tickChan <- &entity.RealTimeFutureTick{
-					Code:     uc.mainFutureCode,
-					TickTime: tick.TickTime,
-					Close:    tick.Close,
-					Volume:   tick.Volume,
-					TickType: tick.TickType,
-					PctChg:   utils.Round(100*(tick.Close-dbClose.Close)/dbClose.Close, 2),
-				}
-			}
-			close(tickChan)
-			balanceArr = append(balanceArr, simulator.CalculateFutureTradeBalance())
-		}
-	}
-
-	var totalCount, totalBalance int64
-	for _, balance := range balanceArr {
-		totalCount += balance.Count
-		totalBalance += balance.Balance
-	}
-
-	return trader.SimulateBalance{
-		Count:   totalCount,
-		Balance: totalBalance,
-	}
 }
 
 // FetchFutureHistoryKbar -.

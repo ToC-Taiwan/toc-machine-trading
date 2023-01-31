@@ -3,7 +3,6 @@ package v1
 import (
 	"net/http"
 
-	"tmt/cmd/config"
 	"tmt/internal/entity"
 	"tmt/internal/usecase"
 
@@ -61,7 +60,7 @@ func (r *basicRoutes) getAllRepoStock(c *gin.Context) {
 // @Failure     500 {object} response
 // @Router      /basic/config [get]
 func (r *basicRoutes) getAllConfig(c *gin.Context) {
-	c.JSON(http.StatusOK, config.GetConfig())
+	c.JSON(http.StatusOK, r.t.GetConfig())
 }
 
 // @Summary     terminateSinopac

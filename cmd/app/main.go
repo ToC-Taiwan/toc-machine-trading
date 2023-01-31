@@ -6,7 +6,7 @@ import (
 )
 
 func main() {
-	cfg := config.GetConfig()
+	cfg := config.Get()
 
 	app.InitDB(cfg.Database)
 	app.RunApp(cfg)

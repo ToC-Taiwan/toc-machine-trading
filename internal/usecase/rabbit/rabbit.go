@@ -34,14 +34,12 @@ type Rabbit struct {
 	orderStatusChanMapLock sync.RWMutex
 }
 
-func NewRabbit() *Rabbit {
-	allConfig := config.GetConfig()
-
+func NewRabbit(cfg config.RabbitMQ) *Rabbit {
 	conn := rabbitmq.NewConnection(
-		allConfig.RabbitMQ.Exchange,
-		allConfig.RabbitMQ.URL,
-		allConfig.RabbitMQ.WaitTime,
-		allConfig.RabbitMQ.Attempts,
+		cfg.Exchange,
+		cfg.URL,
+		cfg.WaitTime,
+		cfg.Attempts,
 	)
 
 	if err := conn.AttemptConnect(); err != nil {

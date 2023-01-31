@@ -5,7 +5,6 @@ import (
 	"context"
 	"errors"
 
-	"tmt/internal/usecase"
 	"tmt/pb"
 	"tmt/pkg/grpc"
 
@@ -17,7 +16,7 @@ type RealTimegRPCAPI struct {
 	conn *grpc.Connection
 }
 
-func NewRealTime(client *grpc.Connection) usecase.RealTimegRPCAPI {
+func NewRealTime(client *grpc.Connection) *RealTimegRPCAPI {
 	return &RealTimegRPCAPI{client}
 }
 

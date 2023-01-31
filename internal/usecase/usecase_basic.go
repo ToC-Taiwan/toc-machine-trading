@@ -26,36 +26,6 @@ type BasicUseCase struct {
 	allFutureDetail []*entity.Future
 }
 
-// NewBasic -.
-func NewBasic(r BasicRepo, t, fugle BasicgRPCAPI) Basic {
-	uc := &BasicUseCase{
-		repo:     r,
-		sc:       t,
-		fg:       fugle,
-		tradeDay: tradeday.NewTradeDay(),
-		cfg:      config.GetConfig(),
-	}
-
-	go uc.healthCheckforSinopac()
-	go uc.healthCheckforFugle()
-
-	if err := uc.importCalendarDate(context.Background()); err != nil {
-		logger.Fatal(err)
-	}
-
-	if _, err := uc.updateRepoStock(); err != nil {
-		logger.Fatal(err)
-	}
-
-	if _, err := uc.updateRepoFuture(); err != nil {
-		logger.Fatal(err)
-	}
-
-	uc.fillBasicInfo()
-
-	return uc
-}
-
 // GetAllRepoStock -.
 func (uc *BasicUseCase) GetAllRepoStock(ctx context.Context) ([]*entity.Stock, error) {
 	data, err := uc.repo.QueryAllStock(context.Background())
@@ -68,6 +38,10 @@ func (uc *BasicUseCase) GetAllRepoStock(ctx context.Context) ([]*entity.Stock, e
 		result = append(result, v)
 	}
 	return result, nil
+}
+
+func (uc *BasicUseCase) GetConfig() *config.Config {
+	return uc.cfg
 }
 
 // TerminateSinopac -.

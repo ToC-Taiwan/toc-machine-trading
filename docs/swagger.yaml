@@ -414,13 +414,6 @@ definitions:
       trade_day:
         type: string
     type: object
-  trader.SimulateBalance:
-    properties:
-      balance:
-        type: integer
-      count:
-        type: integer
-    type: object
   v1.allOrder:
     properties:
       future:
@@ -650,32 +643,6 @@ paths:
           schema:
             $ref: '#/definitions/v1.response'
       summary: getKbarData
-      tags:
-      - history
-  /history/simulate/{interval}:
-    get:
-      consumes:
-      - application/json
-      description: simulateFuture
-      operationId: simulateFuture
-      parameters:
-      - description: interval
-        in: path
-        name: interval
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/trader.SimulateBalance'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/v1.response'
-      summary: simulateFuture
       tags:
       - history
   /order:

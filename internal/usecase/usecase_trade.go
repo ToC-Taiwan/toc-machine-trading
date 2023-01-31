@@ -6,11 +6,9 @@ import (
 	"sync"
 	"time"
 
-	"tmt/cmd/config"
 	"tmt/internal/entity"
 	"tmt/internal/usecase/module/quota"
 	"tmt/internal/usecase/module/tradeday"
-	"tmt/internal/usecase/topic"
 )
 
 // TradeUseCase -.
@@ -22,9 +20,6 @@ type TradeUseCase struct {
 	quota    *quota.Quota
 	tradeDay *tradeday.TradeDay
 
-	placeOrderLock       sync.Mutex
-	placeFutureOrderLock sync.Mutex
-
 	stockTradeDay  tradeday.TradePeriod
 	futureTradeDay tradeday.TradePeriod
 
@@ -32,41 +27,6 @@ type TradeUseCase struct {
 
 	updateFutureOrderLock sync.Mutex
 	updateStockOrderLock  sync.Mutex
-}
-
-func NewTrade(t, fugle TradegRPCAPI, r TradeRepo) Trade {
-	cfg := config.GetConfig()
-	tradeDay := tradeday.NewTradeDay()
-
-	uc := &TradeUseCase{
-		simTrade: cfg.Simulation,
-
-		sc:    t,
-		fg:    fugle,
-		repo:  r,
-		quota: quota.NewQuota(cfg.Quota),
-
-		tradeDay:       tradeDay,
-		stockTradeDay:  tradeDay.GetStockTradeDay(),
-		futureTradeDay: tradeDay.GetFutureTradeDay(),
-	}
-
-	bus.SubscribeTopic(topic.TopicPlaceStockOrder, uc.placeStockOrder)
-	bus.SubscribeTopic(topic.TopicCancelStockOrder, uc.cancelStockOrder)
-	bus.SubscribeTopic(topic.TopicInsertOrUpdateStockOrder, uc.updateStockOrderCacheAndInsertDB)
-
-	bus.SubscribeTopic(topic.TopicPlaceFutureOrder, uc.placeFutureOrder)
-	bus.SubscribeTopic(topic.TopicCancelFutureOrder, uc.cancelFutureOrder)
-	bus.SubscribeTopic(topic.TopicInsertOrUpdateFutureOrder, uc.updateFutureOrderCacheAndInsertDB)
-
-	if uc.simTrade {
-		go uc.askSimulateOrderStatus()
-	} else {
-		go uc.askOrderStatus()
-	}
-
-	go uc.updateAllTradeBalance()
-	return uc
 }
 
 func (uc *TradeUseCase) updateAllTradeBalance() {
@@ -166,140 +126,6 @@ func (uc *TradeUseCase) askSimulateOrderStatus() {
 			logger.Error(err)
 		}
 	}
-}
-
-func (uc *TradeUseCase) placeStockOrder(order *entity.StockOrder) {
-	defer uc.placeOrderLock.Unlock()
-	uc.placeOrderLock.Lock()
-
-	cosumeQuota := uc.quota.CalculateOriginalOrderCost(order)
-	if cosumeQuota != 0 && uc.quota.IsEnough(cosumeQuota) {
-		order.Status = entity.StatusAborted
-		return
-	}
-
-	var orderID string
-	var status entity.OrderStatus
-	var err error
-	switch order.Action {
-	case entity.ActionBuy, entity.ActionBuyLater:
-		orderID, status, err = uc.BuyStock(order)
-	case entity.ActionSell:
-		orderID, status, err = uc.SellStock(order)
-	case entity.ActionSellFirst:
-		orderID, status, err = uc.SellFirstStock(order)
-	}
-	if err != nil {
-		logger.Error(err)
-		order.Status = entity.StatusFailed
-		return
-	}
-
-	if status == entity.StatusFailed || orderID == "" {
-		order.Status = entity.StatusFailed
-		return
-	}
-
-	// count quota
-	uc.quota.CosumeQuota(cosumeQuota)
-
-	// modify order and save to cache
-	order.OrderID = orderID
-	order.Status = status
-	order.TradeTime = time.Now()
-	cc.SetOrderByOrderID(order)
-
-	logger.Infof("Place Stock Order -> Stock: %s, Action: %d, Price: %.2f, Qty: %d, Quota: %d", order.StockNum, order.Action, order.Price, order.Quantity, uc.quota.GetCurrentQuota())
-}
-
-func (uc *TradeUseCase) cancelStockOrder(order *entity.StockOrder) {
-	defer uc.placeOrderLock.Unlock()
-	uc.placeOrderLock.Lock()
-
-	order.TradeTime = time.Now()
-	logger.Infof("Cancel Stock Order -> Stock: %s, Action: %d, Price: %.2f, Qty: %d", order.StockNum, order.Action, order.Price, order.Quantity)
-
-	// result will return instantly
-	_, _, err := uc.CancelStockOrderByID(order.OrderID)
-	if err != nil {
-		logger.Error(err)
-		return
-	}
-
-	if cosumeQuota := uc.quota.CalculateOriginalOrderCost(order); cosumeQuota > 0 {
-		uc.quota.BackQuota(cosumeQuota)
-		logger.Infof("Quota Back: %d", uc.quota.GetCurrentQuota())
-	}
-}
-
-// BuyStock -.
-func (uc *TradeUseCase) BuyStock(order *entity.StockOrder) (string, entity.OrderStatus, error) {
-	result, err := uc.sc.BuyStock(order, uc.simTrade)
-	if err != nil {
-		return "", entity.StatusUnknow, err
-	}
-
-	if e := result.GetError(); e != "" {
-		return "", entity.StatusUnknow, errors.New(e)
-	}
-
-	return result.GetOrderId(), entity.StringToOrderStatus(result.GetStatus()), nil
-}
-
-// SellStock -.
-func (uc *TradeUseCase) SellStock(order *entity.StockOrder) (string, entity.OrderStatus, error) {
-	result, err := uc.sc.SellStock(order, uc.simTrade)
-	if err != nil {
-		return "", entity.StatusUnknow, err
-	}
-
-	if e := result.GetError(); e != "" {
-		return "", entity.StatusUnknow, errors.New(e)
-	}
-
-	return result.GetOrderId(), entity.StringToOrderStatus(result.GetStatus()), nil
-}
-
-// SellFirstStock -.
-func (uc *TradeUseCase) SellFirstStock(order *entity.StockOrder) (string, entity.OrderStatus, error) {
-	result, err := uc.sc.SellFirstStock(order, uc.simTrade)
-	if err != nil {
-		return "", entity.StatusUnknow, err
-	}
-
-	if e := result.GetError(); e != "" {
-		return "", entity.StatusUnknow, errors.New(e)
-	}
-
-	return result.GetOrderId(), entity.StringToOrderStatus(result.GetStatus()), nil
-}
-
-// BuyLaterStock -.
-func (uc *TradeUseCase) BuyLaterStock(order *entity.StockOrder) (string, entity.OrderStatus, error) {
-	result, err := uc.sc.BuyStock(order, uc.simTrade)
-	if err != nil {
-		return "", entity.StatusUnknow, err
-	}
-
-	if e := result.GetError(); e != "" {
-		return "", entity.StatusUnknow, errors.New(e)
-	}
-
-	return result.GetOrderId(), entity.StringToOrderStatus(result.GetStatus()), nil
-}
-
-// CancelStockOrderByID -.
-func (uc *TradeUseCase) CancelStockOrderByID(orderID string) (string, entity.OrderStatus, error) {
-	result, err := uc.sc.CancelStock(orderID, uc.simTrade)
-	if err != nil {
-		return "", entity.StatusUnknow, err
-	}
-
-	if e := result.GetError(); e != "" {
-		return "", entity.StatusUnknow, errors.New(e)
-	}
-
-	return result.GetOrderId(), entity.StringToOrderStatus(result.GetStatus()), nil
 }
 
 func (uc *TradeUseCase) updateStockOrderCacheAndInsertDB(order *entity.StockOrder) {
@@ -425,60 +251,6 @@ func (uc *TradeUseCase) calculateReverseStockBalance(reverse entity.StockOrderAr
 	return revereBalance, tradeCount, discount
 }
 
-//
-// below is future trade
-//
-
-func (uc *TradeUseCase) placeFutureOrder(order *entity.FutureOrder) {
-	defer uc.placeFutureOrderLock.Unlock()
-	uc.placeFutureOrderLock.Lock()
-
-	var orderID string
-	var status entity.OrderStatus
-	var err error
-	switch order.Action {
-	case entity.ActionBuy, entity.ActionBuyLater:
-		orderID, status, err = uc.BuyFuture(order)
-	case entity.ActionSell:
-		orderID, status, err = uc.SellFuture(order)
-	case entity.ActionSellFirst:
-		orderID, status, err = uc.SellFirstFuture(order)
-	}
-	if err != nil {
-		logger.Error(err)
-		order.Status = entity.StatusFailed
-		return
-	}
-
-	if status == entity.StatusFailed || orderID == "" {
-		order.Status = entity.StatusFailed
-		return
-	}
-
-	// modify order and save to cache
-	order.OrderID = orderID
-	order.Status = status
-	order.TradeTime = time.Now()
-	cc.SetFutureOrderByOrderID(order)
-
-	logger.Infof("Place Future Order -> Future: %s, Action: %d, Price: %.0f, Qty: %d", order.Code, order.Action, order.Price, order.Quantity)
-}
-
-func (uc *TradeUseCase) cancelFutureOrder(order *entity.FutureOrder) {
-	defer uc.placeFutureOrderLock.Unlock()
-	uc.placeFutureOrderLock.Lock()
-
-	order.TradeTime = time.Now()
-	logger.Infof("Cancel Future Order -> Future: %s, Action: %d, Price: %.0f, Qty: %d", order.Code, order.Action, order.Price, order.Quantity)
-
-	// result will return instantly
-	_, _, err := uc.CancelFutureOrderByID(order.OrderID)
-	if err != nil {
-		logger.Error(err)
-		return
-	}
-}
-
 func (uc *TradeUseCase) updateFutureOrderCacheAndInsertDB(order *entity.FutureOrder) {
 	defer uc.updateFutureOrderLock.Unlock()
 	uc.updateFutureOrderLock.Lock()
@@ -520,7 +292,7 @@ func (uc *TradeUseCase) ManualInsertFutureOrder(ctx context.Context, order *enti
 
 // BuyFuture -.
 func (uc *TradeUseCase) BuyFuture(order *entity.FutureOrder) (string, entity.OrderStatus, error) {
-	result, err := uc.sc.BuyFuture(order, uc.simTrade)
+	result, err := uc.sc.BuyFuture(order)
 	if err != nil {
 		return "", entity.StatusUnknow, err
 	}
@@ -534,7 +306,7 @@ func (uc *TradeUseCase) BuyFuture(order *entity.FutureOrder) (string, entity.Ord
 
 // SellFuture -.
 func (uc *TradeUseCase) SellFuture(order *entity.FutureOrder) (string, entity.OrderStatus, error) {
-	result, err := uc.sc.SellFuture(order, uc.simTrade)
+	result, err := uc.sc.SellFuture(order)
 	if err != nil {
 		return "", entity.StatusUnknow, err
 	}
@@ -548,21 +320,7 @@ func (uc *TradeUseCase) SellFuture(order *entity.FutureOrder) (string, entity.Or
 
 // SellFirstFuture -.
 func (uc *TradeUseCase) SellFirstFuture(order *entity.FutureOrder) (string, entity.OrderStatus, error) {
-	result, err := uc.sc.SellFirstFuture(order, uc.simTrade)
-	if err != nil {
-		return "", entity.StatusUnknow, err
-	}
-
-	if e := result.GetError(); e != "" {
-		return "", entity.StatusUnknow, errors.New(e)
-	}
-
-	return result.GetOrderId(), entity.StringToOrderStatus(result.GetStatus()), nil
-}
-
-// BuyLaterFuture -.
-func (uc *TradeUseCase) BuyLaterFuture(order *entity.FutureOrder) (string, entity.OrderStatus, error) {
-	result, err := uc.sc.BuyFuture(order, uc.simTrade)
+	result, err := uc.sc.SellFirstFuture(order)
 	if err != nil {
 		return "", entity.StatusUnknow, err
 	}
@@ -576,7 +334,7 @@ func (uc *TradeUseCase) BuyLaterFuture(order *entity.FutureOrder) (string, entit
 
 // CancelFutureOrderByID -.
 func (uc *TradeUseCase) CancelFutureOrderByID(orderID string) (string, entity.OrderStatus, error) {
-	result, err := uc.sc.CancelFuture(orderID, uc.simTrade)
+	result, err := uc.sc.CancelFuture(orderID)
 	if err != nil {
 		return "", entity.StatusUnknow, err
 	}
