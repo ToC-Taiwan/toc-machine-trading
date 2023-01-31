@@ -8,8 +8,10 @@ import (
 
 	"tmt/cmd/config"
 	"tmt/internal/entity"
+	"tmt/internal/usecase/grpcapi"
+	"tmt/internal/usecase/module/hadger"
+	"tmt/internal/usecase/module/quota"
 	"tmt/internal/usecase/module/target"
-	"tmt/internal/usecase/module/trader"
 	"tmt/internal/usecase/rabbit"
 	"tmt/internal/usecase/topic"
 
@@ -18,48 +20,22 @@ import (
 
 // RealTimeUseCase -.
 type RealTimeUseCase struct {
-	repo         RealTimeRepo
-	grpcapi      RealTimegRPCAPI
-	subgRPCAPI   SubscribegRPCAPI
+	repo       RealTimeRepo
+	grpcapi    RealTimegRPCAPI
+	subgRPCAPI SubscribegRPCAPI
+
+	sc TradegRPCAPI
+	fg TradegRPCAPI
+
 	commonRabbit Rabbit
 	futureRabbit Rabbit
 
 	cfg          *config.Config
+	quota        *quota.Quota
 	targetFilter *target.Filter
 	tradeIndex   *entity.TradeIndex
 
 	mainFutureCode string
-}
-
-func NewRealTime(r RealTimeRepo, g RealTimegRPCAPI, s SubscribegRPCAPI) RealTime {
-	cfg := config.GetConfig()
-	uc := &RealTimeUseCase{
-		repo:         r,
-		commonRabbit: rabbit.NewRabbit(),
-		futureRabbit: rabbit.NewRabbit(),
-		grpcapi:      g,
-		subgRPCAPI:   s,
-		cfg:          cfg,
-		targetFilter: target.NewFilter(cfg.TargetCond),
-	}
-
-	// unsubscriba all first
-	if e := uc.UnSubscribeAll(); e != nil {
-		logger.Fatal(e)
-	}
-
-	basic := cc.GetBasicInfo()
-	uc.commonRabbit.FillAllBasic(basic.AllStocks, basic.AllFutures)
-	uc.periodUpdateTradeIndex()
-
-	go uc.ReceiveEvent(context.Background())
-	go uc.ReceiveOrderStatus(context.Background())
-
-	bus.SubscribeTopic(topic.TopicSubscribeStockTickTargets, uc.ReceiveStockSubscribeData, uc.SubscribeStockTick)
-	bus.SubscribeTopic(topic.TopicUnSubscribeStockTickTargets, uc.UnSubscribeStockTick, uc.UnSubscribeStockBidAsk)
-	bus.SubscribeTopic(topic.TopicSubscribeFutureTickTargets, uc.ReceiveFutureSubscribeData, uc.SubscribeFutureTick)
-
-	return uc
 }
 
 func (uc *RealTimeUseCase) GetTradeIndex() *entity.TradeIndex {
@@ -347,20 +323,31 @@ func (uc *RealTimeUseCase) GetMainFuture() *entity.Future {
 // ReceiveStockSubscribeData - receive target data, start goroutine to trade
 func (uc *RealTimeUseCase) ReceiveStockSubscribeData(targetArr []*entity.StockTarget) {
 	for _, t := range targetArr {
-		agent := trader.NewStockTrader(t.StockNum, uc.cfg.StockTradeSwitch, uc.cfg.StockAnalyze)
-		r := rabbit.NewRabbit()
-		go agent.TradingRoom()
-		go r.StockTickConsumer(agent.GetStockNum(), agent.GetTickChan())
+		hadger := hadger.NewHadgerStock(
+			t.StockNum,
+			uc.sc.(*grpcapi.TradegRPCAPI),
+			uc.fg.(*grpcapi.TradegRPCAPI),
+			uc.quota,
+		)
+		r := rabbit.NewRabbit(uc.cfg.RabbitMQ)
+		go r.StockTickConsumer(t.StockNum, hadger.TickChan())
 	}
+
 	logger.Info("Stock trade room all start")
 }
 
 // ReceiveFutureSubscribeData -.
 func (uc *RealTimeUseCase) ReceiveFutureSubscribeData(code string) {
 	uc.mainFutureCode = code
-	agent := trader.NewFutureTrader(code, uc.cfg.FutureTradeSwitch, uc.cfg.FutureAnalyze)
-	go agent.TradingRoom()
-	go uc.futureRabbit.FutureTickConsumer(code, agent.GetTickChan())
+
+	tickChan := make(chan *entity.RealTimeFutureTick)
+	go func() {
+		for {
+			<-tickChan
+		}
+	}()
+
+	go uc.futureRabbit.FutureTickConsumer(code, tickChan)
 	logger.Info("Future trade room start")
 }
 

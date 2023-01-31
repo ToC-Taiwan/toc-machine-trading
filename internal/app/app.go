@@ -2,7 +2,6 @@
 package app
 
 import (
-	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
@@ -10,68 +9,25 @@ import (
 	"tmt/cmd/config"
 	v1 "tmt/internal/controller/http/v1"
 	"tmt/internal/usecase"
-	"tmt/internal/usecase/grpcapi"
-	"tmt/internal/usecase/repo"
-	"tmt/pkg/grpc"
 	"tmt/pkg/httpserver"
 	"tmt/pkg/log"
-	"tmt/pkg/postgres"
 
 	"github.com/gin-gonic/gin"
 )
 
 var logger = log.Get()
 
-type app struct {
-	pg *postgres.Postgres
-	sc *grpc.Connection
-	fg *grpc.Connection
-}
-
-func newApp(cfg *config.Config) *app {
-	pg, err := postgres.New(
-		fmt.Sprintf("%s%s", cfg.Database.URL, cfg.Database.DBName),
-		postgres.MaxPoolSize(cfg.Database.PoolMax),
-	)
-	if err != nil {
-		logger.Fatal(err)
-	}
-
-	logger.Info("Connecting to sinopac gRPC server")
-	sc, err := grpc.New(
-		cfg.Sinopac.URL,
-		grpc.MaxPoolSize(cfg.Sinopac.PoolMax),
-	)
-	if err != nil {
-		logger.Fatal(err)
-	}
-
-	logger.Info("Connecting to fugle gRPC server")
-	fg, err := grpc.New(
-		cfg.Fugle.URL,
-		grpc.MaxPoolSize(cfg.Fugle.PoolMax),
-	)
-	if err != nil {
-		logger.Fatal(err)
-	}
-
-	return &app{
-		pg: pg,
-		sc: sc,
-		fg: fg,
-	}
-}
-
 func RunApp(cfg *config.Config) {
-	app := newApp(cfg)
-	defer app.pg.Close()
+	base := usecase.NewUseCaseBase(cfg)
+	defer base.Close()
 
-	basicUseCase := usecase.NewBasic(repo.NewBasic(app.pg), grpcapi.NewBasic(app.sc), grpcapi.NewBasic(app.fg))
-	tradeUseCase := usecase.NewTrade(grpcapi.NewTrade(app.sc), grpcapi.NewTrade(app.fg), repo.NewTrade(app.pg))
-	analyzeUseCase := usecase.NewAnalyze(repo.NewHistory(app.pg))
-	historyUseCase := usecase.NewHistory(repo.NewHistory(app.pg), grpcapi.NewHistory(app.sc))
-	realTimeUseCase := usecase.NewRealTime(repo.NewRealTime(app.pg), grpcapi.NewRealTime(app.sc), grpcapi.NewSubscribe(app.sc))
-	targetUseCase := usecase.NewTarget(repo.NewTarget(app.pg), grpcapi.NewRealTime(app.sc))
+	// Do not adjust the order
+	basicUseCase := base.NewBasic()
+	tradeUseCase := base.NewTrade()
+	analyzeUseCase := base.NewAnalyze()
+	historyUseCase := base.NewHistory()
+	realTimeUseCase := base.NewRealTime()
+	targetUseCase := base.NewTarget()
 
 	// HTTP Server
 	handler := gin.New()

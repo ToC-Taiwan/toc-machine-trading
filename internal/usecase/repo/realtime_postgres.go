@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"tmt/internal/entity"
-	"tmt/internal/usecase"
 	"tmt/pkg/postgres"
 )
 
@@ -13,7 +12,7 @@ type RealTimeRepo struct {
 	*postgres.Postgres
 }
 
-func NewRealTime(pg *postgres.Postgres) usecase.RealTimeRepo {
+func NewRealTime(pg *postgres.Postgres) *RealTimeRepo {
 	return &RealTimeRepo{pg}
 }
 

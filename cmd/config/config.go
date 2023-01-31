@@ -32,8 +32,8 @@ type Config struct {
 	FutureAnalyze     FutureAnalyze     `yaml:"future_analyze"`
 }
 
-// GetConfig -.
-func GetConfig() *Config {
+// Get -.
+func Get() *Config {
 	if singleton != nil {
 		return singleton
 	}

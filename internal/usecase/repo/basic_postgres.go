@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"tmt/internal/entity"
-	"tmt/internal/usecase"
 	"tmt/pkg/postgres"
 
 	"github.com/google/go-cmp/cmp"
@@ -18,7 +17,7 @@ type BasicRepo struct {
 }
 
 // NewBasic -.
-func NewBasic(pg *postgres.Postgres) usecase.BasicRepo {
+func NewBasic(pg *postgres.Postgres) *BasicRepo {
 	return &BasicRepo{pg}
 }
 

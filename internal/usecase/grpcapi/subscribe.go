@@ -4,7 +4,6 @@ package grpcapi
 import (
 	"context"
 
-	"tmt/internal/usecase"
 	"tmt/pb"
 	"tmt/pkg/grpc"
 
@@ -16,7 +15,7 @@ type SubscribegRPCAPI struct {
 	conn *grpc.Connection
 }
 
-func NewSubscribe(client *grpc.Connection) usecase.SubscribegRPCAPI {
+func NewSubscribe(client *grpc.Connection) *SubscribegRPCAPI {
 	return &SubscribegRPCAPI{client}
 }
 

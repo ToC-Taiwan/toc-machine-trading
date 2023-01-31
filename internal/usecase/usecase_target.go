@@ -28,60 +28,6 @@ type TargetUseCase struct {
 	futureTradeInSwitch bool
 }
 
-// NewTarget -.
-func NewTarget(r TargetRepo, t RealTimegRPCAPI) Target {
-	cfg := config.GetConfig()
-	basic := cc.GetBasicInfo()
-	uc := &TargetUseCase{
-		repo:         r,
-		gRPCAPI:      t,
-		cfg:          cfg,
-		basic:        basic,
-		tradeDay:     tradeday.NewTradeDay(),
-		targetFilter: target.NewFilter(cfg.TargetCond),
-	}
-
-	go uc.checkStockTradeSwitch()
-	go uc.checkFutureTradeSwitch()
-
-	// query targets from db
-	targetArr, err := uc.repo.QueryTargetsByTradeDay(context.Background(), uc.basic.TradeDay)
-	if err != nil {
-		logger.Fatal(err)
-	}
-
-	// db has no targets, find targets from gRPC
-	if len(targetArr) == 0 {
-		targetArr, err = uc.searchTradeDayTargets(uc.basic.TradeDay)
-		if err != nil {
-			logger.Fatal(err)
-		}
-
-		if len(targetArr) == 0 {
-			stuck := make(chan struct{})
-			logger.Error("no targets")
-			<-stuck
-		}
-	}
-
-	cc.AppendStockTargets(targetArr)
-	uc.publishNewStockTargets(targetArr)
-	uc.publishNewFutureTargets()
-
-	go func() {
-		time.Sleep(time.Until(basic.TradeDay.Add(time.Hour * 9)))
-		for range time.NewTicker(time.Second * 60).C {
-			if uc.stockTradeInSwitch {
-				if err := uc.realTimeAddTargets(); err != nil {
-					logger.Fatal(err)
-				}
-			}
-		}
-	}()
-
-	return uc
-}
-
 func (uc *TargetUseCase) checkStockTradeSwitch() {
 	if !uc.cfg.StockTradeSwitch.AllowTrade {
 		return

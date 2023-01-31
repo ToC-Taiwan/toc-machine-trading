@@ -22,19 +22,6 @@ type AnalyzeUseCase struct {
 	tradeDay *tradeday.TradeDay
 }
 
-// NewAnalyze -.
-func NewAnalyze(r HistoryRepo) Analyze {
-	uc := &AnalyzeUseCase{
-		repo:             r,
-		lastBelowMAStock: make(map[string]*entity.StockHistoryAnalyze),
-		rebornMap:        make(map[time.Time][]entity.Stock),
-		tradeDay:         tradeday.NewTradeDay(),
-	}
-
-	bus.SubscribeTopic(topic.TopicAnalyzeStockTargets, uc.findBelowQuaterMATargets)
-	return uc
-}
-
 // GetRebornMap -.
 func (uc *AnalyzeUseCase) GetRebornMap(ctx context.Context) map[time.Time][]entity.Stock {
 	uc.rebornLock.Lock()

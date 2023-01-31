@@ -22,7 +22,6 @@ func newHistoryRoutes(handler *gin.RouterGroup, t usecase.History) {
 	h := handler.Group("/history")
 	{
 		h.GET("/day-kbar/:stock/:start_date/:interval", r.getKbarData)
-		h.GET("/simulate/:interval", r.simulateFuture)
 	}
 }
 
@@ -67,25 +66,4 @@ func (r *historyRoutes) getKbarData(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, result)
-}
-
-// @Summary     simulateFuture
-// @Description simulateFuture
-// @ID          simulateFuture
-// @Tags  	    history
-// @Accept      json
-// @Produce     json
-// @param interval path string true "interval"
-// @success 200 {object} trader.SimulateBalance
-// @Failure     500 {object} response
-// @Router      /history/simulate/{interval} [get]
-func (r *historyRoutes) simulateFuture(c *gin.Context) {
-	interval, err := strconv.Atoi(c.Param("interval"))
-	if err != nil {
-		errorResponse(c, http.StatusBadRequest, err.Error())
-		return
-	}
-
-	cond := r.t.GetFutureTradeCond(interval)
-	c.JSON(http.StatusOK, cond)
 }
