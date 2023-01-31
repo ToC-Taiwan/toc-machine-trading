@@ -103,27 +103,29 @@ func (h *HadgerStock) sendTickToTrader(tick *entity.RealTimeStockTick) {
 
 func (h *HadgerStock) processOrderStatus() {
 	// finishedOrderMap := make(map[string]*entity.FutureOrder)
-	for {
-		order, ok := <-h.notify
-		if !ok {
-			return
+	go func() {
+		for {
+			order, ok := <-h.notify
+			if !ok {
+				return
+			}
+
+			h.localBus.PublishTopicEvent(topicUpdateOrder, order)
+			// if o, ok := order.(*entity.FutureOrder); ok {
+			// 	if finishedOrderMap[o.OrderID] != nil {
+			// 		continue
+			// 	}
+
+			// 	w.updateCacheOrder(o)
+			// 	if !o.Cancellable() {
+			// 		finishedOrderMap[o.OrderID] = o
+			// 		if w.waitingList.orderIDExist(o.OrderID) {
+			// 			w.waitingList.remove(o.OrderID)
+			// 		}
+			// 	} else {
+			// 		w.cancelOverTimeOrder(o)
+			// 	}
+			// }
 		}
-
-		h.localBus.PublishTopicEvent(topicUpdateOrder, order)
-		// if o, ok := order.(*entity.FutureOrder); ok {
-		// 	if finishedOrderMap[o.OrderID] != nil {
-		// 		continue
-		// 	}
-
-		// 	w.updateCacheOrder(o)
-		// 	if !o.Cancellable() {
-		// 		finishedOrderMap[o.OrderID] = o
-		// 		if w.waitingList.orderIDExist(o.OrderID) {
-		// 			w.waitingList.remove(o.OrderID)
-		// 		}
-		// 	} else {
-		// 		w.cancelOverTimeOrder(o)
-		// 	}
-		// }
-	}
+	}()
 }

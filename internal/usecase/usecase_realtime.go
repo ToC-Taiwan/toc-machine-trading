@@ -332,7 +332,6 @@ func (uc *RealTimeUseCase) ReceiveStockSubscribeData(targetArr []*entity.StockTa
 		r := rabbit.NewRabbit(uc.cfg.RabbitMQ)
 		go r.StockTickConsumer(t.StockNum, hadger.TickChan())
 	}
-
 	logger.Info("Stock trade room all start")
 }
 
@@ -346,7 +345,6 @@ func (uc *RealTimeUseCase) ReceiveFutureSubscribeData(code string) {
 			<-tickChan
 		}
 	}()
-
 	go uc.futureRabbit.FutureTickConsumer(code, tickChan)
 	logger.Info("Future trade room start")
 }
