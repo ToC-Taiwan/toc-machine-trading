@@ -322,6 +322,7 @@ func (uc *RealTimeUseCase) GetMainFuture() *entity.Future {
 
 // ReceiveStockSubscribeData - receive target data, start goroutine to trade
 func (uc *RealTimeUseCase) ReceiveStockSubscribeData(targetArr []*entity.StockTarget) {
+	notifyChanMap := make(map[string]chan *entity.StockOrder)
 	for _, t := range targetArr {
 		hadger := hadger.NewHadgerStock(
 			t.StockNum,
@@ -329,9 +330,30 @@ func (uc *RealTimeUseCase) ReceiveStockSubscribeData(targetArr []*entity.StockTa
 			uc.fg.(*grpcapi.TradegRPCAPI),
 			uc.quota,
 		)
+		notifyChanMap[t.StockNum] = hadger.Notify()
+
 		r := rabbit.NewRabbit(uc.cfg.RabbitMQ)
 		go r.StockTickConsumer(t.StockNum, hadger.TickChan())
 	}
+
+	basic := cc.GetBasicInfo()
+	orderStatusChan := make(chan interface{})
+	go func() {
+		for {
+			order := <-orderStatusChan
+			if o, ok := order.(*entity.StockOrder); !ok {
+				continue
+			} else {
+				notifyChanMap[o.StockNum] <- o
+			}
+		}
+	}()
+	hr := rabbit.NewRabbit(uc.cfg.RabbitMQ)
+	hr.FillAllBasic(basic.AllStocks, basic.AllFutures)
+	hr.AddOrderStatusChan(orderStatusChan, uuid.New().String())
+	go hr.OrderStatusConsumer()
+	go hr.OrderStatusArrConsumer()
+
 	logger.Info("Stock trade room all start")
 }
 

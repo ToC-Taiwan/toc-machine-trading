@@ -65,6 +65,15 @@ func (c *Rabbit) FillAllBasic(allStockMap map[string]*entity.Stock, allFutureMap
 	}
 }
 
+func (c *Rabbit) checkBasic() bool {
+	defer c.detailMapLock.RUnlock()
+	c.detailMapLock.RLock()
+	if len(c.allStockMap) == 0 || len(c.allFutureMap) == 0 {
+		return false
+	}
+	return true
+}
+
 // EventConsumer -.
 func (c *Rabbit) EventConsumer(eventChan chan *entity.SinopacEvent) {
 	delivery := c.establishDelivery(routingKeyEvent)
@@ -98,6 +107,10 @@ func (c *Rabbit) EventConsumer(eventChan chan *entity.SinopacEvent) {
 
 // OrderStatusConsumer OrderStatusConsumer
 func (c *Rabbit) OrderStatusConsumer() {
+	if !c.checkBasic() {
+		logger.Fatal("allStockMap or allFutureMap is empty")
+	}
+
 	delivery := c.establishDelivery(routingKeyOrder)
 	for {
 		d, opened := <-delivery
@@ -121,6 +134,10 @@ func (c *Rabbit) OrderStatusConsumer() {
 
 // OrderStatusArrConsumer -.
 func (c *Rabbit) OrderStatusArrConsumer() {
+	if !c.checkBasic() {
+		logger.Fatal("allStockMap or allFutureMap is empty")
+	}
+
 	delivery := c.establishDelivery(routingKeyOrderArr)
 	for {
 		d, opened := <-delivery

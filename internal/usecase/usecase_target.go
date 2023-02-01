@@ -239,6 +239,9 @@ func (uc *TargetUseCase) realTimeAddTargets() error {
 	if len(newTargets) != 0 {
 		cc.AppendStockTargets(newTargets)
 		uc.publishNewStockTargets(newTargets)
+		for _, t := range newTargets {
+			logger.Infof("New target: %s", t.StockNum)
+		}
 	}
 	return nil
 }
