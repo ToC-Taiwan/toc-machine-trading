@@ -273,36 +273,6 @@ func (mr *MockRealTimeMockRecorder) GetMainFuture() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMainFuture", reflect.TypeOf((*MockRealTime)(nil).GetMainFuture))
 }
 
-// GetNasdaqClose mocks base method.
-func (m *MockRealTime) GetNasdaqClose() (*entity.YahooPrice, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetNasdaqClose")
-	ret0, _ := ret[0].(*entity.YahooPrice)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetNasdaqClose indicates an expected call of GetNasdaqClose.
-func (mr *MockRealTimeMockRecorder) GetNasdaqClose() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNasdaqClose", reflect.TypeOf((*MockRealTime)(nil).GetNasdaqClose))
-}
-
-// GetNasdaqFutureClose mocks base method.
-func (m *MockRealTime) GetNasdaqFutureClose() (*entity.YahooPrice, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetNasdaqFutureClose")
-	ret0, _ := ret[0].(*entity.YahooPrice)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetNasdaqFutureClose indicates an expected call of GetNasdaqFutureClose.
-func (mr *MockRealTimeMockRecorder) GetNasdaqFutureClose() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNasdaqFutureClose", reflect.TypeOf((*MockRealTime)(nil).GetNasdaqFutureClose))
-}
-
 // GetOTCSnapshot mocks base method.
 func (m *MockRealTime) GetOTCSnapshot(ctx context.Context) (*entity.StockSnapShot, error) {
 	m.ctrl.T.Helper()
@@ -384,54 +354,6 @@ func (m *MockRealTime) NewOrderStatusConnection(orderStatusChan chan interface{}
 func (mr *MockRealTimeMockRecorder) NewOrderStatusConnection(orderStatusChan, connectionID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NewOrderStatusConnection", reflect.TypeOf((*MockRealTime)(nil).NewOrderStatusConnection), orderStatusChan, connectionID)
-}
-
-// ReceiveEvent mocks base method.
-func (m *MockRealTime) ReceiveEvent(ctx context.Context) {
-	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "ReceiveEvent", ctx)
-}
-
-// ReceiveEvent indicates an expected call of ReceiveEvent.
-func (mr *MockRealTimeMockRecorder) ReceiveEvent(ctx interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReceiveEvent", reflect.TypeOf((*MockRealTime)(nil).ReceiveEvent), ctx)
-}
-
-// ReceiveFutureSubscribeData mocks base method.
-func (m *MockRealTime) ReceiveFutureSubscribeData(code string) {
-	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "ReceiveFutureSubscribeData", code)
-}
-
-// ReceiveFutureSubscribeData indicates an expected call of ReceiveFutureSubscribeData.
-func (mr *MockRealTimeMockRecorder) ReceiveFutureSubscribeData(code interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReceiveFutureSubscribeData", reflect.TypeOf((*MockRealTime)(nil).ReceiveFutureSubscribeData), code)
-}
-
-// ReceiveOrderStatus mocks base method.
-func (m *MockRealTime) ReceiveOrderStatus(ctx context.Context) {
-	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "ReceiveOrderStatus", ctx)
-}
-
-// ReceiveOrderStatus indicates an expected call of ReceiveOrderStatus.
-func (mr *MockRealTimeMockRecorder) ReceiveOrderStatus(ctx interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReceiveOrderStatus", reflect.TypeOf((*MockRealTime)(nil).ReceiveOrderStatus), ctx)
-}
-
-// ReceiveStockSubscribeData mocks base method.
-func (m *MockRealTime) ReceiveStockSubscribeData(targetArr []*entity.StockTarget) {
-	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "ReceiveStockSubscribeData", targetArr)
-}
-
-// ReceiveStockSubscribeData indicates an expected call of ReceiveStockSubscribeData.
-func (mr *MockRealTimeMockRecorder) ReceiveStockSubscribeData(targetArr interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReceiveStockSubscribeData", reflect.TypeOf((*MockRealTime)(nil).ReceiveStockSubscribeData), targetArr)
 }
 
 // MockTrade is a mock of Trade interface.
@@ -705,22 +627,6 @@ func (m *MockTrade) MoveStockOrderToLatestTradeDay(ctx context.Context, orderID 
 func (mr *MockTradeMockRecorder) MoveStockOrderToLatestTradeDay(ctx, orderID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "MoveStockOrderToLatestTradeDay", reflect.TypeOf((*MockTrade)(nil).MoveStockOrderToLatestTradeDay), ctx, orderID)
-}
-
-// SellFirstFuture mocks base method.
-func (m *MockTrade) SellFirstFuture(order *entity.FutureOrder) (string, entity.OrderStatus, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SellFirstFuture", order)
-	ret0, _ := ret[0].(string)
-	ret1, _ := ret[1].(entity.OrderStatus)
-	ret2, _ := ret[2].(error)
-	return ret0, ret1, ret2
-}
-
-// SellFirstFuture indicates an expected call of SellFirstFuture.
-func (mr *MockTradeMockRecorder) SellFirstFuture(order interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SellFirstFuture", reflect.TypeOf((*MockTrade)(nil).SellFirstFuture), order)
 }
 
 // SellFuture mocks base method.

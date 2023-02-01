@@ -318,20 +318,6 @@ func (uc *TradeUseCase) SellFuture(order *entity.FutureOrder) (string, entity.Or
 	return result.GetOrderId(), entity.StringToOrderStatus(result.GetStatus()), nil
 }
 
-// SellFirstFuture -.
-func (uc *TradeUseCase) SellFirstFuture(order *entity.FutureOrder) (string, entity.OrderStatus, error) {
-	result, err := uc.sc.SellFirstFuture(order)
-	if err != nil {
-		return "", entity.StatusUnknow, err
-	}
-
-	if e := result.GetError(); e != "" {
-		return "", entity.StatusUnknow, errors.New(e)
-	}
-
-	return result.GetOrderId(), entity.StringToOrderStatus(result.GetStatus()), nil
-}
-
 // CancelFutureOrderByID -.
 func (uc *TradeUseCase) CancelFutureOrderByID(orderID string) (string, entity.OrderStatus, error) {
 	result, err := uc.sc.CancelFuture(orderID)

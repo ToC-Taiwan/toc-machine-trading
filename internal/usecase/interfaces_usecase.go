@@ -24,22 +24,17 @@ type Target interface {
 
 type History interface {
 	GetTradeDay() time.Time
+
 	GetDayKbarByStockNumDate(stockNum string, date time.Time) *entity.StockHistoryKbar
-	// GetFutureTradeCond(days int) trader.SimulateBalance
 	FetchFutureHistoryKbar(code string, date time.Time) ([]*entity.FutureHistoryKbar, error)
 }
 
 type RealTime interface {
-	ReceiveEvent(ctx context.Context)
-	ReceiveOrderStatus(ctx context.Context)
-	ReceiveStockSubscribeData(targetArr []*entity.StockTarget)
-	ReceiveFutureSubscribeData(code string)
 	GetStockSnapshotByNumArr(stockNumArr []string) ([]*entity.StockSnapShot, error)
 	GetTradeIndex() *entity.TradeIndex
 	GetTSESnapshot(ctx context.Context) (*entity.StockSnapShot, error)
 	GetOTCSnapshot(ctx context.Context) (*entity.StockSnapShot, error)
-	GetNasdaqClose() (*entity.YahooPrice, error)
-	GetNasdaqFutureClose() (*entity.YahooPrice, error)
+
 	GetMainFuture() *entity.Future
 	GetFutureSnapshotByCode(code string) (*entity.FutureSnapShot, error)
 	NewFutureRealTimeConnection(tickChan chan *entity.RealTimeFutureTick, connectionID string)
@@ -64,7 +59,6 @@ type Trade interface {
 
 	BuyFuture(order *entity.FutureOrder) (string, entity.OrderStatus, error)
 	SellFuture(order *entity.FutureOrder) (string, entity.OrderStatus, error)
-	SellFirstFuture(order *entity.FutureOrder) (string, entity.OrderStatus, error)
 	CancelFutureOrderByID(orderID string) (string, entity.OrderStatus, error)
 
 	GetFuturePosition() ([]*entity.FuturePosition, error)
