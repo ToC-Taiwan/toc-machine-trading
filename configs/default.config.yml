@@ -1,16 +1,17 @@
 simulation: false
 
 history:
-    history_close_period: 65 # unit: day
-    history_tick_period: 12 # unit: day
-    history_kbar_period: 65 # unit: day
+    # unit: day
+    history_close_period: 65
+    history_tick_period: 12
+    history_kbar_period: 65
 
 quota:
     stock_trade_quota: 1000000
     stock_fee_discount: 0.28
     future_trade_fee: 15
 
-target_cond:
+target_stock:
     real_time_rank: 20
     black_category:
         - 17
@@ -26,37 +27,51 @@ target_cond:
         - low: 10
           high: 35
 
-stock_trade_switch:
+analyze_stock:
+    # unit: minute
+    max_hold_time: 60
+
+    # unit: %
+    close_change_ratio_low: -2
+    close_change_ratio_high: 2
+    volume_pr_limit: 95
+    all_out_in_ratio: 75
+    all_in_out_ratio: 75
+
+    # unit: millisecond
+    tick_analyze_period: 15000
+
+    # unit: times
+    rsi_min_count: 150
+
+    # unit: day
+    ma_period: 60
+
+trade_stock:
     allow_trade: false
     subscribe: true
-    hold_time_from_open: 45 # unit: second
-    total_open_time: 270 # unit: minute
-    trade_in_end_time: 90 # unit: minute
-    trade_in_wait_time: 45 # unit: seccond
-    trade_out_wait_time: 60 # unit: seccond
-    cancel_wait_time: 30 # unit: seccond
 
-stock_analyze:
-    max_hold_time: 60 # unit: minute
-    close_change_ratio_low: -2 # unit: %
-    close_change_ratio_high: 2 # unit: %
-    tick_analyze_period: 15000 # unit: millisecond
-    volume_pr_limit: 95 # unit: %
-    all_out_in_ratio: 75 # unit: %
-    all_in_out_ratio: 75 # unit: %
-    rsi_min_count: 150 # unit: times
-    ma_period: 60 # unit: day
+    # unit: second
+    hold_time_from_open: 45
+    trade_in_wait_time: 45
+    trade_out_wait_time: 60
+    cancel_wait_time: 30
 
-future_trade_switch:
+    # unit: minute
+    total_open_time: 270
+    trade_in_end_time: 90
+
+trade_future:
     allow_trade: false
     subscribe: true
     quantity: 1
-    trade_in_wait_time: 5 # unit: seccond
-    trade_out_wait_time: 10 # unit: seccond
-    cancel_wait_time: 15 # unit: seccond
-    trade_time_range:
-        first_part_duration: 780 # duration: minute 04:00:00(780/840)
-        second_part_duration: 260 # duration: minute 13:05:00(260/300)
 
-future_analyze:
-    max_hold_time: 5 # unit: minute
+    # unit: seccond
+    trade_in_wait_time: 5
+    trade_out_wait_time: 10
+    cancel_wait_time: 15
+
+    # duration: minute
+    trade_time_range:
+        first_part_duration: 780
+        second_part_duration: 260

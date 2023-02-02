@@ -20,7 +20,7 @@ type HistoryUseCase struct {
 	repo    HistoryRepo
 	grpcapi HistorygRPCAPI
 
-	stockAnalyzeCfg config.StockAnalyze
+	analyzeStockCfg config.AnalyzeStock
 	basic           *entity.BasicInfo
 
 	fetchList map[string]*entity.StockTarget
@@ -372,10 +372,10 @@ func (uc *HistoryUseCase) processCloseArr(arr []*entity.StockHistoryClose) {
 
 	i := 0
 	for {
-		if i+int(uc.stockAnalyzeCfg.MAPeriod) > len(closeArr) {
+		if i+int(uc.analyzeStockCfg.MAPeriod) > len(closeArr) {
 			break
 		}
-		tmp := closeArr[i : i+int(uc.stockAnalyzeCfg.MAPeriod)]
+		tmp := closeArr[i : i+int(uc.analyzeStockCfg.MAPeriod)]
 		ma := utils.GenerareMAByCloseArr(tmp)
 		if err := uc.repo.InsertQuaterMA(context.Background(), &entity.StockHistoryAnalyze{
 			StockNum: stockNum,
@@ -406,8 +406,8 @@ func (uc *HistoryUseCase) processTickArr(arr []*entity.StockHistoryTick) {
 		cc.SetHistoryTickArr(stockNum, tickTradeDay, arr)
 	}
 
-	minPeriod := time.Duration(uc.stockAnalyzeCfg.TickAnalyzePeriod) * time.Millisecond
-	maxPeriod := time.Duration(uc.stockAnalyzeCfg.TickAnalyzePeriod*1.1) * time.Millisecond
+	minPeriod := time.Duration(uc.analyzeStockCfg.TickAnalyzePeriod) * time.Millisecond
+	maxPeriod := time.Duration(uc.analyzeStockCfg.TickAnalyzePeriod*1.1) * time.Millisecond
 
 	var volumeArr []int64
 	var periodVolume int64

@@ -1,14 +1,35 @@
 definitions:
+  config.AnalyzeStock:
+    properties:
+      all_in_out_ratio:
+        type: number
+      all_out_in_ratio:
+        type: number
+      close_change_ratio_high:
+        type: number
+      close_change_ratio_low:
+        type: number
+      ma_period:
+        type: integer
+      max_hold_time:
+        type: number
+      rsi_min_count:
+        type: integer
+      tick_analyze_period:
+        type: number
+      volume_pr_limit:
+        type: number
+    type: object
   config.Config:
     properties:
+      analyzeStock:
+        $ref: '#/definitions/config.AnalyzeStock'
       database:
-        $ref: '#/definitions/config.Database'
+        allOf:
+        - $ref: '#/definitions/config.Database'
+        description: from env no need tag
       fugle:
         $ref: '#/definitions/config.Fugle'
-      futureAnalyze:
-        $ref: '#/definitions/config.FutureAnalyze'
-      futureTradeSwitch:
-        $ref: '#/definitions/config.FutureTradeSwitch'
       history:
         $ref: '#/definitions/config.History'
       quota:
@@ -21,12 +42,12 @@ definitions:
         type: boolean
       sinopac:
         $ref: '#/definitions/config.Sinopac'
-      stockAnalyze:
-        $ref: '#/definitions/config.StockAnalyze'
-      stockTradeSwitch:
-        $ref: '#/definitions/config.StockTradeSwitch'
-      targetCond:
-        $ref: '#/definitions/config.TargetCond'
+      targetStock:
+        $ref: '#/definitions/config.TargetStock'
+      tradeFuture:
+        $ref: '#/definitions/config.TradeFuture'
+      tradeStock:
+        $ref: '#/definitions/config.TradeStock'
     type: object
   config.Database:
     properties:
@@ -43,28 +64,6 @@ definitions:
         type: integer
       url:
         type: string
-    type: object
-  config.FutureAnalyze:
-    properties:
-      max_hold_time:
-        type: number
-    type: object
-  config.FutureTradeSwitch:
-    properties:
-      allow_trade:
-        type: boolean
-      cancel_wait_time:
-        type: integer
-      quantity:
-        type: integer
-      subscribe:
-        type: boolean
-      trade_in_wait_time:
-        type: integer
-      trade_out_wait_time:
-        type: integer
-      trade_time_range:
-        $ref: '#/definitions/config.TradeTimeRange'
     type: object
   config.History:
     properties:
@@ -118,47 +117,7 @@ definitions:
       url:
         type: string
     type: object
-  config.StockAnalyze:
-    properties:
-      all_in_out_ratio:
-        type: number
-      all_out_in_ratio:
-        type: number
-      close_change_ratio_high:
-        type: number
-      close_change_ratio_low:
-        type: number
-      ma_period:
-        type: integer
-      max_hold_time:
-        type: number
-      rsi_min_count:
-        type: integer
-      tick_analyze_period:
-        type: number
-      volume_pr_limit:
-        type: number
-    type: object
-  config.StockTradeSwitch:
-    properties:
-      allow_trade:
-        type: boolean
-      cancel_wait_time:
-        type: integer
-      hold_time_from_open:
-        type: number
-      subscribe:
-        type: boolean
-      total_open_time:
-        type: number
-      trade_in_end_time:
-        type: number
-      trade_in_wait_time:
-        type: integer
-      trade_out_wait_time:
-        type: integer
-    type: object
-  config.TargetCond:
+  config.TargetStock:
     properties:
       black_category:
         items:
@@ -175,6 +134,42 @@ definitions:
           $ref: '#/definitions/config.PriceLimit'
         type: array
       real_time_rank:
+        type: integer
+    type: object
+  config.TradeFuture:
+    properties:
+      allow_trade:
+        type: boolean
+      cancel_wait_time:
+        type: integer
+      quantity:
+        type: integer
+      subscribe:
+        type: boolean
+      trade_in_wait_time:
+        type: integer
+      trade_out_wait_time:
+        type: integer
+      trade_time_range:
+        $ref: '#/definitions/config.TradeTimeRange'
+    type: object
+  config.TradeStock:
+    properties:
+      allow_trade:
+        type: boolean
+      cancel_wait_time:
+        type: integer
+      hold_time_from_open:
+        type: number
+      subscribe:
+        type: boolean
+      total_open_time:
+        type: number
+      trade_in_end_time:
+        type: number
+      trade_in_wait_time:
+        type: integer
+      trade_out_wait_time:
         type: integer
     type: object
   config.TradeTimeRange:

@@ -1,5 +1,14 @@
 package config
 
+type EnvConfig struct {
+	// from env no need tag
+	Database Database
+	Server   Server
+	Sinopac  Sinopac
+	Fugle    Fugle
+	RabbitMQ RabbitMQ
+}
+
 type Database struct {
 	DBName  string `env:"DB_NAME" env-required:"true"`
 	URL     string `env:"DB_URL" env-required:"true"`

@@ -415,7 +415,7 @@ func (uc *RealTimeUseCase) UnSubscribeAll() error {
 
 // SubscribeStockTick -.
 func (uc *RealTimeUseCase) SubscribeStockTick(targetArr []*entity.StockTarget) error {
-	if !uc.cfg.StockTradeSwitch.Subscribe {
+	if !uc.cfg.TradeStock.Subscribe {
 		return nil
 	}
 
@@ -438,7 +438,7 @@ func (uc *RealTimeUseCase) SubscribeStockTick(targetArr []*entity.StockTarget) e
 
 // SubscribeStockBidAsk -.
 func (uc *RealTimeUseCase) SubscribeStockBidAsk(targetArr []*entity.StockTarget) error {
-	if !uc.cfg.StockTradeSwitch.Subscribe {
+	if !uc.cfg.TradeStock.Subscribe {
 		return nil
 	}
 
@@ -489,7 +489,7 @@ func (uc *RealTimeUseCase) UnSubscribeStockBidAsk(stockNum string) error {
 
 // SubscribeFutureTick -.
 func (uc *RealTimeUseCase) SubscribeFutureTick(code string) error {
-	if !uc.cfg.FutureTradeSwitch.Subscribe {
+	if !uc.cfg.TradeFuture.Subscribe {
 		return nil
 	}
 

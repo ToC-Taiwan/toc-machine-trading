@@ -725,20 +725,54 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "config.AnalyzeStock": {
+            "type": "object",
+            "properties": {
+                "all_in_out_ratio": {
+                    "type": "number"
+                },
+                "all_out_in_ratio": {
+                    "type": "number"
+                },
+                "close_change_ratio_high": {
+                    "type": "number"
+                },
+                "close_change_ratio_low": {
+                    "type": "number"
+                },
+                "ma_period": {
+                    "type": "integer"
+                },
+                "max_hold_time": {
+                    "type": "number"
+                },
+                "rsi_min_count": {
+                    "type": "integer"
+                },
+                "tick_analyze_period": {
+                    "type": "number"
+                },
+                "volume_pr_limit": {
+                    "type": "number"
+                }
+            }
+        },
         "config.Config": {
             "type": "object",
             "properties": {
+                "analyzeStock": {
+                    "$ref": "#/definitions/config.AnalyzeStock"
+                },
                 "database": {
-                    "$ref": "#/definitions/config.Database"
+                    "description": "from env no need tag",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/config.Database"
+                        }
+                    ]
                 },
                 "fugle": {
                     "$ref": "#/definitions/config.Fugle"
-                },
-                "futureAnalyze": {
-                    "$ref": "#/definitions/config.FutureAnalyze"
-                },
-                "futureTradeSwitch": {
-                    "$ref": "#/definitions/config.FutureTradeSwitch"
                 },
                 "history": {
                     "$ref": "#/definitions/config.History"
@@ -758,14 +792,14 @@ const docTemplate = `{
                 "sinopac": {
                     "$ref": "#/definitions/config.Sinopac"
                 },
-                "stockAnalyze": {
-                    "$ref": "#/definitions/config.StockAnalyze"
+                "targetStock": {
+                    "$ref": "#/definitions/config.TargetStock"
                 },
-                "stockTradeSwitch": {
-                    "$ref": "#/definitions/config.StockTradeSwitch"
+                "tradeFuture": {
+                    "$ref": "#/definitions/config.TradeFuture"
                 },
-                "targetCond": {
-                    "$ref": "#/definitions/config.TargetCond"
+                "tradeStock": {
+                    "$ref": "#/definitions/config.TradeStock"
                 }
             }
         },
@@ -791,40 +825,6 @@ const docTemplate = `{
                 },
                 "url": {
                     "type": "string"
-                }
-            }
-        },
-        "config.FutureAnalyze": {
-            "type": "object",
-            "properties": {
-                "max_hold_time": {
-                    "type": "number"
-                }
-            }
-        },
-        "config.FutureTradeSwitch": {
-            "type": "object",
-            "properties": {
-                "allow_trade": {
-                    "type": "boolean"
-                },
-                "cancel_wait_time": {
-                    "type": "integer"
-                },
-                "quantity": {
-                    "type": "integer"
-                },
-                "subscribe": {
-                    "type": "boolean"
-                },
-                "trade_in_wait_time": {
-                    "type": "integer"
-                },
-                "trade_out_wait_time": {
-                    "type": "integer"
-                },
-                "trade_time_range": {
-                    "$ref": "#/definitions/config.TradeTimeRange"
                 }
             }
         },
@@ -909,68 +909,7 @@ const docTemplate = `{
                 }
             }
         },
-        "config.StockAnalyze": {
-            "type": "object",
-            "properties": {
-                "all_in_out_ratio": {
-                    "type": "number"
-                },
-                "all_out_in_ratio": {
-                    "type": "number"
-                },
-                "close_change_ratio_high": {
-                    "type": "number"
-                },
-                "close_change_ratio_low": {
-                    "type": "number"
-                },
-                "ma_period": {
-                    "type": "integer"
-                },
-                "max_hold_time": {
-                    "type": "number"
-                },
-                "rsi_min_count": {
-                    "type": "integer"
-                },
-                "tick_analyze_period": {
-                    "type": "number"
-                },
-                "volume_pr_limit": {
-                    "type": "number"
-                }
-            }
-        },
-        "config.StockTradeSwitch": {
-            "type": "object",
-            "properties": {
-                "allow_trade": {
-                    "type": "boolean"
-                },
-                "cancel_wait_time": {
-                    "type": "integer"
-                },
-                "hold_time_from_open": {
-                    "type": "number"
-                },
-                "subscribe": {
-                    "type": "boolean"
-                },
-                "total_open_time": {
-                    "type": "number"
-                },
-                "trade_in_end_time": {
-                    "type": "number"
-                },
-                "trade_in_wait_time": {
-                    "type": "integer"
-                },
-                "trade_out_wait_time": {
-                    "type": "integer"
-                }
-            }
-        },
-        "config.TargetCond": {
+        "config.TargetStock": {
             "type": "object",
             "properties": {
                 "black_category": {
@@ -995,6 +934,61 @@ const docTemplate = `{
                     }
                 },
                 "real_time_rank": {
+                    "type": "integer"
+                }
+            }
+        },
+        "config.TradeFuture": {
+            "type": "object",
+            "properties": {
+                "allow_trade": {
+                    "type": "boolean"
+                },
+                "cancel_wait_time": {
+                    "type": "integer"
+                },
+                "quantity": {
+                    "type": "integer"
+                },
+                "subscribe": {
+                    "type": "boolean"
+                },
+                "trade_in_wait_time": {
+                    "type": "integer"
+                },
+                "trade_out_wait_time": {
+                    "type": "integer"
+                },
+                "trade_time_range": {
+                    "$ref": "#/definitions/config.TradeTimeRange"
+                }
+            }
+        },
+        "config.TradeStock": {
+            "type": "object",
+            "properties": {
+                "allow_trade": {
+                    "type": "boolean"
+                },
+                "cancel_wait_time": {
+                    "type": "integer"
+                },
+                "hold_time_from_open": {
+                    "type": "number"
+                },
+                "subscribe": {
+                    "type": "boolean"
+                },
+                "total_open_time": {
+                    "type": "number"
+                },
+                "trade_in_end_time": {
+                    "type": "number"
+                },
+                "trade_in_wait_time": {
+                    "type": "integer"
+                },
+                "trade_out_wait_time": {
                     "type": "integer"
                 }
             }

@@ -15,21 +15,16 @@ var (
 
 // Config -.
 type Config struct {
-	Simulation bool
+	Simulation   bool         `yaml:"simulation"`
+	History      History      `yaml:"history"`
+	Quota        Quota        `yaml:"quota"`
+	TargetStock  TargetStock  `yaml:"target_stock"`
+	AnalyzeStock AnalyzeStock `yaml:"analyze_stock"`
+	TradeStock   TradeStock   `yaml:"trade_stock"`
+	TradeFuture  TradeFuture  `yaml:"trade_future"`
 
-	Database Database
-	Server   Server
-	Sinopac  Sinopac
-	Fugle    Fugle
-	RabbitMQ RabbitMQ
-
-	StockTradeSwitch  StockTradeSwitch  `yaml:"stock_trade_switch"`
-	FutureTradeSwitch FutureTradeSwitch `yaml:"future_trade_switch"`
-	History           History           `yaml:"history"`
-	Quota             Quota             `yaml:"quota"`
-	TargetCond        TargetCond        `yaml:"target_cond"`
-	StockAnalyze      StockAnalyze      `yaml:"stock_analyze"`
-	FutureAnalyze     FutureAnalyze     `yaml:"future_analyze"`
+	// env must be the last field
+	EnvConfig
 }
 
 // Get -.
@@ -60,11 +55,11 @@ func Get() *Config {
 		singleton = &newConfig
 	})
 
-	if singleton.StockTradeSwitch.AllowTrade && !singleton.StockTradeSwitch.Subscribe {
+	if singleton.TradeStock.AllowTrade && !singleton.TradeStock.Subscribe {
 		panic("stock trade switch allow trade but not subscribe")
 	}
 
-	if singleton.FutureTradeSwitch.AllowTrade && !singleton.FutureTradeSwitch.Subscribe {
+	if singleton.TradeFuture.AllowTrade && !singleton.TradeFuture.Subscribe {
 		panic("stock trade switch allow trade but not subscribe")
 	}
 

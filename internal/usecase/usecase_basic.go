@@ -64,9 +64,9 @@ func (uc *BasicUseCase) fillBasicInfo() {
 		LastTradeDay:       lastTradeDayArr[0],
 		BefroeLastTradeDay: lastTradeDayArr[1],
 
-		OpenTime:       tradeDay.Add(openTime).Add(time.Duration(uc.cfg.StockTradeSwitch.HoldTimeFromOpen) * time.Second),
-		TradeInEndTime: tradeDay.Add(openTime).Add(time.Duration(uc.cfg.StockTradeSwitch.TradeInEndTime) * time.Minute),
-		EndTime:        tradeDay.Add(openTime).Add(time.Duration(uc.cfg.StockTradeSwitch.TotalOpenTime) * time.Minute),
+		OpenTime:       tradeDay.Add(openTime).Add(time.Duration(uc.cfg.TradeStock.HoldTimeFromOpen) * time.Second),
+		TradeInEndTime: tradeDay.Add(openTime).Add(time.Duration(uc.cfg.TradeStock.TradeInEndTime) * time.Minute),
+		EndTime:        tradeDay.Add(openTime).Add(time.Duration(uc.cfg.TradeStock.TotalOpenTime) * time.Minute),
 
 		HistoryCloseRange: uc.tradeDay.GetLastNTradeDayByDate(uc.cfg.History.HistoryClosePeriod, tradeDay),
 		HistoryKbarRange:  uc.tradeDay.GetLastNTradeDayByDate(uc.cfg.History.HistoryKbarPeriod, tradeDay),

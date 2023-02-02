@@ -21,7 +21,7 @@ type Filter struct {
 }
 
 // NewFilter -.
-func NewFilter(cond config.TargetCond) *Filter {
+func NewFilter(cond config.TargetStock) *Filter {
 	blackCategoryMap := make(map[string]struct{})
 	for _, category := range cond.BlackCategory {
 		blackCategoryMap[category] = struct{}{}

@@ -121,7 +121,7 @@ func (u *UseCaseBase) NewHistory() History {
 		grpcapi:         grpcapi.NewHistory(u.sc),
 		fetchList:       make(map[string]*entity.StockTarget),
 		tradeDay:        tradeday.NewTradeDay(),
-		stockAnalyzeCfg: u.cfg.StockAnalyze,
+		analyzeStockCfg: u.cfg.AnalyzeStock,
 	}
 
 	uc.basic = cc.GetBasicInfo()
@@ -141,7 +141,7 @@ func (u *UseCaseBase) NewRealTime() RealTime {
 		cfg:          cfg,
 		sc:           grpcapi.NewTrade(u.sc, cfg.Simulation),
 		fg:           grpcapi.NewTrade(u.fg, cfg.Simulation),
-		targetFilter: target.NewFilter(cfg.TargetCond),
+		targetFilter: target.NewFilter(cfg.TargetStock),
 		quota:        quota.NewQuota(cfg.Quota),
 	}
 
@@ -173,7 +173,7 @@ func (u *UseCaseBase) NewTarget() Target {
 		cfg:          cfg,
 		basic:        basic,
 		tradeDay:     tradeday.NewTradeDay(),
-		targetFilter: target.NewFilter(cfg.TargetCond),
+		targetFilter: target.NewFilter(cfg.TargetStock),
 	}
 
 	go uc.checkStockTradeSwitch()

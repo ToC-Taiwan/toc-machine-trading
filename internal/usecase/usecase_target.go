@@ -29,7 +29,7 @@ type TargetUseCase struct {
 }
 
 func (uc *TargetUseCase) checkStockTradeSwitch() {
-	if !uc.cfg.StockTradeSwitch.AllowTrade {
+	if !uc.cfg.TradeStock.AllowTrade {
 		return
 	}
 
@@ -54,7 +54,7 @@ func (uc *TargetUseCase) checkStockTradeSwitch() {
 }
 
 func (uc *TargetUseCase) checkFutureTradeSwitch() {
-	if !uc.cfg.FutureTradeSwitch.AllowTrade {
+	if !uc.cfg.TradeFuture.AllowTrade {
 		return
 	}
 
@@ -63,8 +63,8 @@ func (uc *TargetUseCase) checkFutureTradeSwitch() {
 	firstStart := futureTradeDay.StartTime
 	secondStart := futureTradeDay.EndTime.Add(-300 * time.Minute)
 
-	timeRange = append(timeRange, []time.Time{firstStart, firstStart.Add(time.Duration(uc.cfg.FutureTradeSwitch.TradeTimeRange.FirstPartDuration) * time.Minute)})
-	timeRange = append(timeRange, []time.Time{secondStart, secondStart.Add(time.Duration(uc.cfg.FutureTradeSwitch.TradeTimeRange.SecondPartDuration) * time.Minute)})
+	timeRange = append(timeRange, []time.Time{firstStart, firstStart.Add(time.Duration(uc.cfg.TradeFuture.TradeTimeRange.FirstPartDuration) * time.Minute)})
+	timeRange = append(timeRange, []time.Time{secondStart, secondStart.Add(time.Duration(uc.cfg.TradeFuture.TradeTimeRange.SecondPartDuration) * time.Minute)})
 
 	for range time.NewTicker(2500 * time.Millisecond).C {
 		now := time.Now()
