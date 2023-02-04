@@ -50,5 +50,5 @@ func (h *HadgeTraderStock) prepare() {
 }
 
 func (h *HadgeTraderStock) updateOrder(order *entity.StockOrder) {
-	// TODO
+	// TODO:
 }

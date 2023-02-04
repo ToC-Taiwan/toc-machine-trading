@@ -4,6 +4,7 @@ package hadger
 import (
 	"sync"
 
+	"tmt/cmd/config"
 	"tmt/internal/entity"
 	"tmt/internal/usecase/grpcapi"
 	"tmt/internal/usecase/module/quota"
@@ -27,9 +28,11 @@ type HadgerStock struct {
 
 	tickChan chan *entity.RealTimeStockTick
 	notify   chan *entity.StockOrder
+
+	tradeConfig *config.TradeStock
 }
 
-func NewHadgerStock(num string, s, f *grpcapi.TradegRPCAPI, q *quota.Quota) *HadgerStock {
+func NewHadgerStock(num string, s, f *grpcapi.TradegRPCAPI, q *quota.Quota, tradeConfig *config.TradeStock) *HadgerStock {
 	h := &HadgerStock{
 		num:           num,
 		orderQuantity: 1,
@@ -40,6 +43,8 @@ func NewHadgerStock(num string, s, f *grpcapi.TradegRPCAPI, q *quota.Quota) *Had
 		quota:         q,
 		tickArr:       []*entity.RealTimeStockTick{},
 		localBus:      eventbus.Get(uuid.NewString()),
+		tradeConfig:   tradeConfig,
+		traderMap:     make(map[string]*HadgeTraderStock),
 	}
 
 	h.localBus.SubscribeTopic(topicTraderDone, h.removeDoneTrader)
@@ -47,18 +52,6 @@ func NewHadgerStock(num string, s, f *grpcapi.TradegRPCAPI, q *quota.Quota) *Had
 	h.processOrderStatus()
 
 	return h
-}
-
-func (h *HadgerStock) TickChan() chan *entity.RealTimeStockTick {
-	return h.tickChan
-}
-
-func (h *HadgerStock) check() bool {
-	return false
-}
-
-func (h *HadgerStock) Notify() chan *entity.StockOrder {
-	return h.notify
 }
 
 func (h *HadgerStock) prepare() {
@@ -85,22 +78,6 @@ func (h *HadgerStock) prepare() {
 	}()
 }
 
-func (h *HadgerStock) removeDoneTrader(id string) {
-	h.traderMapLock.Lock()
-	defer h.traderMapLock.Unlock()
-
-	delete(h.traderMap, id)
-}
-
-func (h *HadgerStock) sendTickToTrader(tick *entity.RealTimeStockTick) {
-	h.traderMapLock.RLock()
-	defer h.traderMapLock.RUnlock()
-
-	for _, trader := range h.traderMap {
-		trader.TickChan() <- tick
-	}
-}
-
 func (h *HadgerStock) processOrderStatus() {
 	finishedOrderMap := make(map[string]*entity.StockOrder)
 	go func() {
@@ -121,4 +98,32 @@ func (h *HadgerStock) processOrderStatus() {
 	}()
 }
 
+func (h *HadgerStock) check() bool {
+	return false
+}
+
+func (h *HadgerStock) sendTickToTrader(tick *entity.RealTimeStockTick) {
+	h.traderMapLock.RLock()
+	defer h.traderMapLock.RUnlock()
+
+	for _, trader := range h.traderMap {
+		trader.TickChan() <- tick
+	}
+}
+
 func (h *HadgerStock) cancelOverTimeOrder(order *entity.StockOrder) {}
+
+func (h *HadgerStock) removeDoneTrader(id string) {
+	h.traderMapLock.Lock()
+	defer h.traderMapLock.Unlock()
+
+	delete(h.traderMap, id)
+}
+
+func (h *HadgerStock) TickChan() chan *entity.RealTimeStockTick {
+	return h.tickChan
+}
+
+func (h *HadgerStock) Notify() chan *entity.StockOrder {
+	return h.notify
+}

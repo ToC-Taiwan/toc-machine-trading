@@ -9,6 +9,7 @@ import (
 	"tmt/cmd/config"
 	"tmt/internal/entity"
 	"tmt/internal/usecase/grpcapi"
+	"tmt/internal/usecase/module/dt"
 	"tmt/internal/usecase/module/hadger"
 	"tmt/internal/usecase/module/quota"
 	"tmt/internal/usecase/module/target"
@@ -329,6 +330,7 @@ func (uc *RealTimeUseCase) ReceiveStockSubscribeData(targetArr []*entity.StockTa
 			uc.sc.(*grpcapi.TradegRPCAPI),
 			uc.fg.(*grpcapi.TradegRPCAPI),
 			uc.quota,
+			&uc.cfg.TradeStock,
 		)
 		notifyChanMap[t.StockNum] = hadger.Notify()
 
@@ -341,10 +343,13 @@ func (uc *RealTimeUseCase) ReceiveStockSubscribeData(targetArr []*entity.StockTa
 	go func() {
 		for {
 			order := <-orderStatusChan
-			if o, ok := order.(*entity.StockOrder); !ok {
+			o, ok := order.(*entity.StockOrder)
+			if !ok {
 				continue
-			} else {
-				notifyChanMap[o.StockNum] <- o
+			}
+
+			if ch := notifyChanMap[o.StockNum]; ch != nil {
+				ch <- o
 			}
 		}
 	}()
@@ -359,16 +364,36 @@ func (uc *RealTimeUseCase) ReceiveStockSubscribeData(targetArr []*entity.StockTa
 
 // ReceiveFutureSubscribeData -.
 func (uc *RealTimeUseCase) ReceiveFutureSubscribeData(code string) {
-	uc.mainFutureCode = code
+	t := dt.NewDTFuture(
+		code,
+		uc.sc.(*grpcapi.TradegRPCAPI),
+		&uc.cfg.TradeFuture,
+	)
 
-	tickChan := make(chan *entity.RealTimeFutureTick)
+	ch := t.Notify()
+	orderStatusChan := make(chan interface{})
+	go uc.futureRabbit.FutureTickConsumer(code, t.TickChan())
 	go func() {
 		for {
-			<-tickChan
+			order := <-orderStatusChan
+			o, ok := order.(*entity.FutureOrder)
+			if !ok {
+				continue
+			}
+
+			ch <- o
 		}
 	}()
-	go uc.futureRabbit.FutureTickConsumer(code, tickChan)
+	basic := cc.GetBasicInfo()
+	uc.futureRabbit.FillAllBasic(basic.AllStocks, basic.AllFutures)
+	uc.futureRabbit.AddOrderStatusChan(orderStatusChan, uuid.New().String())
+	go uc.futureRabbit.OrderStatusConsumer()
+	go uc.futureRabbit.OrderStatusArrConsumer()
 	logger.Info("Future trade room start")
+}
+
+func (uc *RealTimeUseCase) SetMainFuture(code string) {
+	uc.mainFutureCode = code
 }
 
 // NewFutureRealTimeConnection -.

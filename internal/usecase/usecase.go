@@ -159,7 +159,7 @@ func (u *UseCaseBase) NewRealTime() RealTime {
 
 	bus.SubscribeTopic(topic.TopicSubscribeStockTickTargets, uc.ReceiveStockSubscribeData, uc.SubscribeStockTick)
 	bus.SubscribeTopic(topic.TopicUnSubscribeStockTickTargets, uc.UnSubscribeStockTick, uc.UnSubscribeStockBidAsk)
-	bus.SubscribeTopic(topic.TopicSubscribeFutureTickTargets, uc.ReceiveFutureSubscribeData, uc.SubscribeFutureTick)
+	bus.SubscribeTopic(topic.TopicSubscribeFutureTickTargets, uc.SetMainFuture, uc.ReceiveFutureSubscribeData, uc.SubscribeFutureTick)
 
 	return uc
 }

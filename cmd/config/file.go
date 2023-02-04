@@ -50,8 +50,9 @@ type AnalyzeStock struct {
 
 // TradeStock -.
 type TradeStock struct {
-	AllowTrade       bool    `json:"allow_trade"         yaml:"allow_trade"`
-	Subscribe        bool    `json:"subscribe"           yaml:"subscribe"`
+	AllowTrade bool `json:"allow_trade"         yaml:"allow_trade"`
+	Subscribe  bool `json:"subscribe"           yaml:"subscribe"`
+
 	HoldTimeFromOpen float64 `json:"hold_time_from_open" env-required:"true" yaml:"hold_time_from_open"`
 	TotalOpenTime    float64 `json:"total_open_time"     env-required:"true" yaml:"total_open_time"`
 	TradeInEndTime   float64 `json:"trade_in_end_time"   env-required:"true" yaml:"trade_in_end_time"`
@@ -62,8 +63,9 @@ type TradeStock struct {
 
 // TradeFuture -.
 type TradeFuture struct {
-	AllowTrade       bool           `json:"allow_trade"         yaml:"allow_trade"`
-	Subscribe        bool           `json:"subscribe"           yaml:"subscribe"`
+	AllowTrade bool `json:"allow_trade"         yaml:"allow_trade"`
+	Subscribe  bool `json:"subscribe"           yaml:"subscribe"`
+
 	Quantity         int64          `json:"quantity"            env-required:"true" yaml:"quantity"`
 	TradeInWaitTime  int64          `json:"trade_in_wait_time"  env-required:"true" yaml:"trade_in_wait_time"`
 	TradeOutWaitTime int64          `json:"trade_out_wait_time" env-required:"true" yaml:"trade_out_wait_time"`
