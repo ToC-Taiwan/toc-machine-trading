@@ -1024,12 +1024,6 @@ const docTemplate = `{
                 },
                 "status": {
                     "$ref": "#/definitions/entity.OrderStatus"
-                },
-                "tick_time": {
-                    "type": "string"
-                },
-                "trade_time": {
-                    "type": "string"
                 }
             }
         },

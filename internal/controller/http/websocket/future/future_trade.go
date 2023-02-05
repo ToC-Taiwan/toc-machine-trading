@@ -44,6 +44,8 @@ type WSFutureTrade struct {
 	// then delete from map
 	assistTargetWaitingMap     map[string]*assistTarget
 	assistTargetWaitingMapLock sync.Mutex
+
+	orderTradeTime *orderTradeTime
 }
 
 // StartWSFutureTrade - Start ws future trade with one time bus
@@ -59,6 +61,7 @@ func StartWSFutureTrade(c *gin.Context, s usecase.RealTime, o usecase.Trade, h u
 		WSRouter:               websocket.NewWSRouter(c),
 		Bus:                    eventbus.Get(uuid.NewString()),
 		waitingList:            newWaitingList(),
+		orderTradeTime:         newOrderTradeTime(),
 	}
 
 	forwardChan := make(chan []byte)
@@ -120,6 +123,7 @@ func (w *WSFutureTrade) processClientOrder(client clientOrder) {
 				WSFutureTrade:        w,
 				FutureOrder:          o,
 				halfAutomationOption: client.Option,
+				tradeTime:            time.Now(),
 			}
 			w.assistTargetWaitingMapLock.Unlock()
 		} else {
@@ -214,8 +218,7 @@ func (w *WSFutureTrade) placeOrder(order *entity.FutureOrder) *entity.FutureOrde
 		}
 	}
 
-	// order trade time is not set by order service, set it here
-	order.TradeTime = time.Now()
+	w.orderTradeTime.set(order.OrderID, time.Now())
 	return order
 }
 
@@ -264,7 +267,6 @@ func (w *WSFutureTrade) updateCacheOrder(o *entity.FutureOrder) {
 		if cache.Status != o.Status {
 			w.SendToClient(newFutureOrderProto(o))
 		}
-		o.TradeTime = cache.TradeTime
 		w.orderMap[o.OrderID] = o
 		w.PublishTopicEvent(topicOrderStatus, o) // publish updated order to assist
 	}
@@ -281,7 +283,6 @@ func (w *WSFutureTrade) updateAssistTargetWaitingOrder(o *entity.FutureOrder) {
 		if a.Status != o.Status {
 			w.SendToClient(newFutureOrderProto(o))
 		}
-		o.TradeTime = a.TradeTime
 		a.FutureOrder = o
 		w.assistTargetWaitingMap[o.OrderID] = a
 	}
@@ -292,7 +293,7 @@ func (w *WSFutureTrade) cancelOverTimeOrder(o *entity.FutureOrder) {
 	defer w.cancelOrderMapLock.Unlock()
 	w.cancelOrderMapLock.Lock()
 
-	if o.Cancellable() && time.Since(o.TradeTime) > 5*time.Second && w.cancelOrderMap[o.OrderID] == nil {
+	if o.Cancellable() && time.Since(w.orderTradeTime.get(o.OrderID)) > 5*time.Second && w.cancelOrderMap[o.OrderID] == nil {
 		id, s, err := w.o.CancelFutureOrderByID(o.OrderID)
 		if err != nil || s != entity.StatusCancelled || id == "" {
 			w.SendToClient(newErrMessageProto(errCancelOrderFailed))

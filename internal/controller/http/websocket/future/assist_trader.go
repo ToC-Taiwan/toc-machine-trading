@@ -13,6 +13,7 @@ type assistTarget struct {
 	*WSFutureTrade       // use for place order
 	*entity.FutureOrder  // base order
 	halfAutomationOption // option for assist trader
+	tradeTime            time.Time
 }
 
 // toFinishOrder will return a order to finish the assist order
@@ -131,7 +132,7 @@ func (a *assistTrader) isAssistDone() bool {
 
 // halfAutomationOption is the option for assist trader
 func (a *assistTrader) checkByTime(tick *entity.RealTimeFutureTick) {
-	if time.Since(a.TradeTime) > time.Duration(a.ByTimePeriod)*time.Minute {
+	if time.Since(a.tradeTime) > time.Duration(a.ByTimePeriod)*time.Minute {
 		a.placeAssistOrder(tick.Close)
 	}
 }
@@ -221,7 +222,7 @@ func (a *assistTrader) checkByTimeAndBalance(tick *entity.RealTimeFutureTick) {
 		}
 	}
 
-	if time.Since(a.TradeTime) > time.Duration(a.ByTimePeriod)*time.Minute {
+	if time.Since(a.tradeTime) > time.Duration(a.ByTimePeriod)*time.Minute {
 		a.placeAssistOrder(tick.Close)
 	}
 }

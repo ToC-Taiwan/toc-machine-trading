@@ -22,8 +22,7 @@ CREATE TABLE trade_future_order (
     "code" VARCHAR NOT NULL,
     "action" INT NOT NULL,
     "price" DECIMAL NOT NULL,
-    "quantity" INT NOT NULL,
-    "trade_time" TIMESTAMPTZ NOT NULL
+    "quantity" INT NOT NULL
 );
 
 CREATE INDEX trade_future_order_order_time_index ON trade_future_order USING btree ("order_time");

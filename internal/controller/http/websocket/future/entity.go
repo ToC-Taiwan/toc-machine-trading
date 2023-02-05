@@ -2,6 +2,7 @@ package future
 
 import (
 	"sync"
+	"time"
 
 	"tmt/internal/entity"
 )
@@ -79,4 +80,27 @@ func (w *waitingList) remove(orderID string) {
 	defer w.m.Unlock()
 	w.m.Lock()
 	delete(w.list, orderID)
+}
+
+type orderTradeTime struct {
+	data map[string]time.Time
+	m    sync.RWMutex
+}
+
+func newOrderTradeTime() *orderTradeTime {
+	return &orderTradeTime{
+		data: make(map[string]time.Time),
+	}
+}
+
+func (o *orderTradeTime) get(orderID string) time.Time {
+	defer o.m.RUnlock()
+	o.m.RLock()
+	return o.data[orderID]
+}
+
+func (o *orderTradeTime) set(orderID string, t time.Time) {
+	defer o.m.Unlock()
+	o.m.Lock()
+	o.data[orderID] = t
 }
