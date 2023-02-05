@@ -123,15 +123,9 @@ func (uc *RealTimeUseCase) ReceiveOrderStatus(ctx context.Context) {
 			order := <-orderStatusChan
 			switch t := order.(type) {
 			case *entity.StockOrder:
-				if cc.GetOrderByOrderID(t.OrderID) == nil {
-					cc.SetOrderByOrderID(t.FixTime())
-				}
-				bus.PublishTopicEvent(topic.TopicInsertOrUpdateStockOrder, t)
+				bus.PublishTopicEvent(topic.TopicInsertOrUpdateStockOrder, t.FixTime())
 			case *entity.FutureOrder:
-				if cc.GetFutureOrderByOrderID(t.OrderID) == nil {
-					cc.SetFutureOrderByOrderID(t.FixTime())
-				}
-				bus.PublishTopicEvent(topic.TopicInsertOrUpdateFutureOrder, t)
+				bus.PublishTopicEvent(topic.TopicInsertOrUpdateFutureOrder, t.FixTime())
 			}
 		}
 	}()

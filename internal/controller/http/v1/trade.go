@@ -164,7 +164,6 @@ func (r *orderRoutes) manualInsertFutureOrder(c *gin.Context) {
 			Price:     body.Price,
 			Quantity:  body.Quantity,
 			TradeTime: orderTime,
-			TickTime:  orderTime,
 			OrderTime: orderTime,
 		},
 		Code: body.Code,

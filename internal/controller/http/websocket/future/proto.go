@@ -48,7 +48,6 @@ func newFutureOrderProto(f *entity.FutureOrder) *pb.WSMessage {
 					Price:     f.Price,
 					Quantity:  f.Quantity,
 					TradeTime: f.TradeTime.Format(common.LongTimeLayout),
-					TickTime:  f.TickTime.Format(common.LongTimeLayout),
 				},
 			},
 		},

@@ -132,23 +132,8 @@ func (uc *TradeUseCase) updateStockOrderCacheAndInsertDB(order *entity.StockOrde
 	defer uc.updateStockOrderLock.Unlock()
 	uc.updateStockOrderLock.Lock()
 
-	// get order from cache
-	cacheOrder := cc.GetOrderByOrderID(order.OrderID)
-	if cacheOrder == nil {
-		return
-	}
-
-	cacheOrder.Status = order.Status
-	cacheOrder.OrderTime = order.OrderTime
-
-	// qty may not filled with original order, change it by return quantity
-	cacheOrder.Quantity = order.Quantity
-
-	// update cache
-	cc.SetOrderByOrderID(cacheOrder)
-
 	// insert or update order to db
-	if err := uc.repo.InsertOrUpdateOrderByOrderID(context.Background(), cacheOrder); err != nil {
+	if err := uc.repo.InsertOrUpdateOrderByOrderID(context.Background(), order); err != nil {
 		logger.Fatal(err)
 	}
 }
@@ -239,25 +224,8 @@ func (uc *TradeUseCase) updateFutureOrderCacheAndInsertDB(order *entity.FutureOr
 	defer uc.updateFutureOrderLock.Unlock()
 	uc.updateFutureOrderLock.Lock()
 
-	// get order from cache
-	cacheOrder := cc.GetFutureOrderByOrderID(order.OrderID)
-	if cacheOrder == nil {
-		return
-	}
-
-	cacheOrder.Status = order.Status
-	if cacheOrder.OrderTime.IsZero() {
-		cacheOrder.OrderTime = order.OrderTime
-	}
-
-	// qty may not filled with original order, change it by return quantity
-	cacheOrder.Quantity = order.Quantity
-
-	// update cache
-	cc.SetFutureOrderByOrderID(cacheOrder)
-
 	// insert or update order to db
-	if err := uc.repo.InsertOrUpdateFutureOrderByOrderID(context.Background(), cacheOrder); err != nil {
+	if err := uc.repo.InsertOrUpdateFutureOrderByOrderID(context.Background(), order); err != nil {
 		logger.Fatal(err)
 	}
 }

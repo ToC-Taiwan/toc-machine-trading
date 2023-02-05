@@ -19,7 +19,6 @@ CREATE TABLE trade_future_order (
     "order_id" VARCHAR PRIMARY KEY,
     "status" INT NOT NULL,
     "order_time" TIMESTAMPTZ NOT NULL,
-    "tick_time" TIMESTAMPTZ NOT NULL,
     "code" VARCHAR NOT NULL,
     "action" INT NOT NULL,
     "price" DECIMAL NOT NULL,

@@ -157,9 +157,7 @@ type BaseOrder struct {
 	Action    OrderAction `json:"action"`
 	Price     float64     `json:"price"`
 	Quantity  int64       `json:"quantity"`
-
-	TradeTime time.Time `json:"trade_time"`
-	TickTime  time.Time `json:"tick_time"`
+	TradeTime time.Time   `json:"trade_time"`
 }
 
 func (o *BaseOrder) Cancellable() bool {
@@ -207,8 +205,9 @@ func (s *StockOrder) FixTime() *StockOrder {
 		s.OrderTime = time.Now()
 	}
 
-	s.TradeTime = s.OrderTime
-	s.TickTime = s.OrderTime
+	if s.TradeTime.IsZero() {
+		s.TradeTime = s.OrderTime
+	}
 	return s
 }
 
@@ -229,8 +228,9 @@ func (f *FutureOrder) FixTime() *FutureOrder {
 		f.OrderTime = time.Now()
 	}
 
-	f.TradeTime = f.OrderTime
-	f.TickTime = f.OrderTime
+	if f.TradeTime.IsZero() {
+		f.TradeTime = f.OrderTime
+	}
 	return f
 }
 
