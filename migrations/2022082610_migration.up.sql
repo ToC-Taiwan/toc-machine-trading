@@ -17,7 +17,6 @@ CREATE TABLE basic_future (
 
 CREATE TABLE trade_future_order (
     "order_id" VARCHAR PRIMARY KEY,
-    "group_id" VARCHAR NOT NULL,
     "status" INT NOT NULL,
     "order_time" TIMESTAMPTZ NOT NULL,
     "tick_time" TIMESTAMPTZ NOT NULL,

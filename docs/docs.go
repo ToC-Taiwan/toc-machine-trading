@@ -1010,9 +1010,6 @@ const docTemplate = `{
                 "action": {
                     "$ref": "#/definitions/entity.OrderAction"
                 },
-                "group_id": {
-                    "type": "string"
-                },
                 "order_id": {
                     "type": "string"
                 },
@@ -1088,9 +1085,6 @@ const docTemplate = `{
                 },
                 "future": {
                     "$ref": "#/definitions/entity.Future"
-                },
-                "manual": {
-                    "type": "boolean"
                 }
             }
         },
@@ -1222,9 +1216,6 @@ const docTemplate = `{
             "properties": {
                 "base_order": {
                     "$ref": "#/definitions/entity.BaseOrder"
-                },
-                "manual": {
-                    "type": "boolean"
                 },
                 "stock": {
                     "$ref": "#/definitions/entity.Stock"

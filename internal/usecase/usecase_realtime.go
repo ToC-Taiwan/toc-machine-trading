@@ -124,12 +124,12 @@ func (uc *RealTimeUseCase) ReceiveOrderStatus(ctx context.Context) {
 			switch t := order.(type) {
 			case *entity.StockOrder:
 				if cc.GetOrderByOrderID(t.OrderID) == nil {
-					cc.SetOrderByOrderID(t.ToManual())
+					cc.SetOrderByOrderID(t.FixTime())
 				}
 				bus.PublishTopicEvent(topic.TopicInsertOrUpdateStockOrder, t)
 			case *entity.FutureOrder:
 				if cc.GetFutureOrderByOrderID(t.OrderID) == nil {
-					cc.SetFutureOrderByOrderID(t.ToManual())
+					cc.SetFutureOrderByOrderID(t.FixTime())
 				}
 				bus.PublishTopicEvent(topic.TopicInsertOrUpdateFutureOrder, t)
 			}

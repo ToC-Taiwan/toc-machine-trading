@@ -158,7 +158,6 @@ func (r *orderRoutes) manualInsertFutureOrder(c *gin.Context) {
 
 	order := &entity.FutureOrder{
 		BaseOrder: entity.BaseOrder{
-			GroupID:   "-",
 			OrderID:   utils.RandomASCIILowerOctdigitsString(8),
 			Status:    entity.StatusFilled,
 			Action:    body.Action,
@@ -168,8 +167,7 @@ func (r *orderRoutes) manualInsertFutureOrder(c *gin.Context) {
 			TickTime:  orderTime,
 			OrderTime: orderTime,
 		},
-		Code:   body.Code,
-		Manual: true,
+		Code: body.Code,
 	}
 
 	if err := r.t.ManualInsertFutureOrder(c.Request.Context(), order); err != nil {

@@ -88,7 +88,6 @@ ADD CONSTRAINT "fk_history_stock_tick_stock" FOREIGN KEY ("stock_num") REFERENCE
 
 CREATE TABLE trade_stock_order (
     "order_id" VARCHAR PRIMARY KEY,
-    "group_id" VARCHAR NOT NULL,
     "status" INT NOT NULL,
     "order_time" TIMESTAMPTZ NOT NULL,
     "tick_time" TIMESTAMPTZ NOT NULL,

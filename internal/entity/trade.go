@@ -157,9 +157,9 @@ type BaseOrder struct {
 	Action    OrderAction `json:"action"`
 	Price     float64     `json:"price"`
 	Quantity  int64       `json:"quantity"`
-	TradeTime time.Time   `json:"trade_time"`
-	TickTime  time.Time   `json:"tick_time"`
-	GroupID   string      `json:"group_id"`
+
+	TradeTime time.Time `json:"trade_time"`
+	TickTime  time.Time `json:"tick_time"`
 }
 
 func (o *BaseOrder) Cancellable() bool {
@@ -190,59 +190,19 @@ func (o *BaseOrder) FilledQty() int64 {
 	}
 }
 
-type StockOrderArr []*StockOrder
-
-func (s StockOrderArr) SplitManualAndGroupID() (map[string]StockOrderArr, StockOrderArr) {
-	group := make(map[string]StockOrderArr)
-	var manual StockOrderArr
-	for _, v := range s {
-		if v.Manual {
-			manual = append(manual, v)
-		} else {
-			group[v.OrderID] = append(group[v.OrderID], v)
-		}
-	}
-	return group, manual
-}
-
-func (s StockOrderArr) IsAllDone() bool {
-	var qty int64
-	for _, v := range s {
-		if v.Status != StatusFilled {
-			continue
-		}
-
-		switch v.Action {
-		case ActionBuy:
-			qty += v.Quantity
-		case ActionSell:
-			qty -= v.Quantity
-		case ActionSellFirst:
-			qty -= v.Quantity
-		case ActionBuyLater:
-			qty += v.Quantity
-		}
-	}
-	return qty == 0
-}
-
 // StockOrder -.
 type StockOrder struct {
 	BaseOrder `json:"base_order"`
 
 	StockNum string `json:"stock_num"`
 	Stock    *Stock `json:"stock"`
-	Manual   bool   `json:"manual"`
 }
 
 func (s *StockOrder) StockOrderStatusString() string {
 	return fmt.Sprintf("%s %s %s %.0f x %d", s.BaseOrder.Status.String(), s.BaseOrder.Action.String(), s.StockNum, s.BaseOrder.Price, s.BaseOrder.Quantity)
 }
 
-func (s *StockOrder) ToManual() *StockOrder {
-	s.Manual = true
-	s.GroupID = "-"
-
+func (s *StockOrder) FixTime() *StockOrder {
 	if time.Since(s.OrderTime) > 12*time.Hour {
 		s.OrderTime = time.Now()
 	}
@@ -252,59 +212,19 @@ func (s *StockOrder) ToManual() *StockOrder {
 	return s
 }
 
-type FutureOrderArr []*FutureOrder
-
-func (s FutureOrderArr) SplitManualAndGroupID() (map[string]FutureOrderArr, FutureOrderArr) {
-	group := make(map[string]FutureOrderArr)
-	var manual FutureOrderArr
-	for _, v := range s {
-		if v.Manual {
-			manual = append(manual, v)
-		} else {
-			group[v.OrderID] = append(group[v.OrderID], v)
-		}
-	}
-	return group, manual
-}
-
-func (s FutureOrderArr) IsAllDone() bool {
-	var qty int64
-	for _, v := range s {
-		if v.Status != StatusFilled {
-			continue
-		}
-
-		switch v.Action {
-		case ActionBuy:
-			qty += v.Quantity
-		case ActionSell:
-			qty -= v.Quantity
-		case ActionSellFirst:
-			qty -= v.Quantity
-		case ActionBuyLater:
-			qty += v.Quantity
-		}
-	}
-	return qty == 0
-}
-
 // FutureOrder -.
 type FutureOrder struct {
 	BaseOrder `json:"base_order"`
 
 	Code   string  `json:"code"`
 	Future *Future `json:"future"`
-	Manual bool    `json:"manual"`
 }
 
 func (f *FutureOrder) FutureOrderStatusString() string {
 	return fmt.Sprintf("%s %s %s %.0f x %d", f.BaseOrder.Status.String(), f.BaseOrder.Action.String(), f.Code, f.BaseOrder.Price, f.BaseOrder.Quantity)
 }
 
-func (f *FutureOrder) ToManual() *FutureOrder {
-	f.Manual = true
-	f.GroupID = "-"
-
+func (f *FutureOrder) FixTime() *FutureOrder {
 	if time.Since(f.OrderTime) > 12*time.Hour {
 		f.OrderTime = time.Now()
 	}
