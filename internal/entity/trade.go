@@ -12,10 +12,6 @@ const (
 	ActionBuy
 	// ActionSell -.
 	ActionSell
-	// ActionSellFirst -.
-	ActionSellFirst
-	// ActionBuyLater -.
-	ActionBuyLater
 )
 
 const (
@@ -40,11 +36,9 @@ const (
 )
 
 const (
-	ActionStringNone      string = "None"
-	ActionStringBuy       string = "Buy"
-	ActionStringSell      string = "Sell"
-	ActionStringSellFirst string = "SellFirst"
-	ActionStringBuyLater  string = "BuyLater"
+	ActionStringNone string = "None"
+	ActionStringBuy  string = "Buy"
+	ActionStringSell string = "Sell"
 )
 
 const (
@@ -70,10 +64,6 @@ func (a OrderAction) String() string {
 		return ActionStringBuy
 	case ActionSell:
 		return ActionStringSell
-	case ActionSellFirst:
-		return ActionStringSellFirst
-	case ActionBuyLater:
-		return ActionStringBuyLater
 	default:
 		return ""
 	}
@@ -109,16 +99,10 @@ func (s OrderStatus) String() string {
 
 func StringToOrderAction(s string) OrderAction {
 	switch s {
-	case ActionStringNone:
-		return ActionNone
 	case ActionStringBuy:
 		return ActionBuy
 	case ActionStringSell:
 		return ActionSell
-	case ActionStringSellFirst:
-		return ActionSellFirst
-	case ActionStringBuyLater:
-		return ActionBuyLater
 	default:
 		return ActionNone
 	}
@@ -126,8 +110,6 @@ func StringToOrderAction(s string) OrderAction {
 
 func StringToOrderStatus(s string) OrderStatus {
 	switch s {
-	case StatusStringUnknow:
-		return StatusUnknow
 	case StatusStringPendingSubmit:
 		return StatusPendingSubmit
 	case StatusStringPreSubmitted:
@@ -178,10 +160,6 @@ func (o *BaseOrder) FilledQty() int64 {
 		return o.Quantity
 	case ActionSell:
 		return -o.Quantity
-	case ActionSellFirst:
-		return -o.Quantity
-	case ActionBuyLater:
-		return o.Quantity
 	default:
 		return 0
 	}

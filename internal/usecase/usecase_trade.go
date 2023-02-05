@@ -141,16 +141,27 @@ func (uc *TradeUseCase) updateStockOrderCacheAndInsertDB(order *entity.StockOrde
 // calculateStockTradeBalance -.
 func (uc *TradeUseCase) calculateStockTradeBalance(allOrders []*entity.StockOrder, tradeDay time.Time) {
 	var forward, reverse []*entity.StockOrder
+	qtyMap := make(map[string]int64)
 	for _, v := range allOrders {
 		if v.Status != entity.StatusFilled {
 			continue
 		}
 
 		switch v.Action {
-		case entity.ActionBuy, entity.ActionSell:
-			forward = append(forward, v)
-		case entity.ActionSellFirst, entity.ActionBuyLater:
-			reverse = append(reverse, v)
+		case entity.ActionBuy:
+			if qtyMap[v.StockNum] >= 0 {
+				forward = append(forward, v)
+			} else {
+				reverse = append(reverse, v)
+			}
+			qtyMap[v.StockNum] += v.Quantity
+		case entity.ActionSell:
+			if qtyMap[v.StockNum] > 0 {
+				forward = append(forward, v)
+			} else {
+				reverse = append(reverse, v)
+			}
+			qtyMap[v.StockNum] -= v.Quantity
 		}
 	}
 
@@ -203,7 +214,7 @@ func (uc *TradeUseCase) calculateReverseStockBalance(reverse []*entity.StockOrde
 		tradeCount++
 
 		switch v.Action {
-		case entity.ActionSellFirst:
+		case entity.ActionSell:
 			qty -= v.Quantity
 			revereBalance += uc.quota.GetStockSellCost(v.Price, v.Quantity)
 		case entity.ActionBuy:
@@ -287,16 +298,27 @@ func (uc *TradeUseCase) CancelFutureOrderByID(orderID string) (string, entity.Or
 // calculateFutureTradeBalance -.
 func (uc *TradeUseCase) calculateFutureTradeBalance(allOrders []*entity.FutureOrder, tradeDay time.Time) {
 	var forward, reverse []*entity.FutureOrder
+	qtyMap := make(map[string]int64)
 	for _, v := range allOrders {
 		if v.Status != entity.StatusFilled {
 			continue
 		}
 
 		switch v.Action {
-		case entity.ActionBuy, entity.ActionSell:
-			forward = append(forward, v)
-		case entity.ActionSellFirst, entity.ActionBuyLater:
-			reverse = append(reverse, v)
+		case entity.ActionBuy:
+			if qtyMap[v.Code] >= 0 {
+				forward = append(forward, v)
+			} else {
+				reverse = append(reverse, v)
+			}
+			qtyMap[v.Code] += v.Quantity
+		case entity.ActionSell:
+			if qtyMap[v.Code] > 0 {
+				forward = append(forward, v)
+			} else {
+				reverse = append(reverse, v)
+			}
+			qtyMap[v.Code] -= v.Quantity
 		}
 	}
 
@@ -346,10 +368,10 @@ func (uc *TradeUseCase) calculateReverseFutureBalance(reverse []*entity.FutureOr
 		tradeCount++
 
 		switch v.Action {
-		case entity.ActionSellFirst:
+		case entity.ActionSell:
 			qty -= v.Quantity
 			reverseBalance += uc.quota.GetFutureSellCost(v.Price, v.Quantity)
-		case entity.ActionBuyLater:
+		case entity.ActionBuy:
 			qty += v.Quantity
 			reverseBalance -= uc.quota.GetFutureBuyCost(v.Price, v.Quantity)
 		}

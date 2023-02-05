@@ -53,7 +53,7 @@ func (q *Quota) IsEnough(t int64) bool {
 
 // CalculateOriginalOrderCost -.
 func (q *Quota) CalculateOriginalOrderCost(order *entity.StockOrder) int64 {
-	if order.Action == entity.ActionBuy || order.Action == entity.ActionSellFirst {
+	if order.Action == entity.ActionBuy {
 		return int64(math.Ceil(order.Price * float64(order.Quantity) * 1000))
 	}
 	return 0

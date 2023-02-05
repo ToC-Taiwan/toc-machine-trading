@@ -250,15 +250,11 @@ definitions:
     - 0
     - 1
     - 2
-    - 3
-    - 4
     type: integer
     x-enum-varnames:
     - ActionNone
     - ActionBuy
     - ActionSell
-    - ActionSellFirst
-    - ActionBuyLater
   entity.OrderStatus:
     enum:
     - 0
