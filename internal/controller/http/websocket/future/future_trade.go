@@ -123,7 +123,7 @@ func (w *WSFutureTrade) processClientOrder(client clientOrder) {
 				WSFutureTrade:        w,
 				FutureOrder:          o,
 				halfAutomationOption: client.Option,
-				tradeTime:            time.Now(),
+				tradeTime:            w.orderTradeTime.get(o.OrderID),
 			}
 			w.assistTargetWaitingMapLock.Unlock()
 		} else {
