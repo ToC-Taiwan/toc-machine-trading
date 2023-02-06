@@ -21,12 +21,12 @@ import (
 
 // RealTimeUseCase -.
 type RealTimeUseCase struct {
-	repo       RealTimeRepo
+	repo RealTimeRepo
+
 	grpcapi    RealTimegRPCAPI
 	subgRPCAPI SubscribegRPCAPI
-
-	sc TradegRPCAPI
-	fg TradegRPCAPI
+	sc         TradegRPCAPI
+	fg         TradegRPCAPI
 
 	commonRabbit Rabbit
 	futureRabbit Rabbit

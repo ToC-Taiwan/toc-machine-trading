@@ -16,6 +16,8 @@ const (
 	endTradeYear   int = 2023
 )
 
+var singleton *TradeDay
+
 // TradeDay -.
 type TradeDay struct {
 	holidayTimeMap map[time.Time]struct{}
@@ -26,8 +28,11 @@ type holidayArr struct {
 	DateArr []string `json:"date_arr"`
 }
 
-// NewTradeDay -.
-func NewTradeDay() *TradeDay {
+func Get() *TradeDay {
+	if singleton != nil {
+		return singleton
+	}
+
 	t := &TradeDay{
 		holidayTimeMap: make(map[time.Time]struct{}),
 		tradeDayMap:    make(map[time.Time]struct{}),
@@ -35,6 +40,8 @@ func NewTradeDay() *TradeDay {
 
 	t.parseHolidayFile()
 	t.fillTradeDay()
+
+	singleton = t
 	return t
 }
 

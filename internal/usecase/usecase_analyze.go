@@ -12,7 +12,8 @@ import (
 
 // AnalyzeUseCase -.
 type AnalyzeUseCase struct {
-	repo      HistoryRepo
+	repo HistoryRepo
+
 	targetArr []*entity.StockTarget
 
 	lastBelowMAStock map[string]*entity.StockHistoryAnalyze
@@ -64,6 +65,7 @@ func (uc *AnalyzeUseCase) findBelowQuaterMATargets(targetArr []*entity.StockTarg
 			}
 		}
 	}
+
 	bus.PublishTopicEvent(topic.TopicSubscribeStockTickTargets, targetArr)
 	logger.Info("Find below quaterMA targets done")
 }

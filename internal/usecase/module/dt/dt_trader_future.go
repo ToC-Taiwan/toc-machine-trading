@@ -40,7 +40,6 @@ func NewDTTraderFuture(order *entity.FutureOrder, s *grpcapi.TradegRPCAPI, bus *
 	}
 
 	if err := d.placeOrder(order); err != nil {
-		bus.PublishTopicEvent(topicTraderDone, d.id)
 		logger.Error(err)
 		return nil
 	}
@@ -107,9 +106,7 @@ func (d *DTTraderFuture) isTraderDone() bool {
 	d.finishOrderMapLock.RUnlock()
 
 	if endQty == d.baseOrder.Quantity {
-		d.bus.UnSubscribeTopic(topicUpdateOrder, d.updateOrder)
-		d.bus.PublishTopicEvent(topicTraderDone, d.id)
-		d.done = true
+		d.postDone()
 		return true
 	}
 	return false
@@ -163,4 +160,10 @@ func (d *DTTraderFuture) TickChan() chan *entity.RealTimeFutureTick {
 		return nil
 	}
 	return d.tickChan
+}
+
+func (d *DTTraderFuture) postDone() {
+	d.bus.UnSubscribeTopic(topicUpdateOrder, d.updateOrder)
+	d.bus.PublishTopicEvent(topicTraderDone, d.id)
+	d.done = true
 }

@@ -78,7 +78,7 @@ func (u *UseCaseBase) NewAnalyze() Analyze {
 		repo:             repo.NewHistory(u.pg),
 		lastBelowMAStock: make(map[string]*entity.StockHistoryAnalyze),
 		rebornMap:        make(map[time.Time][]entity.Stock),
-		tradeDay:         tradeday.NewTradeDay(),
+		tradeDay:         tradeday.Get(),
 	}
 
 	bus.SubscribeTopic(topic.TopicAnalyzeStockTargets, uc.findBelowQuaterMATargets)
@@ -90,7 +90,7 @@ func (u *UseCaseBase) NewBasic() Basic {
 		repo:     repo.NewBasic(u.pg),
 		sc:       grpcapi.NewBasic(u.sc),
 		fg:       grpcapi.NewBasic(u.fg),
-		tradeDay: tradeday.NewTradeDay(),
+		tradeDay: tradeday.Get(),
 		cfg:      u.cfg,
 	}
 
@@ -120,13 +120,12 @@ func (u *UseCaseBase) NewHistory() History {
 		repo:            repo.NewHistory(u.pg),
 		grpcapi:         grpcapi.NewHistory(u.sc),
 		fetchList:       make(map[string]*entity.StockTarget),
-		tradeDay:        tradeday.NewTradeDay(),
+		tradeDay:        tradeday.Get(),
 		analyzeStockCfg: u.cfg.AnalyzeStock,
 	}
 
 	uc.basic = cc.GetBasicInfo()
 	bus.SubscribeTopic(topic.TopicFetchStockHistory, uc.FetchHistory)
-	bus.SubscribeTopic(topic.TopicSubscribeFutureTickTargets, uc.updateMainFutureCode)
 	return uc
 }
 
@@ -172,7 +171,7 @@ func (u *UseCaseBase) NewTarget() Target {
 		gRPCAPI:      grpcapi.NewRealTime(u.sc),
 		cfg:          cfg,
 		basic:        basic,
-		tradeDay:     tradeday.NewTradeDay(),
+		tradeDay:     tradeday.Get(),
 		targetFilter: target.NewFilter(cfg.TargetStock),
 	}
 
@@ -219,11 +218,9 @@ func (u *UseCaseBase) NewTarget() Target {
 
 func (u *UseCaseBase) NewTrade() Trade {
 	cfg := u.cfg
-	tradeDay := tradeday.NewTradeDay()
+	tradeDay := tradeday.Get()
 
 	uc := &TradeUseCase{
-		simTrade: cfg.Simulation,
-
 		sc:    grpcapi.NewTrade(u.sc, cfg.Simulation),
 		fg:    grpcapi.NewTrade(u.fg, cfg.Simulation),
 		repo:  repo.NewTrade(u.pg),
@@ -237,7 +234,7 @@ func (u *UseCaseBase) NewTrade() Trade {
 	bus.SubscribeTopic(topic.TopicInsertOrUpdateStockOrder, uc.updateStockOrderCacheAndInsertDB)
 	bus.SubscribeTopic(topic.TopicInsertOrUpdateFutureOrder, uc.updateFutureOrderCacheAndInsertDB)
 
-	if uc.simTrade {
+	if cfg.Simulation {
 		go uc.askSimulateOrderStatus()
 	} else {
 		go uc.askOrderStatus()

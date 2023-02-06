@@ -13,17 +13,16 @@ import (
 
 // TradeUseCase -.
 type TradeUseCase struct {
-	sc   TradegRPCAPI
-	fg   TradegRPCAPI
 	repo TradeRepo
+
+	sc TradegRPCAPI
+	fg TradegRPCAPI
 
 	quota    *quota.Quota
 	tradeDay *tradeday.TradeDay
 
 	stockTradeDay  tradeday.TradePeriod
 	futureTradeDay tradeday.TradePeriod
-
-	simTrade bool
 
 	updateFutureOrderLock sync.Mutex
 	updateStockOrderLock  sync.Mutex

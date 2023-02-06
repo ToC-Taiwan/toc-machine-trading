@@ -35,7 +35,7 @@ type DTFuture struct {
 func NewDTFuture(code string, s *grpcapi.TradegRPCAPI, tradeConfig *config.TradeFuture) *DTFuture {
 	d := &DTFuture{
 		code:          code,
-		orderQuantity: 1,
+		orderQuantity: 2,
 		tickChan:      make(chan *entity.RealTimeFutureTick),
 		notify:        make(chan *entity.FutureOrder),
 		sc:            s,
@@ -61,26 +61,6 @@ func (d *DTFuture) TickChan() chan *entity.RealTimeFutureTick {
 	return d.tickChan
 }
 
-func (d *DTFuture) processTick() {
-	go func() {
-		for {
-			tick := <-d.tickChan
-			d.tickArr = append(d.tickArr, tick)
-			if len(d.tickArr) > 1 {
-				d.tickArr = d.tickArr[1:]
-			}
-
-			if d.noTrader() {
-				continue
-			}
-
-			// TODO: add trader
-
-			d.sendTickToTrader(tick)
-		}
-	}()
-}
-
 func (d *DTFuture) processOrderStatus() {
 	finishedOrderMap := make(map[string]*entity.FutureOrder)
 	go func() {
@@ -101,10 +81,25 @@ func (d *DTFuture) processOrderStatus() {
 	}()
 }
 
-func (d *DTFuture) noTrader() bool {
-	d.traderMapLock.RLock()
-	defer d.traderMapLock.RUnlock()
-	return len(d.traderMap) == 0
+func (d *DTFuture) processTick() {
+	go func() {
+		for {
+			tick := <-d.tickChan
+			d.tickArr = append(d.tickArr, tick)
+
+			if len(d.tickArr) > 1 {
+				d.tickArr = d.tickArr[1:]
+			}
+
+			if o := d.generateOrder(); o != nil {
+				for i := 0; i < int(d.orderQuantity); i++ {
+					d.addTrader(o)
+				}
+			}
+
+			d.sendTickToTrader(tick)
+		}
+	}()
 }
 
 func (d *DTFuture) sendTickToTrader(tick *entity.RealTimeFutureTick) {
@@ -128,6 +123,19 @@ func (d *DTFuture) cancelOverTimeOrder(order *entity.FutureOrder) {
 	if entity.StringToOrderStatus(result.GetStatus()) != entity.StatusCancelled {
 		logger.Error("Cancel future order failed", result.GetStatus())
 		return
+	}
+}
+
+func (d *DTFuture) generateOrder() *entity.FutureOrder {
+	return &entity.FutureOrder{}
+}
+
+func (d *DTFuture) addTrader(order *entity.FutureOrder) {
+	d.traderMapLock.Lock()
+	defer d.traderMapLock.Unlock()
+
+	if trader := NewDTTraderFuture(order, d.sc, d.localBus); trader != nil {
+		d.traderMap[trader.id] = trader
 	}
 }
 

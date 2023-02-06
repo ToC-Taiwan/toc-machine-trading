@@ -21,13 +21,12 @@ type HistoryUseCase struct {
 	grpcapi HistorygRPCAPI
 
 	analyzeStockCfg config.AnalyzeStock
-	basic           *entity.BasicInfo
 
 	fetchList map[string]*entity.StockTarget
 	mutex     sync.Mutex
 
-	tradeDay       *tradeday.TradeDay
-	mainFutureCode string
+	basic    *entity.BasicInfo
+	tradeDay *tradeday.TradeDay
 }
 
 // GetTradeDay -.
@@ -545,8 +544,4 @@ func (uc *HistoryUseCase) FetchFutureHistoryKbar(code string, date time.Time) ([
 	close(dataChan)
 	<-wait
 	return result[code], nil
-}
-
-func (uc *HistoryUseCase) updateMainFutureCode(code string) {
-	uc.mainFutureCode = code
 }
