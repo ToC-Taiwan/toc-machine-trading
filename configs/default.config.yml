@@ -64,7 +64,9 @@ trade_stock:
 trade_future:
     allow_trade: false
     subscribe: true
-    quantity: 1
+    quantity: 2
+    target_balance_high: 2
+    target_balance_low: -4
 
     # unit: seccond
     trade_in_wait_time: 5

@@ -31,8 +31,6 @@ const (
 	StatusFilled
 	// StatusPartFilled -.
 	StatusPartFilled
-	// StatusAborted -.
-	StatusAborted
 )
 
 const (
@@ -50,7 +48,6 @@ const (
 	StatusStringCancelled     string = "Cancelled"
 	StatusStringFilled        string = "Filled"
 	StatusStringPartFilled    string = "PartFilled"
-	StatusStringAborted       string = "Aborted"
 )
 
 // OrderAction -.
@@ -90,8 +87,6 @@ func (s OrderStatus) String() string {
 		return "Filled"
 	case StatusPartFilled:
 		return "PartFilled"
-	case StatusAborted:
-		return "Aborted"
 	default:
 		return ""
 	}
@@ -124,8 +119,6 @@ func StringToOrderStatus(s string) OrderStatus {
 		return StatusFilled
 	case StatusStringPartFilled:
 		return StatusPartFilled
-	case StatusStringAborted:
-		return StatusAborted
 	default:
 		return StatusUnknow
 	}

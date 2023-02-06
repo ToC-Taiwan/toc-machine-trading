@@ -146,6 +146,10 @@ definitions:
         type: integer
       subscribe:
         type: boolean
+      target_balance_high:
+        type: number
+      target_balance_low:
+        type: number
       trade_in_wait_time:
         type: integer
       trade_out_wait_time:
@@ -265,7 +269,6 @@ definitions:
     - 5
     - 6
     - 7
-    - 8
     type: integer
     x-enum-varnames:
     - StatusUnknow
@@ -276,7 +279,6 @@ definitions:
     - StatusCancelled
     - StatusFilled
     - StatusPartFilled
-    - StatusAborted
   entity.Stock:
     properties:
       category:

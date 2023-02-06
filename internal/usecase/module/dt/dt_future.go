@@ -35,7 +35,7 @@ type DTFuture struct {
 func NewDTFuture(code string, s *grpcapi.TradegRPCAPI, tradeConfig *config.TradeFuture) *DTFuture {
 	d := &DTFuture{
 		code:          code,
-		orderQuantity: 2,
+		orderQuantity: tradeConfig.Quantity,
 		tickChan:      make(chan *entity.RealTimeFutureTick),
 		notify:        make(chan *entity.FutureOrder),
 		sc:            s,
@@ -134,7 +134,12 @@ func (d *DTFuture) addTrader(order *entity.FutureOrder) {
 	d.traderMapLock.Lock()
 	defer d.traderMapLock.Unlock()
 
-	if trader := NewDTTraderFuture(order, d.sc, d.localBus); trader != nil {
+	orderWithCfg := orderWithCfg{
+		order: order,
+		cfg:   d.tradeConfig,
+	}
+
+	if trader := NewDTTraderFuture(orderWithCfg, d.sc, d.localBus); trader != nil {
 		d.traderMap[trader.id] = trader
 	}
 }
@@ -143,8 +148,8 @@ func (d *DTFuture) removeDoneTrader(id string) {
 	d.traderMapLock.Lock()
 	defer d.traderMapLock.Unlock()
 
-	if ch := d.traderMap[id].TickChan(); ch != nil {
-		close(ch)
+	if trader := d.traderMap[id]; trader != nil {
+		close(trader.tickChan)
+		delete(d.traderMap, id)
 	}
-	delete(d.traderMap, id)
 }

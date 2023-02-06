@@ -3,6 +3,7 @@ package dt
 import (
 	"sync"
 
+	"tmt/cmd/config"
 	"tmt/internal/entity"
 	"tmt/internal/usecase/grpcapi"
 	"tmt/pkg/eventbus"
@@ -14,33 +15,35 @@ type DTTraderFuture struct {
 	id string
 
 	tickChan chan *entity.RealTimeFutureTick
-	tickArr  []*entity.RealTimeFutureTick
 
 	sc  *grpcapi.TradegRPCAPI
 	bus *eventbus.Bus
 
+	tradeConfig  *config.TradeFuture
 	baseOrder    *entity.FutureOrder
 	waitingOrder *entity.FutureOrder
 
 	finishOrderMap     map[string]*entity.FutureOrder
 	finishOrderMapLock sync.RWMutex
 
-	done     bool
-	needTick bool
+	ready bool
+	done  bool
+
+	once sync.Once
 }
 
-func NewDTTraderFuture(order *entity.FutureOrder, s *grpcapi.TradegRPCAPI, bus *eventbus.Bus) *DTTraderFuture {
+func NewDTTraderFuture(orderWithCfg orderWithCfg, s *grpcapi.TradegRPCAPI, bus *eventbus.Bus) *DTTraderFuture {
 	d := &DTTraderFuture{
-		id:        uuid.NewString(),
-		tickChan:  make(chan *entity.RealTimeFutureTick),
-		tickArr:   []*entity.RealTimeFutureTick{},
-		sc:        s,
-		bus:       bus,
-		baseOrder: order,
+		id:          uuid.NewString(),
+		tickChan:    make(chan *entity.RealTimeFutureTick),
+		sc:          s,
+		bus:         bus,
+		baseOrder:   orderWithCfg.order,
+		tradeConfig: orderWithCfg.cfg,
 	}
 
-	if err := d.placeOrder(order); err != nil {
-		logger.Error(err)
+	if err := d.placeOrder(orderWithCfg.order); err != nil {
+		logger.Errorf("NewDTTraderFuture err: %s", err.Error())
 		return nil
 	}
 
@@ -51,14 +54,20 @@ func NewDTTraderFuture(order *entity.FutureOrder, s *grpcapi.TradegRPCAPI, bus *
 }
 
 func (d *DTTraderFuture) processTick() {
+	var tradeOutAction entity.OrderAction
+	switch d.baseOrder.Action {
+	case entity.ActionBuy:
+		tradeOutAction = entity.ActionSell
+	case entity.ActionSell:
+		tradeOutAction = entity.ActionBuy
+	}
+
 	go func() {
 		for {
 			tick, ok := <-d.tickChan
 			if !ok {
 				return
 			}
-
-			d.tickArr = append(d.tickArr, tick)
 
 			if d.waitingOrder != nil {
 				continue
@@ -67,19 +76,66 @@ func (d *DTTraderFuture) processTick() {
 			if d.isTraderDone() {
 				continue
 			}
+
+			d.checkByBalance(tick, tradeOutAction)
 		}
 	}()
 }
 
+func (d *DTTraderFuture) checkByBalance(tick *entity.RealTimeFutureTick, tradeOutAction entity.OrderAction) {
+	var price float64
+	var quantity int64
+
+	switch tradeOutAction {
+	case entity.ActionSell:
+		if tick.Close >= d.baseOrder.Price+d.tradeConfig.TargetBalanceHigh || tick.Close <= d.baseOrder.Price+d.tradeConfig.TargetBalanceLow {
+			price = tick.Close
+			quantity = d.baseOrder.Quantity
+		}
+
+	case entity.ActionBuy:
+		if tick.Close <= d.baseOrder.Price-d.tradeConfig.TargetBalanceHigh || tick.Close >= d.baseOrder.Price-d.tradeConfig.TargetBalanceLow {
+			price = tick.Close
+			quantity = d.baseOrder.Quantity
+		}
+	}
+
+	if price == 0 || quantity == 0 {
+		return
+	}
+
+	o := &entity.FutureOrder{
+		Code: tick.Code,
+		BaseOrder: entity.BaseOrder{
+			Action:   tradeOutAction,
+			Price:    price,
+			Quantity: quantity,
+		},
+	}
+
+	if err := d.placeOrder(o); err != nil {
+		logger.Errorf("checkByBalance place order error: %s", err.Error())
+		return
+	}
+
+	d.waitingOrder = o
+}
+
 func (d *DTTraderFuture) updateOrder(order *entity.FutureOrder) {
+	if !d.ready && d.baseOrder.OrderID == order.OrderID {
+		switch order.Status {
+		case entity.StatusFilled:
+			d.ready = true
+		case entity.StatusCancelled, entity.StatusFailed:
+			d.postDone()
+		}
+		return
+	}
+
 	d.finishOrderMapLock.Lock()
 	defer d.finishOrderMapLock.Unlock()
 
 	if _, ok := d.finishOrderMap[order.OrderID]; ok {
-		if d.baseOrder.OrderID == order.OrderID && order.Status == entity.StatusFilled {
-			d.done = true
-		}
-
 		d.finishOrderMap[order.OrderID] = order
 		if d.waitingOrder != nil && !order.Cancellable() && d.waitingOrder.OrderID == order.OrderID {
 			d.waitingOrder = nil
@@ -95,10 +151,6 @@ func (d *DTTraderFuture) isTraderDone() bool {
 	var endQty int64
 	d.finishOrderMapLock.RLock()
 	for _, o := range d.finishOrderMap {
-		if o.OrderID == d.baseOrder.OrderID {
-			continue
-		}
-
 		if o.Status == entity.StatusFilled {
 			endQty += o.Quantity
 		}
@@ -132,9 +184,11 @@ func (d *DTTraderFuture) buy(o *entity.FutureOrder) error {
 	o.OrderID = result.GetOrderId()
 	o.Status = entity.StringToOrderStatus(result.GetStatus())
 
-	d.finishOrderMapLock.Lock()
-	d.finishOrderMap[o.OrderID] = o
-	d.finishOrderMapLock.Unlock()
+	if d.ready {
+		d.finishOrderMapLock.Lock()
+		d.finishOrderMap[o.OrderID] = o
+		d.finishOrderMapLock.Unlock()
+	}
 
 	return nil
 }
@@ -148,22 +202,26 @@ func (d *DTTraderFuture) sell(o *entity.FutureOrder) error {
 	o.OrderID = result.GetOrderId()
 	o.Status = entity.StringToOrderStatus(result.GetStatus())
 
-	d.finishOrderMapLock.Lock()
-	d.finishOrderMap[o.OrderID] = o
-	d.finishOrderMapLock.Unlock()
+	if d.ready {
+		d.finishOrderMapLock.Lock()
+		d.finishOrderMap[o.OrderID] = o
+		d.finishOrderMapLock.Unlock()
+	}
 
 	return nil
 }
 
 func (d *DTTraderFuture) TickChan() chan *entity.RealTimeFutureTick {
-	if !d.needTick {
+	if !d.ready {
 		return nil
 	}
 	return d.tickChan
 }
 
 func (d *DTTraderFuture) postDone() {
-	d.bus.UnSubscribeTopic(topicUpdateOrder, d.updateOrder)
-	d.bus.PublishTopicEvent(topicTraderDone, d.id)
-	d.done = true
+	d.once.Do(func() {
+		d.bus.UnSubscribeTopic(topicUpdateOrder, d.updateOrder)
+		d.bus.PublishTopicEvent(topicTraderDone, d.id)
+		d.done = true
+	})
 }

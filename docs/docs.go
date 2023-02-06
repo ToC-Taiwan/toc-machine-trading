@@ -953,6 +953,12 @@ const docTemplate = `{
                 "subscribe": {
                     "type": "boolean"
                 },
+                "target_balance_high": {
+                    "type": "number"
+                },
+                "target_balance_low": {
+                    "type": "number"
+                },
                 "trade_in_wait_time": {
                     "type": "integer"
                 },
@@ -1128,8 +1134,7 @@ const docTemplate = `{
                 4,
                 5,
                 6,
-                7,
-                8
+                7
             ],
             "x-enum-varnames": [
                 "StatusUnknow",
@@ -1139,8 +1144,7 @@ const docTemplate = `{
                 "StatusFailed",
                 "StatusCancelled",
                 "StatusFilled",
-                "StatusPartFilled",
-                "StatusAborted"
+                "StatusPartFilled"
             ]
         },
         "entity.Stock": {
