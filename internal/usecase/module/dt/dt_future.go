@@ -9,17 +9,14 @@ import (
 	"tmt/internal/entity"
 	"tmt/internal/usecase/grpcapi"
 	"tmt/pkg/eventbus"
-	"tmt/pkg/log"
 
 	"github.com/google/uuid"
 )
 
-var logger = log.Get()
-
 type DTFuture struct {
 	code          string
 	orderQuantity int64
-	tickArr       []*entity.RealTimeFutureTick
+	tickArr       entity.RealTimeFutureTickArr
 
 	sc       *grpcapi.TradegRPCAPI
 	localBus *eventbus.Bus
@@ -75,7 +72,7 @@ func (d *DTFuture) processOrderStatus() {
 }
 
 func (d *DTFuture) cancelOverTimeOrder(order *entity.FutureOrder) {
-	if time.Since(order.OrderTime) < time.Duration(d.tradeConfig.CancelWaitTime)*time.Second {
+	if time.Since(order.OrderTime) < time.Duration(d.tradeConfig.BuySellWaitTime)*time.Second {
 		return
 	}
 
@@ -105,6 +102,7 @@ func (d *DTFuture) processTick() {
 					go d.addTrader(o)
 				}
 			}
+
 			d.sendTickToTrader(tick)
 		}
 	}()

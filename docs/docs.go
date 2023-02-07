@@ -944,6 +944,9 @@ const docTemplate = `{
                 "allow_trade": {
                     "type": "boolean"
                 },
+                "buy_sell_wait_time": {
+                    "type": "integer"
+                },
                 "cancel_wait_time": {
                     "type": "integer"
                 },
@@ -958,12 +961,6 @@ const docTemplate = `{
                 },
                 "target_balance_low": {
                     "type": "number"
-                },
-                "trade_in_wait_time": {
-                    "type": "integer"
-                },
-                "trade_out_wait_time": {
-                    "type": "integer"
                 },
                 "trade_time_range": {
                     "$ref": "#/definitions/config.TradeTimeRange"

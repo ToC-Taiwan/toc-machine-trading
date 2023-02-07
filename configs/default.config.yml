@@ -69,8 +69,7 @@ trade_future:
     target_balance_low: -4
 
     # unit: seccond
-    trade_in_wait_time: 5
-    trade_out_wait_time: 10
+    buy_sell_wait_time: 7
     cancel_wait_time: 15
 
     # duration: minute

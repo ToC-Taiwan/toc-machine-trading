@@ -66,9 +66,8 @@ type TradeFuture struct {
 	AllowTrade bool `json:"allow_trade"         yaml:"allow_trade"`
 	Subscribe  bool `json:"subscribe"           yaml:"subscribe"`
 
-	TradeInWaitTime  int64 `json:"trade_in_wait_time"  env-required:"true" yaml:"trade_in_wait_time"`
-	TradeOutWaitTime int64 `json:"trade_out_wait_time" env-required:"true" yaml:"trade_out_wait_time"`
-	CancelWaitTime   int64 `json:"cancel_wait_time"    env-required:"true" yaml:"cancel_wait_time"`
+	BuySellWaitTime int64 `json:"buy_sell_wait_time" env-required:"true" yaml:"buy_sell_wait_time"`
+	CancelWaitTime  int64 `json:"cancel_wait_time"    env-required:"true" yaml:"cancel_wait_time"`
 
 	Quantity          int64   `json:"quantity"            env-required:"true" yaml:"quantity"`
 	TargetBalanceHigh float64 `json:"target_balance_high" env-required:"true" yaml:"target_balance_high"`

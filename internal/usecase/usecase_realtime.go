@@ -375,6 +375,10 @@ func (uc *RealTimeUseCase) ReceiveFutureSubscribeData(code string) {
 				continue
 			}
 
+			if o.Code != code {
+				continue
+			}
+
 			ch <- o
 		}
 	}()
