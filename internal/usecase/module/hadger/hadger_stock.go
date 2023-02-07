@@ -48,19 +48,19 @@ func NewHadgerStock(num string, s, f *grpcapi.TradegRPCAPI, q *quota.Quota, trad
 	}
 
 	h.localBus.SubscribeTopic(topicTraderDone, h.removeDoneTrader)
-	h.prepare()
+	h.processTick()
 	h.processOrderStatus()
 
 	return h
 }
 
-func (h *HadgerStock) prepare() {
+func (h *HadgerStock) processTick() {
 	go func() {
 		for {
 			tick := <-h.tickChan
 			h.tickArr = append(h.tickArr, tick)
 
-			if len(h.tickArr) > 10 {
+			if len(h.tickArr) > 1 {
 				h.tickArr = h.tickArr[1:]
 			}
 

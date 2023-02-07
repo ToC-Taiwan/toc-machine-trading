@@ -3,6 +3,7 @@ package dt
 
 import (
 	"sync"
+	"time"
 
 	"tmt/cmd/config"
 	"tmt/internal/entity"
@@ -47,31 +48,23 @@ func NewDTFuture(code string, s *grpcapi.TradegRPCAPI, tradeConfig *config.Trade
 
 	d.localBus.SubscribeTopic(topicTraderDone, d.removeDoneTrader)
 
-	d.processTick()
 	d.processOrderStatus()
+	d.processTick()
 
 	return d
 }
 
-func (d *DTFuture) Notify() chan *entity.FutureOrder {
-	return d.notify
-}
-
-func (d *DTFuture) TickChan() chan *entity.RealTimeFutureTick {
-	return d.tickChan
-}
-
 func (d *DTFuture) processOrderStatus() {
-	finishedOrderMap := make(map[string]*entity.FutureOrder)
+	notCancellableOrderMap := make(map[string]*entity.FutureOrder)
 	go func() {
 		for {
 			o := <-d.notify
-			if _, ok := finishedOrderMap[o.OrderID]; ok {
+			if _, ok := notCancellableOrderMap[o.OrderID]; ok {
 				continue
 			}
 
 			if !o.Cancellable() {
-				finishedOrderMap[o.OrderID] = o
+				notCancellableOrderMap[o.OrderID] = o
 			} else {
 				d.cancelOverTimeOrder(o)
 			}
@@ -81,22 +74,37 @@ func (d *DTFuture) processOrderStatus() {
 	}()
 }
 
+func (d *DTFuture) cancelOverTimeOrder(order *entity.FutureOrder) {
+	if time.Since(order.OrderTime) < time.Duration(d.tradeConfig.CancelWaitTime)*time.Second {
+		return
+	}
+
+	result, err := d.sc.CancelFuture(order.OrderID)
+	if err != nil {
+		logger.Error(err)
+		return
+	}
+
+	if entity.StringToOrderStatus(result.GetStatus()) != entity.StatusCancelled {
+		logger.Error("Cancel future order failed", result.GetStatus())
+		return
+	}
+}
+
 func (d *DTFuture) processTick() {
 	go func() {
 		for {
 			tick := <-d.tickChan
 			d.tickArr = append(d.tickArr, tick)
-
 			if len(d.tickArr) > 1 {
 				d.tickArr = d.tickArr[1:]
 			}
 
 			if o := d.generateOrder(); o != nil {
 				for i := 0; i < int(d.orderQuantity); i++ {
-					d.addTrader(o)
+					go d.addTrader(o)
 				}
 			}
-
 			d.sendTickToTrader(tick)
 		}
 	}()
@@ -113,43 +121,42 @@ func (d *DTFuture) sendTickToTrader(tick *entity.RealTimeFutureTick) {
 	}
 }
 
-func (d *DTFuture) cancelOverTimeOrder(order *entity.FutureOrder) {
-	result, err := d.sc.CancelFuture(order.OrderID)
-	if err != nil {
-		logger.Error(err)
-		return
-	}
-
-	if entity.StringToOrderStatus(result.GetStatus()) != entity.StatusCancelled {
-		logger.Error("Cancel future order failed", result.GetStatus())
-		return
-	}
-}
-
 func (d *DTFuture) generateOrder() *entity.FutureOrder {
+	d.traderMapLock.RLock()
+	defer d.traderMapLock.RUnlock()
+	if len(d.traderMap) > 0 {
+		return nil
+	}
+
 	return &entity.FutureOrder{}
 }
 
 func (d *DTFuture) addTrader(order *entity.FutureOrder) {
-	d.traderMapLock.Lock()
-	defer d.traderMapLock.Unlock()
-
 	orderWithCfg := orderWithCfg{
 		order: order,
 		cfg:   d.tradeConfig,
 	}
 
 	if trader := NewDTTraderFuture(orderWithCfg, d.sc, d.localBus); trader != nil {
+		d.traderMapLock.Lock()
 		d.traderMap[trader.id] = trader
+		d.traderMapLock.Unlock()
 	}
 }
 
 func (d *DTFuture) removeDoneTrader(id string) {
-	d.traderMapLock.Lock()
-	defer d.traderMapLock.Unlock()
-
 	if trader := d.traderMap[id]; trader != nil {
+		d.traderMapLock.Lock()
 		close(trader.tickChan)
 		delete(d.traderMap, id)
+		d.traderMapLock.Unlock()
 	}
+}
+
+func (d *DTFuture) Notify() chan *entity.FutureOrder {
+	return d.notify
+}
+
+func (d *DTFuture) TickChan() chan *entity.RealTimeFutureTick {
+	return d.tickChan
 }

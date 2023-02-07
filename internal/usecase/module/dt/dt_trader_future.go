@@ -83,24 +83,20 @@ func (d *DTTraderFuture) processTick() {
 }
 
 func (d *DTTraderFuture) checkByBalance(tick *entity.RealTimeFutureTick, tradeOutAction entity.OrderAction) {
-	var price float64
-	var quantity int64
-
+	var place bool
 	switch tradeOutAction {
 	case entity.ActionSell:
 		if tick.Close >= d.baseOrder.Price+d.tradeConfig.TargetBalanceHigh || tick.Close <= d.baseOrder.Price+d.tradeConfig.TargetBalanceLow {
-			price = tick.Close
-			quantity = d.baseOrder.Quantity
+			place = true
 		}
 
 	case entity.ActionBuy:
 		if tick.Close <= d.baseOrder.Price-d.tradeConfig.TargetBalanceHigh || tick.Close >= d.baseOrder.Price-d.tradeConfig.TargetBalanceLow {
-			price = tick.Close
-			quantity = d.baseOrder.Quantity
+			place = true
 		}
 	}
 
-	if price == 0 || quantity == 0 {
+	if !place {
 		return
 	}
 
@@ -108,8 +104,8 @@ func (d *DTTraderFuture) checkByBalance(tick *entity.RealTimeFutureTick, tradeOu
 		Code: tick.Code,
 		BaseOrder: entity.BaseOrder{
 			Action:   tradeOutAction,
-			Price:    price,
-			Quantity: quantity,
+			Price:    tick.Close,
+			Quantity: d.baseOrder.Quantity,
 		},
 	}
 
@@ -117,7 +113,6 @@ func (d *DTTraderFuture) checkByBalance(tick *entity.RealTimeFutureTick, tradeOu
 		logger.Errorf("checkByBalance place order error: %s", err.Error())
 		return
 	}
-
 	d.waitingOrder = o
 }
 

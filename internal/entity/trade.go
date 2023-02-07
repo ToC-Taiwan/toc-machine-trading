@@ -170,12 +170,12 @@ func (s *StockOrder) StockOrderStatusString() string {
 	return fmt.Sprintf("%s %s %s %.0f x %d", s.BaseOrder.Status.String(), s.BaseOrder.Action.String(), s.StockNum, s.BaseOrder.Price, s.BaseOrder.Quantity)
 }
 
-func (s *StockOrder) FixTime() *StockOrder {
-	if time.Since(s.OrderTime) > 12*time.Hour {
-		s.OrderTime = time.Now()
-	}
-	return s
-}
+// func (s *StockOrder) FixTime() *StockOrder {
+// 	if time.Since(s.OrderTime) > 12*time.Hour {
+// 		s.OrderTime = time.Now()
+// 	}
+// 	return s
+// }
 
 // FutureOrder -.
 type FutureOrder struct {
@@ -189,12 +189,12 @@ func (f *FutureOrder) FutureOrderStatusString() string {
 	return fmt.Sprintf("%s %s %s %.0f x %d", f.BaseOrder.Status.String(), f.BaseOrder.Action.String(), f.Code, f.BaseOrder.Price, f.BaseOrder.Quantity)
 }
 
-func (f *FutureOrder) FixTime() *FutureOrder {
-	if time.Since(f.OrderTime) > 12*time.Hour {
-		f.OrderTime = time.Now()
-	}
-	return f
-}
+// func (f *FutureOrder) FixTime() *FutureOrder {
+// 	if time.Since(f.OrderTime) > 12*time.Hour {
+// 		f.OrderTime = time.Now()
+// 	}
+// 	return f
+// }
 
 // StockTradeBalance -.
 type StockTradeBalance struct {

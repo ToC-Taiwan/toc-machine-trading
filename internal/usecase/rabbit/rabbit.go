@@ -176,6 +176,10 @@ func (c *Rabbit) protoToOrder(proto *pb.OrderStatus) interface{} {
 		return nil
 	}
 
+	if time.Since(orderTime) > 12*time.Hour {
+		orderTime = time.Now()
+	}
+
 	switch {
 	case c.allStockMap[proto.GetCode()] != nil:
 		return &entity.StockOrder{
