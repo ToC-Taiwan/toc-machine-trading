@@ -8,6 +8,7 @@ import (
 	"tmt/cmd/config"
 	"tmt/internal/entity"
 	"tmt/internal/usecase/grpcapi"
+	"tmt/internal/usecase/module/tradeday"
 	"tmt/pkg/eventbus"
 
 	"github.com/google/uuid"
@@ -32,6 +33,8 @@ type DTFuture struct {
 	tradeConfig *config.TradeFuture
 
 	lastTickRate float64
+
+	isTradeTime bool
 }
 
 func NewDTFuture(code string, s *grpcapi.TradegRPCAPI, tradeConfig *config.TradeFuture) *DTFuture {
@@ -49,6 +52,7 @@ func NewDTFuture(code string, s *grpcapi.TradegRPCAPI, tradeConfig *config.Trade
 
 	d.localBus.SubscribeTopic(topicTraderDone, d.removeDoneTrader)
 
+	d.checkFutureTradeSwitch()
 	d.processOrderStatus()
 	d.processTick()
 
@@ -130,7 +134,7 @@ func (d *DTFuture) sendTickToTrader(tick *entity.RealTimeFutureTick) {
 }
 
 func (d *DTFuture) generateOrder() *entity.FutureOrder {
-	if !d.tradeConfig.AllowTrade {
+	if !d.tradeConfig.AllowTrade || !d.isTradeTime {
 		return nil
 	}
 
@@ -149,7 +153,7 @@ func (d *DTFuture) generateOrder() *entity.FutureOrder {
 		return nil
 	}
 
-	if tickRate/d.lastTickRate < 1.3 || d.lastTickRate < 6 {
+	if tickRate/d.lastTickRate < 1.2 || d.lastTickRate < 5 {
 		return nil
 	}
 
@@ -181,8 +185,9 @@ func (d *DTFuture) addTrader(order *entity.FutureOrder, wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	orderWithCfg := orderWithCfg{
-		order: order,
-		cfg:   d.tradeConfig,
+		order:            order,
+		cfg:              d.tradeConfig,
+		lastTradeOutTime: time.Now().Add(time.Duration(d.tradeConfig.MaxHoldTime) * time.Minute),
 	}
 
 	if trader := NewDTTraderFuture(orderWithCfg, d.sc, d.localBus); trader != nil {
@@ -207,4 +212,36 @@ func (d *DTFuture) Notify() chan *entity.FutureOrder {
 
 func (d *DTFuture) TickChan() chan *entity.RealTimeFutureTick {
 	return d.tickChan
+}
+
+func (d *DTFuture) checkFutureTradeSwitch() {
+	futureTradeDay := tradeday.Get().GetFutureTradeDay()
+
+	timeRange := [][]time.Time{}
+	firstStart := futureTradeDay.StartTime
+	secondStart := futureTradeDay.EndTime.Add(-300 * time.Minute)
+
+	timeRange = append(timeRange, []time.Time{firstStart, firstStart.Add(time.Duration(d.tradeConfig.TradeTimeRange.FirstPartDuration) * time.Minute)})
+	timeRange = append(timeRange, []time.Time{secondStart, secondStart.Add(time.Duration(d.tradeConfig.TradeTimeRange.SecondPartDuration) * time.Minute)})
+
+	go func() {
+		d.turnSwitch(timeRange)
+		for range time.NewTicker(30 * time.Second).C {
+			d.turnSwitch(timeRange)
+		}
+	}()
+}
+
+func (d *DTFuture) turnSwitch(timeRange [][]time.Time) {
+	now := time.Now()
+	var tempSwitch bool
+	for _, rangeTime := range timeRange {
+		if now.After(rangeTime[0]) && now.Before(rangeTime[1]) {
+			tempSwitch = true
+		}
+	}
+
+	if d.isTradeTime != tempSwitch {
+		d.isTradeTime = tempSwitch
+	}
 }

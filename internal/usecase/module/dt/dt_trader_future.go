@@ -3,6 +3,7 @@ package dt
 import (
 	"errors"
 	"sync"
+	"time"
 
 	"tmt/cmd/config"
 	"tmt/internal/entity"
@@ -18,7 +19,9 @@ type DTTraderFuture struct {
 	ready bool   // if true, need tick
 	done  bool   // if true, trader done, no need to check tick
 
-	tradeOutAction entity.OrderAction              // trade out action
+	tradeOutAction   entity.OrderAction // trade out action
+	lastTradeOutTime time.Time          // last trade out time
+
 	tickChan       chan *entity.RealTimeFutureTick // tick chan
 	finishOrderMap map[string]*entity.FutureOrder  // order id -> order
 
@@ -42,13 +45,14 @@ func NewDTTraderFuture(orderWithCfg orderWithCfg, s *grpcapi.TradegRPCAPI, bus *
 	}
 
 	d := &DTTraderFuture{
-		id:             uuid.NewString(),
-		tickChan:       make(chan *entity.RealTimeFutureTick),
-		finishOrderMap: make(map[string]*entity.FutureOrder),
-		sc:             s,
-		bus:            bus,
-		baseOrder:      orderWithCfg.order,
-		tradeConfig:    orderWithCfg.cfg,
+		id:               uuid.NewString(),
+		tickChan:         make(chan *entity.RealTimeFutureTick),
+		finishOrderMap:   make(map[string]*entity.FutureOrder),
+		sc:               s,
+		bus:              bus,
+		baseOrder:        orderWithCfg.order,
+		tradeConfig:      orderWithCfg.cfg,
+		lastTradeOutTime: orderWithCfg.lastTradeOutTime,
 	}
 
 	if orderWithCfg.order.Action == entity.ActionSell {
@@ -128,7 +132,7 @@ func (d *DTTraderFuture) checkByBalance(tick *entity.RealTimeFutureTick) {
 		}
 	}
 
-	if !place {
+	if !place && time.Now().Before(d.lastTradeOutTime) {
 		return
 	}
 

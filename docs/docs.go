@@ -953,6 +953,9 @@ const docTemplate = `{
                 "in_out_ratio": {
                     "type": "number"
                 },
+                "max_hold_time": {
+                    "type": "integer"
+                },
                 "out_in_ratio": {
                     "type": "number"
                 },
