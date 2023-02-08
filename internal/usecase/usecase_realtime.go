@@ -14,6 +14,7 @@ import (
 	"tmt/internal/usecase/module/quota"
 	"tmt/internal/usecase/module/target"
 	"tmt/internal/usecase/rabbit"
+	"tmt/internal/usecase/repo"
 	"tmt/internal/usecase/topic"
 
 	"github.com/google/uuid"
@@ -37,6 +38,40 @@ type RealTimeUseCase struct {
 	tradeIndex   *entity.TradeIndex
 
 	mainFutureCode string
+}
+
+func (u *UseCaseBase) NewRealTime() RealTime {
+	cfg := u.cfg
+	uc := &RealTimeUseCase{
+		repo:         repo.NewRealTime(u.pg),
+		commonRabbit: rabbit.NewRabbit(cfg.RabbitMQ),
+		futureRabbit: rabbit.NewRabbit(cfg.RabbitMQ),
+		grpcapi:      grpcapi.NewRealTime(u.sc),
+		subgRPCAPI:   grpcapi.NewSubscribe(u.sc),
+		cfg:          cfg,
+		sc:           grpcapi.NewTrade(u.sc, cfg.Simulation),
+		fg:           grpcapi.NewTrade(u.fg, cfg.Simulation),
+		targetFilter: target.NewFilter(cfg.TargetStock),
+		quota:        quota.NewQuota(cfg.Quota),
+	}
+
+	// unsubscriba all first
+	if e := uc.UnSubscribeAll(); e != nil {
+		logger.Fatal(e)
+	}
+
+	basic := cc.GetBasicInfo()
+	uc.commonRabbit.FillAllBasic(basic.AllStocks, basic.AllFutures)
+	uc.periodUpdateTradeIndex()
+
+	go uc.ReceiveEvent(context.Background())
+	go uc.ReceiveOrderStatus(context.Background())
+
+	bus.SubscribeTopic(topic.TopicSubscribeStockTickTargets, uc.ReceiveStockSubscribeData, uc.SubscribeStockTick)
+	bus.SubscribeTopic(topic.TopicUnSubscribeStockTickTargets, uc.UnSubscribeStockTick, uc.UnSubscribeStockBidAsk)
+	bus.SubscribeTopic(topic.TopicSubscribeFutureTickTargets, uc.SetMainFuture, uc.ReceiveFutureSubscribeData, uc.SubscribeFutureTick)
+
+	return uc
 }
 
 func (uc *RealTimeUseCase) GetTradeIndex() *entity.TradeIndex {

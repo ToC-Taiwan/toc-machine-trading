@@ -8,8 +8,10 @@ import (
 
 	"tmt/cmd/config"
 	"tmt/internal/entity"
+	"tmt/internal/usecase/grpcapi"
 	"tmt/internal/usecase/module/target"
 	"tmt/internal/usecase/module/tradeday"
+	"tmt/internal/usecase/repo"
 	"tmt/internal/usecase/topic"
 	"tmt/pkg/common"
 )
@@ -23,63 +25,56 @@ type TargetUseCase struct {
 	cfg          *config.Config
 	basic        *entity.BasicInfo
 	tradeDay     *tradeday.TradeDay
-
-	stockTradeInSwitch  bool
-	futureTradeInSwitch bool
 }
 
-func (uc *TargetUseCase) checkStockTradeSwitch() {
-	if !uc.cfg.TradeStock.AllowTrade {
-		return
+func (u *UseCaseBase) NewTarget() Target {
+	cfg := u.cfg
+	basic := cc.GetBasicInfo()
+	uc := &TargetUseCase{
+		repo:         repo.NewTarget(u.pg),
+		gRPCAPI:      grpcapi.NewRealTime(u.sc),
+		cfg:          cfg,
+		basic:        basic,
+		tradeDay:     tradeday.Get(),
+		targetFilter: target.NewFilter(cfg.TargetStock),
 	}
 
-	openTime := uc.basic.OpenTime
-	tradeInEndTime := uc.basic.TradeInEndTime
-
-	for range time.NewTicker(2500 * time.Millisecond).C {
-		now := time.Now()
-		var tempSwitch bool
-		switch {
-		case now.Before(openTime) || now.After(tradeInEndTime):
-			tempSwitch = false
-		case now.After(openTime) && now.Before(tradeInEndTime):
-			tempSwitch = true
-		}
-
-		if uc.stockTradeInSwitch != tempSwitch {
-			uc.stockTradeInSwitch = tempSwitch
-			bus.PublishTopicEvent(topic.TopicUpdateStockTradeSwitch, uc.stockTradeInSwitch)
-		}
-	}
-}
-
-func (uc *TargetUseCase) checkFutureTradeSwitch() {
-	if !uc.cfg.TradeFuture.AllowTrade {
-		return
+	// query targets from db
+	targetArr, err := uc.repo.QueryTargetsByTradeDay(context.Background(), uc.basic.TradeDay)
+	if err != nil {
+		logger.Fatal(err)
 	}
 
-	futureTradeDay := uc.tradeDay.GetFutureTradeDay()
-	timeRange := [][]time.Time{}
-	firstStart := futureTradeDay.StartTime
-	secondStart := futureTradeDay.EndTime.Add(-300 * time.Minute)
-
-	timeRange = append(timeRange, []time.Time{firstStart, firstStart.Add(time.Duration(uc.cfg.TradeFuture.TradeTimeRange.FirstPartDuration) * time.Minute)})
-	timeRange = append(timeRange, []time.Time{secondStart, secondStart.Add(time.Duration(uc.cfg.TradeFuture.TradeTimeRange.SecondPartDuration) * time.Minute)})
-
-	for range time.NewTicker(2500 * time.Millisecond).C {
-		now := time.Now()
-		var tempSwitch bool
-		for _, rangeTime := range timeRange {
-			if now.After(rangeTime[0]) && now.Before(rangeTime[1]) {
-				tempSwitch = true
-			}
+	// db has no targets, find targets from gRPC
+	if len(targetArr) == 0 {
+		targetArr, err = uc.searchTradeDayTargets(uc.basic.TradeDay)
+		if err != nil {
+			logger.Fatal(err)
 		}
 
-		if uc.futureTradeInSwitch != tempSwitch {
-			uc.futureTradeInSwitch = tempSwitch
-			bus.PublishTopicEvent(topic.TopicUpdateFutureTradeSwitch, uc.futureTradeInSwitch)
+		if len(targetArr) == 0 {
+			stuck := make(chan struct{})
+			logger.Error("no targets")
+			<-stuck
 		}
 	}
+
+	cc.AppendStockTargets(targetArr)
+	uc.publishNewStockTargets(targetArr)
+	uc.publishNewFutureTargets()
+
+	// go func() {
+	// 	time.Sleep(time.Until(basic.TradeDay.Add(time.Hour * 9)))
+	// 	for range time.NewTicker(time.Second * 60).C {
+	// 		if uc.stockTradeInSwitch {
+	// 			if err := uc.realTimeAddTargets(); err != nil {
+	// 				logger.Fatal(err)
+	// 			}
+	// 		}
+	// 	}
+	// }()
+
+	return uc
 }
 
 // GetTargets - get targets from cache
@@ -191,57 +186,57 @@ func (uc *TargetUseCase) searchTradeDayTargetsFromAllSnapshot(tradeDay time.Time
 	return result, nil
 }
 
-func (uc *TargetUseCase) realTimeAddTargets() error {
-	data, err := uc.gRPCAPI.GetAllStockSnapshot()
-	if err != nil {
-		return err
-	}
+// func (uc *TargetUseCase) realTimeAddTargets() error {
+// 	data, err := uc.gRPCAPI.GetAllStockSnapshot()
+// 	if err != nil {
+// 		return err
+// 	}
 
-	// at least 200 snapshot to rank volume
-	if len(data) < 200 {
-		logger.Warnf("stock snapshot len is not enough: %d", len(data))
-		return nil
-	}
+// 	// at least 200 snapshot to rank volume
+// 	if len(data) < 200 {
+// 		logger.Warnf("stock snapshot len is not enough: %d", len(data))
+// 		return nil
+// 	}
 
-	sort.Slice(data, func(i, j int) bool {
-		return data[i].GetTotalVolume() > data[j].GetTotalVolume()
-	})
-	data = data[:uc.targetFilter.RealTimeRank]
+// 	sort.Slice(data, func(i, j int) bool {
+// 		return data[i].GetTotalVolume() > data[j].GetTotalVolume()
+// 	})
+// 	data = data[:uc.targetFilter.RealTimeRank]
 
-	currentTargets := cc.GetStockTargets()
-	targetsMap := make(map[string]*entity.StockTarget)
-	for _, t := range currentTargets {
-		targetsMap[t.StockNum] = t
-	}
+// 	currentTargets := cc.GetStockTargets()
+// 	targetsMap := make(map[string]*entity.StockTarget)
+// 	for _, t := range currentTargets {
+// 		targetsMap[t.StockNum] = t
+// 	}
 
-	var newTargets []*entity.StockTarget
-	for i, d := range data {
-		stock := cc.GetStockDetail(d.GetCode())
-		if stock == nil {
-			continue
-		}
+// 	var newTargets []*entity.StockTarget
+// 	for i, d := range data {
+// 		stock := cc.GetStockDetail(d.GetCode())
+// 		if stock == nil {
+// 			continue
+// 		}
 
-		if !uc.targetFilter.IsTarget(stock, d.GetClose()) {
-			continue
-		}
+// 		if !uc.targetFilter.IsTarget(stock, d.GetClose()) {
+// 			continue
+// 		}
 
-		if targetsMap[d.GetCode()] == nil {
-			newTargets = append(newTargets, &entity.StockTarget{
-				Rank:     100 + i + 1,
-				StockNum: d.GetCode(),
-				Volume:   d.GetTotalVolume(),
-				TradeDay: uc.basic.TradeDay,
-				Stock:    stock,
-			})
-		}
-	}
+// 		if targetsMap[d.GetCode()] == nil {
+// 			newTargets = append(newTargets, &entity.StockTarget{
+// 				Rank:     100 + i + 1,
+// 				StockNum: d.GetCode(),
+// 				Volume:   d.GetTotalVolume(),
+// 				TradeDay: uc.basic.TradeDay,
+// 				Stock:    stock,
+// 			})
+// 		}
+// 	}
 
-	if len(newTargets) != 0 {
-		cc.AppendStockTargets(newTargets)
-		uc.publishNewStockTargets(newTargets)
-		for _, t := range newTargets {
-			logger.Infof("New target: %s", t.StockNum)
-		}
-	}
-	return nil
-}
+// 	if len(newTargets) != 0 {
+// 		cc.AppendStockTargets(newTargets)
+// 		uc.publishNewStockTargets(newTargets)
+// 		for _, t := range newTargets {
+// 			logger.Infof("New target: %s", t.StockNum)
+// 		}
+// 	}
+// 	return nil
+// }

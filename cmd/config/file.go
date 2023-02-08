@@ -1,11 +1,5 @@
 package config
 
-// TradeTimeRange -.
-type TradeTimeRange struct {
-	FirstPartDuration  int64 `json:"first_part_duration"  yaml:"first_part_duration"`
-	SecondPartDuration int64 `json:"second_part_duration" yaml:"second_part_duration"`
-}
-
 // History -.
 type History struct {
 	HistoryClosePeriod int64 `json:"history_close_period" env-required:"true" yaml:"history_close_period"`
@@ -78,4 +72,10 @@ type TradeFuture struct {
 	TickInterval int64   `json:"tick_interval"       env-required:"true" yaml:"tick_interval"`
 	OutInRatio   float64 `json:"out_in_ratio"        env-required:"true" yaml:"out_in_ratio"`
 	InOutRatio   float64 `json:"in_out_ratio"        env-required:"true" yaml:"in_out_ratio"`
+}
+
+// TradeTimeRange -.
+type TradeTimeRange struct {
+	FirstPartDuration  int64 `json:"first_part_duration"  yaml:"first_part_duration"`
+	SecondPartDuration int64 `json:"second_part_duration" yaml:"second_part_duration"`
 }

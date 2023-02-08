@@ -8,7 +8,9 @@ import (
 	"tmt/cmd/config"
 	"tmt/internal/entity"
 
+	"tmt/internal/usecase/grpcapi"
 	"tmt/internal/usecase/module/tradeday"
+	"tmt/internal/usecase/repo"
 	"tmt/pkg/common"
 )
 
@@ -24,6 +26,41 @@ type BasicUseCase struct {
 
 	allStockDetail  []*entity.Stock
 	allFutureDetail []*entity.Future
+
+	// stockTradeInSwitch  bool
+	// futureTradeInSwitch bool
+}
+
+func (u *UseCaseBase) NewBasic() Basic {
+	uc := &BasicUseCase{
+		repo:     repo.NewBasic(u.pg),
+		sc:       grpcapi.NewBasic(u.sc),
+		fg:       grpcapi.NewBasic(u.fg),
+		tradeDay: tradeday.Get(),
+		cfg:      u.cfg,
+	}
+
+	go uc.healthCheckforSinopac()
+	go uc.healthCheckforFugle()
+
+	if err := uc.importCalendarDate(context.Background()); err != nil {
+		logger.Fatal(err)
+	}
+
+	if _, err := uc.updateRepoStock(); err != nil {
+		logger.Fatal(err)
+	}
+
+	if _, err := uc.updateRepoFuture(); err != nil {
+		logger.Fatal(err)
+	}
+
+	uc.fillBasicInfo()
+
+	// go uc.checkStockTradeSwitch()
+	// go uc.checkFutureTradeSwitch()
+
+	return uc
 }
 
 // GetAllRepoStock -.
@@ -205,3 +242,57 @@ func (uc *BasicUseCase) importCalendarDate(ctx context.Context) error {
 	}
 	return nil
 }
+
+// func (uc *BasicUseCase) checkStockTradeSwitch() {
+// 	if !uc.cfg.TradeStock.AllowTrade {
+// 		return
+// 	}
+
+// 	openTime := uc.basic.OpenTime
+// 	tradeInEndTime := uc.basic.TradeInEndTime
+
+// 	for range time.NewTicker(2500 * time.Millisecond).C {
+// 		now := time.Now()
+// 		var tempSwitch bool
+// 		switch {
+// 		case now.Before(openTime) || now.After(tradeInEndTime):
+// 			tempSwitch = false
+// 		case now.After(openTime) && now.Before(tradeInEndTime):
+// 			tempSwitch = true
+// 		}
+
+// 		if uc.stockTradeInSwitch != tempSwitch {
+// 			uc.stockTradeInSwitch = tempSwitch
+// 			bus.PublishTopicEvent(topic.TopicUpdateStockTradeSwitch, uc.stockTradeInSwitch)
+// 		}
+// 	}
+// }
+
+// func (uc *BasicUseCase) checkFutureTradeSwitch() {
+// 	if !uc.cfg.TradeFuture.AllowTrade {
+// 		return
+// 	}
+
+// 	futureTradeDay := uc.tradeDay.GetFutureTradeDay()
+// 	timeRange := [][]time.Time{}
+// 	firstStart := futureTradeDay.StartTime
+// 	secondStart := futureTradeDay.EndTime.Add(-300 * time.Minute)
+
+// 	timeRange = append(timeRange, []time.Time{firstStart, firstStart.Add(time.Duration(uc.cfg.TradeFuture.TradeTimeRange.FirstPartDuration) * time.Minute)})
+// 	timeRange = append(timeRange, []time.Time{secondStart, secondStart.Add(time.Duration(uc.cfg.TradeFuture.TradeTimeRange.SecondPartDuration) * time.Minute)})
+
+// 	for range time.NewTicker(2500 * time.Millisecond).C {
+// 		now := time.Now()
+// 		var tempSwitch bool
+// 		for _, rangeTime := range timeRange {
+// 			if now.After(rangeTime[0]) && now.Before(rangeTime[1]) {
+// 				tempSwitch = true
+// 			}
+// 		}
+
+// 		if uc.futureTradeInSwitch != tempSwitch {
+// 			uc.futureTradeInSwitch = tempSwitch
+// 			bus.PublishTopicEvent(topic.TopicUpdateFutureTradeSwitch, uc.futureTradeInSwitch)
+// 		}
+// 	}
+// }

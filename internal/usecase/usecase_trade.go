@@ -7,8 +7,11 @@ import (
 	"time"
 
 	"tmt/internal/entity"
+	"tmt/internal/usecase/grpcapi"
 	"tmt/internal/usecase/module/quota"
 	"tmt/internal/usecase/module/tradeday"
+	"tmt/internal/usecase/repo"
+	"tmt/internal/usecase/topic"
 )
 
 // TradeUseCase -.
@@ -26,6 +29,34 @@ type TradeUseCase struct {
 
 	updateFutureOrderLock sync.Mutex
 	updateStockOrderLock  sync.Mutex
+}
+
+func (u *UseCaseBase) NewTrade() Trade {
+	cfg := u.cfg
+	tradeDay := tradeday.Get()
+
+	uc := &TradeUseCase{
+		sc:    grpcapi.NewTrade(u.sc, cfg.Simulation),
+		fg:    grpcapi.NewTrade(u.fg, cfg.Simulation),
+		repo:  repo.NewTrade(u.pg),
+		quota: quota.NewQuota(cfg.Quota),
+
+		tradeDay:       tradeDay,
+		stockTradeDay:  tradeDay.GetStockTradeDay(),
+		futureTradeDay: tradeDay.GetFutureTradeDay(),
+	}
+
+	bus.SubscribeTopic(topic.TopicInsertOrUpdateStockOrder, uc.updateStockOrderCacheAndInsertDB)
+	bus.SubscribeTopic(topic.TopicInsertOrUpdateFutureOrder, uc.updateFutureOrderCacheAndInsertDB)
+
+	if cfg.Simulation {
+		go uc.askSimulateOrderStatus()
+	} else {
+		go uc.askOrderStatus()
+	}
+
+	go uc.updateAllTradeBalance()
+	return uc
 }
 
 func (uc *TradeUseCase) updateAllTradeBalance() {

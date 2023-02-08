@@ -9,7 +9,9 @@ import (
 
 	"tmt/cmd/config"
 	"tmt/internal/entity"
+	"tmt/internal/usecase/grpcapi"
 	"tmt/internal/usecase/module/tradeday"
+	"tmt/internal/usecase/repo"
 	"tmt/internal/usecase/topic"
 	"tmt/pkg/common"
 	"tmt/pkg/utils"
@@ -27,6 +29,21 @@ type HistoryUseCase struct {
 
 	basic    *entity.BasicInfo
 	tradeDay *tradeday.TradeDay
+}
+
+// NewHistory -.
+func (u *UseCaseBase) NewHistory() History {
+	uc := &HistoryUseCase{
+		repo:            repo.NewHistory(u.pg),
+		grpcapi:         grpcapi.NewHistory(u.sc),
+		fetchList:       make(map[string]*entity.StockTarget),
+		tradeDay:        tradeday.Get(),
+		analyzeStockCfg: u.cfg.AnalyzeStock,
+	}
+
+	uc.basic = cc.GetBasicInfo()
+	bus.SubscribeTopic(topic.TopicFetchStockHistory, uc.FetchHistory)
+	return uc
 }
 
 // GetTradeDay -.
