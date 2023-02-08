@@ -1,4 +1,4 @@
-simulation: false
+simulation: true
 
 history:
     # unit: day
@@ -62,17 +62,21 @@ trade_stock:
     trade_in_end_time: 90
 
 trade_future:
-    allow_trade: false
+    allow_trade: true
     subscribe: true
-    quantity: 2
+    quantity: 3
     target_balance_high: 2
     target_balance_low: -4
 
     # unit: seccond
     buy_sell_wait_time: 7
     cancel_wait_time: 15
+    tick_interval: 10
 
     # duration: minute
     trade_time_range:
         first_part_duration: 780
         second_part_duration: 260
+
+    out_in_ratio: 75
+    in_out_ratio: 25

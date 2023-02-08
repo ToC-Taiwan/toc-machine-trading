@@ -16,7 +16,9 @@ import (
 type DTFuture struct {
 	code          string
 	orderQuantity int64
-	tickArr       entity.RealTimeFutureTickArr
+
+	lastTick *entity.RealTimeFutureTick
+	tickArr  entity.RealTimeFutureTickArr
 
 	sc       *grpcapi.TradegRPCAPI
 	localBus *eventbus.Bus
@@ -28,6 +30,8 @@ type DTFuture struct {
 	notify   chan *entity.FutureOrder
 
 	tradeConfig *config.TradeFuture
+
+	lastTickRate float64
 }
 
 func NewDTFuture(code string, s *grpcapi.TradegRPCAPI, tradeConfig *config.TradeFuture) *DTFuture {
@@ -91,19 +95,25 @@ func (d *DTFuture) cancelOverTimeOrder(order *entity.FutureOrder) {
 func (d *DTFuture) processTick() {
 	go func() {
 		for {
-			tick := <-d.tickChan
-			d.tickArr = append(d.tickArr, tick)
-			if len(d.tickArr) > 1 {
+			d.lastTick = <-d.tickChan
+			d.tickArr = append(d.tickArr, d.lastTick)
+
+			if d.lastTick.TickTime.Sub(d.tickArr[0].TickTime) > time.Duration(d.tradeConfig.TickInterval)*time.Second {
 				d.tickArr = d.tickArr[1:]
+			} else {
+				continue
 			}
 
 			if o := d.generateOrder(); o != nil {
+				var wg sync.WaitGroup
 				for i := 0; i < int(d.orderQuantity); i++ {
-					go d.addTrader(o)
+					wg.Add(1)
+					go d.addTrader(o, &wg)
 				}
+				wg.Wait()
 			}
 
-			d.sendTickToTrader(tick)
+			d.sendTickToTrader(d.lastTick)
 		}
 	}()
 }
@@ -120,16 +130,56 @@ func (d *DTFuture) sendTickToTrader(tick *entity.RealTimeFutureTick) {
 }
 
 func (d *DTFuture) generateOrder() *entity.FutureOrder {
+	if !d.tradeConfig.AllowTrade {
+		return nil
+	}
+
 	d.traderMapLock.RLock()
 	defer d.traderMapLock.RUnlock()
 	if len(d.traderMap) > 0 {
 		return nil
 	}
 
-	return &entity.FutureOrder{}
+	outInRatio, tickRate := d.tickArr.GetOutInRatioAndRate(float64(d.tradeConfig.TickInterval))
+	defer func() {
+		d.lastTickRate = tickRate
+	}()
+
+	if d.lastTickRate == 0 {
+		return nil
+	}
+
+	if tickRate/d.lastTickRate < 1.3 || d.lastTickRate < 6 {
+		return nil
+	}
+
+	switch {
+	case outInRatio > d.tradeConfig.OutInRatio:
+		return &entity.FutureOrder{
+			Code: d.code,
+			BaseOrder: entity.BaseOrder{
+				Action:   entity.ActionBuy,
+				Price:    d.lastTick.Close,
+				Quantity: orderQtyUnit,
+			},
+		}
+	case 100-outInRatio < d.tradeConfig.OutInRatio:
+		return &entity.FutureOrder{
+			Code: d.code,
+			BaseOrder: entity.BaseOrder{
+				Action:   entity.ActionSell,
+				Price:    d.lastTick.Close,
+				Quantity: orderQtyUnit,
+			},
+		}
+	default:
+		return nil
+	}
 }
 
-func (d *DTFuture) addTrader(order *entity.FutureOrder) {
+func (d *DTFuture) addTrader(order *entity.FutureOrder, wg *sync.WaitGroup) {
+	defer wg.Done()
+
 	orderWithCfg := orderWithCfg{
 		order: order,
 		cfg:   d.tradeConfig,

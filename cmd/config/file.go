@@ -74,4 +74,8 @@ type TradeFuture struct {
 	TargetBalanceLow  float64 `json:"target_balance_low"  env-required:"true" yaml:"target_balance_low"`
 
 	TradeTimeRange TradeTimeRange `json:"trade_time_range"    env-required:"true" yaml:"trade_time_range"`
+
+	TickInterval int64   `json:"tick_interval"       env-required:"true" yaml:"tick_interval"`
+	OutInRatio   float64 `json:"out_in_ratio"        env-required:"true" yaml:"out_in_ratio"`
+	InOutRatio   float64 `json:"in_out_ratio"        env-required:"true" yaml:"in_out_ratio"`
 }

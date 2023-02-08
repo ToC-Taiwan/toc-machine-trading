@@ -111,9 +111,9 @@ func (c RealTimeFutureTickArr) GetTotalVolume() int64 {
 	return volume
 }
 
-func (c RealTimeFutureTickArr) GetOutInRatio() float64 {
+func (c RealTimeFutureTickArr) GetOutInRatioAndRate(unit float64) (float64, float64) {
 	if len(c) == 0 {
-		return 0
+		return 0, 0
 	}
 
 	var outVolume, inVolume int64
@@ -127,7 +127,7 @@ func (c RealTimeFutureTickArr) GetOutInRatio() float64 {
 			outVolume += v.Volume
 		}
 	}
-	return 100 * float64(outVolume) / float64(outVolume+inVolume)
+	return 100 * float64(outVolume) / float64(outVolume+inVolume), float64(outVolume+inVolume) / unit
 }
 
 // func (c RealTimeFutureTickArr) splitToMultiPeriod(baseDurtion time.Duration, count int) []RealTimeFutureTickArr {

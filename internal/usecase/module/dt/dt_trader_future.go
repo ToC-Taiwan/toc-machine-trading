@@ -7,6 +7,7 @@ import (
 	"tmt/cmd/config"
 	"tmt/internal/entity"
 	"tmt/internal/usecase/grpcapi"
+	"tmt/pb"
 	"tmt/pkg/eventbus"
 
 	"github.com/google/uuid"
@@ -29,6 +30,8 @@ type DTTraderFuture struct {
 	waitingOrder *entity.FutureOrder // waiting order
 
 	once sync.Once // post done once
+
+	sellFirst bool
 }
 
 // NewDTTraderFuture create a new DTTraderFuture, if quantity > orderQtyUnit, return nil or place order error, return nil
@@ -46,6 +49,10 @@ func NewDTTraderFuture(orderWithCfg orderWithCfg, s *grpcapi.TradegRPCAPI, bus *
 		bus:            bus,
 		baseOrder:      orderWithCfg.order,
 		tradeConfig:    orderWithCfg.cfg,
+	}
+
+	if orderWithCfg.order.Action == entity.ActionSell {
+		d.sellFirst = true
 	}
 
 	if err := d.placeOrder(d.baseOrder); err != nil {
@@ -162,18 +169,20 @@ func (d *DTTraderFuture) updateOrder(order *entity.FutureOrder) {
 }
 
 func (d *DTTraderFuture) placeOrder(o *entity.FutureOrder) error {
+	var fn func(order *entity.FutureOrder) (*pb.TradeResult, error)
 	switch o.Action {
 	case entity.ActionBuy:
-		return d.buy(o)
+		fn = d.sc.BuyFuture
 	case entity.ActionSell:
-		return d.sell(o)
+		fn = d.sc.SellFuture
+		if d.sellFirst {
+			fn = d.sc.SellFirstFuture
+		}
 	default:
 		return nil
 	}
-}
 
-func (d *DTTraderFuture) buy(o *entity.FutureOrder) error {
-	result, err := d.sc.BuyFuture(o)
+	result, err := fn(o)
 	if err != nil {
 		return err
 	}
@@ -188,37 +197,11 @@ func (d *DTTraderFuture) buy(o *entity.FutureOrder) error {
 		return errors.New("order status is failed")
 	}
 
+	logger.Infof("%s future %s at %.2f x %d", o.Action.String(), o.Code, o.Price, o.Quantity)
 	if !d.ready {
 		return nil
 	}
-
 	d.finishOrderMap[o.OrderID] = o
-
-	return nil
-}
-
-func (d *DTTraderFuture) sell(o *entity.FutureOrder) error {
-	result, err := d.sc.SellFuture(o)
-	if err != nil {
-		return err
-	}
-
-	o.OrderID = result.GetOrderId()
-	if o.OrderID == "" {
-		return errors.New("order id is empty")
-	}
-
-	o.Status = entity.StringToOrderStatus(result.GetStatus())
-	if o.Status == entity.StatusFailed {
-		return errors.New("order status is failed")
-	}
-
-	if !d.ready {
-		return nil
-	}
-
-	d.finishOrderMap[o.OrderID] = o
-
 	return nil
 }
 

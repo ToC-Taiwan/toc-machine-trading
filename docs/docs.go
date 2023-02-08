@@ -950,6 +950,12 @@ const docTemplate = `{
                 "cancel_wait_time": {
                     "type": "integer"
                 },
+                "in_out_ratio": {
+                    "type": "number"
+                },
+                "out_in_ratio": {
+                    "type": "number"
+                },
                 "quantity": {
                     "type": "integer"
                 },
@@ -961,6 +967,9 @@ const docTemplate = `{
                 },
                 "target_balance_low": {
                     "type": "number"
+                },
+                "tick_interval": {
+                    "type": "integer"
                 },
                 "trade_time_range": {
                     "$ref": "#/definitions/config.TradeTimeRange"
