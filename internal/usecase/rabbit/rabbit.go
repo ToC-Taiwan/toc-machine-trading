@@ -178,7 +178,7 @@ func (c *Rabbit) protoToOrder(proto *pb.OrderStatus) interface{} {
 
 	if orderTime.IsZero() {
 		orderTime = time.Now()
-		logger.Warnf("%s orderTime is zero, set to now: %s", proto.GetOrderId(), orderTime)
+		logger.Warnf("%s order time is zero, set to now", proto.GetOrderId())
 	} else if time.Since(orderTime) > 12*time.Hour {
 		orderTime = orderTime.Add(time.Hour * 24)
 	}
