@@ -1,6 +1,77 @@
-# [](https://github.com/ToC-Taiwan/toc-machine-trading/compare/v1.7.0...v) (2022-12-10)
+# [](https://github.com/ToC-Taiwan/toc-machine-trading/compare/v2.0.0...v) (2023-02-09)
 
 ## CHANGELOG
+
+# [2.0.0](https://github.com/ToC-Taiwan/toc-machine-trading/compare/v1.7.0...v2.0.0) (2023-02-09)
+
+### Bug Fixes
+
+* **assist:** fix does not try get more balance ([b752c14](https://github.com/ToC-Taiwan/toc-machine-trading/commit/b752c14269800c6aab1bb7d776dcfb94fef1608b))
+* **assist:** fix not trade out ([e036377](https://github.com/ToC-Taiwan/toc-machine-trading/commit/e03637758caaaadc4fd98208585c827570524c68))
+* **basic:** fix dupl pkey in update future basic data ([93b18c2](https://github.com/ToC-Taiwan/toc-machine-trading/commit/93b18c27ee2534702fd443a61eb223e8b0f354a1))
+* **ci:** fix golang version missing double quote ([91f2281](https://github.com/ToC-Taiwan/toc-machine-trading/commit/91f22817c7030f0e37af56ccd9efe3afe100a238))
+* **ci:** fix wrong golangci-lint version ([185705d](https://github.com/ToC-Taiwan/toc-machine-trading/commit/185705dd00eb0b51353f2c8bcc9d9f75ba0a47ce))
+* **event:** fix wrong sinopac event time, change package naming mq to rabbit ([b7cfbe4](https://github.com/ToC-Taiwan/toc-machine-trading/commit/b7cfbe4775360a65842bed81d370d6345eac2d7f))
+* **events:** fix stock trade room will start before history data fetch done ([de19ffc](https://github.com/ToC-Taiwan/toc-machine-trading/commit/de19ffce84a335edc54693b3cdabc09c0aadf3c4))
+* **future:** fix ws client get no future tick ([dd86dc9](https://github.com/ToC-Taiwan/toc-machine-trading/commit/dd86dc947b47556d68fbc48f59fbf7d39b9108fc))
+* **healthcheck:** fix wrong usage of recover ([202b37e](https://github.com/ToC-Taiwan/toc-machine-trading/commit/202b37e215a4ce5b77a732febf712b5ca40a25cc))
+* **index:** cancel multithreading in get index, yahoo price has new error ([28e5a0b](https://github.com/ToC-Taiwan/toc-machine-trading/commit/28e5a0ba779ad2e52c009f76f44886470b04f493))
+* **index:** fix if snapshot or yahoo price is nil cause panic ([9848d68](https://github.com/ToC-Taiwan/toc-machine-trading/commit/9848d68e3e51535f5505e9c879cc253edcbaaf07))
+* **index:** fix yahoo price is nil ([7a902e6](https://github.com/ToC-Taiwan/toc-machine-trading/commit/7a902e6deb8b3461a517859b5d9a03e21fd4a593))
+* **index:** if nasdaq, nf is zero, not return error but log warning ([c7408e8](https://github.com/ToC-Taiwan/toc-machine-trading/commit/c7408e8de9930685850d361669dd460f261ec52c))
+* **lint:** fix ci lint version ([38073a9](https://github.com/ToC-Taiwan/toc-machine-trading/commit/38073a9381a072677bcea16031e6d3cafbe2d973))
+* **order:** fix order time always now cause will not be cancelled in night market ([44e7b0f](https://github.com/ToC-Taiwan/toc-machine-trading/commit/44e7b0ff4f370eede358939bafb21099b2ee91b5))
+* **realtime:** fix stuck when new hadger ([23832b9](https://github.com/ToC-Taiwan/toc-machine-trading/commit/23832b9c586bfe6676bd506dc853c7e0abd2dabe))
+* **target:** fix stock future target mixed, refactor target topic ([ed28159](https://github.com/ToC-Taiwan/toc-machine-trading/commit/ed281593bd4244cbac708d015c95cbd914902e3e))
+* **trade:** fix alway get fixed balance ([411d798](https://github.com/ToC-Taiwan/toc-machine-trading/commit/411d7983fb16fed9db8aafda6f12065ddef48a52))
+* **trade:** fix balance trader missing equal symbol ([5820ff7](https://github.com/ToC-Taiwan/toc-machine-trading/commit/5820ff7e132af8afb56d3af7d392682c833724cf))
+* **trade:** fix mem leak in check balance, fix order time in rabbit, add cancel order in day trader ([76468a3](https://github.com/ToC-Taiwan/toc-machine-trading/commit/76468a34dd815d29bbd3976df435ee4b5ce0636b))
+* **trade:** fix wrong trade time in ws future trade ([9010f88](https://github.com/ToC-Taiwan/toc-machine-trading/commit/9010f882ad57160b1ae8a99c1a2341dc664e5e67))
+* **wording:** fix wrong wording in last commit ([f8ae897](https://github.com/ToC-Taiwan/toc-machine-trading/commit/f8ae89703c4e4d9303b7fe1fd7ec75dac139d2f2))
+
+### Features
+
+* **assist:** add trade out price to get more balance ([2e53f64](https://github.com/ToC-Taiwan/toc-machine-trading/commit/2e53f6406e6712c16994cabcf410d2d1dcf22541))
+* **assist:** modify trade out method to increase more profit possible ([c24d6b0](https://github.com/ToC-Taiwan/toc-machine-trading/commit/c24d6b0087b354a4a3b4255836b59819ce6f7455))
+* **balance:** modify judge forward or reverse order method ([e17bb9f](https://github.com/ToC-Taiwan/toc-machine-trading/commit/e17bb9f2e6b6d7560fc0be6ff3a349954cc7579a))
+* **config:** redesign config naming ([69ec77f](https://github.com/ToC-Taiwan/toc-machine-trading/commit/69ec77fc9c0380f47276785c2cce5ecf2da185e2))
+* **dt:** finish dt module without generate order method ([aa09209](https://github.com/ToC-Taiwan/toc-machine-trading/commit/aa092095f4153517d226dfc4e9a8299ef330da8f))
+* **fugle:** add fugle grpc to order and basic alpha ([a59a838](https://github.com/ToC-Taiwan/toc-machine-trading/commit/a59a838b9867ef94aafc52f6894b9f423f20e5e7))
+* **grpc:** split sinopac and fugle grpc api ([4800d7c](https://github.com/ToC-Taiwan/toc-machine-trading/commit/4800d7c3e8f45496f42b005baee36fd2f3498964))
+* **hadger:** add rabbit for hadger ([8631307](https://github.com/ToC-Taiwan/toc-machine-trading/commit/8631307ef1272a2ba2f48a790ff7dfe4ab680097))
+* **healthcheck:** recover panic if manual stop toc-sinopac-python, update go ([eb0638c](https://github.com/ToC-Taiwan/toc-machine-trading/commit/eb0638c8630f22e0e902b1eb7c818c5b3be1d2cd))
+* **history:** remove biasrate, update to latest proto, realtime usecase use own rabbit ([cd0bd65](https://github.com/ToC-Taiwan/toc-machine-trading/commit/cd0bd6541a137deb663ca8e9d9fdf4f0b62d935b))
+* **index:** improve get all index method performance ([ad1b79a](https://github.com/ToC-Taiwan/toc-machine-trading/commit/ad1b79a60a37261ad1de6987a49db46ebeffc088))
+* **interface:** make sure all new instance return interface instead of original object ([d904f96](https://github.com/ToC-Taiwan/toc-machine-trading/commit/d904f962f1d5a430b0952e496bdf5af7503cc207))
+* **logger:** replace all panic to fetal ([f378b5c](https://github.com/ToC-Taiwan/toc-machine-trading/commit/f378b5c5ee439eae5e8001f8caa006867a0fe967))
+* **order:** decrease future trade cancel time to 5 seconds ([5ff56af](https://github.com/ToC-Taiwan/toc-machine-trading/commit/5ff56afef1fdb61740ce1324d40b2947fd181662))
+* **order:** remove manual, group id, add dt trader beta ([7782109](https://github.com/ToC-Taiwan/toc-machine-trading/commit/77821094c525ff7247845a8f6b46882cd67a4733))
+* **order:** remove tick time in stock, future order ([5c8451b](https://github.com/ToC-Taiwan/toc-machine-trading/commit/5c8451b7c897211716767533889f911eb35d363e))
+* **order:** remove trade time in order ([1cf3cfd](https://github.com/ToC-Taiwan/toc-machine-trading/commit/1cf3cfd956cc9a3bd089b12817de965f4d990c97))
+* **pkg:** refactor log, config package ([65d4131](https://github.com/ToC-Taiwan/toc-machine-trading/commit/65d41310907c90cf6fa97a042bfe87989a0aefb3))
+* **position:** add limit get position in ws stream, if not trade time, return ([d379d16](https://github.com/ToC-Taiwan/toc-machine-trading/commit/d379d1687de6c536e4e1e2170f26a5538d5eaa1a))
+* **proto:** use new format of proto ([d8901a4](https://github.com/ToC-Taiwan/toc-machine-trading/commit/d8901a4faed07b1ae41f45f62db1b347ec79a3e3))
+* **rabbit:** let one trader has own rabbit connection ([a1af8bd](https://github.com/ToC-Taiwan/toc-machine-trading/commit/a1af8bd7d16b013562fd143c0868c4275243c388))
+* **router:** add get trade index api ([fb23cd7](https://github.com/ToC-Taiwan/toc-machine-trading/commit/fb23cd7a27aed0071ca2c2145be5201e28976cdf))
+* **router:** add last stock or future balance router ([333849b](https://github.com/ToC-Taiwan/toc-machine-trading/commit/333849bb3d3dfad92cd79696ff4331aa80ef088f))
+* **simulate:** modify simulate method, fix helath check router ([7a4f549](https://github.com/ToC-Taiwan/toc-machine-trading/commit/7a4f549864bf862696e8dfea780baabd9c3aaa25))
+* **trade:** add balance high, low to day trade future, finish future day trader unit ([716f10c](https://github.com/ToC-Taiwan/toc-machine-trading/commit/716f10c7676d07bb3d7f4ba3499bdbfe9ef6b340))
+* **trade:** add hold times and trade out price ([cf11ef1](https://github.com/ToC-Taiwan/toc-machine-trading/commit/cf11ef1af130186c81c049e3134ef89811004859))
+* **trade:** add max hold time, and check switch in dt ([ccd9fd4](https://github.com/ToC-Taiwan/toc-machine-trading/commit/ccd9fd40e023db499ef6dea0700cd025aa3e11b8))
+* **trade:** add notify trade switch in dt and hadger ([9728acb](https://github.com/ToC-Taiwan/toc-machine-trading/commit/9728acb605d75aec414a014ef054b862740c99ed))
+* **trade:** add support more than 1 qty in assist trade ([97f1530](https://github.com/ToC-Taiwan/toc-machine-trading/commit/97f153096018b3f0bf52ab0c3a60ce2e38723a09))
+* **trade:** add trade out wait times in dt ([bbf968c](https://github.com/ToC-Taiwan/toc-machine-trading/commit/bbf968cb26fe55f750be7ae8a7e8012bc7fa6d92))
+* **trade:** finish first version dt for future ([d209231](https://github.com/ToC-Taiwan/toc-machine-trading/commit/d2092317a2d286818b4312d1769a2b4d2eff3f13))
+* **trade:** increase check times, fix heartbeat panic fn ([dceefbc](https://github.com/ToC-Taiwan/toc-machine-trading/commit/dceefbcf32c3518b40d1dfa4f420d5eb190542d0))
+* **trade:** move try get more balance out of high or low ([e1a11b3](https://github.com/ToC-Taiwan/toc-machine-trading/commit/e1a11b301f6d7ae39e72b4b82e14b578d42df511))
+* **trader:** add day trader for future alpha ([1d33815](https://github.com/ToC-Taiwan/toc-machine-trading/commit/1d338156e96a45baa5d7e2d03aab4d4277a03187))
+* **trade:** remove switch router, add health check router, change trade index to index status ([cb14909](https://github.com/ToC-Taiwan/toc-machine-trading/commit/cb149095989471c05bb476da44d0e621a204bf24))
+* **usecase:** add usecase base, add hadger alpha, split interfaces, config read once ([675d614](https://github.com/ToC-Taiwan/toc-machine-trading/commit/675d61439740e54a4e8d00f8dda84e87029af54d))
+
+### Reverts
+
+* **index:** revert nasdaq, nf return 0,0 process method ([a6c9b4c](https://github.com/ToC-Taiwan/toc-machine-trading/commit/a6c9b4c6864587b2582ac9c36baf6dfdc99bd1aa))
+* **trade:** remove tradeout price compare ([ab345e0](https://github.com/ToC-Taiwan/toc-machine-trading/commit/ab345e0fe0a5af3087fbc015c069fba55e140639))
 
 # [1.7.0](https://github.com/ToC-Taiwan/toc-machine-trading/compare/v1.6.0...v1.7.0) (2022-12-09)
 

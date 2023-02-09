@@ -126,6 +126,10 @@ func (d *DTTraderFuture) checkWaitTimes(tick *entity.RealTimeFutureTick) bool {
 		d.lastTick = tick
 	}()
 
+	if d.lastTick == nil {
+		return true
+	}
+
 	switch d.tradeOutAction {
 	case entity.ActionSell:
 		if d.waitTimes > 0 && tick.Close >= d.lastTick.Close {
