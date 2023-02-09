@@ -160,6 +160,8 @@ definitions:
         type: number
       tick_interval:
         type: integer
+      trade_out_wait_times:
+        type: integer
       trade_time_range:
         $ref: '#/definitions/config.TradeTimeRange'
     type: object
@@ -254,6 +256,13 @@ definitions:
         type: integer
       trade_day:
         type: string
+    type: object
+  entity.IndexStatus:
+    properties:
+      break_count:
+        type: integer
+      price_chg:
+        type: number
     type: object
   entity.OrderAction:
     enum:
@@ -402,6 +411,17 @@ definitions:
         type: integer
       trade_day:
         type: string
+    type: object
+  entity.TradeIndex:
+    properties:
+      nasdaq:
+        $ref: '#/definitions/entity.IndexStatus'
+      nf:
+        $ref: '#/definitions/entity.IndexStatus'
+      otc:
+        $ref: '#/definitions/entity.IndexStatus'
+      tse:
+        $ref: '#/definitions/entity.IndexStatus'
     type: object
   v1.allOrder:
     properties:
@@ -920,6 +940,22 @@ paths:
       summary: moveStockOrderToLatestTradeDay
       tags:
       - order
+  /stream/index:
+    get:
+      consumes:
+      - application/json
+      description: getIndex
+      operationId: getIndex
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.TradeIndex'
+      summary: getIndex
+      tags:
+      - stream
   /stream/tse/snapshot:
     get:
       consumes:

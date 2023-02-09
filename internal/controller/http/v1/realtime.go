@@ -27,6 +27,7 @@ func newRealTimeRoutes(handler *gin.RouterGroup, t usecase.RealTime, o usecase.T
 	h := handler.Group("/stream")
 	{
 		h.GET("/tse/snapshot", r.getTSESnapshot)
+		h.GET("/index", r.getIndex)
 
 		h.GET("/ws/pick-stock", r.servePickStockWS)
 		h.GET("/ws/future", r.serveFutureWS)
@@ -49,6 +50,18 @@ func (r *realTimeRoutes) getTSESnapshot(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, snapshot)
+}
+
+// @Summary     getIndex
+// @Description getIndex
+// @ID          getIndex
+// @Tags  	    stream
+// @Accept      json
+// @Produce     json
+// @Success     200 {object} entity.TradeIndex
+// @Router      /stream/index [get]
+func (r *realTimeRoutes) getIndex(c *gin.Context) {
+	c.JSON(http.StatusOK, r.t.GetTradeIndex())
 }
 
 func (r *realTimeRoutes) servePickStockWS(c *gin.Context) {

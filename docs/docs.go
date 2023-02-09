@@ -666,6 +666,30 @@ const docTemplate = `{
                 }
             }
         },
+        "/stream/index": {
+            "get": {
+                "description": "getIndex",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "stream"
+                ],
+                "summary": "getIndex",
+                "operationId": "getIndex",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/entity.TradeIndex"
+                        }
+                    }
+                }
+            }
+        },
         "/stream/tse/snapshot": {
             "get": {
                 "description": "getTSESnapshot",
@@ -974,6 +998,9 @@ const docTemplate = `{
                 "tick_interval": {
                     "type": "integer"
                 },
+                "trade_out_wait_times": {
+                    "type": "integer"
+                },
                 "trade_time_range": {
                     "$ref": "#/definitions/config.TradeTimeRange"
                 }
@@ -1117,6 +1144,17 @@ const docTemplate = `{
                 },
                 "trade_day": {
                     "type": "string"
+                }
+            }
+        },
+        "entity.IndexStatus": {
+            "type": "object",
+            "properties": {
+                "break_count": {
+                    "type": "integer"
+                },
+                "price_chg": {
+                    "type": "number"
                 }
             }
         },
@@ -1333,6 +1371,23 @@ const docTemplate = `{
                 },
                 "trade_day": {
                     "type": "string"
+                }
+            }
+        },
+        "entity.TradeIndex": {
+            "type": "object",
+            "properties": {
+                "nasdaq": {
+                    "$ref": "#/definitions/entity.IndexStatus"
+                },
+                "nf": {
+                    "$ref": "#/definitions/entity.IndexStatus"
+                },
+                "otc": {
+                    "$ref": "#/definitions/entity.IndexStatus"
+                },
+                "tse": {
+                    "$ref": "#/definitions/entity.IndexStatus"
                 }
             }
         },
