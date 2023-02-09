@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"sync"
 	"time"
 
 	"tmt/cmd/config"
@@ -13,6 +14,7 @@ import (
 	"tmt/internal/usecase/module/hadger"
 	"tmt/internal/usecase/module/quota"
 	"tmt/internal/usecase/module/target"
+	"tmt/internal/usecase/module/tradeday"
 	"tmt/internal/usecase/rabbit"
 	"tmt/internal/usecase/repo"
 	"tmt/internal/usecase/topic"
@@ -38,21 +40,33 @@ type RealTimeUseCase struct {
 	tradeIndex   *entity.TradeIndex
 
 	mainFutureCode string
+
+	stockSwitchChanMap      map[string]chan bool
+	stockSwitchChanMapLock  sync.RWMutex
+	futureSwitchChanMap     map[string]chan bool
+	futureSwitchChanMapLock sync.RWMutex
 }
 
 func (u *UseCaseBase) NewRealTime() RealTime {
 	cfg := u.cfg
 	uc := &RealTimeUseCase{
-		repo:         repo.NewRealTime(u.pg),
+		repo: repo.NewRealTime(u.pg),
+
 		commonRabbit: rabbit.NewRabbit(cfg.RabbitMQ),
 		futureRabbit: rabbit.NewRabbit(cfg.RabbitMQ),
-		grpcapi:      grpcapi.NewRealTime(u.sc),
-		subgRPCAPI:   grpcapi.NewSubscribe(u.sc),
-		cfg:          cfg,
-		sc:           grpcapi.NewTrade(u.sc, cfg.Simulation),
-		fg:           grpcapi.NewTrade(u.fg, cfg.Simulation),
+
+		grpcapi:    grpcapi.NewRealTime(u.sc),
+		subgRPCAPI: grpcapi.NewSubscribe(u.sc),
+
+		sc: grpcapi.NewTrade(u.sc, cfg.Simulation),
+		fg: grpcapi.NewTrade(u.fg, cfg.Simulation),
+
 		targetFilter: target.NewFilter(cfg.TargetStock),
 		quota:        quota.NewQuota(cfg.Quota),
+
+		cfg:                 cfg,
+		futureSwitchChanMap: make(map[string]chan bool),
+		stockSwitchChanMap:  make(map[string]chan bool),
 	}
 
 	// unsubscriba all first
@@ -64,6 +78,9 @@ func (u *UseCaseBase) NewRealTime() RealTime {
 	uc.commonRabbit.FillAllBasic(basic.AllStocks, basic.AllFutures)
 	uc.periodUpdateTradeIndex()
 
+	uc.checkFutureTradeSwitch()
+	uc.checkStockTradeSwitch()
+
 	go uc.ReceiveEvent(context.Background())
 	go uc.ReceiveOrderStatus(context.Background())
 
@@ -72,6 +89,66 @@ func (u *UseCaseBase) NewRealTime() RealTime {
 	bus.SubscribeTopic(topic.TopicSubscribeFutureTickTargets, uc.SetMainFuture, uc.ReceiveFutureSubscribeData, uc.SubscribeFutureTick)
 
 	return uc
+}
+
+func (uc *RealTimeUseCase) checkStockTradeSwitch() {
+	if !uc.cfg.TradeStock.AllowTrade {
+		return
+	}
+	basic := cc.GetBasicInfo()
+	openTime := basic.OpenTime
+	tradeInEndTime := basic.TradeInEndTime
+
+	go func() {
+		for range time.NewTicker(30 * time.Second).C {
+			now := time.Now()
+			var tempSwitch bool
+			switch {
+			case now.Before(openTime) || now.After(tradeInEndTime):
+				tempSwitch = false
+			case now.After(openTime) && now.Before(tradeInEndTime):
+				tempSwitch = true
+			}
+
+			uc.stockSwitchChanMapLock.RLock()
+			for _, ch := range uc.stockSwitchChanMap {
+				ch <- tempSwitch
+			}
+			uc.stockSwitchChanMapLock.RUnlock()
+		}
+	}()
+}
+
+func (uc *RealTimeUseCase) checkFutureTradeSwitch() {
+	if !uc.cfg.TradeFuture.AllowTrade {
+		return
+	}
+	futureTradeDay := tradeday.Get().GetFutureTradeDay()
+
+	timeRange := [][]time.Time{}
+	firstStart := futureTradeDay.StartTime
+	secondStart := futureTradeDay.EndTime.Add(-300 * time.Minute)
+
+	timeRange = append(timeRange, []time.Time{firstStart, firstStart.Add(time.Duration(uc.cfg.TradeFuture.TradeTimeRange.FirstPartDuration) * time.Minute)})
+	timeRange = append(timeRange, []time.Time{secondStart, secondStart.Add(time.Duration(uc.cfg.TradeFuture.TradeTimeRange.SecondPartDuration) * time.Minute)})
+
+	go func() {
+		for range time.NewTicker(30 * time.Second).C {
+			now := time.Now()
+			var tempSwitch bool
+			for _, rangeTime := range timeRange {
+				if now.After(rangeTime[0]) && now.Before(rangeTime[1]) {
+					tempSwitch = true
+				}
+			}
+
+			uc.futureSwitchChanMapLock.RLock()
+			for _, ch := range uc.futureSwitchChanMap {
+				ch <- tempSwitch
+			}
+			uc.futureSwitchChanMapLock.RUnlock()
+		}
+	}()
 }
 
 func (uc *RealTimeUseCase) GetTradeIndex() *entity.TradeIndex {
@@ -363,6 +440,10 @@ func (uc *RealTimeUseCase) ReceiveStockSubscribeData(targetArr []*entity.StockTa
 		)
 		notifyChanMap[t.StockNum] = hadger.Notify()
 
+		uc.stockSwitchChanMapLock.Lock()
+		uc.stockSwitchChanMap[t.StockNum] = hadger.SwitchChan()
+		uc.stockSwitchChanMapLock.Unlock()
+
 		r := rabbit.NewRabbit(uc.cfg.RabbitMQ)
 		go r.StockTickConsumer(t.StockNum, hadger.TickChan())
 	}
@@ -398,6 +479,10 @@ func (uc *RealTimeUseCase) ReceiveFutureSubscribeData(code string) {
 		uc.sc.(*grpcapi.TradegRPCAPI),
 		&uc.cfg.TradeFuture,
 	)
+
+	uc.futureSwitchChanMapLock.Lock()
+	uc.futureSwitchChanMap[code] = t.SwitchChan()
+	uc.futureSwitchChanMapLock.Unlock()
 
 	ch := t.Notify()
 	orderStatusChan := make(chan interface{})

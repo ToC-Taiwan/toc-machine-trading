@@ -26,10 +26,12 @@ type HadgerStock struct {
 	traderMap     map[string]*HadgeTraderStock
 	traderMapLock sync.RWMutex
 
-	tickChan chan *entity.RealTimeStockTick
-	notify   chan *entity.StockOrder
+	tickChan   chan *entity.RealTimeStockTick
+	notify     chan *entity.StockOrder
+	switchChan chan bool
 
 	tradeConfig *config.TradeStock
+	isTradeTime bool
 }
 
 func NewHadgerStock(num string, s, f *grpcapi.TradegRPCAPI, q *quota.Quota, tradeConfig *config.TradeStock) *HadgerStock {
@@ -45,6 +47,7 @@ func NewHadgerStock(num string, s, f *grpcapi.TradegRPCAPI, q *quota.Quota, trad
 		localBus:      eventbus.Get(uuid.NewString()),
 		tradeConfig:   tradeConfig,
 		traderMap:     make(map[string]*HadgeTraderStock),
+		switchChan:    make(chan bool),
 	}
 
 	h.localBus.SubscribeTopic(topicTraderDone, h.removeDoneTrader)
@@ -82,18 +85,22 @@ func (h *HadgerStock) processOrderStatus() {
 	finishedOrderMap := make(map[string]*entity.StockOrder)
 	go func() {
 		for {
-			o := <-h.notify
-			if _, ok := finishedOrderMap[o.OrderID]; ok {
-				continue
-			}
+			select {
+			case o := <-h.notify:
+				if _, ok := finishedOrderMap[o.OrderID]; ok {
+					continue
+				}
 
-			if !o.Cancellable() {
-				finishedOrderMap[o.OrderID] = o
-			} else {
-				h.cancelOverTimeOrder(o)
-			}
+				if !o.Cancellable() {
+					finishedOrderMap[o.OrderID] = o
+				} else {
+					h.cancelOverTimeOrder(o)
+				}
 
-			h.localBus.PublishTopicEvent(topicUpdateOrder, o)
+				h.localBus.PublishTopicEvent(topicUpdateOrder, o)
+			case ts := <-h.switchChan:
+				h.isTradeTime = ts
+			}
 		}
 	}()
 }
@@ -126,4 +133,8 @@ func (h *HadgerStock) TickChan() chan *entity.RealTimeStockTick {
 
 func (h *HadgerStock) Notify() chan *entity.StockOrder {
 	return h.notify
+}
+
+func (h *HadgerStock) SwitchChan() chan bool {
+	return h.switchChan
 }

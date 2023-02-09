@@ -8,7 +8,6 @@ import (
 	"tmt/cmd/config"
 	"tmt/internal/entity"
 	"tmt/internal/usecase/grpcapi"
-	"tmt/internal/usecase/module/tradeday"
 	"tmt/pkg/eventbus"
 
 	"github.com/google/uuid"
@@ -27,14 +26,14 @@ type DTFuture struct {
 	traderMap     map[string]*DTTraderFuture
 	traderMapLock sync.RWMutex
 
-	tickChan chan *entity.RealTimeFutureTick
-	notify   chan *entity.FutureOrder
+	tickChan   chan *entity.RealTimeFutureTick
+	notify     chan *entity.FutureOrder
+	switchChan chan bool
 
 	tradeConfig *config.TradeFuture
 
 	lastTickRate float64
-
-	isTradeTime bool
+	isTradeTime  bool
 }
 
 func NewDTFuture(code string, s *grpcapi.TradegRPCAPI, tradeConfig *config.TradeFuture) *DTFuture {
@@ -43,6 +42,7 @@ func NewDTFuture(code string, s *grpcapi.TradegRPCAPI, tradeConfig *config.Trade
 		orderQuantity: tradeConfig.Quantity,
 		tickChan:      make(chan *entity.RealTimeFutureTick),
 		notify:        make(chan *entity.FutureOrder),
+		switchChan:    make(chan bool),
 		sc:            s,
 		tickArr:       []*entity.RealTimeFutureTick{},
 		localBus:      eventbus.Get(uuid.NewString()),
@@ -52,7 +52,6 @@ func NewDTFuture(code string, s *grpcapi.TradegRPCAPI, tradeConfig *config.Trade
 
 	d.localBus.SubscribeTopic(topicTraderDone, d.removeDoneTrader)
 
-	d.checkFutureTradeSwitch()
 	d.processOrderStatus()
 	d.processTick()
 
@@ -63,18 +62,23 @@ func (d *DTFuture) processOrderStatus() {
 	notCancellableOrderMap := make(map[string]*entity.FutureOrder)
 	go func() {
 		for {
-			o := <-d.notify
-			if _, ok := notCancellableOrderMap[o.OrderID]; ok {
-				continue
-			}
+			select {
+			case o := <-d.notify:
+				if _, ok := notCancellableOrderMap[o.OrderID]; ok {
+					continue
+				}
 
-			if !o.Cancellable() {
-				notCancellableOrderMap[o.OrderID] = o
-			} else {
-				d.cancelOverTimeOrder(o)
-			}
+				if !o.Cancellable() {
+					notCancellableOrderMap[o.OrderID] = o
+				} else {
+					d.cancelOverTimeOrder(o)
+				}
 
-			d.localBus.PublishTopicEvent(topicUpdateOrder, o)
+				d.localBus.PublishTopicEvent(topicUpdateOrder, o)
+
+			case ts := <-d.switchChan:
+				d.isTradeTime = ts
+			}
 		}
 	}()
 }
@@ -214,34 +218,6 @@ func (d *DTFuture) TickChan() chan *entity.RealTimeFutureTick {
 	return d.tickChan
 }
 
-func (d *DTFuture) checkFutureTradeSwitch() {
-	futureTradeDay := tradeday.Get().GetFutureTradeDay()
-
-	timeRange := [][]time.Time{}
-	firstStart := futureTradeDay.StartTime
-	secondStart := futureTradeDay.EndTime.Add(-300 * time.Minute)
-
-	timeRange = append(timeRange, []time.Time{firstStart, firstStart.Add(time.Duration(d.tradeConfig.TradeTimeRange.FirstPartDuration) * time.Minute)})
-	timeRange = append(timeRange, []time.Time{secondStart, secondStart.Add(time.Duration(d.tradeConfig.TradeTimeRange.SecondPartDuration) * time.Minute)})
-
-	go func() {
-		d.turnSwitch(timeRange)
-		for range time.NewTicker(30 * time.Second).C {
-			d.turnSwitch(timeRange)
-		}
-	}()
-}
-
-func (d *DTFuture) turnSwitch(timeRange [][]time.Time) {
-	now := time.Now()
-	var tempSwitch bool
-	for _, rangeTime := range timeRange {
-		if now.After(rangeTime[0]) && now.Before(rangeTime[1]) {
-			tempSwitch = true
-		}
-	}
-
-	if d.isTradeTime != tempSwitch {
-		d.isTradeTime = tempSwitch
-	}
+func (d *DTFuture) SwitchChan() chan bool {
+	return d.switchChan
 }
