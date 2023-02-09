@@ -80,5 +80,5 @@ trade_future:
         second_part_duration: 285
     max_hold_time: 30
 
-    out_in_ratio: 75
-    in_out_ratio: 25
+    out_in_ratio: 65
+    in_out_ratio: 15

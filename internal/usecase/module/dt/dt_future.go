@@ -108,8 +108,6 @@ func (d *DTFuture) processTick() {
 
 			if d.lastTick.TickTime.Sub(d.tickArr[0].TickTime) > time.Duration(d.tradeConfig.TickInterval)*time.Second {
 				d.tickArr = d.tickArr[1:]
-			} else {
-				continue
 			}
 
 			if o := d.generateOrder(); o != nil {
@@ -148,7 +146,12 @@ func (d *DTFuture) generateOrder() *entity.FutureOrder {
 		return nil
 	}
 
-	outInRatio, tickRate := d.tickArr.GetOutInRatioAndRate(float64(d.tradeConfig.TickInterval))
+	if len(d.tickArr) < int(d.tradeConfig.TickInterval) {
+		d.lastTickRate = 0
+		return nil
+	}
+
+	outInRatio, tickRate := d.tickArr.GetOutInRatioAndRate()
 	defer func() {
 		d.lastTickRate = tickRate
 	}()
@@ -157,7 +160,7 @@ func (d *DTFuture) generateOrder() *entity.FutureOrder {
 		return nil
 	}
 
-	if tickRate/d.lastTickRate < 1.2 || d.lastTickRate < 7 {
+	if tickRate/d.lastTickRate < 1.25 || d.lastTickRate < 8 {
 		return nil
 	}
 
@@ -167,7 +170,7 @@ func (d *DTFuture) generateOrder() *entity.FutureOrder {
 			Code: d.code,
 			BaseOrder: entity.BaseOrder{
 				Action:   entity.ActionBuy,
-				Price:    d.lastTick.Close,
+				Price:    d.lastTick.Close - 1,
 				Quantity: orderQtyUnit,
 			},
 		}
@@ -176,7 +179,7 @@ func (d *DTFuture) generateOrder() *entity.FutureOrder {
 			Code: d.code,
 			BaseOrder: entity.BaseOrder{
 				Action:   entity.ActionSell,
-				Price:    d.lastTick.Close,
+				Price:    d.lastTick.Close + 1,
 				Quantity: orderQtyUnit,
 			},
 		}
