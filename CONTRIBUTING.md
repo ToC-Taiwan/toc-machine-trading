@@ -31,16 +31,8 @@ pre-commit run --all-files
 
 ### Modify CHANGELOG
 
-- First Time
-
 ```sh
-conventional-changelog -p angular -i CHANGELOG.md -s -r 0
-```
-
-- From Last semver tag
-
-```sh
-conventional-changelog -p angular -i CHANGELOG.md -s
+git-chglog -o CHANGELOG.md
 ```
 
 ### Find ignored files
