@@ -35,6 +35,8 @@ type DTTraderFuture struct {
 	once sync.Once // post done once
 
 	sellFirst bool
+	waitTimes int64
+	lastTick  *entity.RealTimeFutureTick
 }
 
 // NewDTTraderFuture create a new DTTraderFuture, if quantity > orderQtyUnit, return nil or place order error, return nil
@@ -53,6 +55,7 @@ func NewDTTraderFuture(orderWithCfg orderWithCfg, s *grpcapi.TradegRPCAPI, bus *
 		baseOrder:        orderWithCfg.order,
 		tradeConfig:      orderWithCfg.cfg,
 		lastTradeOutTime: orderWithCfg.lastTradeOutTime,
+		waitTimes:        orderWithCfg.cfg.TradeOutWaitTimes,
 	}
 
 	if orderWithCfg.order.Action == entity.ActionSell {
@@ -118,7 +121,33 @@ func (d *DTTraderFuture) isTraderDone() bool {
 	return false
 }
 
+func (d *DTTraderFuture) checkWaitTimes(tick *entity.RealTimeFutureTick) bool {
+	defer func() {
+		d.lastTick = tick
+	}()
+
+	switch d.tradeOutAction {
+	case entity.ActionSell:
+		if d.waitTimes > 0 && tick.Close >= d.lastTick.Close {
+			d.waitTimes--
+			return true
+		}
+
+	case entity.ActionBuy:
+		if d.waitTimes > 0 && tick.Close <= d.lastTick.Close {
+			d.waitTimes--
+			return true
+		}
+	}
+
+	return false
+}
+
 func (d *DTTraderFuture) checkByBalance(tick *entity.RealTimeFutureTick) {
+	if d.checkWaitTimes(tick) {
+		return
+	}
+
 	var place bool
 	switch d.tradeOutAction {
 	case entity.ActionSell:

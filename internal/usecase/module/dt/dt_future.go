@@ -157,7 +157,7 @@ func (d *DTFuture) generateOrder() *entity.FutureOrder {
 		return nil
 	}
 
-	if tickRate/d.lastTickRate < 1.2 || d.lastTickRate < 5 {
+	if tickRate/d.lastTickRate < 1.2 || d.lastTickRate < 7 {
 		return nil
 	}
 

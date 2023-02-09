@@ -73,6 +73,8 @@ type TradeFuture struct {
 	TickInterval int64   `json:"tick_interval"       env-required:"true" yaml:"tick_interval"`
 	OutInRatio   float64 `json:"out_in_ratio"        env-required:"true" yaml:"out_in_ratio"`
 	InOutRatio   float64 `json:"in_out_ratio"        env-required:"true" yaml:"in_out_ratio"`
+
+	TradeOutWaitTimes int64 `json:"trade_out_wait_times" env-required:"true" yaml:"trade_out_wait_times"`
 }
 
 // TradeTimeRange -.

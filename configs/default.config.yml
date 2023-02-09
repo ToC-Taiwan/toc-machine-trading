@@ -66,7 +66,8 @@ trade_future:
     subscribe: true
     quantity: 1
     target_balance_high: 2
-    target_balance_low: -2
+    target_balance_low: -3
+    trade_out_wait_times: 5
 
     # unit: seccond
     buy_sell_wait_time: 7
