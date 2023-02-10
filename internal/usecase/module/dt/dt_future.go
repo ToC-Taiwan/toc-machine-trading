@@ -160,7 +160,7 @@ func (d *DTFuture) generateOrder() *entity.FutureOrder {
 		return nil
 	}
 
-	if tickRate/d.lastTickRate < 1.25 || d.lastTickRate < 8 {
+	if 100*(tickRate-d.lastTickRate)/d.lastTickRate < d.tradeConfig.RateChangeRatio || d.lastTickRate < d.tradeConfig.RateLimit {
 		return nil
 	}
 

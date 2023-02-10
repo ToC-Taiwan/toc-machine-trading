@@ -80,5 +80,8 @@ trade_future:
         second_part_duration: 285
     max_hold_time: 30
 
+    # unit: %
+    rate_limit: 7
+    rate_change_ratio: 20
     out_in_ratio: 65
     in_out_ratio: 15

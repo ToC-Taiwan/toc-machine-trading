@@ -986,6 +986,12 @@ const docTemplate = `{
                 "quantity": {
                     "type": "integer"
                 },
+                "rate_change_ratio": {
+                    "type": "number"
+                },
+                "rate_limit": {
+                    "type": "number"
+                },
                 "subscribe": {
                     "type": "boolean"
                 },

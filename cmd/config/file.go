@@ -70,9 +70,11 @@ type TradeFuture struct {
 	TradeTimeRange TradeTimeRange `json:"trade_time_range"    env-required:"true" yaml:"trade_time_range"`
 	MaxHoldTime    int64          `json:"max_hold_time"    env-required:"true" yaml:"max_hold_time"`
 
-	TickInterval int64   `json:"tick_interval"       env-required:"true" yaml:"tick_interval"`
-	OutInRatio   float64 `json:"out_in_ratio"        env-required:"true" yaml:"out_in_ratio"`
-	InOutRatio   float64 `json:"in_out_ratio"        env-required:"true" yaml:"in_out_ratio"`
+	TickInterval    int64   `json:"tick_interval"       env-required:"true" yaml:"tick_interval"`
+	RateLimit       float64 `json:"rate_limit"          env-required:"true" yaml:"rate_limit"`
+	RateChangeRatio float64 `json:"rate_change_ratio"       env-required:"true" yaml:"rate_change_ratio"`
+	OutInRatio      float64 `json:"out_in_ratio"        env-required:"true" yaml:"out_in_ratio"`
+	InOutRatio      float64 `json:"in_out_ratio"        env-required:"true" yaml:"in_out_ratio"`
 
 	TradeOutWaitTimes int64 `json:"trade_out_wait_times" env-required:"true" yaml:"trade_out_wait_times"`
 }
