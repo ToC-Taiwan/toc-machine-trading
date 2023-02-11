@@ -9,10 +9,10 @@ import (
 
 	"tmt/cmd/config"
 	"tmt/internal/entity"
+	"tmt/internal/usecase/event"
 	"tmt/internal/usecase/grpcapi"
 	"tmt/internal/usecase/module/tradeday"
 	"tmt/internal/usecase/repo"
-	"tmt/internal/usecase/topic"
 	"tmt/pkg/common"
 	"tmt/pkg/utils"
 )
@@ -42,7 +42,7 @@ func (u *UseCaseBase) NewHistory() History {
 	}
 
 	uc.basic = cc.GetBasicInfo()
-	bus.SubscribeTopic(topic.TopicFetchStockHistory, uc.FetchHistory)
+	bus.SubscribeTopic(event.TopicFetchStockHistory, uc.FetchHistory)
 	return uc
 }
 
@@ -88,7 +88,7 @@ func (uc *HistoryUseCase) FetchHistory(targetArr []*entity.StockTarget) {
 		logger.Fatal(err)
 	}
 
-	bus.PublishTopicEvent(topic.TopicAnalyzeStockTargets, fetchArr)
+	bus.PublishTopicEvent(event.TopicAnalyzeStockTargets, fetchArr)
 }
 
 func (uc *HistoryUseCase) fetchHistoryClose(targetArr []*entity.StockTarget) error {

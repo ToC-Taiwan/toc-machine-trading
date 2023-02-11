@@ -8,11 +8,11 @@ import (
 
 	"tmt/cmd/config"
 	"tmt/internal/entity"
+	"tmt/internal/usecase/event"
 	"tmt/internal/usecase/grpcapi"
 	"tmt/internal/usecase/module/target"
 	"tmt/internal/usecase/module/tradeday"
 	"tmt/internal/usecase/repo"
-	"tmt/internal/usecase/topic"
 	"tmt/pkg/common"
 )
 
@@ -86,14 +86,14 @@ func (uc *TargetUseCase) publishNewStockTargets(targetArr []*entity.StockTarget)
 	if err := uc.repo.InsertOrUpdateTargetArr(context.Background(), targetArr); err != nil {
 		logger.Fatal(err)
 	}
-	bus.PublishTopicEvent(topic.TopicFetchStockHistory, targetArr)
+	bus.PublishTopicEvent(event.TopicFetchStockHistory, targetArr)
 }
 
 func (uc *TargetUseCase) publishNewFutureTargets() {
 	if futureTarget, err := uc.getFutureTarget(); err != nil {
 		logger.Fatal(err)
 	} else {
-		bus.PublishTopicEvent(topic.TopicSubscribeFutureTickTargets, futureTarget)
+		bus.PublishTopicEvent(event.TopicSubscribeFutureTickTargets, futureTarget)
 	}
 }
 

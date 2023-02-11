@@ -7,11 +7,11 @@ import (
 	"time"
 
 	"tmt/internal/entity"
+	"tmt/internal/usecase/event"
 	"tmt/internal/usecase/grpcapi"
 	"tmt/internal/usecase/module/quota"
 	"tmt/internal/usecase/module/tradeday"
 	"tmt/internal/usecase/repo"
-	"tmt/internal/usecase/topic"
 )
 
 // TradeUseCase -.
@@ -46,8 +46,8 @@ func (u *UseCaseBase) NewTrade() Trade {
 		futureTradeDay: tradeDay.GetFutureTradeDay(),
 	}
 
-	bus.SubscribeTopic(topic.TopicInsertOrUpdateStockOrder, uc.updateStockOrderCacheAndInsertDB)
-	bus.SubscribeTopic(topic.TopicInsertOrUpdateFutureOrder, uc.updateFutureOrderCacheAndInsertDB)
+	bus.SubscribeTopic(event.TopicInsertOrUpdateStockOrder, uc.updateStockOrderCacheAndInsertDB)
+	bus.SubscribeTopic(event.TopicInsertOrUpdateFutureOrder, uc.updateFutureOrderCacheAndInsertDB)
 
 	if cfg.Simulation {
 		go uc.askSimulateOrderStatus()

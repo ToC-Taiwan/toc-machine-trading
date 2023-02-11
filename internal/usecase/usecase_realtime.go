@@ -9,6 +9,7 @@ import (
 
 	"tmt/cmd/config"
 	"tmt/internal/entity"
+	"tmt/internal/usecase/event"
 	"tmt/internal/usecase/grpcapi"
 	"tmt/internal/usecase/module/dt"
 	"tmt/internal/usecase/module/hadger"
@@ -17,7 +18,6 @@ import (
 	"tmt/internal/usecase/module/tradeday"
 	"tmt/internal/usecase/rabbit"
 	"tmt/internal/usecase/repo"
-	"tmt/internal/usecase/topic"
 
 	"github.com/google/uuid"
 )
@@ -84,9 +84,9 @@ func (u *UseCaseBase) NewRealTime() RealTime {
 	go uc.ReceiveEvent(context.Background())
 	go uc.ReceiveOrderStatus(context.Background())
 
-	bus.SubscribeTopic(topic.TopicSubscribeStockTickTargets, uc.ReceiveStockSubscribeData, uc.SubscribeStockTick)
-	bus.SubscribeTopic(topic.TopicUnSubscribeStockTickTargets, uc.UnSubscribeStockTick, uc.UnSubscribeStockBidAsk)
-	bus.SubscribeTopic(topic.TopicSubscribeFutureTickTargets, uc.SetMainFuture, uc.ReceiveFutureSubscribeData, uc.SubscribeFutureTick)
+	bus.SubscribeTopic(event.TopicSubscribeStockTickTargets, uc.ReceiveStockSubscribeData, uc.SubscribeStockTick)
+	bus.SubscribeTopic(event.TopicUnSubscribeStockTickTargets, uc.UnSubscribeStockTick, uc.UnSubscribeStockBidAsk)
+	bus.SubscribeTopic(event.TopicSubscribeFutureTickTargets, uc.SetMainFuture, uc.ReceiveFutureSubscribeData, uc.SubscribeFutureTick)
 
 	return uc
 }
@@ -235,9 +235,9 @@ func (uc *RealTimeUseCase) ReceiveOrderStatus(ctx context.Context) {
 			order := <-orderStatusChan
 			switch t := order.(type) {
 			case *entity.StockOrder:
-				bus.PublishTopicEvent(topic.TopicInsertOrUpdateStockOrder, t)
+				bus.PublishTopicEvent(event.TopicInsertOrUpdateStockOrder, t)
 			case *entity.FutureOrder:
-				bus.PublishTopicEvent(topic.TopicInsertOrUpdateFutureOrder, t)
+				bus.PublishTopicEvent(event.TopicInsertOrUpdateFutureOrder, t)
 			}
 		}
 	}()

@@ -6,8 +6,9 @@ import (
 	"time"
 
 	"tmt/internal/entity"
+	"tmt/internal/usecase/event"
 	"tmt/internal/usecase/module/tradeday"
-	"tmt/internal/usecase/topic"
+	"tmt/internal/usecase/repo"
 )
 
 // AnalyzeUseCase -.
@@ -21,6 +22,18 @@ type AnalyzeUseCase struct {
 	rebornLock       sync.Mutex
 
 	tradeDay *tradeday.TradeDay
+}
+
+func (u *UseCaseBase) NewAnalyze() Analyze {
+	uc := &AnalyzeUseCase{
+		repo:             repo.NewHistory(u.pg),
+		lastBelowMAStock: make(map[string]*entity.StockHistoryAnalyze),
+		rebornMap:        make(map[time.Time][]entity.Stock),
+		tradeDay:         tradeday.Get(),
+	}
+
+	bus.SubscribeTopic(event.TopicAnalyzeStockTargets, uc.findBelowQuaterMATargets)
+	return uc
 }
 
 // GetRebornMap -.
@@ -66,6 +79,6 @@ func (uc *AnalyzeUseCase) findBelowQuaterMATargets(targetArr []*entity.StockTarg
 		}
 	}
 
-	bus.PublishTopicEvent(topic.TopicSubscribeStockTickTargets, targetArr)
+	bus.PublishTopicEvent(event.TopicSubscribeStockTickTargets, targetArr)
 	logger.Info("Find below quaterMA targets done")
 }

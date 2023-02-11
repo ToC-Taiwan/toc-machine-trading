@@ -2,14 +2,9 @@ package usecase
 
 import (
 	"fmt"
-	"time"
 
 	"tmt/cmd/config"
-	"tmt/internal/entity"
 	"tmt/internal/usecase/cache"
-	"tmt/internal/usecase/module/tradeday"
-	"tmt/internal/usecase/repo"
-	"tmt/internal/usecase/topic"
 	"tmt/pkg/eventbus"
 	"tmt/pkg/grpc"
 	"tmt/pkg/log"
@@ -66,16 +61,4 @@ func NewUseCaseBase(cfg *config.Config) *UseCaseBase {
 
 func (u *UseCaseBase) Close() {
 	u.pg.Close()
-}
-
-func (u *UseCaseBase) NewAnalyze() Analyze {
-	uc := &AnalyzeUseCase{
-		repo:             repo.NewHistory(u.pg),
-		lastBelowMAStock: make(map[string]*entity.StockHistoryAnalyze),
-		rebornMap:        make(map[time.Time][]entity.Stock),
-		tradeDay:         tradeday.Get(),
-	}
-
-	bus.SubscribeTopic(topic.TopicAnalyzeStockTargets, uc.findBelowQuaterMATargets)
-	return uc
 }
