@@ -142,8 +142,6 @@ definitions:
         type: boolean
       buy_sell_wait_time:
         type: integer
-      cancel_wait_time:
-        type: integer
       in_out_ratio:
         type: number
       max_hold_time:

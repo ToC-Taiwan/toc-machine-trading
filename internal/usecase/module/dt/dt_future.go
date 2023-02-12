@@ -84,7 +84,7 @@ func (d *DTFuture) processOrderStatus() {
 }
 
 func (d *DTFuture) cancelOverTimeOrder(order *entity.FutureOrder) {
-	if time.Since(order.OrderTime) < time.Duration(d.tradeConfig.CancelWaitTime)*time.Second {
+	if time.Since(order.OrderTime) < time.Duration(d.tradeConfig.BuySellWaitTime)*time.Second {
 		return
 	}
 

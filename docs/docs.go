@@ -971,9 +971,6 @@ const docTemplate = `{
                 "buy_sell_wait_time": {
                     "type": "integer"
                 },
-                "cancel_wait_time": {
-                    "type": "integer"
-                },
                 "in_out_ratio": {
                     "type": "number"
                 },

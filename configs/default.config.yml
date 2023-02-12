@@ -1,5 +1,44 @@
 simulation: false
 
+trade_stock:
+    allow_trade: false
+    subscribe: true
+
+    # unit: second
+    hold_time_from_open: 45
+    trade_in_wait_time: 45
+    trade_out_wait_time: 60
+    cancel_wait_time: 30
+
+    # unit: minute
+    total_open_time: 270
+    trade_in_end_time: 90
+
+trade_future:
+    allow_trade: true
+    subscribe: true
+    quantity: 2
+    target_balance_high: 3
+    target_balance_low: -3
+    trade_out_wait_times: 10
+
+    # unit: seccond
+    buy_sell_wait_time: 10
+    cancel_wait_time: 15
+    tick_interval: 15
+
+    # duration: minute
+    trade_time_range:
+        first_part_duration: 720
+        second_part_duration: 285
+    max_hold_time: 30
+
+    # unit: %
+    rate_limit: 9
+    rate_change_ratio: 30
+    out_in_ratio: 85
+    in_out_ratio: 15
+
 history:
     # unit: day
     history_close_period: 65
@@ -46,42 +85,3 @@ analyze_stock:
 
     # unit: day
     ma_period: 60
-
-trade_stock:
-    allow_trade: false
-    subscribe: true
-
-    # unit: second
-    hold_time_from_open: 45
-    trade_in_wait_time: 45
-    trade_out_wait_time: 60
-    cancel_wait_time: 30
-
-    # unit: minute
-    total_open_time: 270
-    trade_in_end_time: 90
-
-trade_future:
-    allow_trade: true
-    subscribe: true
-    quantity: 1
-    target_balance_high: 2
-    target_balance_low: -3
-    trade_out_wait_times: 5
-
-    # unit: seccond
-    buy_sell_wait_time: 7
-    cancel_wait_time: 15
-    tick_interval: 10
-
-    # duration: minute
-    trade_time_range:
-        first_part_duration: 780
-        second_part_duration: 285
-    max_hold_time: 30
-
-    # unit: %
-    rate_limit: 7
-    rate_change_ratio: 20
-    out_in_ratio: 65
-    in_out_ratio: 15
