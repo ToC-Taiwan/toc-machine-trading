@@ -1,44 +1,51 @@
 # CHANGELOG
 
-<a name="v2.0.1"></a>
-
 ## [v2.0.1](https://github.com/ToC-Taiwan/toc-machine-trading/compare/v2.0.0...v2.0.1)
 
 > 2023-02-09
 
-### Fix
+### Bug Fixes (1)
 
 * **trade:** fix check wait time fail when last tick is nil
-
-<a name="v2.0.0"></a>
 
 ## [v2.0.0](https://github.com/ToC-Taiwan/toc-machine-trading/compare/v1.7.0...v2.0.0)
 
 > 2023-02-09
 
-### Chore
+### Bug Fixes (22)
 
-* **dependency:** update dependency
-* **dependency:** period update dependency
-* **index:** remove default gap of price change
-* **interfaces:** remove redundant interface
-* **license:** update license to GPL 3.0
-* **license:** update license file name to COPYING
-* **log:** change log format
-* **naming:** rename Makefile to makefile
-* **naming:** rename order usecase to trade usecase
-* **pkg:** remove redundant var, add singleton for trade day pkg
-* **proto:** update latest proto
-* **realtime:** modify new stock trading room method
-* **switch:** temp remove check trade switch
+* **assist:** fix not trade out
+* **assist:** fix does not try get more balance
+* **basic:** fix dupl pkey in update future basic data
+* **ci:** fix golang version missing double quote
+* **ci:** fix wrong golangci-lint version
+* **event:** fix wrong sinopac event time, change package naming mq to rabbit
+* **events:** fix stock trade room will start before history data fetch done
+* **future:** fix ws client get no future tick
+* **healthcheck:** fix wrong usage of recover
+* **index:** fix yahoo price is nil
+* **index:** fix if snapshot or yahoo price is nil cause panic
+* **index:** if nasdaq, nf is zero, not return error but log warning
+* **index:** cancel multithreading in get index, yahoo price has new error
+* **lint:** fix ci lint version
+* **order:** fix order time always now cause will not be cancelled in night market
+* **realtime:** fix stuck when new hadger
+* **target:** fix stock future target mixed, refactor target topic
+* **trade:** fix mem leak in check balance, fix order time in rabbit, add cancel order in day trader
+* **trade:** fix balance trader missing equal symbol
+* **trade:** fix wrong trade time in ws future trade
+* **trade:** fix alway get fixed balance
+* **wording:** fix wrong wording in last commit
 
-### Ci
+### Code Refactoring (5)
 
-* **actions:** add concurrency rule cancel-in-progress
-* **deploy:** add trigger deploy instead of deploy self, update golang
-* **deployment:** update trigger api url and argument
+* **cache:** refactor cache pkg and module, rename modules to module
+* **db:** modify initail db method
+* **event:** remove event module, refactor event bus pkg
+* **grpc:** refactor attampts method, rename events to topic
+* **usecase:** re-design rpc, add realtime usecase, let method split make sense
 
-### Feat
+### Features (36)
 
 * **assist:** modify trade out method to increase more profit possible
 * **assist:** add trade out price to get more balance
@@ -77,57 +84,22 @@
 * **trader:** add day trader for future alpha
 * **usecase:** add usecase base, add hadger alpha, split interfaces, config read once
 
-### Fix
-
-* **assist:** fix not trade out
-* **assist:** fix does not try get more balance
-* **basic:** fix dupl pkey in update future basic data
-* **ci:** fix golang version missing double quote
-* **ci:** fix wrong golangci-lint version
-* **event:** fix wrong sinopac event time, change package naming mq to rabbit
-* **events:** fix stock trade room will start before history data fetch done
-* **future:** fix ws client get no future tick
-* **healthcheck:** fix wrong usage of recover
-* **index:** fix yahoo price is nil
-* **index:** fix if snapshot or yahoo price is nil cause panic
-* **index:** if nasdaq, nf is zero, not return error but log warning
-* **index:** cancel multithreading in get index, yahoo price has new error
-* **lint:** fix ci lint version
-* **order:** fix order time always now cause will not be cancelled in night market
-* **realtime:** fix stuck when new hadger
-* **target:** fix stock future target mixed, refactor target topic
-* **trade:** fix mem leak in check balance, fix order time in rabbit, add cancel order in day trader
-* **trade:** fix balance trader missing equal symbol
-* **trade:** fix wrong trade time in ws future trade
-* **trade:** fix alway get fixed balance
-* **wording:** fix wrong wording in last commit
-
-### Refactor
-
-* **cache:** refactor cache pkg and module, rename modules to module
-* **db:** modify initail db method
-* **event:** remove event module, refactor event bus pkg
-* **grpc:** refactor attampts method, rename events to topic
-* **usecase:** re-design rpc, add realtime usecase, let method split make sense
-
-### Revert
-
-* **index:** revert nasdaq, nf return 0,0 process method
-* **trade:** remove tradeout price compare
-
-<a name="v1.7.0"></a>
-
 ## [v1.7.0](https://github.com/ToC-Taiwan/toc-machine-trading/compare/v1.6.0...v1.7.0)
 
 > 2023-02-09
 
-### Chore
+### Bug Fixes (8)
 
-* **protobuf:** change to official google proto package
-* **readme:** modify readme, contributing, makefile
-* **stream:** remove send trade volume in future trade
+* **future:** add missing future detail
+* **kbar:** fix wrong time period of stream kbar, add send kbar every minute
+* **lint:** fix stream routes lint error
+* **order:** modify send order sequence to avoid stuck
+* **tick:** fix wrong tick time from snapshot to tick
+* **trade:** fix wrong first tick time
+* **ws:** remove lock for future stream
+* **ws:** fix wrong ws message type
 
-### Feat
+### Features (14)
 
 * **future:** split kbar and send last period to stream
 * **future:** add send future detail in first connect
@@ -144,40 +116,46 @@
 * **subscribe:** add whether subscribe stock or future not
 * **ws:** add lock for future trade ws
 
-### Fix
-
-* **future:** add missing future detail
-* **kbar:** fix wrong time period of stream kbar, add send kbar every minute
-* **lint:** fix stream routes lint error
-* **order:** modify send order sequence to avoid stuck
-* **tick:** fix wrong tick time from snapshot to tick
-* **trade:** fix wrong first tick time
-* **ws:** remove lock for future stream
-* **ws:** fix wrong ws message type
-
-<a name="v1.6.0"></a>
-
 ## [v1.6.0](https://github.com/ToC-Taiwan/toc-machine-trading/compare/v1.5.0...v1.6.0)
 
 > 2023-02-09
 
-### Chore
+### Bug Fixes (25)
 
-* **actions:** modify build and push action version
-* **balance:** revert to normal method query future order
-* **naming:** reanme needassist to assisting
-* **pkg:** move config to module
-* **simulation:** add log for user to know is simulation or not
-* **stream:** remove out chg and in chg
-* **websocket:** revert to new channel in websocket router
-* **ws:** temp remove assist trader, fix stuck tick chan
+* **assist:** add lock for process trade, fix bugs in assist trader
+* **assist:** fix assist trader will kill before start
+* **ci:** temp remove go test from ci
+* **ci:** add missing config in go test
+* **ci:** add checkout in deployment to get git hash
+* **log:** remove unknown order code log
+* **order:** fix manual order does not insert to db
+* **order:** fix order balance calculate wrong, try fix manual order does not insert to db
+* **order:** use timer and reset to fix balance not insert to db
+* **order:** add lock for order usecase to update order in postgres
+* **order:** modify get order by trade day will send not filled order
+* **order:** fix order status chan is not add to rabbit, fix order time is always wrong
+* **position:** fix websocket future position has no column in json
+* **postgres:** fix redundant manual future trade balance cause panic
+* **router:** fix return body of get future trade switch
+* **stream:** fix last trade rate not initial
+* **stream:** add loop lable to avoid index out of range
+* **stream:** fix map is not initail
+* **stuck:** fix missing go in updateAllTradeBalance
+* **trade:** fix order will be cancel multiple times
+* **trade:** fix order will be cancel before 10 seconds
+* **websocket:** fix order map does not initial
+* **websocket:** fix send data to close channel
+* **ws:** fix ws end abnormal, close connection before gin done
+* **ws:** fix stuck if client disconnect by abort gin
 
-### Ci
+### Code Refactoring (4)
 
-* **docker:** add git hash to build tag
-* **registry:** move registry from docker to github
+* **assist:** refactor assist trader
+* **logger:** pack log again
+* **ws:** split pick stock and future to different pkg
+* **ws:** refactor websocket split pick stock and future trade
 
-### Feat
+### Features (28)
 
 * **assist:** finish by balance and by time period assist
 * **assist:** let buy sell has same profit loss automation method
@@ -208,61 +186,24 @@
 * **trade:** add manual to order column, check order status in websocket
 * **websocket:** add nasdaq future to stream
 
-### Fix
-
-* **assist:** add lock for process trade, fix bugs in assist trader
-* **assist:** fix assist trader will kill before start
-* **ci:** temp remove go test from ci
-* **ci:** add missing config in go test
-* **ci:** add checkout in deployment to get git hash
-* **log:** remove unknown order code log
-* **order:** fix manual order does not insert to db
-* **order:** fix order balance calculate wrong, try fix manual order does not insert to db
-* **order:** use timer and reset to fix balance not insert to db
-* **order:** add lock for order usecase to update order in postgres
-* **order:** modify get order by trade day will send not filled order
-* **order:** fix order status chan is not add to rabbit, fix order time is always wrong
-* **position:** fix websocket future position has no column in json
-* **postgres:** fix redundant manual future trade balance cause panic
-* **router:** fix return body of get future trade switch
-* **stream:** fix last trade rate not initial
-* **stream:** add loop lable to avoid index out of range
-* **stream:** fix map is not initail
-* **stuck:** fix missing go in updateAllTradeBalance
-* **trade:** fix order will be cancel multiple times
-* **trade:** fix order will be cancel before 10 seconds
-* **websocket:** fix order map does not initial
-* **websocket:** fix send data to close channel
-* **ws:** fix ws end abnormal, close connection before gin done
-* **ws:** fix stuck if client disconnect by abort gin
-
-### Refactor
-
-* **assist:** refactor assist trader
-* **logger:** pack log again
-* **ws:** split pick stock and future to different pkg
-* **ws:** refactor websocket split pick stock and future trade
-
-### Revert
-
-* **stream:** revert to cut and process in the same loop
-
-<a name="v1.5.0"></a>
-
 ## [v1.5.0](https://github.com/ToC-Taiwan/toc-machine-trading/compare/v1.4.0...v1.5.0)
 
 > 2023-02-09
 
-### Chore
+### Bug Fixes (10)
 
-* **entity:** change db table name to split stock future, modify target stream entity
-* **entity:** split trade balance to stock and future
-* **entity:** modify history entity to split history data and base
-* **global:** remove global pkg, move to common pkg
-* **log:** remove redundant log of websocket
-* **websocket:** add log for unsupport message, remove if v == pong
+* **health:** if disconnect from grpc not panic but os exit
+* **migration:** fix wrong table name in migration sql
+* **subscribe:** remove redundant future bidask subscribe
+* **websocket:** remove period to fix out of index
+* **websocket:** fix wrong scoket data type
+* **websocket:** fix wrong calculation of trade rate
+* **websocket:** fix missing format in send websocket data
+* **websocket:** add missing socketPickStock
+* **websocket:** fix interface cast bug
+* **websocket:** fix concurrency write websocket
 
-### Feat
+### Features (12)
 
 * **action:** use period tick out in ratio to decide action, and add to simulator
 * **history:** add future history close fetch and simulate
@@ -277,26 +218,11 @@
 * **ws:** add log for new future ws and done log
 * **ws:** modify ws layout, add send snapshot in future stream ws
 
-### Fix
-
-* **health:** if disconnect from grpc not panic but os exit
-* **migration:** fix wrong table name in migration sql
-* **subscribe:** remove redundant future bidask subscribe
-* **websocket:** remove period to fix out of index
-* **websocket:** fix wrong scoket data type
-* **websocket:** fix wrong calculation of trade rate
-* **websocket:** fix missing format in send websocket data
-* **websocket:** add missing socketPickStock
-* **websocket:** fix interface cast bug
-* **websocket:** fix concurrency write websocket
-
-<a name="v1.4.0"></a>
-
 ## [v1.4.0](https://github.com/ToC-Taiwan/toc-machine-trading/compare/v1.3.0...v1.4.0)
 
 > 2023-02-09
 
-### Feat
+### Features (8)
 
 * **future:** use rsi to decide trade in, max hold time to trade out
 * **future:** test new method of future trader
@@ -307,50 +233,33 @@
 * **strategy:** modify future trade strategy default config
 * **trader:** add kbar analyze to future trader
 
-<a name="v1.3.0"></a>
-
 ## [v1.3.0](https://github.com/ToC-Taiwan/toc-machine-trading/compare/v1.2.0...v1.3.0)
 
 > 2023-02-09
 
-### Chore
-
-* **changelog:** modify changelog
-* **changelog:** add git-chglog instead of cz-conventional-changelog
-* **make:** copy default config in every run, modify stock trader
-
-### Feat
+### Features (3)
 
 * **balance:** exclude unfinish order in calculate balance, modify topic name
 * **router:** add future trade balance to get balance
 * **strategy:** modify future trader strategy
 
-<a name="v1.2.0"></a>
-
 ## [v1.2.0](https://github.com/ToC-Taiwan/toc-machine-trading/compare/v1.1.0...v1.2.0)
 
 > 2023-02-09
 
-### Chore
-
-* **readme:** move tools to contributing doc, add install migrate in go update
-
-### Refactor
+### Code Refactoring (1)
 
 * **trader:** put stock future trader into a module, change the stream usecase
-
-<a name="v1.1.0"></a>
 
 ## [v1.1.0](https://github.com/ToC-Taiwan/toc-machine-trading/compare/v1.0.0...v1.1.0)
 
 > 2023-02-09
 
-### Chore
+### Bug Fixes (1)
 
-* **module:** move cache to a new module
-* **trader:** remove redundant bus, rename trade agent to trader
+* **future:** fix wrong future trade switch, add future trade fee calculate
 
-### Feat
+### Features (5)
 
 * **future:** add auto select r1 mxf future
 * **module:** move event topic to a new event module with bus
@@ -358,55 +267,55 @@
 * **module:** move all trader to trader module, remove simulate stock trader
 * **tradeday:** add new future trade day method, modify query order method to time range
 
-### Fix
-
-* **future:** fix wrong future trade switch, add future trade fee calculate
-
-<a name="v1.0.0"></a>
-
 ## v1.0.0
 
 > 2023-02-09
 
-### Chore
+### Bug Fixes (32)
 
-* **bidask:** change tick time to bidask time
-* **cache:** rename cache method
-* **config:** modifiy default config
-* **dependency:** update go dependency, protoc version
-* **entity:** move order status map to order entity
-* **event:** change event name from target to fetch history
-* **format:** format all import, add global time format without dash
-* **future:** add new analyze method in future trade
-* **go:** update go version to 1.19
-* **log:** modify usage of logger
-* **logger:** remove reporter in logrus
-* **mod:** change go mod name to tmt
-* **module:** add quota module
-* **module:** move trade to a new module
-* **naming:** rename stock simulate trader file name, add future simulate file
-* **naming:** rename realtime data to trader
-* **port:** change default http port
-* **protobuf:** modify protobuf folder level
-* **readme:** remove old url, add badge in reademe
-* **reorder:** reorder analyze usecase
-* **stream:** remove period get tse snapshot in stream usecase
+* **actions:** add reset environment before deployment
+* **cancel:** fix cancel fail casue filled order not append to order map, add cancel wait time
+* **ci:** fix wrong way to load env file
+* **config:** fix simulate must be true
+* **cpu:** fix checkFirstTickArrive cause cpu 100%
+* **deployment:** fix wrong config path in deployment action
+* **event:** fix missing subscribe bidask
+* **future:** fix wrong rsi gap base, rename future trader and stock trader
+* **history:** fix skip close is 0 in insert db panic
+* **history:** fix wrong key with new fetch kbar tick
+* **history:** no gorutine when process data to avoid unexpected error
+* **logger:** fix wrong use format in log error
+* **logger:** fix debug missing format function
+* **open:** fix wrong open change ratio in trade
+* **order:** update order in every order status return, no compare
+* **order:** fix wrong out in ratio in order generator
+* **order:** fix repeat place order and cancel
+* **order:** fix empty order time when update, temp extend trade in, out wait time
+* **order:** fix wrong status when order updated, add last tick in trader, add lock in cancel order
+* **order:** using waiting order in tick for, remove uuid, place order fail add status
+* **path:** modify initial sequence, fix wrong event subscribe callback
+* **quota:** fix wrong quota when sell or buylater, fix check cancel order wrong tarde time
+* **quota:** fix wrong calulate quota, check order status is failed, add lock in place order
+* **readme:** fix wrong attachment path
+* **simulate:** fix wrong orders return, modify default config, add realtime target to 30 secs
+* **snapshot:** fix all snapshot return empty panic, insert all stock from sinopac
+* **status:** fix fetch history done event wrong input function
+* **table:** fix wrong table name fail to create in postgres
+* **target:** fix wrong repo table name when update target
+* **target:** fix stuck by non async event, add fetch list in history usecase
+* **trade:** fix wrong analyze tick time, if first tick not arrive no action
+* **tradeagent:** fix wrong in out ratio compare
 
-### Ci
+### Code Refactoring (6)
 
-* **ci:** add dockerfile and gitlab-ci
-* **env:** reset env and config after kill container
-* **migrate:** migrate from gitlab ci to github actions
-* **port:** add machine port in actions
+* **config:** move config pkg to top level between cmd
+* **dependency:** remove logger dependency in all pkg
+* **logger:** remove global basepath set and get, remove global dependency from logger
+* **pkg:** rename sinopac to grpc, move global to top level
+* **pkg:** refactor config, eventbus method
+* **target:** rename subscribe and realtime add to pre-fetch, realtime
 
-### Docs
-
-* **changelog:** v0.0.4
-* **changelog:** modify changelog
-* **readme:** add clean arch layers image
-* **script:** modify makefile style, add pre commit, remove callvis install
-
-### Feat
+### Features (104)
 
 * **agent:** add new agent method, reanme trade to trade agent
 * **analyze:** add last trade day all ticks cahce, upgrade go to 1.18.4
@@ -512,51 +421,3 @@
 * **usecase:** add first usecase, include api, grpc, postgres repo
 * **websocket:** add websocket of pickstock on stream router
 * **websocket:** add realtime future tick websocket
-
-### Fix
-
-* **actions:** add reset environment before deployment
-* **cancel:** fix cancel fail casue filled order not append to order map, add cancel wait time
-* **ci:** fix wrong way to load env file
-* **config:** fix simulate must be true
-* **cpu:** fix checkFirstTickArrive cause cpu 100%
-* **deployment:** fix wrong config path in deployment action
-* **event:** fix missing subscribe bidask
-* **future:** fix wrong rsi gap base, rename future trader and stock trader
-* **history:** fix skip close is 0 in insert db panic
-* **history:** fix wrong key with new fetch kbar tick
-* **history:** no gorutine when process data to avoid unexpected error
-* **logger:** fix wrong use format in log error
-* **logger:** fix debug missing format function
-* **open:** fix wrong open change ratio in trade
-* **order:** update order in every order status return, no compare
-* **order:** fix wrong out in ratio in order generator
-* **order:** fix repeat place order and cancel
-* **order:** fix empty order time when update, temp extend trade in, out wait time
-* **order:** fix wrong status when order updated, add last tick in trader, add lock in cancel order
-* **order:** using waiting order in tick for, remove uuid, place order fail add status
-* **path:** modify initial sequence, fix wrong event subscribe callback
-* **quota:** fix wrong quota when sell or buylater, fix check cancel order wrong tarde time
-* **quota:** fix wrong calulate quota, check order status is failed, add lock in place order
-* **readme:** fix wrong attachment path
-* **simulate:** fix wrong orders return, modify default config, add realtime target to 30 secs
-* **snapshot:** fix all snapshot return empty panic, insert all stock from sinopac
-* **status:** fix fetch history done event wrong input function
-* **table:** fix wrong table name fail to create in postgres
-* **target:** fix wrong repo table name when update target
-* **target:** fix stuck by non async event, add fetch list in history usecase
-* **trade:** fix wrong analyze tick time, if first tick not arrive no action
-* **tradeagent:** fix wrong in out ratio compare
-
-### Refactor
-
-* **config:** move config pkg to top level between cmd
-* **dependency:** remove logger dependency in all pkg
-* **logger:** remove global basepath set and get, remove global dependency from logger
-* **pkg:** rename sinopac to grpc, move global to top level
-* **pkg:** refactor config, eventbus method
-* **target:** rename subscribe and realtime add to pre-fetch, realtime
-
-### Style
-
-* **clean:** first commit from clean code layout

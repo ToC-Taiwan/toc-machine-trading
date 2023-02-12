@@ -176,12 +176,12 @@ func (c *Rabbit) protoToOrder(proto *pb.OrderStatus) interface{} {
 		return nil
 	}
 
-	if orderTime.IsZero() {
-		orderTime = time.Now()
-		logger.Warnf("%s order time is zero, set to now", proto.GetOrderId())
-	} else if time.Since(orderTime) > 12*time.Hour {
-		orderTime = orderTime.Add(time.Hour * 24)
-	}
+	// if orderTime.IsZero() {
+	// 	orderTime = time.Now()
+	// 	logger.Warnf("%s order time is zero, set to now", proto.GetOrderId())
+	// } else if time.Since(orderTime) > 12*time.Hour {
+	// 	orderTime = orderTime.Add(time.Hour * 24)
+	// }
 
 	switch {
 	case c.allStockMap[proto.GetCode()] != nil:
