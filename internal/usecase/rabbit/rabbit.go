@@ -100,7 +100,7 @@ func (c *Rabbit) EventConsumer(eventChan chan *entity.SinopacEvent) {
 			EventCode: body.GetEventCode(),
 			Info:      body.GetInfo(),
 			Response:  body.GetRespCode(),
-			EventTime: dataTime.Add(8 * time.Hour),
+			EventTime: dataTime,
 		}
 	}
 }
