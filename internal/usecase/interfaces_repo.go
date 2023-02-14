@@ -18,6 +18,7 @@ type BasicRepo interface {
 	UpdateAllStockDayTradeToNo(ctx context.Context) error
 	InsertOrUpdatetFutureArr(ctx context.Context, t []*entity.Future) error
 	QueryAllFuture(ctx context.Context) (map[string]*entity.Future, error)
+	QueryFutureByLikeName(ctx context.Context, name string) ([]*entity.Future, error)
 }
 
 type TargetRepo interface {

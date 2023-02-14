@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"time"
 
@@ -53,6 +54,7 @@ func (u *UseCaseBase) NewBasic() Basic {
 	}
 
 	uc.fillBasicInfo()
+	uc.saveStockFutureCache()
 
 	return uc
 }
@@ -160,9 +162,6 @@ func (uc *BasicUseCase) updateRepoStock() ([]*entity.Stock, error) {
 			UpdateDate: updateTime,
 		}
 		uc.allStockDetail = append(uc.allStockDetail, stock)
-
-		// save stock in cache
-		cc.SetStockDetail(stock)
 	}
 
 	err = uc.repo.UpdateAllStockDayTradeToNo(context.Background())
@@ -217,7 +216,6 @@ func (uc *BasicUseCase) updateRepoFuture() ([]*entity.Future, error) {
 		if _, ok := duplCodeMap[future.Code]; !ok {
 			duplCodeMap[future.Code] = struct{}{}
 			uc.allFutureDetail = append(uc.allFutureDetail, future)
-			cc.SetFutureDetail(future)
 		} else {
 			logger.Warnf("Dupl future code: %s %s", v.Code, v.Name)
 		}
@@ -235,4 +233,29 @@ func (uc *BasicUseCase) importCalendarDate(ctx context.Context) error {
 		return err
 	}
 	return nil
+}
+
+func (uc *BasicUseCase) saveStockFutureCache() {
+	for _, s := range uc.allStockDetail {
+		f, err := uc.repo.QueryFutureByLikeName(context.Background(), s.Name)
+		if err != nil {
+			logger.Error(err)
+		}
+
+		for _, v := range f {
+			if v.Symbol == fmt.Sprintf("%sR1", v.Category) || v.Symbol == fmt.Sprintf("%sR2", v.Category) {
+				continue
+			}
+
+			if time.Now().Before(v.DeliveryDate) {
+				s.Future = v
+				cc.SetStockDetail(s)
+				break
+			}
+		}
+	}
+
+	for _, f := range uc.allFutureDetail {
+		cc.SetFutureDetail(f)
+	}
 }

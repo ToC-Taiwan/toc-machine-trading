@@ -40,7 +40,7 @@ func (u *UseCaseBase) NewTarget() Target {
 	}
 
 	// query targets from db
-	targetArr, err := uc.repo.QueryTargetsByTradeDay(context.Background(), uc.basic.TradeDay)
+	targetArr, err := uc.searchTradeDayTargetsFromDB(uc.basic.TradeDay)
 	if err != nil {
 		logger.Fatal(err)
 	}
@@ -114,6 +114,26 @@ func (uc *TargetUseCase) getFutureTarget() (string, error) {
 	}
 
 	return "", errors.New("no future")
+}
+
+func (uc *TargetUseCase) searchTradeDayTargetsFromDB(tradeDay time.Time) ([]*entity.StockTarget, error) {
+	targetArr, err := uc.repo.QueryTargetsByTradeDay(context.Background(), tradeDay)
+	if err != nil {
+		return nil, err
+	}
+
+	var result []*entity.StockTarget
+	for _, v := range targetArr {
+		stock := cc.GetStockDetail(v.StockNum)
+		if stock == nil {
+			continue
+		}
+
+		v.Stock = stock
+		result = append(result, v)
+	}
+
+	return result, nil
 }
 
 func (uc *TargetUseCase) searchTradeDayTargets(tradeDay time.Time) ([]*entity.StockTarget, error) {

@@ -1203,8 +1203,17 @@ const docTemplate = `{
                 "category": {
                     "type": "string"
                 },
+                "code": {
+                    "type": "string"
+                },
                 "day_trade": {
                     "type": "boolean"
+                },
+                "delivery_date": {
+                    "type": "string"
+                },
+                "delivery_month": {
+                    "type": "string"
                 },
                 "exchange": {
                     "type": "string"
@@ -1212,11 +1221,29 @@ const docTemplate = `{
                 "last_close": {
                     "type": "number"
                 },
+                "limit_down": {
+                    "type": "number"
+                },
+                "limit_up": {
+                    "type": "number"
+                },
                 "name": {
                     "type": "string"
                 },
                 "number": {
                     "type": "string"
+                },
+                "reference": {
+                    "type": "number"
+                },
+                "symbol": {
+                    "type": "string"
+                },
+                "underlying_kind": {
+                    "type": "string"
+                },
+                "unit": {
+                    "type": "integer"
                 },
                 "update_date": {
                     "type": "string"

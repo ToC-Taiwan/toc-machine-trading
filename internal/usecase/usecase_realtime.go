@@ -444,6 +444,7 @@ func (uc *RealTimeUseCase) ReceiveStockSubscribeData(targetArr []*entity.StockTa
 		uc.stockSwitchChanMap[t.StockNum] = hadger.SwitchChan()
 		uc.stockSwitchChanMapLock.Unlock()
 
+		logger.Warnf("Stock trade room %s:%s", t.Stock.Name, t.Stock.Future.Name)
 		r := rabbit.NewRabbit(uc.cfg.RabbitMQ)
 		go r.StockTickConsumer(t.StockNum, hadger.TickChan())
 	}

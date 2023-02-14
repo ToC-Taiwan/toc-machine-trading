@@ -3,11 +3,13 @@ package repo
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"tmt/internal/entity"
 	"tmt/pkg/postgres"
 
+	"github.com/Masterminds/squirrel"
 	"github.com/google/go-cmp/cmp"
 )
 
@@ -258,6 +260,7 @@ func (r *BasicRepo) InsertOrUpdatetFutureArr(ctx context.Context, t []*entity.Fu
 func (r *BasicRepo) QueryAllFuture(ctx context.Context) (map[string]*entity.Future, error) {
 	sql, _, err := r.Builder.
 		Select("code, symbol, name, category, delivery_month, delivery_date, underlying_kind, unit, limit_up, limit_down, reference, update_date").
+		OrderBy("delivery_date ASC").
 		From(tableNameFuture).ToSql()
 	if err != nil {
 		return nil, err
@@ -276,6 +279,34 @@ func (r *BasicRepo) QueryAllFuture(ctx context.Context) (map[string]*entity.Futu
 			return nil, err
 		}
 		entities[e.Code] = &e
+	}
+	return entities, nil
+}
+
+// QueryFutureByLikeName -.
+func (r *BasicRepo) QueryFutureByLikeName(ctx context.Context, name string) ([]*entity.Future, error) {
+	sql, arg, err := r.Builder.
+		Select("code, symbol, name, category, delivery_month, delivery_date, underlying_kind, unit, limit_up, limit_down, reference, update_date").
+		OrderBy("delivery_date ASC").
+		Where(squirrel.Like{"name": fmt.Sprintf("%s%%", name)}).
+		From(tableNameFuture).ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	rows, err := r.Pool().Query(ctx, sql, arg...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	entities := []*entity.Future{}
+	for rows.Next() {
+		e := entity.Future{}
+		if err = rows.Scan(&e.Code, &e.Symbol, &e.Name, &e.Category, &e.DeliveryMonth, &e.DeliveryDate, &e.UnderlyingKind, &e.Unit, &e.LimitUp, &e.LimitDown, &e.Reference, &e.UpdateDate); err != nil {
+			return nil, err
+		}
+		entities = append(entities, &e)
 	}
 	return entities, nil
 }
