@@ -84,8 +84,6 @@ linters-settings:
     gosec:
         exclude:
             - "G104"
-        excludes:
-            - G402
 
     funlen:
         lines: 60

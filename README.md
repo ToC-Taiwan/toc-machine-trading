@@ -1,10 +1,10 @@
 # TOC MACHINE TRADING
 
 [![Workflow](https://github.com/ToC-Taiwan/toc-machine-trading/actions/workflows/main.yml/badge.svg)](https://github.com/ToC-Taiwan/toc-machine-trading/actions/workflows/main.yml)
-[![Maintained](https://img.shields.io/badge/Maintained-yes-green)](https://github.com/ToC-Taiwan/toc-machine-trading)
-[![Go](https://img.shields.io/badge/Go-1.20-blue?logo=go&logoColor=blue)](https://golang.org)
-[![OS](https://img.shields.io/badge/OS-Linux-orange?logo=linux&logoColor=orange)](https://www.linux.org/)
+[![Go](https://img.shields.io/badge/Go-1.20.1-blue?logo=go&logoColor=blue)](https://golang.org)
 [![Container](https://img.shields.io/badge/Container-Docker-blue?logo=docker&logoColor=blue)](https://www.docker.com/)
+[![Release](https://img.shields.io/github/release/ToC-Taiwan/toc-machine-trading.svg)](https://github.com/golangci/golangci-lint/releases/latest)
+[![License](https://img.shields.io/github/license/ToC-Taiwan/toc-machine-trading)](/LICENSE)
 
 ## Structure
 
@@ -34,6 +34,14 @@ make help
 
 ```sh
 make
+```
+
+### golangci-lint
+
+```sh
+docker run -it registry.gitlab.com/gitlab-org/gitlab-build-images:golangci-lint-alpine bash
+find / -name ".golangci.yml"
+cat /golangci/.golangci.yml
 ```
 
 ### Dev Note
