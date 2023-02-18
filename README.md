@@ -1,10 +1,11 @@
 # TOC MACHINE TRADING
 
-[![Workflow](https://github.com/ToC-Taiwan/toc-machine-trading/actions/workflows/main.yml/badge.svg)](https://github.com/ToC-Taiwan/toc-machine-trading/actions/workflows/main.yml)
-[![Go](https://img.shields.io/badge/Go-1.20.1-blue?logo=go&logoColor=blue)](https://golang.org)
-[![Container](https://img.shields.io/badge/Container-Docker-blue?logo=docker&logoColor=blue)](https://www.docker.com/)
-[![Release](https://img.shields.io/github/release/ToC-Taiwan/toc-machine-trading.svg)](https://github.com/golangci/golangci-lint/releases/latest)
-[![License](https://img.shields.io/github/license/ToC-Taiwan/toc-machine-trading)](/LICENSE)
+[![BUILD](https://img.shields.io/github/actions/workflow/status/ToC-Taiwan/toc-machine-trading/main.yml?style=for-the-badge&logo=github)](https://github.com/ToC-Taiwan/toc-machine-trading/actions/workflows/main.yml)
+[![Go](https://img.shields.io/github/go-mod/go-version/ToC-Taiwan/toc-machine-trading?style=for-the-badge&logo=go)](https://golang.org)
+[![CONTAINER](https://img.shields.io/badge/Container-Docker-blue?style=for-the-badge&logo=docker&logoColor=blue)](https://www.docker.com/)
+
+[![RELEASE](https://img.shields.io/github/release/ToC-Taiwan/toc-machine-trading?style=for-the-badge)](https://github.com/golangci/golangci-lint/releases/latest)
+[![LICENSE](https://img.shields.io/github/license/ToC-Taiwan/toc-machine-trading?style=for-the-badge)](/LICENSE)
 
 ## Structure
 
