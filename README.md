@@ -4,8 +4,8 @@
 [![Go](https://img.shields.io/github/go-mod/go-version/ToC-Taiwan/toc-machine-trading?style=for-the-badge&logo=go)](https://golang.org)
 [![CONTAINER](https://img.shields.io/badge/Container-Docker-blue?style=for-the-badge&logo=docker&logoColor=blue)](https://www.docker.com/)
 
-[![RELEASE](https://img.shields.io/github/release/ToC-Taiwan/toc-machine-trading?style=for-the-badge)](https://github.com/golangci/golangci-lint/releases/latest)
-[![LICENSE](https://img.shields.io/github/license/ToC-Taiwan/toc-machine-trading?style=for-the-badge)](/LICENSE)
+[![RELEASE](https://img.shields.io/github/release/ToC-Taiwan/toc-machine-trading?style=for-the-badge)](https://github.com/ToC-Taiwan/toc-machine-trading/releases/latest)
+[![LICENSE](https://img.shields.io/github/license/ToC-Taiwan/toc-machine-trading?style=for-the-badge)](COPYING)
 
 ## Structure
 
