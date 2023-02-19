@@ -31,6 +31,8 @@ type BasicDataInterfaceClient interface {
 	GetAllStockDetail(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*StockDetailResponse, error)
 	// GetAllFutureDetail is the function to get future detail
 	GetAllFutureDetail(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*FutureDetailResponse, error)
+	// GetAllOptionDetail is the function to get option detail
+	GetAllOptionDetail(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*OptionDetailResponse, error)
 }
 
 type basicDataInterfaceClient struct {
@@ -99,6 +101,15 @@ func (c *basicDataInterfaceClient) GetAllFutureDetail(ctx context.Context, in *e
 	return out, nil
 }
 
+func (c *basicDataInterfaceClient) GetAllOptionDetail(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*OptionDetailResponse, error) {
+	out := new(OptionDetailResponse)
+	err := c.cc.Invoke(ctx, "/toc_python_forwarder.BasicDataInterface/GetAllOptionDetail", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // BasicDataInterfaceServer is the server API for BasicDataInterface service.
 // All implementations must embed UnimplementedBasicDataInterfaceServer
 // for forward compatibility
@@ -111,6 +122,8 @@ type BasicDataInterfaceServer interface {
 	GetAllStockDetail(context.Context, *emptypb.Empty) (*StockDetailResponse, error)
 	// GetAllFutureDetail is the function to get future detail
 	GetAllFutureDetail(context.Context, *emptypb.Empty) (*FutureDetailResponse, error)
+	// GetAllOptionDetail is the function to get option detail
+	GetAllOptionDetail(context.Context, *emptypb.Empty) (*OptionDetailResponse, error)
 	mustEmbedUnimplementedBasicDataInterfaceServer()
 }
 
@@ -129,6 +142,9 @@ func (UnimplementedBasicDataInterfaceServer) GetAllStockDetail(context.Context, 
 }
 func (UnimplementedBasicDataInterfaceServer) GetAllFutureDetail(context.Context, *emptypb.Empty) (*FutureDetailResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAllFutureDetail not implemented")
+}
+func (UnimplementedBasicDataInterfaceServer) GetAllOptionDetail(context.Context, *emptypb.Empty) (*OptionDetailResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAllOptionDetail not implemented")
 }
 func (UnimplementedBasicDataInterfaceServer) mustEmbedUnimplementedBasicDataInterfaceServer() {}
 
@@ -223,6 +239,24 @@ func _BasicDataInterface_GetAllFutureDetail_Handler(srv interface{}, ctx context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _BasicDataInterface_GetAllOptionDetail_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BasicDataInterfaceServer).GetAllOptionDetail(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/toc_python_forwarder.BasicDataInterface/GetAllOptionDetail",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BasicDataInterfaceServer).GetAllOptionDetail(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // BasicDataInterface_ServiceDesc is the grpc.ServiceDesc for BasicDataInterface service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -241,6 +275,10 @@ var BasicDataInterface_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetAllFutureDetail",
 			Handler:    _BasicDataInterface_GetAllFutureDetail_Handler,
+		},
+		{
+			MethodName: "GetAllOptionDetail",
+			Handler:    _BasicDataInterface_GetAllOptionDetail_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

@@ -40,6 +40,24 @@ type Future struct {
 	UpdateDate     time.Time `json:"update_date"`
 }
 
+// Option -.
+type Option struct {
+	Code           string    `json:"code"`
+	Symbol         string    `json:"symbol"`
+	Name           string    `json:"name"`
+	Category       string    `json:"category"`
+	DeliveryMonth  string    `json:"delivery_month"`
+	DeliveryDate   time.Time `json:"delivery_date"`
+	StrikePrice    float64   `json:"strike_price"`
+	OptionRight    string    `json:"option_right"`
+	UnderlyingKind string    `json:"underlying_kind"`
+	Unit           int64     `json:"unit"`
+	LimitUp        float64   `json:"limit_up"`
+	LimitDown      float64   `json:"limit_down"`
+	Reference      float64   `json:"reference"`
+	UpdateDate     time.Time `json:"update_date"`
+}
+
 const (
 	// DayTradeYes -.
 	DayTradeYes string = "Yes"

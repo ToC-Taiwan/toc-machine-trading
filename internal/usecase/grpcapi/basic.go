@@ -100,3 +100,15 @@ func (t *BasicgRPCAPI) GetAllFutureDetail() ([]*pb.FutureDetailMessage, error) {
 	}
 	return r.GetFuture(), nil
 }
+
+// GetAllOptionDetail -.
+func (t *BasicgRPCAPI) GetAllOptionDetail() ([]*pb.OptionDetailMessage, error) {
+	conn := t.conn.GetReadyConn()
+	defer t.conn.PutReadyConn(conn)
+	c := pb.NewBasicDataInterfaceClient(conn)
+	r, err := c.GetAllOptionDetail(context.Background(), &emptypb.Empty{})
+	if err != nil {
+		return []*pb.OptionDetailMessage{}, err
+	}
+	return r.GetOption(), nil
+}

@@ -13,12 +13,18 @@ import (
 type BasicRepo interface {
 	QueryAllStock(ctx context.Context) (map[string]*entity.Stock, error)
 	InsertOrUpdatetStockArr(ctx context.Context, t []*entity.Stock) error
+	UpdateAllStockDayTradeToNo(ctx context.Context) error
+
 	QueryAllCalendar(ctx context.Context) (map[time.Time]*entity.CalendarDate, error)
 	InsertOrUpdatetCalendarDateArr(ctx context.Context, t []*entity.CalendarDate) error
-	UpdateAllStockDayTradeToNo(ctx context.Context) error
-	InsertOrUpdatetFutureArr(ctx context.Context, t []*entity.Future) error
+
 	QueryAllFuture(ctx context.Context) (map[string]*entity.Future, error)
 	QueryFutureByLikeName(ctx context.Context, name string) ([]*entity.Future, error)
+	InsertOrUpdatetFutureArr(ctx context.Context, t []*entity.Future) error
+
+	QueryAllOption(ctx context.Context) (map[string]*entity.Option, error)
+	QueryOptionByLikeName(ctx context.Context, name string) ([]*entity.Option, error)
+	InsertOrUpdatetOptionArr(ctx context.Context, t []*entity.Option) error
 }
 
 type TargetRepo interface {

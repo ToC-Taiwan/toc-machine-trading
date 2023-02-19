@@ -27,6 +27,7 @@ type BasicUseCase struct {
 
 	allStockDetail  []*entity.Stock
 	allFutureDetail []*entity.Future
+	allOptionDetail []*entity.Option
 }
 
 func (u *UseCaseBase) NewBasic() Basic {
@@ -50,6 +51,10 @@ func (u *UseCaseBase) NewBasic() Basic {
 	}
 
 	if _, err := uc.updateRepoFuture(); err != nil {
+		logger.Fatal(err)
+	}
+
+	if _, err := uc.updateRepoOption(); err != nil {
 		logger.Fatal(err)
 	}
 
@@ -226,6 +231,60 @@ func (uc *BasicUseCase) updateRepoFuture() ([]*entity.Future, error) {
 		return []*entity.Future{}, err
 	}
 	return uc.allFutureDetail, nil
+}
+
+func (uc *BasicUseCase) updateRepoOption() ([]*entity.Option, error) {
+	optionArr, err := uc.sc.GetAllOptionDetail()
+	if err != nil {
+		return []*entity.Option{}, err
+	}
+
+	duplCodeMap := make(map[string]struct{})
+	for _, v := range optionArr {
+		if v.GetReference() == 0 {
+			continue
+		}
+
+		updateTime, pErr := time.ParseInLocation(common.ShortSlashTimeLayout, v.GetUpdateDate(), time.Local)
+		if err != nil {
+			return []*entity.Option{}, pErr
+		}
+
+		dDate, e := time.ParseInLocation(common.ShortSlashTimeLayout, v.GetDeliveryDate(), time.Local)
+		if e != nil {
+			return []*entity.Option{}, err
+		}
+
+		option := &entity.Option{
+			Code:           v.GetCode(),
+			Symbol:         v.GetSymbol(),
+			Name:           v.GetName(),
+			Category:       v.GetCategory(),
+			DeliveryMonth:  v.GetDeliveryMonth(),
+			DeliveryDate:   dDate.Add(810 * time.Minute),
+			UnderlyingKind: v.GetUnderlyingKind(),
+			StrikePrice:    v.GetStrikePrice(),
+			OptionRight:    v.GetOptionRight(),
+			Unit:           v.GetUnit(),
+			LimitUp:        v.GetLimitUp(),
+			LimitDown:      v.GetLimitDown(),
+			Reference:      v.GetReference(),
+			UpdateDate:     updateTime,
+		}
+
+		if _, ok := duplCodeMap[option.Code]; !ok {
+			duplCodeMap[option.Code] = struct{}{}
+			uc.allOptionDetail = append(uc.allOptionDetail, option)
+		} else {
+			logger.Warnf("Dupl option code: %s %s", v.Code, v.Name)
+		}
+	}
+
+	err = uc.repo.InsertOrUpdatetOptionArr(context.Background(), uc.allOptionDetail)
+	if err != nil {
+		return []*entity.Option{}, err
+	}
+	return uc.allOptionDetail, nil
 }
 
 func (uc *BasicUseCase) importCalendarDate(ctx context.Context) error {

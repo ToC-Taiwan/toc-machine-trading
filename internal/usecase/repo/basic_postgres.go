@@ -310,3 +310,119 @@ func (r *BasicRepo) QueryFutureByLikeName(ctx context.Context, name string) ([]*
 	}
 	return entities, nil
 }
+
+func (r *BasicRepo) InsertOrUpdatetOptionArr(ctx context.Context, t []*entity.Option) error {
+	inDBOption, err := r.QueryAllOption(ctx)
+	if err != nil {
+		return err
+	}
+	var insert, update int
+	var sql []string
+	var args [][]interface{}
+	for _, v := range t {
+		if _, ok := inDBOption[v.Code]; !ok {
+			insert++
+			builder := r.Builder.Insert(tableNameOption).Columns("code, symbol, name, category, delivery_month, delivery_date, strike_price, option_right, underlying_kind, unit, limit_up, limit_down, reference, update_date")
+			builder = builder.Values(v.Code, v.Symbol, v.Name, v.Category, v.DeliveryMonth, v.DeliveryDate, v.StrikePrice, v.OptionRight, v.UnderlyingKind, v.Unit, v.LimitUp, v.LimitDown, v.Reference, v.UpdateDate)
+			if sqlCommand, argsCommand, ierr := builder.ToSql(); ierr != nil {
+				return ierr
+			} else if len(argsCommand) > 0 {
+				sql = append(sql, sqlCommand)
+				args = append(args, argsCommand)
+			}
+		} else if !cmp.Equal(v, inDBOption[v.Code]) {
+			update++
+			b := r.Builder.
+				Update(tableNameOption).
+				Set("code", v.Code).
+				Set("symbol", v.Symbol).
+				Set("name", v.Name).
+				Set("category", v.Category).
+				Set("delivery_month", v.DeliveryMonth).
+				Set("delivery_date", v.DeliveryDate).
+				Set("strike_price", v.StrikePrice).
+				Set("option_right", v.OptionRight).
+				Set("underlying_kind", v.UnderlyingKind).
+				Set("unit", v.Unit).
+				Set("limit_up", v.LimitUp).
+				Set("limit_down", v.LimitDown).
+				Set("reference", v.Reference).
+				Set("update_date", v.UpdateDate).
+				Where("code = ?", v.Code)
+			if sqlCommand, argsCommand, e := b.ToSql(); e != nil {
+				return e
+			} else {
+				sql = append(sql, sqlCommand)
+				args = append(args, argsCommand)
+			}
+		}
+	}
+
+	tx, err := r.BeginTransaction()
+	if err != nil {
+		return err
+	}
+	var sqlErr error
+	defer r.EndTransaction(tx, sqlErr)
+	for i, v := range sql {
+		_, sqlErr = tx.Exec(ctx, v, args[i]...)
+		if sqlErr != nil {
+			return sqlErr
+		}
+	}
+	logger.Infof("Insert Option -> Exist: %d, Insert: %d, Update: %d", len(t)-update-insert, insert, update)
+	return nil
+}
+
+func (r *BasicRepo) QueryAllOption(ctx context.Context) (map[string]*entity.Option, error) {
+	sql, _, err := r.Builder.
+		Select("code, symbol, name, category, delivery_month, delivery_date, strike_price, option_right, underlying_kind, unit, limit_up, limit_down, reference, update_date").
+		OrderBy("delivery_date ASC").
+		From(tableNameOption).ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	rows, err := r.Pool().Query(ctx, sql)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	entities := make(map[string]*entity.Option)
+	for rows.Next() {
+		e := entity.Option{}
+		if err = rows.Scan(&e.Code, &e.Symbol, &e.Name, &e.Category, &e.DeliveryMonth, &e.DeliveryDate, &e.StrikePrice, &e.OptionRight, &e.UnderlyingKind, &e.Unit, &e.LimitUp, &e.LimitDown, &e.Reference, &e.UpdateDate); err != nil {
+			return nil, err
+		}
+		entities[e.Code] = &e
+	}
+	return entities, nil
+}
+
+func (r *BasicRepo) QueryOptionByLikeName(ctx context.Context, name string) ([]*entity.Option, error) {
+	sql, arg, err := r.Builder.
+		Select("code, symbol, name, category, delivery_month, delivery_date, strike_price, option_right, underlying_kind, unit, limit_up, limit_down, reference, update_date").
+		OrderBy("delivery_date ASC").
+		Where(squirrel.Like{"name": fmt.Sprintf("%s%%", name)}).
+		From(tableNameOption).ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	rows, err := r.Pool().Query(ctx, sql, arg...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	entities := []*entity.Option{}
+	for rows.Next() {
+		e := entity.Option{}
+		if err = rows.Scan(&e.Code, &e.Symbol, &e.Name, &e.Category, &e.DeliveryMonth, &e.DeliveryDate, &e.UnderlyingKind, &e.Unit, &e.LimitUp, &e.LimitDown, &e.Reference, &e.UpdateDate); err != nil {
+			return nil, err
+		}
+		entities = append(entities, &e)
+	}
+	return entities, nil
+}

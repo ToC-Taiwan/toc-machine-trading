@@ -50,6 +50,21 @@ func (mr *MockBasicgRPCAPIMockRecorder) GetAllFutureDetail() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllFutureDetail", reflect.TypeOf((*MockBasicgRPCAPI)(nil).GetAllFutureDetail))
 }
 
+// GetAllOptionDetail mocks base method.
+func (m *MockBasicgRPCAPI) GetAllOptionDetail() ([]*pb.OptionDetailMessage, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAllOptionDetail")
+	ret0, _ := ret[0].([]*pb.OptionDetailMessage)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAllOptionDetail indicates an expected call of GetAllOptionDetail.
+func (mr *MockBasicgRPCAPIMockRecorder) GetAllOptionDetail() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllOptionDetail", reflect.TypeOf((*MockBasicgRPCAPI)(nil).GetAllOptionDetail))
+}
+
 // GetAllStockDetail mocks base method.
 func (m *MockBasicgRPCAPI) GetAllStockDetail() ([]*pb.StockDetailMessage, error) {
 	m.ctrl.T.Helper()

@@ -11,6 +11,7 @@ const (
 	tableNameCalendar string = "basic_calendar"
 	tableNameStock    string = "basic_stock"
 	tableNameFuture   string = "basic_future"
+	tableNameOption   string = "basic_option"
 	tableNameTarget   string = "basic_targets"
 
 	tableNameHistoryStockAnalyze string = "history_stock_analyze"

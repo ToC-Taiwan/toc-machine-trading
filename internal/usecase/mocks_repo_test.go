@@ -64,6 +64,20 @@ func (mr *MockBasicRepoMockRecorder) InsertOrUpdatetFutureArr(ctx, t interface{}
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertOrUpdatetFutureArr", reflect.TypeOf((*MockBasicRepo)(nil).InsertOrUpdatetFutureArr), ctx, t)
 }
 
+// InsertOrUpdatetOptionArr mocks base method.
+func (m *MockBasicRepo) InsertOrUpdatetOptionArr(ctx context.Context, t []*entity.Option) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "InsertOrUpdatetOptionArr", ctx, t)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// InsertOrUpdatetOptionArr indicates an expected call of InsertOrUpdatetOptionArr.
+func (mr *MockBasicRepoMockRecorder) InsertOrUpdatetOptionArr(ctx, t interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertOrUpdatetOptionArr", reflect.TypeOf((*MockBasicRepo)(nil).InsertOrUpdatetOptionArr), ctx, t)
+}
+
 // InsertOrUpdatetStockArr mocks base method.
 func (m *MockBasicRepo) InsertOrUpdatetStockArr(ctx context.Context, t []*entity.Stock) error {
 	m.ctrl.T.Helper()
@@ -108,6 +122,21 @@ func (mr *MockBasicRepoMockRecorder) QueryAllFuture(ctx interface{}) *gomock.Cal
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryAllFuture", reflect.TypeOf((*MockBasicRepo)(nil).QueryAllFuture), ctx)
 }
 
+// QueryAllOption mocks base method.
+func (m *MockBasicRepo) QueryAllOption(ctx context.Context) (map[string]*entity.Option, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "QueryAllOption", ctx)
+	ret0, _ := ret[0].(map[string]*entity.Option)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// QueryAllOption indicates an expected call of QueryAllOption.
+func (mr *MockBasicRepoMockRecorder) QueryAllOption(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryAllOption", reflect.TypeOf((*MockBasicRepo)(nil).QueryAllOption), ctx)
+}
+
 // QueryAllStock mocks base method.
 func (m *MockBasicRepo) QueryAllStock(ctx context.Context) (map[string]*entity.Stock, error) {
 	m.ctrl.T.Helper()
@@ -136,6 +165,21 @@ func (m *MockBasicRepo) QueryFutureByLikeName(ctx context.Context, name string) 
 func (mr *MockBasicRepoMockRecorder) QueryFutureByLikeName(ctx, name interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryFutureByLikeName", reflect.TypeOf((*MockBasicRepo)(nil).QueryFutureByLikeName), ctx, name)
+}
+
+// QueryOptionByLikeName mocks base method.
+func (m *MockBasicRepo) QueryOptionByLikeName(ctx context.Context, name string) ([]*entity.Option, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "QueryOptionByLikeName", ctx, name)
+	ret0, _ := ret[0].([]*entity.Option)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// QueryOptionByLikeName indicates an expected call of QueryOptionByLikeName.
+func (mr *MockBasicRepoMockRecorder) QueryOptionByLikeName(ctx, name interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryOptionByLikeName", reflect.TypeOf((*MockBasicRepo)(nil).QueryOptionByLikeName), ctx, name)
 }
 
 // UpdateAllStockDayTradeToNo mocks base method.

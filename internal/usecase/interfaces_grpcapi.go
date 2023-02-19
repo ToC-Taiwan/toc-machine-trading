@@ -14,6 +14,7 @@ type BasicgRPCAPI interface {
 	Terminate() error
 	GetAllStockDetail() ([]*pb.StockDetailMessage, error)
 	GetAllFutureDetail() ([]*pb.FutureDetailMessage, error)
+	GetAllOptionDetail() ([]*pb.OptionDetailMessage, error)
 }
 
 type SubscribegRPCAPI interface {
