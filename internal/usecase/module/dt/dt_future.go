@@ -106,6 +106,12 @@ func (d *DTFuture) processTick() {
 			d.lastTick = <-d.tickChan
 			d.tickArr = append(d.tickArr, d.lastTick)
 
+			if len(d.tickArr) > 1 && d.tickArr[len(d.tickArr)-1].TickTime.Sub(d.tickArr[len(d.tickArr)-2].TickTime) > time.Second {
+				d.tickArr = entity.RealTimeFutureTickArr{}
+				d.lastTickRate = 0
+				continue
+			}
+
 			if d.lastTick.TickTime.Sub(d.tickArr[0].TickTime) > time.Duration(d.tradeConfig.TickInterval)*time.Second {
 				d.tickArr = d.tickArr[1:]
 			}
@@ -140,14 +146,13 @@ func (d *DTFuture) generateOrder() *entity.FutureOrder {
 		return nil
 	}
 
-	d.traderMapLock.RLock()
-	defer d.traderMapLock.RUnlock()
-	if len(d.traderMap) > 0 {
+	if len(d.tickArr) < int(d.tradeConfig.TickInterval) {
 		return nil
 	}
 
-	if len(d.tickArr) < int(d.tradeConfig.TickInterval) {
-		d.lastTickRate = 0
+	d.traderMapLock.RLock()
+	defer d.traderMapLock.RUnlock()
+	if len(d.traderMap) > 0 {
 		return nil
 	}
 
@@ -156,11 +161,7 @@ func (d *DTFuture) generateOrder() *entity.FutureOrder {
 		d.lastTickRate = tickRate
 	}()
 
-	if d.lastTickRate == 0 {
-		return nil
-	}
-
-	if 100*(tickRate-d.lastTickRate)/d.lastTickRate < d.tradeConfig.RateChangeRatio || d.lastTickRate < d.tradeConfig.RateLimit {
+	if d.lastTickRate < d.tradeConfig.RateLimit || d.lastTickRate == 0 || 100*(tickRate-d.lastTickRate)/d.lastTickRate < d.tradeConfig.RateChangeRatio {
 		return nil
 	}
 

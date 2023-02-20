@@ -39,6 +39,14 @@ type TradeInterfaceClient interface {
 	SellFirstFuture(ctx context.Context, in *FutureOrderDetail, opts ...grpc.CallOption) (*TradeResult, error)
 	// CancelFuture is the interface for canceling future
 	CancelFuture(ctx context.Context, in *FutureOrderID, opts ...grpc.CallOption) (*TradeResult, error)
+	// BuyFuture is the interface for buying future
+	BuyOption(ctx context.Context, in *OptionOrderDetail, opts ...grpc.CallOption) (*TradeResult, error)
+	// SellFuture is the interface for selling future
+	SellOption(ctx context.Context, in *OptionOrderDetail, opts ...grpc.CallOption) (*TradeResult, error)
+	// SellFirstFuture is the interface for selling first future
+	SellFirstOption(ctx context.Context, in *OptionOrderDetail, opts ...grpc.CallOption) (*TradeResult, error)
+	// CancelFuture is the interface for canceling future
+	CancelOption(ctx context.Context, in *OptionOrderID, opts ...grpc.CallOption) (*TradeResult, error)
 	// GetLocalOrderStatusArr is the interface for getting local order status array
 	GetLocalOrderStatusArr(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	// GetSimulateOrderStatusArr is the interface for getting simulate order status array
@@ -131,6 +139,42 @@ func (c *tradeInterfaceClient) CancelFuture(ctx context.Context, in *FutureOrder
 	return out, nil
 }
 
+func (c *tradeInterfaceClient) BuyOption(ctx context.Context, in *OptionOrderDetail, opts ...grpc.CallOption) (*TradeResult, error) {
+	out := new(TradeResult)
+	err := c.cc.Invoke(ctx, "/toc_python_forwarder.TradeInterface/BuyOption", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *tradeInterfaceClient) SellOption(ctx context.Context, in *OptionOrderDetail, opts ...grpc.CallOption) (*TradeResult, error) {
+	out := new(TradeResult)
+	err := c.cc.Invoke(ctx, "/toc_python_forwarder.TradeInterface/SellOption", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *tradeInterfaceClient) SellFirstOption(ctx context.Context, in *OptionOrderDetail, opts ...grpc.CallOption) (*TradeResult, error) {
+	out := new(TradeResult)
+	err := c.cc.Invoke(ctx, "/toc_python_forwarder.TradeInterface/SellFirstOption", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *tradeInterfaceClient) CancelOption(ctx context.Context, in *OptionOrderID, opts ...grpc.CallOption) (*TradeResult, error) {
+	out := new(TradeResult)
+	err := c.cc.Invoke(ctx, "/toc_python_forwarder.TradeInterface/CancelOption", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *tradeInterfaceClient) GetLocalOrderStatusArr(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, "/toc_python_forwarder.TradeInterface/GetLocalOrderStatusArr", in, out, opts...)
@@ -196,6 +240,14 @@ type TradeInterfaceServer interface {
 	SellFirstFuture(context.Context, *FutureOrderDetail) (*TradeResult, error)
 	// CancelFuture is the interface for canceling future
 	CancelFuture(context.Context, *FutureOrderID) (*TradeResult, error)
+	// BuyFuture is the interface for buying future
+	BuyOption(context.Context, *OptionOrderDetail) (*TradeResult, error)
+	// SellFuture is the interface for selling future
+	SellOption(context.Context, *OptionOrderDetail) (*TradeResult, error)
+	// SellFirstFuture is the interface for selling first future
+	SellFirstOption(context.Context, *OptionOrderDetail) (*TradeResult, error)
+	// CancelFuture is the interface for canceling future
+	CancelOption(context.Context, *OptionOrderID) (*TradeResult, error)
 	// GetLocalOrderStatusArr is the interface for getting local order status array
 	GetLocalOrderStatusArr(context.Context, *emptypb.Empty) (*emptypb.Empty, error)
 	// GetSimulateOrderStatusArr is the interface for getting simulate order status array
@@ -236,6 +288,18 @@ func (UnimplementedTradeInterfaceServer) SellFirstFuture(context.Context, *Futur
 }
 func (UnimplementedTradeInterfaceServer) CancelFuture(context.Context, *FutureOrderID) (*TradeResult, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CancelFuture not implemented")
+}
+func (UnimplementedTradeInterfaceServer) BuyOption(context.Context, *OptionOrderDetail) (*TradeResult, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method BuyOption not implemented")
+}
+func (UnimplementedTradeInterfaceServer) SellOption(context.Context, *OptionOrderDetail) (*TradeResult, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SellOption not implemented")
+}
+func (UnimplementedTradeInterfaceServer) SellFirstOption(context.Context, *OptionOrderDetail) (*TradeResult, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SellFirstOption not implemented")
+}
+func (UnimplementedTradeInterfaceServer) CancelOption(context.Context, *OptionOrderID) (*TradeResult, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CancelOption not implemented")
 }
 func (UnimplementedTradeInterfaceServer) GetLocalOrderStatusArr(context.Context, *emptypb.Empty) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetLocalOrderStatusArr not implemented")
@@ -409,6 +473,78 @@ func _TradeInterface_CancelFuture_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _TradeInterface_BuyOption_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(OptionOrderDetail)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TradeInterfaceServer).BuyOption(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/toc_python_forwarder.TradeInterface/BuyOption",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TradeInterfaceServer).BuyOption(ctx, req.(*OptionOrderDetail))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TradeInterface_SellOption_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(OptionOrderDetail)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TradeInterfaceServer).SellOption(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/toc_python_forwarder.TradeInterface/SellOption",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TradeInterfaceServer).SellOption(ctx, req.(*OptionOrderDetail))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TradeInterface_SellFirstOption_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(OptionOrderDetail)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TradeInterfaceServer).SellFirstOption(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/toc_python_forwarder.TradeInterface/SellFirstOption",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TradeInterfaceServer).SellFirstOption(ctx, req.(*OptionOrderDetail))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TradeInterface_CancelOption_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(OptionOrderID)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TradeInterfaceServer).CancelOption(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/toc_python_forwarder.TradeInterface/CancelOption",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TradeInterfaceServer).CancelOption(ctx, req.(*OptionOrderID))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _TradeInterface_GetLocalOrderStatusArr_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(emptypb.Empty)
 	if err := dec(in); err != nil {
@@ -537,6 +673,22 @@ var TradeInterface_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CancelFuture",
 			Handler:    _TradeInterface_CancelFuture_Handler,
+		},
+		{
+			MethodName: "BuyOption",
+			Handler:    _TradeInterface_BuyOption_Handler,
+		},
+		{
+			MethodName: "SellOption",
+			Handler:    _TradeInterface_SellOption_Handler,
+		},
+		{
+			MethodName: "SellFirstOption",
+			Handler:    _TradeInterface_SellFirstOption_Handler,
+		},
+		{
+			MethodName: "CancelOption",
+			Handler:    _TradeInterface_CancelOption_Handler,
 		},
 		{
 			MethodName: "GetLocalOrderStatusArr",

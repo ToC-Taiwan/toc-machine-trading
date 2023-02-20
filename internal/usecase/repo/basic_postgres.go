@@ -419,7 +419,7 @@ func (r *BasicRepo) QueryOptionByLikeName(ctx context.Context, name string) ([]*
 	entities := []*entity.Option{}
 	for rows.Next() {
 		e := entity.Option{}
-		if err = rows.Scan(&e.Code, &e.Symbol, &e.Name, &e.Category, &e.DeliveryMonth, &e.DeliveryDate, &e.UnderlyingKind, &e.Unit, &e.LimitUp, &e.LimitDown, &e.Reference, &e.UpdateDate); err != nil {
+		if err = rows.Scan(&e.Code, &e.Symbol, &e.Name, &e.Category, &e.DeliveryMonth, &e.DeliveryDate, &e.StrikePrice, &e.OptionRight, &e.UnderlyingKind, &e.Unit, &e.LimitUp, &e.LimitDown, &e.Reference, &e.UpdateDate); err != nil {
 			return nil, err
 		}
 		entities = append(entities, &e)
