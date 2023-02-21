@@ -61,6 +61,8 @@ func NewDTFuture(code string, s *grpcapi.TradegRPCAPI, tradeConfig *config.Trade
 
 func (d *DTFuture) processOrderStatusAndTradeSwitch() {
 	notCancellableOrderMap := make(map[string]*entity.FutureOrder)
+	cancelChan := make(chan *entity.FutureOrder)
+	go d.cancelOverTimeOrder(cancelChan)
 	go func() {
 		for {
 			select {
@@ -72,7 +74,7 @@ func (d *DTFuture) processOrderStatusAndTradeSwitch() {
 				if !o.Cancellable() {
 					notCancellableOrderMap[o.OrderID] = o
 				} else {
-					d.cancelOverTimeOrder(o)
+					cancelChan <- o
 				}
 
 				d.localBus.PublishTopicEvent(topicUpdateOrder, o)
@@ -84,24 +86,38 @@ func (d *DTFuture) processOrderStatusAndTradeSwitch() {
 	}()
 }
 
-func (d *DTFuture) cancelOverTimeOrder(order *entity.FutureOrder) {
-	if time.Since(order.OrderTime) < time.Duration(d.tradeConfig.BuySellWaitTime)*time.Second {
-		return
-	}
+func (d *DTFuture) cancelOverTimeOrder(cancelChan chan *entity.FutureOrder) {
+	cancelledIDMap := make(map[string]bool)
+	for {
+		order := <-cancelChan
+		if time.Since(order.OrderTime) < time.Duration(d.tradeConfig.BuySellWaitTime)*time.Second {
+			continue
+		}
 
-	result, err := d.sc.CancelFuture(order.OrderID)
-	if err != nil {
-		logger.Error(err)
-		return
-	}
+		if _, ok := cancelledIDMap[order.OrderID]; ok {
+			continue
+		}
 
-	if entity.StringToOrderStatus(result.GetStatus()) != entity.StatusCancelled {
-		logger.Error("Cancel future order failed", result.GetStatus())
-		return
-	}
+		result, err := d.sc.CancelFuture(order.OrderID)
+		if err != nil {
+			logger.Error(err)
+			continue
+		}
 
-	if e := d.sc.NotifyToSlack(fmt.Sprintf("Cancelled %s", order.String())); e != nil {
-		logger.Errorf("Notify to slack failed: %v", e)
+		if result.GetError() != "" {
+			logger.Error(result.GetError())
+			continue
+		}
+
+		if entity.StringToOrderStatus(result.GetStatus()) != entity.StatusCancelled {
+			logger.Error("Cancel future order failed", result.GetStatus())
+			continue
+		}
+
+		cancelledIDMap[order.OrderID] = true
+		if e := d.sc.NotifyToSlack(fmt.Sprintf("Cancelled %s", order.String())); e != nil {
+			logger.Errorf("Notify to slack failed: %v", e)
+		}
 	}
 }
 
