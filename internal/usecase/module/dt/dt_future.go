@@ -87,14 +87,14 @@ func (d *DTFuture) processOrderStatusAndTradeSwitch() {
 }
 
 func (d *DTFuture) cancelOverTimeOrder(cancelChan chan *entity.FutureOrder) {
-	cancelledIDMap := make(map[string]bool)
+	cancelledIDMap := make(map[string]*entity.FutureOrder)
 	for {
 		order := <-cancelChan
-		if time.Since(order.OrderTime) < time.Duration(d.tradeConfig.BuySellWaitTime)*time.Second {
+		if cancelledIDMap[order.OrderID] != nil {
 			continue
 		}
 
-		if _, ok := cancelledIDMap[order.OrderID]; ok {
+		if time.Since(order.OrderTime) < time.Duration(d.tradeConfig.BuySellWaitTime)*time.Second {
 			continue
 		}
 
@@ -104,17 +104,12 @@ func (d *DTFuture) cancelOverTimeOrder(cancelChan chan *entity.FutureOrder) {
 			continue
 		}
 
-		if result.GetError() != "" {
-			logger.Error(result.GetError())
+		if s := entity.StringToOrderStatus(result.GetStatus()); s != entity.StatusCancelled {
+			logger.Errorf("Cancel future order failed %s", s.String())
 			continue
 		}
 
-		if entity.StringToOrderStatus(result.GetStatus()) != entity.StatusCancelled {
-			logger.Error("Cancel future order failed", result.GetStatus())
-			continue
-		}
-
-		cancelledIDMap[order.OrderID] = true
+		cancelledIDMap[order.OrderID] = order
 		if e := d.sc.NotifyToSlack(fmt.Sprintf("Cancelled %s", order.String())); e != nil {
 			logger.Errorf("Notify to slack failed: %v", e)
 		}

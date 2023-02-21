@@ -45,6 +45,8 @@ type RealTimeUseCase struct {
 	stockSwitchChanMapLock  sync.RWMutex
 	futureSwitchChanMap     map[string]chan bool
 	futureSwitchChanMapLock sync.RWMutex
+
+	inventoryIsNotEmpty bool
 }
 
 func (u *UseCaseBase) NewRealTime() RealTime {
@@ -73,6 +75,7 @@ func (u *UseCaseBase) NewRealTime() RealTime {
 	if e := uc.UnSubscribeAll(); e != nil {
 		logger.Fatal(e)
 	}
+	uc.checkFutureInventory()
 
 	basic := cc.GetBasicInfo()
 	uc.commonRabbit.FillAllBasic(basic.AllStocks, basic.AllFutures)
@@ -89,6 +92,22 @@ func (u *UseCaseBase) NewRealTime() RealTime {
 	bus.SubscribeTopic(event.TopicSubscribeFutureTickTargets, uc.SetMainFuture, uc.ReceiveFutureSubscribeData, uc.SubscribeFutureTick)
 
 	return uc
+}
+
+func (uc *RealTimeUseCase) checkFutureInventory() {
+	position, err := uc.sc.GetFuturePosition()
+	if err != nil {
+		logger.Fatal(err)
+		return
+	}
+
+	for _, v := range position.GetPositionArr() {
+		if cc.GetFutureDetail(v.GetCode()) != nil {
+			logger.Warnf("future inventory is not empty, code: %s", v.GetCode())
+			uc.inventoryIsNotEmpty = true
+			return
+		}
+	}
 }
 
 func (uc *RealTimeUseCase) checkStockTradeSwitch() {
@@ -120,7 +139,7 @@ func (uc *RealTimeUseCase) checkStockTradeSwitch() {
 }
 
 func (uc *RealTimeUseCase) checkFutureTradeSwitch() {
-	if !uc.cfg.TradeFuture.AllowTrade {
+	if !uc.cfg.TradeFuture.AllowTrade || uc.inventoryIsNotEmpty {
 		return
 	}
 	futureTradeDay := tradeday.Get().GetFutureTradeDay()
