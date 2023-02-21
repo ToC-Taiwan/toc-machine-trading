@@ -754,11 +754,9 @@ func (mr *MockTradegRPCAPIMockRecorder) GetSimulateOrderStatusArr() *gomock.Call
 }
 
 // NotifyToSlack mocks base method.
-func (m *MockTradegRPCAPI) NotifyToSlack(message string) error {
+func (m *MockTradegRPCAPI) NotifyToSlack(message string) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "NotifyToSlack", message)
-	ret0, _ := ret[0].(error)
-	return ret0
+	m.ctrl.Call(m, "NotifyToSlack", message)
 }
 
 // NotifyToSlack indicates an expected call of NotifyToSlack.

@@ -110,9 +110,7 @@ func (d *DTFuture) cancelOverTimeOrder(cancelChan chan *entity.FutureOrder) {
 		}
 
 		cancelledIDMap[order.OrderID] = order
-		if e := d.sc.NotifyToSlack(fmt.Sprintf("Cancelled %s", order.String())); e != nil {
-			logger.Errorf("Notify to slack failed: %v", e)
-		}
+		d.sc.NotifyToSlack(fmt.Sprintf("Cancelled %s", order.String()))
 	}
 }
 

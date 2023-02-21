@@ -225,10 +225,9 @@ func (t *TradegRPCAPI) CancelFuture(orderID string) (*pb.TradeResult, error) {
 	return r, nil
 }
 
-func (t *TradegRPCAPI) NotifyToSlack(message string) error {
+func (t *TradegRPCAPI) NotifyToSlack(message string) {
 	_, _, e := t.slack.PostMessage(t.slackChannelID, slack.MsgOptionText(message, false))
 	if e != nil {
-		return e
+		logger.Errorf("NotifyToSlack error: %v", e)
 	}
-	return nil
 }
