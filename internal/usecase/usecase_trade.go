@@ -36,8 +36,8 @@ func (u *UseCaseBase) NewTrade() Trade {
 	tradeDay := tradeday.Get()
 
 	uc := &TradeUseCase{
-		sc:    grpcapi.NewTrade(u.sc, cfg.Simulation),
-		fg:    grpcapi.NewTrade(u.fg, cfg.Simulation),
+		sc:    grpcapi.NewTrade(u.sc, cfg.Slack, cfg.Simulation),
+		fg:    grpcapi.NewTrade(u.fg, cfg.Slack, cfg.Simulation),
 		repo:  repo.NewTrade(u.pg),
 		quota: quota.NewQuota(cfg.Quota),
 

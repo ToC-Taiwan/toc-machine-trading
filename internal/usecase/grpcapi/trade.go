@@ -4,22 +4,29 @@ package grpcapi
 import (
 	"context"
 
+	"tmt/cmd/config"
 	"tmt/internal/entity"
 	"tmt/pb"
 	"tmt/pkg/grpc"
 
+	"github.com/slack-go/slack"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 type TradegRPCAPI struct {
 	conn *grpc.Connection
 	sim  bool
+
+	slack          *slack.Client
+	slackChannelID string
 }
 
-func NewTrade(client *grpc.Connection, sim bool) *TradegRPCAPI {
+func NewTrade(client *grpc.Connection, slackCfg config.Slack, sim bool) *TradegRPCAPI {
 	return &TradegRPCAPI{
-		conn: client,
-		sim:  sim,
+		conn:           client,
+		sim:            sim,
+		slack:          slack.New(slackCfg.Token),
+		slackChannelID: slackCfg.ChannelID,
 	}
 }
 
@@ -216,4 +223,12 @@ func (t *TradegRPCAPI) CancelFuture(orderID string) (*pb.TradeResult, error) {
 		return nil, err
 	}
 	return r, nil
+}
+
+func (t *TradegRPCAPI) NotifyToSlack(message string) error {
+	_, _, e := t.slack.PostMessage(t.slackChannelID, slack.MsgOptionText(message, false))
+	if e != nil {
+		return e
+	}
+	return nil
 }

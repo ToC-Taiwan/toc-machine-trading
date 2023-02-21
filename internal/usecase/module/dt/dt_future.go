@@ -2,6 +2,7 @@
 package dt
 
 import (
+	"fmt"
 	"sync"
 	"time"
 
@@ -52,13 +53,13 @@ func NewDTFuture(code string, s *grpcapi.TradegRPCAPI, tradeConfig *config.Trade
 
 	d.localBus.SubscribeTopic(topicTraderDone, d.removeDoneTrader)
 
-	d.processOrderStatus()
+	d.processOrderStatusAndTradeSwitch()
 	d.processTick()
 
 	return d
 }
 
-func (d *DTFuture) processOrderStatus() {
+func (d *DTFuture) processOrderStatusAndTradeSwitch() {
 	notCancellableOrderMap := make(map[string]*entity.FutureOrder)
 	go func() {
 		for {
@@ -97,6 +98,10 @@ func (d *DTFuture) cancelOverTimeOrder(order *entity.FutureOrder) {
 	if entity.StringToOrderStatus(result.GetStatus()) != entity.StatusCancelled {
 		logger.Error("Cancel future order failed", result.GetStatus())
 		return
+	}
+
+	if e := d.sc.NotifyToSlack(fmt.Sprintf("Cancelled %s", order.String())); e != nil {
+		logger.Errorf("Notify to slack failed: %v", e)
 	}
 }
 

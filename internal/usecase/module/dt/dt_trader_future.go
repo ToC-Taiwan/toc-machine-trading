@@ -224,6 +224,10 @@ func (d *DTTraderFuture) placeOrder(o *entity.FutureOrder) error {
 		return err
 	}
 
+	if e := d.sc.NotifyToSlack(o.String()); e != nil {
+		logger.Errorf("notify to slack error: %s", e.Error())
+	}
+
 	o.OrderID = result.GetOrderId()
 	if o.OrderID == "" {
 		return errors.New("order id is empty")

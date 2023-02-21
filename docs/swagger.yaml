@@ -42,6 +42,8 @@ definitions:
         type: boolean
       sinopac:
         $ref: '#/definitions/config.Sinopac'
+      slack:
+        $ref: '#/definitions/config.Slack'
       targetStock:
         $ref: '#/definitions/config.TargetStock'
       tradeFuture:
@@ -115,6 +117,13 @@ definitions:
       poolMax:
         type: integer
       url:
+        type: string
+    type: object
+  config.Slack:
+    properties:
+      channelID:
+        type: string
+      token:
         type: string
     type: object
   config.TargetStock:

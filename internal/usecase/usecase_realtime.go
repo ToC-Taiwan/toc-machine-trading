@@ -58,8 +58,8 @@ func (u *UseCaseBase) NewRealTime() RealTime {
 		grpcapi:    grpcapi.NewRealTime(u.sc),
 		subgRPCAPI: grpcapi.NewSubscribe(u.sc),
 
-		sc: grpcapi.NewTrade(u.sc, cfg.Simulation),
-		fg: grpcapi.NewTrade(u.fg, cfg.Simulation),
+		sc: grpcapi.NewTrade(u.sc, cfg.Slack, cfg.Simulation),
+		fg: grpcapi.NewTrade(u.fg, cfg.Slack, cfg.Simulation),
 
 		targetFilter: target.NewFilter(cfg.TargetStock),
 		quota:        quota.NewQuota(cfg.Quota),

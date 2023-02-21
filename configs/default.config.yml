@@ -24,7 +24,6 @@ trade_future:
 
     # unit: seccond
     buy_sell_wait_time: 10
-    cancel_wait_time: 15
     tick_interval: 8
 
     # duration: minute
