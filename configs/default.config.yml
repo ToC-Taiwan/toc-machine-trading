@@ -1,4 +1,4 @@
-simulation: false
+simulation: true
 
 trade_stock:
     allow_trade: false

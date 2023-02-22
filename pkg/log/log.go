@@ -80,6 +80,10 @@ func Get() *Log {
 	}
 
 	l.Hooks.Add(l.fileHook(jsonFormatter))
+	if l.slackToken != "" && l.slackChannelID != "" {
+		l.Hooks.Add(newSlackHook(l.slackToken, l.slackChannelID))
+	}
+
 	l.SetFormatter(formatter)
 	l.SetLevel(l.level.Level())
 	l.SetOutput(os.Stdout)
@@ -97,6 +101,8 @@ func (l *Log) readEnv() {
 	LogLevel(cfg.Level)(l.config)
 	LogFormat(cfg.Format)(l.config)
 	NeedCaller(cfg.NeedCaller)(l.config)
+	SlackToken(cfg.Token)(l.config)
+	SlackChannelID(cfg.ChannelID)(l.config)
 }
 
 func (l *Log) fileHook(formatter logrus.Formatter) *lfshook.LfsHook {
