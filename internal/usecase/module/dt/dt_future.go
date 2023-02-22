@@ -35,6 +35,8 @@ type DTFuture struct {
 
 	lastTickRate float64
 	isTradeTime  bool
+
+	lastPlaceOrderTime time.Time
 }
 
 func NewDTFuture(code string, s *grpcapi.TradegRPCAPI, tradeConfig *config.TradeFuture) *DTFuture {
@@ -121,6 +123,7 @@ func (d *DTFuture) processTick() {
 			}
 
 			if o := d.generateOrder(); o != nil {
+				d.lastPlaceOrderTime = time.Now()
 				var wg sync.WaitGroup
 				for i := 0; i < int(d.orderQuantity); i++ {
 					wg.Add(1)
@@ -148,6 +151,10 @@ func (d *DTFuture) sendTickToTrader(tick *entity.RealTimeFutureTick) {
 
 func (d *DTFuture) generateOrder() *entity.FutureOrder {
 	if !d.tradeConfig.AllowTrade || !d.isTradeTime {
+		return nil
+	}
+
+	if time.Since(d.lastPlaceOrderTime) < 3*time.Minute {
 		return nil
 	}
 
