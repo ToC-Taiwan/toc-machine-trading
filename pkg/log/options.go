@@ -2,13 +2,11 @@
 package log
 
 type config struct {
-	timeFormat     string
-	format         Format
-	level          Level
-	needCaller     bool
-	fileName       string
-	slackToken     string
-	slackChannelID string
+	timeFormat string
+	format     Format
+	level      Level
+	needCaller bool
+	fileName   string
 }
 
 // Option -.
@@ -49,17 +47,5 @@ func NeedCaller(need bool) Option {
 func FileName(name string) Option {
 	return func(c *config) {
 		c.fileName = name
-	}
-}
-
-func SlackToken(token string) Option {
-	return func(c *config) {
-		c.slackToken = token
-	}
-}
-
-func SlackChannelID(id string) Option {
-	return func(c *config) {
-		c.slackChannelID = id
 	}
 }

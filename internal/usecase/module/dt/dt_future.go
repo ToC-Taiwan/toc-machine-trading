@@ -21,17 +21,17 @@ type DTFuture struct {
 	lastTick *entity.RealTimeFutureTick
 	tickArr  entity.RealTimeFutureTickArr
 
-	sc       *grpcapi.TradegRPCAPI
-	localBus *eventbus.Bus
+	sc          *grpcapi.TradegRPCAPI
+	localBus    *eventbus.Bus
+	tradeConfig *config.TradeFuture
 
 	traderMap     map[string]*DTTraderFuture
 	traderMapLock sync.RWMutex
 
 	tickChan   chan *entity.RealTimeFutureTick
 	notify     chan *entity.FutureOrder
+	cancelChan chan *entity.FutureOrder
 	switchChan chan bool
-
-	tradeConfig *config.TradeFuture
 
 	lastTickRate float64
 	isTradeTime  bool
@@ -49,10 +49,12 @@ func NewDTFuture(code string, s *grpcapi.TradegRPCAPI, tradeConfig *config.Trade
 		localBus:      eventbus.Get(uuid.NewString()),
 		tradeConfig:   tradeConfig,
 		traderMap:     make(map[string]*DTTraderFuture),
+		cancelChan:    make(chan *entity.FutureOrder),
 	}
 
 	d.localBus.SubscribeTopic(topicTraderDone, d.removeDoneTrader)
 
+	d.cancelOverTimeOrder()
 	d.processOrderStatusAndTradeSwitch()
 	d.processTick()
 
@@ -60,23 +62,13 @@ func NewDTFuture(code string, s *grpcapi.TradegRPCAPI, tradeConfig *config.Trade
 }
 
 func (d *DTFuture) processOrderStatusAndTradeSwitch() {
-	notCancellableOrderMap := make(map[string]*entity.FutureOrder)
-	cancelChan := make(chan *entity.FutureOrder)
-	go d.cancelOverTimeOrder(cancelChan)
 	go func() {
 		for {
 			select {
 			case o := <-d.notify:
-				if _, ok := notCancellableOrderMap[o.OrderID]; ok {
-					continue
+				if o.Cancellable() && time.Since(o.OrderTime) > time.Duration(d.tradeConfig.BuySellWaitTime)*time.Second {
+					d.cancelChan <- o
 				}
-
-				if !o.Cancellable() {
-					notCancellableOrderMap[o.OrderID] = o
-				} else {
-					cancelChan <- o
-				}
-
 				d.localBus.PublishTopicEvent(topicUpdateOrder, o)
 
 			case ts := <-d.switchChan:
@@ -86,32 +78,30 @@ func (d *DTFuture) processOrderStatusAndTradeSwitch() {
 	}()
 }
 
-func (d *DTFuture) cancelOverTimeOrder(cancelChan chan *entity.FutureOrder) {
+func (d *DTFuture) cancelOverTimeOrder() {
 	cancelledIDMap := make(map[string]*entity.FutureOrder)
-	for {
-		order := <-cancelChan
-		if cancelledIDMap[order.OrderID] != nil {
-			continue
-		}
+	go func() {
+		for {
+			order := <-d.cancelChan
+			if _, ok := cancelledIDMap[order.OrderID]; ok {
+				continue
+			}
 
-		if time.Since(order.OrderTime) < time.Duration(d.tradeConfig.BuySellWaitTime)*time.Second {
-			continue
-		}
+			result, err := d.sc.CancelFuture(order.OrderID)
+			if err != nil {
+				logger.Error(err)
+				continue
+			}
 
-		result, err := d.sc.CancelFuture(order.OrderID)
-		if err != nil {
-			logger.Error(err)
-			continue
-		}
+			if s := entity.StringToOrderStatus(result.GetStatus()); s != entity.StatusCancelled {
+				logger.Errorf("Cancel order failed: %s -> %s", s.String(), result.GetError())
+				continue
+			}
 
-		if s := entity.StringToOrderStatus(result.GetStatus()); s != entity.StatusCancelled {
-			logger.Errorf("Cancel future order failed %s", s.String())
-			continue
+			cancelledIDMap[order.OrderID] = order
+			d.sc.NotifyToSlack(fmt.Sprintf("Cancelled %s", order.String()))
 		}
-
-		cancelledIDMap[order.OrderID] = order
-		d.sc.NotifyToSlack(fmt.Sprintf("Cancelled %s", order.String()))
-	}
+	}()
 }
 
 func (d *DTFuture) processTick() {

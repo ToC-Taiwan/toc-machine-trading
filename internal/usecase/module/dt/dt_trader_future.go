@@ -240,6 +240,7 @@ func (d *DTTraderFuture) placeOrder(o *entity.FutureOrder) error {
 	if !d.ready {
 		return nil
 	}
+
 	d.finishOrderMap[o.OrderID] = o
 	return nil
 }
