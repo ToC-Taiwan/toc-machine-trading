@@ -124,7 +124,8 @@ func (d *DTFuture) processTick() {
 				var wg sync.WaitGroup
 				for i := 0; i < int(d.orderQuantity); i++ {
 					wg.Add(1)
-					go d.addTrader(o, &wg)
+					order := *o
+					go d.addTrader(&order, &wg)
 				}
 				wg.Wait()
 			}

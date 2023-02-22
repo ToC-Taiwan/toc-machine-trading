@@ -1,4 +1,4 @@
-simulation: true
+simulation: false
 
 trade_stock:
     allow_trade: false
@@ -23,8 +23,8 @@ trade_future:
     trade_out_wait_times: 15
 
     # unit: seccond
-    buy_sell_wait_time: 10
-    tick_interval: 8
+    buy_sell_wait_time: 7
+    tick_interval: 12
 
     # duration: minute
     trade_time_range:
@@ -33,10 +33,10 @@ trade_future:
     max_hold_time: 30
 
     # unit: %
-    rate_limit: 8
-    rate_change_ratio: 25
-    out_in_ratio: 80
-    in_out_ratio: 20
+    rate_limit: 12
+    rate_change_ratio: 35
+    out_in_ratio: 90
+    in_out_ratio: 10
 
 history:
     # unit: day
