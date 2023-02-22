@@ -1,6 +1,9 @@
 package log
 
 import (
+	"crypto/tls"
+	"net/http"
+
 	"github.com/sirupsen/logrus"
 	"github.com/slack-go/slack"
 )
@@ -12,7 +15,13 @@ type slackHook struct {
 
 func newSlackHook(token, channelID string) *slackHook {
 	return &slackHook{
-		api:       slack.New(token),
+		api: slack.New(token, slack.OptionHTTPClient(&http.Client{
+			Transport: &http.Transport{
+				TLSClientConfig: &tls.Config{
+					InsecureSkipVerify: true,
+				},
+			},
+		})),
 		channelID: channelID,
 	}
 }

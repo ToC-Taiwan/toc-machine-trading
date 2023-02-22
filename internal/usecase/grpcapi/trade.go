@@ -3,6 +3,8 @@ package grpcapi
 
 import (
 	"context"
+	"crypto/tls"
+	"net/http"
 
 	"tmt/cmd/config"
 	"tmt/internal/entity"
@@ -23,9 +25,15 @@ type TradegRPCAPI struct {
 
 func NewTrade(client *grpc.Connection, slackCfg config.Slack, sim bool) *TradegRPCAPI {
 	return &TradegRPCAPI{
-		conn:           client,
-		sim:            sim,
-		slack:          slack.New(slackCfg.Token),
+		conn: client,
+		sim:  sim,
+		slack: slack.New(slackCfg.Token, slack.OptionHTTPClient(&http.Client{
+			Transport: &http.Transport{
+				TLSClientConfig: &tls.Config{
+					InsecureSkipVerify: true,
+				},
+			},
+		})),
 		slackChannelID: slackCfg.ChannelID,
 	}
 }

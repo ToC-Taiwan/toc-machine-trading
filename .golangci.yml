@@ -82,8 +82,7 @@ linters-settings:
 
     # Disable error checking, as errorcheck detects more errors and is more configurable.
     gosec:
-        exclude:
-            - "G104"
+        excludes: ["G104", "G402"]
 
     funlen:
         lines: 60

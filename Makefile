@@ -30,6 +30,7 @@ update: go-mod-update proto swag ### update
 .PHONY: update
 
 lint: ### check by golangci linter
+	@go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 	@golangci-lint run
 .PHONY: lint
 
