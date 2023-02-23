@@ -106,7 +106,6 @@ func (d *DTFuture) cancelOverTimeOrder() {
 			}
 
 			cancelledIDMap[order.OrderID] = order
-			d.sc.NotifyToSlack(fmt.Sprintf("%s %s", order.Status.String(), order.String()))
 		}
 	}()
 }
