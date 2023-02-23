@@ -1,5 +1,35 @@
 # CHANGELOG
 
+## [v2.1.0](https://github.com/ToC-Taiwan/toc-machine-trading/compare/v2.0.1...v2.1.0)
+
+> 2023-02-23
+
+### Bug Fixes (9)
+
+* **badge:** fix wrong badge link
+* **event:** fix wrong event time due to wrong database time zone
+* **order:** fix cancel order will continue if returen is id already cancelled
+* **slack:** add InsecureSkipVerify to fix verify fail
+* **slack:** fix wrong place of notify place order
+* **trade:** fix same pointer cause place redundant order
+* **trade:** fix cancel order multi times
+* **trade:** fix wrong use of cancel order time
+* **trade:** fix wrong trade calculate method
+
+### Features (11)
+
+* **basic:** add option basic data
+* **config:** move rate_limit, rate_change_ratio to config
+* **log:** remove slack hook for logger, modify cancel order method
+* **order:** move modify future night market order time to sinopac
+* **pkg:** change pkg name from topic to event
+* **slack:** add logger hook to slack
+* **slack:** add notify to slack when buy sell cancell future order
+* **target:** filter stock target if it has its own future
+* **trade:** add cool down time 3 minutes between trade in
+* **trade:** add check gap between tick if is lower than 1 second
+* **trade:** remove cancel wait time, use buy sell wait time instead
+
 ## [v2.0.1](https://github.com/ToC-Taiwan/toc-machine-trading/compare/v2.0.0...v2.0.1)
 
 > 2023-02-09

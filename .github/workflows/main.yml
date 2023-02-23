@@ -29,7 +29,7 @@ jobs:
             - name: golangci-lint
               uses: golangci/golangci-lint-action@v3
               with:
-                  version: v1.51.0
+                  version: v1.51.2
 
     Test:
         needs: Lint
@@ -44,10 +44,10 @@ jobs:
               uses: actions/checkout@v3
 
             - name: build test
-              run: go build -v ./...
+              run: make build
 
             - name: go test
-              run: cp ./configs/default.config.yml ./configs/config.yml
+              run: make test
 
     Build:
         needs: Test

@@ -89,14 +89,9 @@ func (d *DTFuture) cancelOverTimeOrder() {
 				continue
 			}
 
-			result, err := d.sc.CancelFuture(order.OrderID)
+			_, err := d.sc.CancelFuture(order.OrderID)
 			if err != nil {
 				logger.Error(err)
-				continue
-			}
-
-			if s := entity.StringToOrderStatus(result.GetStatus()); s != entity.StatusCancelled {
-				logger.Errorf("Cancel order failed: %s -> %s", s.String(), result.GetError())
 				continue
 			}
 

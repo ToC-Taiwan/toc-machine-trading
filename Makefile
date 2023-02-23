@@ -18,6 +18,12 @@ swag: ### swag
 	@./scripts/generate_swagger.sh
 .PHONY: swag
 
+build: ### build
+	@go mod tidy
+	@go mod download
+	@go build -o $(BIN_NAME) ./cmd/app
+.PHONY: build
+
 go-mod-update: ### go-mod-update
 	@./scripts/gomod_update.sh
 .PHONY: go-mod-update
