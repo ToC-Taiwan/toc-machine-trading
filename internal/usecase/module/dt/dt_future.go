@@ -89,14 +89,19 @@ func (d *DTFuture) cancelOverTimeOrder() {
 				continue
 			}
 
-			_, err := d.sc.CancelFuture(order.OrderID)
+			result, err := d.sc.CancelFuture(order.OrderID)
 			if err != nil {
 				logger.Error(err)
 				continue
 			}
 
+			if s := entity.StringToOrderStatus(result.GetStatus()); s != entity.StatusCancelled {
+				logger.Errorf("Cancel order failed: %s %s", s.String(), result.GetError())
+				continue
+			}
+
 			cancelledIDMap[order.OrderID] = order
-			d.sc.NotifyToSlack(fmt.Sprintf("Cancelled %s", order.String()))
+			d.sc.NotifyToSlack(fmt.Sprintf("Cancel %s", order.String()))
 		}
 	}()
 }
