@@ -47,7 +47,9 @@ jobs:
               run: make build
 
             - name: go test
-              run: make test
+              run: |
+                  cp .env.template .env
+                  make test
 
     Build:
         needs: Test
