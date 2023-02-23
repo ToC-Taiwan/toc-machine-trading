@@ -64,10 +64,15 @@ func NewDTFuture(code string, s *grpcapi.TradegRPCAPI, tradeConfig *config.Trade
 }
 
 func (d *DTFuture) processOrderStatusAndTradeSwitch() {
+	notifiedMap := make(map[string]*entity.FutureOrder)
 	go func() {
 		for {
 			select {
 			case o := <-d.notify:
+				if !o.Cancellable() && notifiedMap[o.OrderID] == nil {
+					notifiedMap[o.OrderID] = o
+					d.sc.NotifyToSlack(fmt.Sprintf("%s %s", o.Status.String(), o.String()))
+				}
 				if o.Cancellable() && time.Since(o.OrderTime) > time.Duration(d.tradeConfig.BuySellWaitTime)*time.Second {
 					d.cancelChan <- o
 				}
@@ -96,12 +101,12 @@ func (d *DTFuture) cancelOverTimeOrder() {
 			}
 
 			if s := entity.StringToOrderStatus(result.GetStatus()); s != entity.StatusCancelled {
-				logger.Errorf("Cancel order failed: %s %s", s.String(), result.GetError())
+				logger.Errorf("Cancel order failed: %s %s", order.OrderID, result.GetError())
 				continue
 			}
 
 			cancelledIDMap[order.OrderID] = order
-			d.sc.NotifyToSlack(fmt.Sprintf("Cancel %s", order.String()))
+			d.sc.NotifyToSlack(fmt.Sprintf("%s %s", order.Status.String(), order.String()))
 		}
 	}()
 }

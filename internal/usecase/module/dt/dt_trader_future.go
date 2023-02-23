@@ -2,6 +2,7 @@ package dt
 
 import (
 	"errors"
+	"fmt"
 	"sync"
 	"time"
 
@@ -235,7 +236,7 @@ func (d *DTTraderFuture) placeOrder(o *entity.FutureOrder) error {
 	}
 
 	logger.Infof(o.String())
-	d.sc.NotifyToSlack(o.String())
+	d.sc.NotifyToSlack(fmt.Sprintf("Place %s", o.String()))
 
 	if !d.ready {
 		return nil
