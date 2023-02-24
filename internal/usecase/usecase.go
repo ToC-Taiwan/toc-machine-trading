@@ -5,6 +5,7 @@ import (
 
 	"tmt/cmd/config"
 	"tmt/internal/usecase/cache"
+	"tmt/internal/usecase/slack"
 	"tmt/pkg/eventbus"
 	"tmt/pkg/grpc"
 	"tmt/pkg/log"
@@ -18,10 +19,11 @@ var (
 )
 
 type UseCaseBase struct {
-	pg  *postgres.Postgres
-	sc  *grpc.Connection
-	fg  *grpc.Connection
-	cfg *config.Config
+	pg    *postgres.Postgres
+	sc    *grpc.Connection
+	fg    *grpc.Connection
+	cfg   *config.Config
+	slack *slack.Slack
 }
 
 func NewUseCaseBase(cfg *config.Config) *UseCaseBase {
@@ -51,12 +53,18 @@ func NewUseCaseBase(cfg *config.Config) *UseCaseBase {
 		logger.Fatal(err)
 	}
 
-	return &UseCaseBase{
-		pg:  pg,
-		sc:  sc,
-		fg:  fg,
-		cfg: cfg,
+	uc := &UseCaseBase{
+		pg:    pg,
+		sc:    sc,
+		fg:    fg,
+		cfg:   cfg,
+		slack: slack.NewSlack(cfg.Slack.Token, cfg.Slack.ChannelID),
 	}
+
+	uc.slack.PostMessage("TMT is running")
+	uc.slack.PostMessage(fmt.Sprintf("Simulation Mode: %v", cfg.Simulation))
+
+	return uc
 }
 
 func (u *UseCaseBase) Close() {

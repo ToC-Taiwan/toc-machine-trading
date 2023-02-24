@@ -753,18 +753,6 @@ func (mr *MockTradegRPCAPIMockRecorder) GetSimulateOrderStatusArr() *gomock.Call
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSimulateOrderStatusArr", reflect.TypeOf((*MockTradegRPCAPI)(nil).GetSimulateOrderStatusArr))
 }
 
-// NotifyToSlack mocks base method.
-func (m *MockTradegRPCAPI) NotifyToSlack(message string) {
-	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "NotifyToSlack", message)
-}
-
-// NotifyToSlack indicates an expected call of NotifyToSlack.
-func (mr *MockTradegRPCAPIMockRecorder) NotifyToSlack(message interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NotifyToSlack", reflect.TypeOf((*MockTradegRPCAPI)(nil).NotifyToSlack), message)
-}
-
 // SellFirstFuture mocks base method.
 func (m *MockTradegRPCAPI) SellFirstFuture(order *entity.FutureOrder) (*pb.TradeResult, error) {
 	m.ctrl.T.Helper()

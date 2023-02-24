@@ -21,8 +21,6 @@ func RunApp(cfg *config.Config) {
 	base := usecase.NewUseCaseBase(cfg)
 	defer base.Close()
 
-	logger.Infof("Simulation Mode: %v", cfg.Simulation)
-
 	// Do not adjust the order
 	basicUseCase := base.NewBasic()
 	tradeUseCase := base.NewTrade()

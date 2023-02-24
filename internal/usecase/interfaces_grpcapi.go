@@ -71,6 +71,4 @@ type TradegRPCAPI interface {
 
 	GetNonBlockOrderStatusArr() (*pb.ErrorMessage, error)
 	GetFuturePosition() (*pb.FuturePositionArr, error)
-
-	NotifyToSlack(message string)
 }
