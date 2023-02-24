@@ -119,14 +119,9 @@ func (d *DTFuture) processTick() {
 			d.lastTick = <-d.tickChan
 			d.tickArr = append(d.tickArr, d.lastTick)
 
-			if len(d.tickArr) > 1 && d.tickArr[len(d.tickArr)-1].TickTime.Sub(d.tickArr[len(d.tickArr)-2].TickTime) > time.Second {
-				d.tickArr = entity.RealTimeFutureTickArr{}
-				d.lastTickRate = 0
+			d.cutTickArr()
+			if d.sendTickToTrader(d.lastTick) > 0 {
 				continue
-			}
-
-			if d.lastTick.TickTime.Sub(d.tickArr[0].TickTime) > time.Duration(d.tradeConfig.TickInterval)*time.Second {
-				d.tickArr = d.tickArr[1:]
 			}
 
 			if o := d.generateOrder(); o != nil {
@@ -139,21 +134,37 @@ func (d *DTFuture) processTick() {
 				}
 				wg.Wait()
 			}
-
-			d.sendTickToTrader(d.lastTick)
 		}
 	}()
 }
 
-func (d *DTFuture) sendTickToTrader(tick *entity.RealTimeFutureTick) {
+func (d *DTFuture) cutTickArr() {
+	if len(d.tickArr) < 2 {
+		return
+	}
+
+	if d.tickArr[len(d.tickArr)-1].TickTime.Sub(d.tickArr[len(d.tickArr)-2].TickTime) > 3*time.Second {
+		d.tickArr = entity.RealTimeFutureTickArr{}
+		d.lastTickRate = 0
+		return
+	}
+
+	if d.lastTick.TickTime.Sub(d.tickArr[0].TickTime) > time.Duration(2*d.tradeConfig.TickInterval)*time.Second {
+		d.tickArr = d.tickArr[1:]
+	}
+}
+
+func (d *DTFuture) sendTickToTrader(tick *entity.RealTimeFutureTick) int {
 	d.traderMapLock.RLock()
 	defer d.traderMapLock.RUnlock()
-
+	var sent int
 	for _, trader := range d.traderMap {
+		sent++
 		if ch := trader.TickChan(); ch != nil {
 			ch <- tick
 		}
 	}
+	return sent
 }
 
 func (d *DTFuture) generateOrder() *entity.FutureOrder {
@@ -165,22 +176,15 @@ func (d *DTFuture) generateOrder() *entity.FutureOrder {
 		return nil
 	}
 
-	if len(d.tickArr) < int(d.tradeConfig.TickInterval) {
-		return nil
-	}
-
-	d.traderMapLock.RLock()
-	defer d.traderMapLock.RUnlock()
-	if len(d.traderMap) > 0 {
-		return nil
-	}
-
-	outInRatio, tickRate := d.tickArr.GetOutInRatioAndRate()
+	outInRatio, tickRate := d.tickArr.GetOutInRatioAndRate(time.Duration(d.tradeConfig.TickInterval) * time.Second)
 	defer func() {
 		d.lastTickRate = tickRate
 	}()
+	if d.lastTickRate == 0 {
+		return nil
+	}
 
-	if d.lastTickRate < d.tradeConfig.RateLimit || d.lastTickRate == 0 || 100*(tickRate-d.lastTickRate)/d.lastTickRate < d.tradeConfig.RateChangeRatio {
+	if tickRate < d.tradeConfig.RateLimit || d.lastTickRate < d.tradeConfig.RateLimit || 100*(tickRate-d.lastTickRate)/d.lastTickRate < d.tradeConfig.RateChangeRatio {
 		return nil
 	}
 

@@ -111,8 +111,13 @@ func (c RealTimeFutureTickArr) GetTotalVolume() int64 {
 	return volume
 }
 
-func (c RealTimeFutureTickArr) GetOutInRatioAndRate() (float64, float64) {
-	if len(c) < 2 {
+func (c RealTimeFutureTickArr) GetOutInRatioAndRate(duration time.Duration) (float64, float64) {
+	if len(c) == 0 {
+		return 0, 0
+	}
+
+	takenTime := c[len(c)-1].TickTime.Sub(c[0].TickTime)
+	if takenTime < duration {
 		return 0, 0
 	}
 
@@ -128,7 +133,7 @@ func (c RealTimeFutureTickArr) GetOutInRatioAndRate() (float64, float64) {
 		}
 	}
 
-	return 100 * float64(outVolume) / float64(outVolume+inVolume), float64(outVolume+inVolume) / c[len(c)-1].TickTime.Sub(c[0].TickTime).Seconds()
+	return 100 * float64(outVolume) / float64(outVolume+inVolume), float64(outVolume+inVolume) / takenTime.Seconds()
 }
 
 // func (c RealTimeFutureTickArr) splitToMultiPeriod(baseDurtion time.Duration, count int) []RealTimeFutureTickArr {

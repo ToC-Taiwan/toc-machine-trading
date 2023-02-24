@@ -69,4 +69,5 @@ func NewUseCaseBase(cfg *config.Config) *UseCaseBase {
 
 func (u *UseCaseBase) Close() {
 	u.pg.Close()
+	u.slack.PostMessage("TMT is shutting down")
 }

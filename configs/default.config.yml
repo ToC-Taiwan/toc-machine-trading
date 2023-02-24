@@ -24,7 +24,7 @@ trade_future:
 
     # unit: seccond
     buy_sell_wait_time: 7
-    tick_interval: 12
+    tick_interval: 10
 
     # duration: minute
     trade_time_range:
@@ -33,10 +33,10 @@ trade_future:
     max_hold_time: 30
 
     # unit: %
-    rate_limit: 12
-    rate_change_ratio: 35
-    out_in_ratio: 90
-    in_out_ratio: 10
+    rate_limit: 10
+    rate_change_ratio: 30
+    out_in_ratio: 85
+    in_out_ratio: 15
 
 history:
     # unit: day
