@@ -235,7 +235,6 @@ func (d *DTTraderFuture) placeOrder(o *entity.FutureOrder) error {
 		return errors.New("order status is failed")
 	}
 
-	logger.Infof(o.String())
 	d.sc.NotifyToSlack(fmt.Sprintf("Place %s", o.String()))
 
 	if !d.ready {

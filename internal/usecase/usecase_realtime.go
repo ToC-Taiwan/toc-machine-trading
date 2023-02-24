@@ -463,7 +463,7 @@ func (uc *RealTimeUseCase) ReceiveStockSubscribeData(targetArr []*entity.StockTa
 		uc.stockSwitchChanMap[t.StockNum] = hadger.SwitchChan()
 		uc.stockSwitchChanMapLock.Unlock()
 
-		logger.Warnf("Stock trade room %s:%s:%s", t.Stock.Name, t.Stock.Future.Name, t.Stock.Future.Code)
+		logger.Infof("Stock room %s <-> %s <-> %s", t.Stock.Name, t.Stock.Future.Name, t.Stock.Future.Code)
 		r := rabbit.NewRabbit(uc.cfg.RabbitMQ)
 		go r.StockTickConsumer(t.StockNum, hadger.TickChan())
 	}
@@ -489,7 +489,7 @@ func (uc *RealTimeUseCase) ReceiveStockSubscribeData(targetArr []*entity.StockTa
 	go hr.OrderStatusConsumer()
 	go hr.OrderStatusArrConsumer()
 
-	logger.Info("Stock trade room all start")
+	logger.Info("Stock rooms are all started")
 }
 
 // ReceiveFutureSubscribeData -.
@@ -527,7 +527,7 @@ func (uc *RealTimeUseCase) ReceiveFutureSubscribeData(code string) {
 	uc.futureRabbit.AddOrderStatusChan(orderStatusChan, uuid.New().String())
 	go uc.futureRabbit.OrderStatusConsumer()
 	go uc.futureRabbit.OrderStatusArrConsumer()
-	logger.Info("Future trade room start")
+	logger.Info("Future rooms are all started")
 }
 
 func (uc *RealTimeUseCase) SetMainFuture(code string) {
