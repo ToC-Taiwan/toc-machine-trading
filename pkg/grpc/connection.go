@@ -15,7 +15,7 @@ import (
 const (
 	_defaultMaxPoolSize  = 10
 	_defaultConnAttempts = 10
-	_defaultConnTimeout  = 3 * time.Second
+	_defaultConnTimeout  = 30 * time.Second
 )
 
 // Connection -.
@@ -68,6 +68,7 @@ func New(url string, opts ...Option) (*Connection, error) {
 		}
 
 		if newConn.GetState() == connectivity.Ready {
+			conn.connAttempts = _defaultConnAttempts
 			conn.pool = append(conn.pool, newConn)
 			conn.ReadyConn <- newConn
 		}

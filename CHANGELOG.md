@@ -1,5 +1,26 @@
 # CHANGELOG
 
+## [v2.2.0](https://github.com/ToC-Taiwan/toc-machine-trading/compare/v2.1.0...v2.2.0)
+
+> 2023-02-24
+
+### Bug Fixes (4)
+
+* **ci:** fix missing env file in build test
+* **ci:** fix test missing env file
+* **order:** fix cancel order always show cancel fail
+* **slack:** remove redundant in cancel process message
+
+### Code Refactoring (1)
+
+* **trade:** redesign trade rate usage
+
+### Features (3)
+
+* **slack:** add slack module instead of implement to grpcapi
+* **slack:** add place and filled message for slack
+* **trade:** add back check current order is cancelled or not
+
 ## [v2.1.0](https://github.com/ToC-Taiwan/toc-machine-trading/compare/v2.0.1...v2.1.0)
 
 > 2023-02-23
