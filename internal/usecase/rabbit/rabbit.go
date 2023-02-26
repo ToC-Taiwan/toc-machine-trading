@@ -46,11 +46,13 @@ func NewRabbit(cfg config.RabbitMQ) *Rabbit {
 		logger.Error(err)
 	}
 
-	return &Rabbit{
+	rabbit := &Rabbit{
 		conn:               conn,
 		futureTickChanMap:  make(map[string]chan *entity.RealTimeFutureTick),
 		orderStatusChanMap: make(map[string]chan interface{}),
 	}
+
+	return rabbit
 }
 
 // FillAllBasic -.
@@ -442,4 +444,10 @@ func (c *Rabbit) RemoveOrderStatusChan(connectionID string) {
 	c.orderStatusChanMapLock.Lock()
 	close(c.orderStatusChanMap[connectionID])
 	delete(c.orderStatusChanMap, connectionID)
+}
+
+func (c *Rabbit) PublishTerminate() {
+	if err := c.conn.Publish("terminate", []byte("terminate")); err != nil {
+		logger.Error(err)
+	}
 }

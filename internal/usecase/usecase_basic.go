@@ -3,7 +3,6 @@ package usecase
 import (
 	"context"
 	"fmt"
-	"os"
 	"time"
 
 	"tmt/cmd/config"
@@ -11,8 +10,11 @@ import (
 
 	"tmt/internal/usecase/grpcapi"
 	"tmt/internal/usecase/module/tradeday"
+	"tmt/internal/usecase/rabbit"
 	"tmt/internal/usecase/repo"
 	"tmt/pkg/common"
+
+	"github.com/robfig/cron/v3"
 )
 
 // BasicUseCase -.
@@ -29,20 +31,23 @@ type BasicUseCase struct {
 	allFutureDetail []*entity.Future
 	allOptionDetail []*entity.Option
 
-	terminateChan chan struct{}
+	rabbit Rabbit
 }
 
 func (u *UseCaseBase) NewBasic() Basic {
 	uc := &BasicUseCase{
-		repo:          repo.NewBasic(u.pg),
-		sc:            grpcapi.NewBasic(u.sc),
-		fg:            grpcapi.NewBasic(u.fg),
-		tradeDay:      tradeday.Get(),
-		cfg:           u.cfg,
-		terminateChan: make(chan struct{}),
+		repo:     repo.NewBasic(u.pg),
+		sc:       grpcapi.NewBasic(u.sc),
+		fg:       grpcapi.NewBasic(u.fg),
+		tradeDay: tradeday.Get(),
+		cfg:      u.cfg,
+		rabbit:   rabbit.NewRabbit(u.cfg.RabbitMQ),
 	}
 
-	go uc.healthCheck()
+	if e := uc.SetupCronJob(); e != nil {
+		logger.Fatal(e)
+	}
+
 	go uc.healthCheckforSinopac()
 	go uc.healthCheckforFugle()
 
@@ -129,33 +134,19 @@ func (uc *BasicUseCase) fillBasicInfo() {
 	cc.SetBasicInfo(basic)
 }
 
-func (uc *BasicUseCase) healthCheck() {
-	var deadCount int
-	for {
-		<-uc.terminateChan
-
-		deadCount++
-		if deadCount >= 2 {
-			break
-		}
-	}
-	logger.Warn("healthcheck all fail, terminate")
-	os.Exit(0)
-}
-
 func (uc *BasicUseCase) healthCheckforSinopac() {
 	err := uc.sc.Heartbeat()
 	if err != nil {
-		logger.Warn("sinopac healthcheck fail")
-		uc.terminateChan <- struct{}{}
+		uc.rabbit.PublishTerminate()
+		logger.Fatal("sinopac healthcheck fail, publish terminate")
 	}
 }
 
 func (uc *BasicUseCase) healthCheckforFugle() {
 	err := uc.fg.Heartbeat()
 	if err != nil {
-		logger.Warn("fugle healthcheck fail")
-		uc.terminateChan <- struct{}{}
+		uc.rabbit.PublishTerminate()
+		logger.Fatal("fugle healthcheck fail, publish terminate")
 	}
 }
 
@@ -335,4 +326,16 @@ func (uc *BasicUseCase) saveStockFutureCache() {
 	for _, f := range uc.allFutureDetail {
 		cc.SetFutureDetail(f)
 	}
+}
+
+func (uc *BasicUseCase) SetupCronJob() error {
+	c := cron.New()
+	if _, e := c.AddFunc("20 8 * * *", uc.rabbit.PublishTerminate); e != nil {
+		return e
+	}
+	if _, e := c.AddFunc("40 14 * * *", uc.rabbit.PublishTerminate); e != nil {
+		return e
+	}
+	c.Start()
+	return nil
 }

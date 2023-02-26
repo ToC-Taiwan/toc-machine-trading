@@ -23,4 +23,6 @@ type Rabbit interface {
 	RemoveFutureTickChan(connectionID string)
 	AddOrderStatusChan(orderStatusChan chan interface{}, connectionID string)
 	RemoveOrderStatusChan(connectionID string)
+
+	PublishTerminate()
 }

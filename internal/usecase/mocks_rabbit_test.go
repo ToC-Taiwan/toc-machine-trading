@@ -130,6 +130,18 @@ func (mr *MockRabbitMockRecorder) OrderStatusConsumer() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "OrderStatusConsumer", reflect.TypeOf((*MockRabbit)(nil).OrderStatusConsumer))
 }
 
+// PublishTerminate mocks base method.
+func (m *MockRabbit) PublishTerminate() {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "PublishTerminate")
+}
+
+// PublishTerminate indicates an expected call of PublishTerminate.
+func (mr *MockRabbitMockRecorder) PublishTerminate() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PublishTerminate", reflect.TypeOf((*MockRabbit)(nil).PublishTerminate))
+}
+
 // RemoveFutureTickChan mocks base method.
 func (m *MockRabbit) RemoveFutureTickChan(connectionID string) {
 	m.ctrl.T.Helper()

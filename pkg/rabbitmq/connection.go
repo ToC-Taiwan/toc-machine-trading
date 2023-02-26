@@ -110,3 +110,36 @@ func (c *Connection) BindAndConsume(key string) (<-chan amqp.Delivery, error) {
 	}
 	return delivery, nil
 }
+
+func (c *Connection) Publish(key string, message []byte) error {
+	channel, err := c.Connection.Channel()
+	if err != nil {
+		return err
+	}
+	err = channel.ExchangeDeclare(
+		c.Exchange,
+		"direct",
+		true,
+		false,
+		false,
+		false,
+		nil,
+	)
+	if err != nil {
+		return err
+	}
+	err = channel.Publish(
+		c.Exchange,
+		key,
+		false,
+		false,
+		amqp.Publishing{
+			ContentType: "text/plain",
+			Body:        message,
+		},
+	)
+	if err != nil {
+		return err
+	}
+	return nil
+}
