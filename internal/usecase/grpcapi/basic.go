@@ -5,32 +5,31 @@ import (
 	"context"
 	"errors"
 	"io"
-	"os"
-	"time"
 
 	"tmt/pb"
 	"tmt/pkg/grpc"
 
+	"github.com/google/uuid"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 // BasicgRPCAPI -.
 type BasicgRPCAPI struct {
-	conn         *grpc.Connection
-	heartbeatMsg string
+	conn     *grpc.Connection
+	clientID string
 }
 
 // NewBasic -.
-func NewBasic(client *grpc.Connection) *BasicgRPCAPI {
+func NewBasic(client *grpc.Connection, devMode bool) *BasicgRPCAPI {
 	instance := &BasicgRPCAPI{
-		conn:         client,
-		heartbeatMsg: "beat",
+		conn:     client,
+		clientID: uuid.New().String(),
 	}
 
-	mode, ok := os.LookupEnv("DEPLOYMENT")
-	if !ok || mode != "prod" {
-		instance.heartbeatMsg = "debug"
+	if devMode {
+		instance.clientID = "debug"
 	}
+
 	return instance
 }
 
@@ -38,13 +37,14 @@ func NewBasic(client *grpc.Connection) *BasicgRPCAPI {
 func (t *BasicgRPCAPI) Heartbeat() error {
 	conn := t.conn.GetReadyConn()
 	defer t.conn.PutReadyConn(conn)
+
 	c := pb.NewBasicDataInterfaceClient(conn)
 	stream, err := c.Heartbeat(context.Background())
 	if err != nil {
 		return err
 	}
 
-	err = stream.Send(&pb.BeatMessage{Message: t.heartbeatMsg})
+	err = stream.Send(&pb.BeatMessage{Message: t.clientID})
 	if err != nil {
 		return err
 	}
@@ -57,10 +57,9 @@ func (t *BasicgRPCAPI) Heartbeat() error {
 			}
 			continue
 		}
-		time.Sleep(3 * time.Second)
-		err = stream.Send(&pb.BeatMessage{Message: response.GetMessage()})
-		if err != nil {
-			return err
+
+		if response.GetError() != "" {
+			return errors.New(response.GetError())
 		}
 	}
 }

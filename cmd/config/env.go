@@ -1,6 +1,8 @@
 package config
 
 type EnvConfig struct {
+	Development bool `env:"DEVELOPMENT" env-default:"false"`
+
 	// from env no need tag
 	Database Database
 	Server   Server

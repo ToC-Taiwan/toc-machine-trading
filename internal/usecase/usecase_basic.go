@@ -37,8 +37,8 @@ type BasicUseCase struct {
 func (u *UseCaseBase) NewBasic() Basic {
 	uc := &BasicUseCase{
 		repo:     repo.NewBasic(u.pg),
-		sc:       grpcapi.NewBasic(u.sc),
-		fg:       grpcapi.NewBasic(u.fg),
+		sc:       grpcapi.NewBasic(u.sc, u.cfg.Development),
+		fg:       grpcapi.NewBasic(u.fg, u.cfg.Development),
 		tradeDay: tradeday.Get(),
 		cfg:      u.cfg,
 		rabbit:   rabbit.NewRabbit(u.cfg.RabbitMQ),

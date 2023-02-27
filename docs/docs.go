@@ -795,6 +795,9 @@ const docTemplate = `{
                         }
                     ]
                 },
+                "development": {
+                    "type": "boolean"
+                },
                 "fugle": {
                     "$ref": "#/definitions/config.Fugle"
                 },
