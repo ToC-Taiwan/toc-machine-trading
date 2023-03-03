@@ -15,15 +15,19 @@ trade_stock:
     trade_in_end_time: 90
 
 trade_future:
-    allow_trade: true
+    allow_trade: false
     subscribe: true
     quantity: 2
-    target_balance_high: 4
-    target_balance_low: -5
-    trade_out_wait_times: 15
+
+    # unit: dollar
+    target_balance_high: 3
+    target_balance_low: -3
+
+    # unit: times
+    trade_out_wait_times: 20
 
     # unit: seccond
-    buy_sell_wait_time: 7
+    buy_sell_wait_time: 5
     tick_interval: 10
 
     # duration: minute
@@ -32,17 +36,21 @@ trade_future:
         second_part_duration: 285
     max_hold_time: 30
 
-    # unit: %
+    # unit: volume/second
     rate_limit: 10
-    rate_change_ratio: 30
-    out_in_ratio: 85
-    in_out_ratio: 15
+
+    # unit: %
+    rate_change_ratio: 5
+    out_in_ratio: 70
+    in_out_ratio: 30
 
 history:
     # unit: day
     history_close_period: 65
     history_tick_period: 12
     history_kbar_period: 65
+
+    trigger_simulate: false
 
 quota:
     stock_trade_quota: 1000000

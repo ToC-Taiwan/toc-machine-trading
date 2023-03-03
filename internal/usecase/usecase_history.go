@@ -11,6 +11,8 @@ import (
 	"tmt/internal/entity"
 	"tmt/internal/usecase/event"
 	"tmt/internal/usecase/grpcapi"
+	"tmt/internal/usecase/module/quota"
+	"tmt/internal/usecase/module/simulator"
 	"tmt/internal/usecase/module/tradeday"
 	"tmt/internal/usecase/repo"
 	"tmt/pkg/common"
@@ -29,6 +31,8 @@ type HistoryUseCase struct {
 
 	basic    *entity.BasicInfo
 	tradeDay *tradeday.TradeDay
+
+	cfg *config.Config
 }
 
 // NewHistory -.
@@ -39,10 +43,13 @@ func (u *UseCaseBase) NewHistory() History {
 		fetchList:       make(map[string]*entity.StockTarget),
 		tradeDay:        tradeday.Get(),
 		analyzeStockCfg: u.cfg.AnalyzeStock,
+		cfg:             u.cfg,
+		basic:           cc.GetBasicInfo(),
 	}
 
-	uc.basic = cc.GetBasicInfo()
-	bus.SubscribeTopic(event.TopicFetchStockHistory, uc.FetchHistory)
+	bus.SubscribeTopic(event.TopicFetchStockHistory, uc.FetchStockHistory)
+	bus.SubscribeTopic(event.TopicFetchFutureHistory, uc.FetchFutureHistory)
+
 	return uc
 }
 
@@ -56,8 +63,8 @@ func (uc *HistoryUseCase) GetDayKbarByStockNumDate(stockNum string, date time.Ti
 	return cc.GetDaykbar(stockNum, date)
 }
 
-// FetchHistory FetchHistory
-func (uc *HistoryUseCase) FetchHistory(targetArr []*entity.StockTarget) {
+// FetchStockHistory -.
+func (uc *HistoryUseCase) FetchStockHistory(targetArr []*entity.StockTarget) {
 	defer uc.mutex.Unlock()
 	uc.mutex.Lock()
 
@@ -89,6 +96,88 @@ func (uc *HistoryUseCase) FetchHistory(targetArr []*entity.StockTarget) {
 	}
 
 	bus.PublishTopicEvent(event.TopicAnalyzeStockTargets, fetchArr)
+}
+
+func (uc *HistoryUseCase) FetchFutureHistory(code string) {
+	td := uc.tradeDay.GetLastNFutureTradeDay(1)
+	if len(td) == 0 {
+		return
+	}
+
+	dbTicks, err := uc.repo.QueryFutureHistoryTickArrByTime(context.Background(), code, td[0].StartTime, td[0].EndTime)
+	if err != nil {
+		logger.Error(err)
+		return
+	}
+
+	if len(dbTicks) == 0 {
+		dbTicks = uc.FetchFutureHistoryTick(code, td[0].TradeDay)
+		if len(dbTicks) == 0 {
+			logger.Errorf("Fetch Future History Tick Failed -> Code: %s, Date: %s", code, td[0].TradeDay.Format(common.ShortTimeLayout))
+			return
+		}
+
+		e := uc.repo.InsertFutureHistoryTickArr(context.Background(), dbTicks)
+		if e != nil {
+			logger.Error(e)
+		}
+	}
+
+	if uc.cfg.History.TriggerSimulate {
+		uc.Simulate(code, dbTicks, td[0])
+	}
+
+	bus.PublishTopicEvent(event.TopicSubscribeFutureTickTargets, code)
+}
+
+func (uc *HistoryUseCase) Simulate(code string, dbTicks []*entity.FutureHistoryTick, td tradeday.TradePeriod) {
+	notifyChan := make(chan simulator.SimulateBalance)
+	go func() {
+		var best int64
+		for {
+			balance := <-notifyChan
+			if balance.TotalBalance > best {
+				best = balance.TotalBalance
+				logger.Infof("Best: %d", best)
+				logger.Infof("Quantity: %d", balance.Cond.Quantity)
+				logger.Infof("TargetBalanceHigh: %.0f", balance.Cond.TargetBalanceHigh)
+				logger.Infof("TargetBalanceLow: %.0f", balance.Cond.TargetBalanceLow)
+				logger.Infof("TickInterval: %d", balance.Cond.TickInterval)
+				logger.Infof("RateLimit: %.0f", balance.Cond.RateLimit)
+				logger.Infof("RateChangeRatio: %.2f", balance.Cond.RateChangeRatio)
+				logger.Infof("OutInRatio: %.0f", balance.Cond.OutInRatio)
+				logger.Infof("InOutRatio: %.0f", balance.Cond.InOutRatio)
+			}
+		}
+	}()
+
+	conds := simulator.GenerateCond()
+	logger.Infof("Total simulate conds: %d", len(conds))
+	var wg sync.WaitGroup
+	var count int
+	for _, cond := range conds {
+		tmp := *cond
+		count++
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			s := simulator.NewSimulatorFuture(simulator.SimulatorFutureTarget{
+				Code:        code,
+				TradeConfig: &tmp,
+				Ticks:       dbTicks,
+				Quota:       quota.NewQuota(uc.cfg.Quota),
+				TradePeriod: td,
+			})
+
+			s.Start()
+			s.CalculateFutureTradeBalance(notifyChan)
+		}()
+
+		if count >= 10 {
+			wg.Wait()
+			count = 0
+		}
+	}
 }
 
 func (uc *HistoryUseCase) fetchHistoryClose(targetArr []*entity.StockTarget) error {
