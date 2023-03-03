@@ -69,7 +69,11 @@ func MigrateDB(dbConfig config.Database) {
 
 // TryCreateDB -.
 func TryCreateDB(cfg config.Database) {
-	pg, err := postgres.New(cfg.URL, postgres.MaxPoolSize(cfg.PoolMax))
+	pg, err := postgres.New(
+		cfg.URL,
+		postgres.MaxPoolSize(cfg.PoolMax),
+		postgres.Logger(logger),
+	)
 	if err != nil {
 		logger.Fatal(err)
 	}

@@ -93,7 +93,7 @@ func (uc *TargetUseCase) publishNewFutureTargets() {
 	if futureTarget, err := uc.getFutureTarget(); err != nil {
 		logger.Fatal(err)
 	} else {
-		bus.PublishTopicEvent(event.TopicSubscribeFutureTickTargets, futureTarget)
+		bus.PublishTopicEvent(event.TopicFetchFutureHistory, futureTarget)
 	}
 }
 

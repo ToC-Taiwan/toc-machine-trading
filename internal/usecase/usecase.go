@@ -30,6 +30,7 @@ func NewUseCaseBase(cfg *config.Config) *UseCaseBase {
 	pg, err := postgres.New(
 		fmt.Sprintf("%s%s", cfg.Database.URL, cfg.Database.DBName),
 		postgres.MaxPoolSize(cfg.Database.PoolMax),
+		postgres.Logger(logger),
 	)
 	if err != nil {
 		logger.Fatal(err)

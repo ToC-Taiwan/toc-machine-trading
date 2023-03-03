@@ -16,6 +16,16 @@ type FutureHistoryTick struct {
 	HistoryTickBase
 }
 
+func (f *FutureHistoryTick) ToRealTimeTick() *RealTimeFutureTick {
+	return &RealTimeFutureTick{
+		Code:     f.Code,
+		TickTime: f.TickTime,
+		Close:    f.Close,
+		Volume:   f.Volume,
+		TickType: f.TickType,
+	}
+}
+
 // HistoryTickBase -.
 type HistoryTickBase struct {
 	ID        int64     `json:"id"`

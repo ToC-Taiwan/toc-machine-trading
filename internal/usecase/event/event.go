@@ -4,6 +4,8 @@ package event
 const (
 	TopicFetchStockHistory   string = "fetch_stock_history"
 	TopicAnalyzeStockTargets string = "analyze_stock_targets"
+
+	TopicFetchFutureHistory string = "fetch_future_history"
 )
 
 const (
