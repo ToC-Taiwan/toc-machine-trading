@@ -4,7 +4,6 @@ export
 BIN_NAME = toc-machine-trading
 
 run: swag ### swag run
-	@rm ./$(BIN_NAME)
 	@go mod tidy
 	@go mod download
 	@go generate ./...
@@ -20,7 +19,6 @@ swag: ### swag
 .PHONY: swag
 
 build: ### build
-	@rm ./$(BIN_NAME)
 	@go mod tidy
 	@go mod download
 	@go build -o $(BIN_NAME) ./cmd/app
