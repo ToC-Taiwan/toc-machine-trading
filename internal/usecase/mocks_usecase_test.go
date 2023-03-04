@@ -10,6 +10,7 @@ import (
 	time "time"
 	config "tmt/cmd/config"
 	entity "tmt/internal/entity"
+	simulator "tmt/internal/usecase/module/simulator"
 
 	gomock "github.com/golang/mock/gomock"
 )
@@ -195,6 +196,20 @@ func (m *MockHistory) GetTradeDay() time.Time {
 func (mr *MockHistoryMockRecorder) GetTradeDay() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTradeDay", reflect.TypeOf((*MockHistory)(nil).GetTradeDay))
+}
+
+// Simulate mocks base method.
+func (m *MockHistory) Simulate(cond *config.TradeFuture) *simulator.SimulateBalance {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Simulate", cond)
+	ret0, _ := ret[0].(*simulator.SimulateBalance)
+	return ret0
+}
+
+// Simulate indicates an expected call of Simulate.
+func (mr *MockHistoryMockRecorder) Simulate(cond interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Simulate", reflect.TypeOf((*MockHistory)(nil).Simulate), cond)
 }
 
 // MockRealTime is a mock of RealTime interface.

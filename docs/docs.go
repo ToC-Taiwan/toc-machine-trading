@@ -240,6 +240,47 @@ const docTemplate = `{
                 }
             }
         },
+        "/history/simulate/future": {
+            "post": {
+                "description": "simulateFuture",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "history"
+                ],
+                "summary": "simulateFuture",
+                "operationId": "simulateFuture",
+                "parameters": [
+                    {
+                        "description": "Body",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/config.TradeFuture"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/simulator.SimulateBalance"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/v1.response"
+                        }
+                    }
+                }
+            }
+        },
         "/order": {
             "post": {
                 "description": "manualInsertFutureOrder",
@@ -1435,6 +1476,23 @@ const docTemplate = `{
                 },
                 "tse": {
                     "$ref": "#/definitions/entity.IndexStatus"
+                }
+            }
+        },
+        "simulator.SimulateBalance": {
+            "type": "object",
+            "properties": {
+                "cond": {
+                    "$ref": "#/definitions/config.TradeFuture"
+                },
+                "forward": {
+                    "type": "integer"
+                },
+                "reverse": {
+                    "type": "integer"
+                },
+                "total_balance": {
+                    "type": "integer"
                 }
             }
         },

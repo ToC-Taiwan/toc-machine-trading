@@ -5,7 +5,6 @@ type History struct {
 	HistoryClosePeriod int64 `json:"history_close_period" env-required:"true" yaml:"history_close_period"`
 	HistoryTickPeriod  int64 `json:"history_tick_period"  env-required:"true" yaml:"history_tick_period"`
 	HistoryKbarPeriod  int64 `json:"history_kbar_period"  env-required:"true" yaml:"history_kbar_period"`
-	TriggerSimulate    bool  `json:"trigger_simulate" yaml:"trigger_simulate"`
 }
 
 // Quota -.

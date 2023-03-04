@@ -7,6 +7,7 @@ import (
 
 	"tmt/cmd/config"
 	"tmt/internal/entity"
+	"tmt/internal/usecase/module/simulator"
 )
 
 //go:generate mockgen -source=interfaces_usecase.go -destination=./mocks_usecase_test.go -package=usecase_test
@@ -27,6 +28,8 @@ type History interface {
 
 	GetDayKbarByStockNumDate(stockNum string, date time.Time) *entity.StockHistoryKbar
 	FetchFutureHistoryKbar(code string, date time.Time) ([]*entity.FutureHistoryKbar, error)
+
+	Simulate(cond *config.TradeFuture) *simulator.SimulateBalance
 }
 
 type RealTime interface {

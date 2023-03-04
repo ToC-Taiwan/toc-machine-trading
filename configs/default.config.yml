@@ -50,8 +50,6 @@ history:
     history_tick_period: 12
     history_kbar_period: 65
 
-    trigger_simulate: false
-
 quota:
     stock_trade_quota: 1000000
     stock_fee_discount: 0.28

@@ -59,18 +59,19 @@ func NewSimulatorFuture(target SimulatorFutureTarget) *SimulatorFuture {
 		s.historyTickArr = append(s.historyTickArr, tick.ToRealTimeTick())
 	}
 
-	s.ProcessTick()
+	s.processTick()
+	s.start()
 
 	return s
 }
 
-func (s *SimulatorFuture) Start() {
+func (s *SimulatorFuture) start() {
 	for _, tick := range s.historyTickArr {
 		s.tickChan <- tick
 	}
 }
 
-func (s *SimulatorFuture) ProcessTick() {
+func (s *SimulatorFuture) processTick() {
 	go func() {
 		for {
 			s.lastTick = <-s.tickChan
@@ -225,7 +226,7 @@ func (s *SimulatorFuture) checkByBalance(tick *entity.RealTimeFutureTick) {
 	s.waitingOrder = nil
 }
 
-func (s *SimulatorFuture) CalculateFutureTradeBalance(notifyChan chan SimulateBalance) {
+func (s *SimulatorFuture) CalculateFutureTradeBalance() *SimulateBalance {
 	var forward, reverse []*entity.FutureOrder
 	qtyMap := make(map[string]int64)
 	for _, v := range s.allOrder {
@@ -250,7 +251,7 @@ func (s *SimulatorFuture) CalculateFutureTradeBalance(notifyChan chan SimulateBa
 	forwardBalance, _ := s.calculateForwardFutureBalance(forward)
 	revereBalance, _ := s.calculateReverseFutureBalance(reverse)
 
-	notifyChan <- SimulateBalance{
+	return &SimulateBalance{
 		TotalBalance: forwardBalance + revereBalance,
 		Forward:      forwardBalance,
 		Reverse:      revereBalance,

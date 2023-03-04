@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"time"
 
+	"tmt/cmd/config"
 	"tmt/internal/entity"
 	"tmt/internal/usecase"
 	"tmt/pkg/common"
@@ -22,6 +23,7 @@ func newHistoryRoutes(handler *gin.RouterGroup, t usecase.History) {
 	h := handler.Group("/history")
 	{
 		h.GET("/day-kbar/:stock/:start_date/:interval", r.getKbarData)
+		h.POST("/simulate/future", r.simulateFuture)
 	}
 }
 
@@ -65,5 +67,25 @@ func (r *historyRoutes) getKbarData(c *gin.Context) {
 		result = append(result, *tmp)
 	}
 
+	c.JSON(http.StatusOK, result)
+}
+
+// @Summary     simulateFuture
+// @Description simulateFuture
+// @ID          simulateFuture
+// @Tags  	    history
+// @Accept      json
+// @Produce     json
+// @param       body body config.TradeFuture{} true "Body"
+// @success     200 {object} simulator.SimulateBalance
+// @Failure     500 {object} response
+// @Router      /history/simulate/future [post]
+func (r *historyRoutes) simulateFuture(c *gin.Context) {
+	body := &config.TradeFuture{}
+	if err := c.BindJSON(body); err != nil {
+		errorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+	result := r.t.Simulate(body)
 	c.JSON(http.StatusOK, result)
 }

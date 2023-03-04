@@ -18,8 +18,8 @@ type SimulatorFutureTarget struct {
 }
 
 type SimulateBalance struct {
-	TotalBalance int64
-	Forward      int64
-	Reverse      int64
-	Cond         *config.TradeFuture
+	TotalBalance int64               `json:"total_balance" yaml:"total_balance"`
+	Forward      int64               `json:"forward" yaml:"forward"`
+	Reverse      int64               `json:"reverse" yaml:"reverse"`
+	Cond         *config.TradeFuture `json:"cond" yaml:"cond"`
 }
