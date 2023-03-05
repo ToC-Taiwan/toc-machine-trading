@@ -51,6 +51,22 @@ func (c RealTimeStockTickArr) GetRSIByTickTime(preTime time.Time, count int) flo
 
 type RealTimeFutureTickArr []*RealTimeFutureTick
 
+func (c RealTimeFutureTickArr) GetTotalTime() time.Duration {
+	if len(c) < 2 {
+		return 0
+	}
+
+	return c[len(c)-1].TickTime.Sub(c[0].TickTime)
+}
+
+func (c RealTimeFutureTickArr) GetLastTwoTickGapTime() time.Duration {
+	if len(c) < 2 {
+		return 0
+	}
+
+	return c[len(c)-1].TickTime.Sub(c[len(c)-2].TickTime)
+}
+
 func (c RealTimeFutureTickArr) AppendKbar(originalArr *kbarArr) int {
 	if len(c) < 2 {
 		return 0

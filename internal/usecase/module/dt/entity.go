@@ -8,7 +8,7 @@ import (
 )
 
 type orderWithCfg struct {
-	order            *entity.FutureOrder
-	cfg              *config.TradeFuture
-	lastTradeOutTime time.Time
+	order           *entity.FutureOrder
+	cfg             *config.TradeFuture
+	maxTradeOutTime time.Time
 }

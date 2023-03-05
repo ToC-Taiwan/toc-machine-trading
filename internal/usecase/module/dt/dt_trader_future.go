@@ -21,8 +21,8 @@ type DTTraderFuture struct {
 	ready bool   // if true, need tick
 	done  bool   // if true, trader done, no need to check tick
 
-	tradeOutAction   entity.OrderAction // trade out action
-	lastTradeOutTime time.Time          // last trade out time
+	tradeOutAction  entity.OrderAction // trade out action
+	maxTradeOutTime time.Time          // last trade out time
 
 	tickChan       chan *entity.RealTimeFutureTick // tick chan
 	finishOrderMap map[string]*entity.FutureOrder  // order id -> order
@@ -50,16 +50,16 @@ func NewDTTraderFuture(orderWithCfg orderWithCfg, s *grpcapi.TradegRPCAPI, bus *
 	}
 
 	d := &DTTraderFuture{
-		id:               uuid.NewString(),
-		tickChan:         make(chan *entity.RealTimeFutureTick),
-		finishOrderMap:   make(map[string]*entity.FutureOrder),
-		sc:               s,
-		bus:              bus,
-		baseOrder:        orderWithCfg.order,
-		tradeConfig:      orderWithCfg.cfg,
-		lastTradeOutTime: orderWithCfg.lastTradeOutTime,
-		waitTimes:        orderWithCfg.cfg.TradeOutWaitTimes,
-		slack:            slack,
+		id:              uuid.NewString(),
+		tickChan:        make(chan *entity.RealTimeFutureTick),
+		finishOrderMap:  make(map[string]*entity.FutureOrder),
+		sc:              s,
+		bus:             bus,
+		baseOrder:       orderWithCfg.order,
+		tradeConfig:     orderWithCfg.cfg,
+		maxTradeOutTime: orderWithCfg.maxTradeOutTime,
+		waitTimes:       orderWithCfg.cfg.TradeOutWaitTimes,
+		slack:           slack,
 	}
 
 	if orderWithCfg.order.Action == entity.ActionSell {
@@ -126,29 +126,31 @@ func (d *DTTraderFuture) isTraderDone() bool {
 }
 
 func (d *DTTraderFuture) checkWaitTimes(tick *entity.RealTimeFutureTick) bool {
-	defer func() {
-		d.lastTick = tick
-	}()
-
 	if d.lastTick == nil {
 		return true
 	}
 
+	defer func() {
+		d.lastTick = tick
+	}()
+
+	if d.waitTimes <= 0 {
+		return false
+	}
+
 	switch d.tradeOutAction {
 	case entity.ActionSell:
-		if d.waitTimes > 0 && tick.Close >= d.lastTick.Close {
+		if tick.Close >= d.lastTick.Close {
 			d.waitTimes--
-			return true
 		}
 
 	case entity.ActionBuy:
-		if d.waitTimes > 0 && tick.Close <= d.lastTick.Close {
+		if tick.Close <= d.lastTick.Close {
 			d.waitTimes--
-			return true
 		}
 	}
 
-	return false
+	return true
 }
 
 func (d *DTTraderFuture) checkByBalance(tick *entity.RealTimeFutureTick) {
@@ -169,7 +171,7 @@ func (d *DTTraderFuture) checkByBalance(tick *entity.RealTimeFutureTick) {
 		}
 	}
 
-	if !place && time.Now().Before(d.lastTradeOutTime) {
+	if !place && tick.TickTime.Before(d.maxTradeOutTime) {
 		return
 	}
 

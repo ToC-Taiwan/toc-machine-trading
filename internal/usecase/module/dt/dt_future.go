@@ -125,7 +125,7 @@ func (d *DTFuture) processTick() {
 			}
 
 			if o := d.generateOrder(); o != nil {
-				d.lastPlaceOrderTime = time.Now()
+				d.lastPlaceOrderTime = d.lastTick.TickTime
 				var wg sync.WaitGroup
 				for i := 0; i < int(d.orderQuantity); i++ {
 					wg.Add(1)
@@ -143,13 +143,13 @@ func (d *DTFuture) cutTickArr() {
 		return
 	}
 
-	if d.tickArr[len(d.tickArr)-1].TickTime.Sub(d.tickArr[len(d.tickArr)-2].TickTime) > 3*time.Second {
+	if d.tickArr.GetLastTwoTickGapTime() > 3*time.Second {
 		d.tickArr = entity.RealTimeFutureTickArr{}
 		d.lastTickRate = 0
 		return
 	}
 
-	if d.lastTick.TickTime.Sub(d.tickArr[0].TickTime) > time.Duration(2*d.tradeConfig.TickInterval)*time.Second {
+	if d.tickArr.GetTotalTime() > time.Duration(2*d.tradeConfig.TickInterval)*time.Second {
 		d.tickArr = d.tickArr[1:]
 	}
 }
@@ -198,7 +198,7 @@ func (d *DTFuture) generateOrder() *entity.FutureOrder {
 				Quantity: orderQtyUnit,
 			},
 		}
-	case 100-outInRatio < d.tradeConfig.OutInRatio:
+	case 100-outInRatio > d.tradeConfig.InOutRatio:
 		return &entity.FutureOrder{
 			Code: d.code,
 			BaseOrder: entity.BaseOrder{
@@ -216,9 +216,9 @@ func (d *DTFuture) addTrader(order *entity.FutureOrder, wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	orderWithCfg := orderWithCfg{
-		order:            order,
-		cfg:              d.tradeConfig,
-		lastTradeOutTime: time.Now().Add(time.Duration(d.tradeConfig.MaxHoldTime) * time.Minute),
+		order:           order,
+		cfg:             d.tradeConfig,
+		maxTradeOutTime: time.Now().Add(time.Duration(d.tradeConfig.MaxHoldTime) * time.Minute),
 	}
 
 	if trader := NewDTTraderFuture(orderWithCfg, d.sc, d.localBus, d.slack); trader != nil {

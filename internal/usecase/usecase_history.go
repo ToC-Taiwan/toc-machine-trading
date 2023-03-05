@@ -104,29 +104,20 @@ func (uc *HistoryUseCase) FetchStockHistory(targetArr []*entity.StockTarget) {
 
 func (uc *HistoryUseCase) FetchFutureHistory(code string) {
 	td := uc.tradeDay.GetLastNFutureTradeDay(1)
-	dbTicks, err := uc.repo.QueryFutureHistoryTickArrByTime(context.Background(), code, td[0].StartTime, td[0].EndTime)
+	ticks, err := uc.FetchFutureHistoryTick(code, td[0])
 	if err != nil {
 		logger.Error(err)
 		return
 	}
 
-	if len(dbTicks) == 0 {
-		dbTicks = uc.FetchFutureHistoryTick(code, td[0].TradeDay)
-	}
-
-	if len(dbTicks) == 0 {
-		logger.Error("Fetch Future History Tick Failed Cancel subscribe future tick")
+	if len(ticks) == 0 {
+		logger.Error("Fetch Future History Tick Failed, Cancel subscribe future tick")
 		return
 	}
 
-	uc.simulateFutureTicks = dbTicks
+	uc.simulateFutureTicks = ticks
 	uc.simulateDate = td[0]
 	uc.simulateCode = code
-
-	e := uc.repo.InsertFutureHistoryTickArr(context.Background(), dbTicks)
-	if e != nil {
-		logger.Error(e)
-	}
 
 	bus.PublishTopicEvent(event.TopicSubscribeFutureTickTargets, code)
 }
@@ -134,10 +125,10 @@ func (uc *HistoryUseCase) FetchFutureHistory(code string) {
 func (uc *HistoryUseCase) Simulate(cond *config.TradeFuture) *simulator.SimulateBalance {
 	s := simulator.NewSimulatorFuture(simulator.SimulatorFutureTarget{
 		Code:        uc.simulateCode,
-		TradeConfig: cond,
 		Ticks:       uc.simulateFutureTicks,
-		Quota:       quota.NewQuota(uc.cfg.Quota),
 		TradePeriod: uc.simulateDate,
+		Quota:       quota.NewQuota(uc.cfg.Quota),
+		TradeConfig: cond,
 	})
 	return s.CalculateFutureTradeBalance()
 }
@@ -543,26 +534,24 @@ func (uc *HistoryUseCase) processKbarArr(arr []*entity.StockHistoryKbar) {
 }
 
 // FetchFutureHistoryTick -.
-func (uc *HistoryUseCase) FetchFutureHistoryTick(code string, date time.Time) []*entity.FutureHistoryTick {
-	result := make(map[string][]*entity.FutureHistoryTick)
-	dataChan := make(chan *entity.FutureHistoryTick)
-	wait := make(chan struct{})
-	go func() {
-		for {
-			tick, ok := <-dataChan
-			if !ok {
-				break
-			}
-			result[tick.Code] = append(result[tick.Code], tick)
-		}
-		close(wait)
-	}()
-	tickArr, err := uc.grpcapi.GetFutureHistoryTick([]string{code}, date.Format(common.ShortTimeLayout))
+func (uc *HistoryUseCase) FetchFutureHistoryTick(code string, date tradeday.TradePeriod) ([]*entity.FutureHistoryTick, error) {
+	dbTicks, err := uc.repo.QueryFutureHistoryTickArrByTime(context.Background(), code, date.StartTime, date.EndTime)
 	if err != nil {
-		logger.Error(err)
+		return []*entity.FutureHistoryTick{}, err
 	}
+
+	if len(dbTicks) > 0 {
+		return dbTicks, nil
+	}
+
+	result := []*entity.FutureHistoryTick{}
+	tickArr, err := uc.grpcapi.GetFutureHistoryTick([]string{code}, date.TradeDay.Format(common.ShortTimeLayout))
+	if err != nil {
+		return nil, err
+	}
+
 	for _, t := range tickArr {
-		dataChan <- &entity.FutureHistoryTick{
+		result = append(result, &entity.FutureHistoryTick{
 			Code: t.GetCode(),
 			HistoryTickBase: entity.HistoryTickBase{
 				TickTime: time.Unix(0, t.GetTs()).Add(-8 * time.Hour), Close: t.GetClose(),
@@ -570,46 +559,35 @@ func (uc *HistoryUseCase) FetchFutureHistoryTick(code string, date time.Time) []
 				BidPrice: t.GetBidPrice(), BidVolume: t.GetBidVolume(),
 				AskPrice: t.GetAskPrice(), AskVolume: t.GetAskVolume(),
 			},
-		}
+		})
 	}
-	close(dataChan)
-	<-wait
-	return result[code]
+
+	e := uc.repo.InsertFutureHistoryTickArr(context.Background(), result)
+	if e != nil {
+		logger.Error(e)
+		return nil, e
+	}
+
+	return result, nil
 }
 
 // FetchFutureHistoryKbar -.
 func (uc *HistoryUseCase) FetchFutureHistoryKbar(code string, date time.Time) ([]*entity.FutureHistoryKbar, error) {
-	result := make(map[string][]*entity.FutureHistoryKbar)
-	dataChan := make(chan *entity.FutureHistoryKbar)
-	wait := make(chan struct{})
-	go func() {
-		for {
-			kbar, ok := <-dataChan
-			if !ok {
-				break
-			}
-			// key := fmt.Sprintf("%s:%s", kbar.StockNum, kbar.KbarTime.Format(common.ShortTimeLayout))
-			result[code] = append(result[code], kbar)
-		}
-		close(wait)
-	}()
-
+	result := []*entity.FutureHistoryKbar{}
 	kbarArr, err := uc.grpcapi.GetFutureHistoryKbar([]string{code}, date.Format(common.ShortTimeLayout))
 	if err != nil {
 		return nil, err
 	}
 
 	for _, t := range kbarArr {
-		dataChan <- &entity.FutureHistoryKbar{
+		result = append(result, &entity.FutureHistoryKbar{
 			Code: t.GetCode(),
 			HistoryKbarBase: entity.HistoryKbarBase{
 				KbarTime: time.Unix(0, t.GetTs()).Add(-8 * time.Hour),
 				Open:     t.GetOpen(), High: t.GetHigh(), Low: t.GetLow(),
 				Close: t.GetClose(), Volume: t.GetVolume(),
 			},
-		}
+		})
 	}
-	close(dataChan)
-	<-wait
-	return result[code], nil
+	return result, nil
 }

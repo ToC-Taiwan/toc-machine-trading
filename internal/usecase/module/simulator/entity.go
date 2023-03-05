@@ -10,16 +10,14 @@ import (
 type SimulatorFutureTarget struct {
 	Code        string
 	TradePeriod tradeday.TradePeriod
-
 	TradeConfig *config.TradeFuture
 	Quota       *quota.Quota
-
-	Ticks []*entity.FutureHistoryTick
+	Ticks       []*entity.FutureHistoryTick
 }
 
 type SimulateBalance struct {
-	TotalBalance int64               `json:"total_balance" yaml:"total_balance"`
-	Forward      int64               `json:"forward" yaml:"forward"`
-	Reverse      int64               `json:"reverse" yaml:"reverse"`
-	Cond         *config.TradeFuture `json:"cond" yaml:"cond"`
+	TotalBalance int64               `json:"total_balance"`
+	Forward      int64               `json:"forward"`
+	Reverse      int64               `json:"reverse"`
+	Cond         *config.TradeFuture `json:"cond"`
 }
