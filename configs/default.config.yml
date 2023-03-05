@@ -20,11 +20,11 @@ trade_future:
     quantity: 2
 
     # unit: dollar
-    target_balance_high: 3
+    target_balance_high: 8
     target_balance_low: -3
 
     # unit: times
-    trade_out_wait_times: 20
+    trade_out_wait_times: 75
 
     # unit: seccond
     buy_sell_wait_time: 5
@@ -34,15 +34,15 @@ trade_future:
     trade_time_range:
         first_part_duration: 720
         second_part_duration: 285
-    max_hold_time: 30
+    max_hold_time: 10
 
     # unit: volume/second
     rate_limit: 10
 
     # unit: %
-    rate_change_ratio: 5
-    out_in_ratio: 70
-    in_out_ratio: 30
+    rate_change_ratio: 8
+    out_in_ratio: 90
+    in_out_ratio: 65
 
 history:
     # unit: day

@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"tmt/cmd/config"
+	"tmt/global"
 	"tmt/internal/entity"
 	"tmt/internal/usecase/event"
 	"tmt/internal/usecase/grpcapi"
@@ -15,7 +16,6 @@ import (
 	"tmt/internal/usecase/module/simulator"
 	"tmt/internal/usecase/module/tradeday"
 	"tmt/internal/usecase/repo"
-	"tmt/pkg/common"
 	"tmt/pkg/utils"
 )
 
@@ -165,7 +165,7 @@ func (uc *HistoryUseCase) fetchHistoryClose(targetArr []*entity.StockTarget) err
 		}
 		stockArr := s
 		date := d
-		closeArr, err := uc.grpcapi.GetStockHistoryClose(stockArr, date.Format(common.ShortTimeLayout))
+		closeArr, err := uc.grpcapi.GetStockHistoryClose(stockArr, date.Format(global.ShortTimeLayout))
 		if err != nil {
 			logger.Error(err)
 		}
@@ -251,7 +251,7 @@ func (uc *HistoryUseCase) fetchHistoryTick(targetArr []*entity.StockTarget) erro
 			if !ok {
 				break
 			}
-			key := fmt.Sprintf("%s:%s", tick.StockNum, tick.TickTime.Format(common.ShortTimeLayout))
+			key := fmt.Sprintf("%s:%s", tick.StockNum, tick.TickTime.Format(global.ShortTimeLayout))
 			result[key] = append(result[key], tick)
 		}
 		close(wait)
@@ -262,7 +262,7 @@ func (uc *HistoryUseCase) fetchHistoryTick(targetArr []*entity.StockTarget) erro
 		}
 		stockArr := s
 		date := d
-		tickArr, err := uc.grpcapi.GetStockHistoryTick(stockArr, date.Format(common.ShortTimeLayout))
+		tickArr, err := uc.grpcapi.GetStockHistoryTick(stockArr, date.Format(global.ShortTimeLayout))
 		if err != nil {
 			logger.Error(err)
 		}
@@ -345,7 +345,7 @@ func (uc *HistoryUseCase) fetchHistoryKbar(targetArr []*entity.StockTarget) erro
 			if !ok {
 				break
 			}
-			key := fmt.Sprintf("%s:%s", kbar.StockNum, kbar.KbarTime.Format(common.ShortTimeLayout))
+			key := fmt.Sprintf("%s:%s", kbar.StockNum, kbar.KbarTime.Format(global.ShortTimeLayout))
 			result[key] = append(result[key], kbar)
 		}
 		close(wait)
@@ -356,7 +356,7 @@ func (uc *HistoryUseCase) fetchHistoryKbar(targetArr []*entity.StockTarget) erro
 		}
 		stockArr := s
 		date := d
-		tickArr, err := uc.grpcapi.GetStockHistoryKbar(stockArr, date.Format(common.ShortTimeLayout))
+		tickArr, err := uc.grpcapi.GetStockHistoryKbar(stockArr, date.Format(global.ShortTimeLayout))
 		if err != nil {
 			logger.Error(err)
 		}
@@ -545,7 +545,7 @@ func (uc *HistoryUseCase) FetchFutureHistoryTick(code string, date tradeday.Trad
 	}
 
 	result := []*entity.FutureHistoryTick{}
-	tickArr, err := uc.grpcapi.GetFutureHistoryTick([]string{code}, date.TradeDay.Format(common.ShortTimeLayout))
+	tickArr, err := uc.grpcapi.GetFutureHistoryTick([]string{code}, date.TradeDay.Format(global.ShortTimeLayout))
 	if err != nil {
 		return nil, err
 	}
@@ -574,7 +574,7 @@ func (uc *HistoryUseCase) FetchFutureHistoryTick(code string, date tradeday.Trad
 // FetchFutureHistoryKbar -.
 func (uc *HistoryUseCase) FetchFutureHistoryKbar(code string, date time.Time) ([]*entity.FutureHistoryKbar, error) {
 	result := []*entity.FutureHistoryKbar{}
-	kbarArr, err := uc.grpcapi.GetFutureHistoryKbar([]string{code}, date.Format(common.ShortTimeLayout))
+	kbarArr, err := uc.grpcapi.GetFutureHistoryKbar([]string{code}, date.Format(global.ShortTimeLayout))
 	if err != nil {
 		return nil, err
 	}

@@ -6,9 +6,9 @@ import (
 	"time"
 
 	"tmt/cmd/config"
+	"tmt/global"
 	"tmt/internal/entity"
 	"tmt/internal/usecase"
-	"tmt/pkg/common"
 
 	"github.com/gin-gonic/gin"
 )
@@ -47,7 +47,7 @@ func (r *historyRoutes) getKbarData(c *gin.Context) {
 		return
 	}
 	startDate := c.Param("start_date")
-	startDateTime, err := time.Parse(common.ShortTimeLayout, startDate)
+	startDateTime, err := time.Parse(global.ShortTimeLayout, startDate)
 	if err != nil {
 		errorResponse(c, http.StatusBadRequest, err.Error())
 		return

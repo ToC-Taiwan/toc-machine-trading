@@ -4,8 +4,8 @@ package cache
 import (
 	"time"
 
+	"tmt/global"
 	"tmt/pkg/cache"
-	"tmt/pkg/common"
 )
 
 const (
@@ -44,11 +44,11 @@ func (c *Cache) futureDetailKey(code string) *cache.Key {
 }
 
 func (c *Cache) historyOpenKey(stockNum string, date time.Time) *cache.Key {
-	return cache.NewKey(cacheCatagoryHistoryOpen, cacheIndexStockNum).ExtendIndex(stockNum, date.Format(common.ShortTimeLayout))
+	return cache.NewKey(cacheCatagoryHistoryOpen, cacheIndexStockNum).ExtendIndex(stockNum, date.Format(global.ShortTimeLayout))
 }
 
 func (c *Cache) historyCloseKey(stockNum string, date time.Time) *cache.Key {
-	return cache.NewKey(cacheCatagoryHistoryClose, cacheIndexStockNum).ExtendIndex(stockNum, date.Format(common.ShortTimeLayout))
+	return cache.NewKey(cacheCatagoryHistoryClose, cacheIndexStockNum).ExtendIndex(stockNum, date.Format(global.ShortTimeLayout))
 }
 
 func (c *Cache) historyTickAnalyzeKey(stockNum string) *cache.Key {
@@ -56,9 +56,9 @@ func (c *Cache) historyTickAnalyzeKey(stockNum string) *cache.Key {
 }
 
 func (c *Cache) dayKbarKey(stockNum string, date time.Time) *cache.Key {
-	return cache.NewKey(cacheCatagoryDayKbar, cacheIndexStockNum).ExtendIndex(stockNum, date.Format(common.ShortTimeLayout))
+	return cache.NewKey(cacheCatagoryDayKbar, cacheIndexStockNum).ExtendIndex(stockNum, date.Format(global.ShortTimeLayout))
 }
 
 func (c *Cache) historyTickArrKey(stockNum string, date time.Time) *cache.Key {
-	return cache.NewKey(cacheCatagoryHistoryTickArr, cacheIndexStockNum).ExtendIndex(stockNum, date.Format(common.ShortTimeLayout))
+	return cache.NewKey(cacheCatagoryHistoryTickArr, cacheIndexStockNum).ExtendIndex(stockNum, date.Format(global.ShortTimeLayout))
 }

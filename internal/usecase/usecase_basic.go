@@ -6,13 +6,13 @@ import (
 	"time"
 
 	"tmt/cmd/config"
+	"tmt/global"
 	"tmt/internal/entity"
 
 	"tmt/internal/usecase/grpcapi"
 	"tmt/internal/usecase/module/tradeday"
 	"tmt/internal/usecase/rabbit"
 	"tmt/internal/usecase/repo"
-	"tmt/pkg/common"
 
 	"github.com/robfig/cron/v3"
 )
@@ -161,7 +161,7 @@ func (uc *BasicUseCase) updateRepoStock() ([]*entity.Stock, error) {
 			continue
 		}
 
-		updateTime, pErr := time.ParseInLocation(common.ShortSlashTimeLayout, v.GetUpdateDate(), time.Local)
+		updateTime, pErr := time.ParseInLocation(global.ShortSlashTimeLayout, v.GetUpdateDate(), time.Local)
 		if err != nil {
 			return []*entity.Stock{}, pErr
 		}
@@ -202,12 +202,12 @@ func (uc *BasicUseCase) updateRepoFuture() ([]*entity.Future, error) {
 			continue
 		}
 
-		updateTime, pErr := time.ParseInLocation(common.ShortSlashTimeLayout, v.GetUpdateDate(), time.Local)
+		updateTime, pErr := time.ParseInLocation(global.ShortSlashTimeLayout, v.GetUpdateDate(), time.Local)
 		if err != nil {
 			return []*entity.Future{}, pErr
 		}
 
-		dDate, e := time.ParseInLocation(common.ShortSlashTimeLayout, v.GetDeliveryDate(), time.Local)
+		dDate, e := time.ParseInLocation(global.ShortSlashTimeLayout, v.GetDeliveryDate(), time.Local)
 		if e != nil {
 			return []*entity.Future{}, err
 		}
@@ -254,12 +254,12 @@ func (uc *BasicUseCase) updateRepoOption() ([]*entity.Option, error) {
 			continue
 		}
 
-		updateTime, pErr := time.ParseInLocation(common.ShortSlashTimeLayout, v.GetUpdateDate(), time.Local)
+		updateTime, pErr := time.ParseInLocation(global.ShortSlashTimeLayout, v.GetUpdateDate(), time.Local)
 		if err != nil {
 			return []*entity.Option{}, pErr
 		}
 
-		dDate, e := time.ParseInLocation(common.ShortSlashTimeLayout, v.GetDeliveryDate(), time.Local)
+		dDate, e := time.ParseInLocation(global.ShortSlashTimeLayout, v.GetDeliveryDate(), time.Local)
 		if e != nil {
 			return []*entity.Option{}, err
 		}

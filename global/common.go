@@ -1,5 +1,5 @@
-// Package common package common
-package common
+// Package global package global
+package global
 
 const (
 	// LongTimeLayout -.
