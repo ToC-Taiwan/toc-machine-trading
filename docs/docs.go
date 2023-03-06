@@ -287,6 +287,33 @@ const docTemplate = `{
                 }
             }
         },
+        "/history/simulate/future/auto": {
+            "post": {
+                "description": "simulateFutureAuto",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "history"
+                ],
+                "summary": "simulateFutureAuto",
+                "operationId": "simulateFutureAuto",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/v1.response"
+                        }
+                    }
+                }
+            }
+        },
         "/order": {
             "post": {
                 "description": "manualInsertFutureOrder",

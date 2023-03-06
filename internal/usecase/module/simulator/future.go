@@ -2,6 +2,7 @@
 package simulator
 
 import (
+	"fmt"
 	"time"
 
 	"tmt/cmd/config"
@@ -16,6 +17,7 @@ import (
 var logger = log.Get()
 
 type SimulatorFuture struct {
+	conds       []*config.TradeFuture
 	tradeConfig *config.TradeFuture
 
 	code                string
@@ -39,25 +41,63 @@ type SimulatorFuture struct {
 }
 
 func NewSimulatorFuture(target SimulatorFutureTarget) *SimulatorFuture {
-	s := &SimulatorFuture{
-		code:           target.Code,
-		quota:          target.Quota,
-		quantity:       target.TradeConfig.Quantity,
-		tradeConfig:    target.TradeConfig,
-		tradePeriod:    target.TradePeriod,
-		historyTickArr: target.Ticks,
-		tickChan:       make(chan *entity.RealTimeFutureTick),
-		waitTimes:      make(map[string]int),
+	if len(target.TradeConfigArr) == 0 {
+		logger.Fatal("trade config arr is empty")
 	}
 
-	firstStart := s.tradePeriod.StartTime
-	secondStart := s.tradePeriod.EndTime.Add(-300 * time.Minute)
+	return &SimulatorFuture{
+		code:           target.Code,
+		quota:          target.Quota,
+		tradePeriod:    target.TradePeriod,
+		historyTickArr: target.Ticks,
+		conds:          target.TradeConfigArr,
+	}
+}
 
-	s.allowTradeTimeRange = append(s.allowTradeTimeRange, []time.Time{firstStart, firstStart.Add(time.Duration(s.tradeConfig.TradeTimeRange.FirstPartDuration) * time.Minute)})
-	s.allowTradeTimeRange = append(s.allowTradeTimeRange, []time.Time{secondStart, secondStart.Add(time.Duration(s.tradeConfig.TradeTimeRange.SecondPartDuration) * time.Minute)})
+func (s *SimulatorFuture) clear() {
+	s.waitTimes = make(map[string]int)
+	s.tickChan = make(chan *entity.RealTimeFutureTick)
 
-	s.sendTick()
-	return s
+	s.allowTradeTimeRange = [][]time.Time{}
+	s.allOrder = []*entity.FutureOrder{}
+
+	s.lastTickRate = 0
+	s.waitingOrder = nil
+
+	s.tickArr = entity.RealTimeFutureTickArr{}
+	s.lastPlaceOrderTime = time.Time{}
+}
+
+func (s *SimulatorFuture) OneCond() *SimulateBalance {
+	s.clear()
+
+	s.tradeConfig = s.conds[0]
+	s.quantity = s.tradeConfig.Quantity
+	s.allowTradeTimeRange = s.tradePeriod.ToTimeRange(s.tradeConfig.TradeTimeRange.FirstPartDuration, s.tradeConfig.TradeTimeRange.SecondPartDuration)
+
+	s.process()
+	return s.calculateFutureTradeBalance()
+}
+
+func (s *SimulatorFuture) AllConds(slackMsgChan chan string) {
+	slackMsgChan <- fmt.Sprintf("Start SimulatorFuture AllConds: %d", len(s.conds))
+	var best int64
+	for _, cond := range s.conds {
+		s.clear()
+
+		s.tradeConfig = cond
+		s.quantity = s.tradeConfig.Quantity
+		s.allowTradeTimeRange = s.tradePeriod.ToTimeRange(s.tradeConfig.TradeTimeRange.FirstPartDuration, s.tradeConfig.TradeTimeRange.SecondPartDuration)
+
+		s.process()
+		result := s.calculateFutureTradeBalance()
+		if result.TotalBalance > best {
+			best = result.TotalBalance
+			slackMsgChan <- s.calculateFutureTradeBalance().String()
+			slackMsgChan <- "------------------------------------"
+		}
+	}
+	slackMsgChan <- "SimulatorFuture AllConds Done"
 }
 
 func (s *SimulatorFuture) isAllowTrade(tickTime time.Time) bool {
@@ -70,10 +110,15 @@ func (s *SimulatorFuture) isAllowTrade(tickTime time.Time) bool {
 	return tempSwitch
 }
 
-func (s *SimulatorFuture) sendTick() {
+func (s *SimulatorFuture) process() {
+	stuck := make(chan struct{})
 	go func() {
 		for {
-			tick := <-s.tickChan
+			tick, ok := <-s.tickChan
+			if !ok {
+				break
+			}
+
 			s.tickArr = append(s.tickArr, tick)
 			s.cutTickArr()
 
@@ -96,11 +141,15 @@ func (s *SimulatorFuture) sendTick() {
 				s.waitingOrder = o
 			}
 		}
+		close(stuck)
 	}()
 
 	for _, tick := range s.historyTickArr {
 		s.tickChan <- tick
 	}
+
+	close(s.tickChan)
+	<-stuck
 }
 
 func (s *SimulatorFuture) cutTickArr() {
@@ -174,14 +223,17 @@ func (s *SimulatorFuture) checkWaitTimes(tick *entity.RealTimeFutureTick) bool {
 	}
 
 	switch s.waitingOrder.Action {
-	case entity.ActionSell:
-		if tick.Close <= s.lastTick.Close {
-			s.waitTimes[s.waitingOrder.OrderID]--
-		}
 	case entity.ActionBuy:
-		if tick.Close >= s.lastTick.Close {
-			s.waitTimes[s.waitingOrder.OrderID]--
+		if tick.Close < s.lastTick.Close {
+			return false
 		}
+		s.waitTimes[s.waitingOrder.OrderID]--
+
+	case entity.ActionSell:
+		if tick.Close > s.lastTick.Close {
+			return false
+		}
+		s.waitTimes[s.waitingOrder.OrderID]--
 	}
 	return true
 }
@@ -230,7 +282,7 @@ func (s *SimulatorFuture) checkByBalance(tick *entity.RealTimeFutureTick) {
 	s.waitingOrder = nil
 }
 
-func (s *SimulatorFuture) CalculateFutureTradeBalance() *SimulateBalance {
+func (s *SimulatorFuture) calculateFutureTradeBalance() *SimulateBalance {
 	var forward, reverse []*entity.FutureOrder
 	qtyMap := make(map[string]int64)
 	for _, v := range s.allOrder {

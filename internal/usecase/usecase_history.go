@@ -16,6 +16,7 @@ import (
 	"tmt/internal/usecase/module/simulator"
 	"tmt/internal/usecase/module/tradeday"
 	"tmt/internal/usecase/repo"
+	"tmt/internal/usecase/slack"
 	"tmt/pkg/utils"
 )
 
@@ -37,6 +38,9 @@ type HistoryUseCase struct {
 	simulateFutureTicks entity.RealTimeFutureTickArr
 	simulateDate        tradeday.TradePeriod
 	simulateCode        string
+
+	slack        *slack.Slack
+	slackMsgChan chan string
 }
 
 // NewHistory -.
@@ -49,12 +53,23 @@ func (u *UseCaseBase) NewHistory() History {
 		analyzeStockCfg: u.cfg.AnalyzeStock,
 		cfg:             u.cfg,
 		basic:           cc.GetBasicInfo(),
+		slack:           u.slack,
+		slackMsgChan:    make(chan string),
 	}
+
+	go uc.SendMessage()
 
 	bus.SubscribeAsync(event.TopicFetchStockHistory, true, uc.FetchStockHistory)
 	bus.SubscribeAsync(event.TopicFetchFutureHistory, true, uc.FetchFutureHistory)
 
 	return uc
+}
+
+func (uc *HistoryUseCase) SendMessage() {
+	for {
+		msg := <-uc.slackMsgChan
+		uc.slack.PostMessage(msg)
+	}
 }
 
 // GetTradeDay -.
@@ -124,15 +139,27 @@ func (uc *HistoryUseCase) FetchFutureHistory(code string) {
 	bus.PublishTopicEvent(event.TopicSubscribeFutureTickTargets, code)
 }
 
-func (uc *HistoryUseCase) Simulate(cond *config.TradeFuture) *simulator.SimulateBalance {
+func (uc *HistoryUseCase) SimulateOne(cond *config.TradeFuture) *simulator.SimulateBalance {
 	s := simulator.NewSimulatorFuture(simulator.SimulatorFutureTarget{
-		Code:        uc.simulateCode,
-		Ticks:       uc.simulateFutureTicks,
-		TradePeriod: uc.simulateDate,
-		Quota:       quota.NewQuota(uc.cfg.Quota),
-		TradeConfig: cond,
+		Code:           uc.simulateCode,
+		Ticks:          uc.simulateFutureTicks,
+		TradePeriod:    uc.simulateDate,
+		Quota:          quota.NewQuota(uc.cfg.Quota),
+		TradeConfigArr: []*config.TradeFuture{cond},
 	})
-	return s.CalculateFutureTradeBalance()
+
+	result := s.OneCond()
+	return result
+}
+
+func (uc *HistoryUseCase) SimulateMulti(cond []*config.TradeFuture) {
+	simulator.NewSimulatorFuture(simulator.SimulatorFutureTarget{
+		Code:           uc.simulateCode,
+		Ticks:          uc.simulateFutureTicks,
+		TradePeriod:    uc.simulateDate,
+		Quota:          quota.NewQuota(uc.cfg.Quota),
+		TradeConfigArr: cond,
+	}).AllConds(uc.slackMsgChan)
 }
 
 func (uc *HistoryUseCase) fetchHistoryClose(targetArr []*entity.StockTarget) error {

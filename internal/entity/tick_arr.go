@@ -128,7 +128,7 @@ func (c RealTimeFutureTickArr) GetTotalVolume() int64 {
 }
 
 func (c RealTimeFutureTickArr) GetOutInRatioAndRate(duration time.Duration) (float64, float64) {
-	if len(c) == 0 {
+	if len(c) < 2 {
 		return 0, 0
 	}
 

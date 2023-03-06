@@ -29,7 +29,8 @@ type History interface {
 	GetDayKbarByStockNumDate(stockNum string, date time.Time) *entity.StockHistoryKbar
 	FetchFutureHistoryKbar(code string, date time.Time) ([]*entity.FutureHistoryKbar, error)
 
-	Simulate(cond *config.TradeFuture) *simulator.SimulateBalance
+	SimulateOne(cond *config.TradeFuture) *simulator.SimulateBalance
+	SimulateMulti(cond []*config.TradeFuture)
 }
 
 type RealTime interface {

@@ -9,6 +9,7 @@ import (
 	"tmt/global"
 	"tmt/internal/entity"
 	"tmt/internal/usecase"
+	"tmt/internal/usecase/module/simulator"
 
 	"github.com/gin-gonic/gin"
 )
@@ -24,6 +25,7 @@ func newHistoryRoutes(handler *gin.RouterGroup, t usecase.History) {
 	{
 		h.GET("/day-kbar/:stock/:start_date/:interval", r.getKbarData)
 		h.POST("/simulate/future", r.simulateFuture)
+		h.POST("/simulate/future/auto", r.simulateFutureAuto)
 	}
 }
 
@@ -89,7 +91,7 @@ func (r *historyRoutes) simulateFuture(c *gin.Context) {
 	}
 
 	var needDetail bool
-	result := r.t.Simulate(body)
+	result := r.t.SimulateOne(body)
 	if h := c.GetHeader("need_detail"); h != "" {
 		if need, err := strconv.ParseBool(h); err != nil {
 			errorResponse(c, http.StatusBadRequest, err.Error())
@@ -104,4 +106,18 @@ func (r *historyRoutes) simulateFuture(c *gin.Context) {
 		result.ReverseOrder = nil
 	}
 	c.JSON(http.StatusOK, result)
+}
+
+// @Summary     simulateFutureAuto
+// @Description simulateFutureAuto
+// @ID          simulateFutureAuto
+// @Tags  	    history
+// @Accept      json
+// @Produce     json
+// @success     200
+// @Failure     500 {object} response
+// @Router      /history/simulate/future/auto [post]
+func (r *historyRoutes) simulateFutureAuto(c *gin.Context) {
+	go r.t.SimulateMulti(simulator.GenerateCond())
+	c.JSON(http.StatusOK, nil)
 }

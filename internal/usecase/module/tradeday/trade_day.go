@@ -274,6 +274,19 @@ type TradePeriod struct {
 	base      *TradeDay
 }
 
+func (tp *TradePeriod) ToTimeRange(firstMinute, secondMinute int64) [][]time.Time {
+	var timeRange [][]time.Time
+	timeRange = append(timeRange, []time.Time{
+		tp.StartTime,
+		tp.StartTime.Add(time.Duration(firstMinute) * time.Minute),
+	})
+	timeRange = append(timeRange, []time.Time{
+		tp.EndTime.Add(-300 * time.Minute),
+		tp.EndTime.Add(-300 * time.Minute).Add(time.Duration(secondMinute) * time.Minute),
+	})
+	return timeRange
+}
+
 func (tp *TradePeriod) IsStockMarketOpenNow() bool {
 	if time.Now().After(tp.StartTime) && time.Now().Before(tp.EndTime) {
 		return true

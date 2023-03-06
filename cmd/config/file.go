@@ -1,5 +1,7 @@
 package config
 
+import "fmt"
+
 // History -.
 type History struct {
 	HistoryClosePeriod int64 `json:"history_close_period" env-required:"true" yaml:"history_close_period"`
@@ -82,4 +84,18 @@ type TradeFuture struct {
 type TradeTimeRange struct {
 	FirstPartDuration  int64 `json:"first_part_duration"  yaml:"first_part_duration"`
 	SecondPartDuration int64 `json:"second_part_duration" yaml:"second_part_duration"`
+}
+
+func (t *TradeFuture) String() string {
+	return fmt.Sprintf(`
+TargetBalanceHigh: %.0f
+TargetBalanceLow: %.0f
+TradeOutWaitTimes: %d
+TickInterval: %d
+MaxHoldTime: %d
+RateLimit: %.0f
+RateChangeRatio: %.0f
+OutInRatio: %.0f
+InOutRatio: %.0f
+	`, t.TargetBalanceHigh, t.TargetBalanceLow, t.TradeOutWaitTimes, t.TickInterval, t.MaxHoldTime, t.RateLimit, t.RateChangeRatio, t.OutInRatio, t.InOutRatio)
 }
