@@ -7,8 +7,8 @@ import (
 	"os"
 	"time"
 
+	"tmt/global"
 	"tmt/internal/entity"
-	"tmt/pkg/common"
 )
 
 const (
@@ -101,7 +101,7 @@ func (t *TradeDay) GetFutureTradeDay() TradePeriod {
 
 // GetStockTradePeriodByDate -.
 func (t *TradeDay) GetStockTradePeriodByDate(date string) (TradePeriod, error) {
-	d, err := time.ParseInLocation(common.ShortTimeLayout, date, time.Local)
+	d, err := time.ParseInLocation(global.ShortTimeLayout, date, time.Local)
 	if err != nil {
 		return TradePeriod{}, err
 	}
@@ -118,7 +118,7 @@ func (t *TradeDay) GetStockTradePeriodByDate(date string) (TradePeriod, error) {
 
 // GetFutureTradePeriodByDate -.
 func (t *TradeDay) GetFutureTradePeriodByDate(date string) (TradePeriod, error) {
-	d, err := time.ParseInLocation(common.ShortTimeLayout, date, time.Local)
+	d, err := time.ParseInLocation(global.ShortTimeLayout, date, time.Local)
 	if err != nil {
 		return TradePeriod{}, err
 	}
@@ -191,7 +191,7 @@ func (t *TradeDay) parseHolidayFile() {
 	}
 
 	for _, v := range tmp.DateArr {
-		tm, err := time.ParseInLocation(common.ShortTimeLayout, v, time.Local)
+		tm, err := time.ParseInLocation(global.ShortTimeLayout, v, time.Local)
 		if err != nil {
 			panic(err)
 		}

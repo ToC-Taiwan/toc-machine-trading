@@ -44,18 +44,44 @@ func (c *Bus) PublishTopicEvent(topic string, arg ...interface{}) {
 	c.bus.Publish(topic, arg...)
 }
 
-func (c *Bus) SubscribeTopic(topic string, fn ...interface{}) {
+// SubscribeAsync Transactional determines whether subsequent callbacks for a topic are
+// run serially (true) or concurrently (false)
+func (c *Bus) SubscribeAsync(topic string, transactional bool, fn ...interface{}) {
+	if len(fn) == 0 {
+		panic("fn length must be greater than 0")
+	}
+
 	for i := len(fn) - 1; i >= 0; i-- {
-		err := c.bus.SubscribeAsync(topic, fn[i], true)
+		err := c.bus.SubscribeAsync(topic, fn[i], transactional)
 		if err != nil {
 			panic(err)
 		}
 	}
 }
 
-func (c *Bus) UnSubscribeTopic(topic string, fn interface{}) {
-	err := c.bus.Unsubscribe(topic, fn)
-	if err != nil {
-		panic(err)
+// Subscribe -.
+func (c *Bus) Subscribe(topic string, fn ...interface{}) {
+	if len(fn) == 0 {
+		panic("fn length must be greater than 0")
+	}
+
+	for i := len(fn) - 1; i >= 0; i-- {
+		err := c.bus.Subscribe(topic, fn[i])
+		if err != nil {
+			panic(err)
+		}
+	}
+}
+
+func (c *Bus) UnSubscribe(topic string, fn ...interface{}) {
+	if len(fn) == 0 {
+		panic("fn length must be greater than 0")
+	}
+
+	for _, f := range fn {
+		err := c.bus.Unsubscribe(topic, f)
+		if err != nil {
+			panic(err)
+		}
 	}
 }

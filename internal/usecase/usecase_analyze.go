@@ -32,7 +32,7 @@ func (u *UseCaseBase) NewAnalyze() Analyze {
 		tradeDay:         tradeday.Get(),
 	}
 
-	bus.SubscribeTopic(event.TopicAnalyzeStockTargets, uc.findBelowQuaterMATargets)
+	bus.SubscribeAsync(event.TopicAnalyzeStockTargets, true, uc.findBelowQuaterMATargets)
 	return uc
 }
 

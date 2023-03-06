@@ -5,9 +5,9 @@ import (
 	"strconv"
 	"time"
 
+	"tmt/global"
 	"tmt/internal/entity"
 	"tmt/internal/usecase"
-	"tmt/pkg/common"
 	"tmt/pkg/utils"
 
 	"github.com/gin-gonic/gin"
@@ -150,7 +150,7 @@ func (r *orderRoutes) manualInsertFutureOrder(c *gin.Context) {
 		return
 	}
 
-	orderTime, err := time.ParseInLocation(common.LongTimeLayout, body.OrderTime, time.Local)
+	orderTime, err := time.ParseInLocation(global.LongTimeLayout, body.OrderTime, time.Local)
 	if err != nil {
 		errorResponse(c, http.StatusInternalServerError, err.Error())
 		return

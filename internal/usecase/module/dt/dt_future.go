@@ -57,7 +57,7 @@ func NewDTFuture(code string, s *grpcapi.TradegRPCAPI, tradeConfig *config.Trade
 		slack:         slack,
 	}
 
-	d.localBus.SubscribeTopic(topicTraderDone, d.removeDoneTrader)
+	d.localBus.SubscribeAsync(topicTraderDone, true, d.removeDoneTrader)
 
 	d.cancelOverTimeOrder()
 	d.processOrderStatusAndTradeSwitch()

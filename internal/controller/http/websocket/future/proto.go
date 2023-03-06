@@ -1,9 +1,9 @@
 package future
 
 import (
+	"tmt/global"
 	"tmt/internal/entity"
 	"tmt/pb"
-	"tmt/pkg/common"
 )
 
 func newFutureTickProto(r *entity.RealTimeFutureTick) *pb.WSMessage {
@@ -12,7 +12,7 @@ func newFutureTickProto(r *entity.RealTimeFutureTick) *pb.WSMessage {
 		Data: &pb.WSMessage_FutureTick{
 			FutureTick: &pb.WSFutureTick{
 				Code:            r.Code,
-				TickTime:        r.TickTime.Format(common.LongTimeLayout),
+				TickTime:        r.TickTime.Format(global.LongTimeLayout),
 				Open:            r.Open,
 				UnderlyingPrice: r.UnderlyingPrice,
 				BidSideTotalVol: r.BidSideTotalVol,
@@ -43,7 +43,7 @@ func newFutureOrderProto(f *entity.FutureOrder) *pb.WSMessage {
 				BaseOrder: &pb.WSOrder{
 					OrderId:   f.OrderID,
 					Status:    int64(f.Status),
-					OrderTime: f.OrderTime.Format(common.LongTimeLayout),
+					OrderTime: f.OrderTime.Format(global.LongTimeLayout),
 					Action:    int64(f.Action),
 					Price:     f.Price,
 					Quantity:  f.Quantity,
@@ -122,7 +122,7 @@ func newKbarArrProto(r []*entity.FutureHistoryKbar) *pb.WSMessage {
 	var ret []*pb.Kbar
 	for _, v := range r {
 		ret = append(ret, &pb.Kbar{
-			KbarTime: v.KbarTime.Format(common.LongTimeLayout),
+			KbarTime: v.KbarTime.Format(global.LongTimeLayout),
 			Close:    v.Close,
 			Open:     v.Open,
 			High:     v.High,
@@ -151,13 +151,13 @@ func newFutureDetailProto(r *entity.Future) *pb.WSMessage {
 				Name:           r.Name,
 				Category:       r.Category,
 				DeliveryMonth:  r.DeliveryMonth,
-				DeliveryDate:   r.DeliveryDate.Format(common.ShortTimeLayout),
+				DeliveryDate:   r.DeliveryDate.Format(global.ShortTimeLayout),
 				UnderlyingKind: r.UnderlyingKind,
 				Unit:           r.Unit,
 				LimitUp:        r.LimitUp,
 				LimitDown:      r.LimitDown,
 				Reference:      r.Reference,
-				UpdateDate:     r.UpdateDate.Format(common.ShortTimeLayout),
+				UpdateDate:     r.UpdateDate.Format(global.ShortTimeLayout),
 			},
 		},
 	}

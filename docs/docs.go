@@ -256,7 +256,13 @@ const docTemplate = `{
                 "operationId": "simulateFuture",
                 "parameters": [
                     {
-                        "description": "Body",
+                        "type": "boolean",
+                        "description": "It accepts 1, t, T, TRUE, true, True, 0, f, F, FALSE, false, False.",
+                        "name": "need_detail",
+                        "in": "header"
+                    },
+                    {
+                        "description": "TradeFuture",
                         "name": "body",
                         "in": "body",
                         "required": true,
@@ -1488,8 +1494,26 @@ const docTemplate = `{
                 "forward": {
                     "type": "integer"
                 },
+                "forward_count": {
+                    "type": "integer"
+                },
+                "forward_order": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entity.FutureOrder"
+                    }
+                },
                 "reverse": {
                     "type": "integer"
+                },
+                "reverse_count": {
+                    "type": "integer"
+                },
+                "reverse_order": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entity.FutureOrder"
+                    }
                 },
                 "total_balance": {
                     "type": "integer"
