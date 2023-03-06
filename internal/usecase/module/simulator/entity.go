@@ -9,10 +9,10 @@ import (
 
 type SimulatorFutureTarget struct {
 	Code        string
+	Ticks       entity.RealTimeFutureTickArr
 	TradePeriod tradeday.TradePeriod
 	TradeConfig *config.TradeFuture
 	Quota       *quota.Quota
-	Ticks       []*entity.FutureHistoryTick
 }
 
 type SimulateBalance struct {

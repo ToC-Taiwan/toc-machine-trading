@@ -40,13 +40,14 @@ type SimulatorFuture struct {
 
 func NewSimulatorFuture(target SimulatorFutureTarget) *SimulatorFuture {
 	s := &SimulatorFuture{
-		code:        target.Code,
-		quota:       target.Quota,
-		quantity:    target.TradeConfig.Quantity,
-		tradeConfig: target.TradeConfig,
-		tradePeriod: target.TradePeriod,
-		tickChan:    make(chan *entity.RealTimeFutureTick),
-		waitTimes:   make(map[string]int),
+		code:           target.Code,
+		quota:          target.Quota,
+		quantity:       target.TradeConfig.Quantity,
+		tradeConfig:    target.TradeConfig,
+		tradePeriod:    target.TradePeriod,
+		historyTickArr: target.Ticks,
+		tickChan:       make(chan *entity.RealTimeFutureTick),
+		waitTimes:      make(map[string]int),
 	}
 
 	firstStart := s.tradePeriod.StartTime
@@ -54,10 +55,6 @@ func NewSimulatorFuture(target SimulatorFutureTarget) *SimulatorFuture {
 
 	s.allowTradeTimeRange = append(s.allowTradeTimeRange, []time.Time{firstStart, firstStart.Add(time.Duration(s.tradeConfig.TradeTimeRange.FirstPartDuration) * time.Minute)})
 	s.allowTradeTimeRange = append(s.allowTradeTimeRange, []time.Time{secondStart, secondStart.Add(time.Duration(s.tradeConfig.TradeTimeRange.SecondPartDuration) * time.Minute)})
-
-	for _, tick := range target.Ticks {
-		s.historyTickArr = append(s.historyTickArr, tick.ToRealTimeTick())
-	}
 
 	s.sendTick()
 	return s

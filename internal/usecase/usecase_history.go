@@ -34,7 +34,7 @@ type HistoryUseCase struct {
 
 	cfg *config.Config
 
-	simulateFutureTicks []*entity.FutureHistoryTick
+	simulateFutureTicks entity.RealTimeFutureTickArr
 	simulateDate        tradeday.TradePeriod
 	simulateCode        string
 }
@@ -115,9 +115,11 @@ func (uc *HistoryUseCase) FetchFutureHistory(code string) {
 		return
 	}
 
-	uc.simulateFutureTicks = ticks
 	uc.simulateDate = td[0]
 	uc.simulateCode = code
+	for _, tick := range ticks {
+		uc.simulateFutureTicks = append(uc.simulateFutureTicks, tick.ToRealTimeTick())
+	}
 
 	bus.PublishTopicEvent(event.TopicSubscribeFutureTickTargets, code)
 }

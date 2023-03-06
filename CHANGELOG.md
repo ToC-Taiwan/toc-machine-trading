@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## [v2.3.1](https://github.com/ToC-Taiwan/toc-machine-trading/compare/v2.3.0...v2.3.1)
+
+> 2023-03-06
+
+### Bug Fixes (1)
+
+* **trade:** fix last tick always nil, rename eventbus subscribe naming
+
+### Code Refactoring (1)
+
+* **common:** rename common to global
+
 ## [v2.3.0](https://github.com/ToC-Taiwan/toc-machine-trading/compare/v2.2.0...v2.3.0)
 
 > 2023-03-06
