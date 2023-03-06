@@ -50,7 +50,7 @@ func NewHadgerStock(num string, s, f *grpcapi.TradegRPCAPI, q *quota.Quota, trad
 		switchChan:    make(chan bool),
 	}
 
-	h.localBus.SubscribeTopic(topicTraderDone, h.removeDoneTrader)
+	h.localBus.SubscribeAsync(topicTraderDone, true, h.removeDoneTrader)
 	h.processTick()
 	h.processOrderStatus()
 

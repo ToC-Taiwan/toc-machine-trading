@@ -2,7 +2,7 @@ simulation: false
 
 trade_stock:
     allow_trade: false
-    subscribe: true
+    subscribe: false
 
     # unit: second
     hold_time_from_open: 45

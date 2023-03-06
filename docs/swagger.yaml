@@ -460,8 +460,20 @@ definitions:
         $ref: '#/definitions/config.TradeFuture'
       forward:
         type: integer
+      forward_count:
+        type: integer
+      forward_order:
+        items:
+          $ref: '#/definitions/entity.FutureOrder'
+        type: array
       reverse:
         type: integer
+      reverse_count:
+        type: integer
+      reverse_order:
+        items:
+          $ref: '#/definitions/entity.FutureOrder'
+        type: array
       total_balance:
         type: integer
     type: object
@@ -703,7 +715,12 @@ paths:
       description: simulateFuture
       operationId: simulateFuture
       parameters:
-      - description: Body
+      - description: It accepts 1, t, T, TRUE, true, True, 0, f, F, FALSE, false,
+          False.
+        in: header
+        name: need_detail
+        type: boolean
+      - description: TradeFuture
         in: body
         name: body
         required: true

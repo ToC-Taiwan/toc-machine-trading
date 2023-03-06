@@ -51,8 +51,8 @@ func (u *UseCaseBase) NewHistory() History {
 		basic:           cc.GetBasicInfo(),
 	}
 
-	bus.SubscribeTopic(event.TopicFetchStockHistory, uc.FetchStockHistory)
-	bus.SubscribeTopic(event.TopicFetchFutureHistory, uc.FetchFutureHistory)
+	bus.SubscribeAsync(event.TopicFetchStockHistory, true, uc.FetchStockHistory)
+	bus.SubscribeAsync(event.TopicFetchFutureHistory, true, uc.FetchFutureHistory)
 
 	return uc
 }

@@ -91,9 +91,9 @@ func (u *UseCaseBase) NewRealTime() RealTime {
 	go uc.ReceiveEvent(context.Background())
 	go uc.ReceiveOrderStatus(context.Background())
 
-	bus.SubscribeTopic(event.TopicSubscribeStockTickTargets, uc.ReceiveStockSubscribeData, uc.SubscribeStockTick)
-	bus.SubscribeTopic(event.TopicUnSubscribeStockTickTargets, uc.UnSubscribeStockTick, uc.UnSubscribeStockBidAsk)
-	bus.SubscribeTopic(event.TopicSubscribeFutureTickTargets, uc.SetMainFuture, uc.ReceiveFutureSubscribeData, uc.SubscribeFutureTick)
+	bus.SubscribeAsync(event.TopicSubscribeStockTickTargets, true, uc.ReceiveStockSubscribeData, uc.SubscribeStockTick)
+	bus.SubscribeAsync(event.TopicUnSubscribeStockTickTargets, true, uc.UnSubscribeStockTick, uc.UnSubscribeStockBidAsk)
+	bus.SubscribeAsync(event.TopicSubscribeFutureTickTargets, true, uc.SetMainFuture, uc.ReceiveFutureSubscribeData, uc.SubscribeFutureTick)
 
 	return uc
 }

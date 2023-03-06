@@ -89,6 +89,7 @@ func (s *SimulatorFuture) sendTick() {
 			if o := s.generateOrder(); o != nil {
 				o.OrderTime = tick.TickTime
 				o.OrderID = uuid.NewString()
+				o.Status = entity.StatusFilled
 
 				s.lastPlaceOrderTime = tick.TickTime
 				s.maxTradeOutTime = tick.TickTime.Add(time.Duration(s.tradeConfig.MaxHoldTime) * time.Minute)
@@ -163,13 +164,13 @@ func (s *SimulatorFuture) generateOrder() *entity.FutureOrder {
 }
 
 func (s *SimulatorFuture) checkWaitTimes(tick *entity.RealTimeFutureTick) bool {
-	if s.lastTick == nil {
-		return true
-	}
-
 	defer func() {
 		s.lastTick = tick
 	}()
+
+	if s.lastTick == nil {
+		return true
+	}
 
 	if times := s.waitTimes[s.waitingOrder.OrderID]; times <= 0 {
 		return false
@@ -217,6 +218,7 @@ func (s *SimulatorFuture) checkByBalance(tick *entity.RealTimeFutureTick) {
 			Quantity:  s.waitingOrder.Quantity,
 			OrderTime: tick.TickTime,
 			OrderID:   uuid.NewString(),
+			Status:    entity.StatusFilled,
 		},
 	}
 
@@ -253,13 +255,17 @@ func (s *SimulatorFuture) CalculateFutureTradeBalance() *SimulateBalance {
 		}
 	}
 
-	forwardBalance, _ := s.calculateForwardFutureBalance(forward)
-	revereBalance, _ := s.calculateReverseFutureBalance(reverse)
+	forwardBalance, fCount := s.calculateForwardFutureBalance(forward)
+	revereBalance, rCount := s.calculateReverseFutureBalance(reverse)
 
 	return &SimulateBalance{
 		TotalBalance: forwardBalance + revereBalance,
 		Forward:      forwardBalance,
+		ForwardCount: fCount,
+		ForwardOrder: forward,
 		Reverse:      revereBalance,
+		ReverseCount: rCount,
+		ReverseOrder: reverse,
 		Cond:         s.tradeConfig,
 	}
 }

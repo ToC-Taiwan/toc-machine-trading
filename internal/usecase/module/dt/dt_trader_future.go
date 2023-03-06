@@ -78,7 +78,7 @@ func NewDTTraderFuture(orderWithCfg orderWithCfg, s *grpcapi.TradegRPCAPI, bus *
 		d.tradeOutAction = entity.ActionBuy
 	}
 
-	d.bus.SubscribeTopic(topicUpdateOrder, d.updateOrder)
+	d.bus.SubscribeAsync(topicUpdateOrder, true, d.updateOrder)
 	d.processTick()
 
 	return d
@@ -126,13 +126,13 @@ func (d *DTTraderFuture) isTraderDone() bool {
 }
 
 func (d *DTTraderFuture) checkWaitTimes(tick *entity.RealTimeFutureTick) bool {
-	if d.lastTick == nil {
-		return true
-	}
-
 	defer func() {
 		d.lastTick = tick
 	}()
+
+	if d.lastTick == nil {
+		return true
+	}
 
 	if d.waitTimes <= 0 {
 		return false
@@ -259,7 +259,7 @@ func (d *DTTraderFuture) TickChan() chan *entity.RealTimeFutureTick {
 
 func (d *DTTraderFuture) postDone() {
 	d.once.Do(func() {
-		d.bus.UnSubscribeTopic(topicUpdateOrder, d.updateOrder)
+		d.bus.UnSubscribe(topicUpdateOrder, d.updateOrder)
 		d.bus.PublishTopicEvent(topicTraderDone, d.id)
 		d.done = true
 	})

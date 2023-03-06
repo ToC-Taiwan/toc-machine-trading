@@ -84,8 +84,8 @@ func StartWSFutureTrade(c *gin.Context, s usecase.RealTime, o usecase.Trade, h u
 	go w.sendFuture()
 	go w.checkAssistTargetStatus()
 
-	w.SubscribeTopic(topicAssistDone, w.closeDoneChan)
-	w.SubscribeTopic(topicPlaceOrder, w.addOrderFromAssist)
+	w.SubscribeAsync(topicAssistDone, true, w.closeDoneChan)
+	w.SubscribeAsync(topicPlaceOrder, true, w.addOrderFromAssist)
 
 	w.ReadFromClient(forwardChan)
 }

@@ -76,7 +76,8 @@ func (r *historyRoutes) getKbarData(c *gin.Context) {
 // @Tags  	    history
 // @Accept      json
 // @Produce     json
-// @param       body body config.TradeFuture{} true "Body"
+// @param 		need_detail header bool false "It accepts 1, t, T, TRUE, true, True, 0, f, F, FALSE, false, False."
+// @param       body body config.TradeFuture{} true "TradeFuture"
 // @success     200 {object} simulator.SimulateBalance
 // @Failure     500 {object} response
 // @Router      /history/simulate/future [post]
@@ -86,6 +87,21 @@ func (r *historyRoutes) simulateFuture(c *gin.Context) {
 		errorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
+
+	var needDetail bool
 	result := r.t.Simulate(body)
+	if h := c.GetHeader("need_detail"); h != "" {
+		if need, err := strconv.ParseBool(h); err != nil {
+			errorResponse(c, http.StatusBadRequest, err.Error())
+			return
+		} else if need {
+			needDetail = true
+		}
+	}
+
+	if !needDetail {
+		result.ForwardOrder = nil
+		result.ReverseOrder = nil
+	}
 	c.JSON(http.StatusOK, result)
 }

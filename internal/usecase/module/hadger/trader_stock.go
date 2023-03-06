@@ -30,7 +30,7 @@ func NewHadgeTraderStock(s, f *grpcapi.TradegRPCAPI, bus *eventbus.Bus) *HadgeTr
 		bus:           bus,
 	}
 
-	h.bus.SubscribeTopic(topicUpdateOrder, h.updateOrder)
+	h.bus.SubscribeAsync(topicUpdateOrder, true, h.updateOrder)
 	h.prepare()
 	return h
 }

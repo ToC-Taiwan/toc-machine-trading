@@ -46,8 +46,8 @@ func (u *UseCaseBase) NewTrade() Trade {
 		futureTradeDay: tradeDay.GetFutureTradeDay(),
 	}
 
-	bus.SubscribeTopic(event.TopicInsertOrUpdateStockOrder, uc.updateStockOrderCacheAndInsertDB)
-	bus.SubscribeTopic(event.TopicInsertOrUpdateFutureOrder, uc.updateFutureOrderCacheAndInsertDB)
+	bus.SubscribeAsync(event.TopicInsertOrUpdateStockOrder, true, uc.updateStockOrderCacheAndInsertDB)
+	bus.SubscribeAsync(event.TopicInsertOrUpdateFutureOrder, true, uc.updateFutureOrderCacheAndInsertDB)
 
 	if cfg.Simulation {
 		go uc.askSimulateOrderStatus()
