@@ -143,7 +143,7 @@ func (d *DTFuture) cutTickArr() {
 		return
 	}
 
-	if d.tickArr.GetLastTwoTickGapTime() > 3*time.Second {
+	if d.tickArr.GetLastTwoTickGapTime() > time.Second {
 		d.tickArr = entity.RealTimeFutureTickArr{}
 		d.lastTickRate = 0
 		return

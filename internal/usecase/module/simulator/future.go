@@ -17,27 +17,30 @@ import (
 var logger = log.Get()
 
 type SimulatorFuture struct {
-	conds       []*config.TradeFuture
-	tradeConfig *config.TradeFuture
+	// current cond
+	currentCond *config.TradeFuture
 
-	code                string
-	quantity            int64
-	tradePeriod         tradeday.TradePeriod
-	allowTradeTimeRange [][]time.Time
-	quota               *quota.Quota
-
-	lastTickRate       float64
-	lastPlaceOrderTime time.Time
-	maxTradeOutTime    time.Time
-
-	allOrder     []*entity.FutureOrder
-	waitingOrder *entity.FutureOrder
-
+	// given by target
+	code           string
+	quota          *quota.Quota
+	tradePeriod    tradeday.TradePeriod
 	historyTickArr entity.RealTimeFutureTickArr
-	tickArr        entity.RealTimeFutureTickArr
-	lastTick       *entity.RealTimeFutureTick
-	tickChan       chan *entity.RealTimeFutureTick
-	waitTimes      map[string]int
+	allCond        []*config.TradeFuture
+
+	// given by cond
+	quantity int64
+
+	// clear before each cond
+	waitTimes           map[string]int
+	tickChan            chan *entity.RealTimeFutureTick
+	allowTradeTimeRange [][]time.Time
+	allOrder            []*entity.FutureOrder
+	lastTickRate        float64
+	waitingOrder        *entity.FutureOrder
+	lastTick            *entity.RealTimeFutureTick
+	tickArr             entity.RealTimeFutureTickArr
+	lastPlaceOrderTime  time.Time
+	maxTradeOutTime     time.Time
 }
 
 func NewSimulatorFuture(target SimulatorFutureTarget) *SimulatorFuture {
@@ -50,51 +53,79 @@ func NewSimulatorFuture(target SimulatorFutureTarget) *SimulatorFuture {
 		quota:          target.Quota,
 		tradePeriod:    target.TradePeriod,
 		historyTickArr: target.Ticks,
-		conds:          target.TradeConfigArr,
+		allCond:        target.TradeConfigArr,
 	}
 }
 
 func (s *SimulatorFuture) clear() {
 	s.waitTimes = make(map[string]int)
 	s.tickChan = make(chan *entity.RealTimeFutureTick)
-
 	s.allowTradeTimeRange = [][]time.Time{}
 	s.allOrder = []*entity.FutureOrder{}
-
 	s.lastTickRate = 0
 	s.waitingOrder = nil
-
+	s.lastTick = nil
 	s.tickArr = entity.RealTimeFutureTickArr{}
 	s.lastPlaceOrderTime = time.Time{}
+	s.maxTradeOutTime = time.Time{}
 }
 
 func (s *SimulatorFuture) OneCond() *SimulateBalance {
 	s.clear()
 
-	s.tradeConfig = s.conds[0]
-	s.quantity = s.tradeConfig.Quantity
-	s.allowTradeTimeRange = s.tradePeriod.ToTimeRange(s.tradeConfig.TradeTimeRange.FirstPartDuration, s.tradeConfig.TradeTimeRange.SecondPartDuration)
+	s.currentCond = s.allCond[0]
+	s.quantity = s.currentCond.Quantity
+	s.allowTradeTimeRange = s.tradePeriod.ToTimeRange(s.currentCond.TradeTimeRange.FirstPartDuration, s.currentCond.TradeTimeRange.SecondPartDuration)
 
-	s.process()
-	return s.calculateFutureTradeBalance()
+	return s.process().calculateFutureTradeBalance()
 }
 
 func (s *SimulatorFuture) AllConds(slackMsgChan chan string) {
-	slackMsgChan <- fmt.Sprintf("Start SimulatorFuture AllConds: %d", len(s.conds))
+	slackMsgChan <- fmt.Sprintf("Start SimulatorFuture AllConds: %d", len(s.allCond))
+	workerCount := 10
+	workQueue := make(chan *SimulatorFuture, workerCount)
+	for i := 0; i < workerCount; i++ {
+		clone := *s
+		workQueue <- &clone
+	}
+
 	var best int64
-	for _, cond := range s.conds {
-		s.clear()
+	resultChan := make(chan *SimulateBalance)
+	go func() {
+		for {
+			result, ok := <-resultChan
+			if !ok {
+				break
+			}
+			if result.TotalBalance > best {
+				best = result.TotalBalance
+				slackMsgChan <- result.String()
+				slackMsgChan <- "------------------------------------"
+			}
+		}
+	}()
 
-		s.tradeConfig = cond
-		s.quantity = s.tradeConfig.Quantity
-		s.allowTradeTimeRange = s.tradePeriod.ToTimeRange(s.tradeConfig.TradeTimeRange.FirstPartDuration, s.tradeConfig.TradeTimeRange.SecondPartDuration)
+	for _, cond := range s.allCond {
+		c := *cond
+		worker := <-workQueue
+		go func() {
+			worker.clear()
+			worker.currentCond = &c
+			worker.quantity = worker.currentCond.Quantity
+			worker.allowTradeTimeRange = worker.tradePeriod.ToTimeRange(worker.currentCond.TradeTimeRange.FirstPartDuration, worker.currentCond.TradeTimeRange.SecondPartDuration)
+			resultChan <- worker.process().calculateFutureTradeBalance()
+			workQueue <- worker
+		}()
+	}
 
-		s.process()
-		result := s.calculateFutureTradeBalance()
-		if result.TotalBalance > best {
-			best = result.TotalBalance
-			slackMsgChan <- s.calculateFutureTradeBalance().String()
-			slackMsgChan <- "------------------------------------"
+	recoverWorker := []*SimulatorFuture{}
+	for {
+		worker := <-workQueue
+		recoverWorker = append(recoverWorker, worker)
+		if len(recoverWorker) == workerCount {
+			close(resultChan)
+			close(workQueue)
+			break
 		}
 	}
 	slackMsgChan <- "SimulatorFuture AllConds Done"
@@ -110,7 +141,7 @@ func (s *SimulatorFuture) isAllowTrade(tickTime time.Time) bool {
 	return tempSwitch
 }
 
-func (s *SimulatorFuture) process() {
+func (s *SimulatorFuture) process() *SimulatorFuture {
 	stuck := make(chan struct{})
 	go func() {
 		for {
@@ -134,8 +165,8 @@ func (s *SimulatorFuture) process() {
 				o.Status = entity.StatusFilled
 
 				s.lastPlaceOrderTime = tick.TickTime
-				s.maxTradeOutTime = tick.TickTime.Add(time.Duration(s.tradeConfig.MaxHoldTime) * time.Minute)
-				s.waitTimes[o.OrderID] = int(s.tradeConfig.TradeOutWaitTimes)
+				s.maxTradeOutTime = tick.TickTime.Add(time.Duration(s.currentCond.MaxHoldTime) * time.Minute)
+				s.waitTimes[o.OrderID] = int(s.currentCond.TradeOutWaitTimes)
 
 				s.allOrder = append(s.allOrder, o)
 				s.waitingOrder = o
@@ -150,6 +181,7 @@ func (s *SimulatorFuture) process() {
 
 	close(s.tickChan)
 	<-stuck
+	return s
 }
 
 func (s *SimulatorFuture) cutTickArr() {
@@ -157,13 +189,13 @@ func (s *SimulatorFuture) cutTickArr() {
 		return
 	}
 
-	if s.tickArr.GetLastTwoTickGapTime() > 3*time.Second {
+	if s.tickArr.GetLastTwoTickGapTime() > time.Second {
 		s.tickArr = entity.RealTimeFutureTickArr{}
 		s.lastTickRate = 0
 		return
 	}
 
-	if s.tickArr.GetTotalTime() > time.Duration(2*s.tradeConfig.TickInterval)*time.Second {
+	if s.tickArr.GetTotalTime() > time.Duration(2*s.currentCond.TickInterval)*time.Second {
 		s.tickArr = s.tickArr[1:]
 	}
 }
@@ -173,7 +205,7 @@ func (s *SimulatorFuture) generateOrder() *entity.FutureOrder {
 		return nil
 	}
 
-	outInRatio, tickRate := s.tickArr.GetOutInRatioAndRate(time.Duration(s.tradeConfig.TickInterval) * time.Second)
+	outInRatio, tickRate := s.tickArr.GetOutInRatioAndRate(time.Duration(s.currentCond.TickInterval) * time.Second)
 	defer func() {
 		s.lastTickRate = tickRate
 	}()
@@ -181,27 +213,27 @@ func (s *SimulatorFuture) generateOrder() *entity.FutureOrder {
 		return nil
 	}
 
-	if s.lastTickRate < s.tradeConfig.RateLimit || 100*(tickRate-s.lastTickRate)/s.lastTickRate < s.tradeConfig.RateChangeRatio {
+	if s.lastTickRate < s.currentCond.RateLimit || 100*(tickRate-s.lastTickRate)/s.lastTickRate < s.currentCond.RateChangeRatio {
 		return nil
 	}
 
 	switch {
-	case outInRatio > s.tradeConfig.OutInRatio:
+	case outInRatio > s.currentCond.OutInRatio:
 		return &entity.FutureOrder{
 			Code: s.code,
 			BaseOrder: entity.BaseOrder{
 				Action:   entity.ActionBuy,
 				Price:    s.lastTick.Close - 1,
-				Quantity: s.tradeConfig.Quantity,
+				Quantity: s.currentCond.Quantity,
 			},
 		}
-	case 100-outInRatio > s.tradeConfig.InOutRatio:
+	case 100-outInRatio > s.currentCond.InOutRatio:
 		return &entity.FutureOrder{
 			Code: s.code,
 			BaseOrder: entity.BaseOrder{
 				Action:   entity.ActionSell,
 				Price:    s.lastTick.Close + 1,
-				Quantity: s.tradeConfig.Quantity,
+				Quantity: s.currentCond.Quantity,
 			},
 		}
 	default:
@@ -246,12 +278,12 @@ func (s *SimulatorFuture) checkByBalance(tick *entity.RealTimeFutureTick) {
 	var place bool
 	switch s.waitingOrder.Action {
 	case entity.ActionSell:
-		if tick.Close <= s.waitingOrder.Price-s.tradeConfig.TargetBalanceHigh || tick.Close >= s.waitingOrder.Price-s.tradeConfig.TargetBalanceLow {
+		if tick.Close <= s.waitingOrder.Price-s.currentCond.TargetBalanceHigh || tick.Close >= s.waitingOrder.Price-s.currentCond.TargetBalanceLow {
 			place = true
 		}
 
 	case entity.ActionBuy:
-		if tick.Close >= s.waitingOrder.Price+s.tradeConfig.TargetBalanceHigh || tick.Close <= s.waitingOrder.Price+s.tradeConfig.TargetBalanceLow {
+		if tick.Close >= s.waitingOrder.Price+s.currentCond.TargetBalanceHigh || tick.Close <= s.waitingOrder.Price+s.currentCond.TargetBalanceLow {
 			place = true
 		}
 	}
@@ -315,7 +347,7 @@ func (s *SimulatorFuture) calculateFutureTradeBalance() *SimulateBalance {
 		Reverse:      revereBalance,
 		ReverseCount: rCount,
 		ReverseOrder: reverse,
-		Cond:         s.tradeConfig,
+		Cond:         s.currentCond,
 	}
 }
 

@@ -9,33 +9,50 @@ type ConditionArr []*config.TradeFuture
 func GenerateCond() []*config.TradeFuture {
 	base := ConditionArr{
 		&config.TradeFuture{
-			Quantity:          2,
-			MaxHoldTime:       10,
-			TradeOutWaitTimes: 30,
+			Quantity:    2,
+			MaxHoldTime: 15,
 			TradeTimeRange: config.TradeTimeRange{
 				FirstPartDuration:  720,
 				SecondPartDuration: 285,
 			},
 
+			TradeOutWaitTimes: 20,
 			TargetBalanceHigh: 2,
 			TargetBalanceLow:  -2,
 			TickInterval:      8,
 			RateLimit:         8,
 			RateChangeRatio:   1,
-			OutInRatio:        60,
-			InOutRatio:        60,
+			OutInRatio:        55,
+			InOutRatio:        55,
 		},
 	}
 
 	base.appendTargetBalanceHigh()
 	base.appendTargetBalanceLow()
-	// base.appendTickInterval()
+	base.appendTickInterval()
 	base.appendRateLimit()
 	base.appendRateChangeRatio()
 	base.appendOutInRatio()
 	base.appendInOutRatio()
+	base.appendTradeOutTimes()
 
 	return base
+}
+
+func (c *ConditionArr) appendTradeOutTimes() {
+	var appendCond []*config.TradeFuture
+	for _, cond := range *c {
+		tmp := *cond
+		for {
+			if tmp.TradeOutWaitTimes >= 60 {
+				break
+			}
+			tmp.TradeOutWaitTimes += 5
+			appendCond = append(appendCond, &tmp)
+		}
+	}
+
+	*c = append(*c, appendCond...)
 }
 
 func (c *ConditionArr) appendTargetBalanceHigh() {
@@ -70,28 +87,28 @@ func (c *ConditionArr) appendTargetBalanceLow() {
 	*c = append(*c, appendCond...)
 }
 
-// func (c *ConditionArr) appendTickInterval() {
-// 	var appendCond []*config.TradeFuture
-// 	for _, cond := range *c {
-// 		tmp := *cond
-// 		for {
-// 			if tmp.TickInterval >= 15 {
-// 				break
-// 			}
-// 			tmp.TickInterval += 5
-// 			appendCond = append(appendCond, &tmp)
-// 		}
-// 	}
+func (c *ConditionArr) appendTickInterval() {
+	var appendCond []*config.TradeFuture
+	for _, cond := range *c {
+		tmp := *cond
+		for {
+			if tmp.TickInterval >= 14 {
+				break
+			}
+			tmp.TickInterval += 2
+			appendCond = append(appendCond, &tmp)
+		}
+	}
 
-// 	*c = append(*c, appendCond...)
-// }
+	*c = append(*c, appendCond...)
+}
 
 func (c *ConditionArr) appendRateLimit() {
 	var appendCond []*config.TradeFuture
 	for _, cond := range *c {
 		tmp := *cond
 		for {
-			if tmp.RateLimit >= 12 {
+			if tmp.RateLimit >= 14 {
 				break
 			}
 			tmp.RateLimit += 2
