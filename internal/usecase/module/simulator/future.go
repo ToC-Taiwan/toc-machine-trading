@@ -82,20 +82,50 @@ func (s *SimulatorFuture) OneCond() *SimulateBalance {
 
 func (s *SimulatorFuture) AllConds(slackMsgChan chan string) {
 	slackMsgChan <- fmt.Sprintf("Start SimulatorFuture AllConds: %d", len(s.allCond))
+	workerCount := 10
+	workQueue := make(chan *SimulatorFuture, workerCount)
+	for i := 0; i < workerCount; i++ {
+		clone := *s
+		workQueue <- &clone
+	}
+
 	var best int64
+	resultChan := make(chan *SimulateBalance)
+	go func() {
+		for {
+			result, ok := <-resultChan
+			if !ok {
+				break
+			}
+			if result.TotalBalance > best {
+				best = result.TotalBalance
+				slackMsgChan <- result.String()
+				slackMsgChan <- "------------------------------------"
+			}
+		}
+	}()
+
 	for _, cond := range s.allCond {
-		s.clear()
+		c := *cond
+		worker := <-workQueue
+		go func() {
+			worker.clear()
+			worker.currentCond = &c
+			worker.quantity = worker.currentCond.Quantity
+			worker.allowTradeTimeRange = worker.tradePeriod.ToTimeRange(worker.currentCond.TradeTimeRange.FirstPartDuration, worker.currentCond.TradeTimeRange.SecondPartDuration)
+			resultChan <- worker.process().calculateFutureTradeBalance()
+			workQueue <- worker
+		}()
+	}
 
-		s.currentCond = cond
-		s.quantity = s.currentCond.Quantity
-		s.allowTradeTimeRange = s.tradePeriod.ToTimeRange(s.currentCond.TradeTimeRange.FirstPartDuration, s.currentCond.TradeTimeRange.SecondPartDuration)
-
-		s.process()
-		result := s.calculateFutureTradeBalance()
-		if result.TotalBalance > best {
-			best = result.TotalBalance
-			slackMsgChan <- s.calculateFutureTradeBalance().String()
-			slackMsgChan <- "------------------------------------"
+	recoverWorker := []*SimulatorFuture{}
+	for {
+		worker := <-workQueue
+		recoverWorker = append(recoverWorker, worker)
+		if len(recoverWorker) == workerCount {
+			close(resultChan)
+			close(workQueue)
+			break
 		}
 	}
 	slackMsgChan <- "SimulatorFuture AllConds Done"
@@ -159,7 +189,7 @@ func (s *SimulatorFuture) cutTickArr() {
 		return
 	}
 
-	if s.tickArr.GetLastTwoTickGapTime() > 3*time.Second {
+	if s.tickArr.GetLastTwoTickGapTime() > time.Second {
 		s.tickArr = entity.RealTimeFutureTickArr{}
 		s.lastTickRate = 0
 		return
