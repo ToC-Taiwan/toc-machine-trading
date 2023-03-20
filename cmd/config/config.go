@@ -9,8 +9,8 @@ import (
 )
 
 var (
-	once      sync.Once
 	singleton *Config
+	once      sync.Once
 )
 
 // Config -.
@@ -34,7 +34,7 @@ func Get() *Config {
 	}
 
 	once.Do(func() {
-		filePath := "./configs/config.yml"
+		filePath := "configs/config.yml"
 		fileStat, err := os.Stat(filePath)
 		if err != nil || fileStat.IsDir() {
 			panic(err)
