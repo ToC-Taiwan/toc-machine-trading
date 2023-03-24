@@ -15,7 +15,7 @@ pg_ctl -D ./data/toc-machine-trading -l ./data/toc-machine-trading/logfile start
 echo "\du
 CREATE ROLE postgres WITH LOGIN PASSWORD 'asdf0000';
 ALTER USER postgres WITH SUPERUSER;
-\du" > sql_script
+\du" >sql_script
 
 psql postgres -f sql_script
 rm -rf sql_script
