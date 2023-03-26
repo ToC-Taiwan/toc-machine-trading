@@ -680,6 +680,21 @@ func (mr *MockTradegRPCAPIMockRecorder) CancelStock(orderID interface{}) *gomock
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CancelStock", reflect.TypeOf((*MockTradegRPCAPI)(nil).CancelStock), orderID)
 }
 
+// GetAccountBalance mocks base method.
+func (m *MockTradegRPCAPI) GetAccountBalance() (*pb.AccountBalance, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAccountBalance")
+	ret0, _ := ret[0].(*pb.AccountBalance)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAccountBalance indicates an expected call of GetAccountBalance.
+func (mr *MockTradegRPCAPIMockRecorder) GetAccountBalance() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAccountBalance", reflect.TypeOf((*MockTradegRPCAPI)(nil).GetAccountBalance))
+}
+
 // GetFuturePosition mocks base method.
 func (m *MockTradegRPCAPI) GetFuturePosition() (*pb.FuturePositionArr, error) {
 	m.ctrl.T.Helper()
@@ -707,6 +722,21 @@ func (m *MockTradegRPCAPI) GetLocalOrderStatusArr() error {
 func (mr *MockTradegRPCAPIMockRecorder) GetLocalOrderStatusArr() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetLocalOrderStatusArr", reflect.TypeOf((*MockTradegRPCAPI)(nil).GetLocalOrderStatusArr))
+}
+
+// GetMargin mocks base method.
+func (m *MockTradegRPCAPI) GetMargin() (*pb.Margin, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetMargin")
+	ret0, _ := ret[0].(*pb.Margin)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetMargin indicates an expected call of GetMargin.
+func (mr *MockTradegRPCAPIMockRecorder) GetMargin() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMargin", reflect.TypeOf((*MockTradegRPCAPI)(nil).GetMargin))
 }
 
 // GetNonBlockOrderStatusArr mocks base method.
@@ -737,6 +767,21 @@ func (m *MockTradegRPCAPI) GetOrderStatusByID(orderID string) (*pb.TradeResult, 
 func (mr *MockTradegRPCAPIMockRecorder) GetOrderStatusByID(orderID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOrderStatusByID", reflect.TypeOf((*MockTradegRPCAPI)(nil).GetOrderStatusByID), orderID)
+}
+
+// GetSettlement mocks base method.
+func (m *MockTradegRPCAPI) GetSettlement() (*pb.SettlementV1Message, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetSettlement")
+	ret0, _ := ret[0].(*pb.SettlementV1Message)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetSettlement indicates an expected call of GetSettlement.
+func (mr *MockTradegRPCAPIMockRecorder) GetSettlement() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSettlement", reflect.TypeOf((*MockTradegRPCAPI)(nil).GetSettlement))
 }
 
 // GetSimulateOrderStatusArr mocks base method.

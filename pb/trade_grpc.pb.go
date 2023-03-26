@@ -37,6 +37,9 @@ const (
 	TradeInterface_GetOrderStatusByID_FullMethodName        = "/toc_python_forwarder.TradeInterface/GetOrderStatusByID"
 	TradeInterface_GetNonBlockOrderStatusArr_FullMethodName = "/toc_python_forwarder.TradeInterface/GetNonBlockOrderStatusArr"
 	TradeInterface_GetFuturePosition_FullMethodName         = "/toc_python_forwarder.TradeInterface/GetFuturePosition"
+	TradeInterface_GetSettlement_FullMethodName             = "/toc_python_forwarder.TradeInterface/GetSettlement"
+	TradeInterface_GetAccountBalance_FullMethodName         = "/toc_python_forwarder.TradeInterface/GetAccountBalance"
+	TradeInterface_GetMargin_FullMethodName                 = "/toc_python_forwarder.TradeInterface/GetMargin"
 )
 
 // TradeInterfaceClient is the client API for TradeInterface service.
@@ -77,6 +80,12 @@ type TradeInterfaceClient interface {
 	GetNonBlockOrderStatusArr(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ErrorMessage, error)
 	// GetFuturePosition is the interface for getting future position
 	GetFuturePosition(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*FuturePositionArr, error)
+	// GetSettlement is the interface for getting settlement
+	GetSettlement(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*SettlementV1Message, error)
+	// GetAccountBalance is the interface for getting account balance
+	GetAccountBalance(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*AccountBalance, error)
+	// GetMargin is the interface for getting margin
+	GetMargin(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*Margin, error)
 }
 
 type tradeInterfaceClient struct {
@@ -240,6 +249,33 @@ func (c *tradeInterfaceClient) GetFuturePosition(ctx context.Context, in *emptyp
 	return out, nil
 }
 
+func (c *tradeInterfaceClient) GetSettlement(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*SettlementV1Message, error) {
+	out := new(SettlementV1Message)
+	err := c.cc.Invoke(ctx, TradeInterface_GetSettlement_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *tradeInterfaceClient) GetAccountBalance(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*AccountBalance, error) {
+	out := new(AccountBalance)
+	err := c.cc.Invoke(ctx, TradeInterface_GetAccountBalance_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *tradeInterfaceClient) GetMargin(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*Margin, error) {
+	out := new(Margin)
+	err := c.cc.Invoke(ctx, TradeInterface_GetMargin_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // TradeInterfaceServer is the server API for TradeInterface service.
 // All implementations must embed UnimplementedTradeInterfaceServer
 // for forward compatibility
@@ -278,6 +314,12 @@ type TradeInterfaceServer interface {
 	GetNonBlockOrderStatusArr(context.Context, *emptypb.Empty) (*ErrorMessage, error)
 	// GetFuturePosition is the interface for getting future position
 	GetFuturePosition(context.Context, *emptypb.Empty) (*FuturePositionArr, error)
+	// GetSettlement is the interface for getting settlement
+	GetSettlement(context.Context, *emptypb.Empty) (*SettlementV1Message, error)
+	// GetAccountBalance is the interface for getting account balance
+	GetAccountBalance(context.Context, *emptypb.Empty) (*AccountBalance, error)
+	// GetMargin is the interface for getting margin
+	GetMargin(context.Context, *emptypb.Empty) (*Margin, error)
 	mustEmbedUnimplementedTradeInterfaceServer()
 }
 
@@ -335,6 +377,15 @@ func (UnimplementedTradeInterfaceServer) GetNonBlockOrderStatusArr(context.Conte
 }
 func (UnimplementedTradeInterfaceServer) GetFuturePosition(context.Context, *emptypb.Empty) (*FuturePositionArr, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetFuturePosition not implemented")
+}
+func (UnimplementedTradeInterfaceServer) GetSettlement(context.Context, *emptypb.Empty) (*SettlementV1Message, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetSettlement not implemented")
+}
+func (UnimplementedTradeInterfaceServer) GetAccountBalance(context.Context, *emptypb.Empty) (*AccountBalance, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAccountBalance not implemented")
+}
+func (UnimplementedTradeInterfaceServer) GetMargin(context.Context, *emptypb.Empty) (*Margin, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetMargin not implemented")
 }
 func (UnimplementedTradeInterfaceServer) mustEmbedUnimplementedTradeInterfaceServer() {}
 
@@ -655,6 +706,60 @@ func _TradeInterface_GetFuturePosition_Handler(srv interface{}, ctx context.Cont
 	return interceptor(ctx, in, info, handler)
 }
 
+func _TradeInterface_GetSettlement_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TradeInterfaceServer).GetSettlement(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TradeInterface_GetSettlement_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TradeInterfaceServer).GetSettlement(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TradeInterface_GetAccountBalance_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TradeInterfaceServer).GetAccountBalance(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TradeInterface_GetAccountBalance_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TradeInterfaceServer).GetAccountBalance(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TradeInterface_GetMargin_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TradeInterfaceServer).GetMargin(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TradeInterface_GetMargin_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TradeInterfaceServer).GetMargin(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // TradeInterface_ServiceDesc is the grpc.ServiceDesc for TradeInterface service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -729,6 +834,18 @@ var TradeInterface_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetFuturePosition",
 			Handler:    _TradeInterface_GetFuturePosition_Handler,
+		},
+		{
+			MethodName: "GetSettlement",
+			Handler:    _TradeInterface_GetSettlement_Handler,
+		},
+		{
+			MethodName: "GetAccountBalance",
+			Handler:    _TradeInterface_GetAccountBalance_Handler,
+		},
+		{
+			MethodName: "GetMargin",
+			Handler:    _TradeInterface_GetMargin_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -35,6 +35,42 @@ func (t *TradegRPCAPI) GetFuturePosition() (*pb.FuturePositionArr, error) {
 	return r, nil
 }
 
+// GetAccountBalance -.
+func (t *TradegRPCAPI) GetAccountBalance() (*pb.AccountBalance, error) {
+	conn := t.conn.GetReadyConn()
+	defer t.conn.PutReadyConn(conn)
+	c := pb.NewTradeInterfaceClient(conn)
+	r, err := c.GetAccountBalance(context.Background(), &emptypb.Empty{})
+	if err != nil {
+		return nil, err
+	}
+	return r, nil
+}
+
+// GetMargin -.
+func (t *TradegRPCAPI) GetMargin() (*pb.Margin, error) {
+	conn := t.conn.GetReadyConn()
+	defer t.conn.PutReadyConn(conn)
+	c := pb.NewTradeInterfaceClient(conn)
+	r, err := c.GetMargin(context.Background(), &emptypb.Empty{})
+	if err != nil {
+		return nil, err
+	}
+	return r, nil
+}
+
+// GetSettlement -.
+func (t *TradegRPCAPI) GetSettlement() (*pb.SettlementV1Message, error) {
+	conn := t.conn.GetReadyConn()
+	defer t.conn.PutReadyConn(conn)
+	c := pb.NewTradeInterfaceClient(conn)
+	r, err := c.GetSettlement(context.Background(), &emptypb.Empty{})
+	if err != nil {
+		return nil, err
+	}
+	return r, nil
+}
+
 // BuyStock BuyStock
 func (t *TradegRPCAPI) BuyStock(order *entity.StockOrder) (*pb.TradeResult, error) {
 	conn := t.conn.GetReadyConn()
