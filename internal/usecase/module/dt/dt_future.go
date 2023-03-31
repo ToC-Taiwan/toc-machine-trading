@@ -72,13 +72,18 @@ func (d *DTFuture) processOrderStatusAndTradeSwitch() {
 		for {
 			select {
 			case o := <-d.notify:
-				if !o.Cancellable() && notifiedMap[o.OrderID] == nil {
+				if !d.isTradeTime {
+					continue
+				}
+
+				switch {
+				case !o.Cancellable() && notifiedMap[o.OrderID] == nil:
 					notifiedMap[o.OrderID] = o
 					d.slack.PostMessage(fmt.Sprintf("%s %s", o.Status.String(), o.String()))
-				}
-				if o.Cancellable() && time.Since(o.OrderTime) > time.Duration(d.tradeConfig.BuySellWaitTime)*time.Second {
+				case o.Cancellable() && time.Since(o.OrderTime) > time.Duration(d.tradeConfig.BuySellWaitTime)*time.Second:
 					d.cancelChan <- o
 				}
+
 				d.localBus.PublishTopicEvent(topicUpdateOrder, o)
 
 			case ts := <-d.switchChan:

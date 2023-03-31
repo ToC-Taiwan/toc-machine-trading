@@ -15,17 +15,18 @@ echo '{ "path": "cz-conventional-changelog" }' > ~/.czrc
 
 ### Pre-commit
 
-- install git pre-commit tool global(macOS)
+- install pre-commit
 
 ```sh
-brew install pre-commit
+pip3 install pre-commit
 ```
-
-- install/modify from config
 
 ```sh
 pre-commit autoupdate
 pre-commit install
+```
+
+```sh
 pre-commit run --all-files
 ```
 

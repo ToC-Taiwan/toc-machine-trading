@@ -46,6 +46,8 @@ make
 docker run -it registry.gitlab.com/gitlab-org/gitlab-build-images:golangci-lint-alpine cat /golangci/.golangci.yml
 ```
 
+## [Debug](./docs/DEBUG.md)
+
 ## Authors
 
 - [**Tim Hsu**](https://github.com/Chindada)

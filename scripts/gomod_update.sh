@@ -11,6 +11,7 @@ go install github.com/golang/mock/mockgen@latest
 go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 
 go mod init tmt
+go get -u github.com/gin-gonic/gin
 go mod tidy
 
 git add go.mod go.sum

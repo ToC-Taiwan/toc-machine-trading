@@ -55,6 +55,26 @@ func (u *UseCaseBase) NewTrade() Trade {
 		go uc.askOrderStatus()
 	}
 
+	mg, e := uc.sc.GetMargin()
+	if e != nil {
+		logger.Fatal(e)
+	}
+	logger.Info("GetMargin", mg)
+
+	ac, er := uc.sc.GetAccountBalance()
+	if er != nil {
+		logger.Fatal(e)
+	}
+	logger.Info("GetAccountBalance", ac)
+
+	se, err := uc.sc.GetSettlement()
+	if err != nil {
+		logger.Fatal(e)
+	}
+	for _, s := range se.GetSettlementV1() {
+		logger.Info("GetSettlement", s)
+	}
+
 	go uc.updateAllTradeBalance()
 	return uc
 }
