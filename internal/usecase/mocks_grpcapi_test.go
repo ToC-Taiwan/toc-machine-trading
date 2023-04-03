@@ -770,10 +770,10 @@ func (mr *MockTradegRPCAPIMockRecorder) GetOrderStatusByID(orderID interface{}) 
 }
 
 // GetSettlement mocks base method.
-func (m *MockTradegRPCAPI) GetSettlement() (*pb.SettlementV1Message, error) {
+func (m *MockTradegRPCAPI) GetSettlement() (*pb.SettlementList, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetSettlement")
-	ret0, _ := ret[0].(*pb.SettlementV1Message)
+	ret0, _ := ret[0].(*pb.SettlementList)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

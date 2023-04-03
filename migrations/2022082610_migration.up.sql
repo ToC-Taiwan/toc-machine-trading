@@ -1,5 +1,4 @@
 BEGIN;
-
 CREATE TABLE basic_future (
     "code" VARCHAR PRIMARY KEY,
     "symbol" VARCHAR NOT NULL,
@@ -14,7 +13,6 @@ CREATE TABLE basic_future (
     "reference" DECIMAL NOT NULL,
     "update_date" TIMESTAMPTZ NOT NULL
 );
-
 CREATE TABLE trade_future_order (
     "order_id" VARCHAR PRIMARY KEY,
     "status" INT NOT NULL,
@@ -24,12 +22,9 @@ CREATE TABLE trade_future_order (
     "price" DECIMAL NOT NULL,
     "quantity" INT NOT NULL
 );
-
 CREATE INDEX trade_future_order_order_time_index ON trade_future_order USING btree ("order_time");
-
 ALTER TABLE trade_future_order
 ADD CONSTRAINT "fk_trade_future_order_future" FOREIGN KEY ("code") REFERENCES basic_future ("code");
-
 CREATE TABLE trade_future_balance (
     "id" SERIAL PRIMARY KEY,
     "trade_count" INT NOT NULL,
@@ -38,7 +33,5 @@ CREATE TABLE trade_future_balance (
     "total" INT NOT NULL,
     "trade_day" TIMESTAMPTZ NOT NULL
 );
-
 CREATE INDEX trade_future_balance_trade_day_index ON trade_future_balance USING btree ("trade_day");
-
 COMMIT;

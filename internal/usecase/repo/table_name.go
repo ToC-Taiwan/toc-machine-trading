@@ -27,5 +27,8 @@ const (
 	tableNameTradeFutureOrder   string = "trade_future_order"
 	tableNameFutureTradeBalance string = "trade_future_balance"
 
+	tableNameAccountBalance    string = "account_balance"
+	tableNameAccountSettlement string = "account_settlement"
+
 	tableNameEvent string = "sinopac_event"
 )

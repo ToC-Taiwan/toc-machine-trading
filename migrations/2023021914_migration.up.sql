@@ -1,5 +1,4 @@
 BEGIN;
-
 CREATE TABLE basic_option (
     "code" VARCHAR PRIMARY KEY,
     "symbol" VARCHAR NOT NULL,
@@ -16,7 +15,6 @@ CREATE TABLE basic_option (
     "reference" DECIMAL NOT NULL,
     "update_date" TIMESTAMPTZ NOT NULL
 );
-
 CREATE TABLE trade_option_order (
     "order_id" VARCHAR PRIMARY KEY,
     "status" INT NOT NULL,
@@ -26,12 +24,9 @@ CREATE TABLE trade_option_order (
     "price" DECIMAL NOT NULL,
     "quantity" INT NOT NULL
 );
-
 CREATE INDEX trade_option_order_order_time_index ON trade_option_order USING btree ("order_time");
-
 ALTER TABLE trade_option_order
 ADD CONSTRAINT "fk_trade_option_order_option" FOREIGN KEY ("code") REFERENCES basic_option ("code");
-
 CREATE TABLE trade_option_balance (
     "id" SERIAL PRIMARY KEY,
     "trade_count" INT NOT NULL,
@@ -40,7 +35,5 @@ CREATE TABLE trade_option_balance (
     "total" INT NOT NULL,
     "trade_day" TIMESTAMPTZ NOT NULL
 );
-
 CREATE INDEX trade_option_balance_trade_day_index ON trade_option_balance USING btree ("trade_day");
-
 COMMIT;

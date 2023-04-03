@@ -503,3 +503,122 @@ func (r *TradeRepo) InsertOrUpdateFutureTradeBalance(ctx context.Context, t *ent
 	}
 	return nil
 }
+
+func (r *TradeRepo) QueryAccountBalanceByDateAndBankID(ctx context.Context, date time.Time, bankID int) (*entity.AccountBalance, error) {
+	sql, arg, err := r.Builder.
+		Select("id, date, balance, today_margin, available_margin, yesterday_margin, risk_indicator, bank_id").
+		From(tableNameAccountBalance).
+		Where(squirrel.Eq{"date": date, "bank_id": bankID}).
+		ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	row := r.Pool().QueryRow(ctx, sql, arg...)
+	e := entity.AccountBalance{}
+	if err := row.Scan(&e.ID, &e.Date, &e.Balance, &e.TodayMargin, &e.AvailableMargin, &e.YesterdayMargin, &e.RiskIndicator, &e.BankID); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &e, nil
+}
+
+func (r *TradeRepo) InsertOrUpdateAccountBalance(ctx context.Context, t *entity.AccountBalance) error {
+	dbStatus, err := r.QueryAccountBalanceByDateAndBankID(ctx, t.Date, t.BankID)
+	if err != nil {
+		return err
+	}
+
+	tx, err := r.BeginTransaction()
+	if err != nil {
+		return err
+	}
+	defer r.EndTransaction(tx, err)
+	var sql string
+	var args []interface{}
+
+	if dbStatus == nil {
+		builder := r.Builder.Insert(tableNameAccountBalance).Columns("date, balance, today_margin, available_margin, yesterday_margin, risk_indicator, bank_id")
+		builder = builder.Values(t.Date, t.Balance, t.TodayMargin, t.AvailableMargin, t.YesterdayMargin, t.RiskIndicator, t.BankID)
+		if sql, args, err = builder.ToSql(); err != nil {
+			return err
+		} else if _, err = tx.Exec(ctx, sql, args...); err != nil {
+			return err
+		}
+	} else {
+		builder := r.Builder.
+			Update(tableNameAccountBalance).
+			Set("balance", t.Balance).
+			Set("today_margin", t.TodayMargin).
+			Set("available_margin", t.AvailableMargin).
+			Set("yesterday_margin", t.YesterdayMargin).
+			Set("risk_indicator", t.RiskIndicator).
+			Where(squirrel.Eq{"date": t.Date, "bank_id": t.BankID})
+		if sql, args, err = builder.ToSql(); err != nil {
+			return err
+		} else if _, err = tx.Exec(ctx, sql, args...); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (r *TradeRepo) QueryAccountSettlementByDate(ctx context.Context, date time.Time) (*entity.Settlement, error) {
+	sql, arg, err := r.Builder.
+		Select("date, sinopac, fugle").
+		From(tableNameAccountSettlement).
+		Where(squirrel.Eq{"date": date}).
+		ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	row := r.Pool().QueryRow(ctx, sql, arg...)
+	e := entity.Settlement{}
+	if err := row.Scan(&e.Date, &e.Sinopac, &e.Fugle); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &e, nil
+}
+
+func (r *TradeRepo) InsertOrUpdateAccountSettlement(ctx context.Context, t *entity.Settlement) error {
+	dbSettle, err := r.QueryAccountSettlementByDate(ctx, t.Date)
+	if err != nil {
+		return err
+	}
+
+	tx, err := r.BeginTransaction()
+	if err != nil {
+		return err
+	}
+	defer r.EndTransaction(tx, err)
+	var sql string
+	var args []interface{}
+
+	if dbSettle == nil {
+		builder := r.Builder.Insert(tableNameAccountSettlement).Columns("date, sinopac, fugle")
+		builder = builder.Values(t.Date, t.Sinopac, t.Fugle)
+		if sql, args, err = builder.ToSql(); err != nil {
+			return err
+		} else if _, err = tx.Exec(ctx, sql, args...); err != nil {
+			return err
+		}
+	} else {
+		builder := r.Builder.
+			Update(tableNameAccountSettlement).
+			Set("sinopac", t.Sinopac).
+			Set("fugle", t.Fugle).
+			Where(squirrel.Eq{"date": t.Date})
+		if sql, args, err = builder.ToSql(); err != nil {
+			return err
+		} else if _, err = tx.Exec(ctx, sql, args...); err != nil {
+			return err
+		}
+	}
+	return nil
+}
