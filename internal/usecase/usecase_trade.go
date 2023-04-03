@@ -6,6 +6,7 @@ import (
 	"sync"
 	"time"
 
+	"tmt/global"
 	"tmt/internal/entity"
 	"tmt/internal/usecase/event"
 	"tmt/internal/usecase/grpcapi"
@@ -55,8 +56,111 @@ func (u *UseCaseBase) NewTrade() Trade {
 		go uc.askOrderStatus()
 	}
 
+	go uc.updateAccountDetail()
 	go uc.updateAllTradeBalance()
 	return uc
+}
+
+func (uc *TradeUseCase) updateAccountDetail() {
+	for range time.NewTicker(time.Minute).C {
+		err := uc.repo.InsertOrUpdateAccountBalance(context.Background(), uc.getSinopacAccountBalance())
+		if err != nil {
+			logger.Fatal(err)
+		}
+
+		err = uc.repo.InsertOrUpdateAccountBalance(context.Background(), uc.getFugleAccountBalance())
+		if err != nil {
+			logger.Fatal(err)
+		}
+
+		accountSettlement := uc.getAccountSettlement()
+		for _, v := range accountSettlement {
+			err = uc.repo.InsertOrUpdateAccountSettlement(context.Background(), v)
+			if err != nil {
+				logger.Fatal(err)
+			}
+		}
+	}
+}
+
+func (uc *TradeUseCase) getSinopacAccountBalance() *entity.AccountBalance {
+	margin, err := uc.sc.GetMargin()
+	if err != nil {
+		logger.Fatal(err)
+	}
+	accountBalance, er := uc.sc.GetAccountBalance()
+	if err != nil {
+		logger.Fatal(er)
+	}
+
+	return &entity.AccountBalance{
+		Date:            time.Date(time.Now().Year(), time.Now().Month(), time.Now().Day(), 0, 0, 0, 0, time.Local),
+		Balance:         accountBalance.Balance,
+		TodayMargin:     margin.TodayBalance,
+		AvailableMargin: margin.AvailableMargin,
+		YesterdayMargin: margin.YesterdayBalance,
+		RiskIndicator:   margin.RiskIndicator,
+		BankID:          entity.BankIDSinopac,
+	}
+}
+
+func (uc *TradeUseCase) getFugleAccountBalance() *entity.AccountBalance {
+	accountBalance, er := uc.fg.GetAccountBalance()
+	if er != nil {
+		logger.Fatal(er)
+	}
+
+	return &entity.AccountBalance{
+		Date:          time.Date(time.Now().Year(), time.Now().Month(), time.Now().Day(), 0, 0, 0, 0, time.Local),
+		Balance:       accountBalance.Balance,
+		RiskIndicator: 999,
+		BankID:        entity.BankIDFugle,
+	}
+}
+
+func (uc *TradeUseCase) getAccountSettlement() []*entity.Settlement {
+	result := make(map[time.Time]*entity.Settlement)
+	sinopacSettlement, err := uc.sc.GetSettlement()
+	if err != nil {
+		logger.Fatal(err)
+	}
+
+	for _, v := range sinopacSettlement.GetSettlement() {
+		dateTime, err := time.ParseInLocation(global.LongTimeLayout, v.GetDate(), time.Local)
+		if err != nil {
+			logger.Fatal(err)
+		}
+		result[dateTime] = &entity.Settlement{
+			Date:    dateTime,
+			Sinopac: v.GetAmount(),
+		}
+	}
+
+	fugleSettlement, er := uc.fg.GetSettlement()
+	if er != nil {
+		logger.Fatal(er)
+	}
+
+	for _, v := range fugleSettlement.GetSettlement() {
+		dateTime, err := time.ParseInLocation(global.LongTimeLayout, v.GetDate(), time.Local)
+		if err != nil {
+			logger.Fatal(err)
+		}
+		if _, ok := result[dateTime]; ok {
+			result[dateTime].Fugle = v.GetAmount()
+		} else {
+			result[dateTime] = &entity.Settlement{
+				Date:  dateTime,
+				Fugle: v.GetAmount(),
+			}
+		}
+	}
+
+	var settlement []*entity.Settlement
+	for _, v := range result {
+		settlement = append(settlement, v)
+	}
+	return settlement
 }
 
 func (uc *TradeUseCase) updateAllTradeBalance() {

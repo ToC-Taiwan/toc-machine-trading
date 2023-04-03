@@ -81,7 +81,7 @@ type TradeInterfaceClient interface {
 	// GetFuturePosition is the interface for getting future position
 	GetFuturePosition(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*FuturePositionArr, error)
 	// GetSettlement is the interface for getting settlement
-	GetSettlement(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*SettlementV1Message, error)
+	GetSettlement(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*SettlementList, error)
 	// GetAccountBalance is the interface for getting account balance
 	GetAccountBalance(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*AccountBalance, error)
 	// GetMargin is the interface for getting margin
@@ -249,8 +249,8 @@ func (c *tradeInterfaceClient) GetFuturePosition(ctx context.Context, in *emptyp
 	return out, nil
 }
 
-func (c *tradeInterfaceClient) GetSettlement(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*SettlementV1Message, error) {
-	out := new(SettlementV1Message)
+func (c *tradeInterfaceClient) GetSettlement(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*SettlementList, error) {
+	out := new(SettlementList)
 	err := c.cc.Invoke(ctx, TradeInterface_GetSettlement_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -315,7 +315,7 @@ type TradeInterfaceServer interface {
 	// GetFuturePosition is the interface for getting future position
 	GetFuturePosition(context.Context, *emptypb.Empty) (*FuturePositionArr, error)
 	// GetSettlement is the interface for getting settlement
-	GetSettlement(context.Context, *emptypb.Empty) (*SettlementV1Message, error)
+	GetSettlement(context.Context, *emptypb.Empty) (*SettlementList, error)
 	// GetAccountBalance is the interface for getting account balance
 	GetAccountBalance(context.Context, *emptypb.Empty) (*AccountBalance, error)
 	// GetMargin is the interface for getting margin
@@ -378,7 +378,7 @@ func (UnimplementedTradeInterfaceServer) GetNonBlockOrderStatusArr(context.Conte
 func (UnimplementedTradeInterfaceServer) GetFuturePosition(context.Context, *emptypb.Empty) (*FuturePositionArr, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetFuturePosition not implemented")
 }
-func (UnimplementedTradeInterfaceServer) GetSettlement(context.Context, *emptypb.Empty) (*SettlementV1Message, error) {
+func (UnimplementedTradeInterfaceServer) GetSettlement(context.Context, *emptypb.Empty) (*SettlementList, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetSettlement not implemented")
 }
 func (UnimplementedTradeInterfaceServer) GetAccountBalance(context.Context, *emptypb.Empty) (*AccountBalance, error) {

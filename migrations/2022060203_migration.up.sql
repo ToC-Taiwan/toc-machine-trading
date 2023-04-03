@@ -1,10 +1,8 @@
 BEGIN;
-
 CREATE TABLE basic_calendar (
     "date" TIMESTAMPTZ PRIMARY KEY,
     "is_trade_day" BOOLEAN NOT NULL
 );
-
 CREATE TABLE basic_stock (
     "number" VARCHAR PRIMARY KEY,
     "name" VARCHAR NOT NULL,
@@ -14,7 +12,6 @@ CREATE TABLE basic_stock (
     "last_close" DECIMAL NOT NULL,
     "update_date" TIMESTAMPTZ NOT NULL
 );
-
 CREATE TABLE basic_targets (
     "id" SERIAL PRIMARY KEY,
     "rank" INT NOT NULL,
@@ -22,36 +19,27 @@ CREATE TABLE basic_targets (
     "volume" INT NOT NULL,
     "trade_day" TIMESTAMPTZ
 );
-
 CREATE INDEX basic_targets_trade_day_index ON basic_targets USING btree ("trade_day");
-
 ALTER TABLE basic_targets
 ADD CONSTRAINT "fk_basic_targets_stock" FOREIGN KEY ("stock_num") REFERENCES basic_stock ("number");
-
 CREATE TABLE history_stock_analyze (
     "id" SERIAL PRIMARY KEY,
     "stock_num" VARCHAR NOT NULL,
     "date" TIMESTAMPTZ,
     "quater_ma" DECIMAL NOT NULL
 );
-
 CREATE INDEX history_stock_analyze_stock_num_index ON history_stock_analyze USING btree ("stock_num");
-
 ALTER TABLE history_stock_analyze
 ADD CONSTRAINT "fk_history_stock_analyze_stock" FOREIGN KEY ("stock_num") REFERENCES basic_stock ("number");
-
 CREATE TABLE history_stock_close (
     "id" SERIAL PRIMARY KEY,
     "date" TIMESTAMPTZ NOT NULL,
     "stock_num" VARCHAR NOT NULL,
     "close" DECIMAL NOT NULL
 );
-
 CREATE INDEX history_stock_close_stock_num_index ON history_stock_close USING btree ("stock_num");
-
 ALTER TABLE history_stock_close
 ADD CONSTRAINT "fk_history_stock_close_stock" FOREIGN KEY ("stock_num") REFERENCES basic_stock ("number");
-
 CREATE TABLE history_stock_kbar (
     "id" SERIAL PRIMARY KEY,
     "stock_num" VARCHAR NOT NULL,
@@ -62,12 +50,9 @@ CREATE TABLE history_stock_kbar (
     "close" DECIMAL NOT NULL,
     "volume" INT NOT NULL
 );
-
 CREATE INDEX history_stock_kbar_stock_num_index ON history_stock_kbar USING btree ("stock_num");
-
 ALTER TABLE history_stock_kbar
 ADD CONSTRAINT "fk_history_stock_kbar_stock" FOREIGN KEY ("stock_num") REFERENCES basic_stock ("number");
-
 CREATE TABLE history_stock_tick (
     "id" SERIAL PRIMARY KEY,
     "stock_num" VARCHAR NOT NULL,
@@ -80,12 +65,9 @@ CREATE TABLE history_stock_tick (
     "ask_price" DECIMAL NOT NULL,
     "ask_volume" INT NOT NULL
 );
-
 CREATE INDEX history_stock_tick_stock_num_index ON history_stock_tick USING btree ("stock_num");
-
 ALTER TABLE history_stock_tick
 ADD CONSTRAINT "fk_history_stock_tick_stock" FOREIGN KEY ("stock_num") REFERENCES basic_stock ("number");
-
 CREATE TABLE trade_stock_order (
     "order_id" VARCHAR PRIMARY KEY,
     "status" INT NOT NULL,
@@ -95,12 +77,9 @@ CREATE TABLE trade_stock_order (
     "price" DECIMAL NOT NULL,
     "quantity" INT NOT NULL
 );
-
 CREATE INDEX trade_stock_order_order_time_index ON trade_stock_order USING btree ("order_time");
-
 ALTER TABLE trade_stock_order
 ADD CONSTRAINT "fk_trade_stock_order_stock" FOREIGN KEY ("stock_num") REFERENCES basic_stock ("number");
-
 CREATE TABLE sinopac_event (
     "id" SERIAL PRIMARY KEY,
     "event_code" INT NOT NULL,
@@ -109,7 +88,6 @@ CREATE TABLE sinopac_event (
     "info" VARCHAR NOT NULL,
     "event_time" TIMESTAMPTZ NOT NULL
 );
-
 CREATE TABLE trade_stock_balance (
     "id" SERIAL PRIMARY KEY,
     "trade_count" INT NOT NULL,
@@ -120,7 +98,5 @@ CREATE TABLE trade_stock_balance (
     "total" INT NOT NULL,
     "trade_day" TIMESTAMPTZ NOT NULL
 );
-
 CREATE INDEX trade_stock_balance_trade_day_index ON trade_stock_balance USING btree ("trade_day");
-
 COMMIT;

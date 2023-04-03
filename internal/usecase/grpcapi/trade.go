@@ -60,7 +60,7 @@ func (t *TradegRPCAPI) GetMargin() (*pb.Margin, error) {
 }
 
 // GetSettlement -.
-func (t *TradegRPCAPI) GetSettlement() (*pb.SettlementV1Message, error) {
+func (t *TradegRPCAPI) GetSettlement() (*pb.SettlementList, error) {
 	conn := t.conn.GetReadyConn()
 	defer t.conn.PutReadyConn(conn)
 	c := pb.NewTradeInterfaceClient(conn)
