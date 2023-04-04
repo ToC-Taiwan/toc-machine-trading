@@ -72,6 +72,8 @@ type Trade interface {
 	UpdateTradeBalanceByTradeDay(ctx context.Context, date string) error
 	MoveStockOrderToLatestTradeDay(ctx context.Context, orderID string) error
 	MoveFutureOrderToLatestTradeDay(ctx context.Context, orderID string) error
+
+	GetAccountBalance(ctx context.Context) ([]*entity.AccountBalance, error)
 }
 
 type Analyze interface {

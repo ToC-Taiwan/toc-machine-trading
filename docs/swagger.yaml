@@ -204,6 +204,25 @@ definitions:
       second_part_duration:
         type: integer
     type: object
+  entity.AccountBalance:
+    properties:
+      available_margin:
+        type: number
+      balance:
+        type: number
+      bank_id:
+        type: integer
+      date:
+        type: string
+      id:
+        type: integer
+      risk_indicator:
+        type: number
+      today_margin:
+        type: number
+      yesterday_margin:
+        type: number
+    type: object
   entity.BaseOrder:
     properties:
       action:
@@ -476,6 +495,15 @@ definitions:
         type: array
       total_balance:
         type: integer
+    type: object
+  v1.accountSummary:
+    properties:
+      balance:
+        items:
+          $ref: '#/definitions/entity.AccountBalance'
+        type: array
+      total:
+        type: number
     type: object
   v1.allOrder:
     properties:
@@ -783,6 +811,26 @@ paths:
       summary: manualInsertFutureOrder
       tags:
       - order
+  /order/account/status:
+    get:
+      consumes:
+      - application/json
+      description: getAccountStatus
+      operationId: getAccountStatus
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.accountSummary'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+      summary: getAccountStatus
+      tags:
+      - account
   /order/all:
     get:
       consumes:

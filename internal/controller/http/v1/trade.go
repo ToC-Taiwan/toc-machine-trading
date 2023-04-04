@@ -36,6 +36,8 @@ func newTradeRoutes(handler *gin.RouterGroup, t usecase.Trade) {
 
 		h.GET("/day-trade/forward", r.calculateForwardDayTradeBalance)
 		h.GET("/day-trade/reverse", r.calculateReverseDayTradeBalance)
+
+		h.GET("/account/balance", r.getAccountBalance)
 	}
 }
 
@@ -399,4 +401,37 @@ func (r *orderRoutes) moveStockOrderToLatestTradeDay(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, nil)
+}
+
+type accountSummary struct {
+	Balance []*entity.AccountBalance `json:"balance,omitempty" yaml:"balance"`
+	Total   float64                  `json:"total,omitempty" yaml:"total"`
+}
+
+// @Summary     getAccountBalance
+// @Description getAccountBalance
+// @ID          getAccountBalance
+// @Tags  	    account
+// @Accept      json
+// @Produce     json
+// @Success     200 {object} accountSummary
+// @Failure     500 {object} response
+// @Router      /order/account/balance [get]
+func (r *orderRoutes) getAccountBalance(c *gin.Context) {
+	balance, err := r.t.GetAccountBalance(c.Request.Context())
+	if err != nil {
+		errorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	var total float64
+	for _, b := range balance {
+		total += b.Balance
+		total += b.TodayMargin
+	}
+
+	c.JSON(http.StatusOK, accountSummary{
+		Balance: balance,
+		Total:   total,
+	})
 }

@@ -353,6 +353,36 @@ const docTemplate = `{
                 }
             }
         },
+        "/order/account/status": {
+            "get": {
+                "description": "getAccountStatus",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "account"
+                ],
+                "summary": "getAccountStatus",
+                "operationId": "getAccountStatus",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v1.accountSummary"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/v1.response"
+                        }
+                    }
+                }
+            }
+        },
         "/order/all": {
             "get": {
                 "description": "getAllOrder",
@@ -1141,6 +1171,35 @@ const docTemplate = `{
                 }
             }
         },
+        "entity.AccountBalance": {
+            "type": "object",
+            "properties": {
+                "available_margin": {
+                    "type": "number"
+                },
+                "balance": {
+                    "type": "number"
+                },
+                "bank_id": {
+                    "type": "integer"
+                },
+                "date": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "risk_indicator": {
+                    "type": "number"
+                },
+                "today_margin": {
+                    "type": "number"
+                },
+                "yesterday_margin": {
+                    "type": "number"
+                }
+            }
+        },
         "entity.BaseOrder": {
             "type": "object",
             "properties": {
@@ -1545,6 +1604,20 @@ const docTemplate = `{
                 },
                 "total_balance": {
                     "type": "integer"
+                }
+            }
+        },
+        "v1.accountSummary": {
+            "type": "object",
+            "properties": {
+                "balance": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entity.AccountBalance"
+                    }
+                },
+                "total": {
+                    "type": "number"
                 }
             }
         },

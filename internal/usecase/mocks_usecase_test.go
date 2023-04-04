@@ -480,6 +480,21 @@ func (mr *MockTradeMockRecorder) CancelFutureOrderByID(orderID interface{}) *gom
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CancelFutureOrderByID", reflect.TypeOf((*MockTrade)(nil).CancelFutureOrderByID), orderID)
 }
 
+// GetAccountBalance mocks base method.
+func (m *MockTrade) GetAccountBalance(ctx context.Context) ([]*entity.AccountBalance, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAccountBalance", ctx)
+	ret0, _ := ret[0].([]*entity.AccountBalance)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAccountBalance indicates an expected call of GetAccountBalance.
+func (mr *MockTradeMockRecorder) GetAccountBalance(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAccountBalance", reflect.TypeOf((*MockTrade)(nil).GetAccountBalance), ctx)
+}
+
 // GetAllFutureOrder mocks base method.
 func (m *MockTrade) GetAllFutureOrder(ctx context.Context) ([]*entity.FutureOrder, error) {
 	m.ctrl.T.Helper()

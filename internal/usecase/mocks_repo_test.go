@@ -721,6 +721,21 @@ func (mr *MockTradeRepoMockRecorder) QueryAllFutureTradeBalance(ctx interface{})
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryAllFutureTradeBalance", reflect.TypeOf((*MockTradeRepo)(nil).QueryAllFutureTradeBalance), ctx)
 }
 
+// QueryAllLastAccountBalance mocks base method.
+func (m *MockTradeRepo) QueryAllLastAccountBalance(ctx context.Context, bankIDArr []int) ([]*entity.AccountBalance, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "QueryAllLastAccountBalance", ctx, bankIDArr)
+	ret0, _ := ret[0].([]*entity.AccountBalance)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// QueryAllLastAccountBalance indicates an expected call of QueryAllLastAccountBalance.
+func (mr *MockTradeRepoMockRecorder) QueryAllLastAccountBalance(ctx, bankIDArr interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryAllLastAccountBalance", reflect.TypeOf((*MockTradeRepo)(nil).QueryAllLastAccountBalance), ctx, bankIDArr)
+}
+
 // QueryAllStockOrder mocks base method.
 func (m *MockTradeRepo) QueryAllStockOrder(ctx context.Context) ([]*entity.StockOrder, error) {
 	m.ctrl.T.Helper()

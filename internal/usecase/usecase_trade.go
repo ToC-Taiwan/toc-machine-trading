@@ -616,3 +616,12 @@ func (uc *TradeUseCase) GetFutureOrderByTradeDay(ctx context.Context, tradeDay s
 
 	return filledOrder, nil
 }
+
+func (uc *TradeUseCase) GetAccountBalance(ctx context.Context) ([]*entity.AccountBalance, error) {
+	bankIDArr := []int{entity.BankIDSinopac, entity.BankIDFugle}
+	data, err := uc.repo.QueryAllLastAccountBalance(ctx, bankIDArr)
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
+}

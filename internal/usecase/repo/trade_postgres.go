@@ -504,6 +504,32 @@ func (r *TradeRepo) InsertOrUpdateFutureTradeBalance(ctx context.Context, t *ent
 	return nil
 }
 
+func (r *TradeRepo) QueryAllLastAccountBalance(ctx context.Context, bankIDArr []int) ([]*entity.AccountBalance, error) {
+	var result []*entity.AccountBalance
+	for _, v := range bankIDArr {
+		sql, arg, err := r.Builder.
+			Select("id, date, balance, today_margin, available_margin, yesterday_margin, risk_indicator, bank_id").
+			From(tableNameAccountBalance).
+			Where(squirrel.Eq{"bank_id": v}).
+			Limit(1).OrderBy("date DESC").
+			ToSql()
+		if err != nil {
+			return nil, err
+		}
+
+		row := r.Pool().QueryRow(ctx, sql, arg...)
+		e := entity.AccountBalance{}
+		if err := row.Scan(&e.ID, &e.Date, &e.Balance, &e.TodayMargin, &e.AvailableMargin, &e.YesterdayMargin, &e.RiskIndicator, &e.BankID); err != nil {
+			if errors.Is(err, pgx.ErrNoRows) {
+				continue
+			}
+			return nil, err
+		}
+		result = append(result, &e)
+	}
+	return result, nil
+}
+
 func (r *TradeRepo) QueryAccountBalanceByDateAndBankID(ctx context.Context, date time.Time, bankID int) (*entity.AccountBalance, error) {
 	sql, arg, err := r.Builder.
 		Select("id, date, balance, today_margin, available_margin, yesterday_margin, risk_indicator, bank_id").
