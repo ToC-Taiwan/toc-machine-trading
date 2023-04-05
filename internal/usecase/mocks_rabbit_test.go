@@ -34,28 +34,16 @@ func (m *MockRabbit) EXPECT() *MockRabbitMockRecorder {
 	return m.recorder
 }
 
-// AddFutureTickChan mocks base method.
-func (m *MockRabbit) AddFutureTickChan(tickChan chan *entity.RealTimeFutureTick, connectionID string) {
+// Close mocks base method.
+func (m *MockRabbit) Close() {
 	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "AddFutureTickChan", tickChan, connectionID)
+	m.ctrl.Call(m, "Close")
 }
 
-// AddFutureTickChan indicates an expected call of AddFutureTickChan.
-func (mr *MockRabbitMockRecorder) AddFutureTickChan(tickChan, connectionID interface{}) *gomock.Call {
+// Close indicates an expected call of Close.
+func (mr *MockRabbitMockRecorder) Close() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddFutureTickChan", reflect.TypeOf((*MockRabbit)(nil).AddFutureTickChan), tickChan, connectionID)
-}
-
-// AddOrderStatusChan mocks base method.
-func (m *MockRabbit) AddOrderStatusChan(orderStatusChan chan interface{}, connectionID string) {
-	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "AddOrderStatusChan", orderStatusChan, connectionID)
-}
-
-// AddOrderStatusChan indicates an expected call of AddOrderStatusChan.
-func (mr *MockRabbitMockRecorder) AddOrderStatusChan(orderStatusChan, connectionID interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddOrderStatusChan", reflect.TypeOf((*MockRabbit)(nil).AddOrderStatusChan), orderStatusChan, connectionID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Close", reflect.TypeOf((*MockRabbit)(nil).Close))
 }
 
 // EventConsumer mocks base method.
@@ -107,27 +95,27 @@ func (mr *MockRabbitMockRecorder) FutureTickConsumer(code, tickChan interface{})
 }
 
 // OrderStatusArrConsumer mocks base method.
-func (m *MockRabbit) OrderStatusArrConsumer() {
+func (m *MockRabbit) OrderStatusArrConsumer(orderStatusChan chan interface{}) {
 	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "OrderStatusArrConsumer")
+	m.ctrl.Call(m, "OrderStatusArrConsumer", orderStatusChan)
 }
 
 // OrderStatusArrConsumer indicates an expected call of OrderStatusArrConsumer.
-func (mr *MockRabbitMockRecorder) OrderStatusArrConsumer() *gomock.Call {
+func (mr *MockRabbitMockRecorder) OrderStatusArrConsumer(orderStatusChan interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "OrderStatusArrConsumer", reflect.TypeOf((*MockRabbit)(nil).OrderStatusArrConsumer))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "OrderStatusArrConsumer", reflect.TypeOf((*MockRabbit)(nil).OrderStatusArrConsumer), orderStatusChan)
 }
 
 // OrderStatusConsumer mocks base method.
-func (m *MockRabbit) OrderStatusConsumer() {
+func (m *MockRabbit) OrderStatusConsumer(orderStatusChan chan interface{}) {
 	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "OrderStatusConsumer")
+	m.ctrl.Call(m, "OrderStatusConsumer", orderStatusChan)
 }
 
 // OrderStatusConsumer indicates an expected call of OrderStatusConsumer.
-func (mr *MockRabbitMockRecorder) OrderStatusConsumer() *gomock.Call {
+func (mr *MockRabbitMockRecorder) OrderStatusConsumer(orderStatusChan interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "OrderStatusConsumer", reflect.TypeOf((*MockRabbit)(nil).OrderStatusConsumer))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "OrderStatusConsumer", reflect.TypeOf((*MockRabbit)(nil).OrderStatusConsumer), orderStatusChan)
 }
 
 // PublishTerminate mocks base method.
@@ -140,30 +128,6 @@ func (m *MockRabbit) PublishTerminate() {
 func (mr *MockRabbitMockRecorder) PublishTerminate() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PublishTerminate", reflect.TypeOf((*MockRabbit)(nil).PublishTerminate))
-}
-
-// RemoveFutureTickChan mocks base method.
-func (m *MockRabbit) RemoveFutureTickChan(connectionID string) {
-	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "RemoveFutureTickChan", connectionID)
-}
-
-// RemoveFutureTickChan indicates an expected call of RemoveFutureTickChan.
-func (mr *MockRabbitMockRecorder) RemoveFutureTickChan(connectionID interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RemoveFutureTickChan", reflect.TypeOf((*MockRabbit)(nil).RemoveFutureTickChan), connectionID)
-}
-
-// RemoveOrderStatusChan mocks base method.
-func (m *MockRabbit) RemoveOrderStatusChan(connectionID string) {
-	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "RemoveOrderStatusChan", connectionID)
-}
-
-// RemoveOrderStatusChan indicates an expected call of RemoveOrderStatusChan.
-func (mr *MockRabbitMockRecorder) RemoveOrderStatusChan(connectionID interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RemoveOrderStatusChan", reflect.TypeOf((*MockRabbit)(nil).RemoveOrderStatusChan), connectionID)
 }
 
 // StockBidAskConsumer mocks base method.

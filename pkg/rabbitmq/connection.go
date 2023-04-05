@@ -143,3 +143,7 @@ func (c *Connection) Publish(key string, message []byte) error {
 	}
 	return nil
 }
+
+func (c *Connection) Close() error {
+	return c.Connection.Close()
+}

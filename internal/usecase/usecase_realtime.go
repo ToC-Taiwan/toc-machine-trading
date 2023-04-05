@@ -19,8 +19,6 @@ import (
 	"tmt/internal/usecase/rabbit"
 	"tmt/internal/usecase/repo"
 	"tmt/internal/usecase/slack"
-
-	"github.com/google/uuid"
 )
 
 // RealTimeUseCase -.
@@ -34,6 +32,9 @@ type RealTimeUseCase struct {
 
 	commonRabbit Rabbit
 	futureRabbit Rabbit
+
+	clientRabbitMap     map[string]Rabbit
+	clientRabbitMapLock sync.RWMutex
 
 	cfg          *config.Config
 	quota        *quota.Quota
@@ -73,6 +74,8 @@ func (u *UseCaseBase) NewRealTime() RealTime {
 		stockSwitchChanMap:  make(map[string]chan bool),
 
 		slack: u.slack,
+
+		clientRabbitMap: make(map[string]Rabbit),
 	}
 
 	// unsubscriba all first
@@ -264,9 +267,8 @@ func (uc *RealTimeUseCase) ReceiveOrderStatus(ctx context.Context) {
 			}
 		}
 	}()
-	uc.commonRabbit.AddOrderStatusChan(orderStatusChan, uuid.New().String())
-	go uc.commonRabbit.OrderStatusConsumer()
-	go uc.commonRabbit.OrderStatusArrConsumer()
+	go uc.commonRabbit.OrderStatusConsumer(orderStatusChan)
+	go uc.commonRabbit.OrderStatusArrConsumer(orderStatusChan)
 }
 
 // GetTSESnapshot -.
@@ -489,9 +491,8 @@ func (uc *RealTimeUseCase) ReceiveStockSubscribeData(targetArr []*entity.StockTa
 	}()
 	hr := rabbit.NewRabbit(uc.cfg.RabbitMQ)
 	hr.FillAllBasic(basic.AllStocks, basic.AllFutures)
-	hr.AddOrderStatusChan(orderStatusChan, uuid.New().String())
-	go hr.OrderStatusConsumer()
-	go hr.OrderStatusArrConsumer()
+	go hr.OrderStatusConsumer(orderStatusChan)
+	go hr.OrderStatusArrConsumer(orderStatusChan)
 
 	logger.Info("Stock rooms are all started")
 }
@@ -529,9 +530,8 @@ func (uc *RealTimeUseCase) ReceiveFutureSubscribeData(code string) {
 	}()
 	basic := cc.GetBasicInfo()
 	uc.futureRabbit.FillAllBasic(basic.AllStocks, basic.AllFutures)
-	uc.futureRabbit.AddOrderStatusChan(orderStatusChan, uuid.New().String())
-	go uc.futureRabbit.OrderStatusConsumer()
-	go uc.futureRabbit.OrderStatusArrConsumer()
+	go uc.futureRabbit.OrderStatusConsumer(orderStatusChan)
+	go uc.futureRabbit.OrderStatusArrConsumer(orderStatusChan)
 	logger.Info("Future rooms are all started")
 }
 
@@ -541,21 +541,52 @@ func (uc *RealTimeUseCase) SetMainFuture(code string) {
 
 // NewFutureRealTimeConnection -.
 func (uc *RealTimeUseCase) NewFutureRealTimeConnection(tickChan chan *entity.RealTimeFutureTick, connectionID string) {
-	uc.futureRabbit.AddFutureTickChan(tickChan, connectionID)
+	r := rabbit.NewRabbit(uc.cfg.RabbitMQ)
+	uc.clientRabbitMapLock.Lock()
+	uc.clientRabbitMap[connectionID] = r
+	uc.slack.PostMessage(fmt.Sprintf("New %s RealTimeConnection", connectionID))
+	uc.clientRabbitMapLock.Unlock()
+	go r.FutureTickConsumer(uc.mainFutureCode, tickChan)
 }
 
 // DeleteFutureRealTimeConnection -.
 func (uc *RealTimeUseCase) DeleteFutureRealTimeConnection(connectionID string) {
-	uc.futureRabbit.RemoveFutureTickChan(connectionID)
+	uc.clientRabbitMapLock.Lock()
+	defer uc.clientRabbitMapLock.Unlock()
+	if r, ok := uc.clientRabbitMap[connectionID]; ok {
+		r.Close()
+		uc.slack.PostMessage(fmt.Sprintf("Close %s RealTimeConnection", connectionID))
+		delete(uc.clientRabbitMap, connectionID)
+	}
 }
 
 // NewOrderStatusConnection -.
 func (uc *RealTimeUseCase) NewOrderStatusConnection(orderStatusChan chan interface{}, connectionID string) {
-	uc.futureRabbit.AddOrderStatusChan(orderStatusChan, connectionID)
+	var r Rabbit
+	uc.clientRabbitMapLock.Lock()
+	if rr, ok := uc.clientRabbitMap[connectionID]; ok {
+		r = rr
+	} else {
+		r = rabbit.NewRabbit(uc.cfg.RabbitMQ)
+		uc.clientRabbitMap[connectionID] = r
+		uc.slack.PostMessage(fmt.Sprintf("New RealTimeConnection: %s", connectionID))
+	}
+	uc.clientRabbitMapLock.Unlock()
+
+	basic := cc.GetBasicInfo()
+	r.FillAllBasic(basic.AllStocks, basic.AllFutures)
+	go r.OrderStatusConsumer(orderStatusChan)
+	go r.OrderStatusArrConsumer(orderStatusChan)
 }
 
 func (uc *RealTimeUseCase) DeleteOrderStatusConnection(connectionID string) {
-	uc.futureRabbit.RemoveOrderStatusChan(connectionID)
+	uc.clientRabbitMapLock.Lock()
+	defer uc.clientRabbitMapLock.Unlock()
+	if r, ok := uc.clientRabbitMap[connectionID]; ok {
+		r.Close()
+		uc.slack.PostMessage(fmt.Sprintf("Close RealTimeConnection: %s", connectionID))
+		delete(uc.clientRabbitMap, connectionID)
+	}
 }
 
 // UnSubscribeAll -.

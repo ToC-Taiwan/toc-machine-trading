@@ -13,7 +13,6 @@ import (
 	"tmt/pkg/log"
 	"tmt/pkg/rabbitmq"
 
-	"github.com/google/uuid"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -26,12 +25,6 @@ type Rabbit struct {
 	allStockMap   map[string]*entity.Stock
 	allFutureMap  map[string]*entity.Future
 	detailMapLock sync.RWMutex
-
-	futureTickChanMap map[string]chan *entity.RealTimeFutureTick
-	futureTickMapLock sync.RWMutex
-
-	orderStatusChanMap     map[string]chan interface{}
-	orderStatusChanMapLock sync.RWMutex
 }
 
 func NewRabbit(cfg config.RabbitMQ) *Rabbit {
@@ -47,12 +40,16 @@ func NewRabbit(cfg config.RabbitMQ) *Rabbit {
 	}
 
 	rabbit := &Rabbit{
-		conn:               conn,
-		futureTickChanMap:  make(map[string]chan *entity.RealTimeFutureTick),
-		orderStatusChanMap: make(map[string]chan interface{}),
+		conn: conn,
 	}
 
 	return rabbit
+}
+
+func (c *Rabbit) Close() {
+	if e := c.conn.Close(); e != nil {
+		logger.Error(e)
+	}
 }
 
 // FillAllBasic -.
@@ -108,7 +105,7 @@ func (c *Rabbit) EventConsumer(eventChan chan *entity.SinopacEvent) {
 }
 
 // OrderStatusConsumer OrderStatusConsumer
-func (c *Rabbit) OrderStatusConsumer() {
+func (c *Rabbit) OrderStatusConsumer(orderStatusChan chan interface{}) {
 	if !c.checkBasic() {
 		logger.Fatal("allStockMap or allFutureMap is empty")
 	}
@@ -129,13 +126,13 @@ func (c *Rabbit) OrderStatusConsumer() {
 		if order := c.protoToOrder(body); order == nil {
 			continue
 		} else {
-			c.sendOrder(order)
+			orderStatusChan <- order
 		}
 	}
 }
 
 // OrderStatusArrConsumer -.
-func (c *Rabbit) OrderStatusArrConsumer() {
+func (c *Rabbit) OrderStatusArrConsumer(orderStatusChan chan interface{}) {
 	if !c.checkBasic() {
 		logger.Fatal("allStockMap or allFutureMap is empty")
 	}
@@ -154,18 +151,10 @@ func (c *Rabbit) OrderStatusArrConsumer() {
 
 		for _, b := range body.GetData() {
 			if data := c.protoToOrder(b); data != nil {
-				c.sendOrder(data)
+				orderStatusChan <- data
 			}
 		}
 	}
-}
-
-func (c *Rabbit) sendOrder(order interface{}) {
-	c.orderStatusChanMapLock.RLock()
-	for _, t := range c.orderStatusChanMap {
-		t <- order
-	}
-	c.orderStatusChanMapLock.RUnlock()
 }
 
 func (c *Rabbit) protoToOrder(proto *pb.OrderStatus) interface{} {
@@ -177,13 +166,6 @@ func (c *Rabbit) protoToOrder(proto *pb.OrderStatus) interface{} {
 		logger.Error(err)
 		return nil
 	}
-
-	// if orderTime.IsZero() {
-	// 	orderTime = time.Now()
-	// 	logger.Warnf("%s order time is zero, set to now", proto.GetOrderId())
-	// } else if time.Since(orderTime) > 12*time.Hour {
-	// 	orderTime = orderTime.Add(time.Hour * 24)
-	// }
 
 	switch {
 	case c.allStockMap[proto.GetCode()] != nil:
@@ -268,9 +250,6 @@ func (c *Rabbit) StockTickConsumer(stockNum string, tickChan chan *entity.RealTi
 
 // FutureTickConsumer -.
 func (c *Rabbit) FutureTickConsumer(code string, tickChan chan *entity.RealTimeFutureTick) {
-	c.futureTickMapLock.Lock()
-	c.futureTickChanMap[uuid.New().String()] = tickChan
-	c.futureTickMapLock.Unlock()
 	delivery := c.establishDelivery(fmt.Sprintf("%s:%s", routingKeyFutureTick, code))
 	for {
 		d, opened := <-delivery
@@ -315,11 +294,7 @@ func (c *Rabbit) FutureTickConsumer(code string, tickChan chan *entity.RealTimeF
 			PctChg:          body.GetPctChg(),
 		}
 
-		c.futureTickMapLock.RLock()
-		for _, t := range c.futureTickChanMap {
-			t <- tick
-		}
-		c.futureTickMapLock.RUnlock()
+		tickChan <- tick
 	}
 }
 
@@ -416,34 +391,6 @@ func (c *Rabbit) FutureBidAskConsumer(code string, bidAskChan chan *entity.Futur
 			FirstDerivedAskVol:   body.GetFirstDerivedAskVol(),
 		}
 	}
-}
-
-// AddFutureTickChan -.
-func (c *Rabbit) AddFutureTickChan(tickChan chan *entity.RealTimeFutureTick, connectionID string) {
-	defer c.futureTickMapLock.Unlock()
-	c.futureTickMapLock.Lock()
-	c.futureTickChanMap[connectionID] = tickChan
-}
-
-// RemoveFutureTickChan -.
-func (c *Rabbit) RemoveFutureTickChan(connectionID string) {
-	defer c.futureTickMapLock.Unlock()
-	c.futureTickMapLock.Lock()
-	close(c.futureTickChanMap[connectionID])
-	delete(c.futureTickChanMap, connectionID)
-}
-
-func (c *Rabbit) AddOrderStatusChan(orderStatusChan chan interface{}, connectionID string) {
-	defer c.orderStatusChanMapLock.Unlock()
-	c.orderStatusChanMapLock.Lock()
-	c.orderStatusChanMap[connectionID] = orderStatusChan
-}
-
-func (c *Rabbit) RemoveOrderStatusChan(connectionID string) {
-	defer c.orderStatusChanMapLock.Unlock()
-	c.orderStatusChanMapLock.Lock()
-	close(c.orderStatusChanMap[connectionID])
-	delete(c.orderStatusChanMap, connectionID)
 }
 
 func (c *Rabbit) PublishTerminate() {

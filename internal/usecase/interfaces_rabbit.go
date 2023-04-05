@@ -11,18 +11,13 @@ type Rabbit interface {
 	FillAllBasic(allStockMap map[string]*entity.Stock, allFutureMap map[string]*entity.Future)
 
 	EventConsumer(eventChan chan *entity.SinopacEvent)
-	OrderStatusConsumer()
-	OrderStatusArrConsumer()
-
+	OrderStatusConsumer(orderStatusChan chan interface{})
+	OrderStatusArrConsumer(orderStatusChan chan interface{})
 	StockTickConsumer(stockNum string, tickChan chan *entity.RealTimeStockTick)
 	StockBidAskConsumer(stockNum string, bidAskChan chan *entity.RealTimeStockBidAsk)
-
 	FutureTickConsumer(code string, tickChan chan *entity.RealTimeFutureTick)
 	FutureBidAskConsumer(code string, bidAskChan chan *entity.FutureRealTimeBidAsk)
-	AddFutureTickChan(tickChan chan *entity.RealTimeFutureTick, connectionID string)
-	RemoveFutureTickChan(connectionID string)
-	AddOrderStatusChan(orderStatusChan chan interface{}, connectionID string)
-	RemoveOrderStatusChan(connectionID string)
 
 	PublishTerminate()
+	Close()
 }

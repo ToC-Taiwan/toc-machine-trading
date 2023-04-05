@@ -41,6 +41,7 @@ type RealTime interface {
 
 	GetMainFuture() *entity.Future
 	GetFutureSnapshotByCode(code string) (*entity.FutureSnapShot, error)
+
 	NewFutureRealTimeConnection(tickChan chan *entity.RealTimeFutureTick, connectionID string)
 	DeleteFutureRealTimeConnection(connectionID string)
 	NewOrderStatusConnection(orderStatusChan chan interface{}, connectionID string)
