@@ -8,63 +8,72 @@ import (
 	"github.com/streadway/amqp"
 )
 
+const (
+	_defaultConnAttempts = 10
+	_defaultConnWaitTime = 5
+)
+
 // Connection -.
 type Connection struct {
-	Exchange   string
-	URL        string
-	WaitTime   time.Duration
-	Attempts   int
-	Connection *amqp.Connection
+	exchange string
+	url      string
+	waitTime time.Duration
+	attempts int
+
+	conn   *amqp.Connection
+	logger MQLogger
 }
 
-// NewConnection -.
-func NewConnection(exchange string, url string, waitTime int64, attempts int) *Connection {
+// New -.
+func New(exchange, url string, opts ...Option) (*Connection, error) {
 	conn := &Connection{
-		Exchange: exchange,
-		URL:      url,
-		WaitTime: time.Duration(waitTime) * time.Second,
-		Attempts: attempts,
+		exchange: exchange,
+		url:      url,
+		waitTime: time.Duration(_defaultConnWaitTime) * time.Second,
+		attempts: _defaultConnAttempts,
 	}
-	return conn
+
+	for _, opt := range opts {
+		opt(conn)
+	}
+
+	if err := conn.connect(); err != nil {
+		return nil, err
+	}
+
+	return conn, nil
 }
 
-// AttemptConnect -.
-func (c *Connection) AttemptConnect() error {
-	// TODO: attempts not working
+func (c *Connection) Close() error {
+	return c.conn.Close()
+}
+
+// Connect -.
+func (c *Connection) connect() error {
 	var err error
-	for i := c.Attempts; i > 0; i-- {
-		if err = c.connect(); err == nil {
+	for c.attempts > 0 {
+		if c.conn, err = amqp.Dial(c.url); err == nil {
 			break
 		}
 
-		fmt.Printf("RabbitMQ is trying to connect, attempts left: %d\n", i)
-		time.Sleep(c.WaitTime)
-	}
-
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (c *Connection) connect() error {
-	var err error
-	c.Connection, err = amqp.Dial(c.URL)
-	if err != nil {
-		return err
+		c.attempts--
+		if err != nil && c.attempts == 0 {
+			return err
+		}
+		c.Infof("RabbitMQ is trying to connect, attempts left: %d\n", c.attempts)
+		time.Sleep(c.waitTime)
 	}
 	return nil
 }
 
 // BindAndConsume -.
 func (c *Connection) BindAndConsume(key string) (<-chan amqp.Delivery, error) {
-	channel, err := c.Connection.Channel()
+	channel, err := c.conn.Channel()
 	if err != nil {
 		return nil, err
 	}
 	err = channel.ExchangeDeclare(
-		c.Exchange,
+		c.exchange,
 		"direct",
 		true,
 		false,
@@ -89,7 +98,7 @@ func (c *Connection) BindAndConsume(key string) (<-chan amqp.Delivery, error) {
 	err = channel.QueueBind(
 		queue.Name,
 		key,
-		c.Exchange,
+		c.exchange,
 		false,
 		nil,
 	)
@@ -112,12 +121,12 @@ func (c *Connection) BindAndConsume(key string) (<-chan amqp.Delivery, error) {
 }
 
 func (c *Connection) Publish(key string, message []byte) error {
-	channel, err := c.Connection.Channel()
+	channel, err := c.conn.Channel()
 	if err != nil {
 		return err
 	}
 	err = channel.ExchangeDeclare(
-		c.Exchange,
+		c.exchange,
 		"direct",
 		true,
 		false,
@@ -129,7 +138,7 @@ func (c *Connection) Publish(key string, message []byte) error {
 		return err
 	}
 	err = channel.Publish(
-		c.Exchange,
+		c.exchange,
 		key,
 		false,
 		false,
@@ -144,6 +153,18 @@ func (c *Connection) Publish(key string, message []byte) error {
 	return nil
 }
 
-func (c *Connection) Close() error {
-	return c.Connection.Close()
+func (c *Connection) Infof(format string, args ...interface{}) {
+	if c.logger != nil {
+		c.logger.Infof(format, args...)
+	} else {
+		fmt.Printf(format, args...)
+	}
+}
+
+func (c *Connection) Errorf(format string, args ...interface{}) {
+	if c.logger != nil {
+		c.logger.Errorf(format, args...)
+	} else {
+		fmt.Printf(format, args...)
+	}
 }

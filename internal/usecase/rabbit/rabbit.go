@@ -22,28 +22,25 @@ var logger = log.Get()
 type Rabbit struct {
 	conn *rabbitmq.Connection
 
+	detailMapLock sync.RWMutex
 	allStockMap   map[string]*entity.Stock
 	allFutureMap  map[string]*entity.Future
-	detailMapLock sync.RWMutex
 }
 
 func NewRabbit(cfg config.RabbitMQ) *Rabbit {
-	conn := rabbitmq.NewConnection(
-		cfg.Exchange,
-		cfg.URL,
-		cfg.WaitTime,
-		cfg.Attempts,
-	)
-
-	if err := conn.AttemptConnect(); err != nil {
-		logger.Error(err)
+	if conn, err := rabbitmq.New(
+		cfg.Exchange, cfg.URL,
+		rabbitmq.Attempts(cfg.Attempts),
+		rabbitmq.WaitTime(int(cfg.WaitTime)),
+		rabbitmq.Logger(logger),
+	); err != nil {
+		logger.Fatal(err)
+	} else {
+		return &Rabbit{
+			conn: conn,
+		}
 	}
-
-	rabbit := &Rabbit{
-		conn: conn,
-	}
-
-	return rabbit
+	return nil
 }
 
 func (c *Rabbit) Close() {
