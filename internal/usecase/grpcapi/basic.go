@@ -15,12 +15,12 @@ import (
 
 // BasicgRPCAPI -.
 type BasicgRPCAPI struct {
-	conn     *grpc.Connection
+	conn     *grpc.ConnPool
 	clientID string
 }
 
 // NewBasic -.
-func NewBasic(client *grpc.Connection, devMode bool) *BasicgRPCAPI {
+func NewBasic(client *grpc.ConnPool, devMode bool) *BasicgRPCAPI {
 	instance := &BasicgRPCAPI{
 		conn:     client,
 		clientID: uuid.New().String(),
@@ -35,11 +35,10 @@ func NewBasic(client *grpc.Connection, devMode bool) *BasicgRPCAPI {
 
 // Heartbeat Heartbeat
 func (t *BasicgRPCAPI) Heartbeat() error {
-	conn := t.conn.GetReadyConn()
-	defer t.conn.PutReadyConn(conn)
+	conn := t.conn.Get()
+	defer t.conn.Put(conn)
 
-	c := pb.NewBasicDataInterfaceClient(conn)
-	stream, err := c.Heartbeat(context.Background())
+	stream, err := pb.NewBasicDataInterfaceClient(conn).Heartbeat(context.Background())
 	if err != nil {
 		return err
 	}
@@ -66,10 +65,10 @@ func (t *BasicgRPCAPI) Heartbeat() error {
 
 // Terminate -.
 func (t *BasicgRPCAPI) Terminate() error {
-	conn := t.conn.GetReadyConn()
-	defer t.conn.PutReadyConn(conn)
-	c := pb.NewBasicDataInterfaceClient(conn)
-	_, err := c.Terminate(context.Background(), &emptypb.Empty{})
+	conn := t.conn.Get()
+	defer t.conn.Put(conn)
+
+	_, err := pb.NewBasicDataInterfaceClient(conn).Terminate(context.Background(), &emptypb.Empty{})
 	if err != nil {
 		return err
 	}
@@ -78,10 +77,10 @@ func (t *BasicgRPCAPI) Terminate() error {
 
 // GetAllStockDetail GetAllStockDetail
 func (t *BasicgRPCAPI) GetAllStockDetail() ([]*pb.StockDetailMessage, error) {
-	conn := t.conn.GetReadyConn()
-	defer t.conn.PutReadyConn(conn)
-	c := pb.NewBasicDataInterfaceClient(conn)
-	r, err := c.GetAllStockDetail(context.Background(), &emptypb.Empty{})
+	conn := t.conn.Get()
+	defer t.conn.Put(conn)
+
+	r, err := pb.NewBasicDataInterfaceClient(conn).GetAllStockDetail(context.Background(), &emptypb.Empty{})
 	if err != nil {
 		return []*pb.StockDetailMessage{}, err
 	}
@@ -90,10 +89,10 @@ func (t *BasicgRPCAPI) GetAllStockDetail() ([]*pb.StockDetailMessage, error) {
 
 // GetAllFutureDetail -.
 func (t *BasicgRPCAPI) GetAllFutureDetail() ([]*pb.FutureDetailMessage, error) {
-	conn := t.conn.GetReadyConn()
-	defer t.conn.PutReadyConn(conn)
-	c := pb.NewBasicDataInterfaceClient(conn)
-	r, err := c.GetAllFutureDetail(context.Background(), &emptypb.Empty{})
+	conn := t.conn.Get()
+	defer t.conn.Put(conn)
+
+	r, err := pb.NewBasicDataInterfaceClient(conn).GetAllFutureDetail(context.Background(), &emptypb.Empty{})
 	if err != nil {
 		return []*pb.FutureDetailMessage{}, err
 	}
@@ -102,10 +101,10 @@ func (t *BasicgRPCAPI) GetAllFutureDetail() ([]*pb.FutureDetailMessage, error) {
 
 // GetAllOptionDetail -.
 func (t *BasicgRPCAPI) GetAllOptionDetail() ([]*pb.OptionDetailMessage, error) {
-	conn := t.conn.GetReadyConn()
-	defer t.conn.PutReadyConn(conn)
-	c := pb.NewBasicDataInterfaceClient(conn)
-	r, err := c.GetAllOptionDetail(context.Background(), &emptypb.Empty{})
+	conn := t.conn.Get()
+	defer t.conn.Put(conn)
+
+	r, err := pb.NewBasicDataInterfaceClient(conn).GetAllOptionDetail(context.Background(), &emptypb.Empty{})
 	if err != nil {
 		return []*pb.OptionDetailMessage{}, err
 	}

@@ -15,22 +15,24 @@ import (
 const (
 	_defaultMaxPoolSize  = 10
 	_defaultConnAttempts = 10
-	_defaultConnTimeout  = 30 * time.Second
+	_defaultConnTimeout  = 10 * time.Second
 )
 
-// Connection -.
-type Connection struct {
+// ConnPool -.
+type ConnPool struct {
 	maxPoolSize  int
 	connAttempts int
 	connTimeout  time.Duration
 
 	pool      []*grpc.ClientConn
-	ReadyConn chan *grpc.ClientConn
+	readyConn chan *grpc.ClientConn
+
+	logger GRPCLogger
 }
 
 // New -.
-func New(url string, opts ...Option) (*Connection, error) {
-	conn := &Connection{
+func New(url string, opts ...Option) (*ConnPool, error) {
+	conn := &ConnPool{
 		maxPoolSize:  _defaultMaxPoolSize,
 		connAttempts: _defaultConnAttempts,
 		connTimeout:  _defaultConnTimeout,
@@ -40,7 +42,7 @@ func New(url string, opts ...Option) (*Connection, error) {
 		opt(conn)
 	}
 
-	conn.ReadyConn = make(chan *grpc.ClientConn, conn.maxPoolSize)
+	conn.readyConn = make(chan *grpc.ClientConn, conn.maxPoolSize)
 	for conn.connAttempts > 0 {
 		if len(conn.pool) == conn.maxPoolSize {
 			break
@@ -61,7 +63,7 @@ func New(url string, opts ...Option) (*Connection, error) {
 		if err != nil {
 			conn.connAttempts--
 			if errors.Is(err, context.DeadlineExceeded) {
-				fmt.Printf("gRPC connection timeout, attempts left: %d\n", conn.connAttempts)
+				conn.Infof("gRPC connection timeout, attempts left: %d\n", conn.connAttempts)
 				continue
 			}
 			return nil, err
@@ -70,7 +72,7 @@ func New(url string, opts ...Option) (*Connection, error) {
 		if newConn.GetState() == connectivity.Ready {
 			conn.connAttempts = _defaultConnAttempts
 			conn.pool = append(conn.pool, newConn)
-			conn.ReadyConn <- newConn
+			conn.readyConn <- newConn
 		}
 	}
 
@@ -81,20 +83,28 @@ func New(url string, opts ...Option) (*Connection, error) {
 	return conn, nil
 }
 
-// GetReadyConn -.
-func (s *Connection) GetReadyConn() *grpc.ClientConn {
-	var conn *grpc.ClientConn
-	for {
-		r := <-s.ReadyConn
-		if r != nil {
-			conn = r
-			break
-		}
-	}
-	return conn
+// Get -.
+func (s *ConnPool) Get() *grpc.ClientConn {
+	return <-s.readyConn
 }
 
-// PutReadyConn -.
-func (s *Connection) PutReadyConn(conn *grpc.ClientConn) {
-	s.ReadyConn <- conn
+// Put -.
+func (s *ConnPool) Put(conn *grpc.ClientConn) {
+	s.readyConn <- conn
+}
+
+func (s *ConnPool) Infof(format string, args ...interface{}) {
+	if s.logger != nil {
+		s.logger.Infof(format, args...)
+	} else {
+		fmt.Printf(format, args...)
+	}
+}
+
+func (s *ConnPool) Errorf(format string, args ...interface{}) {
+	if s.logger != nil {
+		s.logger.Errorf(format, args...)
+	} else {
+		fmt.Printf(format, args...)
+	}
 }

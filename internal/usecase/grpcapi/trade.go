@@ -12,11 +12,11 @@ import (
 )
 
 type TradegRPCAPI struct {
-	conn *grpc.Connection
+	conn *grpc.ConnPool
 	sim  bool
 }
 
-func NewTrade(client *grpc.Connection, sim bool) *TradegRPCAPI {
+func NewTrade(client *grpc.ConnPool, sim bool) *TradegRPCAPI {
 	return &TradegRPCAPI{
 		conn: client,
 		sim:  sim,
@@ -25,10 +25,10 @@ func NewTrade(client *grpc.Connection, sim bool) *TradegRPCAPI {
 
 // GetFuturePosition -.
 func (t *TradegRPCAPI) GetFuturePosition() (*pb.FuturePositionArr, error) {
-	conn := t.conn.GetReadyConn()
-	defer t.conn.PutReadyConn(conn)
-	c := pb.NewTradeInterfaceClient(conn)
-	r, err := c.GetFuturePosition(context.Background(), &emptypb.Empty{})
+	conn := t.conn.Get()
+	defer t.conn.Put(conn)
+
+	r, err := pb.NewTradeInterfaceClient(conn).GetFuturePosition(context.Background(), &emptypb.Empty{})
 	if err != nil {
 		return nil, err
 	}
@@ -37,10 +37,10 @@ func (t *TradegRPCAPI) GetFuturePosition() (*pb.FuturePositionArr, error) {
 
 // GetAccountBalance -.
 func (t *TradegRPCAPI) GetAccountBalance() (*pb.AccountBalance, error) {
-	conn := t.conn.GetReadyConn()
-	defer t.conn.PutReadyConn(conn)
-	c := pb.NewTradeInterfaceClient(conn)
-	r, err := c.GetAccountBalance(context.Background(), &emptypb.Empty{})
+	conn := t.conn.Get()
+	defer t.conn.Put(conn)
+
+	r, err := pb.NewTradeInterfaceClient(conn).GetAccountBalance(context.Background(), &emptypb.Empty{})
 	if err != nil {
 		return nil, err
 	}
@@ -49,10 +49,10 @@ func (t *TradegRPCAPI) GetAccountBalance() (*pb.AccountBalance, error) {
 
 // GetMargin -.
 func (t *TradegRPCAPI) GetMargin() (*pb.Margin, error) {
-	conn := t.conn.GetReadyConn()
-	defer t.conn.PutReadyConn(conn)
-	c := pb.NewTradeInterfaceClient(conn)
-	r, err := c.GetMargin(context.Background(), &emptypb.Empty{})
+	conn := t.conn.Get()
+	defer t.conn.Put(conn)
+
+	r, err := pb.NewTradeInterfaceClient(conn).GetMargin(context.Background(), &emptypb.Empty{})
 	if err != nil {
 		return nil, err
 	}
@@ -61,10 +61,10 @@ func (t *TradegRPCAPI) GetMargin() (*pb.Margin, error) {
 
 // GetSettlement -.
 func (t *TradegRPCAPI) GetSettlement() (*pb.SettlementList, error) {
-	conn := t.conn.GetReadyConn()
-	defer t.conn.PutReadyConn(conn)
-	c := pb.NewTradeInterfaceClient(conn)
-	r, err := c.GetSettlement(context.Background(), &emptypb.Empty{})
+	conn := t.conn.Get()
+	defer t.conn.Put(conn)
+
+	r, err := pb.NewTradeInterfaceClient(conn).GetSettlement(context.Background(), &emptypb.Empty{})
 	if err != nil {
 		return nil, err
 	}
@@ -73,10 +73,10 @@ func (t *TradegRPCAPI) GetSettlement() (*pb.SettlementList, error) {
 
 // BuyStock BuyStock
 func (t *TradegRPCAPI) BuyStock(order *entity.StockOrder) (*pb.TradeResult, error) {
-	conn := t.conn.GetReadyConn()
-	defer t.conn.PutReadyConn(conn)
-	c := pb.NewTradeInterfaceClient(conn)
-	r, err := c.BuyStock(context.Background(), &pb.StockOrderDetail{
+	conn := t.conn.Get()
+	defer t.conn.Put(conn)
+
+	r, err := pb.NewTradeInterfaceClient(conn).BuyStock(context.Background(), &pb.StockOrderDetail{
 		StockNum: order.StockNum,
 		Price:    order.Price,
 		Quantity: order.Quantity,
@@ -90,10 +90,10 @@ func (t *TradegRPCAPI) BuyStock(order *entity.StockOrder) (*pb.TradeResult, erro
 
 // SellStock SellStock
 func (t *TradegRPCAPI) SellStock(order *entity.StockOrder) (*pb.TradeResult, error) {
-	conn := t.conn.GetReadyConn()
-	defer t.conn.PutReadyConn(conn)
-	c := pb.NewTradeInterfaceClient(conn)
-	r, err := c.SellStock(context.Background(), &pb.StockOrderDetail{
+	conn := t.conn.Get()
+	defer t.conn.Put(conn)
+
+	r, err := pb.NewTradeInterfaceClient(conn).SellStock(context.Background(), &pb.StockOrderDetail{
 		StockNum: order.StockNum,
 		Price:    order.Price,
 		Quantity: order.Quantity,
@@ -107,10 +107,10 @@ func (t *TradegRPCAPI) SellStock(order *entity.StockOrder) (*pb.TradeResult, err
 
 // SellFirstStock SellFirstStock
 func (t *TradegRPCAPI) SellFirstStock(order *entity.StockOrder) (*pb.TradeResult, error) {
-	conn := t.conn.GetReadyConn()
-	defer t.conn.PutReadyConn(conn)
-	c := pb.NewTradeInterfaceClient(conn)
-	r, err := c.SellFirstStock(context.Background(), &pb.StockOrderDetail{
+	conn := t.conn.Get()
+	defer t.conn.Put(conn)
+
+	r, err := pb.NewTradeInterfaceClient(conn).SellFirstStock(context.Background(), &pb.StockOrderDetail{
 		StockNum: order.StockNum,
 		Price:    order.Price,
 		Quantity: order.Quantity,
@@ -124,10 +124,10 @@ func (t *TradegRPCAPI) SellFirstStock(order *entity.StockOrder) (*pb.TradeResult
 
 // CancelStock CancelStock
 func (t *TradegRPCAPI) CancelStock(orderID string) (*pb.TradeResult, error) {
-	conn := t.conn.GetReadyConn()
-	defer t.conn.PutReadyConn(conn)
-	c := pb.NewTradeInterfaceClient(conn)
-	r, err := c.CancelStock(context.Background(), &pb.OrderID{
+	conn := t.conn.Get()
+	defer t.conn.Put(conn)
+
+	r, err := pb.NewTradeInterfaceClient(conn).CancelStock(context.Background(), &pb.OrderID{
 		OrderId:  orderID,
 		Simulate: t.sim,
 	})
@@ -139,10 +139,10 @@ func (t *TradegRPCAPI) CancelStock(orderID string) (*pb.TradeResult, error) {
 
 // GetOrderStatusByID GetOrderStatusByID
 func (t *TradegRPCAPI) GetOrderStatusByID(orderID string) (*pb.TradeResult, error) {
-	conn := t.conn.GetReadyConn()
-	defer t.conn.PutReadyConn(conn)
-	c := pb.NewTradeInterfaceClient(conn)
-	r, err := c.GetOrderStatusByID(context.Background(), &pb.OrderID{
+	conn := t.conn.Get()
+	defer t.conn.Put(conn)
+
+	r, err := pb.NewTradeInterfaceClient(conn).GetOrderStatusByID(context.Background(), &pb.OrderID{
 		OrderId:  orderID,
 		Simulate: t.sim,
 	})
@@ -154,10 +154,10 @@ func (t *TradegRPCAPI) GetOrderStatusByID(orderID string) (*pb.TradeResult, erro
 
 // GetLocalOrderStatusArr -.
 func (t *TradegRPCAPI) GetLocalOrderStatusArr() error {
-	conn := t.conn.GetReadyConn()
-	defer t.conn.PutReadyConn(conn)
-	c := pb.NewTradeInterfaceClient(conn)
-	_, err := c.GetLocalOrderStatusArr(context.Background(), &emptypb.Empty{})
+	conn := t.conn.Get()
+	defer t.conn.Put(conn)
+
+	_, err := pb.NewTradeInterfaceClient(conn).GetLocalOrderStatusArr(context.Background(), &emptypb.Empty{})
 	if err != nil {
 		return err
 	}
@@ -166,10 +166,10 @@ func (t *TradegRPCAPI) GetLocalOrderStatusArr() error {
 
 // GetSimulateOrderStatusArr -.
 func (t *TradegRPCAPI) GetSimulateOrderStatusArr() error {
-	conn := t.conn.GetReadyConn()
-	defer t.conn.PutReadyConn(conn)
-	c := pb.NewTradeInterfaceClient(conn)
-	_, err := c.GetSimulateOrderStatusArr(context.Background(), &emptypb.Empty{})
+	conn := t.conn.Get()
+	defer t.conn.Put(conn)
+
+	_, err := pb.NewTradeInterfaceClient(conn).GetSimulateOrderStatusArr(context.Background(), &emptypb.Empty{})
 	if err != nil {
 		return err
 	}
@@ -178,10 +178,10 @@ func (t *TradegRPCAPI) GetSimulateOrderStatusArr() error {
 
 // GetNonBlockOrderStatusArr GetNonBlockOrderStatusArr
 func (t *TradegRPCAPI) GetNonBlockOrderStatusArr() (*pb.ErrorMessage, error) {
-	conn := t.conn.GetReadyConn()
-	defer t.conn.PutReadyConn(conn)
-	c := pb.NewTradeInterfaceClient(conn)
-	r, err := c.GetNonBlockOrderStatusArr(context.Background(), &emptypb.Empty{})
+	conn := t.conn.Get()
+	defer t.conn.Put(conn)
+
+	r, err := pb.NewTradeInterfaceClient(conn).GetNonBlockOrderStatusArr(context.Background(), &emptypb.Empty{})
 	if err != nil {
 		return nil, err
 	}
@@ -190,10 +190,10 @@ func (t *TradegRPCAPI) GetNonBlockOrderStatusArr() (*pb.ErrorMessage, error) {
 
 // BuyFuture -.
 func (t *TradegRPCAPI) BuyFuture(order *entity.FutureOrder) (*pb.TradeResult, error) {
-	conn := t.conn.GetReadyConn()
-	defer t.conn.PutReadyConn(conn)
-	c := pb.NewTradeInterfaceClient(conn)
-	r, err := c.BuyFuture(context.Background(), &pb.FutureOrderDetail{
+	conn := t.conn.Get()
+	defer t.conn.Put(conn)
+
+	r, err := pb.NewTradeInterfaceClient(conn).BuyFuture(context.Background(), &pb.FutureOrderDetail{
 		Code:     order.Code,
 		Price:    order.Price,
 		Quantity: order.Quantity,
@@ -207,10 +207,10 @@ func (t *TradegRPCAPI) BuyFuture(order *entity.FutureOrder) (*pb.TradeResult, er
 
 // SellFuture -.
 func (t *TradegRPCAPI) SellFuture(order *entity.FutureOrder) (*pb.TradeResult, error) {
-	conn := t.conn.GetReadyConn()
-	defer t.conn.PutReadyConn(conn)
-	c := pb.NewTradeInterfaceClient(conn)
-	r, err := c.SellFuture(context.Background(), &pb.FutureOrderDetail{
+	conn := t.conn.Get()
+	defer t.conn.Put(conn)
+
+	r, err := pb.NewTradeInterfaceClient(conn).SellFuture(context.Background(), &pb.FutureOrderDetail{
 		Code:     order.Code,
 		Price:    order.Price,
 		Quantity: order.Quantity,
@@ -224,10 +224,10 @@ func (t *TradegRPCAPI) SellFuture(order *entity.FutureOrder) (*pb.TradeResult, e
 
 // SellFirstFuture -.
 func (t *TradegRPCAPI) SellFirstFuture(order *entity.FutureOrder) (*pb.TradeResult, error) {
-	conn := t.conn.GetReadyConn()
-	defer t.conn.PutReadyConn(conn)
-	c := pb.NewTradeInterfaceClient(conn)
-	r, err := c.SellFirstFuture(context.Background(), &pb.FutureOrderDetail{
+	conn := t.conn.Get()
+	defer t.conn.Put(conn)
+
+	r, err := pb.NewTradeInterfaceClient(conn).SellFirstFuture(context.Background(), &pb.FutureOrderDetail{
 		Code:     order.Code,
 		Price:    order.Price,
 		Quantity: order.Quantity,
@@ -241,10 +241,10 @@ func (t *TradegRPCAPI) SellFirstFuture(order *entity.FutureOrder) (*pb.TradeResu
 
 // CancelFuture -.
 func (t *TradegRPCAPI) CancelFuture(orderID string) (*pb.TradeResult, error) {
-	conn := t.conn.GetReadyConn()
-	defer t.conn.PutReadyConn(conn)
-	c := pb.NewTradeInterfaceClient(conn)
-	r, err := c.CancelFuture(context.Background(), &pb.FutureOrderID{
+	conn := t.conn.Get()
+	defer t.conn.Put(conn)
+
+	r, err := pb.NewTradeInterfaceClient(conn).CancelFuture(context.Background(), &pb.FutureOrderID{
 		OrderId:  orderID,
 		Simulate: t.sim,
 	})

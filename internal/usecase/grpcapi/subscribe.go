@@ -12,19 +12,19 @@ import (
 
 // SubscribegRPCAPI -.
 type SubscribegRPCAPI struct {
-	conn *grpc.Connection
+	conn *grpc.ConnPool
 }
 
-func NewSubscribe(client *grpc.Connection) *SubscribegRPCAPI {
+func NewSubscribe(client *grpc.ConnPool) *SubscribegRPCAPI {
 	return &SubscribegRPCAPI{client}
 }
 
 // SubscribeStockTick return arry means fail to subscribe
 func (t *SubscribegRPCAPI) SubscribeStockTick(stockNumArr []string) ([]string, error) {
-	conn := t.conn.GetReadyConn()
-	defer t.conn.PutReadyConn(conn)
-	c := pb.NewSubscribeDataInterfaceClient(conn)
-	r, err := c.SubscribeStockTick(context.Background(), &pb.StockNumArr{StockNumArr: stockNumArr})
+	conn := t.conn.Get()
+	defer t.conn.Put(conn)
+
+	r, err := pb.NewSubscribeDataInterfaceClient(conn).SubscribeStockTick(context.Background(), &pb.StockNumArr{StockNumArr: stockNumArr})
 	if err != nil {
 		return []string{}, err
 	}
@@ -33,10 +33,10 @@ func (t *SubscribegRPCAPI) SubscribeStockTick(stockNumArr []string) ([]string, e
 
 // UnSubscribeStockTick return arry means fail to subscribe
 func (t *SubscribegRPCAPI) UnSubscribeStockTick(stockNumArr []string) ([]string, error) {
-	conn := t.conn.GetReadyConn()
-	defer t.conn.PutReadyConn(conn)
-	c := pb.NewSubscribeDataInterfaceClient(conn)
-	r, err := c.UnSubscribeStockTick(context.Background(), &pb.StockNumArr{StockNumArr: stockNumArr})
+	conn := t.conn.Get()
+	defer t.conn.Put(conn)
+
+	r, err := pb.NewSubscribeDataInterfaceClient(conn).UnSubscribeStockTick(context.Background(), &pb.StockNumArr{StockNumArr: stockNumArr})
 	if err != nil {
 		return []string{}, err
 	}
@@ -45,10 +45,10 @@ func (t *SubscribegRPCAPI) UnSubscribeStockTick(stockNumArr []string) ([]string,
 
 // UnSubscribeAllTick -.
 func (t *SubscribegRPCAPI) UnSubscribeAllTick() (*pb.ErrorMessage, error) {
-	conn := t.conn.GetReadyConn()
-	defer t.conn.PutReadyConn(conn)
-	c := pb.NewSubscribeDataInterfaceClient(conn)
-	r, err := c.UnSubscribeAllTick(context.Background(), &emptypb.Empty{})
+	conn := t.conn.Get()
+	defer t.conn.Put(conn)
+
+	r, err := pb.NewSubscribeDataInterfaceClient(conn).UnSubscribeAllTick(context.Background(), &emptypb.Empty{})
 	if err != nil {
 		return nil, err
 	}
@@ -57,10 +57,10 @@ func (t *SubscribegRPCAPI) UnSubscribeAllTick() (*pb.ErrorMessage, error) {
 
 // SubscribeStockBidAsk return arry means fail to subscribe
 func (t *SubscribegRPCAPI) SubscribeStockBidAsk(stockNumArr []string) ([]string, error) {
-	conn := t.conn.GetReadyConn()
-	defer t.conn.PutReadyConn(conn)
-	c := pb.NewSubscribeDataInterfaceClient(conn)
-	r, err := c.SubscribeStockBidAsk(context.Background(), &pb.StockNumArr{StockNumArr: stockNumArr})
+	conn := t.conn.Get()
+	defer t.conn.Put(conn)
+
+	r, err := pb.NewSubscribeDataInterfaceClient(conn).SubscribeStockBidAsk(context.Background(), &pb.StockNumArr{StockNumArr: stockNumArr})
 	if err != nil {
 		return []string{}, err
 	}
@@ -69,10 +69,10 @@ func (t *SubscribegRPCAPI) SubscribeStockBidAsk(stockNumArr []string) ([]string,
 
 // UnSubscribeStockBidAsk return arry means fail to subscribe
 func (t *SubscribegRPCAPI) UnSubscribeStockBidAsk(stockNumArr []string) ([]string, error) {
-	conn := t.conn.GetReadyConn()
-	defer t.conn.PutReadyConn(conn)
-	c := pb.NewSubscribeDataInterfaceClient(conn)
-	r, err := c.UnSubscribeStockBidAsk(context.Background(), &pb.StockNumArr{StockNumArr: stockNumArr})
+	conn := t.conn.Get()
+	defer t.conn.Put(conn)
+
+	r, err := pb.NewSubscribeDataInterfaceClient(conn).UnSubscribeStockBidAsk(context.Background(), &pb.StockNumArr{StockNumArr: stockNumArr})
 	if err != nil {
 		return []string{}, err
 	}
@@ -81,10 +81,10 @@ func (t *SubscribegRPCAPI) UnSubscribeStockBidAsk(stockNumArr []string) ([]strin
 
 // UnSubscribeAllBidAsk -.
 func (t *SubscribegRPCAPI) UnSubscribeAllBidAsk() (*pb.ErrorMessage, error) {
-	conn := t.conn.GetReadyConn()
-	defer t.conn.PutReadyConn(conn)
-	c := pb.NewSubscribeDataInterfaceClient(conn)
-	r, err := c.UnSubscribeAllBidAsk(context.Background(), &emptypb.Empty{})
+	conn := t.conn.Get()
+	defer t.conn.Put(conn)
+
+	r, err := pb.NewSubscribeDataInterfaceClient(conn).UnSubscribeAllBidAsk(context.Background(), &emptypb.Empty{})
 	if err != nil {
 		return nil, err
 	}
@@ -93,10 +93,10 @@ func (t *SubscribegRPCAPI) UnSubscribeAllBidAsk() (*pb.ErrorMessage, error) {
 
 // SubscribeFutureTick return arry means fail to subscribe
 func (t *SubscribegRPCAPI) SubscribeFutureTick(codeArr []string) ([]string, error) {
-	conn := t.conn.GetReadyConn()
-	defer t.conn.PutReadyConn(conn)
-	c := pb.NewSubscribeDataInterfaceClient(conn)
-	r, err := c.SubscribeFutureTick(context.Background(), &pb.FutureCodeArr{FutureCodeArr: codeArr})
+	conn := t.conn.Get()
+	defer t.conn.Put(conn)
+
+	r, err := pb.NewSubscribeDataInterfaceClient(conn).SubscribeFutureTick(context.Background(), &pb.FutureCodeArr{FutureCodeArr: codeArr})
 	if err != nil {
 		return []string{}, err
 	}
@@ -105,10 +105,10 @@ func (t *SubscribegRPCAPI) SubscribeFutureTick(codeArr []string) ([]string, erro
 
 // UnSubscribeFutureTick return arry means fail to subscribe
 func (t *SubscribegRPCAPI) UnSubscribeFutureTick(codeArr []string) ([]string, error) {
-	conn := t.conn.GetReadyConn()
-	defer t.conn.PutReadyConn(conn)
-	c := pb.NewSubscribeDataInterfaceClient(conn)
-	r, err := c.UnSubscribeFutureTick(context.Background(), &pb.FutureCodeArr{FutureCodeArr: codeArr})
+	conn := t.conn.Get()
+	defer t.conn.Put(conn)
+
+	r, err := pb.NewSubscribeDataInterfaceClient(conn).UnSubscribeFutureTick(context.Background(), &pb.FutureCodeArr{FutureCodeArr: codeArr})
 	if err != nil {
 		return []string{}, err
 	}
@@ -117,10 +117,10 @@ func (t *SubscribegRPCAPI) UnSubscribeFutureTick(codeArr []string) ([]string, er
 
 // SubscribeFutureBidAsk return arry means fail to subscribe
 func (t *SubscribegRPCAPI) SubscribeFutureBidAsk(codeArr []string) ([]string, error) {
-	conn := t.conn.GetReadyConn()
-	defer t.conn.PutReadyConn(conn)
-	c := pb.NewSubscribeDataInterfaceClient(conn)
-	r, err := c.SubscribeFutureBidAsk(context.Background(), &pb.FutureCodeArr{FutureCodeArr: codeArr})
+	conn := t.conn.Get()
+	defer t.conn.Put(conn)
+
+	r, err := pb.NewSubscribeDataInterfaceClient(conn).SubscribeFutureBidAsk(context.Background(), &pb.FutureCodeArr{FutureCodeArr: codeArr})
 	if err != nil {
 		return []string{}, err
 	}
@@ -129,10 +129,10 @@ func (t *SubscribegRPCAPI) SubscribeFutureBidAsk(codeArr []string) ([]string, er
 
 // UnSubscribeFutureBidAsk return arry means fail to subscribe
 func (t *SubscribegRPCAPI) UnSubscribeFutureBidAsk(codeArr []string) ([]string, error) {
-	conn := t.conn.GetReadyConn()
-	defer t.conn.PutReadyConn(conn)
-	c := pb.NewSubscribeDataInterfaceClient(conn)
-	r, err := c.UnSubscribeFutureBidAsk(context.Background(), &pb.FutureCodeArr{FutureCodeArr: codeArr})
+	conn := t.conn.Get()
+	defer t.conn.Put(conn)
+
+	r, err := pb.NewSubscribeDataInterfaceClient(conn).UnSubscribeFutureBidAsk(context.Background(), &pb.FutureCodeArr{FutureCodeArr: codeArr})
 	if err != nil {
 		return []string{}, err
 	}

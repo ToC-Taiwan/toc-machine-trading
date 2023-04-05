@@ -811,12 +811,12 @@ paths:
       summary: manualInsertFutureOrder
       tags:
       - order
-  /order/account/status:
+  /order/account/balance:
     get:
       consumes:
       - application/json
-      description: getAccountStatus
-      operationId: getAccountStatus
+      description: getAccountBalance
+      operationId: getAccountBalance
       produces:
       - application/json
       responses:
@@ -828,7 +828,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/v1.response'
-      summary: getAccountStatus
+      summary: getAccountBalance
       tags:
       - account
   /order/all:

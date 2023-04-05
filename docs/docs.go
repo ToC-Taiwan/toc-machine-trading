@@ -353,9 +353,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/order/account/status": {
+        "/order/account/balance": {
             "get": {
-                "description": "getAccountStatus",
+                "description": "getAccountBalance",
                 "consumes": [
                     "application/json"
                 ],
@@ -365,8 +365,8 @@ const docTemplate = `{
                 "tags": [
                     "account"
                 ],
-                "summary": "getAccountStatus",
-                "operationId": "getAccountStatus",
+                "summary": "getAccountBalance",
+                "operationId": "getAccountBalance",
                 "responses": {
                     "200": {
                         "description": "OK",

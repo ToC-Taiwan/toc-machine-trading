@@ -20,8 +20,8 @@ var (
 
 type UseCaseBase struct {
 	pg    *postgres.Postgres
-	sc    *grpc.Connection
-	fg    *grpc.Connection
+	sc    *grpc.ConnPool
+	fg    *grpc.ConnPool
 	cfg   *config.Config
 	slack *slack.Slack
 }
@@ -40,6 +40,7 @@ func NewUseCaseBase(cfg *config.Config) *UseCaseBase {
 	sc, err := grpc.New(
 		cfg.Sinopac.URL,
 		grpc.MaxPoolSize(cfg.Sinopac.PoolMax),
+		grpc.Logger(logger),
 	)
 	if err != nil {
 		logger.Fatal(err)
@@ -49,6 +50,7 @@ func NewUseCaseBase(cfg *config.Config) *UseCaseBase {
 	fg, err := grpc.New(
 		cfg.Fugle.URL,
 		grpc.MaxPoolSize(cfg.Fugle.PoolMax),
+		grpc.Logger(logger),
 	)
 	if err != nil {
 		logger.Fatal(err)

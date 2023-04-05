@@ -13,19 +13,19 @@ import (
 
 // RealTimegRPCAPI -.
 type RealTimegRPCAPI struct {
-	conn *grpc.Connection
+	conn *grpc.ConnPool
 }
 
-func NewRealTime(client *grpc.Connection) *RealTimegRPCAPI {
+func NewRealTime(client *grpc.ConnPool) *RealTimegRPCAPI {
 	return &RealTimegRPCAPI{client}
 }
 
 // GetAllStockSnapshot -.
 func (t *RealTimegRPCAPI) GetAllStockSnapshot() ([]*pb.SnapshotMessage, error) {
-	conn := t.conn.GetReadyConn()
-	defer t.conn.PutReadyConn(conn)
-	c := pb.NewRealTimeDataInterfaceClient(conn)
-	r, err := c.GetAllStockSnapshot(context.Background(), &emptypb.Empty{})
+	conn := t.conn.Get()
+	defer t.conn.Put(conn)
+
+	r, err := pb.NewRealTimeDataInterfaceClient(conn).GetAllStockSnapshot(context.Background(), &emptypb.Empty{})
 	if err != nil {
 		return []*pb.SnapshotMessage{}, err
 	}
@@ -34,10 +34,10 @@ func (t *RealTimegRPCAPI) GetAllStockSnapshot() ([]*pb.SnapshotMessage, error) {
 
 // GetStockSnapshotByNumArr -.
 func (t *RealTimegRPCAPI) GetStockSnapshotByNumArr(stockNumArr []string) ([]*pb.SnapshotMessage, error) {
-	conn := t.conn.GetReadyConn()
-	defer t.conn.PutReadyConn(conn)
-	c := pb.NewRealTimeDataInterfaceClient(conn)
-	r, err := c.GetStockSnapshotByNumArr(context.Background(), &pb.StockNumArr{
+	conn := t.conn.Get()
+	defer t.conn.Put(conn)
+
+	r, err := pb.NewRealTimeDataInterfaceClient(conn).GetStockSnapshotByNumArr(context.Background(), &pb.StockNumArr{
 		StockNumArr: stockNumArr,
 	})
 	if err != nil {
@@ -48,10 +48,10 @@ func (t *RealTimegRPCAPI) GetStockSnapshotByNumArr(stockNumArr []string) ([]*pb.
 
 // GetStockSnapshotTSE -.
 func (t *RealTimegRPCAPI) GetStockSnapshotTSE() (*pb.SnapshotMessage, error) {
-	conn := t.conn.GetReadyConn()
-	defer t.conn.PutReadyConn(conn)
-	c := pb.NewRealTimeDataInterfaceClient(conn)
-	r, err := c.GetStockSnapshotTSE(context.Background(), &emptypb.Empty{})
+	conn := t.conn.Get()
+	defer t.conn.Put(conn)
+
+	r, err := pb.NewRealTimeDataInterfaceClient(conn).GetStockSnapshotTSE(context.Background(), &emptypb.Empty{})
 	if err != nil {
 		return &pb.SnapshotMessage{}, err
 	}
@@ -60,10 +60,10 @@ func (t *RealTimegRPCAPI) GetStockSnapshotTSE() (*pb.SnapshotMessage, error) {
 
 // GetStockSnapshotOTC -.
 func (t *RealTimegRPCAPI) GetStockSnapshotOTC() (*pb.SnapshotMessage, error) {
-	conn := t.conn.GetReadyConn()
-	defer t.conn.PutReadyConn(conn)
-	c := pb.NewRealTimeDataInterfaceClient(conn)
-	r, err := c.GetStockSnapshotOTC(context.Background(), &emptypb.Empty{})
+	conn := t.conn.Get()
+	defer t.conn.Put(conn)
+
+	r, err := pb.NewRealTimeDataInterfaceClient(conn).GetStockSnapshotOTC(context.Background(), &emptypb.Empty{})
 	if err != nil {
 		return &pb.SnapshotMessage{}, err
 	}
@@ -72,10 +72,10 @@ func (t *RealTimegRPCAPI) GetStockSnapshotOTC() (*pb.SnapshotMessage, error) {
 
 // GetFutureSnapshotByCode -.
 func (t *RealTimegRPCAPI) GetFutureSnapshotByCode(code string) (*pb.SnapshotMessage, error) {
-	conn := t.conn.GetReadyConn()
-	defer t.conn.PutReadyConn(conn)
-	c := pb.NewRealTimeDataInterfaceClient(conn)
-	r, err := c.GetFutureSnapshotByCodeArr(context.Background(), &pb.FutureCodeArr{
+	conn := t.conn.Get()
+	defer t.conn.Put(conn)
+
+	r, err := pb.NewRealTimeDataInterfaceClient(conn).GetFutureSnapshotByCodeArr(context.Background(), &pb.FutureCodeArr{
 		FutureCodeArr: []string{code},
 	})
 	if err != nil {
@@ -89,10 +89,10 @@ func (t *RealTimegRPCAPI) GetFutureSnapshotByCode(code string) (*pb.SnapshotMess
 }
 
 func (t *RealTimegRPCAPI) GetNasdaq() (*pb.YahooFinancePrice, error) {
-	conn := t.conn.GetReadyConn()
-	defer t.conn.PutReadyConn(conn)
-	c := pb.NewRealTimeDataInterfaceClient(conn)
-	r, err := c.GetNasdaq(context.Background(), &emptypb.Empty{})
+	conn := t.conn.Get()
+	defer t.conn.Put(conn)
+
+	r, err := pb.NewRealTimeDataInterfaceClient(conn).GetNasdaq(context.Background(), &emptypb.Empty{})
 	if err != nil {
 		return &pb.YahooFinancePrice{}, err
 	}
@@ -100,10 +100,10 @@ func (t *RealTimegRPCAPI) GetNasdaq() (*pb.YahooFinancePrice, error) {
 }
 
 func (t *RealTimegRPCAPI) GetNasdaqFuture() (*pb.YahooFinancePrice, error) {
-	conn := t.conn.GetReadyConn()
-	defer t.conn.PutReadyConn(conn)
-	c := pb.NewRealTimeDataInterfaceClient(conn)
-	r, err := c.GetNasdaqFuture(context.Background(), &emptypb.Empty{})
+	conn := t.conn.Get()
+	defer t.conn.Put(conn)
+
+	r, err := pb.NewRealTimeDataInterfaceClient(conn).GetNasdaqFuture(context.Background(), &emptypb.Empty{})
 	if err != nil {
 		return &pb.YahooFinancePrice{}, err
 	}
@@ -112,10 +112,10 @@ func (t *RealTimegRPCAPI) GetNasdaqFuture() (*pb.YahooFinancePrice, error) {
 
 // GetStockVolumeRank -.
 func (t *RealTimegRPCAPI) GetStockVolumeRank(date string) ([]*pb.StockVolumeRankMessage, error) {
-	conn := t.conn.GetReadyConn()
-	defer t.conn.PutReadyConn(conn)
-	c := pb.NewRealTimeDataInterfaceClient(conn)
-	r, err := c.GetStockVolumeRank(context.Background(), &pb.VolumeRankRequest{
+	conn := t.conn.Get()
+	defer t.conn.Put(conn)
+
+	r, err := pb.NewRealTimeDataInterfaceClient(conn).GetStockVolumeRank(context.Background(), &pb.VolumeRankRequest{
 		Count: 200,
 		Date:  date,
 	})
