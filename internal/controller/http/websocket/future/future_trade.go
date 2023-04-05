@@ -167,13 +167,13 @@ func (w *WSFutureTrade) sendFuture() {
 	go w.sendPosition()
 
 	connectionID := uuid.New().String()
-	w.s.NewFutureRealTimeConnection(tickChan, connectionID)
-	w.s.NewOrderStatusConnection(orderStatusChan, connectionID)
+	w.s.NewFutureRealTimeClient(tickChan, orderStatusChan, connectionID)
 
 	<-w.Ctx().Done()
 
-	w.s.DeleteFutureRealTimeConnection(connectionID)
-	w.s.DeleteOrderStatusConnection(connectionID)
+	w.s.DeleteFutureRealTimeClient(connectionID)
+	close(tickChan)
+	close(orderStatusChan)
 }
 
 func (w *WSFutureTrade) checkAssistTargetStatus() {
