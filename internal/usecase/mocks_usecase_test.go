@@ -247,28 +247,16 @@ func (m *MockRealTime) EXPECT() *MockRealTimeMockRecorder {
 	return m.recorder
 }
 
-// DeleteFutureRealTimeConnection mocks base method.
-func (m *MockRealTime) DeleteFutureRealTimeConnection(connectionID string) {
+// DeleteFutureRealTimeClient mocks base method.
+func (m *MockRealTime) DeleteFutureRealTimeClient(connectionID string) {
 	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "DeleteFutureRealTimeConnection", connectionID)
+	m.ctrl.Call(m, "DeleteFutureRealTimeClient", connectionID)
 }
 
-// DeleteFutureRealTimeConnection indicates an expected call of DeleteFutureRealTimeConnection.
-func (mr *MockRealTimeMockRecorder) DeleteFutureRealTimeConnection(connectionID interface{}) *gomock.Call {
+// DeleteFutureRealTimeClient indicates an expected call of DeleteFutureRealTimeClient.
+func (mr *MockRealTimeMockRecorder) DeleteFutureRealTimeClient(connectionID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteFutureRealTimeConnection", reflect.TypeOf((*MockRealTime)(nil).DeleteFutureRealTimeConnection), connectionID)
-}
-
-// DeleteOrderStatusConnection mocks base method.
-func (m *MockRealTime) DeleteOrderStatusConnection(connectionID string) {
-	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "DeleteOrderStatusConnection", connectionID)
-}
-
-// DeleteOrderStatusConnection indicates an expected call of DeleteOrderStatusConnection.
-func (mr *MockRealTimeMockRecorder) DeleteOrderStatusConnection(connectionID interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteOrderStatusConnection", reflect.TypeOf((*MockRealTime)(nil).DeleteOrderStatusConnection), connectionID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteFutureRealTimeClient", reflect.TypeOf((*MockRealTime)(nil).DeleteFutureRealTimeClient), connectionID)
 }
 
 // GetFutureSnapshotByCode mocks base method.
@@ -359,28 +347,16 @@ func (mr *MockRealTimeMockRecorder) GetTradeIndex() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTradeIndex", reflect.TypeOf((*MockRealTime)(nil).GetTradeIndex))
 }
 
-// NewFutureRealTimeConnection mocks base method.
-func (m *MockRealTime) NewFutureRealTimeConnection(tickChan chan *entity.RealTimeFutureTick, connectionID string) {
+// NewFutureRealTimeClient mocks base method.
+func (m *MockRealTime) NewFutureRealTimeClient(tickChan chan *entity.RealTimeFutureTick, orderStatusChan chan interface{}, connectionID string) {
 	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "NewFutureRealTimeConnection", tickChan, connectionID)
+	m.ctrl.Call(m, "NewFutureRealTimeClient", tickChan, orderStatusChan, connectionID)
 }
 
-// NewFutureRealTimeConnection indicates an expected call of NewFutureRealTimeConnection.
-func (mr *MockRealTimeMockRecorder) NewFutureRealTimeConnection(tickChan, connectionID interface{}) *gomock.Call {
+// NewFutureRealTimeClient indicates an expected call of NewFutureRealTimeClient.
+func (mr *MockRealTimeMockRecorder) NewFutureRealTimeClient(tickChan, orderStatusChan, connectionID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NewFutureRealTimeConnection", reflect.TypeOf((*MockRealTime)(nil).NewFutureRealTimeConnection), tickChan, connectionID)
-}
-
-// NewOrderStatusConnection mocks base method.
-func (m *MockRealTime) NewOrderStatusConnection(orderStatusChan chan interface{}, connectionID string) {
-	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "NewOrderStatusConnection", orderStatusChan, connectionID)
-}
-
-// NewOrderStatusConnection indicates an expected call of NewOrderStatusConnection.
-func (mr *MockRealTimeMockRecorder) NewOrderStatusConnection(orderStatusChan, connectionID interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NewOrderStatusConnection", reflect.TypeOf((*MockRealTime)(nil).NewOrderStatusConnection), orderStatusChan, connectionID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NewFutureRealTimeClient", reflect.TypeOf((*MockRealTime)(nil).NewFutureRealTimeClient), tickChan, orderStatusChan, connectionID)
 }
 
 // MockTrade is a mock of Trade interface.

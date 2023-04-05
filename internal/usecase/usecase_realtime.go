@@ -539,53 +539,28 @@ func (uc *RealTimeUseCase) SetMainFuture(code string) {
 	uc.mainFutureCode = code
 }
 
-// NewFutureRealTimeConnection -.
-func (uc *RealTimeUseCase) NewFutureRealTimeConnection(tickChan chan *entity.RealTimeFutureTick, connectionID string) {
+func (uc *RealTimeUseCase) NewFutureRealTimeClient(tickChan chan *entity.RealTimeFutureTick, orderStatusChan chan interface{}, connectionID string) {
+	basic := cc.GetBasicInfo()
 	r := rabbit.NewRabbit(uc.cfg.RabbitMQ)
+	r.FillAllBasic(basic.AllStocks, basic.AllFutures)
+
 	uc.clientRabbitMapLock.Lock()
 	uc.clientRabbitMap[connectionID] = r
-	uc.slack.PostMessage(fmt.Sprintf("New %s RealTimeConnection", connectionID))
+	uc.slack.PostMessage(fmt.Sprintf("New RealTimeConnection: %s", connectionID))
 	uc.clientRabbitMapLock.Unlock()
+
+	go r.OrderStatusConsumer(orderStatusChan)
+	go r.OrderStatusArrConsumer(orderStatusChan)
 	go r.FutureTickConsumer(uc.mainFutureCode, tickChan)
 }
 
-// DeleteFutureRealTimeConnection -.
-func (uc *RealTimeUseCase) DeleteFutureRealTimeConnection(connectionID string) {
+func (uc *RealTimeUseCase) DeleteFutureRealTimeClient(connectionID string) {
 	uc.clientRabbitMapLock.Lock()
 	defer uc.clientRabbitMapLock.Unlock()
 	if r, ok := uc.clientRabbitMap[connectionID]; ok {
 		r.Close()
-		uc.slack.PostMessage(fmt.Sprintf("Close %s RealTimeConnection", connectionID))
 		delete(uc.clientRabbitMap, connectionID)
-	}
-}
-
-// NewOrderStatusConnection -.
-func (uc *RealTimeUseCase) NewOrderStatusConnection(orderStatusChan chan interface{}, connectionID string) {
-	var r Rabbit
-	uc.clientRabbitMapLock.Lock()
-	if rr, ok := uc.clientRabbitMap[connectionID]; ok {
-		r = rr
-	} else {
-		r = rabbit.NewRabbit(uc.cfg.RabbitMQ)
-		uc.clientRabbitMap[connectionID] = r
-		uc.slack.PostMessage(fmt.Sprintf("New RealTimeConnection: %s", connectionID))
-	}
-	uc.clientRabbitMapLock.Unlock()
-
-	basic := cc.GetBasicInfo()
-	r.FillAllBasic(basic.AllStocks, basic.AllFutures)
-	go r.OrderStatusConsumer(orderStatusChan)
-	go r.OrderStatusArrConsumer(orderStatusChan)
-}
-
-func (uc *RealTimeUseCase) DeleteOrderStatusConnection(connectionID string) {
-	uc.clientRabbitMapLock.Lock()
-	defer uc.clientRabbitMapLock.Unlock()
-	if r, ok := uc.clientRabbitMap[connectionID]; ok {
-		r.Close()
 		uc.slack.PostMessage(fmt.Sprintf("Close RealTimeConnection: %s", connectionID))
-		delete(uc.clientRabbitMap, connectionID)
 	}
 }
 
