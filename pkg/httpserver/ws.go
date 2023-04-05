@@ -1,5 +1,4 @@
-// Package websocket package websocket
-package websocket
+package httpserver
 
 import (
 	"context"

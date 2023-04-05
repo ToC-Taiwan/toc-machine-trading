@@ -9,16 +9,15 @@ import (
 	"tmt/internal/entity"
 	"tmt/internal/usecase"
 	"tmt/pkg/eventbus"
-
-	"tmt/internal/controller/http/websocket"
+	"tmt/pkg/httpserver"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
 
 type WSFutureTrade struct {
-	*websocket.WSRouter // ws router
-	*eventbus.Bus       // event bus
+	*httpserver.WSRouter // ws router
+	*eventbus.Bus        // event bus
 
 	s usecase.RealTime // RealTime
 	o usecase.Trade    // order
@@ -58,7 +57,7 @@ func StartWSFutureTrade(c *gin.Context, s usecase.RealTime, o usecase.Trade, h u
 		assistTargetWaitingMap: make(map[string]*assistTarget),
 		orderMap:               make(map[string]*entity.FutureOrder),
 		cancelOrderMap:         make(map[string]*entity.FutureOrder),
-		WSRouter:               websocket.NewWSRouter(c),
+		WSRouter:               httpserver.NewWSRouter(c),
 		Bus:                    eventbus.Get(uuid.NewString()),
 		waitingList:            newWaitingList(),
 		orderTradeTime:         newOrderTradeTime(),
