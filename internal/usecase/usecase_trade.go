@@ -63,21 +63,25 @@ func (u *UseCaseBase) NewTrade() Trade {
 
 func (uc *TradeUseCase) updateAccountDetail() {
 	for range time.NewTicker(time.Minute).C {
-		err := uc.repo.InsertOrUpdateAccountBalance(context.Background(), uc.getSinopacAccountBalance())
-		if err != nil {
-			logger.Fatal(err)
-		}
-
-		err = uc.repo.InsertOrUpdateAccountBalance(context.Background(), uc.getFugleAccountBalance())
-		if err != nil {
-			logger.Fatal(err)
-		}
-
-		accountSettlement := uc.getAccountSettlement()
-		for _, v := range accountSettlement {
-			err = uc.repo.InsertOrUpdateAccountSettlement(context.Background(), v)
+		if uc.IsFutureTradeTime() || uc.IsStockTradeTime() {
+			err := uc.repo.InsertOrUpdateAccountBalance(context.Background(), uc.getSinopacAccountBalance())
 			if err != nil {
 				logger.Fatal(err)
+			}
+		}
+
+		if uc.IsStockTradeTime() {
+			err := uc.repo.InsertOrUpdateAccountBalance(context.Background(), uc.getFugleAccountBalance())
+			if err != nil {
+				logger.Fatal(err)
+			}
+
+			accountSettlement := uc.getAccountSettlement()
+			for _, v := range accountSettlement {
+				err := uc.repo.InsertOrUpdateAccountSettlement(context.Background(), v)
+				if err != nil {
+					logger.Fatal(err)
+				}
 			}
 		}
 	}
