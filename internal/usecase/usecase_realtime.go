@@ -546,7 +546,6 @@ func (uc *RealTimeUseCase) NewFutureRealTimeClient(tickChan chan *entity.RealTim
 
 	uc.clientRabbitMapLock.Lock()
 	uc.clientRabbitMap[connectionID] = r
-	uc.slack.PostMessage(fmt.Sprintf("New RealTimeConnection: %s", connectionID))
 	uc.clientRabbitMapLock.Unlock()
 
 	go r.OrderStatusConsumer(orderStatusChan)
@@ -560,7 +559,6 @@ func (uc *RealTimeUseCase) DeleteFutureRealTimeClient(connectionID string) {
 	if r, ok := uc.clientRabbitMap[connectionID]; ok {
 		r.Close()
 		delete(uc.clientRabbitMap, connectionID)
-		uc.slack.PostMessage(fmt.Sprintf("Close RealTimeConnection: %s", connectionID))
 	}
 }
 
