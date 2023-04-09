@@ -37,6 +37,7 @@ const (
 	TradeInterface_GetOrderStatusByID_FullMethodName        = "/toc_python_forwarder.TradeInterface/GetOrderStatusByID"
 	TradeInterface_GetNonBlockOrderStatusArr_FullMethodName = "/toc_python_forwarder.TradeInterface/GetNonBlockOrderStatusArr"
 	TradeInterface_GetFuturePosition_FullMethodName         = "/toc_python_forwarder.TradeInterface/GetFuturePosition"
+	TradeInterface_GetStockPosition_FullMethodName          = "/toc_python_forwarder.TradeInterface/GetStockPosition"
 	TradeInterface_GetSettlement_FullMethodName             = "/toc_python_forwarder.TradeInterface/GetSettlement"
 	TradeInterface_GetAccountBalance_FullMethodName         = "/toc_python_forwarder.TradeInterface/GetAccountBalance"
 	TradeInterface_GetMargin_FullMethodName                 = "/toc_python_forwarder.TradeInterface/GetMargin"
@@ -80,6 +81,8 @@ type TradeInterfaceClient interface {
 	GetNonBlockOrderStatusArr(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ErrorMessage, error)
 	// GetFuturePosition is the interface for getting future position
 	GetFuturePosition(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*FuturePositionArr, error)
+	// GetStockPosition is the interface for getting stock position
+	GetStockPosition(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*StockPositionArr, error)
 	// GetSettlement is the interface for getting settlement
 	GetSettlement(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*SettlementList, error)
 	// GetAccountBalance is the interface for getting account balance
@@ -249,6 +252,15 @@ func (c *tradeInterfaceClient) GetFuturePosition(ctx context.Context, in *emptyp
 	return out, nil
 }
 
+func (c *tradeInterfaceClient) GetStockPosition(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*StockPositionArr, error) {
+	out := new(StockPositionArr)
+	err := c.cc.Invoke(ctx, TradeInterface_GetStockPosition_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *tradeInterfaceClient) GetSettlement(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*SettlementList, error) {
 	out := new(SettlementList)
 	err := c.cc.Invoke(ctx, TradeInterface_GetSettlement_FullMethodName, in, out, opts...)
@@ -314,6 +326,8 @@ type TradeInterfaceServer interface {
 	GetNonBlockOrderStatusArr(context.Context, *emptypb.Empty) (*ErrorMessage, error)
 	// GetFuturePosition is the interface for getting future position
 	GetFuturePosition(context.Context, *emptypb.Empty) (*FuturePositionArr, error)
+	// GetStockPosition is the interface for getting stock position
+	GetStockPosition(context.Context, *emptypb.Empty) (*StockPositionArr, error)
 	// GetSettlement is the interface for getting settlement
 	GetSettlement(context.Context, *emptypb.Empty) (*SettlementList, error)
 	// GetAccountBalance is the interface for getting account balance
@@ -377,6 +391,9 @@ func (UnimplementedTradeInterfaceServer) GetNonBlockOrderStatusArr(context.Conte
 }
 func (UnimplementedTradeInterfaceServer) GetFuturePosition(context.Context, *emptypb.Empty) (*FuturePositionArr, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetFuturePosition not implemented")
+}
+func (UnimplementedTradeInterfaceServer) GetStockPosition(context.Context, *emptypb.Empty) (*StockPositionArr, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetStockPosition not implemented")
 }
 func (UnimplementedTradeInterfaceServer) GetSettlement(context.Context, *emptypb.Empty) (*SettlementList, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetSettlement not implemented")
@@ -706,6 +723,24 @@ func _TradeInterface_GetFuturePosition_Handler(srv interface{}, ctx context.Cont
 	return interceptor(ctx, in, info, handler)
 }
 
+func _TradeInterface_GetStockPosition_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TradeInterfaceServer).GetStockPosition(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TradeInterface_GetStockPosition_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TradeInterfaceServer).GetStockPosition(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _TradeInterface_GetSettlement_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(emptypb.Empty)
 	if err := dec(in); err != nil {
@@ -834,6 +869,10 @@ var TradeInterface_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetFuturePosition",
 			Handler:    _TradeInterface_GetFuturePosition_Handler,
+		},
+		{
+			MethodName: "GetStockPosition",
+			Handler:    _TradeInterface_GetStockPosition_Handler,
 		},
 		{
 			MethodName: "GetSettlement",

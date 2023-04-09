@@ -798,6 +798,21 @@ func (mr *MockTradegRPCAPIMockRecorder) GetSimulateOrderStatusArr() *gomock.Call
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSimulateOrderStatusArr", reflect.TypeOf((*MockTradegRPCAPI)(nil).GetSimulateOrderStatusArr))
 }
 
+// GetStockPosition mocks base method.
+func (m *MockTradegRPCAPI) GetStockPosition() (*pb.StockPositionArr, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetStockPosition")
+	ret0, _ := ret[0].(*pb.StockPositionArr)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetStockPosition indicates an expected call of GetStockPosition.
+func (mr *MockTradegRPCAPIMockRecorder) GetStockPosition() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStockPosition", reflect.TypeOf((*MockTradegRPCAPI)(nil).GetStockPosition))
+}
+
 // SellFirstFuture mocks base method.
 func (m *MockTradegRPCAPI) SellFirstFuture(order *entity.FutureOrder) (*pb.TradeResult, error) {
 	m.ctrl.T.Helper()

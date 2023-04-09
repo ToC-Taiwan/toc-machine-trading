@@ -35,19 +35,39 @@ type stockDetailResponse struct {
 // @Tags  	    basic
 // @Accept      json
 // @Produce     json
+// @Param 		num query string false "num"
 // @Success     200 {object} stockDetailResponse
+// @Failure     404 {object} response
 // @Failure     500 {object} response
 // @Router      /basic/stock [get]
 func (r *basicRoutes) getAllRepoStock(c *gin.Context) {
+	stockNum := c.Query("num")
 	stockDetail, err := r.t.GetAllRepoStock(c.Request.Context())
 	if err != nil {
 		errorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, stockDetailResponse{
-		StockDetail: stockDetail,
-	})
+	if stockNum != "" {
+		result := []*entity.Stock{}
+		for _, stock := range stockDetail {
+			if stockNum == stock.Number {
+				result = append(result, stock)
+				break
+			}
+		}
+		if len(result) == 0 {
+			errorResponse(c, http.StatusNotFound, "stock not found")
+			return
+		}
+		c.JSON(http.StatusOK, stockDetailResponse{
+			StockDetail: result,
+		})
+	} else {
+		c.JSON(http.StatusOK, stockDetailResponse{
+			StockDetail: stockDetail,
+		})
+	}
 }
 
 // @Summary     getAllConfig

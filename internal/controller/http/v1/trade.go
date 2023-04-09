@@ -23,6 +23,7 @@ func newTradeRoutes(handler *gin.RouterGroup, t usecase.Trade) {
 	h := handler.Group("/order")
 	{
 		h.POST("", r.manualInsertFutureOrder)
+
 		h.GET("/all", r.getAllOrder)
 		h.GET("/balance", r.getAllTradeBalance)
 		h.GET("/balance/stock/last", r.getLastStockTradeBalance)

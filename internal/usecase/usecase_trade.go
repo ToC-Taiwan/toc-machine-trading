@@ -28,8 +28,10 @@ type TradeUseCase struct {
 	stockTradeDay  tradeday.TradePeriod
 	futureTradeDay tradeday.TradePeriod
 
-	updateFutureOrderLock sync.Mutex
-	updateStockOrderLock  sync.Mutex
+	finishedStockOrderMap  map[string]*entity.StockOrder
+	finishedFutureOrderMap map[string]*entity.FutureOrder
+	updateFutureOrderLock  sync.Mutex
+	updateStockOrderLock   sync.Mutex
 }
 
 func (u *UseCaseBase) NewTrade() Trade {
@@ -45,6 +47,9 @@ func (u *UseCaseBase) NewTrade() Trade {
 		tradeDay:       tradeDay,
 		stockTradeDay:  tradeDay.GetStockTradeDay(),
 		futureTradeDay: tradeDay.GetFutureTradeDay(),
+
+		finishedStockOrderMap:  make(map[string]*entity.StockOrder),
+		finishedFutureOrderMap: make(map[string]*entity.FutureOrder),
 	}
 
 	bus.SubscribeAsync(event.TopicInsertOrUpdateStockOrder, true, uc.updateStockOrderCacheAndInsertDB)
@@ -163,6 +168,10 @@ func (uc *TradeUseCase) getAccountSettlement() []*entity.Settlement {
 	return settlement
 }
 
+func (uc *TradeUseCase) updateStockInventory() {}
+
+func (uc *TradeUseCase) updateFutureInventory() {}
+
 func (uc *TradeUseCase) updateAllTradeBalance() {
 	for range time.NewTicker(time.Second * 20).C {
 		if uc.IsStockTradeTime() {
@@ -265,10 +274,18 @@ func (uc *TradeUseCase) askSimulateOrderStatus() {
 func (uc *TradeUseCase) updateStockOrderCacheAndInsertDB(order *entity.StockOrder) {
 	defer uc.updateStockOrderLock.Unlock()
 	uc.updateStockOrderLock.Lock()
+	if _, ok := uc.finishedStockOrderMap[order.OrderID]; ok {
+		return
+	}
 
 	// insert or update order to db
 	if err := uc.repo.InsertOrUpdateOrderByOrderID(context.Background(), order); err != nil {
 		logger.Fatal(err)
+	}
+
+	uc.updateStockInventory()
+	if !order.Cancellable() {
+		uc.finishedStockOrderMap[order.OrderID] = order
 	}
 }
 
@@ -368,10 +385,18 @@ func (uc *TradeUseCase) calculateReverseStockBalance(reverse []*entity.StockOrde
 func (uc *TradeUseCase) updateFutureOrderCacheAndInsertDB(order *entity.FutureOrder) {
 	defer uc.updateFutureOrderLock.Unlock()
 	uc.updateFutureOrderLock.Lock()
+	if _, ok := uc.finishedFutureOrderMap[order.OrderID]; ok {
+		return
+	}
 
 	// insert or update order to db
 	if err := uc.repo.InsertOrUpdateFutureOrderByOrderID(context.Background(), order); err != nil {
 		logger.Fatal(err)
+	}
+
+	uc.updateFutureInventory()
+	if !order.Cancellable() {
+		uc.finishedFutureOrderMap[order.OrderID] = order
 	}
 }
 

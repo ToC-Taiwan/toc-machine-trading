@@ -648,6 +648,11 @@ paths:
       - application/json
       description: getAllRepoStock
       operationId: getAllRepoStock
+      parameters:
+      - description: num
+        in: query
+        name: num
+        type: string
       produces:
       - application/json
       responses:
@@ -655,6 +660,10 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/v1.stockDetailResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.response'
         "500":
           description: Internal Server Error
           schema:

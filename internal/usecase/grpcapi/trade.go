@@ -35,6 +35,18 @@ func (t *TradegRPCAPI) GetFuturePosition() (*pb.FuturePositionArr, error) {
 	return r, nil
 }
 
+// GetStockPosition -.
+func (t *TradegRPCAPI) GetStockPosition() (*pb.StockPositionArr, error) {
+	conn := t.conn.Get()
+	defer t.conn.Put(conn)
+
+	r, err := pb.NewTradeInterfaceClient(conn).GetStockPosition(context.Background(), &emptypb.Empty{})
+	if err != nil {
+		return nil, err
+	}
+	return r, nil
+}
+
 // GetAccountBalance -.
 func (t *TradegRPCAPI) GetAccountBalance() (*pb.AccountBalance, error) {
 	conn := t.conn.Get()

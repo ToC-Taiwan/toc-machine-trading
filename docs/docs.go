@@ -115,11 +115,25 @@ const docTemplate = `{
                 ],
                 "summary": "getAllRepoStock",
                 "operationId": "getAllRepoStock",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "num",
+                        "name": "num",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/v1.stockDetailResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/v1.response"
                         }
                     },
                     "500": {

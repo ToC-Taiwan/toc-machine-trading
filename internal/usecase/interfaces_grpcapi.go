@@ -71,6 +71,7 @@ type TradegRPCAPI interface {
 
 	GetNonBlockOrderStatusArr() (*pb.ErrorMessage, error)
 	GetFuturePosition() (*pb.FuturePositionArr, error)
+	GetStockPosition() (*pb.StockPositionArr, error)
 	GetSettlement() (*pb.SettlementList, error)
 	GetAccountBalance() (*pb.AccountBalance, error)
 	GetMargin() (*pb.Margin, error)

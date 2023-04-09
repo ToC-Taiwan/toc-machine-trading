@@ -64,8 +64,8 @@ func NewUseCaseBase(cfg *config.Config) *UseCaseBase {
 		slack: slack.NewSlack(cfg.Slack.Token, cfg.Slack.ChannelID),
 	}
 
-	uc.slack.PostMessage(":honeybee: TMT is running")
-	uc.slack.PostMessage(fmt.Sprintf(":computer: Simulation Mode: %v", cfg.Simulation))
+	uc.slack.PostMessage("TMT is running :honeybee:")
+	uc.slack.PostMessage(fmt.Sprintf("Simulation Mode: %v :computer:", cfg.Simulation))
 
 	return uc
 }
