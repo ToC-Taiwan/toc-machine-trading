@@ -8,14 +8,16 @@ echo '{
     "version": "0.2.0",
     "configurations": [
         {
-            "preLaunchTask": "Build",
             "name": "Debug",
-            "debugAdapter": "dlv-dap",
             "type": "go",
             "request": "launch",
+            "debugAdapter": "dlv-dap",
             "mode": "exec",
             "program": "${workspaceFolder}/toc-machine-trading",
             "envFile": "${workspaceFolder}/.env",
+            "preLaunchTask": "Build",
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen"
         }
     ]
 }' > .vscode/launch.json
@@ -23,10 +25,13 @@ echo '{
 echo '{
     "version": "2.0.0",
     "cwd": "${workspaceFolder}",
+    "type": "shell",
+    "presentation": {
+        "close": true
+    },
     "tasks": [
         {
             "label": "go generate",
-            "type": "shell",
             "command": "go",
             "args": [
                 "generate",
@@ -34,8 +39,14 @@ echo '{
             ],
         },
         {
+            "label": "swag",
+            "command": "bash",
+            "args": [
+                "./scripts/generate_swagger.sh",
+            ],
+        },
+        {
             "label": "cp config",
-            "type": "shell",
             "command": "cp",
             "args": [
                 "./configs/default.config.yml",
@@ -44,7 +55,6 @@ echo '{
         },
         {
             "label": "go build",
-            "type": "shell",
             "command": "go",
             "args": [
                 "build",
@@ -59,6 +69,7 @@ echo '{
             "dependsOrder": "sequence",
             "dependsOn": [
                 "go generate",
+                "swag",
                 "cp config",
                 "go build"
             ]
