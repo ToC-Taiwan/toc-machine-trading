@@ -13,6 +13,8 @@ import (
 	"tmt/internal/usecase/module/quota"
 	"tmt/internal/usecase/module/tradeday"
 	"tmt/internal/usecase/repo"
+
+	"github.com/google/go-cmp/cmp"
 )
 
 // TradeUseCase -.
@@ -85,6 +87,8 @@ func (uc *TradeUseCase) updateAccountDetail() {
 				logger.Fatal(err)
 			}
 		}
+		uc.updateStockInventory()
+		uc.updateFutureInventory()
 	}
 }
 
@@ -168,7 +172,63 @@ func (uc *TradeUseCase) getAccountSettlement() []*entity.Settlement {
 	return settlement
 }
 
-func (uc *TradeUseCase) updateStockInventory() {}
+func (uc *TradeUseCase) updateStockInventory() {
+	inv := []*entity.InventoryStock{}
+	queryDate := time.Date(time.Now().Year(), time.Now().Month(), time.Now().Day(), 0, 0, 0, 0, time.Local)
+
+	sinopacInventory, err := uc.sc.GetStockPosition()
+	if err != nil {
+		logger.Fatal(err)
+	}
+	for _, s := range sinopacInventory.GetPositionArr() {
+		inv = append(inv, &entity.InventoryStock{
+			StockNum: s.GetCode(),
+			Inventory: entity.Inventory{
+				BankID:   1,
+				AvgPrice: s.GetPrice(),
+				Quantity: int(s.GetQuantity()),
+				Updated:  queryDate,
+			},
+		})
+	}
+
+	fugleInventory, err := uc.fg.GetStockPosition()
+	if err != nil {
+		logger.Fatal(err)
+	}
+	for _, s := range fugleInventory.GetPositionArr() {
+		inv = append(inv, &entity.InventoryStock{
+			StockNum: s.GetCode(),
+			Inventory: entity.Inventory{
+				BankID:   2,
+				AvgPrice: s.GetPrice(),
+				Quantity: int(s.GetQuantity()),
+				Updated:  queryDate,
+			},
+		})
+	}
+
+	dbData, err := uc.repo.QueryInventoryStockByDate(context.Background(), queryDate)
+	if err != nil {
+		logger.Fatal(err)
+	}
+
+	for _, v := range dbData {
+		v.ID = 0
+	}
+
+	if !cmp.Equal(dbData, inv) {
+		err = uc.repo.DeleteInventoryStockByDate(context.Background(), queryDate)
+		if err != nil {
+			logger.Fatal(err)
+		}
+
+		err = uc.repo.InsertInventoryStock(context.Background(), inv)
+		if err != nil {
+			logger.Fatal(err)
+		}
+	}
+}
 
 func (uc *TradeUseCase) updateFutureInventory() {}
 
@@ -283,7 +343,6 @@ func (uc *TradeUseCase) updateStockOrderCacheAndInsertDB(order *entity.StockOrde
 		logger.Fatal(err)
 	}
 
-	uc.updateStockInventory()
 	if !order.Cancellable() {
 		uc.finishedStockOrderMap[order.OrderID] = order
 	}
@@ -394,7 +453,6 @@ func (uc *TradeUseCase) updateFutureOrderCacheAndInsertDB(order *entity.FutureOr
 		logger.Fatal(err)
 	}
 
-	uc.updateFutureInventory()
 	if !order.Cancellable() {
 		uc.finishedFutureOrderMap[order.OrderID] = order
 	}

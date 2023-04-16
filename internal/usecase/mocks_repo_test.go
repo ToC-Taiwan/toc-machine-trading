@@ -562,6 +562,34 @@ func (m *MockTradeRepo) EXPECT() *MockTradeRepoMockRecorder {
 	return m.recorder
 }
 
+// DeleteInventoryStockByDate mocks base method.
+func (m *MockTradeRepo) DeleteInventoryStockByDate(ctx context.Context, date time.Time) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteInventoryStockByDate", ctx, date)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteInventoryStockByDate indicates an expected call of DeleteInventoryStockByDate.
+func (mr *MockTradeRepoMockRecorder) DeleteInventoryStockByDate(ctx, date interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteInventoryStockByDate", reflect.TypeOf((*MockTradeRepo)(nil).DeleteInventoryStockByDate), ctx, date)
+}
+
+// InsertInventoryStock mocks base method.
+func (m *MockTradeRepo) InsertInventoryStock(ctx context.Context, t []*entity.InventoryStock) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "InsertInventoryStock", ctx, t)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// InsertInventoryStock indicates an expected call of InsertInventoryStock.
+func (mr *MockTradeRepoMockRecorder) InsertInventoryStock(ctx, t interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertInventoryStock", reflect.TypeOf((*MockTradeRepo)(nil).InsertInventoryStock), ctx, t)
+}
+
 // InsertOrUpdateAccountBalance mocks base method.
 func (m *MockTradeRepo) InsertOrUpdateAccountBalance(ctx context.Context, t *entity.AccountBalance) error {
 	m.ctrl.T.Helper()
@@ -809,6 +837,21 @@ func (m *MockTradeRepo) QueryFutureTradeBalanceByDate(ctx context.Context, date 
 func (mr *MockTradeRepoMockRecorder) QueryFutureTradeBalanceByDate(ctx, date interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryFutureTradeBalanceByDate", reflect.TypeOf((*MockTradeRepo)(nil).QueryFutureTradeBalanceByDate), ctx, date)
+}
+
+// QueryInventoryStockByDate mocks base method.
+func (m *MockTradeRepo) QueryInventoryStockByDate(ctx context.Context, date time.Time) ([]*entity.InventoryStock, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "QueryInventoryStockByDate", ctx, date)
+	ret0, _ := ret[0].([]*entity.InventoryStock)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// QueryInventoryStockByDate indicates an expected call of QueryInventoryStockByDate.
+func (mr *MockTradeRepoMockRecorder) QueryInventoryStockByDate(ctx, date interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryInventoryStockByDate", reflect.TypeOf((*MockTradeRepo)(nil).QueryInventoryStockByDate), ctx, date)
 }
 
 // QueryLastFutureTradeBalance mocks base method.

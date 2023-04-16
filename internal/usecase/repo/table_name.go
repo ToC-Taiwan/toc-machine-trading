@@ -30,5 +30,8 @@ const (
 	tableNameAccountBalance    string = "account_balance"
 	tableNameAccountSettlement string = "account_settlement"
 
+	tableNameInventoryStock  string = "inventory_stock"
+	tableNameInventoryFuture string = "inventory_future"
+
 	tableNameEvent string = "sinopac_event"
 )

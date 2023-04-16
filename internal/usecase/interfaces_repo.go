@@ -77,4 +77,7 @@ type TradeRepo interface {
 	InsertOrUpdateAccountBalance(ctx context.Context, t *entity.AccountBalance) error
 	QueryAccountSettlementByDate(ctx context.Context, date time.Time) (*entity.Settlement, error)
 	InsertOrUpdateAccountSettlement(ctx context.Context, t *entity.Settlement) error
+	QueryInventoryStockByDate(ctx context.Context, date time.Time) ([]*entity.InventoryStock, error)
+	DeleteInventoryStockByDate(ctx context.Context, date time.Time) error
+	InsertInventoryStock(ctx context.Context, t []*entity.InventoryStock) error
 }
