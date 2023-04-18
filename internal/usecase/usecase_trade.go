@@ -217,7 +217,7 @@ func (uc *TradeUseCase) updateStockInventory() {
 		v.ID = 0
 	}
 
-	if !cmp.Equal(dbData, inv) {
+	if !cmp.Equal(dbData, inv) && len(inv) > 0 {
 		err = uc.repo.DeleteInventoryStockByDate(context.Background(), queryDate)
 		if err != nil {
 			logger.Fatal(err)
