@@ -1761,6 +1761,8 @@ var SwaggerInfo = &swag.Spec{
 	Description:      "API docs for Auto Trade",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
+	LeftDelim:        "{{",
+	RightDelim:       "}}",
 }
 
 func init() {
