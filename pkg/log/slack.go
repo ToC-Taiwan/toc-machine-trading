@@ -87,7 +87,7 @@ func (s *SlackHook) Format(entry *logrus.Entry) ([]byte, error) {
 		b = &bytes.Buffer{}
 	}
 	levelText := strings.ToUpper(entry.Level.String())[0:4]
-	_, e := b.WriteString(fmt.Sprintf("[%s][%s]  %-30s", levelText, entry.Time.Format(_defaultTimeFormat), strings.TrimSuffix(entry.Message, "\n")))
+	_, e := b.WriteString(fmt.Sprintf("[%s] %s", levelText, strings.TrimSuffix(entry.Message, "\n")))
 	if e != nil {
 		return nil, e
 	}
