@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 rm -rf toc-trade-protobuf
 git clone git@github.com:ToC-Taiwan/toc-trade-protobuf.git
 

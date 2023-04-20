@@ -16,7 +16,6 @@ import (
 	"tmt/internal/usecase/module/simulator"
 	"tmt/internal/usecase/module/tradeday"
 	"tmt/internal/usecase/repo"
-	"tmt/internal/usecase/slack"
 	"tmt/internal/utils"
 )
 
@@ -39,7 +38,6 @@ type HistoryUseCase struct {
 	simulateDate        tradeday.TradePeriod
 	simulateCode        string
 
-	slack        *slack.Slack
 	slackMsgChan chan string
 }
 
@@ -53,7 +51,6 @@ func (u *UseCaseBase) NewHistory() History {
 		analyzeStockCfg: u.cfg.AnalyzeStock,
 		cfg:             u.cfg,
 		basic:           cc.GetBasicInfo(),
-		slack:           u.slack,
 		slackMsgChan:    make(chan string),
 	}
 
@@ -68,7 +65,7 @@ func (u *UseCaseBase) NewHistory() History {
 func (uc *HistoryUseCase) SendMessage() {
 	for {
 		msg := <-uc.slackMsgChan
-		uc.slack.PostMessage(msg)
+		logger.Warn(msg)
 	}
 }
 

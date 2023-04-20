@@ -2,14 +2,12 @@ package dt
 
 import (
 	"errors"
-	"fmt"
 	"sync"
 	"time"
 
 	"tmt/cmd/config"
 	"tmt/internal/entity"
 	"tmt/internal/usecase/grpcapi"
-	"tmt/internal/usecase/slack"
 	"tmt/pb"
 	"tmt/pkg/eventbus"
 
@@ -27,9 +25,8 @@ type DTTraderFuture struct {
 	tickChan       chan *entity.RealTimeFutureTick // tick chan
 	finishOrderMap map[string]*entity.FutureOrder  // order id -> order
 
-	sc    *grpcapi.TradegRPCAPI
-	bus   *eventbus.Bus
-	slack *slack.Slack
+	sc  *grpcapi.TradegRPCAPI
+	bus *eventbus.Bus
 
 	tradeConfig  *config.TradeFuture
 	baseOrder    *entity.FutureOrder // base order
@@ -43,7 +40,7 @@ type DTTraderFuture struct {
 }
 
 // NewDTTraderFuture create a new DTTraderFuture, if quantity > orderQtyUnit, return nil or place order error, return nil
-func NewDTTraderFuture(orderWithCfg orderWithCfg, s *grpcapi.TradegRPCAPI, bus *eventbus.Bus, slack *slack.Slack) *DTTraderFuture {
+func NewDTTraderFuture(orderWithCfg orderWithCfg, s *grpcapi.TradegRPCAPI, bus *eventbus.Bus) *DTTraderFuture {
 	if orderWithCfg.order.Quantity > orderQtyUnit {
 		logger.Warnf("New DTTraderFuture quantity > %d", orderQtyUnit)
 		return nil
@@ -59,7 +56,6 @@ func NewDTTraderFuture(orderWithCfg orderWithCfg, s *grpcapi.TradegRPCAPI, bus *
 		tradeConfig:     orderWithCfg.cfg,
 		maxTradeOutTime: orderWithCfg.maxTradeOutTime,
 		waitTimes:       orderWithCfg.cfg.TradeOutWaitTimes,
-		slack:           slack,
 	}
 
 	if orderWithCfg.order.Action == entity.ActionSell {
@@ -242,7 +238,7 @@ func (d *DTTraderFuture) placeOrder(o *entity.FutureOrder) error {
 		return errors.New("order status is failed")
 	}
 
-	d.slack.PostMessage(fmt.Sprintf("Place %s", o.String()))
+	logger.Warnf("Place %s", o.String())
 
 	if !d.ready {
 		return nil

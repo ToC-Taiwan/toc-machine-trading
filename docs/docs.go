@@ -938,9 +938,6 @@ const docTemplate = `{
                 "sinopac": {
                     "$ref": "#/definitions/config.Sinopac"
                 },
-                "slack": {
-                    "$ref": "#/definitions/config.Slack"
-                },
                 "targetStock": {
                     "$ref": "#/definitions/config.TargetStock"
                 },
@@ -1054,17 +1051,6 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "url": {
-                    "type": "string"
-                }
-            }
-        },
-        "config.Slack": {
-            "type": "object",
-            "properties": {
-                "channelID": {
-                    "type": "string"
-                },
-                "token": {
                     "type": "string"
                 }
             }

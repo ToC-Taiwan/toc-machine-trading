@@ -5,7 +5,6 @@ import (
 
 	"tmt/cmd/config"
 	"tmt/internal/usecase/cache"
-	"tmt/internal/usecase/slack"
 	"tmt/pkg/eventbus"
 	"tmt/pkg/grpc"
 	"tmt/pkg/log"
@@ -19,11 +18,10 @@ var (
 )
 
 type UseCaseBase struct {
-	pg    *postgres.Postgres
-	sc    *grpc.ConnPool
-	fg    *grpc.ConnPool
-	cfg   *config.Config
-	slack *slack.Slack
+	pg  *postgres.Postgres
+	sc  *grpc.ConnPool
+	fg  *grpc.ConnPool
+	cfg *config.Config
 }
 
 func NewUseCaseBase(cfg *config.Config) *UseCaseBase {
@@ -57,20 +55,19 @@ func NewUseCaseBase(cfg *config.Config) *UseCaseBase {
 	}
 
 	uc := &UseCaseBase{
-		pg:    pg,
-		sc:    sc,
-		fg:    fg,
-		cfg:   cfg,
-		slack: slack.NewSlack(cfg.Slack.Token, cfg.Slack.ChannelID),
+		pg:  pg,
+		sc:  sc,
+		fg:  fg,
+		cfg: cfg,
 	}
 
-	uc.slack.PostMessage("TMT is running :honeybee:")
-	uc.slack.PostMessage(fmt.Sprintf("Simulation Mode: %v :computer:", cfg.Simulation))
+	logger.Warn("TMT is running :honeybee:")
+	logger.Warnf("Simulation Mode: %v :computer:", cfg.Simulation)
 
 	return uc
 }
 
 func (u *UseCaseBase) Close() {
 	u.pg.Close()
-	u.slack.PostMessage("TMT is shutting down")
+	logger.Warn("TMT is shutting down")
 }

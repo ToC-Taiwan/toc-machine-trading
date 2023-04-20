@@ -97,6 +97,14 @@ func (l *Log) readEnv() {
 	LogLevel(cfg.Level)(l.config)
 	LogFormat(cfg.Format)(l.config)
 	NeedCaller(cfg.NeedCaller)(l.config)
+
+	if cfg.SlackToken != "" && cfg.SlackChannelID != "" {
+		l.Hooks.Add(NewSlackHook(
+			cfg.SlackToken,
+			cfg.SlackChannelID,
+			logrus.WarnLevel,
+		))
+	}
 }
 
 func (l *Log) fileHook(formatter logrus.Formatter) *lfshook.LfsHook {

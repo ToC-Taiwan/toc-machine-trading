@@ -18,7 +18,6 @@ import (
 	"tmt/internal/usecase/module/tradeday"
 	"tmt/internal/usecase/rabbit"
 	"tmt/internal/usecase/repo"
-	"tmt/internal/usecase/slack"
 )
 
 // RealTimeUseCase -.
@@ -40,7 +39,6 @@ type RealTimeUseCase struct {
 	quota        *quota.Quota
 	targetFilter *target.Filter
 	tradeIndex   *entity.TradeIndex
-	slack        *slack.Slack
 
 	mainFutureCode string
 
@@ -72,8 +70,6 @@ func (u *UseCaseBase) NewRealTime() RealTime {
 		cfg:                 cfg,
 		futureSwitchChanMap: make(map[string]chan bool),
 		stockSwitchChanMap:  make(map[string]chan bool),
-
-		slack: u.slack,
 
 		clientRabbitMap: make(map[string]Rabbit),
 	}
@@ -503,7 +499,6 @@ func (uc *RealTimeUseCase) ReceiveFutureSubscribeData(code string) {
 		code,
 		uc.sc.(*grpcapi.TradegRPCAPI),
 		&uc.cfg.TradeFuture,
-		uc.slack,
 	)
 
 	uc.futureSwitchChanMapLock.Lock()

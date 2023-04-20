@@ -9,7 +9,6 @@ type EnvConfig struct {
 	Sinopac  Sinopac
 	Fugle    Fugle
 	RabbitMQ RabbitMQ
-	Slack    Slack
 }
 
 type Database struct {
@@ -42,9 +41,4 @@ type RabbitMQ struct {
 	Exchange string `env:"RABBITMQ_EXCHANGE" env-required:"true"`
 	WaitTime int64  `env:"RABBITMQ_WAIT_TIME" env-required:"true"`
 	Attempts int    `env:"RABBITMQ_ATTEMPTS" env-required:"true"`
-}
-
-type Slack struct {
-	Token     string `env:"SLACK_TOKEN" env-required:"true"`
-	ChannelID string `env:"SLACK_CHANNEL_ID" env-required:"true"`
 }

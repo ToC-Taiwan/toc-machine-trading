@@ -2,14 +2,12 @@
 package dt
 
 import (
-	"fmt"
 	"sync"
 	"time"
 
 	"tmt/cmd/config"
 	"tmt/internal/entity"
 	"tmt/internal/usecase/grpcapi"
-	"tmt/internal/usecase/slack"
 	"tmt/pkg/eventbus"
 
 	"github.com/google/uuid"
@@ -25,7 +23,6 @@ type DTFuture struct {
 	sc          *grpcapi.TradegRPCAPI
 	localBus    *eventbus.Bus
 	tradeConfig *config.TradeFuture
-	slack       *slack.Slack
 
 	traderMap     map[string]*DTTraderFuture
 	traderMapLock sync.RWMutex
@@ -41,7 +38,7 @@ type DTFuture struct {
 	lastPlaceOrderTime time.Time
 }
 
-func NewDTFuture(code string, s *grpcapi.TradegRPCAPI, tradeConfig *config.TradeFuture, slack *slack.Slack) *DTFuture {
+func NewDTFuture(code string, s *grpcapi.TradegRPCAPI, tradeConfig *config.TradeFuture) *DTFuture {
 	d := &DTFuture{
 		code:          code,
 		orderQuantity: tradeConfig.Quantity,
@@ -54,7 +51,6 @@ func NewDTFuture(code string, s *grpcapi.TradegRPCAPI, tradeConfig *config.Trade
 		tradeConfig:   tradeConfig,
 		traderMap:     make(map[string]*DTTraderFuture),
 		cancelChan:    make(chan *entity.FutureOrder),
-		slack:         slack,
 	}
 
 	d.localBus.SubscribeAsync(topicTraderDone, true, d.removeDoneTrader)
@@ -79,7 +75,7 @@ func (d *DTFuture) processOrderStatusAndTradeSwitch() {
 				switch {
 				case !o.Cancellable() && notifiedMap[o.OrderID] == nil:
 					notifiedMap[o.OrderID] = o
-					d.slack.PostMessage(fmt.Sprintf("%s %s", o.Status.String(), o.String()))
+					logger.Warnf("%s %s", o.Status.String(), o.String())
 				case o.Cancellable() && time.Since(o.OrderTime) > time.Duration(d.tradeConfig.BuySellWaitTime)*time.Second:
 					d.cancelChan <- o
 				}
@@ -226,7 +222,7 @@ func (d *DTFuture) addTrader(order *entity.FutureOrder, wg *sync.WaitGroup) {
 		maxTradeOutTime: time.Now().Add(time.Duration(d.tradeConfig.MaxHoldTime) * time.Minute),
 	}
 
-	if trader := NewDTTraderFuture(orderWithCfg, d.sc, d.localBus, d.slack); trader != nil {
+	if trader := NewDTTraderFuture(orderWithCfg, d.sc, d.localBus); trader != nil {
 		d.traderMapLock.Lock()
 		d.traderMap[trader.id] = trader
 		d.traderMapLock.Unlock()
