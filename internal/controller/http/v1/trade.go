@@ -8,7 +8,7 @@ import (
 	"tmt/global"
 	"tmt/internal/entity"
 	"tmt/internal/usecase"
-	"tmt/pkg/utils"
+	"tmt/internal/utils"
 
 	"github.com/gin-gonic/gin"
 )

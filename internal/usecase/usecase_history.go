@@ -17,7 +17,7 @@ import (
 	"tmt/internal/usecase/module/tradeday"
 	"tmt/internal/usecase/repo"
 	"tmt/internal/usecase/slack"
-	"tmt/pkg/utils"
+	"tmt/internal/utils"
 )
 
 // HistoryUseCase -.
