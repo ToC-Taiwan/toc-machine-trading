@@ -27,7 +27,7 @@ type ConnPool struct {
 	pool      []*grpc.ClientConn
 	readyConn chan *grpc.ClientConn
 
-	logger GRPCLogger
+	logger Logger
 }
 
 // New -.

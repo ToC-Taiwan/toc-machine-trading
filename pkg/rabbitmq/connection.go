@@ -21,7 +21,7 @@ type Connection struct {
 	attempts int
 
 	conn   *amqp.Connection
-	logger MQLogger
+	logger Logger
 }
 
 // New -.

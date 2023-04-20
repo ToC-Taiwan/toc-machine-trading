@@ -18,7 +18,7 @@ func Attempts(attempts int) Option {
 	}
 }
 
-func Logger(logger MQLogger) Option {
+func AddLogger(logger Logger) Option {
 	return func(c *Connection) {
 		c.logger = logger
 	}

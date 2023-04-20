@@ -72,7 +72,7 @@ func TryCreateDB(cfg config.Database) {
 	pg, err := postgres.New(
 		cfg.URL,
 		postgres.MaxPoolSize(cfg.PoolMax),
-		postgres.Logger(logger),
+		postgres.AddLogger(logger),
 	)
 	if err != nil {
 		logger.Fatal(err)

@@ -27,8 +27,8 @@ func ConnTimeout(timeout time.Duration) Option {
 	}
 }
 
-// Logger -.
-func Logger(logger GRPCLogger) Option {
+// AddLogger -.
+func AddLogger(logger Logger) Option {
 	return func(c *ConnPool) {
 		c.logger = logger
 	}

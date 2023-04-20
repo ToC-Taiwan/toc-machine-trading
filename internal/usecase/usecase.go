@@ -30,7 +30,7 @@ func NewUseCaseBase(cfg *config.Config) *UseCaseBase {
 	pg, err := postgres.New(
 		fmt.Sprintf("%s%s", cfg.Database.URL, cfg.Database.DBName),
 		postgres.MaxPoolSize(cfg.Database.PoolMax),
-		postgres.Logger(logger),
+		postgres.AddLogger(logger),
 	)
 	if err != nil {
 		logger.Fatal(err)
@@ -40,7 +40,7 @@ func NewUseCaseBase(cfg *config.Config) *UseCaseBase {
 	sc, err := grpc.New(
 		cfg.Sinopac.URL,
 		grpc.MaxPoolSize(cfg.Sinopac.PoolMax),
-		grpc.Logger(logger),
+		grpc.AddLogger(logger),
 	)
 	if err != nil {
 		logger.Fatal(err)
@@ -50,7 +50,7 @@ func NewUseCaseBase(cfg *config.Config) *UseCaseBase {
 	fg, err := grpc.New(
 		cfg.Fugle.URL,
 		grpc.MaxPoolSize(cfg.Fugle.PoolMax),
-		grpc.Logger(logger),
+		grpc.AddLogger(logger),
 	)
 	if err != nil {
 		logger.Fatal(err)

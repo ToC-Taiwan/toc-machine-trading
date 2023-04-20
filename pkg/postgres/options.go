@@ -26,8 +26,8 @@ func ConnTimeout(timeout time.Duration) Option {
 	}
 }
 
-// Logger -.
-func Logger(logger PGLogger) Option {
+// AddLogger -.
+func AddLogger(logger Logger) Option {
 	return func(c *Postgres) {
 		c.logger = logger
 	}

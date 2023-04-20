@@ -27,7 +27,7 @@ type Postgres struct {
 	Builder squirrel.StatementBuilderType
 	pool    *pgxpool.Pool
 
-	logger PGLogger
+	logger Logger
 }
 
 // New -.

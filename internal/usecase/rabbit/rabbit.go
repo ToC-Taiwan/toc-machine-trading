@@ -32,7 +32,7 @@ func NewRabbit(cfg config.RabbitMQ) *Rabbit {
 		cfg.Exchange, cfg.URL,
 		rabbitmq.Attempts(cfg.Attempts),
 		rabbitmq.WaitTime(int(cfg.WaitTime)),
-		rabbitmq.Logger(logger),
+		rabbitmq.AddLogger(logger),
 	); err != nil {
 		logger.Fatal(err)
 	} else {
