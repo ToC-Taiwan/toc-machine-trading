@@ -5,11 +5,20 @@ import (
 	"crypto/tls"
 	"fmt"
 	"net/http"
-	"strings"
 	"sync"
 
 	"github.com/sirupsen/logrus"
 	"github.com/slack-go/slack"
+)
+
+const (
+	slackEmojiPanic string = ":rotating_light:"
+	slackEmojiFatal string = ":skull_and_crossbones:"
+	slackEmojiError string = ":no_entry:"
+	slackEmojiWarn  string = ":warning:"
+	slackEmojiInfo  string = ":information_source:"
+	slackEmojiDebug string = ":mag_right:"
+	slackEmojiTrace string = ":microscope:"
 )
 
 type SlackHook struct {
@@ -86,8 +95,27 @@ func (s *SlackHook) Format(entry *logrus.Entry) ([]byte, error) {
 	} else {
 		b = &bytes.Buffer{}
 	}
-	levelText := strings.ToUpper(entry.Level.String())[0:4]
-	_, e := b.WriteString(fmt.Sprintf("[%s] %s", levelText, strings.TrimSuffix(entry.Message, "\n")))
+
+	var slackEmoji string
+	switch entry.Level {
+	case logrus.PanicLevel:
+		slackEmoji = slackEmojiPanic
+	case logrus.FatalLevel:
+		slackEmoji = slackEmojiFatal
+	case logrus.ErrorLevel:
+		slackEmoji = slackEmojiError
+	case logrus.WarnLevel:
+		slackEmoji = slackEmojiWarn
+	case logrus.InfoLevel:
+		slackEmoji = slackEmojiInfo
+	case logrus.DebugLevel:
+		slackEmoji = slackEmojiDebug
+	case logrus.TraceLevel:
+		slackEmoji = slackEmojiTrace
+	}
+
+	// levelText := strings.ToUpper(entry.Level.String())[0:4]
+	_, e := b.WriteString(fmt.Sprintf("%s %s", slackEmoji, entry.Message))
 	if e != nil {
 		return nil, e
 	}
