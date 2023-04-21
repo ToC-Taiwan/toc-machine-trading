@@ -99,11 +99,13 @@ func (l *Log) readEnv() {
 	NeedCaller(cfg.NeedCaller)(l.config)
 
 	if cfg.SlackToken != "" && cfg.SlackChannelID != "" {
-		l.Hooks.Add(NewSlackHook(
-			cfg.SlackToken,
-			cfg.SlackChannelID,
-			logrus.WarnLevel,
-		))
+		l.Hooks.Add(
+			NewSlackHook(
+				cfg.SlackToken,
+				cfg.SlackChannelID,
+				l.level.Level(),
+			),
+		)
 	}
 }
 

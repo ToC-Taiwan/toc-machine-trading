@@ -27,8 +27,8 @@ type SlackHook struct {
 
 	levels []logrus.Level
 
-	msgChan  chan string
-	hookLock sync.Mutex
+	msgChan chan string
+	msgLock sync.Mutex
 }
 
 func NewSlackHook(token, channelID string, level logrus.Level) *SlackHook {
@@ -63,8 +63,8 @@ func (s *SlackHook) PostMessage() {
 	for {
 		message := <-s.msgChan
 		go func() {
-			defer s.hookLock.Unlock()
-			s.hookLock.Lock()
+			defer s.msgLock.Unlock()
+			s.msgLock.Lock()
 			_, _, e := s.api.PostMessage(s.channelID, slack.MsgOptionText(message, false))
 			if e != nil {
 				fmt.Printf("SlackHook error: %s", e.Error())

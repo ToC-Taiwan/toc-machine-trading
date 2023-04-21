@@ -61,8 +61,8 @@ func NewUseCaseBase(cfg *config.Config) *UseCaseBase {
 		cfg: cfg,
 	}
 
-	logger.Warn("TMT is running :honeybee:")
-	logger.Warnf("Simulation Mode: %v :computer:", cfg.Simulation)
+	logger.Warn("TMT is running")
+	logger.Warnf("Simulation Mode: %v", cfg.Simulation)
 
 	return uc
 }
