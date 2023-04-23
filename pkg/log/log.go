@@ -98,12 +98,20 @@ func (l *Log) readEnv() {
 	LogFormat(cfg.Format)(l.config)
 	NeedCaller(cfg.NeedCaller)(l.config)
 
+	var slackLevel logrus.Level
+	switch cfg.SlackLogLevel {
+	case LevelPanic.String(), LevelFatal.String(), LevelError.String(), LevelWarn.String(), LevelInfo.String(), LevelDebug.String(), LevelTrace.String():
+		slackLevel = Level(cfg.SlackLogLevel).Level()
+	default:
+		slackLevel = logrus.WarnLevel
+	}
+
 	if cfg.SlackToken != "" && cfg.SlackChannelID != "" {
 		l.Hooks.Add(
 			NewSlackHook(
 				cfg.SlackToken,
 				cfg.SlackChannelID,
-				l.level.Level(),
+				slackLevel,
 			),
 		)
 	}

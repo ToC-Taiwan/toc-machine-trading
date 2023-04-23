@@ -6,4 +6,5 @@ type env struct {
 	NeedCaller     bool   `env:"LOG_NEED_CALLER"`
 	SlackToken     string `env:"SLACK_TOKEN"`
 	SlackChannelID string `env:"SLACK_CHANNEL_ID"`
+	SlackLogLevel  string `env:"SLACK_LOG_LEVEL"`
 }
