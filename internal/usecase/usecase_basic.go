@@ -11,10 +11,7 @@ import (
 
 	"tmt/internal/usecase/grpcapi"
 	"tmt/internal/usecase/module/tradeday"
-	"tmt/internal/usecase/rabbit"
 	"tmt/internal/usecase/repo"
-
-	"github.com/robfig/cron/v3"
 )
 
 // BasicUseCase -.
@@ -30,8 +27,6 @@ type BasicUseCase struct {
 	allStockDetail  []*entity.Stock
 	allFutureDetail []*entity.Future
 	allOptionDetail []*entity.Option
-
-	rabbit Rabbit
 }
 
 func (u *UseCaseBase) NewBasic() Basic {
@@ -41,15 +36,7 @@ func (u *UseCaseBase) NewBasic() Basic {
 		fg:       grpcapi.NewBasic(u.fg, u.cfg.Development),
 		tradeDay: tradeday.Get(),
 		cfg:      u.cfg,
-		rabbit:   rabbit.NewRabbit(u.cfg.RabbitMQ),
 	}
-
-	if e := uc.SetupCronJob(); e != nil {
-		logger.Fatal(e)
-	}
-
-	go uc.healthCheckforSinopac()
-	go uc.healthCheckforFugle()
 
 	if err := uc.importCalendarDate(context.Background()); err != nil {
 		logger.Fatal(err)
@@ -132,22 +119,6 @@ func (uc *BasicUseCase) fillBasicInfo() {
 	}
 
 	cc.SetBasicInfo(basic)
-}
-
-func (uc *BasicUseCase) healthCheckforSinopac() {
-	err := uc.sc.Heartbeat()
-	if err != nil {
-		uc.rabbit.PublishTerminate()
-		logger.Fatal("sinopac healthcheck fail, publish terminate")
-	}
-}
-
-func (uc *BasicUseCase) healthCheckforFugle() {
-	err := uc.fg.Heartbeat()
-	if err != nil {
-		uc.rabbit.PublishTerminate()
-		logger.Fatal("fugle healthcheck fail, publish terminate")
-	}
 }
 
 func (uc *BasicUseCase) updateRepoStock() ([]*entity.Stock, error) {
@@ -326,16 +297,4 @@ func (uc *BasicUseCase) saveStockFutureCache() {
 	for _, f := range uc.allFutureDetail {
 		cc.SetFutureDetail(f)
 	}
-}
-
-func (uc *BasicUseCase) SetupCronJob() error {
-	c := cron.New()
-	if _, e := c.AddFunc("20 8 * * *", uc.rabbit.PublishTerminate); e != nil {
-		return e
-	}
-	if _, e := c.AddFunc("40 14 * * *", uc.rabbit.PublishTerminate); e != nil {
-		return e
-	}
-	c.Start()
-	return nil
 }
