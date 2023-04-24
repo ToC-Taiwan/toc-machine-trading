@@ -1,3 +1,5 @@
+name: ToC Machine Trading CI
+
 on:
     workflow_dispatch:
     push:
