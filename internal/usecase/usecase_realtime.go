@@ -14,7 +14,6 @@ import (
 	"tmt/internal/usecase/module/dt"
 	"tmt/internal/usecase/module/hadger"
 	"tmt/internal/usecase/module/quota"
-	"tmt/internal/usecase/module/target"
 	"tmt/internal/usecase/module/tradeday"
 	"tmt/internal/usecase/rabbit"
 	"tmt/internal/usecase/repo"
@@ -35,10 +34,9 @@ type RealTimeUseCase struct {
 	clientRabbitMap     map[string]Rabbit
 	clientRabbitMapLock sync.RWMutex
 
-	cfg          *config.Config
-	quota        *quota.Quota
-	targetFilter *target.Filter
-	tradeIndex   *entity.TradeIndex
+	cfg        *config.Config
+	quota      *quota.Quota
+	tradeIndex *entity.TradeIndex
 
 	mainFutureCode string
 
@@ -53,7 +51,8 @@ type RealTimeUseCase struct {
 func (u *UseCaseBase) NewRealTime() RealTime {
 	cfg := u.cfg
 	uc := &RealTimeUseCase{
-		repo: repo.NewRealTime(u.pg),
+		quota: quota.NewQuota(cfg.Quota),
+		repo:  repo.NewRealTime(u.pg),
 
 		commonRabbit: rabbit.NewRabbit(cfg.RabbitMQ),
 		futureRabbit: rabbit.NewRabbit(cfg.RabbitMQ),
@@ -63,9 +62,6 @@ func (u *UseCaseBase) NewRealTime() RealTime {
 
 		sc: grpcapi.NewTrade(u.sc, cfg.Simulation),
 		fg: grpcapi.NewTrade(u.fg, cfg.Simulation),
-
-		targetFilter: target.NewFilter(cfg.TargetStock),
-		quota:        quota.NewQuota(cfg.Quota),
 
 		cfg:                 cfg,
 		futureSwitchChanMap: make(map[string]chan bool),
@@ -82,6 +78,7 @@ func (u *UseCaseBase) NewRealTime() RealTime {
 
 	basic := cc.GetBasicInfo()
 	uc.commonRabbit.FillAllBasic(basic.AllStocks, basic.AllFutures)
+	uc.futureRabbit.FillAllBasic(basic.AllStocks, basic.AllFutures)
 	uc.periodUpdateTradeIndex()
 
 	uc.checkFutureTradeSwitch()
@@ -489,8 +486,6 @@ func (uc *RealTimeUseCase) ReceiveStockSubscribeData(targetArr []*entity.StockTa
 	hr.FillAllBasic(basic.AllStocks, basic.AllFutures)
 	go hr.OrderStatusConsumer(orderStatusChan)
 	go hr.OrderStatusArrConsumer(orderStatusChan)
-
-	logger.Info("Stock rooms are all started")
 }
 
 // ReceiveFutureSubscribeData -.
@@ -505,32 +500,28 @@ func (uc *RealTimeUseCase) ReceiveFutureSubscribeData(code string) {
 	uc.futureSwitchChanMap[code] = t.SwitchChan()
 	uc.futureSwitchChanMapLock.Unlock()
 
-	ch := t.Notify()
 	orderStatusChan := make(chan interface{})
 	go uc.futureRabbit.FutureTickConsumer(code, t.TickChan())
 	go func() {
+		ch := t.Notify()
 		for {
 			order := <-orderStatusChan
 			o, ok := order.(*entity.FutureOrder)
-			if !ok {
+			if !ok || o.Code != code {
 				continue
 			}
-
-			if o.Code != code {
-				continue
-			}
-
 			ch <- o
 		}
 	}()
-	basic := cc.GetBasicInfo()
-	uc.futureRabbit.FillAllBasic(basic.AllStocks, basic.AllFutures)
 	go uc.futureRabbit.OrderStatusConsumer(orderStatusChan)
 	go uc.futureRabbit.OrderStatusArrConsumer(orderStatusChan)
-	logger.Info("Future rooms are all started")
 }
 
 func (uc *RealTimeUseCase) SetMainFuture(code string) {
+	if uc.mainFutureCode != "" {
+		logger.Fatal("main future code already set, can't set again")
+	}
+
 	uc.mainFutureCode = code
 }
 

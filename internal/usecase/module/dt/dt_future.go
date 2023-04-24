@@ -62,6 +62,31 @@ func NewDTFuture(code string, s *grpcapi.TradegRPCAPI, tradeConfig *config.Trade
 	return d
 }
 
+func (d *DTFuture) cancelOverTimeOrder() {
+	cancelledIDMap := make(map[string]*entity.FutureOrder)
+	go func() {
+		for {
+			order := <-d.cancelChan
+			if _, ok := cancelledIDMap[order.OrderID]; ok {
+				continue
+			}
+
+			result, err := d.sc.CancelFuture(order.OrderID)
+			if err != nil {
+				logger.Error(err)
+				continue
+			}
+
+			if s := entity.StringToOrderStatus(result.GetStatus()); s != entity.StatusCancelled {
+				logger.Errorf("Cancel order failed: %s %s", order.OrderID, result.GetError())
+				continue
+			}
+
+			cancelledIDMap[order.OrderID] = order
+		}
+	}()
+}
+
 func (d *DTFuture) processOrderStatusAndTradeSwitch() {
 	notifiedMap := make(map[string]*entity.FutureOrder)
 	go func() {
@@ -85,31 +110,6 @@ func (d *DTFuture) processOrderStatusAndTradeSwitch() {
 			case ts := <-d.switchChan:
 				d.isTradeTime = ts
 			}
-		}
-	}()
-}
-
-func (d *DTFuture) cancelOverTimeOrder() {
-	cancelledIDMap := make(map[string]*entity.FutureOrder)
-	go func() {
-		for {
-			order := <-d.cancelChan
-			if _, ok := cancelledIDMap[order.OrderID]; ok {
-				continue
-			}
-
-			result, err := d.sc.CancelFuture(order.OrderID)
-			if err != nil {
-				logger.Error(err)
-				continue
-			}
-
-			if s := entity.StringToOrderStatus(result.GetStatus()); s != entity.StatusCancelled {
-				logger.Errorf("Cancel order failed: %s %s", order.OrderID, result.GetError())
-				continue
-			}
-
-			cancelledIDMap[order.OrderID] = order
 		}
 	}()
 }

@@ -260,7 +260,9 @@ func (w *WSFutureTrade) processOrderStatus(orderStatusChan chan interface{}) {
 
 // cancelOverTimeOrder cancel order if it is not cancelled or filled, and also update order from assist
 func (w *WSFutureTrade) updateCacheOrder(o *entity.FutureOrder) {
+	defer w.orderMapLock.Unlock()
 	w.orderMapLock.Lock()
+
 	cache, ok := w.orderMap[o.OrderID]
 	if ok {
 		if cache.Status != o.Status {
@@ -268,16 +270,16 @@ func (w *WSFutureTrade) updateCacheOrder(o *entity.FutureOrder) {
 		}
 		w.orderMap[o.OrderID] = o
 		w.PublishTopicEvent(topicOrderStatus, o) // publish updated order to assist
-	}
-	w.orderMapLock.Unlock()
-	if !ok {
+	} else {
 		w.updateAssistTargetWaitingOrder(o)
 	}
 }
 
 // updateAssistTargetWaitingOrder if filled, assist trader will start
 func (w *WSFutureTrade) updateAssistTargetWaitingOrder(o *entity.FutureOrder) {
+	defer w.assistTargetWaitingMapLock.Unlock()
 	w.assistTargetWaitingMapLock.Lock()
+
 	if a, ok := w.assistTargetWaitingMap[o.OrderID]; ok {
 		if a.Status != o.Status {
 			w.SendToClient(newFutureOrderProto(o))
@@ -285,14 +287,18 @@ func (w *WSFutureTrade) updateAssistTargetWaitingOrder(o *entity.FutureOrder) {
 		a.FutureOrder = o
 		w.assistTargetWaitingMap[o.OrderID] = a
 	}
-	w.assistTargetWaitingMapLock.Unlock()
 }
 
 func (w *WSFutureTrade) cancelOverTimeOrder(o *entity.FutureOrder) {
 	defer w.cancelOrderMapLock.Unlock()
 	w.cancelOrderMapLock.Lock()
 
-	if o.Cancellable() && time.Since(w.orderTradeTime.get(o.OrderID)) > 5*time.Second && w.cancelOrderMap[o.OrderID] == nil {
+	tradeTime := w.orderTradeTime.get(o.OrderID)
+	if tradeTime.IsZero() {
+		return
+	}
+
+	if o.Cancellable() && time.Since(tradeTime) > 5*time.Second && w.cancelOrderMap[o.OrderID] == nil {
 		id, s, err := w.o.CancelFutureOrderByID(o.OrderID)
 		if err != nil || s != entity.StatusCancelled || id == "" {
 			w.SendToClient(newErrMessageProto(errCancelOrderFailed))
