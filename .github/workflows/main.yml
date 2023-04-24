@@ -1,4 +1,4 @@
-name: "${{ GITHUB_REPOSITORY }} CI"
+name: ${{ github.repository }}
 
 on:
     workflow_dispatch:
