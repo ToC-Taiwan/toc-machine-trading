@@ -662,42 +662,6 @@ paths:
       summary: getAllRepoStock
       tags:
       - basic
-  /basic/system/terminate/fugle:
-    put:
-      consumes:
-      - application/json
-      description: terminateFugle
-      operationId: terminateFugle
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/v1.response'
-      summary: terminateFugle
-      tags:
-      - system
-  /basic/system/terminate/sinopac:
-    put:
-      consumes:
-      - application/json
-      description: terminateSinopac
-      operationId: terminateSinopac
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/v1.response'
-      summary: terminateSinopac
-      tags:
-      - system
   /history/day-kbar/{stock}/{start_date}/{interval}:
     get:
       consumes:

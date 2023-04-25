@@ -67,34 +67,6 @@ func (mr *MockBasicMockRecorder) GetConfig() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetConfig", reflect.TypeOf((*MockBasic)(nil).GetConfig))
 }
 
-// TerminateFugle mocks base method.
-func (m *MockBasic) TerminateFugle() error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "TerminateFugle")
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// TerminateFugle indicates an expected call of TerminateFugle.
-func (mr *MockBasicMockRecorder) TerminateFugle() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "TerminateFugle", reflect.TypeOf((*MockBasic)(nil).TerminateFugle))
-}
-
-// TerminateSinopac mocks base method.
-func (m *MockBasic) TerminateSinopac() error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "TerminateSinopac")
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// TerminateSinopac indicates an expected call of TerminateSinopac.
-func (mr *MockBasicMockRecorder) TerminateSinopac() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "TerminateSinopac", reflect.TypeOf((*MockBasic)(nil).TerminateSinopac))
-}
-
 // MockTarget is a mock of Target interface.
 type MockTarget struct {
 	ctrl     *gomock.Controller

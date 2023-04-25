@@ -14,8 +14,6 @@ import (
 
 type Basic interface {
 	GetAllRepoStock(ctx context.Context) ([]*entity.Stock, error)
-	TerminateSinopac() error
-	TerminateFugle() error
 	GetConfig() *config.Config
 }
 
