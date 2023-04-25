@@ -19,7 +19,6 @@ type BasicUseCase struct {
 	repo BasicRepo
 
 	sc BasicgRPCAPI
-	fg BasicgRPCAPI
 
 	cfg      *config.Config
 	tradeDay *tradeday.TradeDay
@@ -33,7 +32,6 @@ func (u *UseCaseBase) NewBasic() Basic {
 	uc := &BasicUseCase{
 		repo:     repo.NewBasic(u.pg),
 		sc:       grpcapi.NewBasic(u.sc, u.cfg.Development),
-		fg:       grpcapi.NewBasic(u.fg, u.cfg.Development),
 		tradeDay: tradeday.Get(),
 		cfg:      u.cfg,
 	}
@@ -76,16 +74,6 @@ func (uc *BasicUseCase) GetAllRepoStock(ctx context.Context) ([]*entity.Stock, e
 
 func (uc *BasicUseCase) GetConfig() *config.Config {
 	return uc.cfg
-}
-
-// TerminateSinopac -.
-func (uc *BasicUseCase) TerminateSinopac() error {
-	return uc.sc.Terminate()
-}
-
-// TerminateFugle -.
-func (uc *BasicUseCase) TerminateFugle() error {
-	return uc.fg.Terminate()
 }
 
 func (uc *BasicUseCase) fillBasicInfo() {
