@@ -2,6 +2,7 @@
 package log
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -22,6 +23,24 @@ const (
 	_defaultFilePath   = "./logs"
 	_defaultFileName   = "log"
 )
+
+type terminalFormatter struct{}
+
+func (s *terminalFormatter) Format(entry *logrus.Entry) ([]byte, error) {
+	var b *bytes.Buffer
+	if entry.Buffer != nil {
+		b = entry.Buffer
+	} else {
+		b = &bytes.Buffer{}
+	}
+
+	levelText := strings.ToUpper(entry.Level.String())[0:4]
+	_, e := b.WriteString(fmt.Sprintf("%s[%s] %s\n", levelText, entry.Time.Format(_defaultTimeFormat), entry.Message))
+	if e != nil {
+		return nil, e
+	}
+	return b.Bytes(), nil
+}
 
 // Log -.
 type Log struct {
@@ -79,7 +98,7 @@ func Get() *Log {
 		l.SetReportCaller(true)
 	}
 
-	l.Hooks.Add(l.fileHook(jsonFormatter))
+	l.Hooks.Add(l.fileHook(&terminalFormatter{}))
 	l.SetFormatter(formatter)
 	l.SetLevel(l.level.Level())
 	l.SetOutput(os.Stdout)
