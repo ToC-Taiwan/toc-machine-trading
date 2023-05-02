@@ -16,10 +16,8 @@ import (
 
 // BasicUseCase -.
 type BasicUseCase struct {
-	repo BasicRepo
-
-	sc BasicgRPCAPI
-
+	repo     BasicRepo
+	sc       BasicgRPCAPI
 	cfg      *config.Config
 	tradeDay *tradeday.TradeDay
 
@@ -32,8 +30,8 @@ func (u *UseCaseBase) NewBasic() Basic {
 	uc := &BasicUseCase{
 		repo:     repo.NewBasic(u.pg),
 		sc:       grpcapi.NewBasic(u.sc, u.cfg.Development),
-		tradeDay: tradeday.Get(),
 		cfg:      u.cfg,
+		tradeDay: tradeday.Get(),
 	}
 
 	if err := uc.importCalendarDate(context.Background()); err != nil {
@@ -121,7 +119,7 @@ func (uc *BasicUseCase) updateRepoStock() ([]*entity.Stock, error) {
 		}
 
 		updateTime, pErr := time.ParseInLocation(global.ShortSlashTimeLayout, v.GetUpdateDate(), time.Local)
-		if err != nil {
+		if pErr != nil {
 			return []*entity.Stock{}, pErr
 		}
 
@@ -162,13 +160,13 @@ func (uc *BasicUseCase) updateRepoFuture() ([]*entity.Future, error) {
 		}
 
 		updateTime, pErr := time.ParseInLocation(global.ShortSlashTimeLayout, v.GetUpdateDate(), time.Local)
-		if err != nil {
+		if pErr != nil {
 			return []*entity.Future{}, pErr
 		}
 
 		dDate, e := time.ParseInLocation(global.ShortSlashTimeLayout, v.GetDeliveryDate(), time.Local)
 		if e != nil {
-			return []*entity.Future{}, err
+			return []*entity.Future{}, e
 		}
 
 		future := &entity.Future{
@@ -214,13 +212,13 @@ func (uc *BasicUseCase) updateRepoOption() ([]*entity.Option, error) {
 		}
 
 		updateTime, pErr := time.ParseInLocation(global.ShortSlashTimeLayout, v.GetUpdateDate(), time.Local)
-		if err != nil {
+		if pErr != nil {
 			return []*entity.Option{}, pErr
 		}
 
 		dDate, e := time.ParseInLocation(global.ShortSlashTimeLayout, v.GetDeliveryDate(), time.Local)
 		if e != nil {
-			return []*entity.Option{}, err
+			return []*entity.Option{}, e
 		}
 
 		option := &entity.Option{
