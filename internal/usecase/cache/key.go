@@ -10,6 +10,8 @@ import (
 
 const (
 	cacheCatagoryBasic              string = "basic"
+	cacheCatagoryStockDetail        string = "stock_detail"
+	cacheCatagoryFutureDetail       string = "future_detail"
 	cacheCatagoryHistoryOpen        string = "history_open"
 	cacheCatagoryHistoryClose       string = "history_close"
 	cacheCatagoryHistoryTickAnalyze string = "history_tick_analyze"
@@ -27,20 +29,24 @@ const (
 	cacheIndexOrderID    string = "order_id"
 )
 
-func (c *Cache) basicInfoKey() *cache.Key {
-	return cache.NewKey(cacheCatagoryBasic, cacheIndexBasicInfo)
-}
-
 func (c *Cache) targetsKey() *cache.Key {
 	return cache.NewKey(cacheCatagoryBasic, cacheIndexTargets)
 }
 
 func (c *Cache) stockDetailKey(stockNum string) *cache.Key {
-	return cache.NewKey(cacheCatagoryBasic, cacheIndexStockNum).ExtendIndex(stockNum)
+	return cache.NewKey(cacheCatagoryStockDetail, cacheIndexStockNum).ExtendIndex(stockNum)
+}
+
+func (c *Cache) allStockDetailKey() *cache.Key {
+	return cache.NewKey(cacheCatagoryStockDetail)
 }
 
 func (c *Cache) futureDetailKey(code string) *cache.Key {
-	return cache.NewKey(cacheCatagoryBasic, cacheIndexFutureCode).ExtendIndex(code)
+	return cache.NewKey(cacheCatagoryFutureDetail, cacheIndexFutureCode).ExtendIndex(code)
+}
+
+func (c *Cache) allFutureDetailKey() *cache.Key {
+	return cache.NewKey(cacheCatagoryFutureDetail)
 }
 
 func (c *Cache) historyOpenKey(stockNum string, date time.Time) *cache.Key {

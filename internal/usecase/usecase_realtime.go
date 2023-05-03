@@ -76,9 +76,8 @@ func (u *UseCaseBase) NewRealTime() RealTime {
 	}
 	uc.checkFutureInventory()
 
-	basic := cc.GetBasicInfo()
-	uc.commonRabbit.FillAllBasic(basic.AllStocks, basic.AllFutures)
-	uc.futureRabbit.FillAllBasic(basic.AllStocks, basic.AllFutures)
+	uc.commonRabbit.FillAllBasic(cc.GetAllStockDetail(), cc.GetAllFutureDetail())
+	uc.futureRabbit.FillAllBasic(cc.GetAllStockDetail(), cc.GetAllFutureDetail())
 	uc.periodUpdateTradeIndex()
 
 	uc.checkFutureTradeSwitch()
@@ -114,9 +113,9 @@ func (uc *RealTimeUseCase) checkStockTradeSwitch() {
 	if !uc.cfg.TradeStock.AllowTrade {
 		return
 	}
-	basic := cc.GetBasicInfo()
-	openTime := basic.OpenTime
-	tradeInEndTime := basic.TradeInEndTime
+	stockTradeDay := tradeday.Get().GetStockTradeDay().TradeDay
+	openTime := stockTradeDay.Add(9 * time.Hour).Add(time.Duration(uc.cfg.TradeStock.HoldTimeFromOpen) * time.Second)
+	tradeInEndTime := stockTradeDay.Add(9 * time.Hour).Add(time.Duration(uc.cfg.TradeStock.TradeInEndTime) * time.Minute)
 
 	go func() {
 		for range time.NewTicker(30 * time.Second).C {
@@ -467,7 +466,6 @@ func (uc *RealTimeUseCase) ReceiveStockSubscribeData(targetArr []*entity.StockTa
 		go r.StockTickConsumer(t.StockNum, hadger.TickChan())
 	}
 
-	basic := cc.GetBasicInfo()
 	orderStatusChan := make(chan interface{})
 	go func() {
 		for {
@@ -483,7 +481,7 @@ func (uc *RealTimeUseCase) ReceiveStockSubscribeData(targetArr []*entity.StockTa
 		}
 	}()
 	hr := rabbit.NewRabbit(uc.cfg.RabbitMQ)
-	hr.FillAllBasic(basic.AllStocks, basic.AllFutures)
+	hr.FillAllBasic(cc.GetAllStockDetail(), cc.GetAllFutureDetail())
 	go hr.OrderStatusConsumer(orderStatusChan)
 	go hr.OrderStatusArrConsumer(orderStatusChan)
 }
@@ -526,9 +524,8 @@ func (uc *RealTimeUseCase) SetMainFuture(code string) {
 }
 
 func (uc *RealTimeUseCase) NewFutureRealTimeClient(tickChan chan *entity.RealTimeFutureTick, orderStatusChan chan interface{}, connectionID string) {
-	basic := cc.GetBasicInfo()
 	r := rabbit.NewRabbit(uc.cfg.RabbitMQ)
-	r.FillAllBasic(basic.AllStocks, basic.AllFutures)
+	r.FillAllBasic(cc.GetAllStockDetail(), cc.GetAllFutureDetail())
 
 	uc.clientRabbitMapLock.Lock()
 	uc.clientRabbitMap[connectionID] = r

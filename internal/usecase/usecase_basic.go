@@ -14,7 +14,6 @@ import (
 	"tmt/internal/usecase/repo"
 )
 
-// BasicUseCase -.
 type BasicUseCase struct {
 	repo     BasicRepo
 	sc       BasicgRPCAPI
@@ -34,93 +33,46 @@ func (u *UseCaseBase) NewBasic() Basic {
 		tradeDay: tradeday.Get(),
 	}
 
-	if err := uc.importCalendarDate(context.Background()); err != nil {
+	if err := uc.importCalendarDate(); err != nil {
 		logger.Fatal(err)
 	}
 
-	if _, err := uc.updateRepoStock(); err != nil {
+	if err := uc.updateRepoStock(); err != nil {
 		logger.Fatal(err)
 	}
 
-	if _, err := uc.updateRepoFuture(); err != nil {
+	if err := uc.updateRepoFuture(); err != nil {
 		logger.Fatal(err)
 	}
 
-	if _, err := uc.updateRepoOption(); err != nil {
+	if err := uc.updateRepoOption(); err != nil {
 		logger.Fatal(err)
 	}
 
-	uc.fillBasicInfo()
 	uc.saveStockFutureCache()
 
 	return uc
 }
 
-// GetAllRepoStock -.
-func (uc *BasicUseCase) GetAllRepoStock(ctx context.Context) ([]*entity.Stock, error) {
-	data, err := uc.repo.QueryAllStock(context.Background())
-	if err != nil {
-		return []*entity.Stock{}, err
-	}
-
-	var result []*entity.Stock
-	for _, v := range data {
-		result = append(result, v)
-	}
-	return result, nil
+func (uc *BasicUseCase) importCalendarDate() error {
+	return uc.repo.InsertOrUpdatetCalendarDateArr(context.Background(), uc.tradeDay.GetAllCalendar())
 }
 
-func (uc *BasicUseCase) GetConfig() *config.Config {
-	return uc.cfg
-}
-
-func (uc *BasicUseCase) fillBasicInfo() {
-	tradeDay := uc.tradeDay.GetStockTradeDay().TradeDay
-	openTime := 9 * time.Hour
-	lastTradeDayArr := uc.tradeDay.GetLastNTradeDayByDate(2, tradeDay)
-
-	basic := &entity.BasicInfo{
-		TradeDay:           tradeDay,
-		LastTradeDay:       lastTradeDayArr[0],
-		BefroeLastTradeDay: lastTradeDayArr[1],
-
-		OpenTime:       tradeDay.Add(openTime).Add(time.Duration(uc.cfg.TradeStock.HoldTimeFromOpen) * time.Second),
-		TradeInEndTime: tradeDay.Add(openTime).Add(time.Duration(uc.cfg.TradeStock.TradeInEndTime) * time.Minute),
-		EndTime:        tradeDay.Add(openTime).Add(time.Duration(uc.cfg.TradeStock.TotalOpenTime) * time.Minute),
-
-		HistoryCloseRange: uc.tradeDay.GetLastNTradeDayByDate(uc.cfg.History.HistoryClosePeriod, tradeDay),
-		HistoryKbarRange:  uc.tradeDay.GetLastNTradeDayByDate(uc.cfg.History.HistoryKbarPeriod, tradeDay),
-		HistoryTickRange:  uc.tradeDay.GetLastNTradeDayByDate(uc.cfg.History.HistoryTickPeriod, tradeDay),
-
-		AllStocks:  make(map[string]*entity.Stock),
-		AllFutures: make(map[string]*entity.Future),
-	}
-
-	for _, s := range uc.allStockDetail {
-		basic.AllStocks[s.Number] = s
-	}
-
-	for _, f := range uc.allFutureDetail {
-		basic.AllFutures[f.Code] = f
-	}
-
-	cc.SetBasicInfo(basic)
-}
-
-func (uc *BasicUseCase) updateRepoStock() ([]*entity.Stock, error) {
+func (uc *BasicUseCase) updateRepoStock() error {
 	stockArr, err := uc.sc.GetAllStockDetail()
 	if err != nil {
-		return []*entity.Stock{}, err
+		return err
 	}
 
 	for _, v := range stockArr {
 		if v.GetReference() == 0 {
+			logger.Warnf("stock %s reference is 0", v.GetCode())
 			continue
 		}
 
 		updateTime, pErr := time.ParseInLocation(global.ShortSlashTimeLayout, v.GetUpdateDate(), time.Local)
 		if pErr != nil {
-			return []*entity.Stock{}, pErr
+			return pErr
 		}
 
 		stock := &entity.Stock{
@@ -137,36 +89,33 @@ func (uc *BasicUseCase) updateRepoStock() ([]*entity.Stock, error) {
 
 	err = uc.repo.UpdateAllStockDayTradeToNo(context.Background())
 	if err != nil {
-		return []*entity.Stock{}, err
+		return err
 	}
 
-	err = uc.repo.InsertOrUpdatetStockArr(context.Background(), uc.allStockDetail)
-	if err != nil {
-		return []*entity.Stock{}, err
-	}
-	return uc.allStockDetail, nil
+	return uc.repo.InsertOrUpdatetStockArr(context.Background(), uc.allStockDetail)
 }
 
-func (uc *BasicUseCase) updateRepoFuture() ([]*entity.Future, error) {
+func (uc *BasicUseCase) updateRepoFuture() error {
 	futureArr, err := uc.sc.GetAllFutureDetail()
 	if err != nil {
-		return []*entity.Future{}, err
+		return err
 	}
 
 	duplCodeMap := make(map[string]struct{})
 	for _, v := range futureArr {
 		if v.GetReference() == 0 {
+			logger.Warnf("future %s reference is 0", v.GetCode())
 			continue
 		}
 
 		updateTime, pErr := time.ParseInLocation(global.ShortSlashTimeLayout, v.GetUpdateDate(), time.Local)
 		if pErr != nil {
-			return []*entity.Future{}, pErr
+			return pErr
 		}
 
 		dDate, e := time.ParseInLocation(global.ShortSlashTimeLayout, v.GetDeliveryDate(), time.Local)
 		if e != nil {
-			return []*entity.Future{}, e
+			return e
 		}
 
 		future := &entity.Future{
@@ -192,33 +141,30 @@ func (uc *BasicUseCase) updateRepoFuture() ([]*entity.Future, error) {
 		}
 	}
 
-	err = uc.repo.InsertOrUpdatetFutureArr(context.Background(), uc.allFutureDetail)
-	if err != nil {
-		return []*entity.Future{}, err
-	}
-	return uc.allFutureDetail, nil
+	return uc.repo.InsertOrUpdatetFutureArr(context.Background(), uc.allFutureDetail)
 }
 
-func (uc *BasicUseCase) updateRepoOption() ([]*entity.Option, error) {
+func (uc *BasicUseCase) updateRepoOption() error {
 	optionArr, err := uc.sc.GetAllOptionDetail()
 	if err != nil {
-		return []*entity.Option{}, err
+		return err
 	}
 
 	duplCodeMap := make(map[string]struct{})
 	for _, v := range optionArr {
 		if v.GetReference() == 0 {
+			logger.Warnf("option %s reference is 0", v.GetCode())
 			continue
 		}
 
 		updateTime, pErr := time.ParseInLocation(global.ShortSlashTimeLayout, v.GetUpdateDate(), time.Local)
 		if pErr != nil {
-			return []*entity.Option{}, pErr
+			return pErr
 		}
 
 		dDate, e := time.ParseInLocation(global.ShortSlashTimeLayout, v.GetDeliveryDate(), time.Local)
 		if e != nil {
-			return []*entity.Option{}, e
+			return e
 		}
 
 		option := &entity.Option{
@@ -246,18 +192,7 @@ func (uc *BasicUseCase) updateRepoOption() ([]*entity.Option, error) {
 		}
 	}
 
-	err = uc.repo.InsertOrUpdatetOptionArr(context.Background(), uc.allOptionDetail)
-	if err != nil {
-		return []*entity.Option{}, err
-	}
-	return uc.allOptionDetail, nil
-}
-
-func (uc *BasicUseCase) importCalendarDate(ctx context.Context) error {
-	if err := uc.repo.InsertOrUpdatetCalendarDateArr(ctx, uc.tradeDay.GetAllCalendar()); err != nil {
-		return err
-	}
-	return nil
+	return uc.repo.InsertOrUpdatetOptionArr(context.Background(), uc.allOptionDetail)
 }
 
 func (uc *BasicUseCase) saveStockFutureCache() {
@@ -283,4 +218,21 @@ func (uc *BasicUseCase) saveStockFutureCache() {
 	for _, f := range uc.allFutureDetail {
 		cc.SetFutureDetail(f)
 	}
+}
+
+func (uc *BasicUseCase) GetAllRepoStock(ctx context.Context) ([]*entity.Stock, error) {
+	data, err := uc.repo.QueryAllStock(ctx)
+	if err != nil {
+		return []*entity.Stock{}, err
+	}
+
+	var result []*entity.Stock
+	for _, v := range data {
+		result = append(result, v)
+	}
+	return result, nil
+}
+
+func (uc *BasicUseCase) GetConfig() *config.Config {
+	return uc.cfg
 }

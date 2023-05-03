@@ -23,31 +23,28 @@ type TargetUseCase struct {
 
 	targetFilter *target.Filter
 	cfg          *config.Config
-	basic        *entity.BasicInfo
 	tradeDay     *tradeday.TradeDay
 }
 
 func (u *UseCaseBase) NewTarget() Target {
 	cfg := u.cfg
-	basic := cc.GetBasicInfo()
 	uc := &TargetUseCase{
 		repo:         repo.NewTarget(u.pg),
 		gRPCAPI:      grpcapi.NewRealTime(u.sc),
 		cfg:          cfg,
-		basic:        basic,
 		tradeDay:     tradeday.Get(),
 		targetFilter: target.NewFilter(cfg.TargetStock),
 	}
-
 	// query targets from db
-	targetArr, err := uc.searchTradeDayTargetsFromDB(uc.basic.TradeDay)
+	tDay := uc.tradeDay.GetStockTradeDay().TradeDay
+	targetArr, err := uc.searchTradeDayTargetsFromDB(tDay)
 	if err != nil {
 		logger.Fatal(err)
 	}
 
 	// db has no targets, find targets from gRPC
 	if len(targetArr) == 0 {
-		targetArr, err = uc.searchTradeDayTargets(uc.basic.TradeDay)
+		targetArr, err = uc.searchTradeDayTargets(tDay)
 		if err != nil {
 			logger.Fatal(err)
 		}
@@ -137,13 +134,13 @@ func (uc *TargetUseCase) searchTradeDayTargetsFromDB(tradeDay time.Time) ([]*ent
 }
 
 func (uc *TargetUseCase) searchTradeDayTargets(tradeDay time.Time) ([]*entity.StockTarget, error) {
-	lastTradeDay := cc.GetBasicInfo().LastTradeDay
+	lastTradeDay := uc.tradeDay.GetLastNStockTradeDay(1)[0]
 	t, err := uc.gRPCAPI.GetStockVolumeRank(lastTradeDay.Format(global.ShortTimeLayout))
 	if err != nil {
 		return nil, err
 	}
 
-	if len(t) == 0 && time.Now().Before(cc.GetBasicInfo().TradeDay.Add(8*time.Hour)) {
+	if len(t) == 0 && time.Now().Before(uc.tradeDay.GetStockTradeDay().TradeDay.Add(8*time.Hour)) {
 		logger.Warn("VolumeRank is empty, search from all snapshot")
 		return uc.searchTradeDayTargetsFromAllSnapshot(tradeDay)
 	}

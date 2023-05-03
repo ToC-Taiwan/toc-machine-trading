@@ -41,6 +41,14 @@ func (c *Cache) GetStockDetail(stockNum string) *entity.Stock {
 	return nil
 }
 
+func (c *Cache) GetAllStockDetail() map[string]*entity.Stock {
+	result := make(map[string]*entity.Stock)
+	for k, v := range c.GetAll(c.allStockDetailKey()) {
+		result[k] = v.(*entity.Stock)
+	}
+	return result
+}
+
 // SetFutureDetail -.
 func (c *Cache) SetFutureDetail(future *entity.Future) {
 	c.Set(c.futureDetailKey(future.Code), future)
@@ -54,17 +62,12 @@ func (c *Cache) GetFutureDetail(code string) *entity.Future {
 	return nil
 }
 
-// SetBasicInfo -.
-func (c *Cache) SetBasicInfo(info *entity.BasicInfo) {
-	c.Set(c.basicInfoKey(), info)
-}
-
-// GetBasicInfo -.
-func (c *Cache) GetBasicInfo() *entity.BasicInfo {
-	if value, ok := c.Get(c.basicInfoKey()); ok {
-		return value.(*entity.BasicInfo)
+func (c *Cache) GetAllFutureDetail() map[string]*entity.Future {
+	result := make(map[string]*entity.Future)
+	for k, v := range c.GetAll(c.allFutureDetailKey()) {
+		result[k] = v.(*entity.Future)
 	}
-	return nil
+	return result
 }
 
 // SetHistoryOpen -.

@@ -266,6 +266,21 @@ func (t *TradeDay) GetLastNTradeDayByDate(n int64, firstDay time.Time) []time.Ti
 	return arr
 }
 
+func (t *TradeDay) GetLastNStockTradeDay(n int64) []time.Time {
+	firstDay := t.GetStockTradeDay().TradeDay
+	var arr []time.Time
+	for {
+		if t.isTradeDay(firstDay.AddDate(0, 0, -1)) {
+			arr = append(arr, firstDay.AddDate(0, 0, -1))
+		}
+		if len(arr) == int(n) {
+			break
+		}
+		firstDay = firstDay.AddDate(0, 0, -1)
+	}
+	return arr
+}
+
 // TradePeriod -.
 type TradePeriod struct {
 	StartTime time.Time

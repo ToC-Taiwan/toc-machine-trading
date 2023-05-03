@@ -29,10 +29,8 @@ type HistoryUseCase struct {
 	fetchList map[string]*entity.StockTarget
 	mutex     sync.Mutex
 
-	basic    *entity.BasicInfo
 	tradeDay *tradeday.TradeDay
-
-	cfg *config.Config
+	cfg      *config.Config
 
 	simulateFutureTicks entity.RealTimeFutureTickArr
 	simulateDate        tradeday.TradePeriod
@@ -50,7 +48,6 @@ func (u *UseCaseBase) NewHistory() History {
 		tradeDay:        tradeday.Get(),
 		analyzeStockCfg: u.cfg.AnalyzeStock,
 		cfg:             u.cfg,
-		basic:           cc.GetBasicInfo(),
 		slackMsgChan:    make(chan string),
 	}
 
@@ -71,7 +68,7 @@ func (uc *HistoryUseCase) SendMessage() {
 
 // GetTradeDay -.
 func (uc *HistoryUseCase) GetTradeDay() time.Time {
-	return uc.basic.TradeDay
+	return uc.tradeDay.GetStockTradeDay().TradeDay
 }
 
 // GetDayKbarByStockNumDate -.
@@ -160,7 +157,7 @@ func (uc *HistoryUseCase) SimulateMulti(cond []*config.TradeFuture) {
 }
 
 func (uc *HistoryUseCase) fetchHistoryClose(targetArr []*entity.StockTarget) error {
-	fetchTradeDayArr := cc.GetBasicInfo().HistoryCloseRange
+	fetchTradeDayArr := uc.tradeDay.GetLastNStockTradeDay(uc.cfg.History.HistoryClosePeriod)
 	stockNumArr := []string{}
 	for _, target := range targetArr {
 		stockNumArr = append(stockNumArr, target.StockNum)
@@ -256,7 +253,7 @@ func (uc *HistoryUseCase) findExistHistoryClose(fetchTradeDayArr []time.Time, st
 }
 
 func (uc *HistoryUseCase) fetchHistoryTick(targetArr []*entity.StockTarget) error {
-	fetchTradeDayArr := cc.GetBasicInfo().HistoryTickRange
+	fetchTradeDayArr := uc.tradeDay.GetLastNStockTradeDay(uc.cfg.History.HistoryTickPeriod)
 	stockNumArr := []string{}
 	for _, target := range targetArr {
 		stockNumArr = append(stockNumArr, target.StockNum)
@@ -350,7 +347,7 @@ func (uc *HistoryUseCase) findExistStockHistoryTick(fetchTradeDayArr []time.Time
 }
 
 func (uc *HistoryUseCase) fetchHistoryKbar(targetArr []*entity.StockTarget) error {
-	fetchTradeDayArr := cc.GetBasicInfo().HistoryKbarRange
+	fetchTradeDayArr := uc.tradeDay.GetLastNStockTradeDay(uc.cfg.History.HistoryKbarPeriod)
 	stockNumArr := []string{}
 	for _, target := range targetArr {
 		stockNumArr = append(stockNumArr, target.StockNum)
@@ -486,7 +483,7 @@ func (uc *HistoryUseCase) processTickArr(arr []*entity.StockHistoryTick) {
 	stockNum := arr[0].StockNum
 	firsTickTime := arr[0].TickTime
 	tickTradeDay := time.Date(firsTickTime.Year(), firsTickTime.Month(), firsTickTime.Day(), 0, 0, 0, 0, time.Local)
-	if uc.basic.LastTradeDay.Equal(tickTradeDay) {
+	if uc.tradeDay.GetLastNStockTradeDay(1)[0].Equal(tickTradeDay) {
 		cc.SetHistoryTickArr(stockNum, tickTradeDay, arr)
 	}
 

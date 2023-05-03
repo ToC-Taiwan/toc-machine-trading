@@ -66,21 +66,3 @@ const (
 	// DayTradeOnlyBuy -.
 	DayTradeOnlyBuy string = "OnlyBuy"
 )
-
-// BasicInfo -.
-type BasicInfo struct {
-	TradeDay           time.Time
-	LastTradeDay       time.Time
-	BefroeLastTradeDay time.Time
-
-	OpenTime       time.Time
-	EndTime        time.Time
-	TradeInEndTime time.Time
-
-	HistoryCloseRange []time.Time
-	HistoryKbarRange  []time.Time
-	HistoryTickRange  []time.Time
-
-	AllStocks  map[string]*Stock
-	AllFutures map[string]*Future
-}

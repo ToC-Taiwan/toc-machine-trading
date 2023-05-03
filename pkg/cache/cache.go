@@ -36,6 +36,17 @@ func (c *Cache) Get(k *Key) (interface{}, bool) {
 	return nil, false
 }
 
+func (c *Cache) GetAll(k *Key) map[string]interface{} {
+	if cc := c.getCacher(k); cc != nil {
+		result := make(map[string]interface{})
+		for k, v := range cc.Items() {
+			result[k] = v.Object
+		}
+		return result
+	}
+	return nil
+}
+
 func (c *Cache) getCacher(key *Key) *cache.Cache {
 	c.lock.RLock()
 	defer c.lock.RUnlock()

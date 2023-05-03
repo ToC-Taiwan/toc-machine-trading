@@ -12,11 +12,21 @@ type Key struct {
 	index    string
 }
 
-func NewKey(category, index string) *Key {
-	return &Key{
+func NewKey(category string, index ...string) *Key {
+	k := &Key{
 		category: category,
-		index:    index,
 	}
+
+	switch len(index) {
+	case 0:
+		k.index = ""
+	case 1:
+		k.index = index[0]
+	default:
+		panic("index length must be 0 or 1")
+	}
+
+	return k
 }
 
 func (k *Key) String() string {
@@ -32,6 +42,9 @@ func (k *Key) Index() string {
 }
 
 func (k *Key) ExtendIndex(opt ...string) *Key {
+	if k.index == "" {
+		panic("to extend index, original index must not be empty")
+	}
 	k.index = fmt.Sprintf("%s:%s", k.index, strings.Join(opt, ":"))
 	return k
 }
