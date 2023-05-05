@@ -22,15 +22,16 @@ func New() *Cache {
 }
 
 func (c *Cache) splitKey(k string) (int64, string) {
-	split := strings.Split(k, ":")
-	if len(split) != 2 {
-		panic("invalid cache key format")
+	before, after, ok := strings.Cut(k, ":")
+	if !ok {
+		panic(fmt.Sprintf("invalid key: %s", k))
 	}
-	category, err := strconv.ParseInt(split[0], 10, 8)
+
+	category, err := strconv.ParseInt(before, 10, 8)
 	if err != nil {
-		panic(fmt.Sprintf("invalid category: %s", split[0]))
+		panic(fmt.Sprintf("invalid category: %s", before))
 	}
-	return category, split[1]
+	return category, after
 }
 
 func (c *Cache) getCacher(category int64) *cache.Cache {

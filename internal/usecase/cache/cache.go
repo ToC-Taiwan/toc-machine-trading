@@ -93,22 +93,22 @@ func (c *Cache) GetAllFutureDetail() map[string]*entity.Future {
 }
 
 func (c *Cache) SetHistoryOpen(stockNum string, date time.Time, open float64) {
-	c.Set(c.key(cacheCatagoryHistoryOpen, stockNum, date.Format(time.RFC3339)), open)
+	c.Set(c.key(cacheCatagoryHistoryOpen, stockNum, date.Format("200601021504.000000")), open)
 }
 
 func (c *Cache) GetHistoryOpen(stockNum string, date time.Time) float64 {
-	if value, ok := c.Get(c.key(cacheCatagoryHistoryOpen, stockNum, date.Format(time.RFC3339))); ok {
+	if value, ok := c.Get(c.key(cacheCatagoryHistoryOpen, stockNum, date.Format("200601021504.000000"))); ok {
 		return value.(float64)
 	}
 	return 0
 }
 
 func (c *Cache) SetHistoryClose(stockNum string, date time.Time, close float64) {
-	c.Set(c.key(cacheCatagoryHistoryClose, stockNum, date.Format(time.RFC3339)), close)
+	c.Set(c.key(cacheCatagoryHistoryClose, stockNum, date.Format("200601021504.000000")), close)
 }
 
 func (c *Cache) GetHistoryClose(stockNum string, date time.Time) float64 {
-	if value, ok := c.Get(c.key(cacheCatagoryHistoryClose, stockNum, date.Format(time.RFC3339))); ok {
+	if value, ok := c.Get(c.key(cacheCatagoryHistoryClose, stockNum, date.Format("200601021504.000000"))); ok {
 		return value.(float64)
 	}
 	return 0
@@ -149,22 +149,22 @@ func (c *Cache) AppendHistoryTickAnalyze(stockNum string, arr []int64) {
 }
 
 func (c *Cache) SetDaykbar(stockNum string, date time.Time, daykbar *entity.StockHistoryKbar) {
-	c.Set(c.key(cacheCatagoryDayKbar, stockNum, date.Format(time.RFC3339)), daykbar)
+	c.Set(c.key(cacheCatagoryDayKbar, stockNum, date.Format("200601021504.000000")), daykbar)
 }
 
 func (c *Cache) GetDaykbar(stockNum string, date time.Time) *entity.StockHistoryKbar {
-	if value, ok := c.Get(c.key(cacheCatagoryDayKbar, stockNum, date.Format(time.RFC3339))); ok {
+	if value, ok := c.Get(c.key(cacheCatagoryDayKbar, stockNum, date.Format("200601021504.000000"))); ok {
 		return value.(*entity.StockHistoryKbar)
 	}
 	return nil
 }
 
 func (c *Cache) SetHistoryTickArr(stockNum string, date time.Time, tickArr []*entity.StockHistoryTick) {
-	c.Set(c.key(cacheCatagoryHistoryTickArr, stockNum, date.Format(time.RFC3339)), tickArr)
+	c.Set(c.key(cacheCatagoryHistoryTickArr, stockNum, date.Format("200601021504.000000")), tickArr)
 }
 
 func (c *Cache) GetHistoryTickArr(stockNum string, date time.Time) []*entity.StockHistoryTick {
-	if value, ok := c.Get(c.key(cacheCatagoryHistoryTickArr, stockNum, date.Format(time.RFC3339))); ok {
+	if value, ok := c.Get(c.key(cacheCatagoryHistoryTickArr, stockNum, date.Format("200601021504.000000"))); ok {
 		return value.([]*entity.StockHistoryTick)
 	}
 	return nil
