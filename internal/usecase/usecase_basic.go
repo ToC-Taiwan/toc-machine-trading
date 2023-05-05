@@ -65,7 +65,7 @@ func (uc *BasicUseCase) updateRepoStock() error {
 	}
 
 	for _, v := range stockArr {
-		if v.GetReference() == 0 {
+		if v.GetReference() == 0 && v.GetCode() != "001" {
 			logger.Warnf("stock %s reference is 0", v.GetCode())
 			continue
 		}
