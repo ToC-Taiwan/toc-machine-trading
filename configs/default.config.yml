@@ -1,4 +1,5 @@
 simulation: false
+manual_trade: true
 
 trade_stock:
     allow_trade: false

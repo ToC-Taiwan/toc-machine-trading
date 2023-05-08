@@ -16,6 +16,7 @@ var (
 // Config -.
 type Config struct {
 	Simulation   bool         `yaml:"simulation"`
+	ManualTrade  bool         `yaml:"manual_trade"`
 	History      History      `yaml:"history"`
 	Quota        Quota        `yaml:"quota"`
 	TargetStock  TargetStock  `yaml:"target_stock"`

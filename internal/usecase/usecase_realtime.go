@@ -110,7 +110,7 @@ func (uc *RealTimeUseCase) checkFutureInventory() {
 }
 
 func (uc *RealTimeUseCase) checkStockTradeSwitch() {
-	if !uc.cfg.TradeStock.AllowTrade {
+	if !uc.cfg.TradeStock.AllowTrade || uc.cfg.ManualTrade {
 		return
 	}
 	stockTradeDay := tradeday.Get().GetStockTradeDay().TradeDay
@@ -138,7 +138,7 @@ func (uc *RealTimeUseCase) checkStockTradeSwitch() {
 }
 
 func (uc *RealTimeUseCase) checkFutureTradeSwitch() {
-	if !uc.cfg.TradeFuture.AllowTrade || uc.inventoryIsNotEmpty {
+	if !uc.cfg.TradeFuture.AllowTrade || uc.inventoryIsNotEmpty || uc.cfg.ManualTrade {
 		return
 	}
 	futureTradeDay := tradeday.Get().GetFutureTradeDay()

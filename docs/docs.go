@@ -869,6 +869,9 @@ const docTemplate = `{
                 "history": {
                     "$ref": "#/definitions/config.History"
                 },
+                "manualTrade": {
+                    "type": "boolean"
+                },
                 "quota": {
                     "$ref": "#/definitions/config.Quota"
                 },
