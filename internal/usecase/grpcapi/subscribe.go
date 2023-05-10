@@ -20,11 +20,11 @@ func NewSubscribe(client *grpc.ConnPool) *SubscribegRPCAPI {
 }
 
 // SubscribeStockTick return arry means fail to subscribe
-func (t *SubscribegRPCAPI) SubscribeStockTick(stockNumArr []string) ([]string, error) {
+func (t *SubscribegRPCAPI) SubscribeStockTick(stockNumArr []string, odd bool) ([]string, error) {
 	conn := t.conn.Get()
 	defer t.conn.Put(conn)
 
-	r, err := pb.NewSubscribeDataInterfaceClient(conn).SubscribeStockTick(context.Background(), &pb.StockNumArr{StockNumArr: stockNumArr})
+	r, err := pb.NewSubscribeDataInterfaceClient(conn).SubscribeStockTick(context.Background(), &pb.StockNumArr{StockNumArr: stockNumArr, Odd: odd})
 	if err != nil {
 		return []string{}, err
 	}

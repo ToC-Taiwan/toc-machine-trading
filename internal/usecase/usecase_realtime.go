@@ -579,7 +579,7 @@ func (uc *RealTimeUseCase) SubscribeStockTick(targetArr []*entity.StockTarget) e
 		subArr = append(subArr, v.StockNum)
 	}
 
-	failSubNumArr, err := uc.subgRPCAPI.SubscribeStockTick(subArr)
+	failSubNumArr, err := uc.subgRPCAPI.SubscribeStockTick(subArr, uc.cfg.TradeStock.Odd)
 	if err != nil {
 		return err
 	}

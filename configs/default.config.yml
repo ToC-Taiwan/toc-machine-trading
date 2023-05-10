@@ -4,6 +4,7 @@ manual_trade: true
 trade_stock:
     allow_trade: false
     subscribe: false
+    odd: true
 
     # unit: second
     hold_time_from_open: 45

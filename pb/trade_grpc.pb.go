@@ -22,6 +22,8 @@ const _ = grpc.SupportPackageIsVersion7
 const (
 	TradeInterface_BuyStock_FullMethodName                  = "/toc_python_forwarder.TradeInterface/BuyStock"
 	TradeInterface_SellStock_FullMethodName                 = "/toc_python_forwarder.TradeInterface/SellStock"
+	TradeInterface_BuyOddStock_FullMethodName               = "/toc_python_forwarder.TradeInterface/BuyOddStock"
+	TradeInterface_SellOddStock_FullMethodName              = "/toc_python_forwarder.TradeInterface/SellOddStock"
 	TradeInterface_SellFirstStock_FullMethodName            = "/toc_python_forwarder.TradeInterface/SellFirstStock"
 	TradeInterface_CancelStock_FullMethodName               = "/toc_python_forwarder.TradeInterface/CancelStock"
 	TradeInterface_BuyFuture_FullMethodName                 = "/toc_python_forwarder.TradeInterface/BuyFuture"
@@ -51,6 +53,10 @@ type TradeInterfaceClient interface {
 	BuyStock(ctx context.Context, in *StockOrderDetail, opts ...grpc.CallOption) (*TradeResult, error)
 	// SellStock is the interface for selling stock
 	SellStock(ctx context.Context, in *StockOrderDetail, opts ...grpc.CallOption) (*TradeResult, error)
+	// BuyStock is the interface for buying stock
+	BuyOddStock(ctx context.Context, in *OddStockOrderDetail, opts ...grpc.CallOption) (*TradeResult, error)
+	// SellStock is the interface for selling stock
+	SellOddStock(ctx context.Context, in *OddStockOrderDetail, opts ...grpc.CallOption) (*TradeResult, error)
 	// SellFirstStock is the interface for selling first stock
 	SellFirstStock(ctx context.Context, in *StockOrderDetail, opts ...grpc.CallOption) (*TradeResult, error)
 	// CancelStock is the interface for canceling stock
@@ -111,6 +117,24 @@ func (c *tradeInterfaceClient) BuyStock(ctx context.Context, in *StockOrderDetai
 func (c *tradeInterfaceClient) SellStock(ctx context.Context, in *StockOrderDetail, opts ...grpc.CallOption) (*TradeResult, error) {
 	out := new(TradeResult)
 	err := c.cc.Invoke(ctx, TradeInterface_SellStock_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *tradeInterfaceClient) BuyOddStock(ctx context.Context, in *OddStockOrderDetail, opts ...grpc.CallOption) (*TradeResult, error) {
+	out := new(TradeResult)
+	err := c.cc.Invoke(ctx, TradeInterface_BuyOddStock_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *tradeInterfaceClient) SellOddStock(ctx context.Context, in *OddStockOrderDetail, opts ...grpc.CallOption) (*TradeResult, error) {
+	out := new(TradeResult)
+	err := c.cc.Invoke(ctx, TradeInterface_SellOddStock_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -296,6 +320,10 @@ type TradeInterfaceServer interface {
 	BuyStock(context.Context, *StockOrderDetail) (*TradeResult, error)
 	// SellStock is the interface for selling stock
 	SellStock(context.Context, *StockOrderDetail) (*TradeResult, error)
+	// BuyStock is the interface for buying stock
+	BuyOddStock(context.Context, *OddStockOrderDetail) (*TradeResult, error)
+	// SellStock is the interface for selling stock
+	SellOddStock(context.Context, *OddStockOrderDetail) (*TradeResult, error)
 	// SellFirstStock is the interface for selling first stock
 	SellFirstStock(context.Context, *StockOrderDetail) (*TradeResult, error)
 	// CancelStock is the interface for canceling stock
@@ -346,6 +374,12 @@ func (UnimplementedTradeInterfaceServer) BuyStock(context.Context, *StockOrderDe
 }
 func (UnimplementedTradeInterfaceServer) SellStock(context.Context, *StockOrderDetail) (*TradeResult, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SellStock not implemented")
+}
+func (UnimplementedTradeInterfaceServer) BuyOddStock(context.Context, *OddStockOrderDetail) (*TradeResult, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method BuyOddStock not implemented")
+}
+func (UnimplementedTradeInterfaceServer) SellOddStock(context.Context, *OddStockOrderDetail) (*TradeResult, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SellOddStock not implemented")
 }
 func (UnimplementedTradeInterfaceServer) SellFirstStock(context.Context, *StockOrderDetail) (*TradeResult, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SellFirstStock not implemented")
@@ -449,6 +483,42 @@ func _TradeInterface_SellStock_Handler(srv interface{}, ctx context.Context, dec
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TradeInterfaceServer).SellStock(ctx, req.(*StockOrderDetail))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TradeInterface_BuyOddStock_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(OddStockOrderDetail)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TradeInterfaceServer).BuyOddStock(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TradeInterface_BuyOddStock_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TradeInterfaceServer).BuyOddStock(ctx, req.(*OddStockOrderDetail))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TradeInterface_SellOddStock_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(OddStockOrderDetail)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TradeInterfaceServer).SellOddStock(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TradeInterface_SellOddStock_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TradeInterfaceServer).SellOddStock(ctx, req.(*OddStockOrderDetail))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -809,6 +879,14 @@ var TradeInterface_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SellStock",
 			Handler:    _TradeInterface_SellStock_Handler,
+		},
+		{
+			MethodName: "BuyOddStock",
+			Handler:    _TradeInterface_BuyOddStock_Handler,
+		},
+		{
+			MethodName: "SellOddStock",
+			Handler:    _TradeInterface_SellOddStock_Handler,
 		},
 		{
 			MethodName: "SellFirstStock",

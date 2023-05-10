@@ -1092,6 +1092,9 @@ const docTemplate = `{
                 "hold_time_from_open": {
                     "type": "number"
                 },
+                "odd": {
+                    "type": "boolean"
+                },
                 "subscribe": {
                     "type": "boolean"
                 },

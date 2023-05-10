@@ -48,6 +48,7 @@ type AnalyzeStock struct {
 type TradeStock struct {
 	AllowTrade bool `json:"allow_trade"         yaml:"allow_trade"`
 	Subscribe  bool `json:"subscribe"           yaml:"subscribe"`
+	Odd        bool `json:"odd"                 yaml:"odd"`
 
 	HoldTimeFromOpen float64 `json:"hold_time_from_open" env-required:"true" yaml:"hold_time_from_open"`
 	TotalOpenTime    float64 `json:"total_open_time"     env-required:"true" yaml:"total_open_time"`

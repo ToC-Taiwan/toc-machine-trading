@@ -117,6 +117,36 @@ func (t *TradegRPCAPI) SellStock(order *entity.StockOrder) (*pb.TradeResult, err
 	return r, nil
 }
 
+func (t *TradegRPCAPI) BuyOddStock(order *entity.StockOrder) (*pb.TradeResult, error) {
+	conn := t.conn.Get()
+	defer t.conn.Put(conn)
+
+	r, err := pb.NewTradeInterfaceClient(conn).BuyOddStock(context.Background(), &pb.OddStockOrderDetail{
+		StockNum: order.StockNum,
+		Price:    order.Price,
+		Quantity: order.Quantity,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return r, nil
+}
+
+func (t *TradegRPCAPI) SellOddStock(order *entity.StockOrder) (*pb.TradeResult, error) {
+	conn := t.conn.Get()
+	defer t.conn.Put(conn)
+
+	r, err := pb.NewTradeInterfaceClient(conn).SellOddStock(context.Background(), &pb.OddStockOrderDetail{
+		StockNum: order.StockNum,
+		Price:    order.Price,
+		Quantity: order.Quantity,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return r, nil
+}
+
 // SellFirstStock SellFirstStock
 func (t *TradegRPCAPI) SellFirstStock(order *entity.StockOrder) (*pb.TradeResult, error) {
 	conn := t.conn.Get()

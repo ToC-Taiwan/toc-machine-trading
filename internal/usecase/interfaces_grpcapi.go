@@ -18,7 +18,7 @@ type BasicgRPCAPI interface {
 }
 
 type SubscribegRPCAPI interface {
-	SubscribeStockTick(stockNumArr []string) ([]string, error)
+	SubscribeStockTick(stockNumArr []string, odd bool) ([]string, error)
 	UnSubscribeStockTick(stockNumArr []string) ([]string, error)
 	UnSubscribeAllTick() (*pb.ErrorMessage, error)
 	SubscribeStockBidAsk(stockNumArr []string) ([]string, error)
@@ -57,6 +57,8 @@ type RealTimegRPCAPI interface {
 type TradegRPCAPI interface {
 	BuyStock(order *entity.StockOrder) (*pb.TradeResult, error)
 	SellStock(order *entity.StockOrder) (*pb.TradeResult, error)
+	BuyOddStock(order *entity.StockOrder) (*pb.TradeResult, error)
+	SellOddStock(order *entity.StockOrder) (*pb.TradeResult, error)
 	SellFirstStock(order *entity.StockOrder) (*pb.TradeResult, error)
 	CancelStock(orderID string) (*pb.TradeResult, error)
 
