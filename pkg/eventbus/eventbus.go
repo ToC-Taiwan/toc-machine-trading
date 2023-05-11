@@ -51,7 +51,7 @@ func (c *Bus) SubscribeAsync(topic string, transactional bool, fn ...interface{}
 		panic("fn length must be greater than 0")
 	}
 
-	for i := len(fn) - 1; i >= 0; i-- {
+	for i := 0; i < len(fn); i++ {
 		err := c.bus.SubscribeAsync(topic, fn[i], transactional)
 		if err != nil {
 			panic(err)
@@ -65,7 +65,7 @@ func (c *Bus) Subscribe(topic string, fn ...interface{}) {
 		panic("fn length must be greater than 0")
 	}
 
-	for i := len(fn) - 1; i >= 0; i-- {
+	for i := 0; i < len(fn); i++ {
 		err := c.bus.Subscribe(topic, fn[i])
 		if err != nil {
 			panic(err)
@@ -78,8 +78,8 @@ func (c *Bus) UnSubscribe(topic string, fn ...interface{}) {
 		panic("fn length must be greater than 0")
 	}
 
-	for _, f := range fn {
-		err := c.bus.Unsubscribe(topic, f)
+	for i := len(fn) - 1; i >= 0; i-- {
+		err := c.bus.Unsubscribe(topic, fn[i])
 		if err != nil {
 			panic(err)
 		}

@@ -177,18 +177,18 @@ func (mr *MockSubscribegRPCAPIMockRecorder) SubscribeStockBidAsk(stockNumArr int
 }
 
 // SubscribeStockTick mocks base method.
-func (m *MockSubscribegRPCAPI) SubscribeStockTick(stockNumArr []string) ([]string, error) {
+func (m *MockSubscribegRPCAPI) SubscribeStockTick(stockNumArr []string, odd bool) ([]string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SubscribeStockTick", stockNumArr)
+	ret := m.ctrl.Call(m, "SubscribeStockTick", stockNumArr, odd)
 	ret0, _ := ret[0].([]string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // SubscribeStockTick indicates an expected call of SubscribeStockTick.
-func (mr *MockSubscribegRPCAPIMockRecorder) SubscribeStockTick(stockNumArr interface{}) *gomock.Call {
+func (mr *MockSubscribegRPCAPIMockRecorder) SubscribeStockTick(stockNumArr, odd interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SubscribeStockTick", reflect.TypeOf((*MockSubscribegRPCAPI)(nil).SubscribeStockTick), stockNumArr)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SubscribeStockTick", reflect.TypeOf((*MockSubscribegRPCAPI)(nil).SubscribeStockTick), stockNumArr, odd)
 }
 
 // UnSubscribeAllBidAsk mocks base method.
@@ -635,6 +635,21 @@ func (mr *MockTradegRPCAPIMockRecorder) BuyFuture(order interface{}) *gomock.Cal
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BuyFuture", reflect.TypeOf((*MockTradegRPCAPI)(nil).BuyFuture), order)
 }
 
+// BuyOddStock mocks base method.
+func (m *MockTradegRPCAPI) BuyOddStock(order *entity.StockOrder) (*pb.TradeResult, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "BuyOddStock", order)
+	ret0, _ := ret[0].(*pb.TradeResult)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// BuyOddStock indicates an expected call of BuyOddStock.
+func (mr *MockTradegRPCAPIMockRecorder) BuyOddStock(order interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BuyOddStock", reflect.TypeOf((*MockTradegRPCAPI)(nil).BuyOddStock), order)
+}
+
 // BuyStock mocks base method.
 func (m *MockTradegRPCAPI) BuyStock(order *entity.StockOrder) (*pb.TradeResult, error) {
 	m.ctrl.T.Helper()
@@ -856,6 +871,21 @@ func (m *MockTradegRPCAPI) SellFuture(order *entity.FutureOrder) (*pb.TradeResul
 func (mr *MockTradegRPCAPIMockRecorder) SellFuture(order interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SellFuture", reflect.TypeOf((*MockTradegRPCAPI)(nil).SellFuture), order)
+}
+
+// SellOddStock mocks base method.
+func (m *MockTradegRPCAPI) SellOddStock(order *entity.StockOrder) (*pb.TradeResult, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SellOddStock", order)
+	ret0, _ := ret[0].(*pb.TradeResult)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SellOddStock indicates an expected call of SellOddStock.
+func (mr *MockTradegRPCAPIMockRecorder) SellOddStock(order interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SellOddStock", reflect.TypeOf((*MockTradegRPCAPI)(nil).SellOddStock), order)
 }
 
 // SellStock mocks base method.

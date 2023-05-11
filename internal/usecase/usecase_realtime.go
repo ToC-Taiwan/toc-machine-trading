@@ -86,9 +86,9 @@ func (u *UseCaseBase) NewRealTime() RealTime {
 	go uc.ReceiveEvent(context.Background())
 	go uc.ReceiveOrderStatus(context.Background())
 
-	bus.SubscribeAsync(event.TopicSubscribeStockTickTargets, true, uc.ReceiveStockSubscribeData, uc.SubscribeStockTick)
-	bus.SubscribeAsync(event.TopicUnSubscribeStockTickTargets, true, uc.UnSubscribeStockTick, uc.UnSubscribeStockBidAsk)
-	bus.SubscribeAsync(event.TopicSubscribeFutureTickTargets, true, uc.SetMainFuture, uc.ReceiveFutureSubscribeData, uc.SubscribeFutureTick)
+	bus.SubscribeAsync(event.TopicSubscribeStockTickTargets, true, uc.ReceiveStockSubscribeData)
+	bus.SubscribeAsync(event.TopicUnSubscribeStockTickTargets, false, uc.UnSubscribeStockTick, uc.UnSubscribeStockBidAsk)
+	bus.SubscribeAsync(event.TopicSubscribeFutureTickTargets, true, uc.SetMainFuture)
 
 	return uc
 }
@@ -446,6 +446,7 @@ func (uc *RealTimeUseCase) GetMainFuture() *entity.Future {
 
 // ReceiveStockSubscribeData - receive target data, start goroutine to trade
 func (uc *RealTimeUseCase) ReceiveStockSubscribeData(targetArr []*entity.StockTarget) {
+	defer uc.SubscribeStockTick(targetArr)
 	notifyChanMap := make(map[string]chan *entity.StockOrder)
 	for _, t := range targetArr {
 		hadger := hadger.NewHadgerStock(
@@ -488,6 +489,7 @@ func (uc *RealTimeUseCase) ReceiveStockSubscribeData(targetArr []*entity.StockTa
 
 // ReceiveFutureSubscribeData -.
 func (uc *RealTimeUseCase) ReceiveFutureSubscribeData(code string) {
+	defer uc.SubscribeFutureTick(code)
 	t := dt.NewDTFuture(
 		code,
 		uc.sc.(*grpcapi.TradegRPCAPI),
@@ -516,6 +518,8 @@ func (uc *RealTimeUseCase) ReceiveFutureSubscribeData(code string) {
 }
 
 func (uc *RealTimeUseCase) SetMainFuture(code string) {
+	defer uc.ReceiveFutureSubscribeData(code)
+
 	if uc.mainFutureCode != "" {
 		logger.Fatal("main future code already set, can't set again")
 	}
@@ -569,9 +573,9 @@ func (uc *RealTimeUseCase) UnSubscribeAll() error {
 }
 
 // SubscribeStockTick -.
-func (uc *RealTimeUseCase) SubscribeStockTick(targetArr []*entity.StockTarget) error {
+func (uc *RealTimeUseCase) SubscribeStockTick(targetArr []*entity.StockTarget) {
 	if !uc.cfg.TradeStock.Subscribe {
-		return nil
+		return
 	}
 
 	var subArr []string
@@ -581,14 +585,13 @@ func (uc *RealTimeUseCase) SubscribeStockTick(targetArr []*entity.StockTarget) e
 
 	failSubNumArr, err := uc.subgRPCAPI.SubscribeStockTick(subArr, uc.cfg.TradeStock.Odd)
 	if err != nil {
-		return err
+		logger.Error(err)
+		return
 	}
 
 	if len(failSubNumArr) != 0 {
-		return fmt.Errorf("subscribe fail %v", failSubNumArr)
+		logger.Errorf("subscribe fail %v", failSubNumArr)
 	}
-
-	return nil
 }
 
 // SubscribeStockBidAsk -.
@@ -643,21 +646,20 @@ func (uc *RealTimeUseCase) UnSubscribeStockBidAsk(stockNum string) error {
 }
 
 // SubscribeFutureTick -.
-func (uc *RealTimeUseCase) SubscribeFutureTick(code string) error {
+func (uc *RealTimeUseCase) SubscribeFutureTick(code string) {
 	if !uc.cfg.TradeFuture.Subscribe {
-		return nil
+		return
 	}
 
 	failSubNumArr, err := uc.subgRPCAPI.SubscribeFutureTick([]string{code})
 	if err != nil {
-		return err
+		logger.Error(err)
+		return
 	}
 
 	if len(failSubNumArr) != 0 {
-		return fmt.Errorf("subscribe future fail %v", failSubNumArr)
+		logger.Errorf("subscribe future fail %v", failSubNumArr)
 	}
-
-	return nil
 }
 
 // SubscribeFutureBidAsk -.
