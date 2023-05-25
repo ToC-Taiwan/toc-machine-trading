@@ -2,16 +2,13 @@
 package log
 
 import (
-	"bytes"
 	"fmt"
 	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
-	"time"
 
 	"github.com/ilyakaznacheev/cleanenv"
-	"github.com/rifflock/lfshook"
 	"github.com/sirupsen/logrus"
 )
 
@@ -23,24 +20,6 @@ const (
 	_defaultFilePath   = "./logs"
 	_defaultFileName   = "log"
 )
-
-type terminalFormatter struct{}
-
-func (s *terminalFormatter) Format(entry *logrus.Entry) ([]byte, error) {
-	var b *bytes.Buffer
-	if entry.Buffer != nil {
-		b = entry.Buffer
-	} else {
-		b = &bytes.Buffer{}
-	}
-
-	levelText := strings.ToUpper(entry.Level.String())[0:4]
-	_, e := b.WriteString(fmt.Sprintf("%s[%s] %s\n", levelText, entry.Time.Format(_defaultTimeFormat), entry.Message))
-	if e != nil {
-		return nil, e
-	}
-	return b.Bytes(), nil
-}
 
 // Log -.
 type Log struct {
@@ -98,7 +77,7 @@ func Get() *Log {
 		l.SetReportCaller(true)
 	}
 
-	l.Hooks.Add(l.fileHook(&terminalFormatter{}))
+	l.Hooks.Add(NewFilekHook(l.level.Level(), filepath.Join(l.basePath, _defaultFilePath), l.fileName))
 	l.SetFormatter(formatter)
 	l.SetLevel(l.level.Level())
 	l.SetOutput(os.Stdout)
@@ -134,13 +113,6 @@ func (l *Log) readEnv() {
 			),
 		)
 	}
-}
-
-func (l *Log) fileHook(formatter logrus.Formatter) *lfshook.LfsHook {
-	return lfshook.NewHook(
-		filepath.Join(l.basePath, fmt.Sprintf("%s/%s-%s.log", _defaultFilePath, l.fileName, time.Now().Format("20060102"))),
-		formatter,
-	)
 }
 
 func (l *Log) setCallerPrettyfier(isJSON bool) func(*runtime.Frame) (function string, file string) {
