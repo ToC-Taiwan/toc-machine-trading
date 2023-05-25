@@ -76,7 +76,8 @@ func (uc *BasicUseCase) updateRepoStock() error {
 
 		updateTime, pErr := time.ParseInLocation(global.ShortSlashTimeLayout, v.GetUpdateDate(), time.Local)
 		if pErr != nil {
-			return pErr
+			logger.Warnf("stock %s update date parse error: %s", v.GetCode(), pErr.Error())
+			continue
 		}
 
 		stock := &entity.Stock{
@@ -114,12 +115,14 @@ func (uc *BasicUseCase) updateRepoFuture() error {
 
 		updateTime, pErr := time.ParseInLocation(global.ShortSlashTimeLayout, v.GetUpdateDate(), time.Local)
 		if pErr != nil {
-			return pErr
+			logger.Warnf("future %s update date parse error: %s", v.GetCode(), pErr.Error())
+			continue
 		}
 
 		dDate, e := time.ParseInLocation(global.ShortSlashTimeLayout, v.GetDeliveryDate(), time.Local)
 		if e != nil {
-			return e
+			logger.Warnf("future %s delivery date parse error: %s", v.GetCode(), e.Error())
+			continue
 		}
 
 		future := &entity.Future{
@@ -163,12 +166,14 @@ func (uc *BasicUseCase) updateRepoOption() error {
 
 		updateTime, pErr := time.ParseInLocation(global.ShortSlashTimeLayout, v.GetUpdateDate(), time.Local)
 		if pErr != nil {
-			return pErr
+			logger.Warnf("option %s update date parse error: %s", v.GetCode(), pErr.Error())
+			continue
 		}
 
 		dDate, e := time.ParseInLocation(global.ShortSlashTimeLayout, v.GetDeliveryDate(), time.Local)
 		if e != nil {
-			return e
+			logger.Warnf("option %s delivery date parse error: %s", v.GetCode(), e.Error())
+			continue
 		}
 
 		option := &entity.Option{
