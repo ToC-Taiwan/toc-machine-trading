@@ -70,7 +70,6 @@ func (uc *BasicUseCase) updateRepoStock() error {
 		}
 
 		if v.GetReference() == 0 {
-			logger.Warnf("stock %s reference is 0", v.GetCode())
 			continue
 		}
 
@@ -109,7 +108,6 @@ func (uc *BasicUseCase) updateRepoFuture() error {
 	duplCodeMap := make(map[string]struct{})
 	for _, v := range futureArr {
 		if v.GetReference() == 0 {
-			logger.Warnf("future %s reference is 0", v.GetCode())
 			continue
 		}
 
