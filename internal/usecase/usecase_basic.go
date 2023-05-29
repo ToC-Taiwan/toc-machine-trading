@@ -160,7 +160,6 @@ func (uc *BasicUseCase) updateRepoOption() error {
 	duplCodeMap := make(map[string]struct{})
 	for _, v := range optionArr {
 		if v.GetReference() == 0 {
-			logger.Warnf("option %s reference is 0", v.GetCode())
 			continue
 		}
 
