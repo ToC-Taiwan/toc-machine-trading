@@ -475,6 +475,11 @@ definitions:
       tse:
         $ref: '#/definitions/entity.IndexStatus'
     type: object
+  resp.Response:
+    properties:
+      response:
+        type: string
+    type: object
   simulator.SimulateBalance:
     properties:
       cond:
@@ -558,11 +563,6 @@ definitions:
           $ref: '#/definitions/entity.Stock'
         type: array
     type: object
-  v1.response:
-    properties:
-      error:
-        type: string
-    type: object
   v1.stockDetailResponse:
     properties:
       stock_detail:
@@ -640,7 +640,7 @@ paths:
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/v1.response'
+            $ref: '#/definitions/resp.Response'
       summary: getAllConfig
       tags:
       - system
@@ -665,11 +665,11 @@ paths:
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/v1.response'
+            $ref: '#/definitions/resp.Response'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/v1.response'
+            $ref: '#/definitions/resp.Response'
       summary: getAllRepoStock
       tags:
       - basic
@@ -689,7 +689,7 @@ paths:
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/v1.response'
+            $ref: '#/definitions/resp.Response'
       summary: getShioajiUsage
       tags:
       - system
@@ -727,7 +727,7 @@ paths:
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/v1.response'
+            $ref: '#/definitions/resp.Response'
       summary: getKbarData
       tags:
       - history
@@ -759,7 +759,7 @@ paths:
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/v1.response'
+            $ref: '#/definitions/resp.Response'
       summary: simulateFuture
       tags:
       - history
@@ -777,7 +777,7 @@ paths:
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/v1.response'
+            $ref: '#/definitions/resp.Response'
       summary: simulateFutureAuto
       tags:
       - history
@@ -802,7 +802,7 @@ paths:
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/v1.response'
+            $ref: '#/definitions/resp.Response'
       summary: manualInsertFutureOrder
       tags:
       - order
@@ -822,7 +822,7 @@ paths:
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/v1.response'
+            $ref: '#/definitions/resp.Response'
       summary: getAccountBalance
       tags:
       - account
@@ -842,7 +842,7 @@ paths:
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/v1.response'
+            $ref: '#/definitions/resp.Response'
       summary: getAllOrder
       tags:
       - order
@@ -862,7 +862,7 @@ paths:
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/v1.response'
+            $ref: '#/definitions/resp.Response'
       summary: getAllTradeBalance
       tags:
       - order
@@ -882,7 +882,7 @@ paths:
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/v1.response'
+            $ref: '#/definitions/resp.Response'
       summary: getLastFutureTradeBalance
       tags:
       - order
@@ -902,7 +902,7 @@ paths:
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/v1.response'
+            $ref: '#/definitions/resp.Response'
       summary: getLastStockTradeBalance
       tags:
       - order
@@ -928,7 +928,7 @@ paths:
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/v1.response'
+            $ref: '#/definitions/resp.Response'
       summary: getAllOrderByTradeDay
       tags:
       - order
@@ -953,7 +953,7 @@ paths:
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/v1.response'
+            $ref: '#/definitions/resp.Response'
       summary: updateTradeBalanceByTradeDay
       tags:
       - order
@@ -994,7 +994,7 @@ paths:
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/v1.response'
+            $ref: '#/definitions/resp.Response'
       summary: calculateForwardDayTradeBalance
       tags:
       - order
@@ -1035,7 +1035,7 @@ paths:
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/v1.response'
+            $ref: '#/definitions/resp.Response'
       summary: calculateReverseDayTradeBalance
       tags:
       - order
@@ -1059,7 +1059,7 @@ paths:
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/v1.response'
+            $ref: '#/definitions/resp.Response'
       summary: moveFutureOrderToLatestTradeDay
       tags:
       - order
@@ -1083,7 +1083,7 @@ paths:
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/v1.response'
+            $ref: '#/definitions/resp.Response'
       summary: moveStockOrderToLatestTradeDay
       tags:
       - order
@@ -1119,7 +1119,7 @@ paths:
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/v1.response'
+            $ref: '#/definitions/resp.Response'
       summary: getTSESnapshot
       tags:
       - stream

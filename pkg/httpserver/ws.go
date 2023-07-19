@@ -6,27 +6,26 @@ import (
 	"net/http"
 
 	"tmt/pb"
-	"tmt/pkg/log"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"google.golang.org/protobuf/proto"
 )
 
-var logger = log.Get()
-
 // WSRouter -.
 type WSRouter struct {
 	msgChan chan interface{}
 	conn    *websocket.Conn
 	ctx     context.Context
+	logger  Logger
 }
 
 // NewWSRouter -.
-func NewWSRouter(c *gin.Context) *WSRouter {
+func NewWSRouter(c *gin.Context, logger Logger) *WSRouter {
 	r := &WSRouter{
 		msgChan: make(chan interface{}),
 		ctx:     c.Request.Context(),
+		logger:  logger,
 	}
 	r.upgrade(c)
 	return r
@@ -44,7 +43,7 @@ func (w *WSRouter) upgrade(gin *gin.Context) {
 
 	c, err := upGrader.Upgrade(gin.Writer, gin.Request, nil)
 	if err != nil {
-		logger.Error(err)
+		w.logger.Errorf("upgrade websocket err: %v", err)
 		return
 	}
 
@@ -103,7 +102,7 @@ func (w *WSRouter) ReadFromClient(forwardChan chan []byte) {
 	}
 
 	if err := w.conn.Close(); err != nil {
-		logger.Error(err)
+		w.logger.Errorf("websocket close err: %v", err)
 	}
 }
 

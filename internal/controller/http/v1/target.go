@@ -1,3 +1,4 @@
+// Package v1 package v1
 package v1
 
 import (
@@ -12,7 +13,7 @@ type targetRoutes struct {
 	t usecase.Target
 }
 
-func newTargetRoutes(handler *gin.RouterGroup, t usecase.Target) {
+func NewTargetRoutes(handler *gin.RouterGroup, t usecase.Target) {
 	r := &targetRoutes{t}
 
 	h := handler.Group("/targets")

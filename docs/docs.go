@@ -95,7 +95,7 @@ const docTemplate = `{
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/v1.response"
+                            "$ref": "#/definitions/resp.Response"
                         }
                     }
                 }
@@ -133,13 +133,13 @@ const docTemplate = `{
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/v1.response"
+                            "$ref": "#/definitions/resp.Response"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/v1.response"
+                            "$ref": "#/definitions/resp.Response"
                         }
                     }
                 }
@@ -169,7 +169,7 @@ const docTemplate = `{
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/v1.response"
+                            "$ref": "#/definitions/resp.Response"
                         }
                     }
                 }
@@ -225,7 +225,7 @@ const docTemplate = `{
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/v1.response"
+                            "$ref": "#/definitions/resp.Response"
                         }
                     }
                 }
@@ -272,7 +272,7 @@ const docTemplate = `{
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/v1.response"
+                            "$ref": "#/definitions/resp.Response"
                         }
                     }
                 }
@@ -299,7 +299,7 @@ const docTemplate = `{
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/v1.response"
+                            "$ref": "#/definitions/resp.Response"
                         }
                     }
                 }
@@ -337,7 +337,7 @@ const docTemplate = `{
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/v1.response"
+                            "$ref": "#/definitions/resp.Response"
                         }
                     }
                 }
@@ -367,7 +367,7 @@ const docTemplate = `{
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/v1.response"
+                            "$ref": "#/definitions/resp.Response"
                         }
                     }
                 }
@@ -397,7 +397,7 @@ const docTemplate = `{
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/v1.response"
+                            "$ref": "#/definitions/resp.Response"
                         }
                     }
                 }
@@ -427,7 +427,7 @@ const docTemplate = `{
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/v1.response"
+                            "$ref": "#/definitions/resp.Response"
                         }
                     }
                 }
@@ -457,7 +457,7 @@ const docTemplate = `{
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/v1.response"
+                            "$ref": "#/definitions/resp.Response"
                         }
                     }
                 }
@@ -487,7 +487,7 @@ const docTemplate = `{
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/v1.response"
+                            "$ref": "#/definitions/resp.Response"
                         }
                     }
                 }
@@ -526,7 +526,7 @@ const docTemplate = `{
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/v1.response"
+                            "$ref": "#/definitions/resp.Response"
                         }
                     }
                 }
@@ -563,7 +563,7 @@ const docTemplate = `{
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/v1.response"
+                            "$ref": "#/definitions/resp.Response"
                         }
                     }
                 }
@@ -623,7 +623,7 @@ const docTemplate = `{
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/v1.response"
+                            "$ref": "#/definitions/resp.Response"
                         }
                     }
                 }
@@ -683,7 +683,7 @@ const docTemplate = `{
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/v1.response"
+                            "$ref": "#/definitions/resp.Response"
                         }
                     }
                 }
@@ -719,7 +719,7 @@ const docTemplate = `{
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/v1.response"
+                            "$ref": "#/definitions/resp.Response"
                         }
                     }
                 }
@@ -755,7 +755,7 @@ const docTemplate = `{
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/v1.response"
+                            "$ref": "#/definitions/resp.Response"
                         }
                     }
                 }
@@ -809,7 +809,7 @@ const docTemplate = `{
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/v1.response"
+                            "$ref": "#/definitions/resp.Response"
                         }
                     }
                 }
@@ -1565,6 +1565,14 @@ const docTemplate = `{
                 }
             }
         },
+        "resp.Response": {
+            "type": "object",
+            "properties": {
+                "response": {
+                    "type": "string"
+                }
+            }
+        },
         "simulator.SimulateBalance": {
             "type": "object",
             "properties": {
@@ -1688,14 +1696,6 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/entity.Stock"
                     }
-                }
-            }
-        },
-        "v1.response": {
-            "type": "object",
-            "properties": {
-                "error": {
-                    "type": "string"
                 }
             }
         },

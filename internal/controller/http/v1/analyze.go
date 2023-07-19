@@ -1,3 +1,4 @@
+// Package v1 package v1
 package v1
 
 import (
@@ -16,7 +17,7 @@ type analyzeRoutes struct {
 	t usecase.Analyze
 }
 
-func newAnalyzeRoutes(handler *gin.RouterGroup, t usecase.Analyze) {
+func NewAnalyzeRoutes(handler *gin.RouterGroup, t usecase.Analyze) {
 	r := &analyzeRoutes{t}
 
 	h := handler.Group("/analyze")

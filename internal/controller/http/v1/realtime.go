@@ -1,8 +1,10 @@
+// Package v1 package v1
 package v1
 
 import (
 	"net/http"
 
+	"tmt/internal/controller/http/resp"
 	"tmt/internal/controller/http/websocket/future"
 	"tmt/internal/controller/http/websocket/pick"
 
@@ -17,7 +19,7 @@ type realTimeRoutes struct {
 	h usecase.History
 }
 
-func newRealTimeRoutes(handler *gin.RouterGroup, t usecase.RealTime, o usecase.Trade, history usecase.History) {
+func NewRealTimeRoutes(handler *gin.RouterGroup, t usecase.RealTime, o usecase.Trade, history usecase.History) {
 	r := &realTimeRoutes{
 		t: t,
 		o: o,
@@ -41,12 +43,12 @@ func newRealTimeRoutes(handler *gin.RouterGroup, t usecase.RealTime, o usecase.T
 // @Accept      json
 // @Produce     json
 // @Success     200 {object} entity.StockSnapShot
-// @Failure     500 {object} response
+// @Failure     500 {object} resp.Response{}
 // @Router      /stream/tse/snapshot [get]
 func (r *realTimeRoutes) getTSESnapshot(c *gin.Context) {
 	snapshot, err := r.t.GetTSESnapshot(c.Request.Context())
 	if err != nil {
-		errorResponse(c, http.StatusInternalServerError, err.Error())
+		resp.ErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 	c.JSON(http.StatusOK, snapshot)

@@ -8,9 +8,12 @@ import (
 
 	"tmt/internal/usecase"
 	"tmt/pkg/httpserver"
+	"tmt/pkg/log"
 
 	"github.com/gin-gonic/gin"
 )
+
+var logger = log.Get()
 
 type WSPickStock struct {
 	*httpserver.WSRouter
@@ -25,7 +28,7 @@ type WSPickStock struct {
 func StartWSPickStock(c *gin.Context, s usecase.RealTime) {
 	w := &WSPickStock{
 		s:        s,
-		WSRouter: httpserver.NewWSRouter(c),
+		WSRouter: httpserver.NewWSRouter(c, logger),
 	}
 
 	forwardChan := make(chan []byte)

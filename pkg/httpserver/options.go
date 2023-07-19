@@ -11,27 +11,38 @@ type Option func(*Server)
 // Port -.
 func Port(port string) Option {
 	return func(s *Server) {
-		s.server.Addr = net.JoinHostPort("", port)
+		s.srv.Addr = net.JoinHostPort("", port)
 	}
 }
 
 // ReadTimeout -.
 func ReadTimeout(timeout time.Duration) Option {
 	return func(s *Server) {
-		s.server.ReadTimeout = timeout
+		s.srv.ReadTimeout = timeout
 	}
 }
 
 // WriteTimeout -.
 func WriteTimeout(timeout time.Duration) Option {
 	return func(s *Server) {
-		s.server.WriteTimeout = timeout
+		s.srv.WriteTimeout = timeout
 	}
 }
 
-// ShutdownTimeout -.
-func ShutdownTimeout(timeout time.Duration) Option {
+func KeyPath(keyPath string) Option {
 	return func(s *Server) {
-		s.shutdownTimeout = timeout
+		s.keyPath = keyPath
+	}
+}
+
+func CertPath(certPath string) Option {
+	return func(s *Server) {
+		s.certPath = certPath
+	}
+}
+
+func AddLogger(logger Logger) Option {
+	return func(c *Server) {
+		c.logger = logger
 	}
 }

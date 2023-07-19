@@ -1,3 +1,4 @@
+// Package v1 package v1
 package v1
 
 import (
@@ -7,6 +8,7 @@ import (
 
 	"tmt/cmd/config"
 	"tmt/global"
+	"tmt/internal/controller/http/resp"
 	"tmt/internal/entity"
 	"tmt/internal/usecase"
 	"tmt/internal/usecase/module/simulator"
@@ -18,7 +20,7 @@ type historyRoutes struct {
 	t usecase.History
 }
 
-func newHistoryRoutes(handler *gin.RouterGroup, t usecase.History) {
+func NewHistoryRoutes(handler *gin.RouterGroup, t usecase.History) {
 	r := &historyRoutes{t}
 
 	h := handler.Group("/history")
@@ -39,19 +41,19 @@ func newHistoryRoutes(handler *gin.RouterGroup, t usecase.History) {
 // @param start_date path string true "start_date"
 // @param interval path string true "interval"
 // @success 200 {object} []entity.StockHistoryKbar
-// @Failure     500 {object} response
+// @Failure     500 {object} resp.Response{}
 // @Router      /history/day-kbar/{stock}/{start_date}/{interval} [get]
 func (r *historyRoutes) getKbarData(c *gin.Context) {
 	stockNum := c.Param("stock")
 	interval, err := strconv.Atoi(c.Param("interval"))
 	if err != nil {
-		errorResponse(c, http.StatusBadRequest, err.Error())
+		resp.ErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 	startDate := c.Param("start_date")
 	startDateTime, err := time.Parse(global.ShortTimeLayout, startDate)
 	if err != nil {
-		errorResponse(c, http.StatusBadRequest, err.Error())
+		resp.ErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -81,12 +83,12 @@ func (r *historyRoutes) getKbarData(c *gin.Context) {
 // @param 		need_detail header bool false "It accepts 1, t, T, TRUE, true, True, 0, f, F, FALSE, false, False."
 // @param       body body config.TradeFuture{} true "TradeFuture"
 // @success     200 {object} simulator.SimulateBalance
-// @Failure     500 {object} response
+// @Failure     500 {object} resp.Response{}
 // @Router      /history/simulate/future [post]
 func (r *historyRoutes) simulateFuture(c *gin.Context) {
 	body := &config.TradeFuture{}
 	if err := c.BindJSON(body); err != nil {
-		errorResponse(c, http.StatusBadRequest, err.Error())
+		resp.ErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -94,7 +96,7 @@ func (r *historyRoutes) simulateFuture(c *gin.Context) {
 	result := r.t.SimulateOne(body)
 	if h := c.GetHeader("need_detail"); h != "" {
 		if need, err := strconv.ParseBool(h); err != nil {
-			errorResponse(c, http.StatusBadRequest, err.Error())
+			resp.ErrorResponse(c, http.StatusBadRequest, err.Error())
 			return
 		} else if need {
 			needDetail = true
@@ -115,7 +117,7 @@ func (r *historyRoutes) simulateFuture(c *gin.Context) {
 // @Accept      json
 // @Produce     json
 // @success     200
-// @Failure     500 {object} response
+// @Failure     500 {object} resp.Response{}
 // @Router      /history/simulate/future/auto [post]
 func (r *historyRoutes) simulateFutureAuto(c *gin.Context) {
 	go r.t.SimulateMulti(simulator.GenerateCond())

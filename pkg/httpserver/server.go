@@ -2,68 +2,138 @@
 package httpserver
 
 import (
-	"context"
+	"fmt"
+	"io"
+	olog "log"
+	"net"
 	"net/http"
 	"time"
 )
 
 const (
+	localHost                 = "127.0.0.1"
+	_defaultPort              = "80"
 	_defaultReadTimeout       = 5 * time.Second
 	_defaultReadHeaderTimeout = 5 * time.Second
 	_defaultWriteTimeout      = 5 * time.Minute
-	_defaultAddr              = ":80"
 	_defaultShutdownTimeout   = 3 * time.Second
 )
 
 // Server -.
 type Server struct {
-	server          *http.Server
-	notify          chan error
-	shutdownTimeout time.Duration
+	srv      *http.Server
+	logger   Logger
+	keyPath  string
+	certPath string
 }
 
 // New -.
 func New(handler http.Handler, opts ...Option) *Server {
-	httpServer := &http.Server{
-		Handler:           handler,
-		ReadHeaderTimeout: _defaultReadHeaderTimeout,
-		ReadTimeout:       _defaultReadTimeout,
-		WriteTimeout:      _defaultWriteTimeout,
-		Addr:              _defaultAddr,
-	}
-
 	s := &Server{
-		server:          httpServer,
-		notify:          make(chan error, 1),
-		shutdownTimeout: _defaultShutdownTimeout,
+		srv: &http.Server{
+			ErrorLog:          olog.New(io.Discard, "", 0),
+			Handler:           handler,
+			Addr:              net.JoinHostPort("", _defaultPort),
+			ReadHeaderTimeout: _defaultReadHeaderTimeout,
+			ReadTimeout:       _defaultReadTimeout,
+			WriteTimeout:      _defaultWriteTimeout,
+		},
 	}
-
-	// Custom options
 	for _, opt := range opts {
 		opt(s)
 	}
-
-	s.start()
-
 	return s
 }
 
-func (s *Server) start() {
+func (s *Server) Infof(format string, args ...interface{}) {
+	if s.logger != nil {
+		s.logger.Infof(format, args...)
+	} else {
+		fmt.Printf(format, args...)
+	}
+}
+
+func (s *Server) Errorf(format string, args ...interface{}) {
+	if s.logger != nil {
+		s.logger.Errorf(format, args...)
+	} else {
+		fmt.Printf(format, args...)
+	}
+}
+
+func (s *Server) Fatalf(format string, args ...interface{}) {
+	if s.logger != nil {
+		s.logger.Fatalf(format, args...)
+	} else {
+		panic(fmt.Errorf(format, args...))
+	}
+}
+
+func (s *Server) Start() error {
+	if err := s.tryListen(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *Server) tryListen() error {
+	errChan := make(chan error)
 	go func() {
-		s.notify <- s.server.ListenAndServe()
-		close(s.notify)
+		if s.certPath == "" || s.keyPath == "" {
+			err := s.srv.ListenAndServe()
+			if err != nil {
+				errChan <- err
+			}
+			return
+		}
+		err := s.srv.ListenAndServeTLS(s.certPath, s.keyPath)
+		if err != nil {
+			errChan <- err
+		}
 	}()
+
+	for {
+		select {
+		case err := <-errChan:
+			return err
+		case <-time.After(1 * time.Second):
+			if s.getPortIsUsed(localHost, s.srv.Addr[1:]) {
+				s.Infof("WEB Server On %v", s.srv.Addr)
+				return nil
+			}
+		}
+	}
 }
 
-// Notify -.
-func (s *Server) Notify() <-chan error {
-	return s.notify
-}
+// GetPortIsUsed GetPortIsUsed
+func (s *Server) getPortIsUsed(host string, port string) bool {
+	conn, err := net.DialTimeout("tcp", net.JoinHostPort(host, port), 500*time.Millisecond)
+	if err != nil && conn != nil {
+		return false
+	}
 
-// Shutdown -.
-func (s *Server) Shutdown() error {
-	ctx, cancel := context.WithTimeout(context.Background(), s.shutdownTimeout)
-	defer cancel()
+	if conn != nil {
+		defer func() {
+			if err = conn.Close(); err != nil {
+				s.logger.Errorf("getPortIsUsed: %s", err.Error())
+				return
+			}
+		}()
+		return true
+	}
 
-	return s.server.Shutdown(ctx)
+	ln, err := net.Listen("tcp", net.JoinHostPort("", port))
+	if err != nil {
+		return true
+	}
+
+	if ln != nil {
+		defer func() {
+			if err = ln.Close(); err != nil {
+				s.logger.Errorf("ln close: %s", err.Error())
+				return
+			}
+		}()
+	}
+	return false
 }
