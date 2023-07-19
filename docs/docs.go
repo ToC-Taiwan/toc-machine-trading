@@ -73,7 +73,7 @@ const docTemplate = `{
         },
         "/basic/config": {
             "get": {
-                "description": "getShioajiUsage",
+                "description": "getAllConfig",
                 "consumes": [
                     "application/json"
                 ],
@@ -83,13 +83,13 @@ const docTemplate = `{
                 "tags": [
                     "system"
                 ],
-                "summary": "getShioajiUsage",
-                "operationId": "getShioajiUsage",
+                "summary": "getAllConfig",
+                "operationId": "getAllConfig",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/entity.ShioajiUsage"
+                            "$ref": "#/definitions/config.Config"
                         }
                     },
                     "500": {
@@ -134,6 +134,36 @@ const docTemplate = `{
                         "description": "Not Found",
                         "schema": {
                             "$ref": "#/definitions/v1.response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/v1.response"
+                        }
+                    }
+                }
+            }
+        },
+        "/basic/usage/shioaji": {
+            "get": {
+                "description": "getShioajiUsage",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "system"
+                ],
+                "summary": "getShioajiUsage",
+                "operationId": "getShioajiUsage",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/entity.ShioajiUsage"
                         }
                     },
                     "500": {

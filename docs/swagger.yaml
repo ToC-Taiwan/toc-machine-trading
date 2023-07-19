@@ -628,20 +628,20 @@ paths:
     get:
       consumes:
       - application/json
-      description: getShioajiUsage
-      operationId: getShioajiUsage
+      description: getAllConfig
+      operationId: getAllConfig
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/entity.ShioajiUsage'
+            $ref: '#/definitions/config.Config'
         "500":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/v1.response'
-      summary: getShioajiUsage
+      summary: getAllConfig
       tags:
       - system
   /basic/stock:
@@ -673,6 +673,26 @@ paths:
       summary: getAllRepoStock
       tags:
       - basic
+  /basic/usage/shioaji:
+    get:
+      consumes:
+      - application/json
+      description: getShioajiUsage
+      operationId: getShioajiUsage
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.ShioajiUsage'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+      summary: getShioajiUsage
+      tags:
+      - system
   /history/day-kbar/{stock}/{start_date}/{interval}:
     get:
       consumes:

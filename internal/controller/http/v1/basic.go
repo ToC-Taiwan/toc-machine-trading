@@ -90,7 +90,7 @@ func (r *basicRoutes) getAllConfig(c *gin.Context) {
 // @Produce     json
 // @Success     200 {object} entity.ShioajiUsage
 // @Failure     500 {object} response
-// @Router      /basic/config [get]
+// @Router      /basic/usage/shioaji [get]
 func (r *basicRoutes) getShioajiUsage(c *gin.Context) {
 	usage, err := r.t.GetShioajiUsage()
 	if err != nil {
