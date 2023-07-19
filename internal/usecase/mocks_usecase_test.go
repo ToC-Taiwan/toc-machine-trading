@@ -67,6 +67,21 @@ func (mr *MockBasicMockRecorder) GetConfig() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetConfig", reflect.TypeOf((*MockBasic)(nil).GetConfig))
 }
 
+// GetShioajiUsage mocks base method.
+func (m *MockBasic) GetShioajiUsage() (*entity.ShioajiUsage, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetShioajiUsage")
+	ret0, _ := ret[0].(*entity.ShioajiUsage)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetShioajiUsage indicates an expected call of GetShioajiUsage.
+func (mr *MockBasicMockRecorder) GetShioajiUsage() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetShioajiUsage", reflect.TypeOf((*MockBasic)(nil).GetShioajiUsage))
+}
+
 // MockTarget is a mock of Target interface.
 type MockTarget struct {
 	ctrl     *gomock.Controller

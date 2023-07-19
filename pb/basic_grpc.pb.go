@@ -25,6 +25,7 @@ const (
 	BasicDataInterface_GetAllStockDetail_FullMethodName  = "/toc_python_forwarder.BasicDataInterface/GetAllStockDetail"
 	BasicDataInterface_GetAllFutureDetail_FullMethodName = "/toc_python_forwarder.BasicDataInterface/GetAllFutureDetail"
 	BasicDataInterface_GetAllOptionDetail_FullMethodName = "/toc_python_forwarder.BasicDataInterface/GetAllOptionDetail"
+	BasicDataInterface_CheckUsage_FullMethodName         = "/toc_python_forwarder.BasicDataInterface/CheckUsage"
 )
 
 // BasicDataInterfaceClient is the client API for BasicDataInterface service.
@@ -41,6 +42,8 @@ type BasicDataInterfaceClient interface {
 	GetAllFutureDetail(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*FutureDetailResponse, error)
 	// GetAllOptionDetail is the function to get option detail
 	GetAllOptionDetail(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*OptionDetailResponse, error)
+	// CheckUsage get shioaji usage
+	CheckUsage(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ShioajiUsage, error)
 }
 
 type basicDataInterfaceClient struct {
@@ -118,6 +121,15 @@ func (c *basicDataInterfaceClient) GetAllOptionDetail(ctx context.Context, in *e
 	return out, nil
 }
 
+func (c *basicDataInterfaceClient) CheckUsage(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ShioajiUsage, error) {
+	out := new(ShioajiUsage)
+	err := c.cc.Invoke(ctx, BasicDataInterface_CheckUsage_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // BasicDataInterfaceServer is the server API for BasicDataInterface service.
 // All implementations must embed UnimplementedBasicDataInterfaceServer
 // for forward compatibility
@@ -132,6 +144,8 @@ type BasicDataInterfaceServer interface {
 	GetAllFutureDetail(context.Context, *emptypb.Empty) (*FutureDetailResponse, error)
 	// GetAllOptionDetail is the function to get option detail
 	GetAllOptionDetail(context.Context, *emptypb.Empty) (*OptionDetailResponse, error)
+	// CheckUsage get shioaji usage
+	CheckUsage(context.Context, *emptypb.Empty) (*ShioajiUsage, error)
 	mustEmbedUnimplementedBasicDataInterfaceServer()
 }
 
@@ -153,6 +167,9 @@ func (UnimplementedBasicDataInterfaceServer) GetAllFutureDetail(context.Context,
 }
 func (UnimplementedBasicDataInterfaceServer) GetAllOptionDetail(context.Context, *emptypb.Empty) (*OptionDetailResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAllOptionDetail not implemented")
+}
+func (UnimplementedBasicDataInterfaceServer) CheckUsage(context.Context, *emptypb.Empty) (*ShioajiUsage, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CheckUsage not implemented")
 }
 func (UnimplementedBasicDataInterfaceServer) mustEmbedUnimplementedBasicDataInterfaceServer() {}
 
@@ -265,6 +282,24 @@ func _BasicDataInterface_GetAllOptionDetail_Handler(srv interface{}, ctx context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _BasicDataInterface_CheckUsage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BasicDataInterfaceServer).CheckUsage(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BasicDataInterface_CheckUsage_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BasicDataInterfaceServer).CheckUsage(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // BasicDataInterface_ServiceDesc is the grpc.ServiceDesc for BasicDataInterface service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -287,6 +322,10 @@ var BasicDataInterface_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetAllOptionDetail",
 			Handler:    _BasicDataInterface_GetAllOptionDetail_Handler,
+		},
+		{
+			MethodName: "CheckUsage",
+			Handler:    _BasicDataInterface_CheckUsage_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

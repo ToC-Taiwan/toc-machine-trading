@@ -12,6 +12,7 @@ import (
 type BasicgRPCAPI interface {
 	Heartbeat() error
 	Terminate() error
+	CheckUsage() (*pb.ShioajiUsage, error)
 	GetAllStockDetail() ([]*pb.StockDetailMessage, error)
 	GetAllFutureDetail() ([]*pb.FutureDetailMessage, error)
 	GetAllOptionDetail() ([]*pb.OptionDetailMessage, error)

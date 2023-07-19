@@ -58,6 +58,17 @@ func (uc *BasicUseCase) importCalendarDate() error {
 	return uc.repo.InsertOrUpdatetCalendarDateArr(context.Background(), uc.tradeDay.GetAllCalendar())
 }
 
+func (uc *BasicUseCase) GetShioajiUsage() (*entity.ShioajiUsage, error) {
+	usage, err := uc.sc.CheckUsage()
+	if err != nil {
+		return nil, err
+	}
+	return &entity.ShioajiUsage{
+		Connections: int(usage.GetConnections()),
+		Bytes:       int(usage.GetBytes()),
+	}, nil
+}
+
 func (uc *BasicUseCase) updateRepoStock() error {
 	stockArr, err := uc.sc.GetAllStockDetail()
 	if err != nil {

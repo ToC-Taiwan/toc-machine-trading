@@ -20,6 +20,7 @@ func newBasicRoutes(handler *gin.RouterGroup, t usecase.Basic) {
 	{
 		h.GET("/stock", r.getAllRepoStock)
 		h.GET("/config", r.getAllConfig)
+		h.GET("/usage/shioaji", r.getShioajiUsage)
 	}
 }
 
@@ -79,4 +80,23 @@ func (r *basicRoutes) getAllRepoStock(c *gin.Context) {
 // @Router      /basic/config [get]
 func (r *basicRoutes) getAllConfig(c *gin.Context) {
 	c.JSON(http.StatusOK, r.t.GetConfig())
+}
+
+// @Summary     getShioajiUsage
+// @Description getShioajiUsage
+// @ID          getShioajiUsage
+// @Tags  	    system
+// @Accept      json
+// @Produce     json
+// @Success     200 {object} entity.ShioajiUsage
+// @Failure     500 {object} response
+// @Router      /basic/config [get]
+func (r *basicRoutes) getShioajiUsage(c *gin.Context) {
+	usage, err := r.t.GetShioajiUsage()
+	if err != nil {
+		errorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, usage)
 }

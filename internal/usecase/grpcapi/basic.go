@@ -110,3 +110,14 @@ func (t *BasicgRPCAPI) GetAllOptionDetail() ([]*pb.OptionDetailMessage, error) {
 	}
 	return r.GetOption(), nil
 }
+
+func (t *BasicgRPCAPI) CheckUsage() (*pb.ShioajiUsage, error) {
+	conn := t.conn.Get()
+	defer t.conn.Put(conn)
+
+	r, err := pb.NewBasicDataInterfaceClient(conn).CheckUsage(context.Background(), &emptypb.Empty{})
+	if err != nil {
+		return &pb.ShioajiUsage{}, err
+	}
+	return r, nil
+}

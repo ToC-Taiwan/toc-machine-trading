@@ -73,7 +73,7 @@ const docTemplate = `{
         },
         "/basic/config": {
             "get": {
-                "description": "getAllConfig",
+                "description": "getShioajiUsage",
                 "consumes": [
                     "application/json"
                 ],
@@ -83,13 +83,13 @@ const docTemplate = `{
                 "tags": [
                     "system"
                 ],
-                "summary": "getAllConfig",
-                "operationId": "getAllConfig",
+                "summary": "getShioajiUsage",
+                "operationId": "getShioajiUsage",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/config.Config"
+                            "$ref": "#/definitions/entity.ShioajiUsage"
                         }
                     },
                     "500": {
@@ -1299,6 +1299,17 @@ const docTemplate = `{
                 "StatusFilled",
                 "StatusPartFilled"
             ]
+        },
+        "entity.ShioajiUsage": {
+            "type": "object",
+            "properties": {
+                "bytes": {
+                    "type": "integer"
+                },
+                "connections": {
+                    "type": "integer"
+                }
+            }
         },
         "entity.Stock": {
             "type": "object",

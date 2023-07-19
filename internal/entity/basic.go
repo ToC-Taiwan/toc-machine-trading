@@ -5,6 +5,11 @@ import (
 	"time"
 )
 
+type ShioajiUsage struct {
+	Connections int `json:"connections"`
+	Bytes       int `json:"bytes"`
+}
+
 // CalendarDate -.
 type CalendarDate struct {
 	Date       time.Time `json:"date"`

@@ -15,6 +15,7 @@ import (
 type Basic interface {
 	GetAllRepoStock(ctx context.Context) ([]*entity.Stock, error)
 	GetConfig() *config.Config
+	GetShioajiUsage() (*entity.ShioajiUsage, error)
 }
 
 type Target interface {

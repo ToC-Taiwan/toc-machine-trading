@@ -321,6 +321,13 @@ definitions:
     - StatusCancelled
     - StatusFilled
     - StatusPartFilled
+  entity.ShioajiUsage:
+    properties:
+      bytes:
+        type: integer
+      connections:
+        type: integer
+    type: object
   entity.Stock:
     properties:
       category:
@@ -621,20 +628,20 @@ paths:
     get:
       consumes:
       - application/json
-      description: getAllConfig
-      operationId: getAllConfig
+      description: getShioajiUsage
+      operationId: getShioajiUsage
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/config.Config'
+            $ref: '#/definitions/entity.ShioajiUsage'
         "500":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/v1.response'
-      summary: getAllConfig
+      summary: getShioajiUsage
       tags:
       - system
   /basic/stock:

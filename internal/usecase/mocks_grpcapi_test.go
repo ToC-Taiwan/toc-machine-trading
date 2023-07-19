@@ -35,6 +35,21 @@ func (m *MockBasicgRPCAPI) EXPECT() *MockBasicgRPCAPIMockRecorder {
 	return m.recorder
 }
 
+// CheckUsage mocks base method.
+func (m *MockBasicgRPCAPI) CheckUsage() (*pb.ShioajiUsage, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CheckUsage")
+	ret0, _ := ret[0].(*pb.ShioajiUsage)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CheckUsage indicates an expected call of CheckUsage.
+func (mr *MockBasicgRPCAPIMockRecorder) CheckUsage() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckUsage", reflect.TypeOf((*MockBasicgRPCAPI)(nil).CheckUsage))
+}
+
 // GetAllFutureDetail mocks base method.
 func (m *MockBasicgRPCAPI) GetAllFutureDetail() ([]*pb.FutureDetailMessage, error) {
 	m.ctrl.T.Helper()
