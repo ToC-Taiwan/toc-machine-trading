@@ -16,25 +16,25 @@ import (
 var logger = log.Get()
 
 func RunApp() {
+	cfg := config.Get()
 	usecase.StartHealthCheck()
 	// Do not adjust the order
-	basicUseCase := usecase.NewBasic()
-	tradeUseCase := usecase.NewTrade()
-	analyzeUseCase := usecase.NewAnalyze()
-	historyUseCase := usecase.NewHistory()
-	realTimeUseCase := usecase.NewRealTime()
-	targetUseCase := usecase.NewTarget()
+	basic := usecase.NewBasic()
+	trade := usecase.NewTrade()
+	analyze := usecase.NewAnalyze()
+	history := usecase.NewHistory()
+	realTime := usecase.NewRealTime()
+	target := usecase.NewTarget()
 
 	// HTTP Server
 	r := router.NewRouter().
-		AddV1BasicRoutes(basicUseCase).
-		AddV1TradeRoutes(tradeUseCase).
-		AddV1RealTimeRoutes(realTimeUseCase, tradeUseCase, historyUseCase).
-		AddV1AnalyzeRoutes(analyzeUseCase).
-		AddV1HistoryRoutes(historyUseCase).
-		AddV1TargetRoutes(targetUseCase)
+		AddV1BasicRoutes(basic).
+		AddV1TradeRoutes(trade).
+		AddV1RealTimeRoutes(realTime, trade, history).
+		AddV1AnalyzeRoutes(analyze).
+		AddV1HistoryRoutes(history).
+		AddV1TargetRoutes(target)
 
-	cfg := config.Get()
 	if e := httpserver.New(
 		r.GetHandler(),
 		httpserver.Port(cfg.Server.HTTP),
