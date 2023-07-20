@@ -14,15 +14,15 @@ run: swag ### swag run
 	@./$(BIN_NAME)
 .PHONY: run
 
-swag: ### swag
-	@./scripts/generate_swagger.sh
-.PHONY: swag
-
 build: ### build
 	@go mod tidy
 	@go mod download
 	@go build -o $(BIN_NAME) ./cmd/app
 .PHONY: build
+
+swag: ### swag
+	@./scripts/generate_swagger.sh
+.PHONY: swag
 
 go-mod-update: ### go-mod-update
 	@./scripts/gomod_update.sh

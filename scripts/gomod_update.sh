@@ -10,7 +10,6 @@ go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@lat
 go install github.com/golang/mock/mockgen@latest
 
 go mod init tmt
-go get -u github.com/gin-gonic/gin
 go mod tidy
 
 git add go.mod go.sum
