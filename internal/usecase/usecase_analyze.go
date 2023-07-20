@@ -5,6 +5,7 @@ import (
 	"sync"
 	"time"
 
+	"tmt/cmd/config"
 	"tmt/internal/entity"
 	"tmt/internal/usecase/event"
 	"tmt/internal/usecase/module/tradeday"
@@ -24,9 +25,9 @@ type AnalyzeUseCase struct {
 	tradeDay *tradeday.TradeDay
 }
 
-func (u *UseCaseBase) NewAnalyze() Analyze {
+func NewAnalyze() Analyze {
 	uc := &AnalyzeUseCase{
-		repo:             repo.NewHistory(u.pg),
+		repo:             repo.NewHistory(config.Get().GetPostgresPool()),
 		lastBelowMAStock: make(map[string]*entity.StockHistoryAnalyze),
 		rebornMap:        make(map[time.Time][]entity.Stock),
 		tradeDay:         tradeday.Get(),

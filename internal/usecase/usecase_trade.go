@@ -6,6 +6,7 @@ import (
 	"sync"
 	"time"
 
+	"tmt/cmd/config"
 	"tmt/global"
 	"tmt/internal/entity"
 	"tmt/internal/usecase/event"
@@ -36,14 +37,14 @@ type TradeUseCase struct {
 	updateStockOrderLock   sync.Mutex
 }
 
-func (u *UseCaseBase) NewTrade() Trade {
-	cfg := u.cfg
+func NewTrade() Trade {
+	cfg := config.Get()
 	tradeDay := tradeday.Get()
 
 	uc := &TradeUseCase{
-		sc:    grpcapi.NewTrade(u.sc, cfg.Simulation),
-		fg:    grpcapi.NewTrade(u.fg, cfg.Simulation),
-		repo:  repo.NewTrade(u.pg),
+		sc:    grpcapi.NewTrade(cfg.GetSinopacPool(), cfg.Simulation),
+		fg:    grpcapi.NewTrade(cfg.GetFuglePool(), cfg.Simulation),
+		repo:  repo.NewTrade(cfg.GetPostgresPool()),
 		quota: quota.NewQuota(cfg.Quota),
 
 		tradeDay:       tradeDay,

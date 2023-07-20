@@ -26,11 +26,11 @@ type TargetUseCase struct {
 	tradeDay     *tradeday.TradeDay
 }
 
-func (u *UseCaseBase) NewTarget() Target {
-	cfg := u.cfg
+func NewTarget() Target {
+	cfg := config.Get()
 	uc := &TargetUseCase{
-		repo:         repo.NewTarget(u.pg),
-		gRPCAPI:      grpcapi.NewRealTime(u.sc),
+		repo:         repo.NewTarget(cfg.GetPostgresPool()),
+		gRPCAPI:      grpcapi.NewRealTime(cfg.GetSinopacPool()),
 		cfg:          cfg,
 		tradeDay:     tradeday.Get(),
 		targetFilter: target.NewFilter(cfg.TargetStock),

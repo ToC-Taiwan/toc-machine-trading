@@ -6,7 +6,6 @@ import (
 	"sync"
 	"time"
 
-	"tmt/cmd/config"
 	"tmt/global"
 	"tmt/internal/entity"
 	"tmt/pb"
@@ -27,20 +26,10 @@ type Rabbit struct {
 	allFutureMap  map[string]*entity.Future
 }
 
-func NewRabbit(cfg config.RabbitMQ) *Rabbit {
-	if conn, err := rabbitmq.New(
-		cfg.Exchange, cfg.URL,
-		rabbitmq.Attempts(cfg.Attempts),
-		rabbitmq.WaitTime(int(cfg.WaitTime)),
-		rabbitmq.AddLogger(logger),
-	); err != nil {
-		logger.Fatal(err)
-	} else {
-		return &Rabbit{
-			conn: conn,
-		}
+func NewRabbit(connection *rabbitmq.Connection) *Rabbit {
+	return &Rabbit{
+		conn: connection,
 	}
-	return nil
 }
 
 func (c *Rabbit) Close() {

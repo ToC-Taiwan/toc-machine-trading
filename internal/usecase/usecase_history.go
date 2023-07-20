@@ -40,14 +40,15 @@ type HistoryUseCase struct {
 }
 
 // NewHistory -.
-func (u *UseCaseBase) NewHistory() History {
+func NewHistory() History {
+	cfg := config.Get()
 	uc := &HistoryUseCase{
-		repo:            repo.NewHistory(u.pg),
-		grpcapi:         grpcapi.NewHistory(u.sc),
+		repo:            repo.NewHistory(cfg.GetPostgresPool()),
+		grpcapi:         grpcapi.NewHistory(cfg.GetSinopacPool()),
 		fetchList:       make(map[string]*entity.StockTarget),
 		tradeDay:        tradeday.Get(),
-		analyzeStockCfg: u.cfg.AnalyzeStock,
-		cfg:             u.cfg,
+		analyzeStockCfg: cfg.AnalyzeStock,
+		cfg:             cfg,
 		slackMsgChan:    make(chan string),
 	}
 

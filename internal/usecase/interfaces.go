@@ -7,8 +7,17 @@ import (
 
 	"tmt/cmd/config"
 	"tmt/internal/entity"
+	"tmt/internal/usecase/cache"
 	"tmt/internal/usecase/module/simulator"
 	"tmt/pb"
+	"tmt/pkg/eventbus"
+	"tmt/pkg/log"
+)
+
+var (
+	logger = log.Get()
+	cc     = cache.Get()
+	bus    = eventbus.Get()
 )
 
 //go:generate mockgen -source=interfaces.go -destination=./mocks_usecase_test.go -package=usecase_test

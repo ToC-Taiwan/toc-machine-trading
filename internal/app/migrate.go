@@ -23,7 +23,8 @@ const (
 )
 
 // InitDB -.
-func InitDB(cfg config.Database) {
+func InitDB() {
+	cfg := config.Get().Database
 	TryCreateDB(cfg)
 	MigrateDB(cfg)
 }

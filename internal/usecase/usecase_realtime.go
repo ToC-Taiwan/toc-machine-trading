@@ -48,20 +48,20 @@ type RealTimeUseCase struct {
 	inventoryIsNotEmpty bool
 }
 
-func (u *UseCaseBase) NewRealTime() RealTime {
-	cfg := u.cfg
+func NewRealTime() RealTime {
+	cfg := config.Get()
 	uc := &RealTimeUseCase{
 		quota: quota.NewQuota(cfg.Quota),
-		repo:  repo.NewRealTime(u.pg),
+		repo:  repo.NewRealTime(cfg.GetPostgresPool()),
 
-		commonRabbit: rabbit.NewRabbit(cfg.RabbitMQ),
-		futureRabbit: rabbit.NewRabbit(cfg.RabbitMQ),
+		commonRabbit: rabbit.NewRabbit(cfg.GetRabbitConn()),
+		futureRabbit: rabbit.NewRabbit(cfg.GetRabbitConn()),
 
-		grpcapi:    grpcapi.NewRealTime(u.sc),
-		subgRPCAPI: grpcapi.NewSubscribe(u.sc),
+		grpcapi:    grpcapi.NewRealTime(cfg.GetSinopacPool()),
+		subgRPCAPI: grpcapi.NewSubscribe(cfg.GetSinopacPool()),
 
-		sc: grpcapi.NewTrade(u.sc, cfg.Simulation),
-		fg: grpcapi.NewTrade(u.fg, cfg.Simulation),
+		sc: grpcapi.NewTrade(cfg.GetSinopacPool(), cfg.Simulation),
+		fg: grpcapi.NewTrade(cfg.GetFuglePool(), cfg.Simulation),
 
 		cfg:                 cfg,
 		futureSwitchChanMap: make(map[string]chan bool),
@@ -463,7 +463,7 @@ func (uc *RealTimeUseCase) ReceiveStockSubscribeData(targetArr []*entity.StockTa
 		uc.stockSwitchChanMapLock.Unlock()
 
 		logger.Infof("Stock room %s <-> %s <-> %s", t.Stock.Name, t.Stock.Future.Name, t.Stock.Future.Code)
-		r := rabbit.NewRabbit(uc.cfg.RabbitMQ)
+		r := rabbit.NewRabbit(uc.cfg.GetRabbitConn())
 		go r.StockTickConsumer(t.StockNum, hadger.TickChan())
 	}
 
@@ -481,7 +481,7 @@ func (uc *RealTimeUseCase) ReceiveStockSubscribeData(targetArr []*entity.StockTa
 			}
 		}
 	}()
-	hr := rabbit.NewRabbit(uc.cfg.RabbitMQ)
+	hr := rabbit.NewRabbit(uc.cfg.GetRabbitConn())
 	hr.FillAllBasic(cc.GetAllStockDetail(), cc.GetAllFutureDetail())
 	go hr.OrderStatusConsumer(orderStatusChan)
 	go hr.OrderStatusArrConsumer(orderStatusChan)
@@ -528,7 +528,7 @@ func (uc *RealTimeUseCase) SetMainFuture(code string) {
 }
 
 func (uc *RealTimeUseCase) NewFutureRealTimeClient(tickChan chan *entity.RealTimeFutureTick, orderStatusChan chan interface{}, connectionID string) {
-	r := rabbit.NewRabbit(uc.cfg.RabbitMQ)
+	r := rabbit.NewRabbit(uc.cfg.GetRabbitConn())
 	r.FillAllBasic(cc.GetAllStockDetail(), cc.GetAllFutureDetail())
 
 	uc.clientRabbitMapLock.Lock()

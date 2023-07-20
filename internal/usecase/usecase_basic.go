@@ -26,11 +26,12 @@ type BasicUseCase struct {
 	allOptionDetail []*entity.Option
 }
 
-func (u *UseCaseBase) NewBasic() Basic {
+func NewBasic() Basic {
+	cfg := config.Get()
 	uc := &BasicUseCase{
-		repo:     repo.NewBasic(u.pg),
-		sc:       grpcapi.NewBasic(u.sc, u.cfg.Development),
-		cfg:      u.cfg,
+		repo:     repo.NewBasic(cfg.GetPostgresPool()),
+		sc:       grpcapi.NewBasic(cfg.GetSinopacPool(), cfg.Development),
+		cfg:      cfg,
 		tradeDay: tradeday.Get(),
 	}
 
@@ -51,7 +52,6 @@ func (u *UseCaseBase) NewBasic() Basic {
 	}
 
 	uc.saveStockFutureCache()
-
 	return uc
 }
 
