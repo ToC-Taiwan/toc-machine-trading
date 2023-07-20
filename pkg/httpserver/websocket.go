@@ -48,7 +48,6 @@ func (w *WSRouter) upgrade(gin *gin.Context) {
 	}
 
 	w.conn = c
-
 	go w.write()
 }
 

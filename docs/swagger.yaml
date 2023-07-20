@@ -323,10 +323,10 @@ definitions:
     - StatusPartFilled
   entity.ShioajiUsage:
     properties:
-      bytes:
-        type: integer
       connections:
         type: integer
+      traffic_usage:
+        type: number
     type: object
   entity.Stock:
     properties:

@@ -98,7 +98,7 @@ func (s *Server) tryListen() error {
 			return err
 		case <-time.After(1 * time.Second):
 			if s.getPortIsUsed(localHost, s.srv.Addr[1:]) {
-				s.Infof("WEB Server On %v", s.srv.Addr)
+				s.Infof("API Server On %v", s.srv.Addr)
 				return nil
 			}
 		}

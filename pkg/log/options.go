@@ -1,11 +1,16 @@
 // Package log package log
 package log
 
+const (
+	FormatJSON string = "json"
+	FormatText string = "text"
+)
+
 type config struct {
-	timeFormat string
-	format     Format
 	level      Level
 	needCaller bool
+	timeFormat string
+	format     string
 	fileName   string
 }
 
@@ -34,7 +39,7 @@ func LogFormat(format string) Option {
 		if format != "json" && format != "text" {
 			c.format = _defaultLogFormat
 		}
-		c.format = Format(format)
+		c.format = format
 	}
 }
 

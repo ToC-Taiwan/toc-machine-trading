@@ -13,13 +13,15 @@ import (
 )
 
 const (
-	_defaultLogFormat  = FormatText
-	_defaultLogLevel   = LevelInfo
 	_defaultNeedCaller = false
+	_defaultLogLevel   = LevelInfo
+	_defaultLogFormat  = FormatText
 	_defaultTimeFormat = "2006-01-02 15:04:05"
-	_defaultFilePath   = "./logs"
+	_defaultFilePath   = "logs"
 	_defaultFileName   = "log"
 )
+
+var singleton *Log
 
 // Log -.
 type Log struct {
@@ -29,7 +31,14 @@ type Log struct {
 	basePath string
 }
 
-var singleton *Log
+type env struct {
+	Level          string `env:"LOG_LEVEL"`
+	Format         string `env:"LOG_FORMAT"`
+	NeedCaller     bool   `env:"LOG_NEED_CALLER"`
+	SlackToken     string `env:"SLACK_TOKEN"`
+	SlackChannelID string `env:"SLACK_CHANNEL_ID"`
+	SlackLogLevel  string `env:"SLACK_LOG_LEVEL"`
+}
 
 // Get -.
 func Get() *Log {

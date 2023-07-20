@@ -8,6 +8,7 @@ import (
 	"tmt/cmd/config"
 	"tmt/global"
 	"tmt/internal/entity"
+	"tmt/internal/utils"
 
 	"tmt/internal/usecase/grpcapi"
 	"tmt/internal/usecase/module/tradeday"
@@ -64,8 +65,8 @@ func (uc *BasicUseCase) GetShioajiUsage() (*entity.ShioajiUsage, error) {
 		return nil, err
 	}
 	return &entity.ShioajiUsage{
-		Connections: int(usage.GetConnections()),
-		Bytes:       int(usage.GetBytes()),
+		Connections:  int(usage.GetConnections()),
+		TrafficUsage: utils.Round(float64(usage.GetBytes())/1024/1024, 2),
 	}, nil
 }
 

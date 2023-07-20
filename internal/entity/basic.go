@@ -6,8 +6,8 @@ import (
 )
 
 type ShioajiUsage struct {
-	Connections int `json:"connections"`
-	Bytes       int `json:"bytes"`
+	Connections  int     `json:"connections"`
+	TrafficUsage float64 `json:"traffic_usage"`
 }
 
 // CalendarDate -.

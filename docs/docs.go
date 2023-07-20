@@ -1333,11 +1333,11 @@ const docTemplate = `{
         "entity.ShioajiUsage": {
             "type": "object",
             "properties": {
-                "bytes": {
-                    "type": "integer"
-                },
                 "connections": {
                     "type": "integer"
+                },
+                "traffic_usage": {
+                    "type": "number"
                 }
             }
         },
