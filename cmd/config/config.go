@@ -4,6 +4,7 @@ package config
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"tmt/pkg/grpc"
 	"tmt/pkg/log"
@@ -11,6 +12,7 @@ import (
 	"tmt/pkg/rabbitmq"
 
 	"github.com/ilyakaznacheev/cleanenv"
+	"github.com/joho/godotenv"
 )
 
 var (
@@ -50,8 +52,10 @@ func Get() *Config {
 	}
 
 	newConfig := Config{}
+	newConfig.loadEnvFile()
+
 	if fileStat.Size() > 0 {
-		err := cleanenv.ReadConfig(filePath, &newConfig)
+		err = cleanenv.ReadConfig(filePath, &newConfig)
 		if err != nil {
 			logger.Fatalf("config file read error: %v", err)
 		}
@@ -71,6 +75,18 @@ func Get() *Config {
 
 	singleton = &newConfig
 	return singleton
+}
+
+func (c *Config) loadEnvFile() {
+	ex, err := os.Executable()
+	if err != nil {
+		panic(err)
+	}
+
+	err = godotenv.Load(filepath.Join(filepath.Dir(ex), ".env"))
+	if err != nil {
+		panic(err)
+	}
 }
 
 func (c *Config) GetPostgresPool() *postgres.Postgres {
