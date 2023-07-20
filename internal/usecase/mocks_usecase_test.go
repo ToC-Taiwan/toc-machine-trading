@@ -83,6 +83,20 @@ func (mr *MockBasicMockRecorder) GetShioajiUsage() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetShioajiUsage", reflect.TypeOf((*MockBasic)(nil).GetShioajiUsage))
 }
 
+// LogoutSinopac mocks base method.
+func (m *MockBasic) LogoutSinopac() error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "LogoutSinopac")
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// LogoutSinopac indicates an expected call of LogoutSinopac.
+func (mr *MockBasicMockRecorder) LogoutSinopac() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "LogoutSinopac", reflect.TypeOf((*MockBasic)(nil).LogoutSinopac))
+}
+
 // MockTarget is a mock of Target interface.
 type MockTarget struct {
 	ctrl     *gomock.Controller
@@ -1841,6 +1855,20 @@ func (m *MockBasicgRPCAPI) Heartbeat() error {
 func (mr *MockBasicgRPCAPIMockRecorder) Heartbeat() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Heartbeat", reflect.TypeOf((*MockBasicgRPCAPI)(nil).Heartbeat))
+}
+
+// LogOut mocks base method.
+func (m *MockBasicgRPCAPI) LogOut() error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "LogOut")
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// LogOut indicates an expected call of LogOut.
+func (mr *MockBasicgRPCAPIMockRecorder) LogOut() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "LogOut", reflect.TypeOf((*MockBasicgRPCAPI)(nil).LogOut))
 }
 
 // Terminate mocks base method.

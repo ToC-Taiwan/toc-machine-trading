@@ -13,7 +13,7 @@ type Health struct {
 	rabbit Rabbit
 }
 
-func StartHealthCheck() *Health {
+func StartHealthCheck() {
 	cfg := config.Get()
 	uc := &Health{
 		rabbit: rabbit.NewRabbit(cfg.GetRabbitConn()),
@@ -28,8 +28,6 @@ func StartHealthCheck() *Health {
 
 	logger.Warn("TMT is running")
 	logger.Warnf("Simulation Mode: %v", cfg.Simulation)
-
-	return uc
 }
 
 func (u *Health) setupCronJob() error {
@@ -60,8 +58,4 @@ func (u *Health) healthCheckforFugle(client *grpc.ConnPool, devMode bool) {
 		u.rabbit.PublishTerminate()
 		logger.Fatal("fugle healthcheck fail, publish terminate")
 	}
-}
-
-func (u *Health) Stop() {
-	u.rabbit.PublishTerminate()
 }

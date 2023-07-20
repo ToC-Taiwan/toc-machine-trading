@@ -4,6 +4,7 @@ package router
 import (
 	"fmt"
 	"net/http"
+	"os"
 
 	"tmt/docs"
 	v1 "tmt/internal/controller/http/v1"
@@ -32,6 +33,7 @@ type Router struct {
 // @license.name Apache 2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 func NewRouter() *Router {
+	gin.SetMode(os.Getenv("GIN_MODE"))
 	docs.SwaggerInfo.BasePath = prefixV1
 
 	handler := gin.New()
@@ -39,8 +41,9 @@ func NewRouter() *Router {
 	handler.Use(corsMiddleware())
 
 	// Swagger
-	swaggerHandler := ginSwagger.DisablingWrapHandler(swaggerFiles.Handler, "DISABLE_SWAGGER_HTTP_HANDLER")
-	handler.GET("/swagger/*any", swaggerHandler)
+	if os.Getenv("DISABLE_SWAGGER_HTTP_HANDLER") != "" {
+		handler.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	}
 	handler.GET("/metrics", gin.WrapH(promhttp.Handler()))
 	handler.GET(fmt.Sprintf("%s/-/health", prefixV1), healthCheck)
 

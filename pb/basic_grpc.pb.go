@@ -26,6 +26,7 @@ const (
 	BasicDataInterface_GetAllFutureDetail_FullMethodName = "/toc_python_forwarder.BasicDataInterface/GetAllFutureDetail"
 	BasicDataInterface_GetAllOptionDetail_FullMethodName = "/toc_python_forwarder.BasicDataInterface/GetAllOptionDetail"
 	BasicDataInterface_CheckUsage_FullMethodName         = "/toc_python_forwarder.BasicDataInterface/CheckUsage"
+	BasicDataInterface_LogOut_FullMethodName             = "/toc_python_forwarder.BasicDataInterface/LogOut"
 )
 
 // BasicDataInterfaceClient is the client API for BasicDataInterface service.
@@ -44,6 +45,8 @@ type BasicDataInterfaceClient interface {
 	GetAllOptionDetail(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*OptionDetailResponse, error)
 	// CheckUsage get shioaji usage
 	CheckUsage(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ShioajiUsage, error)
+	// LogOut log out
+	LogOut(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type basicDataInterfaceClient struct {
@@ -130,6 +133,15 @@ func (c *basicDataInterfaceClient) CheckUsage(ctx context.Context, in *emptypb.E
 	return out, nil
 }
 
+func (c *basicDataInterfaceClient) LogOut(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, BasicDataInterface_LogOut_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // BasicDataInterfaceServer is the server API for BasicDataInterface service.
 // All implementations must embed UnimplementedBasicDataInterfaceServer
 // for forward compatibility
@@ -146,6 +158,8 @@ type BasicDataInterfaceServer interface {
 	GetAllOptionDetail(context.Context, *emptypb.Empty) (*OptionDetailResponse, error)
 	// CheckUsage get shioaji usage
 	CheckUsage(context.Context, *emptypb.Empty) (*ShioajiUsage, error)
+	// LogOut log out
+	LogOut(context.Context, *emptypb.Empty) (*emptypb.Empty, error)
 	mustEmbedUnimplementedBasicDataInterfaceServer()
 }
 
@@ -170,6 +184,9 @@ func (UnimplementedBasicDataInterfaceServer) GetAllOptionDetail(context.Context,
 }
 func (UnimplementedBasicDataInterfaceServer) CheckUsage(context.Context, *emptypb.Empty) (*ShioajiUsage, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CheckUsage not implemented")
+}
+func (UnimplementedBasicDataInterfaceServer) LogOut(context.Context, *emptypb.Empty) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method LogOut not implemented")
 }
 func (UnimplementedBasicDataInterfaceServer) mustEmbedUnimplementedBasicDataInterfaceServer() {}
 
@@ -300,6 +317,24 @@ func _BasicDataInterface_CheckUsage_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _BasicDataInterface_LogOut_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BasicDataInterfaceServer).LogOut(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BasicDataInterface_LogOut_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BasicDataInterfaceServer).LogOut(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // BasicDataInterface_ServiceDesc is the grpc.ServiceDesc for BasicDataInterface service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -326,6 +361,10 @@ var BasicDataInterface_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CheckUsage",
 			Handler:    _BasicDataInterface_CheckUsage_Handler,
+		},
+		{
+			MethodName: "LogOut",
+			Handler:    _BasicDataInterface_LogOut_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

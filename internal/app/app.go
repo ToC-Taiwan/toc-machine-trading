@@ -17,7 +17,7 @@ var logger = log.Get()
 
 func RunApp() {
 	cfg := config.Get()
-	health := usecase.StartHealthCheck()
+	usecase.StartHealthCheck()
 	// Do not adjust the order
 	basic := usecase.NewBasic()
 	trade := usecase.NewTrade()
@@ -47,7 +47,8 @@ func RunApp() {
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
 	<-interrupt
-
-	health.Stop()
+	if e := basic.LogoutSinopac(); e != nil {
+		logger.Errorf("LogoutSinopac error: %s", e.Error())
+	}
 	cfg.Close()
 }

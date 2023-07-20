@@ -70,6 +70,10 @@ func (uc *BasicUseCase) GetShioajiUsage() (*entity.ShioajiUsage, error) {
 	}, nil
 }
 
+func (uc *BasicUseCase) LogoutSinopac() error {
+	return uc.sc.LogOut()
+}
+
 func (uc *BasicUseCase) updateRepoStock() error {
 	stockArr, err := uc.sc.GetAllStockDetail()
 	if err != nil {
