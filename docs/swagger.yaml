@@ -28,8 +28,6 @@ definitions:
         allOf:
         - $ref: '#/definitions/config.Database'
         description: from env no need tag
-      development:
-        type: boolean
       fugle:
         $ref: '#/definitions/config.Fugle'
       history:

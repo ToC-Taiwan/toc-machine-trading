@@ -17,7 +17,9 @@ var logger = log.Get()
 
 func RunApp() {
 	cfg := config.Get()
-	usecase.StartHealthCheck()
+	logger.Warn("TMT is running")
+	logger.Warnf("Simulation Mode: %v", cfg.Simulation)
+
 	// Do not adjust the order
 	basic := usecase.NewBasic()
 	trade := usecase.NewTrade()

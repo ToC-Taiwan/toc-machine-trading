@@ -2,7 +2,9 @@ package usecase
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"sync"
 	"time"
 
 	"tmt/cmd/config"
@@ -13,11 +15,14 @@ import (
 	"tmt/internal/usecase/grpcapi"
 	"tmt/internal/usecase/module/tradeday"
 	"tmt/internal/usecase/repo"
+
+	"github.com/robfig/cron/v3"
 )
 
 type BasicUseCase struct {
 	repo     BasicRepo
 	sc       BasicgRPCAPI
+	fugle    BasicgRPCAPI
 	cfg      *config.Config
 	tradeDay *tradeday.TradeDay
 
@@ -30,9 +35,16 @@ func NewBasic() Basic {
 	cfg := config.Get()
 	uc := &BasicUseCase{
 		repo:     repo.NewBasic(cfg.GetPostgresPool()),
-		sc:       grpcapi.NewBasic(cfg.GetSinopacPool(), cfg.Development),
+		sc:       grpcapi.NewBasic(cfg.GetSinopacPool()),
+		fugle:    grpcapi.NewBasic(cfg.GetFuglePool()),
 		cfg:      cfg,
 		tradeDay: tradeday.Get(),
+	}
+	go uc.checkHealth()
+	uc.loginAll()
+
+	if err := uc.setupCronJob(); err != nil {
+		logger.Fatal(err)
 	}
 
 	if err := uc.importCalendarDate(); err != nil {
@@ -53,6 +65,64 @@ func NewBasic() Basic {
 
 	uc.saveStockFutureCache()
 	return uc
+}
+
+func (uc *BasicUseCase) checkHealth() {
+	errChan := make(chan error)
+	go func() {
+		if err := uc.sc.CreateLongConnection(); err != nil {
+			errChan <- errors.New("sinopac CreateLongConnection error")
+		}
+	}()
+	go func() {
+		if err := uc.fugle.CreateLongConnection(); err != nil {
+			errChan <- errors.New("fugle CreateLongConnection error")
+		}
+	}()
+	err := <-errChan
+	logger.Fatal(err)
+}
+
+func (uc *BasicUseCase) setupCronJob() error {
+	c := cron.New()
+	if _, e := c.AddFunc("20 8 * * *", uc.terminateAll); e != nil {
+		return e
+	}
+	if _, e := c.AddFunc("40 14 * * *", uc.terminateAll); e != nil {
+		return e
+	}
+	c.Start()
+	return nil
+}
+
+func (uc *BasicUseCase) terminateAll() {
+	if e := uc.sc.LogOut(); e != nil {
+		logger.Fatal(e)
+	}
+	if e := uc.sc.Terminate(); e != nil {
+		logger.Fatal(e)
+	}
+	if e := uc.fugle.Terminate(); e != nil {
+		logger.Fatal(e)
+	}
+}
+
+func (uc *BasicUseCase) loginAll() {
+	var wg sync.WaitGroup
+	wg.Add(2)
+	go func() {
+		defer wg.Done()
+		if err := uc.sc.Login(); err != nil {
+			logger.Fatal(err)
+		}
+	}()
+	go func() {
+		defer wg.Done()
+		if err := uc.fugle.Login(); err != nil {
+			logger.Fatal(err)
+		}
+	}()
+	wg.Wait()
 }
 
 func (uc *BasicUseCase) importCalendarDate() error {

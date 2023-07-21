@@ -172,13 +172,13 @@ type Rabbit interface {
 	FutureTickConsumer(code string, tickChan chan *entity.RealTimeFutureTick)
 	FutureBidAskConsumer(code string, bidAskChan chan *entity.FutureRealTimeBidAsk)
 
-	PublishTerminate()
 	Close()
 }
 
 type BasicgRPCAPI interface {
-	Heartbeat() error
+	CreateLongConnection() error
 	Terminate() error
+	Login() error
 	LogOut() error
 	CheckUsage() (*pb.ShioajiUsage, error)
 	GetAllStockDetail() ([]*pb.StockDetailMessage, error)

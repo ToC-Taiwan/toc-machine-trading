@@ -1724,18 +1724,6 @@ func (mr *MockRabbitMockRecorder) OrderStatusConsumer(orderStatusChan interface{
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "OrderStatusConsumer", reflect.TypeOf((*MockRabbit)(nil).OrderStatusConsumer), orderStatusChan)
 }
 
-// PublishTerminate mocks base method.
-func (m *MockRabbit) PublishTerminate() {
-	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "PublishTerminate")
-}
-
-// PublishTerminate indicates an expected call of PublishTerminate.
-func (mr *MockRabbitMockRecorder) PublishTerminate() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PublishTerminate", reflect.TypeOf((*MockRabbit)(nil).PublishTerminate))
-}
-
 // StockBidAskConsumer mocks base method.
 func (m *MockRabbit) StockBidAskConsumer(stockNum string, bidAskChan chan *entity.RealTimeStockBidAsk) {
 	m.ctrl.T.Helper()
@@ -1798,6 +1786,20 @@ func (mr *MockBasicgRPCAPIMockRecorder) CheckUsage() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckUsage", reflect.TypeOf((*MockBasicgRPCAPI)(nil).CheckUsage))
 }
 
+// CreateLongConnection mocks base method.
+func (m *MockBasicgRPCAPI) CreateLongConnection() error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateLongConnection")
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// CreateLongConnection indicates an expected call of CreateLongConnection.
+func (mr *MockBasicgRPCAPIMockRecorder) CreateLongConnection() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateLongConnection", reflect.TypeOf((*MockBasicgRPCAPI)(nil).CreateLongConnection))
+}
+
 // GetAllFutureDetail mocks base method.
 func (m *MockBasicgRPCAPI) GetAllFutureDetail() ([]*pb.FutureDetailMessage, error) {
 	m.ctrl.T.Helper()
@@ -1843,20 +1845,6 @@ func (mr *MockBasicgRPCAPIMockRecorder) GetAllStockDetail() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllStockDetail", reflect.TypeOf((*MockBasicgRPCAPI)(nil).GetAllStockDetail))
 }
 
-// Heartbeat mocks base method.
-func (m *MockBasicgRPCAPI) Heartbeat() error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Heartbeat")
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// Heartbeat indicates an expected call of Heartbeat.
-func (mr *MockBasicgRPCAPIMockRecorder) Heartbeat() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Heartbeat", reflect.TypeOf((*MockBasicgRPCAPI)(nil).Heartbeat))
-}
-
 // LogOut mocks base method.
 func (m *MockBasicgRPCAPI) LogOut() error {
 	m.ctrl.T.Helper()
@@ -1869,6 +1857,20 @@ func (m *MockBasicgRPCAPI) LogOut() error {
 func (mr *MockBasicgRPCAPIMockRecorder) LogOut() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "LogOut", reflect.TypeOf((*MockBasicgRPCAPI)(nil).LogOut))
+}
+
+// Login mocks base method.
+func (m *MockBasicgRPCAPI) Login() error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Login")
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Login indicates an expected call of Login.
+func (mr *MockBasicgRPCAPIMockRecorder) Login() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Login", reflect.TypeOf((*MockBasicgRPCAPI)(nil).Login))
 }
 
 // Terminate mocks base method.

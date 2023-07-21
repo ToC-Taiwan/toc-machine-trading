@@ -378,9 +378,3 @@ func (c *Rabbit) FutureBidAskConsumer(code string, bidAskChan chan *entity.Futur
 		}
 	}
 }
-
-func (c *Rabbit) PublishTerminate() {
-	if err := c.conn.Publish("terminate", []byte("terminate")); err != nil {
-		logger.Error(err)
-	}
-}

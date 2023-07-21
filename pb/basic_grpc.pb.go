@@ -20,33 +20,36 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	BasicDataInterface_Heartbeat_FullMethodName          = "/toc_python_forwarder.BasicDataInterface/Heartbeat"
-	BasicDataInterface_Terminate_FullMethodName          = "/toc_python_forwarder.BasicDataInterface/Terminate"
-	BasicDataInterface_GetAllStockDetail_FullMethodName  = "/toc_python_forwarder.BasicDataInterface/GetAllStockDetail"
-	BasicDataInterface_GetAllFutureDetail_FullMethodName = "/toc_python_forwarder.BasicDataInterface/GetAllFutureDetail"
-	BasicDataInterface_GetAllOptionDetail_FullMethodName = "/toc_python_forwarder.BasicDataInterface/GetAllOptionDetail"
-	BasicDataInterface_CheckUsage_FullMethodName         = "/toc_python_forwarder.BasicDataInterface/CheckUsage"
-	BasicDataInterface_LogOut_FullMethodName             = "/toc_python_forwarder.BasicDataInterface/LogOut"
+	BasicDataInterface_CreateLongConnection_FullMethodName = "/toc_python_forwarder.BasicDataInterface/CreateLongConnection"
+	BasicDataInterface_Terminate_FullMethodName            = "/toc_python_forwarder.BasicDataInterface/Terminate"
+	BasicDataInterface_CheckUsage_FullMethodName           = "/toc_python_forwarder.BasicDataInterface/CheckUsage"
+	BasicDataInterface_Login_FullMethodName                = "/toc_python_forwarder.BasicDataInterface/Login"
+	BasicDataInterface_Logout_FullMethodName               = "/toc_python_forwarder.BasicDataInterface/Logout"
+	BasicDataInterface_GetAllStockDetail_FullMethodName    = "/toc_python_forwarder.BasicDataInterface/GetAllStockDetail"
+	BasicDataInterface_GetAllFutureDetail_FullMethodName   = "/toc_python_forwarder.BasicDataInterface/GetAllFutureDetail"
+	BasicDataInterface_GetAllOptionDetail_FullMethodName   = "/toc_python_forwarder.BasicDataInterface/GetAllOptionDetail"
 )
 
 // BasicDataInterfaceClient is the client API for BasicDataInterface service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type BasicDataInterfaceClient interface {
-	// Heartbeat is the heartbeat function
-	Heartbeat(ctx context.Context, opts ...grpc.CallOption) (BasicDataInterface_HeartbeatClient, error)
+	// CreateLongConnection is the function to create long connection
+	CreateLongConnection(ctx context.Context, opts ...grpc.CallOption) (BasicDataInterface_CreateLongConnectionClient, error)
 	// Terminate is the terminate function
 	Terminate(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	// CheckUsage get shioaji usage
+	CheckUsage(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ShioajiUsage, error)
+	// Login log in
+	Login(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	// Logout log out
+	Logout(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	// GetAllStockDetail is the function to get stock detail
 	GetAllStockDetail(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*StockDetailResponse, error)
 	// GetAllFutureDetail is the function to get future detail
 	GetAllFutureDetail(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*FutureDetailResponse, error)
 	// GetAllOptionDetail is the function to get option detail
 	GetAllOptionDetail(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*OptionDetailResponse, error)
-	// CheckUsage get shioaji usage
-	CheckUsage(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ShioajiUsage, error)
-	// LogOut log out
-	LogOut(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type basicDataInterfaceClient struct {
@@ -57,31 +60,34 @@ func NewBasicDataInterfaceClient(cc grpc.ClientConnInterface) BasicDataInterface
 	return &basicDataInterfaceClient{cc}
 }
 
-func (c *basicDataInterfaceClient) Heartbeat(ctx context.Context, opts ...grpc.CallOption) (BasicDataInterface_HeartbeatClient, error) {
-	stream, err := c.cc.NewStream(ctx, &BasicDataInterface_ServiceDesc.Streams[0], BasicDataInterface_Heartbeat_FullMethodName, opts...)
+func (c *basicDataInterfaceClient) CreateLongConnection(ctx context.Context, opts ...grpc.CallOption) (BasicDataInterface_CreateLongConnectionClient, error) {
+	stream, err := c.cc.NewStream(ctx, &BasicDataInterface_ServiceDesc.Streams[0], BasicDataInterface_CreateLongConnection_FullMethodName, opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &basicDataInterfaceHeartbeatClient{stream}
+	x := &basicDataInterfaceCreateLongConnectionClient{stream}
 	return x, nil
 }
 
-type BasicDataInterface_HeartbeatClient interface {
-	Send(*BeatMessage) error
-	Recv() (*BeatMessage, error)
+type BasicDataInterface_CreateLongConnectionClient interface {
+	Send(*emptypb.Empty) error
+	CloseAndRecv() (*emptypb.Empty, error)
 	grpc.ClientStream
 }
 
-type basicDataInterfaceHeartbeatClient struct {
+type basicDataInterfaceCreateLongConnectionClient struct {
 	grpc.ClientStream
 }
 
-func (x *basicDataInterfaceHeartbeatClient) Send(m *BeatMessage) error {
+func (x *basicDataInterfaceCreateLongConnectionClient) Send(m *emptypb.Empty) error {
 	return x.ClientStream.SendMsg(m)
 }
 
-func (x *basicDataInterfaceHeartbeatClient) Recv() (*BeatMessage, error) {
-	m := new(BeatMessage)
+func (x *basicDataInterfaceCreateLongConnectionClient) CloseAndRecv() (*emptypb.Empty, error) {
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	m := new(emptypb.Empty)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
@@ -91,6 +97,33 @@ func (x *basicDataInterfaceHeartbeatClient) Recv() (*BeatMessage, error) {
 func (c *basicDataInterfaceClient) Terminate(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, BasicDataInterface_Terminate_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *basicDataInterfaceClient) CheckUsage(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ShioajiUsage, error) {
+	out := new(ShioajiUsage)
+	err := c.cc.Invoke(ctx, BasicDataInterface_CheckUsage_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *basicDataInterfaceClient) Login(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, BasicDataInterface_Login_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *basicDataInterfaceClient) Logout(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, BasicDataInterface_Logout_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -124,42 +157,26 @@ func (c *basicDataInterfaceClient) GetAllOptionDetail(ctx context.Context, in *e
 	return out, nil
 }
 
-func (c *basicDataInterfaceClient) CheckUsage(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ShioajiUsage, error) {
-	out := new(ShioajiUsage)
-	err := c.cc.Invoke(ctx, BasicDataInterface_CheckUsage_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *basicDataInterfaceClient) LogOut(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, BasicDataInterface_LogOut_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // BasicDataInterfaceServer is the server API for BasicDataInterface service.
 // All implementations must embed UnimplementedBasicDataInterfaceServer
 // for forward compatibility
 type BasicDataInterfaceServer interface {
-	// Heartbeat is the heartbeat function
-	Heartbeat(BasicDataInterface_HeartbeatServer) error
+	// CreateLongConnection is the function to create long connection
+	CreateLongConnection(BasicDataInterface_CreateLongConnectionServer) error
 	// Terminate is the terminate function
 	Terminate(context.Context, *emptypb.Empty) (*emptypb.Empty, error)
+	// CheckUsage get shioaji usage
+	CheckUsage(context.Context, *emptypb.Empty) (*ShioajiUsage, error)
+	// Login log in
+	Login(context.Context, *emptypb.Empty) (*emptypb.Empty, error)
+	// Logout log out
+	Logout(context.Context, *emptypb.Empty) (*emptypb.Empty, error)
 	// GetAllStockDetail is the function to get stock detail
 	GetAllStockDetail(context.Context, *emptypb.Empty) (*StockDetailResponse, error)
 	// GetAllFutureDetail is the function to get future detail
 	GetAllFutureDetail(context.Context, *emptypb.Empty) (*FutureDetailResponse, error)
 	// GetAllOptionDetail is the function to get option detail
 	GetAllOptionDetail(context.Context, *emptypb.Empty) (*OptionDetailResponse, error)
-	// CheckUsage get shioaji usage
-	CheckUsage(context.Context, *emptypb.Empty) (*ShioajiUsage, error)
-	// LogOut log out
-	LogOut(context.Context, *emptypb.Empty) (*emptypb.Empty, error)
 	mustEmbedUnimplementedBasicDataInterfaceServer()
 }
 
@@ -167,11 +184,20 @@ type BasicDataInterfaceServer interface {
 type UnimplementedBasicDataInterfaceServer struct {
 }
 
-func (UnimplementedBasicDataInterfaceServer) Heartbeat(BasicDataInterface_HeartbeatServer) error {
-	return status.Errorf(codes.Unimplemented, "method Heartbeat not implemented")
+func (UnimplementedBasicDataInterfaceServer) CreateLongConnection(BasicDataInterface_CreateLongConnectionServer) error {
+	return status.Errorf(codes.Unimplemented, "method CreateLongConnection not implemented")
 }
 func (UnimplementedBasicDataInterfaceServer) Terminate(context.Context, *emptypb.Empty) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Terminate not implemented")
+}
+func (UnimplementedBasicDataInterfaceServer) CheckUsage(context.Context, *emptypb.Empty) (*ShioajiUsage, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CheckUsage not implemented")
+}
+func (UnimplementedBasicDataInterfaceServer) Login(context.Context, *emptypb.Empty) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Login not implemented")
+}
+func (UnimplementedBasicDataInterfaceServer) Logout(context.Context, *emptypb.Empty) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Logout not implemented")
 }
 func (UnimplementedBasicDataInterfaceServer) GetAllStockDetail(context.Context, *emptypb.Empty) (*StockDetailResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAllStockDetail not implemented")
@@ -181,12 +207,6 @@ func (UnimplementedBasicDataInterfaceServer) GetAllFutureDetail(context.Context,
 }
 func (UnimplementedBasicDataInterfaceServer) GetAllOptionDetail(context.Context, *emptypb.Empty) (*OptionDetailResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAllOptionDetail not implemented")
-}
-func (UnimplementedBasicDataInterfaceServer) CheckUsage(context.Context, *emptypb.Empty) (*ShioajiUsage, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CheckUsage not implemented")
-}
-func (UnimplementedBasicDataInterfaceServer) LogOut(context.Context, *emptypb.Empty) (*emptypb.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method LogOut not implemented")
 }
 func (UnimplementedBasicDataInterfaceServer) mustEmbedUnimplementedBasicDataInterfaceServer() {}
 
@@ -201,26 +221,26 @@ func RegisterBasicDataInterfaceServer(s grpc.ServiceRegistrar, srv BasicDataInte
 	s.RegisterService(&BasicDataInterface_ServiceDesc, srv)
 }
 
-func _BasicDataInterface_Heartbeat_Handler(srv interface{}, stream grpc.ServerStream) error {
-	return srv.(BasicDataInterfaceServer).Heartbeat(&basicDataInterfaceHeartbeatServer{stream})
+func _BasicDataInterface_CreateLongConnection_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(BasicDataInterfaceServer).CreateLongConnection(&basicDataInterfaceCreateLongConnectionServer{stream})
 }
 
-type BasicDataInterface_HeartbeatServer interface {
-	Send(*BeatMessage) error
-	Recv() (*BeatMessage, error)
+type BasicDataInterface_CreateLongConnectionServer interface {
+	SendAndClose(*emptypb.Empty) error
+	Recv() (*emptypb.Empty, error)
 	grpc.ServerStream
 }
 
-type basicDataInterfaceHeartbeatServer struct {
+type basicDataInterfaceCreateLongConnectionServer struct {
 	grpc.ServerStream
 }
 
-func (x *basicDataInterfaceHeartbeatServer) Send(m *BeatMessage) error {
+func (x *basicDataInterfaceCreateLongConnectionServer) SendAndClose(m *emptypb.Empty) error {
 	return x.ServerStream.SendMsg(m)
 }
 
-func (x *basicDataInterfaceHeartbeatServer) Recv() (*BeatMessage, error) {
-	m := new(BeatMessage)
+func (x *basicDataInterfaceCreateLongConnectionServer) Recv() (*emptypb.Empty, error) {
+	m := new(emptypb.Empty)
 	if err := x.ServerStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
@@ -241,6 +261,60 @@ func _BasicDataInterface_Terminate_Handler(srv interface{}, ctx context.Context,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(BasicDataInterfaceServer).Terminate(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _BasicDataInterface_CheckUsage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BasicDataInterfaceServer).CheckUsage(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BasicDataInterface_CheckUsage_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BasicDataInterfaceServer).CheckUsage(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _BasicDataInterface_Login_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BasicDataInterfaceServer).Login(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BasicDataInterface_Login_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BasicDataInterfaceServer).Login(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _BasicDataInterface_Logout_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BasicDataInterfaceServer).Logout(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BasicDataInterface_Logout_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BasicDataInterfaceServer).Logout(ctx, req.(*emptypb.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -299,42 +373,6 @@ func _BasicDataInterface_GetAllOptionDetail_Handler(srv interface{}, ctx context
 	return interceptor(ctx, in, info, handler)
 }
 
-func _BasicDataInterface_CheckUsage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(emptypb.Empty)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(BasicDataInterfaceServer).CheckUsage(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: BasicDataInterface_CheckUsage_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(BasicDataInterfaceServer).CheckUsage(ctx, req.(*emptypb.Empty))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _BasicDataInterface_LogOut_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(emptypb.Empty)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(BasicDataInterfaceServer).LogOut(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: BasicDataInterface_LogOut_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(BasicDataInterfaceServer).LogOut(ctx, req.(*emptypb.Empty))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 // BasicDataInterface_ServiceDesc is the grpc.ServiceDesc for BasicDataInterface service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -345,6 +383,18 @@ var BasicDataInterface_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Terminate",
 			Handler:    _BasicDataInterface_Terminate_Handler,
+		},
+		{
+			MethodName: "CheckUsage",
+			Handler:    _BasicDataInterface_CheckUsage_Handler,
+		},
+		{
+			MethodName: "Login",
+			Handler:    _BasicDataInterface_Login_Handler,
+		},
+		{
+			MethodName: "Logout",
+			Handler:    _BasicDataInterface_Logout_Handler,
 		},
 		{
 			MethodName: "GetAllStockDetail",
@@ -358,20 +408,11 @@ var BasicDataInterface_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "GetAllOptionDetail",
 			Handler:    _BasicDataInterface_GetAllOptionDetail_Handler,
 		},
-		{
-			MethodName: "CheckUsage",
-			Handler:    _BasicDataInterface_CheckUsage_Handler,
-		},
-		{
-			MethodName: "LogOut",
-			Handler:    _BasicDataInterface_LogOut_Handler,
-		},
 	},
 	Streams: []grpc.StreamDesc{
 		{
-			StreamName:    "Heartbeat",
-			Handler:       _BasicDataInterface_Heartbeat_Handler,
-			ServerStreams: true,
+			StreamName:    "CreateLongConnection",
+			Handler:       _BasicDataInterface_CreateLongConnection_Handler,
 			ClientStreams: true,
 		},
 	},
