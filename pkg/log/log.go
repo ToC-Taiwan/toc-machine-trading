@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/ilyakaznacheev/cleanenv"
+	"github.com/joho/godotenv"
 	"github.com/sirupsen/logrus"
 )
 
@@ -96,6 +97,16 @@ func Get() *Log {
 }
 
 func (l *Log) readEnv() {
+	ex, err := os.Executable()
+	if err != nil {
+		panic(err)
+	}
+
+	err = godotenv.Load(filepath.Join(filepath.Dir(ex), ".env"))
+	if err != nil {
+		panic(err)
+	}
+
 	cfg := env{}
 	if err := cleanenv.ReadEnv(&cfg); err != nil {
 		panic(err)

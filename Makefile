@@ -1,6 +1,3 @@
-include .env
-export
-
 BIN_NAME = toc-machine-trading
 
 run: swag ### swag run

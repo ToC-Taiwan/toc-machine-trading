@@ -4,6 +4,7 @@ package config
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"tmt/pkg/grpc"
 	"tmt/pkg/log"
@@ -11,6 +12,7 @@ import (
 	"tmt/pkg/rabbitmq"
 
 	"github.com/ilyakaznacheev/cleanenv"
+	"github.com/joho/godotenv"
 )
 
 var (
@@ -55,6 +57,16 @@ func Get() *Config {
 		if err != nil {
 			logger.Fatalf("config file read error: %v", err)
 		}
+	}
+
+	ex, err := os.Executable()
+	if err != nil {
+		panic(err)
+	}
+
+	err = godotenv.Load(filepath.Join(filepath.Dir(ex), ".env"))
+	if err != nil {
+		panic(err)
 	}
 
 	if err := cleanenv.ReadEnv(&newConfig); err != nil {

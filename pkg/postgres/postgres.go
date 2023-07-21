@@ -58,7 +58,7 @@ func New(url string, opts ...Option) (*Postgres, error) {
 			return pg, nil
 		}
 
-		pg.Infof("Postgres trying connect, attempts left: %d\n", pg.connAttempts)
+		pg.Warnf("Postgres trying connect, attempts left: %d\n", pg.connAttempts)
 
 		pg.connAttempts--
 		time.Sleep(pg.connTimeout)
@@ -105,6 +105,14 @@ func (p *Postgres) EndTransaction(tx pgx.Tx, err error) {
 func (p *Postgres) Infof(format string, args ...interface{}) {
 	if p.logger != nil {
 		p.logger.Infof(format, args...)
+	} else {
+		fmt.Printf(format, args...)
+	}
+}
+
+func (p *Postgres) Warnf(format string, args ...interface{}) {
+	if p.logger != nil {
+		p.logger.Warnf(format, args...)
 	} else {
 		fmt.Printf(format, args...)
 	}
