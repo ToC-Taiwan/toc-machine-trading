@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
 	"sync"
 	"time"
 
@@ -85,26 +86,21 @@ func (uc *BasicUseCase) checkHealth() {
 
 func (uc *BasicUseCase) setupCronJob() error {
 	c := cron.New()
-	if _, e := c.AddFunc("20 8 * * *", uc.terminateAll); e != nil {
+	if _, e := c.AddFunc("20 8 * * *", uc.logoutAndExit); e != nil {
 		return e
 	}
-	if _, e := c.AddFunc("40 14 * * *", uc.terminateAll); e != nil {
+	if _, e := c.AddFunc("40 14 * * *", uc.logoutAndExit); e != nil {
 		return e
 	}
 	c.Start()
 	return nil
 }
 
-func (uc *BasicUseCase) terminateAll() {
+func (uc *BasicUseCase) logoutAndExit() {
 	if e := uc.sc.LogOut(); e != nil {
 		logger.Fatal(e)
 	}
-	if e := uc.sc.Terminate(); e != nil {
-		logger.Fatal(e)
-	}
-	if e := uc.fugle.Terminate(); e != nil {
-		logger.Fatal(e)
-	}
+	os.Exit(0)
 }
 
 func (uc *BasicUseCase) loginAll() {
