@@ -223,8 +223,6 @@ func (uc *BasicUseCase) updateRepoFuture() error {
 		if _, ok := duplCodeMap[future.Code]; !ok {
 			duplCodeMap[future.Code] = struct{}{}
 			uc.allFutureDetail = append(uc.allFutureDetail, future)
-		} else {
-			logger.Warnf("Dupl future code: %s %s", v.Code, v.Name)
 		}
 	}
 
@@ -275,8 +273,6 @@ func (uc *BasicUseCase) updateRepoOption() error {
 		if _, ok := duplCodeMap[option.Code]; !ok {
 			duplCodeMap[option.Code] = struct{}{}
 			uc.allOptionDetail = append(uc.allOptionDetail, option)
-		} else {
-			logger.Warnf("Dupl option code: %s %s", v.Code, v.Name)
 		}
 	}
 
