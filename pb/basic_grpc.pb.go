@@ -24,7 +24,6 @@ const (
 	BasicDataInterface_Terminate_FullMethodName            = "/toc_python_forwarder.BasicDataInterface/Terminate"
 	BasicDataInterface_CheckUsage_FullMethodName           = "/toc_python_forwarder.BasicDataInterface/CheckUsage"
 	BasicDataInterface_Login_FullMethodName                = "/toc_python_forwarder.BasicDataInterface/Login"
-	BasicDataInterface_Logout_FullMethodName               = "/toc_python_forwarder.BasicDataInterface/Logout"
 	BasicDataInterface_GetAllStockDetail_FullMethodName    = "/toc_python_forwarder.BasicDataInterface/GetAllStockDetail"
 	BasicDataInterface_GetAllFutureDetail_FullMethodName   = "/toc_python_forwarder.BasicDataInterface/GetAllFutureDetail"
 	BasicDataInterface_GetAllOptionDetail_FullMethodName   = "/toc_python_forwarder.BasicDataInterface/GetAllOptionDetail"
@@ -42,8 +41,6 @@ type BasicDataInterfaceClient interface {
 	CheckUsage(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ShioajiUsage, error)
 	// Login log in
 	Login(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	// Logout log out
-	Logout(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	// GetAllStockDetail is the function to get stock detail
 	GetAllStockDetail(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*StockDetailResponse, error)
 	// GetAllFutureDetail is the function to get future detail
@@ -121,15 +118,6 @@ func (c *basicDataInterfaceClient) Login(ctx context.Context, in *emptypb.Empty,
 	return out, nil
 }
 
-func (c *basicDataInterfaceClient) Logout(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, BasicDataInterface_Logout_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *basicDataInterfaceClient) GetAllStockDetail(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*StockDetailResponse, error) {
 	out := new(StockDetailResponse)
 	err := c.cc.Invoke(ctx, BasicDataInterface_GetAllStockDetail_FullMethodName, in, out, opts...)
@@ -169,8 +157,6 @@ type BasicDataInterfaceServer interface {
 	CheckUsage(context.Context, *emptypb.Empty) (*ShioajiUsage, error)
 	// Login log in
 	Login(context.Context, *emptypb.Empty) (*emptypb.Empty, error)
-	// Logout log out
-	Logout(context.Context, *emptypb.Empty) (*emptypb.Empty, error)
 	// GetAllStockDetail is the function to get stock detail
 	GetAllStockDetail(context.Context, *emptypb.Empty) (*StockDetailResponse, error)
 	// GetAllFutureDetail is the function to get future detail
@@ -195,9 +181,6 @@ func (UnimplementedBasicDataInterfaceServer) CheckUsage(context.Context, *emptyp
 }
 func (UnimplementedBasicDataInterfaceServer) Login(context.Context, *emptypb.Empty) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Login not implemented")
-}
-func (UnimplementedBasicDataInterfaceServer) Logout(context.Context, *emptypb.Empty) (*emptypb.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Logout not implemented")
 }
 func (UnimplementedBasicDataInterfaceServer) GetAllStockDetail(context.Context, *emptypb.Empty) (*StockDetailResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAllStockDetail not implemented")
@@ -301,24 +284,6 @@ func _BasicDataInterface_Login_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
-func _BasicDataInterface_Logout_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(emptypb.Empty)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(BasicDataInterfaceServer).Logout(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: BasicDataInterface_Logout_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(BasicDataInterfaceServer).Logout(ctx, req.(*emptypb.Empty))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _BasicDataInterface_GetAllStockDetail_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(emptypb.Empty)
 	if err := dec(in); err != nil {
@@ -391,10 +356,6 @@ var BasicDataInterface_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Login",
 			Handler:    _BasicDataInterface_Login_Handler,
-		},
-		{
-			MethodName: "Logout",
-			Handler:    _BasicDataInterface_Logout_Handler,
 		},
 		{
 			MethodName: "GetAllStockDetail",

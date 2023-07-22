@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"os"
 	"sync"
 	"time"
 
@@ -16,8 +15,6 @@ import (
 	"tmt/internal/usecase/grpcapi"
 	"tmt/internal/usecase/module/tradeday"
 	"tmt/internal/usecase/repo"
-
-	"github.com/robfig/cron/v3"
 )
 
 type BasicUseCase struct {
@@ -41,12 +38,8 @@ func NewBasic() Basic {
 		cfg:      cfg,
 		tradeDay: tradeday.Get(),
 	}
-	go uc.checkHealth()
 	uc.loginAll()
-
-	if err := uc.setupCronJob(); err != nil {
-		logger.Fatal(err)
-	}
+	uc.checkgRPCHealth()
 
 	if err := uc.importCalendarDate(); err != nil {
 		logger.Fatal(err)
@@ -68,39 +61,22 @@ func NewBasic() Basic {
 	return uc
 }
 
-func (uc *BasicUseCase) checkHealth() {
-	errChan := make(chan error)
+func (uc *BasicUseCase) checkgRPCHealth() {
 	go func() {
-		if err := uc.sc.CreateLongConnection(); err != nil {
-			errChan <- errors.New("sinopac CreateLongConnection error")
-		}
+		errChan := make(chan error)
+		go func(errChan chan error) {
+			if err := uc.sc.CreateLongConnection(); err != nil {
+				errChan <- errors.New("sinopac CreateLongConnection error")
+			}
+		}(errChan)
+		go func(errChan chan error) {
+			if err := uc.fugle.CreateLongConnection(); err != nil {
+				errChan <- errors.New("fugle CreateLongConnection error")
+			}
+		}(errChan)
+		err := <-errChan
+		logger.Fatal(err)
 	}()
-	go func() {
-		if err := uc.fugle.CreateLongConnection(); err != nil {
-			errChan <- errors.New("fugle CreateLongConnection error")
-		}
-	}()
-	err := <-errChan
-	logger.Fatal(err)
-}
-
-func (uc *BasicUseCase) setupCronJob() error {
-	c := cron.New()
-	if _, e := c.AddFunc("20 8 * * *", uc.logoutAndExit); e != nil {
-		return e
-	}
-	if _, e := c.AddFunc("40 14 * * *", uc.logoutAndExit); e != nil {
-		return e
-	}
-	c.Start()
-	return nil
-}
-
-func (uc *BasicUseCase) logoutAndExit() {
-	if e := uc.sc.LogOut(); e != nil {
-		logger.Fatal(e)
-	}
-	os.Exit(0)
 }
 
 func (uc *BasicUseCase) loginAll() {
@@ -134,12 +110,6 @@ func (uc *BasicUseCase) GetShioajiUsage() (*entity.ShioajiUsage, error) {
 		Connections:  int(usage.GetConnections()),
 		TrafficUsage: utils.Round(float64(usage.GetBytes())/1024/1024, 2),
 	}, nil
-}
-
-func (uc *BasicUseCase) LogoutAll() {
-	if e := uc.sc.LogOut(); e != nil {
-		logger.Errorf("Logout Sinopac error: %s", e.Error())
-	}
 }
 
 func (uc *BasicUseCase) updateRepoStock() error {

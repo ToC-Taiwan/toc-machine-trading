@@ -13,6 +13,7 @@ import (
 
 	"github.com/ilyakaznacheev/cleanenv"
 	"github.com/joho/godotenv"
+	"github.com/robfig/cron/v3"
 )
 
 var (
@@ -81,8 +82,28 @@ func Get() *Config {
 		logger.Fatal("stock trade switch allow trade but not subscribe")
 	}
 
+	if e := newConfig.setupCronJob(); e != nil {
+		logger.Fatal(e)
+	}
+
 	singleton = &newConfig
 	return singleton
+}
+
+func (c *Config) setupCronJob() error {
+	job := cron.New()
+	if _, e := job.AddFunc("20 8 * * *", c.exit); e != nil {
+		return e
+	}
+	if _, e := job.AddFunc("40 14 * * *", c.exit); e != nil {
+		return e
+	}
+	job.Start()
+	return nil
+}
+
+func (c *Config) exit() {
+	os.Exit(0)
 }
 
 func (c *Config) GetPostgresPool() *postgres.Postgres {

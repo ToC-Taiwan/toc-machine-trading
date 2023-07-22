@@ -99,17 +99,6 @@ func (t *BasicgRPCAPI) CheckUsage() (*pb.ShioajiUsage, error) {
 	return r, nil
 }
 
-func (t *BasicgRPCAPI) LogOut() error {
-	conn := t.conn.Get()
-	defer t.conn.Put(conn)
-
-	_, err := pb.NewBasicDataInterfaceClient(conn).Logout(context.Background(), &emptypb.Empty{})
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
 func (t *BasicgRPCAPI) Login() error {
 	conn := t.conn.Get()
 	defer t.conn.Put(conn)

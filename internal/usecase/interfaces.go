@@ -26,7 +26,6 @@ type Basic interface {
 	GetAllRepoStock(ctx context.Context) ([]*entity.Stock, error)
 	GetConfig() *config.Config
 	GetShioajiUsage() (*entity.ShioajiUsage, error)
-	LogoutAll()
 }
 
 type Target interface {
@@ -179,7 +178,6 @@ type BasicgRPCAPI interface {
 	CreateLongConnection() error
 	Terminate() error
 	Login() error
-	LogOut() error
 	CheckUsage() (*pb.ShioajiUsage, error)
 	GetAllStockDetail() ([]*pb.StockDetailMessage, error)
 	GetAllFutureDetail() ([]*pb.FutureDetailMessage, error)
