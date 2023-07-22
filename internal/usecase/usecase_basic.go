@@ -136,8 +136,10 @@ func (uc *BasicUseCase) GetShioajiUsage() (*entity.ShioajiUsage, error) {
 	}, nil
 }
 
-func (uc *BasicUseCase) LogoutSinopac() error {
-	return uc.sc.LogOut()
+func (uc *BasicUseCase) LogoutAll() {
+	if e := uc.sc.LogOut(); e != nil {
+		logger.Errorf("Logout Sinopac error: %s", e.Error())
+	}
 }
 
 func (uc *BasicUseCase) updateRepoStock() error {

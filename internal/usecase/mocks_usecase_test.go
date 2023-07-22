@@ -83,18 +83,16 @@ func (mr *MockBasicMockRecorder) GetShioajiUsage() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetShioajiUsage", reflect.TypeOf((*MockBasic)(nil).GetShioajiUsage))
 }
 
-// LogoutSinopac mocks base method.
-func (m *MockBasic) LogoutSinopac() error {
+// LogoutAll mocks base method.
+func (m *MockBasic) LogoutAll() {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "LogoutSinopac")
-	ret0, _ := ret[0].(error)
-	return ret0
+	m.ctrl.Call(m, "LogoutAll")
 }
 
-// LogoutSinopac indicates an expected call of LogoutSinopac.
-func (mr *MockBasicMockRecorder) LogoutSinopac() *gomock.Call {
+// LogoutAll indicates an expected call of LogoutAll.
+func (mr *MockBasicMockRecorder) LogoutAll() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "LogoutSinopac", reflect.TypeOf((*MockBasic)(nil).LogoutSinopac))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "LogoutAll", reflect.TypeOf((*MockBasic)(nil).LogoutAll))
 }
 
 // MockTarget is a mock of Target interface.
