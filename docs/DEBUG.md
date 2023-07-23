@@ -14,7 +14,6 @@ echo '{
             "debugAdapter": "dlv-dap",
             "mode": "exec",
             "program": "${workspaceFolder}/toc-machine-trading",
-            "envFile": "${workspaceFolder}/.env",
             "preLaunchTask": "Build",
             "console": "integratedTerminal",
             "internalConsoleOptions": "neverOpen"
