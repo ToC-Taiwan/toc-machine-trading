@@ -18,8 +18,6 @@ import (
 	"github.com/google/uuid"
 )
 
-var logger = log.Get()
-
 type WSFutureTrade struct {
 	*httpserver.WSRouter // ws router
 	*eventbus.Bus        // event bus
@@ -62,7 +60,7 @@ func StartWSFutureTrade(c *gin.Context, s realtime.RealTime, o trade.Trade, h hi
 		assistTargetWaitingMap: make(map[string]*assistTarget),
 		orderMap:               make(map[string]*entity.FutureOrder),
 		cancelOrderMap:         make(map[string]*entity.FutureOrder),
-		WSRouter:               httpserver.NewWSRouter(c, logger),
+		WSRouter:               httpserver.NewWSRouter(c, log.Get()),
 		Bus:                    eventbus.Get(uuid.NewString()),
 		waitingList:            newWaitingList(),
 		orderTradeTime:         newOrderTradeTime(),

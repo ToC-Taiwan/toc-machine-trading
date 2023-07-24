@@ -9,6 +9,7 @@ import (
 	"tmt/internal/entity"
 	"tmt/internal/usecase/grpcapi"
 	"tmt/pkg/eventbus"
+	"tmt/pkg/log"
 
 	"github.com/google/uuid"
 )
@@ -36,6 +37,7 @@ type DTFuture struct {
 	isTradeTime  bool
 
 	lastPlaceOrderTime time.Time
+	logger             *log.Log
 }
 
 func NewDTFuture(code string, s *grpcapi.TradegRPCAPI, tradeConfig *config.TradeFuture) *DTFuture {
@@ -51,6 +53,7 @@ func NewDTFuture(code string, s *grpcapi.TradegRPCAPI, tradeConfig *config.Trade
 		tradeConfig:   tradeConfig,
 		traderMap:     make(map[string]*DTTraderFuture),
 		cancelChan:    make(chan *entity.FutureOrder),
+		logger:        log.Get(),
 	}
 
 	d.localBus.SubscribeAsync(topicTraderDone, true, d.removeDoneTrader)
@@ -73,12 +76,12 @@ func (d *DTFuture) cancelOverTimeOrder() {
 
 			result, err := d.sc.CancelFuture(order.OrderID)
 			if err != nil {
-				logger.Error(err)
+				d.logger.Error(err)
 				continue
 			}
 
 			if s := entity.StringToOrderStatus(result.GetStatus()); s != entity.StatusCancelled {
-				logger.Errorf("Cancel order failed: %s %s", order.OrderID, result.GetError())
+				d.logger.Errorf("Cancel order failed: %s %s", order.OrderID, result.GetError())
 				continue
 			}
 
@@ -100,7 +103,7 @@ func (d *DTFuture) processOrderStatusAndTradeSwitch() {
 				switch {
 				case !o.Cancellable() && notifiedMap[o.OrderID] == nil:
 					notifiedMap[o.OrderID] = o
-					logger.Warnf("%s %s", o.Status.String(), o.String())
+					d.logger.Warnf("%s %s", o.Status.String(), o.String())
 				case o.Cancellable() && time.Since(o.OrderTime) > time.Duration(d.tradeConfig.BuySellWaitTime)*time.Second:
 					d.cancelChan <- o
 				}

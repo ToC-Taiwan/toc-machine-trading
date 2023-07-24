@@ -1,11 +1,6 @@
 package repo
 
-import "tmt/pkg/log"
-
-var (
-	logger        = log.Get()
-	batchSize int = 2000
-)
+var batchSize int = 2000
 
 const (
 	tableNameCalendar string = "basic_calendar"

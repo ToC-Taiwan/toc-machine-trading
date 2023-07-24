@@ -13,8 +13,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var logger = log.Get()
-
 type WSPickStock struct {
 	*httpserver.WSRouter
 
@@ -28,7 +26,7 @@ type WSPickStock struct {
 func StartWSPickStock(c *gin.Context, s realtime.RealTime) {
 	w := &WSPickStock{
 		s:        s,
-		WSRouter: httpserver.NewWSRouter(c, logger),
+		WSRouter: httpserver.NewWSRouter(c, log.Get()),
 	}
 
 	forwardChan := make(chan []byte)

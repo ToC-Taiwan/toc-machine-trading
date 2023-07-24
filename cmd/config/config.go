@@ -16,10 +16,7 @@ import (
 	"github.com/robfig/cron/v3"
 )
 
-var (
-	singleton *Config
-	logger    = log.Get()
-)
+var singleton *Config
 
 // Config -.
 type Config struct {
@@ -38,6 +35,8 @@ type Config struct {
 	dbPool      *postgres.Postgres
 	sinopacPool *grpc.ConnPool
 	fuglePool   *grpc.ConnPool
+
+	logger *log.Log
 }
 
 // Get -.
@@ -46,13 +45,16 @@ func Get() *Config {
 		return singleton
 	}
 
+	logger := log.Get()
 	filePath := "configs/config.yml"
 	fileStat, err := os.Stat(filePath)
 	if err != nil || fileStat.IsDir() {
 		logger.Fatalf("config file not found: %v", err)
 	}
 
-	newConfig := Config{}
+	newConfig := Config{
+		logger: logger,
+	}
 	if fileStat.Size() > 0 {
 		err = cleanenv.ReadConfig(filePath, &newConfig)
 		if err != nil {
@@ -113,10 +115,10 @@ func (c *Config) GetPostgresPool() *postgres.Postgres {
 	pg, err := postgres.New(
 		fmt.Sprintf("%s%s", c.Database.URL, c.Database.DBName),
 		postgres.MaxPoolSize(c.Database.PoolMax),
-		postgres.AddLogger(logger),
+		postgres.AddLogger(c.logger),
 	)
 	if err != nil {
-		logger.Fatal(err)
+		c.logger.Fatal(err)
 	}
 	c.dbPool = pg
 	return pg
@@ -126,14 +128,14 @@ func (c *Config) GetSinopacPool() *grpc.ConnPool {
 	if c.sinopacPool != nil {
 		return c.sinopacPool
 	}
-	logger.Info("Connecting to sinopac gRPC server")
+	c.logger.Info("Connecting to sinopac gRPC server")
 	sc, err := grpc.New(
 		c.Sinopac.URL,
 		grpc.MaxPoolSize(c.Sinopac.PoolMax),
-		grpc.AddLogger(logger),
+		grpc.AddLogger(c.logger),
 	)
 	if err != nil {
-		logger.Fatal(err)
+		c.logger.Fatal(err)
 	}
 	c.sinopacPool = sc
 	return sc
@@ -143,14 +145,14 @@ func (c *Config) GetFuglePool() *grpc.ConnPool {
 	if c.fuglePool != nil {
 		return c.fuglePool
 	}
-	logger.Info("Connecting to fugle gRPC server")
+	c.logger.Info("Connecting to fugle gRPC server")
 	fg, err := grpc.New(
 		c.Fugle.URL,
 		grpc.MaxPoolSize(c.Fugle.PoolMax),
-		grpc.AddLogger(logger),
+		grpc.AddLogger(c.logger),
 	)
 	if err != nil {
-		logger.Fatal(err)
+		c.logger.Fatal(err)
 	}
 	c.fuglePool = fg
 	return fg
@@ -161,10 +163,10 @@ func (c *Config) GetRabbitConn() *rabbitmq.Connection {
 		c.RabbitMQ.Exchange, c.RabbitMQ.URL,
 		rabbitmq.Attempts(c.RabbitMQ.Attempts),
 		rabbitmq.WaitTime(int(c.RabbitMQ.WaitTime)),
-		rabbitmq.AddLogger(logger),
+		rabbitmq.AddLogger(c.logger),
 	)
 	if err != nil {
-		logger.Fatal(err)
+		c.logger.Fatal(err)
 	}
 	return conn
 }
@@ -172,6 +174,6 @@ func (c *Config) GetRabbitConn() *rabbitmq.Connection {
 func (c *Config) CloseDB() {
 	if c.dbPool != nil {
 		c.dbPool.Close()
-		logger.Warn("TMT is shutting down")
+		c.logger.Warn("TMT is shutting down")
 	}
 }

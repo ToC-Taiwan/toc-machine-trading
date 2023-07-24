@@ -14,8 +14,6 @@ import (
 	"github.com/google/uuid"
 )
 
-var logger = log.Get()
-
 type SimulatorFuture struct {
 	// current cond
 	currentCond *config.TradeFuture
@@ -41,9 +39,12 @@ type SimulatorFuture struct {
 	tickArr             entity.RealTimeFutureTickArr
 	lastPlaceOrderTime  time.Time
 	maxTradeOutTime     time.Time
+
+	logger *log.Log
 }
 
 func NewSimulatorFuture(target SimulatorFutureTarget) *SimulatorFuture {
+	logger := log.Get()
 	if len(target.TradeConfigArr) == 0 {
 		logger.Fatal("trade config arr is empty")
 	}
@@ -54,6 +55,7 @@ func NewSimulatorFuture(target SimulatorFutureTarget) *SimulatorFuture {
 		tradePeriod:    target.TradePeriod,
 		historyTickArr: target.Ticks,
 		allCond:        target.TradeConfigArr,
+		logger:         logger,
 	}
 }
 
@@ -368,7 +370,7 @@ func (s *SimulatorFuture) calculateForwardFutureBalance(forward []*entity.Future
 	}
 
 	if qty != 0 {
-		logger.Error("forward qty not zero")
+		s.logger.Error("forward qty not zero")
 		return 0, tradeCount
 	}
 
@@ -392,7 +394,7 @@ func (s *SimulatorFuture) calculateReverseFutureBalance(reverse []*entity.Future
 	}
 
 	if qty != 0 {
-		logger.Error("forward qty not zero")
+		s.logger.Error("forward qty not zero")
 		return 0, tradeCount
 	}
 

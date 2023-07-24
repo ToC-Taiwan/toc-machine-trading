@@ -73,7 +73,7 @@ func (r *BasicRepo) InsertOrUpdatetStockArr(ctx context.Context, t []*entity.Sto
 			return err
 		}
 	}
-	logger.Infof("Insert Stock -> Exist: %d, Insert: %d, Update: %d", len(t)-update-insert, insert, update)
+	r.Infof("Insert Stock -> Exist: %d, Insert: %d, Update: %d", len(t)-update-insert, insert, update)
 	return nil
 }
 
@@ -168,7 +168,7 @@ func (r *BasicRepo) InsertOrUpdatetCalendarDateArr(ctx context.Context, t []*ent
 			return err
 		}
 	}
-	logger.Infof("Insert Calendar -> Exist: %d, Insert: %d, Update: %d", len(t)-update-insert, insert, update)
+	r.Infof("Insert Calendar -> Exist: %d, Insert: %d, Update: %d", len(t)-update-insert, insert, update)
 	return nil
 }
 
@@ -252,7 +252,7 @@ func (r *BasicRepo) InsertOrUpdatetFutureArr(ctx context.Context, t []*entity.Fu
 			return err
 		}
 	}
-	logger.Infof("Insert Future -> Exist: %d, Insert: %d, Update: %d", len(t)-update-insert, insert, update)
+	r.Infof("Insert Future -> Exist: %d, Insert: %d, Update: %d", len(t)-update-insert, insert, update)
 	return nil
 }
 
@@ -370,7 +370,7 @@ func (r *BasicRepo) InsertOrUpdatetOptionArr(ctx context.Context, t []*entity.Op
 			return sqlErr
 		}
 	}
-	logger.Infof("Insert Option -> Exist: %d, Insert: %d, Update: %d", len(t)-update-insert, insert, update)
+	r.Infof("Insert Option -> Exist: %d, Insert: %d, Update: %d", len(t)-update-insert, insert, update)
 	return nil
 }
 

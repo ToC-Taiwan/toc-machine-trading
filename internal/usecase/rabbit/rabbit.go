@@ -15,11 +15,10 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-var logger = log.Get()
-
 // Rabbit -.
 type Rabbit struct {
-	conn *rabbitmq.Connection
+	conn   *rabbitmq.Connection
+	logger *log.Log
 
 	detailMapLock sync.RWMutex
 	allStockMap   map[string]*entity.Stock
@@ -28,13 +27,14 @@ type Rabbit struct {
 
 func NewRabbit(connection *rabbitmq.Connection) *Rabbit {
 	return &Rabbit{
-		conn: connection,
+		conn:   connection,
+		logger: log.Get(),
 	}
 }
 
 func (c *Rabbit) Close() {
 	if e := c.conn.Close(); e != nil {
-		logger.Error(e)
+		c.logger.Error(e)
 	}
 }
 
@@ -46,7 +46,7 @@ func (c *Rabbit) FillAllBasic(allStockMap map[string]*entity.Stock, allFutureMap
 	c.allFutureMap = allFutureMap
 
 	if len(c.allStockMap) == 0 || len(c.allFutureMap) == 0 {
-		logger.Fatal("allStockMap or allFutureMap is empty")
+		c.logger.Fatal("allStockMap or allFutureMap is empty")
 	}
 }
 
@@ -70,13 +70,13 @@ func (c *Rabbit) EventConsumer(eventChan chan *entity.SinopacEvent) {
 
 		body := pb.EventMessage{}
 		if err := proto.Unmarshal(d.Body, &body); err != nil {
-			logger.Error(err)
+			c.logger.Error(err)
 			continue
 		}
 
 		dataTime, err := time.ParseInLocation(global.LongTimeLayout, body.GetEventTime(), time.Local)
 		if err != nil {
-			logger.Error(err)
+			c.logger.Error(err)
 			continue
 		}
 
@@ -93,7 +93,7 @@ func (c *Rabbit) EventConsumer(eventChan chan *entity.SinopacEvent) {
 // OrderStatusConsumer OrderStatusConsumer
 func (c *Rabbit) OrderStatusConsumer(orderStatusChan chan interface{}) {
 	if !c.checkBasic() {
-		logger.Fatal("allStockMap or allFutureMap is empty")
+		c.logger.Fatal("allStockMap or allFutureMap is empty")
 	}
 
 	delivery := c.establishDelivery(routingKeyOrder)
@@ -105,7 +105,7 @@ func (c *Rabbit) OrderStatusConsumer(orderStatusChan chan interface{}) {
 
 		body := &pb.OrderStatus{}
 		if err := proto.Unmarshal(d.Body, body); err != nil {
-			logger.Error(err)
+			c.logger.Error(err)
 			continue
 		}
 
@@ -120,7 +120,7 @@ func (c *Rabbit) OrderStatusConsumer(orderStatusChan chan interface{}) {
 // OrderStatusArrConsumer -.
 func (c *Rabbit) OrderStatusArrConsumer(orderStatusChan chan interface{}) {
 	if !c.checkBasic() {
-		logger.Fatal("allStockMap or allFutureMap is empty")
+		c.logger.Fatal("allStockMap or allFutureMap is empty")
 	}
 
 	delivery := c.establishDelivery(routingKeyOrderArr)
@@ -131,7 +131,7 @@ func (c *Rabbit) OrderStatusArrConsumer(orderStatusChan chan interface{}) {
 		}
 		body := &pb.OrderStatusArr{}
 		if err := proto.Unmarshal(d.Body, body); err != nil {
-			logger.Error(err)
+			c.logger.Error(err)
 			continue
 		}
 
@@ -149,7 +149,7 @@ func (c *Rabbit) protoToOrder(proto *pb.OrderStatus) interface{} {
 
 	orderTime, err := time.ParseInLocation(global.LongTimeLayout, proto.GetOrderTime(), time.Local)
 	if err != nil {
-		logger.Error(err)
+		c.logger.Error(err)
 		return nil
 	}
 
@@ -196,13 +196,13 @@ func (c *Rabbit) StockTickConsumer(stockNum string, tickChan chan *entity.RealTi
 
 		body := pb.StockRealTimeTickMessage{}
 		if err := proto.Unmarshal(d.Body, &body); err != nil {
-			logger.Error(err)
+			c.logger.Error(err)
 			continue
 		}
 
 		dataTime, err := time.ParseInLocation(global.LongTimeLayout, body.GetDateTime(), time.Local)
 		if err != nil {
-			logger.Error(err)
+			c.logger.Error(err)
 			continue
 		}
 
@@ -245,13 +245,13 @@ func (c *Rabbit) FutureTickConsumer(code string, tickChan chan *entity.RealTimeF
 
 		body := pb.FutureRealTimeTickMessage{}
 		if err := proto.Unmarshal(d.Body, &body); err != nil {
-			logger.Error(err)
+			c.logger.Error(err)
 			continue
 		}
 
 		dataTime, err := time.ParseInLocation(global.LongTimeLayout, body.GetDateTime(), time.Local)
 		if err != nil {
-			logger.Error(err)
+			c.logger.Error(err)
 			continue
 		}
 
@@ -295,13 +295,13 @@ func (c *Rabbit) StockBidAskConsumer(stockNum string, bidAskChan chan *entity.Re
 
 		body := pb.StockRealTimeBidAskMessage{}
 		if err := proto.Unmarshal(d.Body, &body); err != nil {
-			logger.Error(err)
+			c.logger.Error(err)
 			continue
 		}
 
 		dataTime, err := time.ParseInLocation(global.LongTimeLayout, body.GetDateTime(), time.Local)
 		if err != nil {
-			logger.Error(err)
+			c.logger.Error(err)
 			continue
 		}
 
@@ -339,13 +339,13 @@ func (c *Rabbit) FutureBidAskConsumer(code string, bidAskChan chan *entity.Futur
 
 		body := pb.FutureRealTimeBidAskMessage{}
 		if err := proto.Unmarshal(d.Body, &body); err != nil {
-			logger.Error(err)
+			c.logger.Error(err)
 			continue
 		}
 
 		dataTime, err := time.ParseInLocation(global.LongTimeLayout, body.GetDateTime(), time.Local)
 		if err != nil {
-			logger.Error(err)
+			c.logger.Error(err)
 			continue
 		}
 

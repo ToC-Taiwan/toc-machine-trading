@@ -10,6 +10,7 @@ import (
 	"tmt/internal/usecase/grpcapi"
 	"tmt/pb"
 	"tmt/pkg/eventbus"
+	"tmt/pkg/log"
 
 	"github.com/google/uuid"
 )
@@ -37,10 +38,13 @@ type DTTraderFuture struct {
 	sellFirst bool
 	waitTimes int64
 	lastTick  *entity.RealTimeFutureTick
+
+	logger *log.Log
 }
 
 // NewDTTraderFuture create a new DTTraderFuture, if quantity > orderQtyUnit, return nil or place order error, return nil
 func NewDTTraderFuture(orderWithCfg orderWithCfg, s *grpcapi.TradegRPCAPI, bus *eventbus.Bus) *DTTraderFuture {
+	logger := log.Get()
 	if orderWithCfg.order.Quantity > orderQtyUnit {
 		logger.Warnf("New DTTraderFuture quantity > %d", orderQtyUnit)
 		return nil
@@ -56,6 +60,7 @@ func NewDTTraderFuture(orderWithCfg orderWithCfg, s *grpcapi.TradegRPCAPI, bus *
 		tradeConfig:     orderWithCfg.cfg,
 		maxTradeOutTime: orderWithCfg.maxTradeOutTime,
 		waitTimes:       orderWithCfg.cfg.TradeOutWaitTimes,
+		logger:          logger,
 	}
 
 	if orderWithCfg.order.Action == entity.ActionSell {
@@ -183,7 +188,7 @@ func (d *DTTraderFuture) checkByBalance(tick *entity.RealTimeFutureTick) {
 	}
 
 	if err := d.placeOrder(o); err != nil {
-		logger.Errorf("checkByBalance place order error: %s", err.Error())
+		d.logger.Errorf("checkByBalance place order error: %s", err.Error())
 		return
 	}
 
@@ -238,7 +243,7 @@ func (d *DTTraderFuture) placeOrder(o *entity.FutureOrder) error {
 		return errors.New("order status is failed")
 	}
 
-	logger.Warnf("Place %s", o.String())
+	d.logger.Warnf("Place %s", o.String())
 
 	if !d.ready {
 		return nil
