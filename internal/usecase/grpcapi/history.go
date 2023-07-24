@@ -10,7 +10,7 @@ import (
 
 // HistorygRPCAPI -.
 type HistorygRPCAPI struct {
-	conn *grpc.ConnPool
+	pool *grpc.ConnPool
 }
 
 // NewHistory -.
@@ -20,8 +20,8 @@ func NewHistory(client *grpc.ConnPool) *HistorygRPCAPI {
 
 // GetStockHistoryTick GetStockHistoryTick
 func (t *HistorygRPCAPI) GetStockHistoryTick(stockNumArr []string, date string) ([]*pb.HistoryTickMessage, error) {
-	conn := t.conn.Get()
-	defer t.conn.Put(conn)
+	conn := t.pool.Get()
+	defer t.pool.Put(conn)
 
 	r, err := pb.NewHistoryDataInterfaceClient(conn).GetStockHistoryTick(context.Background(), &pb.StockNumArrWithDate{
 		StockNumArr: stockNumArr,
@@ -35,8 +35,8 @@ func (t *HistorygRPCAPI) GetStockHistoryTick(stockNumArr []string, date string) 
 
 // GetStockHistoryKbar GetStockHistoryKbar
 func (t *HistorygRPCAPI) GetStockHistoryKbar(stockNumArr []string, date string) ([]*pb.HistoryKbarMessage, error) {
-	conn := t.conn.Get()
-	defer t.conn.Put(conn)
+	conn := t.pool.Get()
+	defer t.pool.Put(conn)
 
 	r, err := pb.NewHistoryDataInterfaceClient(conn).GetStockHistoryKbar(context.Background(), &pb.StockNumArrWithDate{
 		StockNumArr: stockNumArr,
@@ -50,8 +50,8 @@ func (t *HistorygRPCAPI) GetStockHistoryKbar(stockNumArr []string, date string) 
 
 // GetStockHistoryClose GetStockHistoryClose
 func (t *HistorygRPCAPI) GetStockHistoryClose(stockNumArr []string, date string) ([]*pb.HistoryCloseMessage, error) {
-	conn := t.conn.Get()
-	defer t.conn.Put(conn)
+	conn := t.pool.Get()
+	defer t.pool.Put(conn)
 
 	r, err := pb.NewHistoryDataInterfaceClient(conn).GetStockHistoryClose(context.Background(), &pb.StockNumArrWithDate{
 		StockNumArr: stockNumArr,
@@ -65,8 +65,8 @@ func (t *HistorygRPCAPI) GetStockHistoryClose(stockNumArr []string, date string)
 
 // GetStockHistoryCloseByDateArr GetStockHistoryCloseByDateArr
 func (t *HistorygRPCAPI) GetStockHistoryCloseByDateArr(stockNumArr []string, date []string) ([]*pb.HistoryCloseMessage, error) {
-	conn := t.conn.Get()
-	defer t.conn.Put(conn)
+	conn := t.pool.Get()
+	defer t.pool.Put(conn)
 
 	r, err := pb.NewHistoryDataInterfaceClient(conn).GetStockHistoryCloseByDateArr(context.Background(), &pb.StockNumArrWithDateArr{
 		StockNumArr: stockNumArr,
@@ -80,8 +80,8 @@ func (t *HistorygRPCAPI) GetStockHistoryCloseByDateArr(stockNumArr []string, dat
 
 // GetStockTSEHistoryTick GetStockTSEHistoryTick
 func (t *HistorygRPCAPI) GetStockTSEHistoryTick(date string) ([]*pb.HistoryTickMessage, error) {
-	conn := t.conn.Get()
-	defer t.conn.Put(conn)
+	conn := t.pool.Get()
+	defer t.pool.Put(conn)
 
 	r, err := pb.NewHistoryDataInterfaceClient(conn).GetStockTSEHistoryTick(context.Background(), &pb.Date{
 		Date: date,
@@ -94,8 +94,8 @@ func (t *HistorygRPCAPI) GetStockTSEHistoryTick(date string) ([]*pb.HistoryTickM
 
 // GetStockTSEHistoryKbar GetStockTSEHistoryKbar
 func (t *HistorygRPCAPI) GetStockTSEHistoryKbar(date string) ([]*pb.HistoryKbarMessage, error) {
-	conn := t.conn.Get()
-	defer t.conn.Put(conn)
+	conn := t.pool.Get()
+	defer t.pool.Put(conn)
 
 	r, err := pb.NewHistoryDataInterfaceClient(conn).GetStockTSEHistoryKbar(context.Background(), &pb.Date{
 		Date: date,
@@ -108,8 +108,8 @@ func (t *HistorygRPCAPI) GetStockTSEHistoryKbar(date string) ([]*pb.HistoryKbarM
 
 // GetStockTSEHistoryClose GetStockTSEHistoryClose
 func (t *HistorygRPCAPI) GetStockTSEHistoryClose(date string) ([]*pb.HistoryCloseMessage, error) {
-	conn := t.conn.Get()
-	defer t.conn.Put(conn)
+	conn := t.pool.Get()
+	defer t.pool.Put(conn)
 
 	r, err := pb.NewHistoryDataInterfaceClient(conn).GetStockTSEHistoryClose(context.Background(), &pb.Date{
 		Date: date,
@@ -122,8 +122,8 @@ func (t *HistorygRPCAPI) GetStockTSEHistoryClose(date string) ([]*pb.HistoryClos
 
 // GetFutureHistoryTick -.
 func (t *HistorygRPCAPI) GetFutureHistoryTick(codeArr []string, date string) ([]*pb.HistoryTickMessage, error) {
-	conn := t.conn.Get()
-	defer t.conn.Put(conn)
+	conn := t.pool.Get()
+	defer t.pool.Put(conn)
 
 	r, err := pb.NewHistoryDataInterfaceClient(conn).GetFutureHistoryTick(context.Background(), &pb.FutureCodeArrWithDate{
 		FutureCodeArr: codeArr,
@@ -137,8 +137,8 @@ func (t *HistorygRPCAPI) GetFutureHistoryTick(codeArr []string, date string) ([]
 
 // GetFutureHistoryClose -.
 func (t *HistorygRPCAPI) GetFutureHistoryClose(codeArr []string, date string) ([]*pb.HistoryCloseMessage, error) {
-	conn := t.conn.Get()
-	defer t.conn.Put(conn)
+	conn := t.pool.Get()
+	defer t.pool.Put(conn)
 
 	r, err := pb.NewHistoryDataInterfaceClient(conn).GetFutureHistoryClose(context.Background(), &pb.FutureCodeArrWithDate{
 		FutureCodeArr: codeArr,
@@ -152,8 +152,8 @@ func (t *HistorygRPCAPI) GetFutureHistoryClose(codeArr []string, date string) ([
 
 // GetFutureHistoryKbar -.
 func (t *HistorygRPCAPI) GetFutureHistoryKbar(codeArr []string, date string) ([]*pb.HistoryKbarMessage, error) {
-	conn := t.conn.Get()
-	defer t.conn.Put(conn)
+	conn := t.pool.Get()
+	defer t.pool.Put(conn)
 
 	r, err := pb.NewHistoryDataInterfaceClient(conn).GetFutureHistoryKbar(context.Background(), &pb.FutureCodeArrWithDate{
 		FutureCodeArr: codeArr,
