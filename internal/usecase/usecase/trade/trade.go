@@ -1,4 +1,5 @@
-package usecase
+// Package trade package trade
+package trade
 
 import (
 	"context"
@@ -14,13 +15,16 @@ import (
 	"tmt/internal/usecase/module/quota"
 	"tmt/internal/usecase/module/tradeday"
 	"tmt/internal/usecase/repo"
+	"tmt/pkg/eventbus"
+	"tmt/pkg/log"
 
 	"github.com/google/go-cmp/cmp"
 )
 
 // TradeUseCase -.
 type TradeUseCase struct {
-	repo TradeRepo
+	simulation bool
+	repo       TradeRepo
 
 	sc TradegRPCAPI
 	fg TradegRPCAPI
@@ -35,17 +39,20 @@ type TradeUseCase struct {
 	finishedFutureOrderMap map[string]*entity.FutureOrder
 	updateFutureOrderLock  sync.Mutex
 	updateStockOrderLock   sync.Mutex
+
+	logger *log.Log
+	bus    *eventbus.Bus
 }
 
 func NewTrade() Trade {
 	cfg := config.Get()
 	tradeDay := tradeday.Get()
-
-	uc := &TradeUseCase{
-		sc:    grpcapi.NewTrade(cfg.GetSinopacPool(), cfg.Simulation),
-		fg:    grpcapi.NewTrade(cfg.GetFuglePool(), cfg.Simulation),
-		repo:  repo.NewTrade(cfg.GetPostgresPool()),
-		quota: quota.NewQuota(cfg.Quota),
+	return &TradeUseCase{
+		simulation: cfg.Simulation,
+		sc:         grpcapi.NewTrade(cfg.GetSinopacPool(), cfg.Simulation),
+		fg:         grpcapi.NewTrade(cfg.GetFuglePool(), cfg.Simulation),
+		repo:       repo.NewTrade(cfg.GetPostgresPool()),
+		quota:      quota.NewQuota(cfg.Quota),
 
 		tradeDay:       tradeDay,
 		stockTradeDay:  tradeDay.GetStockTradeDay(),
@@ -54,11 +61,16 @@ func NewTrade() Trade {
 		finishedStockOrderMap:  make(map[string]*entity.StockOrder),
 		finishedFutureOrderMap: make(map[string]*entity.FutureOrder),
 	}
+}
 
-	bus.SubscribeAsync(event.TopicInsertOrUpdateStockOrder, true, uc.updateStockOrderCacheAndInsertDB)
-	bus.SubscribeAsync(event.TopicInsertOrUpdateFutureOrder, true, uc.updateFutureOrderCacheAndInsertDB)
+func (uc *TradeUseCase) Init(logger *log.Log, bus *eventbus.Bus) Trade {
+	uc.logger = logger
+	uc.bus = bus
 
-	if cfg.Simulation {
+	uc.bus.SubscribeAsync(event.TopicInsertOrUpdateStockOrder, true, uc.updateStockOrderCacheAndInsertDB)
+	uc.bus.SubscribeAsync(event.TopicInsertOrUpdateFutureOrder, true, uc.updateFutureOrderCacheAndInsertDB)
+
+	if uc.simulation {
 		go uc.askSimulateOrderStatus()
 	} else {
 		go uc.askOrderStatus()
@@ -66,6 +78,7 @@ func NewTrade() Trade {
 
 	go uc.updateAccountDetail()
 	go uc.updateAllTradeBalance()
+
 	return uc
 }
 
@@ -73,19 +86,19 @@ func (uc *TradeUseCase) updateAccountDetail() {
 	for range time.NewTicker(time.Minute).C {
 		err := uc.repo.InsertOrUpdateAccountBalance(context.Background(), uc.getSinopacAccountBalance())
 		if err != nil {
-			logger.Fatal(err)
+			uc.logger.Fatal(err)
 		}
 
 		err = uc.repo.InsertOrUpdateAccountBalance(context.Background(), uc.getFugleAccountBalance())
 		if err != nil {
-			logger.Fatal(err)
+			uc.logger.Fatal(err)
 		}
 
 		accountSettlement := uc.getAccountSettlement()
 		for _, v := range accountSettlement {
 			err := uc.repo.InsertOrUpdateAccountSettlement(context.Background(), v)
 			if err != nil {
-				logger.Fatal(err)
+				uc.logger.Fatal(err)
 			}
 		}
 		uc.updateStockInventory()
@@ -96,11 +109,11 @@ func (uc *TradeUseCase) updateAccountDetail() {
 func (uc *TradeUseCase) getSinopacAccountBalance() *entity.AccountBalance {
 	margin, err := uc.sc.GetMargin()
 	if err != nil {
-		logger.Fatal(err)
+		uc.logger.Fatal(err)
 	}
 	accountBalance, er := uc.sc.GetAccountBalance()
 	if err != nil {
-		logger.Fatal(er)
+		uc.logger.Fatal(er)
 	}
 
 	return &entity.AccountBalance{
@@ -117,7 +130,7 @@ func (uc *TradeUseCase) getSinopacAccountBalance() *entity.AccountBalance {
 func (uc *TradeUseCase) getFugleAccountBalance() *entity.AccountBalance {
 	accountBalance, er := uc.fg.GetAccountBalance()
 	if er != nil {
-		logger.Fatal(er)
+		uc.logger.Fatal(er)
 	}
 
 	return &entity.AccountBalance{
@@ -132,13 +145,13 @@ func (uc *TradeUseCase) getAccountSettlement() []*entity.Settlement {
 	result := make(map[time.Time]*entity.Settlement)
 	sinopacSettlement, err := uc.sc.GetSettlement()
 	if err != nil {
-		logger.Fatal(err)
+		uc.logger.Fatal(err)
 	}
 
 	for _, v := range sinopacSettlement.GetSettlement() {
 		dateTime, err := time.ParseInLocation(global.LongTimeLayout, v.GetDate(), time.Local)
 		if err != nil {
-			logger.Fatal(err)
+			uc.logger.Fatal(err)
 		}
 		result[dateTime] = &entity.Settlement{
 			Date:    dateTime,
@@ -148,13 +161,13 @@ func (uc *TradeUseCase) getAccountSettlement() []*entity.Settlement {
 
 	fugleSettlement, er := uc.fg.GetSettlement()
 	if er != nil {
-		logger.Fatal(er)
+		uc.logger.Fatal(er)
 	}
 
 	for _, v := range fugleSettlement.GetSettlement() {
 		dateTime, err := time.ParseInLocation(global.LongTimeLayout, v.GetDate(), time.Local)
 		if err != nil {
-			logger.Fatal(err)
+			uc.logger.Fatal(err)
 		}
 		if _, ok := result[dateTime]; ok {
 			result[dateTime].Fugle = v.GetAmount()
@@ -179,7 +192,7 @@ func (uc *TradeUseCase) updateStockInventory() {
 
 	sinopacInventory, err := uc.sc.GetStockPosition()
 	if err != nil {
-		logger.Fatal(err)
+		uc.logger.Fatal(err)
 	}
 	for _, s := range sinopacInventory.GetPositionArr() {
 		inv = append(inv, &entity.InventoryStock{
@@ -195,7 +208,7 @@ func (uc *TradeUseCase) updateStockInventory() {
 
 	fugleInventory, err := uc.fg.GetStockPosition()
 	if err != nil {
-		logger.Fatal(err)
+		uc.logger.Fatal(err)
 	}
 	for _, s := range fugleInventory.GetPositionArr() {
 		inv = append(inv, &entity.InventoryStock{
@@ -211,7 +224,7 @@ func (uc *TradeUseCase) updateStockInventory() {
 
 	dbData, err := uc.repo.QueryInventoryStockByDate(context.Background(), queryDate)
 	if err != nil {
-		logger.Fatal(err)
+		uc.logger.Fatal(err)
 	}
 
 	for _, v := range dbData {
@@ -221,12 +234,12 @@ func (uc *TradeUseCase) updateStockInventory() {
 	if !cmp.Equal(dbData, inv) && len(inv) > 0 {
 		err = uc.repo.DeleteInventoryStockByDate(context.Background(), queryDate)
 		if err != nil {
-			logger.Fatal(err)
+			uc.logger.Fatal(err)
 		}
 
 		err = uc.repo.InsertInventoryStock(context.Background(), inv)
 		if err != nil {
-			logger.Fatal(err)
+			uc.logger.Fatal(err)
 		}
 	}
 }
@@ -238,7 +251,7 @@ func (uc *TradeUseCase) updateAllTradeBalance() {
 		if uc.IsStockTradeTime() {
 			stockOrders, err := uc.repo.QueryAllStockOrderByDate(context.Background(), uc.stockTradeDay.ToStartEndArray())
 			if err != nil {
-				logger.Fatal(err)
+				uc.logger.Fatal(err)
 			}
 			uc.calculateStockTradeBalance(stockOrders, uc.stockTradeDay.TradeDay)
 		}
@@ -246,7 +259,7 @@ func (uc *TradeUseCase) updateAllTradeBalance() {
 		if uc.IsFutureTradeTime() {
 			futureOrders, err := uc.repo.QueryAllFutureOrderByDate(context.Background(), uc.futureTradeDay.ToStartEndArray())
 			if err != nil {
-				logger.Fatal(err)
+				uc.logger.Fatal(err)
 			}
 			uc.calculateFutureTradeBalance(futureOrders, uc.futureTradeDay.TradeDay)
 		}
@@ -307,11 +320,11 @@ func (uc *TradeUseCase) askOrderStatus() {
 		}
 
 		if err := uc.sc.GetLocalOrderStatusArr(); err != nil {
-			logger.Error(err)
+			uc.logger.Error(err)
 		}
 
 		if err := uc.fg.GetLocalOrderStatusArr(); err != nil {
-			logger.Error(err)
+			uc.logger.Error(err)
 		}
 	}
 }
@@ -323,11 +336,11 @@ func (uc *TradeUseCase) askSimulateOrderStatus() {
 		}
 
 		if err := uc.sc.GetSimulateOrderStatusArr(); err != nil {
-			logger.Error(err)
+			uc.logger.Error(err)
 		}
 
 		if err := uc.fg.GetSimulateOrderStatusArr(); err != nil {
-			logger.Error(err)
+			uc.logger.Error(err)
 		}
 	}
 }
@@ -341,7 +354,7 @@ func (uc *TradeUseCase) updateStockOrderCacheAndInsertDB(order *entity.StockOrde
 
 	// insert or update order to db
 	if err := uc.repo.InsertOrUpdateOrderByOrderID(context.Background(), order); err != nil {
-		logger.Fatal(err)
+		uc.logger.Fatal(err)
 	}
 
 	if !order.Cancellable() {
@@ -390,7 +403,7 @@ func (uc *TradeUseCase) calculateStockTradeBalance(allOrders []*entity.StockOrde
 
 	err := uc.repo.InsertOrUpdateStockTradeBalance(context.Background(), tmp)
 	if err != nil {
-		logger.Fatal(err)
+		uc.logger.Fatal(err)
 	}
 }
 
@@ -451,7 +464,7 @@ func (uc *TradeUseCase) updateFutureOrderCacheAndInsertDB(order *entity.FutureOr
 
 	// insert or update order to db
 	if err := uc.repo.InsertOrUpdateFutureOrderByOrderID(context.Background(), order); err != nil {
-		logger.Fatal(err)
+		uc.logger.Fatal(err)
 	}
 
 	if !order.Cancellable() {
@@ -552,7 +565,7 @@ func (uc *TradeUseCase) calculateFutureTradeBalance(allOrders []*entity.FutureOr
 
 	err := uc.repo.InsertOrUpdateFutureTradeBalance(context.Background(), tmp)
 	if err != nil {
-		logger.Fatal(err)
+		uc.logger.Fatal(err)
 	}
 }
 

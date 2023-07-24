@@ -8,7 +8,12 @@ import (
 
 	"tmt/docs"
 	v1 "tmt/internal/controller/http/v1"
-	"tmt/internal/usecase"
+	"tmt/internal/usecase/usecase/analyze"
+	"tmt/internal/usecase/usecase/basic"
+	"tmt/internal/usecase/usecase/history"
+	"tmt/internal/usecase/usecase/realtime"
+	"tmt/internal/usecase/usecase/target"
+	"tmt/internal/usecase/usecase/trade"
 
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -58,37 +63,37 @@ func (r *Router) GetHandler() *gin.Engine {
 }
 
 // AddV1BasicRoutes -.
-func (r *Router) AddV1BasicRoutes(basic usecase.Basic) *Router {
+func (r *Router) AddV1BasicRoutes(basic basic.Basic) *Router {
 	v1.NewBasicRoutes(r.public, basic)
 	return r
 }
 
 // AddV1AnalyzeRoutes -.
-func (r *Router) AddV1AnalyzeRoutes(analyze usecase.Analyze) *Router {
+func (r *Router) AddV1AnalyzeRoutes(analyze analyze.Analyze) *Router {
 	v1.NewAnalyzeRoutes(r.public, analyze)
 	return r
 }
 
 // AddV1TargetRoutes -.
-func (r *Router) AddV1TargetRoutes(target usecase.Target) *Router {
+func (r *Router) AddV1TargetRoutes(target target.Target) *Router {
 	v1.NewTargetRoutes(r.public, target)
 	return r
 }
 
 // AddV1TradeRoutes -.
-func (r *Router) AddV1TradeRoutes(trade usecase.Trade) *Router {
+func (r *Router) AddV1TradeRoutes(trade trade.Trade) *Router {
 	v1.NewTradeRoutes(r.public, trade)
 	return r
 }
 
 // AddV1HistoryRoutes -.
-func (r *Router) AddV1HistoryRoutes(history usecase.History) *Router {
+func (r *Router) AddV1HistoryRoutes(history history.History) *Router {
 	v1.NewHistoryRoutes(r.public, history)
 	return r
 }
 
 // AddV1RealTimeRoutes -.
-func (r *Router) AddV1RealTimeRoutes(realTime usecase.RealTime, trade usecase.Trade, history usecase.History) *Router {
+func (r *Router) AddV1RealTimeRoutes(realTime realtime.RealTime, trade trade.Trade, history history.History) *Router {
 	v1.NewRealTimeRoutes(r.public, realTime, trade, history)
 	return r
 }

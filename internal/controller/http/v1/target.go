@@ -4,16 +4,16 @@ package v1
 import (
 	"net/http"
 
-	"tmt/internal/usecase"
+	"tmt/internal/usecase/usecase/target"
 
 	"github.com/gin-gonic/gin"
 )
 
 type targetRoutes struct {
-	t usecase.Target
+	t target.Target
 }
 
-func NewTargetRoutes(handler *gin.RouterGroup, t usecase.Target) {
+func NewTargetRoutes(handler *gin.RouterGroup, t target.Target) {
 	r := &targetRoutes{t}
 
 	h := handler.Group("/targets")

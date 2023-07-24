@@ -169,9 +169,9 @@ func (c *Config) GetRabbitConn() *rabbitmq.Connection {
 	return conn
 }
 
-func (c *Config) Close() {
+func (c *Config) CloseDB() {
 	if c.dbPool != nil {
 		c.dbPool.Close()
+		logger.Warn("TMT is shutting down")
 	}
-	logger.Warn("TMT is shutting down")
 }

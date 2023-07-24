@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"time"
 
+	"tmt/pkg/log"
+
 	"tmt/cmd/config"
 	"tmt/pkg/postgres"
 
@@ -32,6 +34,8 @@ func InitDB() {
 // MigrateDB -.
 func MigrateDB(dbConfig config.Database) {
 	m := &migrate.Migrate{}
+	logger := log.Get()
+
 	path := fmt.Sprintf("%s%s%s", dbConfig.URL, dbConfig.DBName, "?sslmode=disable")
 	attempts := _defaultAttempts
 	var err error
@@ -70,6 +74,7 @@ func MigrateDB(dbConfig config.Database) {
 
 // TryCreateDB -.
 func TryCreateDB(cfg config.Database) {
+	logger := log.Get()
 	pg, err := postgres.New(
 		cfg.URL,
 		postgres.MaxPoolSize(cfg.PoolMax),

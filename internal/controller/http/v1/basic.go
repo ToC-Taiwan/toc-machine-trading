@@ -6,16 +6,16 @@ import (
 
 	"tmt/internal/controller/http/resp"
 	"tmt/internal/entity"
-	"tmt/internal/usecase"
+	"tmt/internal/usecase/usecase/basic"
 
 	"github.com/gin-gonic/gin"
 )
 
 type basicRoutes struct {
-	t usecase.Basic
+	t basic.Basic
 }
 
-func NewBasicRoutes(handler *gin.RouterGroup, t usecase.Basic) {
+func NewBasicRoutes(handler *gin.RouterGroup, t basic.Basic) {
 	r := &basicRoutes{t}
 
 	h := handler.Group("/basic")

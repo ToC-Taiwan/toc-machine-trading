@@ -8,16 +8,16 @@ import (
 
 	"tmt/global"
 	"tmt/internal/entity"
-	"tmt/internal/usecase"
+	"tmt/internal/usecase/usecase/analyze"
 
 	"github.com/gin-gonic/gin"
 )
 
 type analyzeRoutes struct {
-	t usecase.Analyze
+	t analyze.Analyze
 }
 
-func NewAnalyzeRoutes(handler *gin.RouterGroup, t usecase.Analyze) {
+func NewAnalyzeRoutes(handler *gin.RouterGroup, t analyze.Analyze) {
 	r := &analyzeRoutes{t}
 
 	h := handler.Group("/analyze")

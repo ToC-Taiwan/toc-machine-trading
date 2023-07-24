@@ -8,25 +8,34 @@ import (
 
 	"tmt/cmd/config"
 	"tmt/internal/controller/http/router"
-	"tmt/internal/usecase"
+	"tmt/internal/usecase/cache"
+	"tmt/internal/usecase/usecase/analyze"
+	"tmt/internal/usecase/usecase/basic"
+	"tmt/internal/usecase/usecase/history"
+	"tmt/internal/usecase/usecase/realtime"
+	"tmt/internal/usecase/usecase/target"
+	"tmt/internal/usecase/usecase/trade"
+	"tmt/pkg/eventbus"
 	"tmt/pkg/httpserver"
 	"tmt/pkg/log"
 )
 
-var logger = log.Get()
-
 func RunApp() {
 	cfg := config.Get()
+	logger := log.Get()
+	cc := cache.Get()
+	bus := eventbus.Get()
+
 	logger.Warn("TMT is running")
 	logger.Warnf("Simulation Mode: %v", cfg.Simulation)
 
 	// Do not adjust the order
-	basic := usecase.NewBasic()
-	trade := usecase.NewTrade()
-	analyze := usecase.NewAnalyze()
-	history := usecase.NewHistory()
-	realTime := usecase.NewRealTime()
-	target := usecase.NewTarget()
+	basic := basic.NewBasic().Init(logger, cc)
+	trade := trade.NewTrade().Init(logger, bus)
+	analyze := analyze.NewAnalyze().Init(logger, cc, bus)
+	history := history.NewHistory().Init(logger, cc, bus)
+	realTime := realtime.NewRealTime().Init(logger, cc, bus)
+	target := target.NewTarget().Init(logger, cc, bus)
 
 	// HTTP Server
 	r := router.NewRouter().
@@ -49,5 +58,5 @@ func RunApp() {
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
 	<-interrupt
-	cfg.Close()
+	cfg.CloseDB()
 }

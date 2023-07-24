@@ -8,18 +8,20 @@ import (
 	"tmt/internal/controller/http/websocket/future"
 	"tmt/internal/controller/http/websocket/pick"
 
-	"tmt/internal/usecase"
+	"tmt/internal/usecase/usecase/history"
+	"tmt/internal/usecase/usecase/realtime"
+	"tmt/internal/usecase/usecase/trade"
 
 	"github.com/gin-gonic/gin"
 )
 
 type realTimeRoutes struct {
-	t usecase.RealTime
-	o usecase.Trade
-	h usecase.History
+	t realtime.RealTime
+	o trade.Trade
+	h history.History
 }
 
-func NewRealTimeRoutes(handler *gin.RouterGroup, t usecase.RealTime, o usecase.Trade, history usecase.History) {
+func NewRealTimeRoutes(handler *gin.RouterGroup, t realtime.RealTime, o trade.Trade, history history.History) {
 	r := &realTimeRoutes{
 		t: t,
 		o: o,

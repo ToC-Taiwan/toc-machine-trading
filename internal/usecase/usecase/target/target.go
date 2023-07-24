@@ -1,4 +1,5 @@
-package usecase
+// Package target package target
+package target
 
 import (
 	"context"
@@ -9,54 +10,69 @@ import (
 	"tmt/cmd/config"
 	"tmt/global"
 	"tmt/internal/entity"
+	"tmt/internal/usecase/cache"
 	"tmt/internal/usecase/event"
 	"tmt/internal/usecase/grpcapi"
 	"tmt/internal/usecase/module/target"
 	"tmt/internal/usecase/module/tradeday"
 	"tmt/internal/usecase/repo"
+	"tmt/internal/usecase/usecase/realtime"
+	"tmt/pkg/eventbus"
+	"tmt/pkg/log"
 )
 
 // TargetUseCase -.
 type TargetUseCase struct {
 	repo    TargetRepo
-	gRPCAPI RealTimegRPCAPI
+	gRPCAPI realtime.RealTimegRPCAPI
 
 	targetFilter *target.Filter
 	cfg          *config.Config
 	tradeDay     *tradeday.TradeDay
+
+	logger *log.Log
+	cc     *cache.Cache
+	bus    *eventbus.Bus
 }
 
 func NewTarget() Target {
 	cfg := config.Get()
-	uc := &TargetUseCase{
+	return &TargetUseCase{
 		repo:         repo.NewTarget(cfg.GetPostgresPool()),
 		gRPCAPI:      grpcapi.NewRealTime(cfg.GetSinopacPool()),
 		cfg:          cfg,
 		tradeDay:     tradeday.Get(),
 		targetFilter: target.NewFilter(cfg.TargetStock),
 	}
+}
+
+func (uc *TargetUseCase) Init(logger *log.Log, cc *cache.Cache, bus *eventbus.Bus) Target {
+	uc.logger = logger
+	uc.cc = cc
+	uc.bus = bus
+
 	// query targets from db
 	tDay := uc.tradeDay.GetStockTradeDay().TradeDay
 	targetArr, err := uc.searchTradeDayTargetsFromDB(tDay)
 	if err != nil {
-		logger.Fatal(err)
+		uc.logger.Fatal(err)
 	}
 
 	// db has no targets, find targets from gRPC
 	if len(targetArr) == 0 {
 		targetArr, err = uc.searchTradeDayTargets(tDay)
 		if err != nil {
-			logger.Fatal(err)
+			uc.logger.Fatal(err)
 		}
 
 		if len(targetArr) == 0 {
 			stuck := make(chan struct{})
-			logger.Error("no targets")
+			uc.logger.Error("no targets")
 			<-stuck
 		}
 	}
 
-	cc.AppendStockTargets(targetArr)
+	uc.cc.AppendStockTargets(targetArr)
 	uc.publishNewStockTargets(targetArr)
 	uc.publishNewFutureTargets()
 
@@ -65,7 +81,7 @@ func NewTarget() Target {
 	// 	for range time.NewTicker(time.Second * 60).C {
 	// 		if uc.stockTradeInSwitch {
 	// 			if err := uc.realTimeAddTargets(); err != nil {
-	// 				logger.Fatal(err)
+	// 				uc.logger.Fatal(err)
 	// 			}
 	// 		}
 	// 	}
@@ -76,21 +92,21 @@ func NewTarget() Target {
 
 // GetTargets - get targets from cache
 func (uc *TargetUseCase) GetTargets(ctx context.Context) []*entity.StockTarget {
-	return cc.GetStockTargets()
+	return uc.cc.GetStockTargets()
 }
 
 func (uc *TargetUseCase) publishNewStockTargets(targetArr []*entity.StockTarget) {
 	if err := uc.repo.InsertOrUpdateTargetArr(context.Background(), targetArr); err != nil {
-		logger.Fatal(err)
+		uc.logger.Fatal(err)
 	}
-	bus.PublishTopicEvent(event.TopicFetchStockHistory, targetArr)
+	uc.bus.PublishTopicEvent(event.TopicFetchStockHistory, targetArr)
 }
 
 func (uc *TargetUseCase) publishNewFutureTargets() {
 	if futureTarget, err := uc.getFutureTarget(); err != nil {
-		logger.Fatal(err)
+		uc.logger.Fatal(err)
 	} else {
-		bus.PublishTopicEvent(event.TopicFetchFutureHistory, futureTarget)
+		uc.bus.PublishTopicEvent(event.TopicFetchFutureHistory, futureTarget)
 	}
 }
 
@@ -121,7 +137,7 @@ func (uc *TargetUseCase) searchTradeDayTargetsFromDB(tradeDay time.Time) ([]*ent
 
 	var result []*entity.StockTarget
 	for _, v := range targetArr {
-		stock := cc.GetStockDetail(v.StockNum)
+		stock := uc.cc.GetStockDetail(v.StockNum)
 		if stock == nil {
 			continue
 		}
@@ -141,13 +157,13 @@ func (uc *TargetUseCase) searchTradeDayTargets(tradeDay time.Time) ([]*entity.St
 	}
 
 	if len(t) == 0 && time.Now().Before(uc.tradeDay.GetStockTradeDay().TradeDay.Add(8*time.Hour)) {
-		logger.Warn("VolumeRank is empty, search from all snapshot")
+		uc.logger.Warn("VolumeRank is empty, search from all snapshot")
 		return uc.searchTradeDayTargetsFromAllSnapshot(tradeDay)
 	}
 
 	var result []*entity.StockTarget
 	for _, v := range t {
-		stock := cc.GetStockDetail(v.GetCode())
+		stock := uc.cc.GetStockDetail(v.GetCode())
 		if stock == nil {
 			continue
 		}
@@ -183,7 +199,7 @@ func (uc *TargetUseCase) searchTradeDayTargetsFromAllSnapshot(tradeDay time.Time
 
 	var result []*entity.StockTarget
 	for _, v := range data[:200] {
-		stock := cc.GetStockDetail(v.GetCode())
+		stock := uc.cc.GetStockDetail(v.GetCode())
 		if stock == nil {
 			continue
 		}
@@ -211,7 +227,7 @@ func (uc *TargetUseCase) searchTradeDayTargetsFromAllSnapshot(tradeDay time.Time
 
 // 	// at least 200 snapshot to rank volume
 // 	if len(data) < 200 {
-// 		logger.Warnf("stock snapshot len is not enough: %d", len(data))
+// 		uc.logger.Warnf("stock snapshot len is not enough: %d", len(data))
 // 		return nil
 // 	}
 
@@ -220,7 +236,7 @@ func (uc *TargetUseCase) searchTradeDayTargetsFromAllSnapshot(tradeDay time.Time
 // 	})
 // 	data = data[:uc.targetFilter.RealTimeRank]
 
-// 	currentTargets := cc.GetStockTargets()
+// 	currentTargets := uc.cc.GetStockTargets()
 // 	targetsMap := make(map[string]*entity.StockTarget)
 // 	for _, t := range currentTargets {
 // 		targetsMap[t.StockNum] = t
@@ -228,7 +244,7 @@ func (uc *TargetUseCase) searchTradeDayTargetsFromAllSnapshot(tradeDay time.Time
 
 // 	var newTargets []*entity.StockTarget
 // 	for i, d := range data {
-// 		stock := cc.GetStockDetail(d.GetCode())
+// 		stock := uc.cc.GetStockDetail(d.GetCode())
 // 		if stock == nil {
 // 			continue
 // 		}
@@ -249,10 +265,10 @@ func (uc *TargetUseCase) searchTradeDayTargetsFromAllSnapshot(tradeDay time.Time
 // 	}
 
 // 	if len(newTargets) != 0 {
-// 		cc.AppendStockTargets(newTargets)
+// 		uc.cc.AppendStockTargets(newTargets)
 // 		uc.publishNewStockTargets(newTargets)
 // 		for _, t := range newTargets {
-// 			logger.Infof("New target: %s", t.StockNum)
+// 			uc.logger.Infof("New target: %s", t.StockNum)
 // 		}
 // 	}
 // 	return nil

@@ -1,4 +1,5 @@
-package usecase
+// Package basic package basic
+package basic
 
 import (
 	"context"
@@ -10,11 +11,12 @@ import (
 	"tmt/cmd/config"
 	"tmt/global"
 	"tmt/internal/entity"
-	"tmt/internal/utils"
-
+	"tmt/internal/usecase/cache"
 	"tmt/internal/usecase/grpcapi"
 	"tmt/internal/usecase/module/tradeday"
 	"tmt/internal/usecase/repo"
+	"tmt/internal/utils"
+	"tmt/pkg/log"
 )
 
 type BasicUseCase struct {
@@ -27,34 +29,43 @@ type BasicUseCase struct {
 	allStockDetail  []*entity.Stock
 	allFutureDetail []*entity.Future
 	allOptionDetail []*entity.Option
+
+	logger *log.Log
+	cc     *cache.Cache
 }
 
 func NewBasic() Basic {
 	cfg := config.Get()
-	uc := &BasicUseCase{
+	return &BasicUseCase{
 		repo:     repo.NewBasic(cfg.GetPostgresPool()),
 		sc:       grpcapi.NewBasic(cfg.GetSinopacPool()),
 		fugle:    grpcapi.NewBasic(cfg.GetFuglePool()),
 		cfg:      cfg,
 		tradeDay: tradeday.Get(),
 	}
+}
+
+func (uc *BasicUseCase) Init(logger *log.Log, cc *cache.Cache) Basic {
+	uc.logger = logger
+	uc.cc = cc
+
 	uc.loginAll()
 	uc.checkgRPCHealth()
 
 	if err := uc.importCalendarDate(); err != nil {
-		logger.Fatal(err)
+		uc.logger.Fatal(err)
 	}
 
 	if err := uc.updateRepoStock(); err != nil {
-		logger.Fatal(err)
+		uc.logger.Fatal(err)
 	}
 
 	if err := uc.updateRepoFuture(); err != nil {
-		logger.Fatal(err)
+		uc.logger.Fatal(err)
 	}
 
 	if err := uc.updateRepoOption(); err != nil {
-		logger.Fatal(err)
+		uc.logger.Fatal(err)
 	}
 
 	uc.saveStockFutureCache()
@@ -75,7 +86,7 @@ func (uc *BasicUseCase) checkgRPCHealth() {
 			}
 		}(errChan)
 		err := <-errChan
-		logger.Fatal(err)
+		uc.logger.Fatal(err)
 	}()
 }
 
@@ -85,13 +96,13 @@ func (uc *BasicUseCase) loginAll() {
 	go func() {
 		defer wg.Done()
 		if err := uc.sc.Login(); err != nil {
-			logger.Fatal(err)
+			uc.logger.Fatal(err)
 		}
 	}()
 	go func() {
 		defer wg.Done()
 		if err := uc.fugle.Login(); err != nil {
-			logger.Fatal(err)
+			uc.logger.Fatal(err)
 		}
 	}()
 	wg.Wait()
@@ -129,7 +140,7 @@ func (uc *BasicUseCase) updateRepoStock() error {
 
 		updateTime, pErr := time.ParseInLocation(global.ShortSlashTimeLayout, v.GetUpdateDate(), time.Local)
 		if pErr != nil {
-			logger.Warnf("stock %s update date parse error: %s", v.GetCode(), pErr.Error())
+			uc.logger.Warnf("stock %s update date parse error: %s", v.GetCode(), pErr.Error())
 			continue
 		}
 
@@ -167,13 +178,13 @@ func (uc *BasicUseCase) updateRepoFuture() error {
 
 		updateTime, pErr := time.ParseInLocation(global.ShortSlashTimeLayout, v.GetUpdateDate(), time.Local)
 		if pErr != nil {
-			logger.Warnf("future %s update date parse error: %s", v.GetCode(), pErr.Error())
+			uc.logger.Warnf("future %s update date parse error: %s", v.GetCode(), pErr.Error())
 			continue
 		}
 
 		dDate, e := time.ParseInLocation(global.ShortSlashTimeLayout, v.GetDeliveryDate(), time.Local)
 		if e != nil {
-			logger.Warnf("future %s delivery date parse error: %s", v.GetCode(), e.Error())
+			uc.logger.Warnf("future %s delivery date parse error: %s", v.GetCode(), e.Error())
 			continue
 		}
 
@@ -215,13 +226,13 @@ func (uc *BasicUseCase) updateRepoOption() error {
 
 		updateTime, pErr := time.ParseInLocation(global.ShortSlashTimeLayout, v.GetUpdateDate(), time.Local)
 		if pErr != nil {
-			logger.Warnf("option %s update date parse error: %s", v.GetCode(), pErr.Error())
+			uc.logger.Warnf("option %s update date parse error: %s", v.GetCode(), pErr.Error())
 			continue
 		}
 
 		dDate, e := time.ParseInLocation(global.ShortSlashTimeLayout, v.GetDeliveryDate(), time.Local)
 		if e != nil {
-			logger.Warnf("option %s delivery date parse error: %s", v.GetCode(), e.Error())
+			uc.logger.Warnf("option %s delivery date parse error: %s", v.GetCode(), e.Error())
 			continue
 		}
 
@@ -255,7 +266,7 @@ func (uc *BasicUseCase) saveStockFutureCache() {
 	for _, s := range uc.allStockDetail {
 		f, err := uc.repo.QueryFutureByLikeName(context.Background(), s.Name)
 		if err != nil {
-			logger.Error(err)
+			uc.logger.Error(err)
 		}
 
 		for _, v := range f {
@@ -265,14 +276,14 @@ func (uc *BasicUseCase) saveStockFutureCache() {
 
 			if time.Now().Before(v.DeliveryDate) {
 				s.Future = v
-				cc.SetStockDetail(s)
+				uc.cc.SetStockDetail(s)
 				break
 			}
 		}
 	}
 
 	for _, f := range uc.allFutureDetail {
-		cc.SetFutureDetail(f)
+		uc.cc.SetFutureDetail(f)
 	}
 }
 

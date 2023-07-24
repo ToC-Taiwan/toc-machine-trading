@@ -1,4 +1,5 @@
-package usecase
+// Package realtime package realtime
+package realtime
 
 import (
 	"context"
@@ -9,6 +10,7 @@ import (
 
 	"tmt/cmd/config"
 	"tmt/internal/entity"
+	"tmt/internal/usecase/cache"
 	"tmt/internal/usecase/event"
 	"tmt/internal/usecase/grpcapi"
 	"tmt/internal/usecase/module/dt"
@@ -17,6 +19,9 @@ import (
 	"tmt/internal/usecase/module/tradeday"
 	"tmt/internal/usecase/rabbit"
 	"tmt/internal/usecase/repo"
+	"tmt/internal/usecase/usecase/trade"
+	"tmt/pkg/eventbus"
+	"tmt/pkg/log"
 )
 
 // RealTimeUseCase -.
@@ -25,8 +30,8 @@ type RealTimeUseCase struct {
 
 	grpcapi    RealTimegRPCAPI
 	subgRPCAPI SubscribegRPCAPI
-	sc         TradegRPCAPI
-	fg         TradegRPCAPI
+	sc         trade.TradegRPCAPI
+	fg         trade.TradegRPCAPI
 
 	commonRabbit Rabbit
 	futureRabbit Rabbit
@@ -46,11 +51,15 @@ type RealTimeUseCase struct {
 	futureSwitchChanMapLock sync.RWMutex
 
 	inventoryIsNotEmpty bool
+
+	logger *log.Log
+	cc     *cache.Cache
+	bus    *eventbus.Bus
 }
 
 func NewRealTime() RealTime {
 	cfg := config.Get()
-	uc := &RealTimeUseCase{
+	return &RealTimeUseCase{
 		quota: quota.NewQuota(cfg.Quota),
 		repo:  repo.NewRealTime(cfg.GetPostgresPool()),
 
@@ -69,15 +78,21 @@ func NewRealTime() RealTime {
 
 		clientRabbitMap: make(map[string]Rabbit),
 	}
+}
+
+func (uc *RealTimeUseCase) Init(logger *log.Log, cc *cache.Cache, bus *eventbus.Bus) RealTime {
+	uc.logger = logger
+	uc.cc = cc
+	uc.bus = bus
 
 	// unsubscriba all first
 	if e := uc.UnSubscribeAll(); e != nil {
-		logger.Fatal(e)
+		uc.logger.Fatal(e)
 	}
 	uc.checkFutureInventory()
 
-	uc.commonRabbit.FillAllBasic(cc.GetAllStockDetail(), cc.GetAllFutureDetail())
-	uc.futureRabbit.FillAllBasic(cc.GetAllStockDetail(), cc.GetAllFutureDetail())
+	uc.commonRabbit.FillAllBasic(uc.cc.GetAllStockDetail(), uc.cc.GetAllFutureDetail())
+	uc.futureRabbit.FillAllBasic(uc.cc.GetAllStockDetail(), uc.cc.GetAllFutureDetail())
 	uc.periodUpdateTradeIndex()
 
 	uc.checkFutureTradeSwitch()
@@ -86,9 +101,9 @@ func NewRealTime() RealTime {
 	go uc.ReceiveEvent(context.Background())
 	go uc.ReceiveOrderStatus(context.Background())
 
-	bus.SubscribeAsync(event.TopicSubscribeStockTickTargets, true, uc.ReceiveStockSubscribeData)
-	bus.SubscribeAsync(event.TopicUnSubscribeStockTickTargets, false, uc.UnSubscribeStockTick, uc.UnSubscribeStockBidAsk)
-	bus.SubscribeAsync(event.TopicSubscribeFutureTickTargets, true, uc.SetMainFuture)
+	uc.bus.SubscribeAsync(event.TopicSubscribeStockTickTargets, true, uc.ReceiveStockSubscribeData)
+	uc.bus.SubscribeAsync(event.TopicUnSubscribeStockTickTargets, false, uc.UnSubscribeStockTick, uc.UnSubscribeStockBidAsk)
+	uc.bus.SubscribeAsync(event.TopicSubscribeFutureTickTargets, true, uc.SetMainFuture)
 
 	return uc
 }
@@ -96,13 +111,13 @@ func NewRealTime() RealTime {
 func (uc *RealTimeUseCase) checkFutureInventory() {
 	position, err := uc.sc.GetFuturePosition()
 	if err != nil {
-		logger.Fatal(err)
+		uc.logger.Fatal(err)
 		return
 	}
 
 	for _, v := range position.GetPositionArr() {
-		if cc.GetFutureDetail(v.GetCode()) != nil {
-			logger.Warnf("future inventory is not empty, code: %s", v.GetCode())
+		if uc.cc.GetFutureDetail(v.GetCode()) != nil {
+			uc.logger.Warnf("future inventory is not empty, code: %s", v.GetCode())
 			uc.inventoryIsNotEmpty = true
 			return
 		}
@@ -190,7 +205,7 @@ func (uc *RealTimeUseCase) periodUpdateTradeIndex() {
 func (uc *RealTimeUseCase) updateNasdaqIndex() {
 	for range time.NewTicker(time.Second * 5).C {
 		if data, err := uc.GetNasdaqClose(); err != nil && !errors.Is(err, errNasdaqPriceAbnormal) {
-			logger.Error(err)
+			uc.logger.Error(err)
 		} else if data != nil {
 			uc.tradeIndex.Nasdaq.UpdateIndexStatus(data.Price - data.Last)
 		}
@@ -200,7 +215,7 @@ func (uc *RealTimeUseCase) updateNasdaqIndex() {
 func (uc *RealTimeUseCase) updateNFIndex() {
 	for range time.NewTicker(time.Second * 5).C {
 		if data, err := uc.GetNasdaqFutureClose(); err != nil && !errors.Is(err, errNFQPriceAbnormal) {
-			logger.Error(err)
+			uc.logger.Error(err)
 		} else if data != nil {
 			uc.tradeIndex.NF.UpdateIndexStatus(data.Price - data.Last)
 		}
@@ -210,7 +225,7 @@ func (uc *RealTimeUseCase) updateNFIndex() {
 func (uc *RealTimeUseCase) updateTSEIndex() {
 	for range time.NewTicker(time.Second * 3).C {
 		if data, err := uc.GetTSESnapshot(context.Background()); err != nil {
-			logger.Error(err)
+			uc.logger.Error(err)
 		} else {
 			uc.tradeIndex.TSE.UpdateIndexStatus(data.PriceChg)
 		}
@@ -220,7 +235,7 @@ func (uc *RealTimeUseCase) updateTSEIndex() {
 func (uc *RealTimeUseCase) updateOTCIndex() {
 	for range time.NewTicker(time.Second * 3).C {
 		if data, err := uc.GetOTCSnapshot(context.Background()); err != nil {
-			logger.Error(err)
+			uc.logger.Error(err)
 		} else {
 			uc.tradeIndex.OTC.UpdateIndexStatus(data.PriceChg)
 		}
@@ -234,11 +249,11 @@ func (uc *RealTimeUseCase) ReceiveEvent(ctx context.Context) {
 		for {
 			event := <-eventChan
 			if err := uc.repo.InsertEvent(ctx, event); err != nil {
-				logger.Error(err)
+				uc.logger.Error(err)
 			}
 
 			if event.EventCode != 16 {
-				logger.Warnf("EventCode: %d, Event: %s, ResoCode: %d, Info: %s", event.EventCode, event.Event, event.Response, event.Info)
+				uc.logger.Warnf("EventCode: %d, Event: %s, ResoCode: %d, Info: %s", event.EventCode, event.Event, event.Response, event.Info)
 			}
 		}
 	}()
@@ -253,9 +268,9 @@ func (uc *RealTimeUseCase) ReceiveOrderStatus(ctx context.Context) {
 			order := <-orderStatusChan
 			switch t := order.(type) {
 			case *entity.StockOrder:
-				bus.PublishTopicEvent(event.TopicInsertOrUpdateStockOrder, t)
+				uc.bus.PublishTopicEvent(event.TopicInsertOrUpdateStockOrder, t)
 			case *entity.FutureOrder:
-				bus.PublishTopicEvent(event.TopicInsertOrUpdateFutureOrder, t)
+				uc.bus.PublishTopicEvent(event.TopicInsertOrUpdateFutureOrder, t)
 			}
 		}
 	}()
@@ -362,7 +377,7 @@ func (uc *RealTimeUseCase) GetNasdaqFutureClose() (*entity.YahooPrice, error) {
 func (uc *RealTimeUseCase) GetStockSnapshotByNumArr(stockNumArr []string) ([]*entity.StockSnapShot, error) {
 	var fetchArr, stockNotExist []string
 	for _, s := range stockNumArr {
-		if cc.GetStockDetail(s) == nil {
+		if uc.cc.GetStockDetail(s) == nil {
 			stockNotExist = append(stockNotExist, s)
 		} else {
 			fetchArr = append(fetchArr, s)
@@ -379,7 +394,7 @@ func (uc *RealTimeUseCase) GetStockSnapshotByNumArr(stockNumArr []string) ([]*en
 		stockNum := body.GetCode()
 		result = append(result, &entity.StockSnapShot{
 			StockNum:  stockNum,
-			StockName: cc.GetStockDetail(stockNum).Name,
+			StockName: uc.cc.GetStockDetail(stockNum).Name,
 			SnapShotBase: entity.SnapShotBase{
 				SnapTime:        time.Unix(0, body.GetTs()).Add(-8 * time.Hour),
 				Open:            body.GetOpen(),
@@ -418,7 +433,7 @@ func (uc *RealTimeUseCase) GetFutureSnapshotByCode(code string) (*entity.FutureS
 
 	return &entity.FutureSnapShot{
 		Code:       snapshot.GetCode(),
-		FutureName: cc.GetFutureDetail(code).Name,
+		FutureName: uc.cc.GetFutureDetail(code).Name,
 		SnapShotBase: entity.SnapShotBase{
 			SnapTime:        time.Unix(0, snapshot.GetTs()).Add(-8 * time.Hour),
 			Open:            snapshot.GetOpen(),
@@ -441,7 +456,7 @@ func (uc *RealTimeUseCase) GetFutureSnapshotByCode(code string) (*entity.FutureS
 
 // GetMainFuture -.
 func (uc *RealTimeUseCase) GetMainFuture() *entity.Future {
-	return cc.GetFutureDetail(uc.mainFutureCode)
+	return uc.cc.GetFutureDetail(uc.mainFutureCode)
 }
 
 // ReceiveStockSubscribeData - receive target data, start goroutine to trade
@@ -462,7 +477,7 @@ func (uc *RealTimeUseCase) ReceiveStockSubscribeData(targetArr []*entity.StockTa
 		uc.stockSwitchChanMap[t.StockNum] = hadger.SwitchChan()
 		uc.stockSwitchChanMapLock.Unlock()
 
-		logger.Infof("Stock room %s <-> %s <-> %s", t.Stock.Name, t.Stock.Future.Name, t.Stock.Future.Code)
+		uc.logger.Infof("Stock room %s <-> %s <-> %s", t.Stock.Name, t.Stock.Future.Name, t.Stock.Future.Code)
 		r := rabbit.NewRabbit(uc.cfg.GetRabbitConn())
 		go r.StockTickConsumer(t.StockNum, hadger.TickChan())
 	}
@@ -482,7 +497,7 @@ func (uc *RealTimeUseCase) ReceiveStockSubscribeData(targetArr []*entity.StockTa
 		}
 	}()
 	hr := rabbit.NewRabbit(uc.cfg.GetRabbitConn())
-	hr.FillAllBasic(cc.GetAllStockDetail(), cc.GetAllFutureDetail())
+	hr.FillAllBasic(uc.cc.GetAllStockDetail(), uc.cc.GetAllFutureDetail())
 	go hr.OrderStatusConsumer(orderStatusChan)
 	go hr.OrderStatusArrConsumer(orderStatusChan)
 }
@@ -521,7 +536,7 @@ func (uc *RealTimeUseCase) SetMainFuture(code string) {
 	defer uc.ReceiveFutureSubscribeData(code)
 
 	if uc.mainFutureCode != "" {
-		logger.Fatal("main future code already set, can't set again")
+		uc.logger.Fatal("main future code already set, can't set again")
 	}
 
 	uc.mainFutureCode = code
@@ -529,7 +544,7 @@ func (uc *RealTimeUseCase) SetMainFuture(code string) {
 
 func (uc *RealTimeUseCase) NewFutureRealTimeClient(tickChan chan *entity.RealTimeFutureTick, orderStatusChan chan interface{}, connectionID string) {
 	r := rabbit.NewRabbit(uc.cfg.GetRabbitConn())
-	r.FillAllBasic(cc.GetAllStockDetail(), cc.GetAllFutureDetail())
+	r.FillAllBasic(uc.cc.GetAllStockDetail(), uc.cc.GetAllFutureDetail())
 
 	uc.clientRabbitMapLock.Lock()
 	uc.clientRabbitMap[connectionID] = r
@@ -585,12 +600,12 @@ func (uc *RealTimeUseCase) SubscribeStockTick(targetArr []*entity.StockTarget) {
 
 	failSubNumArr, err := uc.subgRPCAPI.SubscribeStockTick(subArr, uc.cfg.TradeStock.Odd)
 	if err != nil {
-		logger.Error(err)
+		uc.logger.Error(err)
 		return
 	}
 
 	if len(failSubNumArr) != 0 {
-		logger.Errorf("subscribe fail %v", failSubNumArr)
+		uc.logger.Errorf("subscribe fail %v", failSubNumArr)
 	}
 }
 
@@ -653,12 +668,12 @@ func (uc *RealTimeUseCase) SubscribeFutureTick(code string) {
 
 	failSubNumArr, err := uc.subgRPCAPI.SubscribeFutureTick([]string{code})
 	if err != nil {
-		logger.Error(err)
+		uc.logger.Error(err)
 		return
 	}
 
 	if len(failSubNumArr) != 0 {
-		logger.Errorf("subscribe future fail %v", failSubNumArr)
+		uc.logger.Errorf("subscribe future fail %v", failSubNumArr)
 	}
 }
 
