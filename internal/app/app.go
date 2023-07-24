@@ -22,9 +22,9 @@ import (
 
 func RunApp() {
 	cfg := config.Get()
+	cc := cache.New()
+	bus := eventbus.New()
 	logger := log.Get()
-	cc := cache.Get()
-	bus := eventbus.Get()
 
 	logger.Warn("TMT is running")
 	logger.Warnf("Simulation Mode: %v", cfg.Simulation)

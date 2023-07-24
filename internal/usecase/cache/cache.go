@@ -24,22 +24,14 @@ const (
 	cacheStaticIndexTargets string = "targets"
 )
 
-var singleton *Cache
-
 type Cache struct {
 	*cache.Cache
 }
 
-func Get() *Cache {
-	if singleton != nil {
-		return singleton
-	}
-
-	singleton = &Cache{
+func New() *Cache {
+	return &Cache{
 		Cache: cache.New(),
 	}
-
-	return singleton
 }
 
 func (c *Cache) key(category int64, index ...string) string {

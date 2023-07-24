@@ -61,7 +61,7 @@ func StartWSFutureTrade(c *gin.Context, s realtime.RealTime, o trade.Trade, h hi
 		orderMap:               make(map[string]*entity.FutureOrder),
 		cancelOrderMap:         make(map[string]*entity.FutureOrder),
 		WSRouter:               httpserver.NewWSRouter(c, log.Get()),
-		Bus:                    eventbus.Get(uuid.NewString()),
+		Bus:                    eventbus.New(uuid.NewString()),
 		waitingList:            newWaitingList(),
 		orderTradeTime:         newOrderTradeTime(),
 	}

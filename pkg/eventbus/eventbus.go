@@ -15,7 +15,8 @@ type Bus struct {
 	bus EventBus.Bus
 }
 
-func Get(route ...string) *Bus {
+// New if route is empty, return singleton
+func New(route ...string) *Bus {
 	if singleton == nil {
 		singleton = &Bus{
 			bus: EventBus.New(),

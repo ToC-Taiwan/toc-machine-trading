@@ -49,7 +49,7 @@ func NewDTFuture(code string, s *grpcapi.TradegRPCAPI, tradeConfig *config.Trade
 		switchChan:    make(chan bool),
 		sc:            s,
 		tickArr:       []*entity.RealTimeFutureTick{},
-		localBus:      eventbus.Get(uuid.NewString()),
+		localBus:      eventbus.New(uuid.NewString()),
 		tradeConfig:   tradeConfig,
 		traderMap:     make(map[string]*DTTraderFuture),
 		cancelChan:    make(chan *entity.FutureOrder),
