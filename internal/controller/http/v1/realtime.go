@@ -8,9 +8,9 @@ import (
 	"tmt/internal/controller/http/websocket/future"
 	"tmt/internal/controller/http/websocket/pick"
 
-	"tmt/internal/usecase/usecase/history"
-	"tmt/internal/usecase/usecase/realtime"
-	"tmt/internal/usecase/usecase/trade"
+	"tmt/internal/usecase/case/history"
+	"tmt/internal/usecase/case/realtime"
+	"tmt/internal/usecase/case/trade"
 
 	"github.com/gin-gonic/gin"
 )

@@ -11,7 +11,7 @@ import (
 	config "tmt/cmd/config"
 	entity "tmt/internal/entity"
 	cache "tmt/internal/usecase/cache"
-	basic "tmt/internal/usecase/usecase/basic"
+	basic "tmt/internal/usecase/case/basic"
 	pb "tmt/pb"
 	log "tmt/pkg/log"
 

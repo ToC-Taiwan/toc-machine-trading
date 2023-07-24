@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"tmt/internal/usecase/usecase/realtime"
+	"tmt/internal/usecase/case/realtime"
 	"tmt/pkg/httpserver"
 	"tmt/pkg/log"
 

@@ -10,7 +10,7 @@ import (
 	time "time"
 	entity "tmt/internal/entity"
 	cache "tmt/internal/usecase/cache"
-	analyze "tmt/internal/usecase/usecase/analyze"
+	analyze "tmt/internal/usecase/case/analyze"
 	eventbus "tmt/pkg/eventbus"
 	log "tmt/pkg/log"
 

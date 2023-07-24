@@ -11,6 +11,7 @@ import (
 	"tmt/cmd/config"
 	"tmt/internal/entity"
 	"tmt/internal/usecase/cache"
+	"tmt/internal/usecase/case/trade"
 	"tmt/internal/usecase/event"
 	"tmt/internal/usecase/grpcapi"
 	"tmt/internal/usecase/module/dt"
@@ -19,7 +20,6 @@ import (
 	"tmt/internal/usecase/module/tradeday"
 	"tmt/internal/usecase/rabbit"
 	"tmt/internal/usecase/repo"
-	"tmt/internal/usecase/usecase/trade"
 	"tmt/pkg/eventbus"
 	"tmt/pkg/log"
 )

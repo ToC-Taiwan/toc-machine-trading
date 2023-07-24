@@ -11,12 +11,12 @@ import (
 	"tmt/global"
 	"tmt/internal/entity"
 	"tmt/internal/usecase/cache"
+	"tmt/internal/usecase/case/realtime"
 	"tmt/internal/usecase/event"
 	"tmt/internal/usecase/grpcapi"
 	"tmt/internal/usecase/module/target"
 	"tmt/internal/usecase/module/tradeday"
 	"tmt/internal/usecase/repo"
-	"tmt/internal/usecase/usecase/realtime"
 	"tmt/pkg/eventbus"
 	"tmt/pkg/log"
 )
