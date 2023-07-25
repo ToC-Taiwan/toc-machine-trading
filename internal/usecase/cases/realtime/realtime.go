@@ -11,7 +11,7 @@ import (
 	"tmt/cmd/config"
 	"tmt/internal/entity"
 	"tmt/internal/usecase/cache"
-	"tmt/internal/usecase/case/trade"
+	"tmt/internal/usecase/cases/trade"
 	"tmt/internal/usecase/event"
 	"tmt/internal/usecase/grpcapi"
 	"tmt/internal/usecase/module/dt"

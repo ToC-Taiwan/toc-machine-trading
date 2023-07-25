@@ -11,7 +11,7 @@ import (
 	config "tmt/cmd/config"
 	entity "tmt/internal/entity"
 	cache "tmt/internal/usecase/cache"
-	history "tmt/internal/usecase/case/history"
+	history "tmt/internal/usecase/cases/history"
 	simulator "tmt/internal/usecase/module/simulator"
 	pb "tmt/pb"
 	eventbus "tmt/pkg/eventbus"

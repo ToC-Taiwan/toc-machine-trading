@@ -6,7 +6,7 @@ import (
 
 	"tmt/internal/controller/http/resp"
 	"tmt/internal/entity"
-	"tmt/internal/usecase/case/basic"
+	"tmt/internal/usecase/cases/basic"
 
 	"github.com/gin-gonic/gin"
 )

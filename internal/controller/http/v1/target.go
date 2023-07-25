@@ -4,7 +4,7 @@ package v1
 import (
 	"net/http"
 
-	"tmt/internal/usecase/case/target"
+	"tmt/internal/usecase/cases/target"
 
 	"github.com/gin-gonic/gin"
 )

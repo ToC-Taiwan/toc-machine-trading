@@ -9,7 +9,7 @@ import (
 	"tmt/cmd/config"
 	"tmt/internal/entity"
 	"tmt/internal/usecase/cache"
-	"tmt/internal/usecase/case/history"
+	"tmt/internal/usecase/cases/history"
 	"tmt/internal/usecase/event"
 	"tmt/internal/usecase/module/tradeday"
 	"tmt/internal/usecase/repo"

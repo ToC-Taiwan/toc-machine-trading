@@ -9,7 +9,7 @@ import (
 	reflect "reflect"
 	entity "tmt/internal/entity"
 	cache "tmt/internal/usecase/cache"
-	realtime "tmt/internal/usecase/case/realtime"
+	realtime "tmt/internal/usecase/cases/realtime"
 	pb "tmt/pb"
 	eventbus "tmt/pkg/eventbus"
 	log "tmt/pkg/log"

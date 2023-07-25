@@ -11,7 +11,7 @@ import (
 	"tmt/global"
 	"tmt/internal/entity"
 	"tmt/internal/usecase/cache"
-	"tmt/internal/usecase/case/realtime"
+	"tmt/internal/usecase/cases/realtime"
 	"tmt/internal/usecase/event"
 	"tmt/internal/usecase/grpcapi"
 	"tmt/internal/usecase/module/target"

@@ -9,7 +9,7 @@ import (
 	reflect "reflect"
 	time "time"
 	entity "tmt/internal/entity"
-	trade "tmt/internal/usecase/case/trade"
+	trade "tmt/internal/usecase/cases/trade"
 	pb "tmt/pb"
 	eventbus "tmt/pkg/eventbus"
 	log "tmt/pkg/log"

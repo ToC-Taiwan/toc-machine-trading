@@ -7,9 +7,9 @@ import (
 	"time"
 
 	"tmt/internal/entity"
-	"tmt/internal/usecase/case/history"
-	"tmt/internal/usecase/case/realtime"
-	"tmt/internal/usecase/case/trade"
+	"tmt/internal/usecase/cases/history"
+	"tmt/internal/usecase/cases/realtime"
+	"tmt/internal/usecase/cases/trade"
 	"tmt/pkg/eventbus"
 	"tmt/pkg/httpserver"
 	"tmt/pkg/log"

@@ -8,12 +8,12 @@ import (
 
 	"tmt/docs"
 	v1 "tmt/internal/controller/http/v1"
-	"tmt/internal/usecase/case/analyze"
-	"tmt/internal/usecase/case/basic"
-	"tmt/internal/usecase/case/history"
-	"tmt/internal/usecase/case/realtime"
-	"tmt/internal/usecase/case/target"
-	"tmt/internal/usecase/case/trade"
+	"tmt/internal/usecase/cases/analyze"
+	"tmt/internal/usecase/cases/basic"
+	"tmt/internal/usecase/cases/history"
+	"tmt/internal/usecase/cases/realtime"
+	"tmt/internal/usecase/cases/target"
+	"tmt/internal/usecase/cases/trade"
 
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"

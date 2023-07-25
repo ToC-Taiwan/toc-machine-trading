@@ -10,7 +10,7 @@ import (
 	"tmt/global"
 	"tmt/internal/controller/http/resp"
 	"tmt/internal/entity"
-	"tmt/internal/usecase/case/history"
+	"tmt/internal/usecase/cases/history"
 	"tmt/internal/usecase/module/simulator"
 
 	"github.com/gin-gonic/gin"
