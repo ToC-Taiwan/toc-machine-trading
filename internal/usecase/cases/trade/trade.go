@@ -268,6 +268,10 @@ func (uc *TradeUseCase) updateAllTradeBalance() {
 
 // UpdateTradeBalanceByTradeDay -.
 func (uc *TradeUseCase) UpdateTradeBalanceByTradeDay(ctx context.Context, date string) error {
+	if date == "" {
+		return errors.New("empty date")
+	}
+
 	stockTradePeriod, err := uc.tradeDay.GetStockTradePeriodByDate(date)
 	if err != nil {
 		return err
