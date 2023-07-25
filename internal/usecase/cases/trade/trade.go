@@ -26,8 +26,8 @@ type TradeUseCase struct {
 	simulation bool
 	repo       TradeRepo
 
-	sc TradegRPCAPI
-	fg TradegRPCAPI
+	Sinopac TradegRPCAPI
+	Fugle   TradegRPCAPI
 
 	quota    *quota.Quota
 	tradeDay *tradeday.TradeDay
@@ -49,8 +49,8 @@ func NewTrade() Trade {
 	tradeDay := tradeday.Get()
 	return &TradeUseCase{
 		simulation: cfg.Simulation,
-		sc:         grpcapi.NewTrade(cfg.GetSinopacPool(), cfg.Simulation),
-		fg:         grpcapi.NewTrade(cfg.GetFuglePool(), cfg.Simulation),
+		Sinopac:    grpcapi.NewTrade(cfg.GetSinopacPool(), cfg.Simulation),
+		Fugle:      grpcapi.NewTrade(cfg.GetFuglePool(), cfg.Simulation),
 		repo:       repo.NewTrade(cfg.GetPostgresPool()),
 		quota:      quota.NewQuota(cfg.Quota),
 
@@ -107,11 +107,11 @@ func (uc *TradeUseCase) updateAccountDetail() {
 }
 
 func (uc *TradeUseCase) getSinopacAccountBalance() *entity.AccountBalance {
-	margin, err := uc.sc.GetMargin()
+	margin, err := uc.Sinopac.GetMargin()
 	if err != nil {
 		uc.logger.Fatal(err)
 	}
-	accountBalance, er := uc.sc.GetAccountBalance()
+	accountBalance, er := uc.Sinopac.GetAccountBalance()
 	if err != nil {
 		uc.logger.Fatal(er)
 	}
@@ -128,7 +128,7 @@ func (uc *TradeUseCase) getSinopacAccountBalance() *entity.AccountBalance {
 }
 
 func (uc *TradeUseCase) getFugleAccountBalance() *entity.AccountBalance {
-	accountBalance, er := uc.fg.GetAccountBalance()
+	accountBalance, er := uc.Fugle.GetAccountBalance()
 	if er != nil {
 		uc.logger.Fatal(er)
 	}
@@ -143,7 +143,7 @@ func (uc *TradeUseCase) getFugleAccountBalance() *entity.AccountBalance {
 
 func (uc *TradeUseCase) getAccountSettlement() []*entity.Settlement {
 	result := make(map[time.Time]*entity.Settlement)
-	sinopacSettlement, err := uc.sc.GetSettlement()
+	sinopacSettlement, err := uc.Sinopac.GetSettlement()
 	if err != nil {
 		uc.logger.Fatal(err)
 	}
@@ -159,7 +159,7 @@ func (uc *TradeUseCase) getAccountSettlement() []*entity.Settlement {
 		}
 	}
 
-	fugleSettlement, er := uc.fg.GetSettlement()
+	fugleSettlement, er := uc.Fugle.GetSettlement()
 	if er != nil {
 		uc.logger.Fatal(er)
 	}
@@ -190,7 +190,7 @@ func (uc *TradeUseCase) updateStockInventory() {
 	inv := []*entity.InventoryStock{}
 	queryDate := time.Date(time.Now().Year(), time.Now().Month(), time.Now().Day(), 0, 0, 0, 0, time.Local)
 
-	sinopacInventory, err := uc.sc.GetStockPosition()
+	sinopacInventory, err := uc.Sinopac.GetStockPosition()
 	if err != nil {
 		uc.logger.Fatal(err)
 	}
@@ -206,7 +206,7 @@ func (uc *TradeUseCase) updateStockInventory() {
 		})
 	}
 
-	fugleInventory, err := uc.fg.GetStockPosition()
+	fugleInventory, err := uc.Fugle.GetStockPosition()
 	if err != nil {
 		uc.logger.Fatal(err)
 	}
@@ -323,11 +323,11 @@ func (uc *TradeUseCase) askOrderStatus() {
 			continue
 		}
 
-		if err := uc.sc.GetLocalOrderStatusArr(); err != nil {
+		if err := uc.Sinopac.GetLocalOrderStatusArr(); err != nil {
 			uc.logger.Error(err)
 		}
 
-		if err := uc.fg.GetLocalOrderStatusArr(); err != nil {
+		if err := uc.Fugle.GetLocalOrderStatusArr(); err != nil {
 			uc.logger.Error(err)
 		}
 	}
@@ -339,11 +339,11 @@ func (uc *TradeUseCase) askSimulateOrderStatus() {
 			continue
 		}
 
-		if err := uc.sc.GetSimulateOrderStatusArr(); err != nil {
+		if err := uc.Sinopac.GetSimulateOrderStatusArr(); err != nil {
 			uc.logger.Error(err)
 		}
 
-		if err := uc.fg.GetSimulateOrderStatusArr(); err != nil {
+		if err := uc.Fugle.GetSimulateOrderStatusArr(); err != nil {
 			uc.logger.Error(err)
 		}
 	}
@@ -490,7 +490,11 @@ func (uc *TradeUseCase) ManualInsertFutureOrder(ctx context.Context, order *enti
 
 // BuyFuture -.
 func (uc *TradeUseCase) BuyFuture(order *entity.FutureOrder) (string, entity.OrderStatus, error) {
-	result, err := uc.sc.BuyFuture(order)
+	if order.Code == "" {
+		return "", entity.StatusUnknow, errors.New("empty code")
+	}
+
+	result, err := uc.Sinopac.BuyFuture(order)
 	if err != nil {
 		return "", entity.StatusUnknow, err
 	}
@@ -504,7 +508,7 @@ func (uc *TradeUseCase) BuyFuture(order *entity.FutureOrder) (string, entity.Ord
 
 // SellFuture -.
 func (uc *TradeUseCase) SellFuture(order *entity.FutureOrder) (string, entity.OrderStatus, error) {
-	result, err := uc.sc.SellFuture(order)
+	result, err := uc.Sinopac.SellFuture(order)
 	if err != nil {
 		return "", entity.StatusUnknow, err
 	}
@@ -518,7 +522,7 @@ func (uc *TradeUseCase) SellFuture(order *entity.FutureOrder) (string, entity.Or
 
 // CancelFutureOrderByID -.
 func (uc *TradeUseCase) CancelFutureOrderByID(orderID string) (string, entity.OrderStatus, error) {
-	result, err := uc.sc.CancelFuture(orderID)
+	result, err := uc.Sinopac.CancelFuture(orderID)
 	if err != nil {
 		return "", entity.StatusUnknow, err
 	}
@@ -671,7 +675,7 @@ func (uc *TradeUseCase) CalculateTradeDiscount(price float64, quantity int64) in
 
 // GetFuturePosition .
 func (uc *TradeUseCase) GetFuturePosition() ([]*entity.FuturePosition, error) {
-	query, err := uc.sc.GetFuturePosition()
+	query, err := uc.Sinopac.GetFuturePosition()
 	if err != nil {
 		return nil, err
 	}
