@@ -131,11 +131,7 @@ func (uc *HistoryUseCase) FetchFutureHistory(code string) {
 	ticks, err := uc.FetchFutureHistoryTick(code, td[0])
 	if err != nil {
 		uc.logger.Error(err)
-		return
-	}
-
-	if len(ticks) == 0 {
-		uc.logger.Error("Fetch Future History Tick Failed, Cancel subscribe future tick")
+		uc.logger.Warn("Cancel subscribe future tick")
 		return
 	}
 
@@ -588,6 +584,10 @@ func (uc *HistoryUseCase) FetchFutureHistoryTick(code string, date tradeday.Trad
 		return nil, err
 	}
 
+	if len(tickArr) == 0 {
+		return nil, fmt.Errorf("fetch Future History Tick Failed, Code: %s, Date: %s", code, date.TradeDay.Format(global.ShortTimeLayout))
+	}
+
 	for _, t := range tickArr {
 		result = append(result, &entity.FutureHistoryTick{
 			Code: t.GetCode(),
@@ -602,7 +602,6 @@ func (uc *HistoryUseCase) FetchFutureHistoryTick(code string, date tradeday.Trad
 
 	e := uc.repo.InsertFutureHistoryTickArr(context.Background(), result)
 	if e != nil {
-		uc.logger.Error(e)
 		return nil, e
 	}
 
