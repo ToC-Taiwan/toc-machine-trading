@@ -325,6 +325,8 @@ definitions:
         type: integer
       traffic_usage:
         type: number
+      traffic_usage_percents:
+        type: number
     type: object
   entity.Stock:
     properties:

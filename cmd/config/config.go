@@ -4,7 +4,7 @@ package config
 import (
 	"fmt"
 	"os"
-	"path/filepath"
+	"sync"
 
 	"tmt/pkg/grpc"
 	"tmt/pkg/log"
@@ -12,11 +12,8 @@ import (
 	"tmt/pkg/rabbitmq"
 
 	"github.com/ilyakaznacheev/cleanenv"
-	"github.com/joho/godotenv"
 	"github.com/robfig/cron/v3"
 )
-
-var singleton *Config
 
 // Config -.
 type Config struct {
@@ -29,15 +26,20 @@ type Config struct {
 	TradeStock   TradeStock   `yaml:"trade_stock"`
 	TradeFuture  TradeFuture  `yaml:"trade_future"`
 
-	// env must be the last field
-	EnvConfig
-
 	dbPool      *postgres.Postgres
 	sinopacPool *grpc.ConnPool
 	fuglePool   *grpc.ConnPool
 
 	logger *log.Log
+
+	// env must be the last field
+	EnvConfig
 }
+
+var (
+	singleton *Config
+	initOnce  sync.Once
+)
 
 // Get -.
 func Get() *Config {
@@ -45,50 +47,43 @@ func Get() *Config {
 		return singleton
 	}
 
-	logger := log.Get()
-	filePath := "configs/config.yml"
-	fileStat, err := os.Stat(filePath)
-	if err != nil || fileStat.IsDir() {
-		logger.Fatalf("config file not found: %v", err)
-	}
-
-	newConfig := Config{
-		logger: logger,
-	}
-	if fileStat.Size() > 0 {
-		err = cleanenv.ReadConfig(filePath, &newConfig)
-		if err != nil {
-			logger.Fatalf("config file read error: %v", err)
+	initOnce.Do(func() {
+		cfg := Config{
+			logger: log.Get(),
 		}
-	}
 
-	ex, err := os.Executable()
-	if err != nil {
-		panic(err)
-	}
+		filePath := "configs/config.yml"
+		fileStat, err := os.Stat(filePath)
+		if err != nil || fileStat.IsDir() {
+			cfg.logger.Fatalf("config file not found: %v", err)
+		}
 
-	err = godotenv.Load(filepath.Join(filepath.Dir(ex), ".env"))
-	if err != nil {
-		panic(err)
-	}
+		if fileStat.Size() > 0 {
+			err = cleanenv.ReadConfig(filePath, &cfg)
+			if err != nil {
+				cfg.logger.Fatalf("config file read error: %v", err)
+			}
+		}
 
-	if err := cleanenv.ReadEnv(&newConfig); err != nil {
-		logger.Fatalf("config env read error: %v", err)
-	}
+		if err := cleanenv.ReadEnv(&cfg); err != nil {
+			cfg.logger.Fatalf("config env read error: %v", err)
+		}
 
-	if newConfig.TradeStock.AllowTrade && !newConfig.TradeStock.Subscribe {
-		logger.Fatal("stock trade switch allow trade but not subscribe")
-	}
+		if cfg.TradeStock.AllowTrade && !cfg.TradeStock.Subscribe {
+			cfg.logger.Fatalf("stock trade switch allow trade but not subscribe")
+		}
 
-	if newConfig.TradeFuture.AllowTrade && !newConfig.TradeFuture.Subscribe {
-		logger.Fatal("stock trade switch allow trade but not subscribe")
-	}
+		if cfg.TradeFuture.AllowTrade && !cfg.TradeFuture.Subscribe {
+			cfg.logger.Fatalf("stock trade switch allow trade but not subscribe")
+		}
 
-	if e := newConfig.setupCronJob(); e != nil {
-		logger.Fatal(e)
-	}
+		if e := cfg.setupCronJob(); e != nil {
+			cfg.logger.Fatalf(e.Error())
+		}
 
-	singleton = &newConfig
+		singleton = &cfg
+	})
+
 	return singleton
 }
 

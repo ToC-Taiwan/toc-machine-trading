@@ -1,6 +1,8 @@
 // Package log package log
 package log
 
+import "time"
+
 const (
 	FormatJSON string = "json"
 	FormatText string = "text"
@@ -30,7 +32,12 @@ func LogLevel(level string) Option {
 
 func TimeFormat(format string) Option {
 	return func(c *config) {
-		c.timeFormat = format
+		_, err := time.Parse(format, "2006-01-02")
+		if err != nil {
+			c.timeFormat = _defaultTimeFormat
+		} else {
+			c.timeFormat = format
+		}
 	}
 }
 

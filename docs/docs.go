@@ -1335,6 +1335,9 @@ const docTemplate = `{
                 },
                 "traffic_usage": {
                     "type": "number"
+                },
+                "traffic_usage_percents": {
+                    "type": "number"
                 }
             }
         },
