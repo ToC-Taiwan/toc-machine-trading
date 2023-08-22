@@ -120,7 +120,7 @@ func (uc *BasicUseCase) GetShioajiUsage() (*entity.ShioajiUsage, error) {
 	return &entity.ShioajiUsage{
 		Connections:          int(usage.GetConnections()),
 		TrafficUsage:         utils.Round(float64(usage.GetBytes())/1024/1024, 2),
-		TrafficUsagePercents: 100 * (1 - utils.Round(float64(usage.GetRemainingBytes())/float64(usage.GetLimitBytes()), 4)),
+		TrafficUsagePercents: utils.Round(100*(1-float64(usage.GetRemainingBytes())/float64(usage.GetLimitBytes())), 2),
 	}, nil
 }
 
