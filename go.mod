@@ -19,7 +19,7 @@ require (
 	github.com/prometheus/client_golang v1.16.0
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/sirupsen/logrus v1.9.3
-	github.com/slack-go/slack v0.12.2
+	github.com/slack-go/slack v0.12.3
 	github.com/smartystreets/goconvey v1.8.1
 	github.com/streadway/amqp v1.1.0
 	github.com/swaggo/files v1.0.1
