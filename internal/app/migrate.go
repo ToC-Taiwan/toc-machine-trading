@@ -24,15 +24,43 @@ const (
 	_defaultTimeout  = time.Second
 )
 
-// InitDB -.
 func InitDB() {
 	cfg := config.Get().Database
-	TryCreateDB(cfg)
-	MigrateDB(cfg)
+	logger := log.Get()
+	if e := createDB(cfg); e != nil {
+		logger.Fatal(fmt.Errorf("postgres create db error: %s", e.Error()))
+	}
+	migrateScheme(cfg)
 }
 
-// MigrateDB -.
-func MigrateDB(dbConfig config.Database) {
+func createDB(cfg config.Database) error {
+	pg, err := postgres.New(
+		cfg.URL,
+		postgres.MaxPoolSize(cfg.PoolMax),
+		postgres.AddLogger(log.Get()),
+	)
+	if err != nil {
+		return err
+	}
+	defer pg.Close()
+
+	var name string
+	if err := pg.Pool().QueryRow(context.Background(),
+		"SELECT datname FROM pg_catalog.pg_database WHERE datname = $1", cfg.DBName).
+		Scan(&name); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			_, err = pg.Pool().Exec(context.Background(), fmt.Sprintf("CREATE DATABASE %s", cfg.DBName))
+			if err != nil {
+				return err
+			}
+			return nil
+		}
+		return err
+	}
+	return nil
+}
+
+func migrateScheme(dbConfig config.Database) {
 	m := &migrate.Migrate{}
 	logger := log.Get()
 
@@ -54,46 +82,18 @@ func MigrateDB(dbConfig config.Database) {
 		logger.Fatal(fmt.Errorf("postgres connect error in migrate: %s", err))
 	}
 
-	err = m.Up()
 	defer func() {
 		_, _ = m.Close()
 	}()
-
-	if err != nil && !errors.Is(err, migrate.ErrNoChange) {
-		logger.Infof("Migrate: up error: %s", err)
-		return
-	}
-
-	if errors.Is(err, migrate.ErrNoChange) {
-		logger.Info("Migrate: no change")
-		return
-	}
-
-	logger.Info("Migrate: up success")
-}
-
-// TryCreateDB -.
-func TryCreateDB(cfg config.Database) {
-	logger := log.Get()
-	pg, err := postgres.New(
-		cfg.URL,
-		postgres.MaxPoolSize(cfg.PoolMax),
-		postgres.AddLogger(logger),
-	)
+	err = m.Up()
 	if err != nil {
-		logger.Fatal(err)
-	}
-	defer pg.Close()
-
-	var name string
-	if err := pg.Pool().QueryRow(context.Background(), "SELECT datname FROM pg_catalog.pg_database WHERE datname = $1", cfg.DBName).Scan(&name); err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			_, err = pg.Pool().Exec(context.Background(), fmt.Sprintf("CREATE DATABASE %s", cfg.DBName))
-			if err != nil {
-				logger.Fatal(err)
-			}
-			return
+		switch err {
+		case migrate.ErrNoChange:
+			logger.Info("Migrate: no change")
+		default:
+			logger.Errorf("Migrate: up error: %s", err)
 		}
-		logger.Fatal(err)
+		return
 	}
+	logger.Info("Migrate: up success")
 }

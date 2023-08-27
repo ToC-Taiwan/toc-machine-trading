@@ -89,7 +89,7 @@ func Get() *Log {
 		l.SetFormatter(formatter)
 		l.SetLevel(l.level.Level())
 		l.SetOutput(os.Stdout)
-		l.Info("Log is initialized")
+		l.Info("Logger initialized successfully")
 
 		singleton = l
 	})
