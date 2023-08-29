@@ -8,7 +8,7 @@ WORKDIR /
 RUN mkdir build_space
 WORKDIR /build_space
 COPY . .
-RUN go build -o toc-machine-trading ./cmd/app
+RUN CGO_ENABLED=0 go build -o toc-machine-trading ./cmd/app
 
 # production-stage
 FROM debian:bullseye as production-stage
