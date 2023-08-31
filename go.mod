@@ -24,7 +24,7 @@ require (
 	github.com/streadway/amqp v1.1.0
 	github.com/swaggo/files v1.0.1
 	github.com/swaggo/gin-swagger v1.6.0
-	github.com/swaggo/swag v1.16.1
+	github.com/swaggo/swag v1.16.2
 	google.golang.org/grpc v1.57.0
 	google.golang.org/protobuf v1.31.0
 )
