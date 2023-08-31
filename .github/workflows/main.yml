@@ -58,6 +58,9 @@ jobs:
             REPOSITORY: "${{ github.repository }}"
             SHA: "${{ github.sha }}"
             OWNER: "${{ github.repository_owner }}"
+            REPOSITORY_LC: ""
+            SHORT_SHA: ""
+            REPOSITORY_NAME_ONLY: ""
 
         runs-on: ubuntu-latest
         steps:
