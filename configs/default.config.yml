@@ -3,7 +3,7 @@ manual_trade: true
 
 trade_stock:
     allow_trade: false
-    subscribe: false
+    subscribe: true
     odd: true
 
     # unit: second

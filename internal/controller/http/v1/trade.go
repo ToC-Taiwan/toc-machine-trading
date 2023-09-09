@@ -407,8 +407,8 @@ func (r *tradeRoutes) moveStockOrderToLatestTradeDay(c *gin.Context) {
 }
 
 type accountSummary struct {
-	Balance []*entity.AccountBalance `json:"balance,omitempty" yaml:"balance"`
-	Total   float64                  `json:"total,omitempty" yaml:"total"`
+	Balance []*entity.AccountBalance `json:"balance" yaml:"balance"`
+	Total   float64                  `json:"total" yaml:"total"`
 }
 
 // @Summary     getAccountBalance

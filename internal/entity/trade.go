@@ -160,10 +160,10 @@ func (o *BaseOrder) FilledQty() int64 {
 
 // StockOrder -.
 type StockOrder struct {
-	BaseOrder `json:"base_order,omitempty"`
+	BaseOrder `json:"base_order"`
 
-	StockNum string `json:"stock_num,omitempty"`
-	Stock    *Stock `json:"stock,omitempty"`
+	StockNum string `json:"stock_num"`
+	Stock    *Stock `json:"stock"`
 }
 
 func (s *StockOrder) StockOrderStatusString() string {
@@ -179,10 +179,10 @@ func (s *StockOrder) StockOrderStatusString() string {
 
 // FutureOrder -.
 type FutureOrder struct {
-	BaseOrder `json:"base_order,omitempty"`
+	BaseOrder `json:"base_order"`
 
-	Code   string  `json:"code,omitempty"`
-	Future *Future `json:"future,omitempty"`
+	Code   string  `json:"code"`
+	Future *Future `json:"future"`
 }
 
 func (f *FutureOrder) FutureOrderStatusString() string {

@@ -18,14 +18,14 @@ type SimulatorFutureTarget struct {
 }
 
 type SimulateBalance struct {
-	TotalBalance int64                 `json:"total_balance,omitempty"`
-	Forward      int64                 `json:"forward,omitempty"`
-	ForwardCount int64                 `json:"forward_count,omitempty"`
-	ForwardOrder []*entity.FutureOrder `json:"forward_order,omitempty"`
-	Reverse      int64                 `json:"reverse,omitempty"`
-	ReverseCount int64                 `json:"reverse_count,omitempty"`
-	ReverseOrder []*entity.FutureOrder `json:"reverse_order,omitempty"`
-	Cond         *config.TradeFuture   `json:"cond,omitempty"`
+	TotalBalance int64                 `json:"total_balance"`
+	Forward      int64                 `json:"forward"`
+	ForwardCount int64                 `json:"forward_count"`
+	ForwardOrder []*entity.FutureOrder `json:"forward_order"`
+	Reverse      int64                 `json:"reverse"`
+	ReverseCount int64                 `json:"reverse_count"`
+	ReverseOrder []*entity.FutureOrder `json:"reverse_order"`
+	Cond         *config.TradeFuture   `json:"cond"`
 }
 
 func (s *SimulateBalance) String() string {
