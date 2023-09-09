@@ -4,10 +4,8 @@ import (
 	"context"
 	"time"
 
-	"tmt/cmd/config"
 	"tmt/internal/entity"
 	"tmt/internal/usecase/cache"
-	"tmt/internal/usecase/module/simulator"
 	"tmt/pb"
 	"tmt/pkg/eventbus"
 	"tmt/pkg/log"
@@ -21,9 +19,6 @@ type History interface {
 
 	GetDayKbarByStockNumDate(stockNum string, date time.Time) *entity.StockHistoryKbar
 	FetchFutureHistoryKbar(code string, date time.Time) ([]*entity.FutureHistoryKbar, error)
-
-	SimulateOne(cond *config.TradeFuture) *simulator.SimulateBalance
-	SimulateMulti(cond []*config.TradeFuture)
 }
 
 type HistoryRepo interface {

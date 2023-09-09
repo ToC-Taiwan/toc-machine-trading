@@ -222,80 +222,6 @@
                 }
             }
         },
-        "/history/simulate/future": {
-            "post": {
-                "description": "simulateFuture",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "history"
-                ],
-                "summary": "simulateFuture",
-                "operationId": "simulateFuture",
-                "parameters": [
-                    {
-                        "type": "boolean",
-                        "description": "It accepts 1, t, T, TRUE, true, True, 0, f, F, FALSE, false, False.",
-                        "name": "need_detail",
-                        "in": "header"
-                    },
-                    {
-                        "description": "TradeFuture",
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/config.TradeFuture"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/simulator.SimulateBalance"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/resp.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/history/simulate/future/auto": {
-            "post": {
-                "description": "simulateFutureAuto",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "history"
-                ],
-                "summary": "simulateFutureAuto",
-                "operationId": "simulateFutureAuto",
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/resp.Response"
-                        }
-                    }
-                }
-            }
-        },
         "/order": {
             "post": {
                 "description": "manualInsertFutureOrder",
@@ -1561,41 +1487,6 @@
             "properties": {
                 "response": {
                     "type": "string"
-                }
-            }
-        },
-        "simulator.SimulateBalance": {
-            "type": "object",
-            "properties": {
-                "cond": {
-                    "$ref": "#/definitions/config.TradeFuture"
-                },
-                "forward": {
-                    "type": "integer"
-                },
-                "forward_count": {
-                    "type": "integer"
-                },
-                "forward_order": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/entity.FutureOrder"
-                    }
-                },
-                "reverse": {
-                    "type": "integer"
-                },
-                "reverse_count": {
-                    "type": "integer"
-                },
-                "reverse_order": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/entity.FutureOrder"
-                    }
-                },
-                "total_balance": {
-                    "type": "integer"
                 }
             }
         },

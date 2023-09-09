@@ -6,12 +6,10 @@ import (
 	"strconv"
 	"time"
 
-	"tmt/cmd/config"
 	"tmt/global"
 	"tmt/internal/controller/http/resp"
 	"tmt/internal/entity"
 	"tmt/internal/usecase/cases/history"
-	"tmt/internal/usecase/module/simulator"
 
 	"github.com/gin-gonic/gin"
 )
@@ -26,8 +24,6 @@ func NewHistoryRoutes(handler *gin.RouterGroup, t history.History) {
 	h := handler.Group("/history")
 	{
 		h.GET("/day-kbar/:stock/:start_date/:interval", r.getKbarData)
-		h.POST("/simulate/future", r.simulateFuture)
-		h.POST("/simulate/future/auto", r.simulateFutureAuto)
 	}
 }
 
@@ -72,54 +68,4 @@ func (r *historyRoutes) getKbarData(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, result)
-}
-
-// @Summary     simulateFuture
-// @Description simulateFuture
-// @ID          simulateFuture
-// @Tags  	    history
-// @Accept      json
-// @Produce     json
-// @param 		need_detail header bool false "It accepts 1, t, T, TRUE, true, True, 0, f, F, FALSE, false, False."
-// @param       body body config.TradeFuture{} true "TradeFuture"
-// @success     200 {object} simulator.SimulateBalance
-// @Failure     500 {object} resp.Response{}
-// @Router      /history/simulate/future [post]
-func (r *historyRoutes) simulateFuture(c *gin.Context) {
-	body := &config.TradeFuture{}
-	if err := c.BindJSON(body); err != nil {
-		resp.ErrorResponse(c, http.StatusBadRequest, err.Error())
-		return
-	}
-
-	var needDetail bool
-	result := r.t.SimulateOne(body)
-	if h := c.GetHeader("need_detail"); h != "" {
-		if need, err := strconv.ParseBool(h); err != nil {
-			resp.ErrorResponse(c, http.StatusBadRequest, err.Error())
-			return
-		} else if need {
-			needDetail = true
-		}
-	}
-
-	if !needDetail {
-		result.ForwardOrder = nil
-		result.ReverseOrder = nil
-	}
-	c.JSON(http.StatusOK, result)
-}
-
-// @Summary     simulateFutureAuto
-// @Description simulateFutureAuto
-// @ID          simulateFutureAuto
-// @Tags  	    history
-// @Accept      json
-// @Produce     json
-// @success     200
-// @Failure     500 {object} resp.Response{}
-// @Router      /history/simulate/future/auto [post]
-func (r *historyRoutes) simulateFutureAuto(c *gin.Context) {
-	go r.t.SimulateMulti(simulator.GenerateCond())
-	c.JSON(http.StatusOK, nil)
 }

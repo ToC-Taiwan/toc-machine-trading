@@ -480,29 +480,6 @@ definitions:
       response:
         type: string
     type: object
-  simulator.SimulateBalance:
-    properties:
-      cond:
-        $ref: '#/definitions/config.TradeFuture'
-      forward:
-        type: integer
-      forward_count:
-        type: integer
-      forward_order:
-        items:
-          $ref: '#/definitions/entity.FutureOrder'
-        type: array
-      reverse:
-        type: integer
-      reverse_count:
-        type: integer
-      reverse_order:
-        items:
-          $ref: '#/definitions/entity.FutureOrder'
-        type: array
-      total_balance:
-        type: integer
-    type: object
   v1.accountSummary:
     properties:
       balance:
@@ -729,56 +706,6 @@ paths:
           schema:
             $ref: '#/definitions/resp.Response'
       summary: getKbarData
-      tags:
-      - history
-  /history/simulate/future:
-    post:
-      consumes:
-      - application/json
-      description: simulateFuture
-      operationId: simulateFuture
-      parameters:
-      - description: It accepts 1, t, T, TRUE, true, True, 0, f, F, FALSE, false,
-          False.
-        in: header
-        name: need_detail
-        type: boolean
-      - description: TradeFuture
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/config.TradeFuture'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/simulator.SimulateBalance'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/resp.Response'
-      summary: simulateFuture
-      tags:
-      - history
-  /history/simulate/future/auto:
-    post:
-      consumes:
-      - application/json
-      description: simulateFutureAuto
-      operationId: simulateFutureAuto
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/resp.Response'
-      summary: simulateFutureAuto
       tags:
       - history
   /order:

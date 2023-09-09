@@ -8,11 +8,9 @@ import (
 	context "context"
 	reflect "reflect"
 	time "time"
-	config "tmt/cmd/config"
 	entity "tmt/internal/entity"
 	cache "tmt/internal/usecase/cache"
 	history "tmt/internal/usecase/cases/history"
-	simulator "tmt/internal/usecase/module/simulator"
 	pb "tmt/pb"
 	eventbus "tmt/pkg/eventbus"
 	log "tmt/pkg/log"
@@ -98,32 +96,6 @@ func (m *MockHistory) Init(logger *log.Log, cc *cache.Cache, bus *eventbus.Bus) 
 func (mr *MockHistoryMockRecorder) Init(logger, cc, bus interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Init", reflect.TypeOf((*MockHistory)(nil).Init), logger, cc, bus)
-}
-
-// SimulateMulti mocks base method.
-func (m *MockHistory) SimulateMulti(cond []*config.TradeFuture) {
-	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "SimulateMulti", cond)
-}
-
-// SimulateMulti indicates an expected call of SimulateMulti.
-func (mr *MockHistoryMockRecorder) SimulateMulti(cond interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SimulateMulti", reflect.TypeOf((*MockHistory)(nil).SimulateMulti), cond)
-}
-
-// SimulateOne mocks base method.
-func (m *MockHistory) SimulateOne(cond *config.TradeFuture) *simulator.SimulateBalance {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SimulateOne", cond)
-	ret0, _ := ret[0].(*simulator.SimulateBalance)
-	return ret0
-}
-
-// SimulateOne indicates an expected call of SimulateOne.
-func (mr *MockHistoryMockRecorder) SimulateOne(cond interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SimulateOne", reflect.TypeOf((*MockHistory)(nil).SimulateOne), cond)
 }
 
 // MockHistoryRepo is a mock of HistoryRepo interface.
