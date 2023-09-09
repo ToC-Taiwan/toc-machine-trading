@@ -8,10 +8,9 @@ import (
 
 	"tmt/cmd/config"
 	"tmt/internal/entity"
-	"tmt/internal/usecase/cache"
+	"tmt/internal/modules/tradeday"
+	"tmt/internal/usecase"
 	"tmt/internal/usecase/cases/history"
-	"tmt/internal/usecase/event"
-	"tmt/internal/usecase/module/tradeday"
 	"tmt/internal/usecase/repo"
 	"tmt/pkg/eventbus"
 	"tmt/pkg/log"
@@ -30,7 +29,7 @@ type AnalyzeUseCase struct {
 	tradeDay *tradeday.TradeDay
 
 	logger *log.Log
-	cc     *cache.Cache
+	cc     *usecase.Cache
 	bus    *eventbus.Bus
 }
 
@@ -43,12 +42,12 @@ func NewAnalyze() Analyze {
 	}
 }
 
-func (uc *AnalyzeUseCase) Init(logger *log.Log, cc *cache.Cache, bus *eventbus.Bus) Analyze {
+func (uc *AnalyzeUseCase) Init(logger *log.Log, cc *usecase.Cache, bus *eventbus.Bus) Analyze {
 	uc.logger = logger
 	uc.cc = cc
 	uc.bus = bus
 
-	uc.bus.SubscribeAsync(event.TopicAnalyzeStockTargets, true, uc.findBelowQuaterMATargets)
+	uc.bus.SubscribeAsync(usecase.TopicAnalyzeStockTargets, true, uc.findBelowQuaterMATargets)
 	return uc
 }
 
@@ -93,6 +92,6 @@ func (uc *AnalyzeUseCase) findBelowQuaterMATargets(targetArr []*entity.StockTarg
 		}
 	}
 
-	uc.bus.PublishTopicEvent(event.TopicSubscribeStockTickTargets, targetArr)
+	uc.bus.PublishTopicEvent(usecase.TopicSubscribeStockTickTargets, targetArr)
 	uc.logger.Info("Find below quaterMA targets done")
 }

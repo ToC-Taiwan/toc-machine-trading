@@ -8,7 +8,7 @@ import (
 
 	"tmt/cmd/config"
 	"tmt/internal/controller/http/router"
-	"tmt/internal/usecase/cache"
+	"tmt/internal/usecase"
 	"tmt/internal/usecase/cases/analyze"
 	"tmt/internal/usecase/cases/basic"
 	"tmt/internal/usecase/cases/history"
@@ -24,8 +24,8 @@ func RunApp() {
 	logger := log.Get()
 	cfg := config.Get()
 
-	cc := cache.New()
 	bus := eventbus.New()
+	cc := usecase.New()
 
 	logger.Warn("TMT is running")
 	logger.Warnf("Simulation Mode: %v", cfg.Simulation)

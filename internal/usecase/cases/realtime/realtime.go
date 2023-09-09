@@ -10,15 +10,14 @@ import (
 
 	"tmt/cmd/config"
 	"tmt/internal/entity"
-	"tmt/internal/usecase/cache"
+	"tmt/internal/modules/dt"
+	"tmt/internal/modules/hadger"
+	"tmt/internal/modules/quota"
+	"tmt/internal/modules/tradeday"
+	"tmt/internal/usecase"
 	"tmt/internal/usecase/cases/trade"
-	"tmt/internal/usecase/event"
-	"tmt/internal/usecase/grpcapi"
-	"tmt/internal/usecase/module/dt"
-	"tmt/internal/usecase/module/hadger"
-	"tmt/internal/usecase/module/quota"
-	"tmt/internal/usecase/module/tradeday"
-	"tmt/internal/usecase/rabbit"
+	"tmt/internal/usecase/grpc"
+	"tmt/internal/usecase/mq"
 	"tmt/internal/usecase/repo"
 	"tmt/pkg/eventbus"
 	"tmt/pkg/log"
@@ -53,7 +52,7 @@ type RealTimeUseCase struct {
 	inventoryIsNotEmpty bool
 
 	logger *log.Log
-	cc     *cache.Cache
+	cc     *usecase.Cache
 	bus    *eventbus.Bus
 }
 
@@ -63,14 +62,14 @@ func NewRealTime() RealTime {
 		quota: quota.NewQuota(cfg.Quota),
 		repo:  repo.NewRealTime(cfg.GetPostgresPool()),
 
-		commonRabbit: rabbit.NewRabbit(cfg.GetRabbitConn()),
-		futureRabbit: rabbit.NewRabbit(cfg.GetRabbitConn()),
+		commonRabbit: mq.NewRabbit(cfg.GetRabbitConn()),
+		futureRabbit: mq.NewRabbit(cfg.GetRabbitConn()),
 
-		grpcapi:    grpcapi.NewRealTime(cfg.GetSinopacPool()),
-		subgRPCAPI: grpcapi.NewSubscribe(cfg.GetSinopacPool()),
+		grpcapi:    grpc.NewRealTime(cfg.GetSinopacPool()),
+		subgRPCAPI: grpc.NewSubscribe(cfg.GetSinopacPool()),
 
-		sc: grpcapi.NewTrade(cfg.GetSinopacPool(), cfg.Simulation),
-		fg: grpcapi.NewTrade(cfg.GetFuglePool(), cfg.Simulation),
+		sc: grpc.NewTrade(cfg.GetSinopacPool(), cfg.Simulation),
+		fg: grpc.NewTrade(cfg.GetFuglePool(), cfg.Simulation),
 
 		cfg:                 cfg,
 		futureSwitchChanMap: make(map[string]chan bool),
@@ -80,7 +79,7 @@ func NewRealTime() RealTime {
 	}
 }
 
-func (uc *RealTimeUseCase) Init(logger *log.Log, cc *cache.Cache, bus *eventbus.Bus) RealTime {
+func (uc *RealTimeUseCase) Init(logger *log.Log, cc *usecase.Cache, bus *eventbus.Bus) RealTime {
 	uc.logger = logger
 	uc.cc = cc
 	uc.bus = bus
@@ -101,9 +100,9 @@ func (uc *RealTimeUseCase) Init(logger *log.Log, cc *cache.Cache, bus *eventbus.
 	go uc.ReceiveEvent(context.Background())
 	go uc.ReceiveOrderStatus(context.Background())
 
-	uc.bus.SubscribeAsync(event.TopicSubscribeStockTickTargets, true, uc.ReceiveStockSubscribeData)
-	uc.bus.SubscribeAsync(event.TopicUnSubscribeStockTickTargets, false, uc.UnSubscribeStockTick, uc.UnSubscribeStockBidAsk)
-	uc.bus.SubscribeAsync(event.TopicSubscribeFutureTickTargets, true, uc.SetMainFuture)
+	uc.bus.SubscribeAsync(usecase.TopicSubscribeStockTickTargets, true, uc.ReceiveStockSubscribeData)
+	uc.bus.SubscribeAsync(usecase.TopicUnSubscribeStockTickTargets, false, uc.UnSubscribeStockTick, uc.UnSubscribeStockBidAsk)
+	uc.bus.SubscribeAsync(usecase.TopicSubscribeFutureTickTargets, true, uc.SetMainFuture)
 
 	return uc
 }
@@ -268,9 +267,9 @@ func (uc *RealTimeUseCase) ReceiveOrderStatus(ctx context.Context) {
 			order := <-orderStatusChan
 			switch t := order.(type) {
 			case *entity.StockOrder:
-				uc.bus.PublishTopicEvent(event.TopicInsertOrUpdateStockOrder, t)
+				uc.bus.PublishTopicEvent(usecase.TopicInsertOrUpdateStockOrder, t)
 			case *entity.FutureOrder:
-				uc.bus.PublishTopicEvent(event.TopicInsertOrUpdateFutureOrder, t)
+				uc.bus.PublishTopicEvent(usecase.TopicInsertOrUpdateFutureOrder, t)
 			}
 		}
 	}()
@@ -466,8 +465,8 @@ func (uc *RealTimeUseCase) ReceiveStockSubscribeData(targetArr []*entity.StockTa
 	for _, t := range targetArr {
 		hadger := hadger.NewHadgerStock(
 			t.StockNum,
-			uc.sc.(*grpcapi.TradegRPCAPI),
-			uc.fg.(*grpcapi.TradegRPCAPI),
+			uc.sc.(*grpc.TradegRPCAPI),
+			uc.fg.(*grpc.TradegRPCAPI),
 			uc.quota,
 			&uc.cfg.TradeStock,
 		)
@@ -478,7 +477,7 @@ func (uc *RealTimeUseCase) ReceiveStockSubscribeData(targetArr []*entity.StockTa
 		uc.stockSwitchChanMapLock.Unlock()
 
 		uc.logger.Infof("Stock room %s <-> %s <-> %s", t.Stock.Name, t.Stock.Future.Name, t.Stock.Future.Code)
-		r := rabbit.NewRabbit(uc.cfg.GetRabbitConn())
+		r := mq.NewRabbit(uc.cfg.GetRabbitConn())
 		go r.StockTickConsumer(t.StockNum, hadger.TickChan())
 	}
 
@@ -496,7 +495,7 @@ func (uc *RealTimeUseCase) ReceiveStockSubscribeData(targetArr []*entity.StockTa
 			}
 		}
 	}()
-	hr := rabbit.NewRabbit(uc.cfg.GetRabbitConn())
+	hr := mq.NewRabbit(uc.cfg.GetRabbitConn())
 	hr.FillAllBasic(uc.cc.GetAllStockDetail(), uc.cc.GetAllFutureDetail())
 	go hr.OrderStatusConsumer(orderStatusChan)
 	go hr.OrderStatusArrConsumer(orderStatusChan)
@@ -507,7 +506,7 @@ func (uc *RealTimeUseCase) ReceiveFutureSubscribeData(code string) {
 	defer uc.SubscribeFutureTick(code)
 	t := dt.NewDTFuture(
 		code,
-		uc.sc.(*grpcapi.TradegRPCAPI),
+		uc.sc.(*grpc.TradegRPCAPI),
 		&uc.cfg.TradeFuture,
 	)
 
@@ -543,7 +542,7 @@ func (uc *RealTimeUseCase) SetMainFuture(code string) {
 }
 
 func (uc *RealTimeUseCase) NewFutureRealTimeClient(tickChan chan *entity.RealTimeFutureTick, orderStatusChan chan interface{}, connectionID string) {
-	r := rabbit.NewRabbit(uc.cfg.GetRabbitConn())
+	r := mq.NewRabbit(uc.cfg.GetRabbitConn())
 	r.FillAllBasic(uc.cc.GetAllStockDetail(), uc.cc.GetAllFutureDetail())
 
 	uc.clientRabbitMapLock.Lock()

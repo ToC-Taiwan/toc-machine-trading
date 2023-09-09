@@ -10,7 +10,7 @@ import (
 	time "time"
 	config "tmt/cmd/config"
 	entity "tmt/internal/entity"
-	cache "tmt/internal/usecase/cache"
+	usecase "tmt/internal/usecase"
 	basic "tmt/internal/usecase/cases/basic"
 	pb "tmt/pb"
 	log "tmt/pkg/log"
@@ -86,7 +86,7 @@ func (mr *MockBasicMockRecorder) GetShioajiUsage() *gomock.Call {
 }
 
 // Init mocks base method.
-func (m *MockBasic) Init(logger *log.Log, cc *cache.Cache) basic.Basic {
+func (m *MockBasic) Init(logger *log.Log, cc *usecase.Cache) basic.Basic {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Init", logger, cc)
 	ret0, _ := ret[0].(basic.Basic)

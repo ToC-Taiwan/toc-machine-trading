@@ -1,5 +1,5 @@
-// Package cache package cache
-package cache
+// Package usecase package usecase
+package usecase
 
 import (
 	"fmt"

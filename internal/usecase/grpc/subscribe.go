@@ -1,5 +1,5 @@
-// Package grpcapi package grpcapi
-package grpcapi
+// Package grpc package grpc
+package grpc
 
 import (
 	"context"

@@ -6,8 +6,8 @@ import (
 
 	"tmt/cmd/config"
 	"tmt/internal/entity"
-	"tmt/internal/usecase/grpcapi"
-	"tmt/internal/usecase/module/quota"
+	"tmt/internal/modules/quota"
+	"tmt/internal/usecase/grpc"
 	"tmt/pkg/eventbus"
 
 	"github.com/google/uuid"
@@ -18,8 +18,8 @@ type HadgerStock struct {
 	orderQuantity int64
 	tickArr       []*entity.RealTimeStockTick
 
-	forwardTrader *grpcapi.TradegRPCAPI
-	reverseTrader *grpcapi.TradegRPCAPI
+	forwardTrader *grpc.TradegRPCAPI
+	reverseTrader *grpc.TradegRPCAPI
 	localBus      *eventbus.Bus
 	quota         *quota.Quota
 
@@ -34,7 +34,7 @@ type HadgerStock struct {
 	isTradeTime bool
 }
 
-func NewHadgerStock(num string, s, f *grpcapi.TradegRPCAPI, q *quota.Quota, tradeConfig *config.TradeStock) *HadgerStock {
+func NewHadgerStock(num string, s, f *grpc.TradegRPCAPI, q *quota.Quota, tradeConfig *config.TradeStock) *HadgerStock {
 	h := &HadgerStock{
 		num:           num,
 		orderQuantity: 1,

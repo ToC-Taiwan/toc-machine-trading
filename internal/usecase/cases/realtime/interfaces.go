@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"tmt/internal/entity"
-	"tmt/internal/usecase/cache"
+	"tmt/internal/usecase"
 	"tmt/pb"
 	"tmt/pkg/eventbus"
 	"tmt/pkg/log"
@@ -13,7 +13,7 @@ import (
 //go:generate mockgen -source=interfaces.go -destination=./mocks_test.go -package=realtime_test
 
 type RealTime interface {
-	Init(logger *log.Log, cc *cache.Cache, bus *eventbus.Bus) RealTime
+	Init(logger *log.Log, cc *usecase.Cache, bus *eventbus.Bus) RealTime
 	GetStockSnapshotByNumArr(stockNumArr []string) ([]*entity.StockSnapShot, error)
 	GetTradeIndex() *entity.TradeIndex
 	GetTSESnapshot(ctx context.Context) (*entity.StockSnapShot, error)

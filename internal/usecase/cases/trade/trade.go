@@ -10,10 +10,10 @@ import (
 	"tmt/cmd/config"
 	"tmt/global"
 	"tmt/internal/entity"
-	"tmt/internal/usecase/event"
-	"tmt/internal/usecase/grpcapi"
-	"tmt/internal/usecase/module/quota"
-	"tmt/internal/usecase/module/tradeday"
+	"tmt/internal/modules/quota"
+	"tmt/internal/modules/tradeday"
+	"tmt/internal/usecase"
+	"tmt/internal/usecase/grpc"
 	"tmt/internal/usecase/repo"
 	"tmt/pkg/eventbus"
 	"tmt/pkg/log"
@@ -49,8 +49,8 @@ func NewTrade() Trade {
 	tradeDay := tradeday.Get()
 	return &TradeUseCase{
 		simulation: cfg.Simulation,
-		Sinopac:    grpcapi.NewTrade(cfg.GetSinopacPool(), cfg.Simulation),
-		Fugle:      grpcapi.NewTrade(cfg.GetFuglePool(), cfg.Simulation),
+		Sinopac:    grpc.NewTrade(cfg.GetSinopacPool(), cfg.Simulation),
+		Fugle:      grpc.NewTrade(cfg.GetFuglePool(), cfg.Simulation),
 		repo:       repo.NewTrade(cfg.GetPostgresPool()),
 		quota:      quota.NewQuota(cfg.Quota),
 
@@ -67,8 +67,8 @@ func (uc *TradeUseCase) Init(logger *log.Log, bus *eventbus.Bus) Trade {
 	uc.logger = logger
 	uc.bus = bus
 
-	uc.bus.SubscribeAsync(event.TopicInsertOrUpdateStockOrder, true, uc.updateStockOrderCacheAndInsertDB)
-	uc.bus.SubscribeAsync(event.TopicInsertOrUpdateFutureOrder, true, uc.updateFutureOrderCacheAndInsertDB)
+	uc.bus.SubscribeAsync(usecase.TopicInsertOrUpdateStockOrder, true, uc.updateStockOrderCacheAndInsertDB)
+	uc.bus.SubscribeAsync(usecase.TopicInsertOrUpdateFutureOrder, true, uc.updateFutureOrderCacheAndInsertDB)
 
 	if uc.simulation {
 		go uc.askSimulateOrderStatus()

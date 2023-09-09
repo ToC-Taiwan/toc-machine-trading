@@ -1,5 +1,5 @@
-// Package rabbit package rabbit
-package rabbit
+// Package mq package mq
+package mq
 
 import (
 	"fmt"
@@ -12,7 +12,21 @@ import (
 	"tmt/pkg/log"
 	"tmt/pkg/rabbitmq"
 
+	"github.com/streadway/amqp"
 	"google.golang.org/protobuf/proto"
+)
+
+const (
+	routingKeyEvent = "event"
+
+	routingKeyOrder    = "order"
+	routingKeyOrderArr = "order_arr"
+
+	routingKeyTick       = "tick"
+	routingKeyFutureTick = "future_tick"
+
+	routingKeyBidAsk       = "bid_ask"
+	routingKeyFutureBidAsk = "future_bid_ask"
 )
 
 // Rabbit -.
@@ -30,6 +44,14 @@ func NewRabbit(connection *rabbitmq.Connection) *Rabbit {
 		conn:   connection,
 		logger: log.Get(),
 	}
+}
+
+func (c *Rabbit) establishDelivery(key string) <-chan amqp.Delivery {
+	delivery, err := c.conn.BindAndConsume(key)
+	if err != nil {
+		c.logger.Fatal(err)
+	}
+	return delivery
 }
 
 func (c *Rabbit) Close() {

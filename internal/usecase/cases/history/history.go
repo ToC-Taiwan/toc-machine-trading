@@ -11,10 +11,9 @@ import (
 	"tmt/cmd/config"
 	"tmt/global"
 	"tmt/internal/entity"
-	"tmt/internal/usecase/cache"
-	"tmt/internal/usecase/event"
-	"tmt/internal/usecase/grpcapi"
-	"tmt/internal/usecase/module/tradeday"
+	"tmt/internal/modules/tradeday"
+	"tmt/internal/usecase"
+	"tmt/internal/usecase/grpc"
 	"tmt/internal/usecase/repo"
 	"tmt/internal/utils"
 	"tmt/pkg/eventbus"
@@ -37,7 +36,7 @@ type HistoryUseCase struct {
 	slackMsgChan chan string
 
 	logger *log.Log
-	cc     *cache.Cache
+	cc     *usecase.Cache
 	bus    *eventbus.Bus
 }
 
@@ -46,7 +45,7 @@ func NewHistory() History {
 	cfg := config.Get()
 	return &HistoryUseCase{
 		repo:            repo.NewHistory(cfg.GetPostgresPool()),
-		grpcapi:         grpcapi.NewHistory(cfg.GetSinopacPool()),
+		grpcapi:         grpc.NewHistory(cfg.GetSinopacPool()),
 		fetchList:       make(map[string]*entity.StockTarget),
 		tradeDay:        tradeday.Get(),
 		analyzeStockCfg: cfg.AnalyzeStock,
@@ -55,15 +54,15 @@ func NewHistory() History {
 	}
 }
 
-func (uc *HistoryUseCase) Init(logger *log.Log, cc *cache.Cache, bus *eventbus.Bus) History {
+func (uc *HistoryUseCase) Init(logger *log.Log, cc *usecase.Cache, bus *eventbus.Bus) History {
 	uc.logger = logger
 	uc.cc = cc
 	uc.bus = bus
 
 	go uc.SendMessage()
 
-	uc.bus.SubscribeAsync(event.TopicFetchStockHistory, true, uc.FetchStockHistory)
-	uc.bus.SubscribeAsync(event.TopicFetchFutureHistory, true, uc.FetchFutureHistory)
+	uc.bus.SubscribeAsync(usecase.TopicFetchStockHistory, true, uc.FetchStockHistory)
+	uc.bus.SubscribeAsync(usecase.TopicFetchFutureHistory, true, uc.FetchFutureHistory)
 
 	return uc
 }
@@ -117,7 +116,7 @@ func (uc *HistoryUseCase) FetchStockHistory(targetArr []*entity.StockTarget) {
 		uc.logger.Fatal(err)
 	}
 
-	uc.bus.PublishTopicEvent(event.TopicAnalyzeStockTargets, fetchArr)
+	uc.bus.PublishTopicEvent(usecase.TopicAnalyzeStockTargets, fetchArr)
 }
 
 func (uc *HistoryUseCase) FetchFutureHistory(code string) {
@@ -129,7 +128,7 @@ func (uc *HistoryUseCase) FetchFutureHistory(code string) {
 	// 	return
 	// }
 
-	uc.bus.PublishTopicEvent(event.TopicSubscribeFutureTickTargets, code)
+	uc.bus.PublishTopicEvent(usecase.TopicSubscribeFutureTickTargets, code)
 }
 
 func (uc *HistoryUseCase) fetchHistoryClose(targetArr []*entity.StockTarget) error {

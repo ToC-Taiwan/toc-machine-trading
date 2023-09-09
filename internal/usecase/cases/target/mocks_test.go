@@ -9,7 +9,7 @@ import (
 	reflect "reflect"
 	time "time"
 	entity "tmt/internal/entity"
-	cache "tmt/internal/usecase/cache"
+	usecase "tmt/internal/usecase"
 	target "tmt/internal/usecase/cases/target"
 	eventbus "tmt/pkg/eventbus"
 	log "tmt/pkg/log"
@@ -55,7 +55,7 @@ func (mr *MockTargetMockRecorder) GetTargets(ctx interface{}) *gomock.Call {
 }
 
 // Init mocks base method.
-func (m *MockTarget) Init(logger *log.Log, cc *cache.Cache, bus *eventbus.Bus) target.Target {
+func (m *MockTarget) Init(logger *log.Log, cc *usecase.Cache, bus *eventbus.Bus) target.Target {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Init", logger, cc, bus)
 	ret0, _ := ret[0].(target.Target)

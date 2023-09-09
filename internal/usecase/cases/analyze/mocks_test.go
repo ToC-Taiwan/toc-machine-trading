@@ -9,7 +9,7 @@ import (
 	reflect "reflect"
 	time "time"
 	entity "tmt/internal/entity"
-	cache "tmt/internal/usecase/cache"
+	usecase "tmt/internal/usecase"
 	analyze "tmt/internal/usecase/cases/analyze"
 	eventbus "tmt/pkg/eventbus"
 	log "tmt/pkg/log"
@@ -55,7 +55,7 @@ func (mr *MockAnalyzeMockRecorder) GetRebornMap(ctx interface{}) *gomock.Call {
 }
 
 // Init mocks base method.
-func (m *MockAnalyze) Init(logger *log.Log, cc *cache.Cache, bus *eventbus.Bus) analyze.Analyze {
+func (m *MockAnalyze) Init(logger *log.Log, cc *usecase.Cache, bus *eventbus.Bus) analyze.Analyze {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Init", logger, cc, bus)
 	ret0, _ := ret[0].(analyze.Analyze)

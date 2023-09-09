@@ -7,7 +7,7 @@ import (
 
 	"tmt/cmd/config"
 	"tmt/internal/entity"
-	"tmt/internal/usecase/grpcapi"
+	"tmt/internal/usecase/grpc"
 	"tmt/pkg/eventbus"
 	"tmt/pkg/log"
 
@@ -21,7 +21,7 @@ type DTFuture struct {
 	lastTick *entity.RealTimeFutureTick
 	tickArr  entity.RealTimeFutureTickArr
 
-	sc          *grpcapi.TradegRPCAPI
+	sc          *grpc.TradegRPCAPI
 	localBus    *eventbus.Bus
 	tradeConfig *config.TradeFuture
 
@@ -40,7 +40,7 @@ type DTFuture struct {
 	logger             *log.Log
 }
 
-func NewDTFuture(code string, s *grpcapi.TradegRPCAPI, tradeConfig *config.TradeFuture) *DTFuture {
+func NewDTFuture(code string, s *grpc.TradegRPCAPI, tradeConfig *config.TradeFuture) *DTFuture {
 	d := &DTFuture{
 		code:          code,
 		orderQuantity: tradeConfig.Quantity,

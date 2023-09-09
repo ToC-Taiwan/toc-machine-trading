@@ -9,7 +9,7 @@ import (
 	reflect "reflect"
 	time "time"
 	entity "tmt/internal/entity"
-	cache "tmt/internal/usecase/cache"
+	usecase "tmt/internal/usecase"
 	history "tmt/internal/usecase/cases/history"
 	pb "tmt/pb"
 	eventbus "tmt/pkg/eventbus"
@@ -85,7 +85,7 @@ func (mr *MockHistoryMockRecorder) GetTradeDay() *gomock.Call {
 }
 
 // Init mocks base method.
-func (m *MockHistory) Init(logger *log.Log, cc *cache.Cache, bus *eventbus.Bus) history.History {
+func (m *MockHistory) Init(logger *log.Log, cc *usecase.Cache, bus *eventbus.Bus) history.History {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Init", logger, cc, bus)
 	ret0, _ := ret[0].(history.History)

@@ -11,9 +11,9 @@ import (
 	"tmt/cmd/config"
 	"tmt/global"
 	"tmt/internal/entity"
-	"tmt/internal/usecase/cache"
-	"tmt/internal/usecase/grpcapi"
-	"tmt/internal/usecase/module/tradeday"
+	"tmt/internal/modules/tradeday"
+	"tmt/internal/usecase"
+	"tmt/internal/usecase/grpc"
 	"tmt/internal/usecase/repo"
 	"tmt/internal/utils"
 	"tmt/pkg/log"
@@ -31,21 +31,21 @@ type BasicUseCase struct {
 	allOptionDetail []*entity.Option
 
 	logger *log.Log
-	cc     *cache.Cache
+	cc     *usecase.Cache
 }
 
 func NewBasic() Basic {
 	cfg := config.Get()
 	return &BasicUseCase{
 		repo:     repo.NewBasic(cfg.GetPostgresPool()),
-		sc:       grpcapi.NewBasic(cfg.GetSinopacPool()),
-		fugle:    grpcapi.NewBasic(cfg.GetFuglePool()),
+		sc:       grpc.NewBasic(cfg.GetSinopacPool()),
+		fugle:    grpc.NewBasic(cfg.GetFuglePool()),
 		cfg:      cfg,
 		tradeDay: tradeday.Get(),
 	}
 }
 
-func (uc *BasicUseCase) Init(logger *log.Log, cc *cache.Cache) Basic {
+func (uc *BasicUseCase) Init(logger *log.Log, cc *usecase.Cache) Basic {
 	uc.logger = logger
 	uc.cc = cc
 

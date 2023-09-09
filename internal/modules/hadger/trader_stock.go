@@ -2,7 +2,7 @@ package hadger
 
 import (
 	"tmt/internal/entity"
-	"tmt/internal/usecase/grpcapi"
+	"tmt/internal/usecase/grpc"
 	"tmt/pkg/eventbus"
 
 	"github.com/google/uuid"
@@ -14,13 +14,13 @@ type HadgeTraderStock struct {
 	tickChan chan *entity.RealTimeStockTick
 	tickArr  []*entity.RealTimeStockTick
 
-	forwardTrader *grpcapi.TradegRPCAPI
-	reverseTrader *grpcapi.TradegRPCAPI
+	forwardTrader *grpc.TradegRPCAPI
+	reverseTrader *grpc.TradegRPCAPI
 
 	bus *eventbus.Bus
 }
 
-func NewHadgeTraderStock(s, f *grpcapi.TradegRPCAPI, bus *eventbus.Bus) *HadgeTraderStock {
+func NewHadgeTraderStock(s, f *grpc.TradegRPCAPI, bus *eventbus.Bus) *HadgeTraderStock {
 	h := &HadgeTraderStock{
 		id:            uuid.NewString(),
 		tickChan:      make(chan *entity.RealTimeStockTick),

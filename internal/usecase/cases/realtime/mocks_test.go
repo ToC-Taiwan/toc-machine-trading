@@ -8,7 +8,7 @@ import (
 	context "context"
 	reflect "reflect"
 	entity "tmt/internal/entity"
-	cache "tmt/internal/usecase/cache"
+	usecase "tmt/internal/usecase"
 	realtime "tmt/internal/usecase/cases/realtime"
 	pb "tmt/pb"
 	eventbus "tmt/pkg/eventbus"
@@ -141,7 +141,7 @@ func (mr *MockRealTimeMockRecorder) GetTradeIndex() *gomock.Call {
 }
 
 // Init mocks base method.
-func (m *MockRealTime) Init(logger *log.Log, cc *cache.Cache, bus *eventbus.Bus) realtime.RealTime {
+func (m *MockRealTime) Init(logger *log.Log, cc *usecase.Cache, bus *eventbus.Bus) realtime.RealTime {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Init", logger, cc, bus)
 	ret0, _ := ret[0].(realtime.RealTime)

@@ -1,5 +1,5 @@
-// Package event package event
-package event
+// Package usecase package usecase
+package usecase
 
 const (
 	TopicFetchStockHistory   string = "fetch_stock_history"

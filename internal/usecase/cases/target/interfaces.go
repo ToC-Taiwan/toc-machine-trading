@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"tmt/internal/entity"
-	"tmt/internal/usecase/cache"
+	"tmt/internal/usecase"
 	"tmt/pkg/eventbus"
 	"tmt/pkg/log"
 )
@@ -13,7 +13,7 @@ import (
 //go:generate mockgen -source=interfaces.go -destination=./mocks_test.go -package=target_test
 
 type Target interface {
-	Init(logger *log.Log, cc *cache.Cache, bus *eventbus.Bus) Target
+	Init(logger *log.Log, cc *usecase.Cache, bus *eventbus.Bus) Target
 	GetTargets(ctx context.Context) []*entity.StockTarget
 }
 

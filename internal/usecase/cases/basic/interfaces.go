@@ -6,7 +6,7 @@ import (
 
 	"tmt/cmd/config"
 	"tmt/internal/entity"
-	"tmt/internal/usecase/cache"
+	"tmt/internal/usecase"
 	"tmt/pb"
 	"tmt/pkg/log"
 )
@@ -14,7 +14,7 @@ import (
 //go:generate mockgen -source=interfaces.go -destination=./mocks_test.go -package=basic_test
 
 type Basic interface {
-	Init(logger *log.Log, cc *cache.Cache) Basic
+	Init(logger *log.Log, cc *usecase.Cache) Basic
 	GetAllRepoStock(ctx context.Context) ([]*entity.Stock, error)
 	GetConfig() *config.Config
 	GetShioajiUsage() (*entity.ShioajiUsage, error)

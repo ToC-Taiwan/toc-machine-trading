@@ -7,7 +7,7 @@ import (
 
 	"tmt/cmd/config"
 	"tmt/internal/entity"
-	"tmt/internal/usecase/grpcapi"
+	"tmt/internal/usecase/grpc"
 	"tmt/pb"
 	"tmt/pkg/eventbus"
 	"tmt/pkg/log"
@@ -26,7 +26,7 @@ type DTTraderFuture struct {
 	tickChan       chan *entity.RealTimeFutureTick // tick chan
 	finishOrderMap map[string]*entity.FutureOrder  // order id -> order
 
-	sc  *grpcapi.TradegRPCAPI
+	sc  *grpc.TradegRPCAPI
 	bus *eventbus.Bus
 
 	tradeConfig  *config.TradeFuture
@@ -43,7 +43,7 @@ type DTTraderFuture struct {
 }
 
 // NewDTTraderFuture create a new DTTraderFuture, if quantity > orderQtyUnit, return nil or place order error, return nil
-func NewDTTraderFuture(orderWithCfg orderWithCfg, s *grpcapi.TradegRPCAPI, bus *eventbus.Bus) *DTTraderFuture {
+func NewDTTraderFuture(orderWithCfg orderWithCfg, s *grpc.TradegRPCAPI, bus *eventbus.Bus) *DTTraderFuture {
 	logger := log.Get()
 	if orderWithCfg.order.Quantity > orderQtyUnit {
 		logger.Warnf("New DTTraderFuture quantity > %d", orderQtyUnit)
