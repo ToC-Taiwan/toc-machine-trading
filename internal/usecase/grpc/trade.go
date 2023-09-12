@@ -124,7 +124,7 @@ func (t *TradegRPCAPI) BuyOddStock(order *entity.StockOrder) (*pb.TradeResult, e
 	r, err := pb.NewTradeInterfaceClient(conn).BuyOddStock(context.Background(), &pb.OddStockOrderDetail{
 		StockNum: order.StockNum,
 		Price:    order.Price,
-		Quantity: order.Quantity,
+		Share:    order.Quantity,
 	})
 	if err != nil {
 		return nil, err
@@ -139,7 +139,7 @@ func (t *TradegRPCAPI) SellOddStock(order *entity.StockOrder) (*pb.TradeResult, 
 	r, err := pb.NewTradeInterfaceClient(conn).SellOddStock(context.Background(), &pb.OddStockOrderDetail{
 		StockNum: order.StockNum,
 		Price:    order.Price,
-		Quantity: order.Quantity,
+		Share:    order.Quantity,
 	})
 	if err != nil {
 		return nil, err
