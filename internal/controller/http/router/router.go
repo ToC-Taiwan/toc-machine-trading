@@ -32,11 +32,12 @@ type Router struct {
 }
 
 // NewRouter -.
-// @title       TOC MACHINE TRADING
-// @description API docs for Auto Trade
-// @version     0.0.1
-// @license.name Apache 2.0
-// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+//
+//	@title			TOC MACHINE TRADING
+//	@description	API docs for Auto Trade
+//	@version		0.0.1
+//	@license.name	Apache 2.0
+//	@license.url	http://www.apache.org/licenses/LICENSE-2.0.html
 func NewRouter() *Router {
 	gin.SetMode(os.Getenv("GIN_MODE"))
 	docs.SwaggerInfo.BasePath = prefixV1
@@ -98,14 +99,16 @@ func (r *Router) AddV1RealTimeRoutes(realTime realtime.RealTime, trade trade.Tra
 	return r
 }
 
-// @Summary     healthCheck
-// @Description healthCheck
-// @ID          healthCheck
-// @Tags  	    healthCheck
-// @Accept      json
-// @Produce     json
-// @Success     200 {string} string
-// @Router      /-/health [get]
+// healthCheck -.
+//
+//	@Summary		healthCheck
+//	@Description	healthCheck
+//	@ID				healthCheck
+//	@Tags			healthCheck
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{string}	string
+//	@Router			/-/health [get]
 func healthCheck(c *gin.Context) {
 	c.JSON(http.StatusOK, "OK")
 }

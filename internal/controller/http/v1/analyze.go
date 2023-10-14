@@ -31,14 +31,16 @@ type reborn struct {
 	Stocks []entity.Stock `json:"stocks"`
 }
 
-// @Summary     getRebornTargets
-// @Description getRebornTargets
-// @ID          getRebornTargets
-// @Tags  	    analyze
-// @Accept      json
-// @Produce     json
-// @Success     200 {object} []reborn{}
-// @Router      /analyze/reborn [get]
+// getRebornTargets -.
+//
+//	@Summary		getRebornTargets
+//	@Description	getRebornTargets
+//	@ID				getRebornTargets
+//	@Tags			analyze
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{object}	[]reborn{}
+//	@Router			/analyze/reborn [get]
 func (r *analyzeRoutes) getRebornTargets(c *gin.Context) {
 	mapData := r.t.GetRebornMap(c.Request.Context())
 	result := []reborn{}

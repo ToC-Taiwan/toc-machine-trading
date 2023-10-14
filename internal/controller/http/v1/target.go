@@ -22,14 +22,16 @@ func NewTargetRoutes(handler *gin.RouterGroup, t target.Target) {
 	}
 }
 
-// @Summary     getTargets
-// @Description getTargets
-// @ID          getTargets
-// @Tags  	    targets
-// @Accept      json
-// @Produce     json
-// @Success     200 {object} []entity.StockTarget
-// @Router      /targets [get]
+// getTargets -.
+//
+//	@Summary		getTargets
+//	@Description	getTargets
+//	@ID				getTargets
+//	@Tags			targets
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{object}	[]entity.StockTarget
+//	@Router			/targets [get]
 func (r *targetRoutes) getTargets(c *gin.Context) {
 	c.JSON(http.StatusOK, r.t.GetTargets(c.Request.Context()))
 }

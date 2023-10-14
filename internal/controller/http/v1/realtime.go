@@ -38,15 +38,17 @@ func NewRealTimeRoutes(handler *gin.RouterGroup, t realtime.RealTime, o trade.Tr
 	}
 }
 
-// @Summary     getTSESnapshot
-// @Description getTSESnapshot
-// @ID          getTSESnapshot
-// @Tags  	    stream
-// @Accept      json
-// @Produce     json
-// @Success     200 {object} entity.StockSnapShot
-// @Failure     500 {object} resp.Response{}
-// @Router      /stream/tse/snapshot [get]
+// getTSESnapshot -.
+//
+//	@Summary		getTSESnapshot
+//	@Description	getTSESnapshot
+//	@ID				getTSESnapshot
+//	@Tags			stream
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{object}	entity.StockSnapShot
+//	@Failure		500	{object}	resp.Response{}
+//	@Router			/stream/tse/snapshot [get]
 func (r *realTimeRoutes) getTSESnapshot(c *gin.Context) {
 	snapshot, err := r.t.GetTSESnapshot(c.Request.Context())
 	if err != nil {
@@ -56,14 +58,16 @@ func (r *realTimeRoutes) getTSESnapshot(c *gin.Context) {
 	c.JSON(http.StatusOK, snapshot)
 }
 
-// @Summary     getIndex
-// @Description getIndex
-// @ID          getIndex
-// @Tags  	    stream
-// @Accept      json
-// @Produce     json
-// @Success     200 {object} entity.TradeIndex
-// @Router      /stream/index [get]
+// getIndex -.
+//
+//	@Summary		getIndex
+//	@Description	getIndex
+//	@ID				getIndex
+//	@Tags			stream
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{object}	entity.TradeIndex
+//	@Router			/stream/index [get]
 func (r *realTimeRoutes) getIndex(c *gin.Context) {
 	c.JSON(http.StatusOK, r.t.GetTradeIndex())
 }
