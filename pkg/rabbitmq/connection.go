@@ -2,10 +2,11 @@
 package rabbitmq
 
 import (
+	"context"
 	"fmt"
 	"time"
 
-	"github.com/streadway/amqp"
+	amqp "github.com/rabbitmq/amqp091-go"
 )
 
 const (
@@ -137,7 +138,8 @@ func (c *Connection) Publish(key string, message []byte) error {
 	if err != nil {
 		return err
 	}
-	err = channel.Publish(
+	err = channel.PublishWithContext(
+		context.Background(),
 		c.exchange,
 		key,
 		false,

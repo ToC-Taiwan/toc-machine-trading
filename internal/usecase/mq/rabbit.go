@@ -12,7 +12,7 @@ import (
 	"tmt/pkg/log"
 	"tmt/pkg/rabbitmq"
 
-	"github.com/streadway/amqp"
+	amqp "github.com/rabbitmq/amqp091-go"
 	"google.golang.org/protobuf/proto"
 )
 
