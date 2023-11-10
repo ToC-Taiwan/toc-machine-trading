@@ -2,14 +2,17 @@
 package tradeday
 
 import (
+	"embed"
 	"encoding/json"
 	"errors"
-	"os"
 	"time"
 
 	"tmt/global"
 	"tmt/internal/entity"
 )
+
+//go:embed holidays.json
+var files embed.FS
 
 const (
 	startTradeYear int = 2021
@@ -181,12 +184,12 @@ func (t *TradeDay) GetLastNFutureTradeDay(count int) []TradePeriod {
 
 func (t *TradeDay) parseHolidayFile() {
 	tmp := holidayArr{}
-	holidayFile, err := os.ReadFile("./data/holidays.json")
+	content, err := files.ReadFile("holidays.json")
 	if err != nil {
 		panic(err)
 	}
 
-	if err := json.Unmarshal(holidayFile, &tmp); err != nil {
+	if err := json.Unmarshal(content, &tmp); err != nil {
 		panic(err)
 	}
 

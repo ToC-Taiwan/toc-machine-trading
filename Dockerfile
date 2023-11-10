@@ -32,7 +32,6 @@ RUN apt update -y && \
 WORKDIR /toc-machine-trading
 
 COPY --from=build-stage /build_space/toc-machine-trading ./toc-machine-trading
-COPY --from=build-stage /build_space/data/holidays.json ./data/holidays.json
 COPY --from=build-stage /build_space/migrations ./migrations/
 
 ENTRYPOINT ["/toc-machine-trading/toc-machine-trading"]
