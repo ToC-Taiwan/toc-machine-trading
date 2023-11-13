@@ -7,9 +7,9 @@
 - install git cz tool global
 
 ```sh
-sudo npm install -g commitizen
-sudo npm install -g cz-conventional-changelog
-sudo npm install -g conventional-changelog-cli
+npm install -g commitizen
+npm install -g cz-conventional-changelog
+npm install -g conventional-changelog-cli
 echo '{ "path": "cz-conventional-changelog" }' > ~/.czrc
 ```
 
