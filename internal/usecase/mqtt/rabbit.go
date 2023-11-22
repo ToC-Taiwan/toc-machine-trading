@@ -1,5 +1,5 @@
-// Package mq package mq
-package mq
+// Package mqtt package mqtt
+package mqtt
 
 import (
 	"fmt"

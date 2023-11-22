@@ -14,7 +14,7 @@ import (
 	"tmt/internal/modules/quota"
 	"tmt/internal/modules/tradeday"
 	"tmt/internal/usecase/grpc"
-	"tmt/internal/usecase/mq"
+	"tmt/internal/usecase/mqtt"
 	"tmt/internal/usecase/repo"
 	"tmt/pkg/eventbus"
 	"tmt/pkg/log"
@@ -59,8 +59,8 @@ func NewRealTime() RealTime {
 		quota: quota.NewQuota(cfg.Quota),
 		repo:  repo.NewRealTime(cfg.GetPostgresPool()),
 
-		commonRabbit: mq.NewRabbit(cfg.GetRabbitConn()),
-		futureRabbit: mq.NewRabbit(cfg.GetRabbitConn()),
+		commonRabbit: mqtt.NewRabbit(cfg.GetRabbitConn()),
+		futureRabbit: mqtt.NewRabbit(cfg.GetRabbitConn()),
 
 		grpcapi:    grpc.NewRealTime(cfg.GetSinopacPool()),
 		subgRPCAPI: grpc.NewSubscribe(cfg.GetSinopacPool()),
@@ -474,7 +474,7 @@ func (uc *RealTimeUseCase) ReceiveStockSubscribeData(targetArr []*entity.StockTa
 		uc.stockSwitchChanMapLock.Unlock()
 
 		uc.logger.Infof("Stock room %s <-> %s <-> %s", t.Stock.Name, t.Stock.Future.Name, t.Stock.Future.Code)
-		r := mq.NewRabbit(uc.cfg.GetRabbitConn())
+		r := mqtt.NewRabbit(uc.cfg.GetRabbitConn())
 		go r.StockTickConsumer(t.StockNum, hadger.TickChan())
 	}
 
@@ -492,7 +492,7 @@ func (uc *RealTimeUseCase) ReceiveStockSubscribeData(targetArr []*entity.StockTa
 			}
 		}
 	}()
-	hr := mq.NewRabbit(uc.cfg.GetRabbitConn())
+	hr := mqtt.NewRabbit(uc.cfg.GetRabbitConn())
 	hr.FillAllBasic(uc.cc.GetAllStockDetail(), uc.cc.GetAllFutureDetail())
 	go hr.OrderStatusConsumer(orderStatusChan)
 	go hr.OrderStatusArrConsumer(orderStatusChan)
@@ -539,7 +539,7 @@ func (uc *RealTimeUseCase) SetMainFuture(code string) {
 }
 
 func (uc *RealTimeUseCase) NewFutureRealTimeClient(tickChan chan *entity.RealTimeFutureTick, orderStatusChan chan interface{}, connectionID string) {
-	r := mq.NewRabbit(uc.cfg.GetRabbitConn())
+	r := mqtt.NewRabbit(uc.cfg.GetRabbitConn())
 	r.FillAllBasic(uc.cc.GetAllStockDetail(), uc.cc.GetAllFutureDetail())
 
 	uc.clientRabbitMapLock.Lock()
