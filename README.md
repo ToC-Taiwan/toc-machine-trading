@@ -12,7 +12,7 @@
 
 ## Structure
 
-![Example](docs/img/layers.png)
+![Example](docs/assets/layers.png)
 
 ### Config
 
