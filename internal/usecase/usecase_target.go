@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"tmt/cmd/config"
-	"tmt/global"
+
 	"tmt/internal/entity"
 	"tmt/internal/usecase/grpc"
 	"tmt/internal/usecase/modules/target"
@@ -147,7 +147,7 @@ func (uc *TargetUseCase) searchTradeDayTargetsFromDB(tradeDay time.Time) ([]*ent
 
 func (uc *TargetUseCase) searchTradeDayTargets(tradeDay time.Time) ([]*entity.StockTarget, error) {
 	lastTradeDay := uc.tradeDay.GetLastNStockTradeDay(1)[0]
-	t, err := uc.gRPCAPI.GetStockVolumeRank(lastTradeDay.Format(global.ShortTimeLayout))
+	t, err := uc.gRPCAPI.GetStockVolumeRank(lastTradeDay.Format(entity.ShortTimeLayout))
 	if err != nil {
 		return nil, err
 	}

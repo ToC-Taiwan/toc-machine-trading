@@ -6,7 +6,6 @@ import (
 	"sort"
 	"time"
 
-	"tmt/global"
 	"tmt/internal/entity"
 	"tmt/internal/usecase"
 
@@ -55,7 +54,7 @@ func (r *analyzeRoutes) getRebornTargets(c *gin.Context) {
 
 	for _, date := range dateArr {
 		result = append(result, reborn{
-			Date:   date.Format(global.ShortTimeLayout),
+			Date:   date.Format(entity.ShortTimeLayout),
 			Stocks: mapData[date],
 		})
 	}

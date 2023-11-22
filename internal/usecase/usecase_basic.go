@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"tmt/cmd/config"
-	"tmt/global"
+
 	"tmt/internal/entity"
 	"tmt/internal/usecase/grpc"
 	"tmt/internal/usecase/modules/tradeday"
@@ -137,7 +137,7 @@ func (uc *BasicUseCase) updateRepoStock() error {
 			continue
 		}
 
-		updateTime, pErr := time.ParseInLocation(global.ShortSlashTimeLayout, v.GetUpdateDate(), time.Local)
+		updateTime, pErr := time.ParseInLocation(entity.ShortSlashTimeLayout, v.GetUpdateDate(), time.Local)
 		if pErr != nil {
 			uc.logger.Warnf("stock %s update date parse error: %s", v.GetCode(), pErr.Error())
 			continue
@@ -175,13 +175,13 @@ func (uc *BasicUseCase) updateRepoFuture() error {
 			continue
 		}
 
-		updateTime, pErr := time.ParseInLocation(global.ShortSlashTimeLayout, v.GetUpdateDate(), time.Local)
+		updateTime, pErr := time.ParseInLocation(entity.ShortSlashTimeLayout, v.GetUpdateDate(), time.Local)
 		if pErr != nil {
 			uc.logger.Warnf("future %s update date parse error: %s", v.GetCode(), pErr.Error())
 			continue
 		}
 
-		dDate, e := time.ParseInLocation(global.ShortSlashTimeLayout, v.GetDeliveryDate(), time.Local)
+		dDate, e := time.ParseInLocation(entity.ShortSlashTimeLayout, v.GetDeliveryDate(), time.Local)
 		if e != nil {
 			uc.logger.Warnf("future %s delivery date parse error: %s", v.GetCode(), e.Error())
 			continue
@@ -223,13 +223,13 @@ func (uc *BasicUseCase) updateRepoOption() error {
 			continue
 		}
 
-		updateTime, pErr := time.ParseInLocation(global.ShortSlashTimeLayout, v.GetUpdateDate(), time.Local)
+		updateTime, pErr := time.ParseInLocation(entity.ShortSlashTimeLayout, v.GetUpdateDate(), time.Local)
 		if pErr != nil {
 			uc.logger.Warnf("option %s update date parse error: %s", v.GetCode(), pErr.Error())
 			continue
 		}
 
-		dDate, e := time.ParseInLocation(global.ShortSlashTimeLayout, v.GetDeliveryDate(), time.Local)
+		dDate, e := time.ParseInLocation(entity.ShortSlashTimeLayout, v.GetDeliveryDate(), time.Local)
 		if e != nil {
 			uc.logger.Warnf("option %s delivery date parse error: %s", v.GetCode(), e.Error())
 			continue

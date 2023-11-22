@@ -6,7 +6,6 @@ import (
 	"strconv"
 	"time"
 
-	"tmt/global"
 	"tmt/internal/controller/http/resp"
 	"tmt/internal/entity"
 	"tmt/internal/usecase"
@@ -163,7 +162,7 @@ func (r *tradeRoutes) manualInsertFutureOrder(c *gin.Context) {
 		return
 	}
 
-	orderTime, err := time.ParseInLocation(global.LongTimeLayout, body.OrderTime, time.Local)
+	orderTime, err := time.ParseInLocation(entity.LongTimeLayout, body.OrderTime, time.Local)
 	if err != nil {
 		resp.ErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return

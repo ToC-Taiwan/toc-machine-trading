@@ -6,7 +6,6 @@ import (
 	"sync"
 	"time"
 
-	"tmt/global"
 	"tmt/internal/entity"
 	"tmt/pb"
 	"tmt/pkg/log"
@@ -96,7 +95,7 @@ func (c *Rabbit) EventConsumer(eventChan chan *entity.SinopacEvent) {
 			continue
 		}
 
-		dataTime, err := time.ParseInLocation(global.LongTimeLayout, body.GetEventTime(), time.Local)
+		dataTime, err := time.ParseInLocation(entity.LongTimeLayout, body.GetEventTime(), time.Local)
 		if err != nil {
 			c.logger.Error(err)
 			continue
@@ -169,7 +168,7 @@ func (c *Rabbit) protoToOrder(proto *pb.OrderStatus) interface{} {
 	defer c.detailMapLock.RUnlock()
 	c.detailMapLock.RLock()
 
-	orderTime, err := time.ParseInLocation(global.LongTimeLayout, proto.GetOrderTime(), time.Local)
+	orderTime, err := time.ParseInLocation(entity.LongTimeLayout, proto.GetOrderTime(), time.Local)
 	if err != nil {
 		c.logger.Error(err)
 		return nil
@@ -222,7 +221,7 @@ func (c *Rabbit) StockTickConsumer(stockNum string, tickChan chan *entity.RealTi
 			continue
 		}
 
-		dataTime, err := time.ParseInLocation(global.LongTimeLayout, body.GetDateTime(), time.Local)
+		dataTime, err := time.ParseInLocation(entity.LongTimeLayout, body.GetDateTime(), time.Local)
 		if err != nil {
 			c.logger.Error(err)
 			continue
@@ -271,7 +270,7 @@ func (c *Rabbit) FutureTickConsumer(code string, tickChan chan *entity.RealTimeF
 			continue
 		}
 
-		dataTime, err := time.ParseInLocation(global.LongTimeLayout, body.GetDateTime(), time.Local)
+		dataTime, err := time.ParseInLocation(entity.LongTimeLayout, body.GetDateTime(), time.Local)
 		if err != nil {
 			c.logger.Error(err)
 			continue
@@ -321,7 +320,7 @@ func (c *Rabbit) StockBidAskConsumer(stockNum string, bidAskChan chan *entity.Re
 			continue
 		}
 
-		dataTime, err := time.ParseInLocation(global.LongTimeLayout, body.GetDateTime(), time.Local)
+		dataTime, err := time.ParseInLocation(entity.LongTimeLayout, body.GetDateTime(), time.Local)
 		if err != nil {
 			c.logger.Error(err)
 			continue
@@ -365,7 +364,7 @@ func (c *Rabbit) FutureBidAskConsumer(code string, bidAskChan chan *entity.Futur
 			continue
 		}
 
-		dataTime, err := time.ParseInLocation(global.LongTimeLayout, body.GetDateTime(), time.Local)
+		dataTime, err := time.ParseInLocation(entity.LongTimeLayout, body.GetDateTime(), time.Local)
 		if err != nil {
 			c.logger.Error(err)
 			continue

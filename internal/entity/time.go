@@ -1,5 +1,4 @@
-// Package global package global
-package global
+package entity
 
 const (
 	// LongTimeLayout -.

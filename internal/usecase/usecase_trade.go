@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"tmt/cmd/config"
-	"tmt/global"
+
 	"tmt/internal/entity"
 	"tmt/internal/usecase/grpc"
 	"tmt/internal/usecase/modules/quota"
@@ -147,7 +147,7 @@ func (uc *TradeUseCase) getAccountSettlement() []*entity.Settlement {
 	}
 
 	for _, v := range sinopacSettlement.GetSettlement() {
-		dateTime, err := time.ParseInLocation(global.LongTimeLayout, v.GetDate(), time.Local)
+		dateTime, err := time.ParseInLocation(entity.LongTimeLayout, v.GetDate(), time.Local)
 		if err != nil {
 			uc.logger.Fatal(err)
 		}
@@ -163,7 +163,7 @@ func (uc *TradeUseCase) getAccountSettlement() []*entity.Settlement {
 	}
 
 	for _, v := range fugleSettlement.GetSettlement() {
-		dateTime, err := time.ParseInLocation(global.LongTimeLayout, v.GetDate(), time.Local)
+		dateTime, err := time.ParseInLocation(entity.LongTimeLayout, v.GetDate(), time.Local)
 		if err != nil {
 			uc.logger.Fatal(err)
 		}

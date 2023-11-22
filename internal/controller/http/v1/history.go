@@ -6,7 +6,6 @@ import (
 	"strconv"
 	"time"
 
-	"tmt/global"
 	"tmt/internal/controller/http/resp"
 	"tmt/internal/entity"
 	"tmt/internal/usecase"
@@ -49,7 +48,7 @@ func (r *historyRoutes) getKbarData(c *gin.Context) {
 		return
 	}
 	startDate := c.Param("start_date")
-	startDateTime, err := time.Parse(global.ShortTimeLayout, startDate)
+	startDateTime, err := time.Parse(entity.ShortTimeLayout, startDate)
 	if err != nil {
 		resp.ErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
