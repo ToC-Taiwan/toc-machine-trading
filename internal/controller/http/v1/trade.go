@@ -10,7 +10,7 @@ import (
 	"tmt/internal/controller/http/resp"
 	"tmt/internal/entity"
 	"tmt/internal/usecase"
-	"tmt/internal/utils"
+	"tmt/pkg/utils"
 
 	"github.com/gin-gonic/gin"
 )

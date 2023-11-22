@@ -13,9 +13,9 @@ import (
 	"tmt/internal/modules/tradeday"
 	"tmt/internal/usecase/grpc"
 	"tmt/internal/usecase/repo"
-	"tmt/internal/utils"
 	"tmt/pkg/eventbus"
 	"tmt/pkg/log"
+	"tmt/pkg/utils"
 )
 
 // HistoryUseCase -.

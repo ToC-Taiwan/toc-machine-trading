@@ -13,8 +13,8 @@ import (
 	"tmt/internal/modules/tradeday"
 	"tmt/internal/usecase/grpc"
 	"tmt/internal/usecase/repo"
-	"tmt/internal/utils"
 	"tmt/pkg/log"
+	"tmt/pkg/utils"
 )
 
 type BasicUseCase struct {

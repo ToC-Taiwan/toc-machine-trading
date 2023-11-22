@@ -3,7 +3,7 @@ package entity
 import (
 	"time"
 
-	"tmt/internal/utils"
+	"tmt/pkg/utils"
 )
 
 type RealTimeStockTickArr []*RealTimeStockTick
