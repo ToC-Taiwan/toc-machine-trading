@@ -14,11 +14,9 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-
-	err = godotenv.Load(filepath.Join(filepath.Dir(ex), ".env"))
-	if err != nil {
+	if err := godotenv.Load(filepath.Join(filepath.Dir(ex), ".env")); err != nil {
 		panic(err)
 	}
 	app.InitDB()
-	app.RunApp()
+	app.Run()
 }

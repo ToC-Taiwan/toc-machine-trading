@@ -14,7 +14,7 @@ import (
 	"tmt/pkg/log"
 )
 
-func RunApp() {
+func Run() {
 	logger := log.Get()
 	cfg := config.Get()
 
