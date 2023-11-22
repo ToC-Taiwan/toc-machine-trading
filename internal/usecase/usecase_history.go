@@ -1,5 +1,4 @@
-// Package history package history
-package history
+package usecase
 
 import (
 	"context"
@@ -12,7 +11,6 @@ import (
 	"tmt/global"
 	"tmt/internal/entity"
 	"tmt/internal/modules/tradeday"
-	"tmt/internal/usecase"
 	"tmt/internal/usecase/grpc"
 	"tmt/internal/usecase/repo"
 	"tmt/internal/utils"
@@ -36,7 +34,7 @@ type HistoryUseCase struct {
 	slackMsgChan chan string
 
 	logger *log.Log
-	cc     *usecase.Cache
+	cc     *Cache
 	bus    *eventbus.Bus
 }
 
@@ -54,15 +52,15 @@ func NewHistory() History {
 	}
 }
 
-func (uc *HistoryUseCase) Init(logger *log.Log, cc *usecase.Cache, bus *eventbus.Bus) History {
+func (uc *HistoryUseCase) Init(logger *log.Log, cc *Cache, bus *eventbus.Bus) History {
 	uc.logger = logger
 	uc.cc = cc
 	uc.bus = bus
 
 	go uc.SendMessage()
 
-	uc.bus.SubscribeAsync(usecase.TopicFetchStockHistory, true, uc.FetchStockHistory)
-	uc.bus.SubscribeAsync(usecase.TopicFetchFutureHistory, true, uc.FetchFutureHistory)
+	uc.bus.SubscribeAsync(TopicFetchStockHistory, true, uc.FetchStockHistory)
+	uc.bus.SubscribeAsync(TopicFetchFutureHistory, true, uc.FetchFutureHistory)
 
 	return uc
 }
@@ -116,7 +114,7 @@ func (uc *HistoryUseCase) FetchStockHistory(targetArr []*entity.StockTarget) {
 		uc.logger.Fatal(err)
 	}
 
-	uc.bus.PublishTopicEvent(usecase.TopicAnalyzeStockTargets, fetchArr)
+	uc.bus.PublishTopicEvent(TopicAnalyzeStockTargets, fetchArr)
 }
 
 func (uc *HistoryUseCase) FetchFutureHistory(code string) {
@@ -128,7 +126,7 @@ func (uc *HistoryUseCase) FetchFutureHistory(code string) {
 	// 	return
 	// }
 
-	uc.bus.PublishTopicEvent(usecase.TopicSubscribeFutureTickTargets, code)
+	uc.bus.PublishTopicEvent(TopicSubscribeFutureTickTargets, code)
 }
 
 func (uc *HistoryUseCase) fetchHistoryClose(targetArr []*entity.StockTarget) error {

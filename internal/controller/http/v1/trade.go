@@ -9,17 +9,17 @@ import (
 	"tmt/global"
 	"tmt/internal/controller/http/resp"
 	"tmt/internal/entity"
-	"tmt/internal/usecase/cases/trade"
+	"tmt/internal/usecase"
 	"tmt/internal/utils"
 
 	"github.com/gin-gonic/gin"
 )
 
 type tradeRoutes struct {
-	t trade.Trade
+	t usecase.Trade
 }
 
-func NewTradeRoutes(handler *gin.RouterGroup, t trade.Trade) {
+func NewTradeRoutes(handler *gin.RouterGroup, t usecase.Trade) {
 	r := &tradeRoutes{t}
 
 	h := handler.Group("/order")

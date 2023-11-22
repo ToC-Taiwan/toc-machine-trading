@@ -9,16 +9,16 @@ import (
 	"tmt/global"
 	"tmt/internal/controller/http/resp"
 	"tmt/internal/entity"
-	"tmt/internal/usecase/cases/history"
+	"tmt/internal/usecase"
 
 	"github.com/gin-gonic/gin"
 )
 
 type historyRoutes struct {
-	t history.History
+	t usecase.History
 }
 
-func NewHistoryRoutes(handler *gin.RouterGroup, t history.History) {
+func NewHistoryRoutes(handler *gin.RouterGroup, t usecase.History) {
 	r := &historyRoutes{t}
 
 	h := handler.Group("/history")

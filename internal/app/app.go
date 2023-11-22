@@ -9,12 +9,6 @@ import (
 	"tmt/cmd/config"
 	"tmt/internal/controller/http/router"
 	"tmt/internal/usecase"
-	"tmt/internal/usecase/cases/analyze"
-	"tmt/internal/usecase/cases/basic"
-	"tmt/internal/usecase/cases/history"
-	"tmt/internal/usecase/cases/realtime"
-	"tmt/internal/usecase/cases/target"
-	"tmt/internal/usecase/cases/trade"
 	"tmt/pkg/eventbus"
 	"tmt/pkg/httpserver"
 	"tmt/pkg/log"
@@ -31,12 +25,12 @@ func RunApp() {
 	logger.Warnf("Simulation Mode: %v", cfg.Simulation)
 
 	// Do not adjust the order
-	basic := basic.NewBasic().Init(logger, cc)
-	trade := trade.NewTrade().Init(logger, bus)
-	analyze := analyze.NewAnalyze().Init(logger, cc, bus)
-	history := history.NewHistory().Init(logger, cc, bus)
-	realTime := realtime.NewRealTime().Init(logger, cc, bus)
-	target := target.NewTarget().Init(logger, cc, bus)
+	basic := usecase.NewBasic().Init(logger, cc)
+	trade := usecase.NewTrade().Init(logger, bus)
+	analyze := usecase.NewAnalyze().Init(logger, cc, bus)
+	history := usecase.NewHistory().Init(logger, cc, bus)
+	realTime := usecase.NewRealTime().Init(logger, cc, bus)
+	target := usecase.NewTarget().Init(logger, cc, bus)
 
 	// HTTP Server
 	r := router.NewRouter().

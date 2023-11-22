@@ -1,5 +1,4 @@
-// Package trade package trade
-package trade
+package usecase
 
 import (
 	"context"
@@ -12,7 +11,6 @@ import (
 	"tmt/internal/entity"
 	"tmt/internal/modules/quota"
 	"tmt/internal/modules/tradeday"
-	"tmt/internal/usecase"
 	"tmt/internal/usecase/grpc"
 	"tmt/internal/usecase/repo"
 	"tmt/pkg/eventbus"
@@ -67,8 +65,8 @@ func (uc *TradeUseCase) Init(logger *log.Log, bus *eventbus.Bus) Trade {
 	uc.logger = logger
 	uc.bus = bus
 
-	uc.bus.SubscribeAsync(usecase.TopicInsertOrUpdateStockOrder, true, uc.updateStockOrderCacheAndInsertDB)
-	uc.bus.SubscribeAsync(usecase.TopicInsertOrUpdateFutureOrder, true, uc.updateFutureOrderCacheAndInsertDB)
+	uc.bus.SubscribeAsync(TopicInsertOrUpdateStockOrder, true, uc.updateStockOrderCacheAndInsertDB)
+	uc.bus.SubscribeAsync(TopicInsertOrUpdateFutureOrder, true, uc.updateFutureOrderCacheAndInsertDB)
 
 	if uc.simulation {
 		go uc.askSimulateOrderStatus()

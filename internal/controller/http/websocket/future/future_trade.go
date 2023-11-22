@@ -7,9 +7,7 @@ import (
 	"time"
 
 	"tmt/internal/entity"
-	"tmt/internal/usecase/cases/history"
-	"tmt/internal/usecase/cases/realtime"
-	"tmt/internal/usecase/cases/trade"
+	"tmt/internal/usecase"
 	"tmt/pkg/eventbus"
 	"tmt/pkg/httpserver"
 	"tmt/pkg/log"
@@ -22,9 +20,9 @@ type WSFutureTrade struct {
 	*httpserver.WSRouter // ws router
 	*eventbus.Bus        // event bus
 
-	s realtime.RealTime // RealTime
-	o trade.Trade       // order
-	h history.History   // history
+	s usecase.RealTime // RealTime
+	o usecase.Trade    // order
+	h usecase.History  // history
 
 	// save tick chan for assist
 	assistTickChanMap     map[string]chan *entity.RealTimeFutureTick
@@ -51,7 +49,7 @@ type WSFutureTrade struct {
 }
 
 // StartWSFutureTrade - Start ws future trade with one time bus
-func StartWSFutureTrade(c *gin.Context, s realtime.RealTime, o trade.Trade, h history.History) {
+func StartWSFutureTrade(c *gin.Context, s usecase.RealTime, o usecase.Trade, h usecase.History) {
 	w := &WSFutureTrade{
 		s:                      s,
 		o:                      o,

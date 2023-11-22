@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"tmt/internal/usecase/cases/realtime"
+	"tmt/internal/usecase"
 	"tmt/pkg/httpserver"
 	"tmt/pkg/log"
 
@@ -16,14 +16,14 @@ import (
 type WSPickStock struct {
 	*httpserver.WSRouter
 
-	s realtime.RealTime
+	s usecase.RealTime
 
 	pickStockArr []string
 	mutex        sync.Mutex
 }
 
 // StartWSPickStock -.
-func StartWSPickStock(c *gin.Context, s realtime.RealTime) {
+func StartWSPickStock(c *gin.Context, s usecase.RealTime) {
 	w := &WSPickStock{
 		s:        s,
 		WSRouter: httpserver.NewWSRouter(c, log.Get()),

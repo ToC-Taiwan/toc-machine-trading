@@ -1,5 +1,4 @@
-// Package target package target
-package target
+package usecase
 
 import (
 	"context"
@@ -12,8 +11,6 @@ import (
 	"tmt/internal/entity"
 	"tmt/internal/modules/target"
 	"tmt/internal/modules/tradeday"
-	"tmt/internal/usecase"
-	"tmt/internal/usecase/cases/realtime"
 	"tmt/internal/usecase/grpc"
 	"tmt/internal/usecase/repo"
 	"tmt/pkg/eventbus"
@@ -23,14 +20,14 @@ import (
 // TargetUseCase -.
 type TargetUseCase struct {
 	repo    TargetRepo
-	gRPCAPI realtime.RealTimegRPCAPI
+	gRPCAPI RealTimegRPCAPI
 
 	targetFilter *target.Filter
 	cfg          *config.Config
 	tradeDay     *tradeday.TradeDay
 
 	logger *log.Log
-	cc     *usecase.Cache
+	cc     *Cache
 	bus    *eventbus.Bus
 }
 
@@ -45,7 +42,7 @@ func NewTarget() Target {
 	}
 }
 
-func (uc *TargetUseCase) Init(logger *log.Log, cc *usecase.Cache, bus *eventbus.Bus) Target {
+func (uc *TargetUseCase) Init(logger *log.Log, cc *Cache, bus *eventbus.Bus) Target {
 	uc.logger = logger
 	uc.cc = cc
 	uc.bus = bus
@@ -98,14 +95,14 @@ func (uc *TargetUseCase) publishNewStockTargets(targetArr []*entity.StockTarget)
 	if err := uc.repo.InsertOrUpdateTargetArr(context.Background(), targetArr); err != nil {
 		uc.logger.Fatal(err)
 	}
-	uc.bus.PublishTopicEvent(usecase.TopicFetchStockHistory, targetArr)
+	uc.bus.PublishTopicEvent(TopicFetchStockHistory, targetArr)
 }
 
 func (uc *TargetUseCase) publishNewFutureTargets() {
 	if futureTarget, err := uc.getFutureTarget(); err != nil {
 		uc.logger.Fatal(err)
 	} else {
-		uc.bus.PublishTopicEvent(usecase.TopicFetchFutureHistory, futureTarget)
+		uc.bus.PublishTopicEvent(TopicFetchFutureHistory, futureTarget)
 	}
 }
 

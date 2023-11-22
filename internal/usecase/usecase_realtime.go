@@ -1,5 +1,4 @@
-// Package realtime package realtime
-package realtime
+package usecase
 
 import (
 	"context"
@@ -14,8 +13,6 @@ import (
 	"tmt/internal/modules/hadger"
 	"tmt/internal/modules/quota"
 	"tmt/internal/modules/tradeday"
-	"tmt/internal/usecase"
-	"tmt/internal/usecase/cases/trade"
 	"tmt/internal/usecase/grpc"
 	"tmt/internal/usecase/mq"
 	"tmt/internal/usecase/repo"
@@ -29,8 +26,8 @@ type RealTimeUseCase struct {
 
 	grpcapi    RealTimegRPCAPI
 	subgRPCAPI SubscribegRPCAPI
-	sc         trade.TradegRPCAPI
-	fg         trade.TradegRPCAPI
+	sc         TradegRPCAPI
+	fg         TradegRPCAPI
 
 	commonRabbit Rabbit
 	futureRabbit Rabbit
@@ -52,7 +49,7 @@ type RealTimeUseCase struct {
 	inventoryIsNotEmpty bool
 
 	logger *log.Log
-	cc     *usecase.Cache
+	cc     *Cache
 	bus    *eventbus.Bus
 }
 
@@ -79,7 +76,7 @@ func NewRealTime() RealTime {
 	}
 }
 
-func (uc *RealTimeUseCase) Init(logger *log.Log, cc *usecase.Cache, bus *eventbus.Bus) RealTime {
+func (uc *RealTimeUseCase) Init(logger *log.Log, cc *Cache, bus *eventbus.Bus) RealTime {
 	uc.logger = logger
 	uc.cc = cc
 	uc.bus = bus
@@ -100,9 +97,9 @@ func (uc *RealTimeUseCase) Init(logger *log.Log, cc *usecase.Cache, bus *eventbu
 	go uc.ReceiveEvent(context.Background())
 	go uc.ReceiveOrderStatus(context.Background())
 
-	uc.bus.SubscribeAsync(usecase.TopicSubscribeStockTickTargets, true, uc.ReceiveStockSubscribeData)
-	uc.bus.SubscribeAsync(usecase.TopicUnSubscribeStockTickTargets, false, uc.UnSubscribeStockTick, uc.UnSubscribeStockBidAsk)
-	uc.bus.SubscribeAsync(usecase.TopicSubscribeFutureTickTargets, true, uc.SetMainFuture)
+	uc.bus.SubscribeAsync(TopicSubscribeStockTickTargets, true, uc.ReceiveStockSubscribeData)
+	uc.bus.SubscribeAsync(TopicUnSubscribeStockTickTargets, false, uc.UnSubscribeStockTick, uc.UnSubscribeStockBidAsk)
+	uc.bus.SubscribeAsync(TopicSubscribeFutureTickTargets, true, uc.SetMainFuture)
 
 	return uc
 }
@@ -267,9 +264,9 @@ func (uc *RealTimeUseCase) ReceiveOrderStatus(ctx context.Context) {
 			order := <-orderStatusChan
 			switch t := order.(type) {
 			case *entity.StockOrder:
-				uc.bus.PublishTopicEvent(usecase.TopicInsertOrUpdateStockOrder, t)
+				uc.bus.PublishTopicEvent(TopicInsertOrUpdateStockOrder, t)
 			case *entity.FutureOrder:
-				uc.bus.PublishTopicEvent(usecase.TopicInsertOrUpdateFutureOrder, t)
+				uc.bus.PublishTopicEvent(TopicInsertOrUpdateFutureOrder, t)
 			}
 		}
 	}()
