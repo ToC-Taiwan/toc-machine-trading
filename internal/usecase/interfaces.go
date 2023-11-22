@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"tmt/cmd/config"
+	"tmt/internal/config"
 	"tmt/internal/entity"
 	"tmt/pb"
 	"tmt/pkg/eventbus"

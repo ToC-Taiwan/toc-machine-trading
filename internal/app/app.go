@@ -6,7 +6,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	"tmt/cmd/config"
+	"tmt/internal/config"
 	"tmt/internal/controller/http/router"
 	"tmt/internal/usecase"
 	"tmt/pkg/eventbus"

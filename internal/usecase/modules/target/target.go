@@ -4,7 +4,7 @@ package target
 import (
 	"sync"
 
-	"tmt/cmd/config"
+	"tmt/internal/config"
 	"tmt/internal/entity"
 )
 

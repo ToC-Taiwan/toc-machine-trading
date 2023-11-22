@@ -4,7 +4,7 @@ package hadger
 import (
 	"sync"
 
-	"tmt/cmd/config"
+	"tmt/internal/config"
 	"tmt/internal/entity"
 	"tmt/internal/usecase/grpc"
 	"tmt/internal/usecase/modules/quota"

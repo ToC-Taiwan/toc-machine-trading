@@ -3,7 +3,7 @@ package dt
 import (
 	"time"
 
-	"tmt/cmd/config"
+	"tmt/internal/config"
 	"tmt/internal/entity"
 )
 

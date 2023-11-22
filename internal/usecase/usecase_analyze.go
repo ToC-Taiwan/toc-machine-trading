@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"tmt/cmd/config"
+	"tmt/internal/config"
 	"tmt/internal/entity"
 	"tmt/internal/usecase/modules/tradeday"
 	"tmt/internal/usecase/repo"

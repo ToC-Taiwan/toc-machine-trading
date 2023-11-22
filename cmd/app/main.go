@@ -9,7 +9,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
-func init() {
+func main() {
 	ex, err := os.Executable()
 	if err != nil {
 		panic(err)
@@ -19,9 +19,6 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
-}
-
-func main() {
 	app.InitDB()
 	app.RunApp()
 }

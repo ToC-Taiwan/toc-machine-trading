@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"tmt/cmd/config"
+	"tmt/internal/config"
 	"tmt/internal/entity"
 	"tmt/internal/usecase/grpc"
 	"tmt/internal/usecase/modules/dt"

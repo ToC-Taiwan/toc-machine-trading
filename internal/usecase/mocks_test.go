@@ -8,7 +8,7 @@ import (
 	context "context"
 	reflect "reflect"
 	time "time"
-	config "tmt/cmd/config"
+	config "tmt/internal/config"
 	entity "tmt/internal/entity"
 	pb "tmt/pb"
 	eventbus "tmt/pkg/eventbus"

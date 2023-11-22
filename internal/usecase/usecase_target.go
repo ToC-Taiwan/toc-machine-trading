@@ -6,7 +6,7 @@ import (
 	"sort"
 	"time"
 
-	"tmt/cmd/config"
+	"tmt/internal/config"
 
 	"tmt/internal/entity"
 	"tmt/internal/usecase/grpc"

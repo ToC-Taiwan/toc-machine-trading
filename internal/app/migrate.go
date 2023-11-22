@@ -8,7 +8,7 @@ import (
 
 	"tmt/pkg/log"
 
-	"tmt/cmd/config"
+	"tmt/internal/config"
 	"tmt/pkg/postgres"
 
 	"github.com/golang-migrate/migrate/v4"
