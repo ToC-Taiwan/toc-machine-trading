@@ -6,8 +6,8 @@ import (
 
 	"tmt/cmd/config"
 	"tmt/internal/entity"
-	"tmt/internal/modules/quota"
 	"tmt/internal/usecase/grpc"
+	"tmt/internal/usecase/modules/quota"
 	"tmt/pkg/eventbus"
 
 	"github.com/google/uuid"
