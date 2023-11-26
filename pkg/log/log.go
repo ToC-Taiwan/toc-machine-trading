@@ -6,11 +6,24 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
-	"strings"
 	"sync"
+	"time"
 
 	"github.com/ilyakaznacheev/cleanenv"
 	"github.com/sirupsen/logrus"
+)
+
+const (
+	_defaultNeedCaller = false
+	_defaultLogLevel   = logrus.InfoLevel
+	_defaultLogFormat  = formatText
+	_defaultTimeFormat = time.RFC3339
+	_defaultFileName   = "app"
+)
+
+const (
+	formatJSON string = "json"
+	formatText string = "text"
 )
 
 type Log struct {
@@ -18,122 +31,133 @@ type Log struct {
 	*config
 }
 
-type env struct {
-	Level      string `env:"LOG_LEVEL"`
-	Format     string `env:"LOG_FORMAT"`
+type config struct {
 	NeedCaller bool   `env:"LOG_NEED_CALLER"`
+	Format     string `env:"LOG_FORMAT"`
 	TimeFormat string `env:"LOG_TIME_FORMAT"`
-
-	SlackToken     string `env:"SLACK_TOKEN"`
-	SlackChannelID string `env:"SLACK_CHANNEL_ID"`
-	SlackLogLevel  string `env:"SLACK_LOG_LEVEL"`
+	Level      string `env:"LOG_LEVEL"`
+	FileName   string `env:"LOG_FILE_NAME"`
+	LinkSlack  bool   `env:"LOG_LINK_SLACK"`
 }
 
 var (
-	singleton *Log
-	initOnce  sync.Once
+	global *Log
+	once   sync.Once
 )
 
-// Get -.
 func Get() *Log {
-	if singleton != nil {
-		return singleton
+	if global != nil {
+		return global
 	}
-
-	initOnce.Do(func() {
-		l := &Log{
-			Logger: logrus.New(),
-			config: &config{
-				timeFormat: _defaultTimeFormat,
-				format:     _defaultLogFormat,
-				level:      _defaultLogLevel,
-				needCaller: _defaultNeedCaller,
-				fileName:   _defaultFileName,
-			},
-		}
-		l.readEnv()
-
-		var formatter logrus.Formatter
-		if l.format == FormatJSON {
-			formatter = &logrus.JSONFormatter{
-				DisableHTMLEscape: true,
-				TimestampFormat:   l.timeFormat,
-				PrettyPrint:       false,
-				CallerPrettyfier:  l.callerPrettyfier(true),
-			}
-		} else {
-			formatter = &logrus.TextFormatter{
-				TimestampFormat:  l.timeFormat,
-				FullTimestamp:    true,
-				QuoteEmptyFields: true,
-				PadLevelText:     false,
-				ForceColors:      true,
-				CallerPrettyfier: l.callerPrettyfier(false),
-			}
-		}
-
-		if l.needCaller {
-			l.SetReportCaller(true)
-		}
-
-		l.Hooks.Add(
-			NewFilekHook(
-				l.level.Level(),
-				filepath.Join(
-					getExecPath(),
-					_defaultFilePath,
-				),
-				l.fileName,
-			),
-		)
-		l.SetFormatter(formatter)
-		l.SetLevel(l.level.Level())
-		l.SetOutput(os.Stdout)
-		l.Info("Logger initialized successfully")
-
-		singleton = l
+	once.Do(func() {
+		global = newLogger()
 	})
-
-	return singleton
+	return global
 }
 
-func (l *Log) readEnv() {
-	cfg := env{}
+func newLogger() *Log {
+	l := new(Log)
+	l.Logger = logrus.New()
+
+	l.readConfig()
+	l.setFormatter()
+	l.setFileHook()
+	l.setSlackHook()
+	return l
+}
+
+func (l *Log) readConfig() {
+	cfg := config{}
 	if err := cleanenv.ReadEnv(&cfg); err != nil {
 		panic(err)
 	}
+	l.config = &cfg
 
-	TimeFormat(cfg.TimeFormat)(l.config)
-	LogLevel(cfg.Level)(l.config)
-	LogFormat(cfg.Format)(l.config)
-	NeedCaller(cfg.NeedCaller)(l.config)
+	l.Logger.SetReportCaller(cfg.NeedCaller)
 
-	var slackLevel logrus.Level
-	switch cfg.SlackLogLevel {
-	case LevelPanic.String(), LevelFatal.String(), LevelError.String(), LevelWarn.String(), LevelInfo.String(), LevelDebug.String(), LevelTrace.String():
-		slackLevel = Level(cfg.SlackLogLevel).Level()
-	default:
-		slackLevel = logrus.WarnLevel
+	if cfg.Format != formatJSON && cfg.Format != formatText {
+		cfg.Format = _defaultLogFormat
 	}
 
-	if cfg.SlackToken != "" && cfg.SlackChannelID != "" {
-		l.Hooks.Add(
-			NewSlackHook(
-				cfg.SlackToken,
-				cfg.SlackChannelID,
-				slackLevel,
-			),
-		)
+	_, err := time.Parse(cfg.TimeFormat, "2006-01-02")
+	if err != nil {
+		cfg.TimeFormat = _defaultTimeFormat
+	}
+
+	level, err := logrus.ParseLevel(cfg.Level)
+	if err != nil {
+		cfg.Level = _defaultLogLevel.String()
+	}
+	l.Logger.SetLevel(level)
+
+	if cfg.FileName == "" {
+		cfg.FileName = _defaultFileName
 	}
 }
 
-func (l *Log) callerPrettyfier(isJSON bool) func(*runtime.Frame) (function string, file string) {
-	basePath := getExecPath()
-	return func(frame *runtime.Frame) (function string, file string) {
-		fileName := strings.ReplaceAll(frame.File, fmt.Sprintf("%s/", basePath), "")
-		if isJSON {
-			return fmt.Sprintf("%s:%d", fileName, frame.Line), ""
+func (l *Log) setFormatter() {
+	var formatter logrus.Formatter
+	if l.config.Format == formatJSON {
+		formatter = &logrus.JSONFormatter{
+			DisableHTMLEscape: true,
+			TimestampFormat:   l.config.TimeFormat,
+			PrettyPrint:       false,
+			CallerPrettyfier:  l.callerPrettyfier(),
 		}
-		return fmt.Sprintf("[%s:%d]", fileName, frame.Line), ""
+	} else {
+		formatter = &logrus.TextFormatter{
+			TimestampFormat:  l.config.TimeFormat,
+			FullTimestamp:    true,
+			QuoteEmptyFields: true,
+			PadLevelText:     false,
+			ForceColors:      true,
+			CallerPrettyfier: l.callerPrettyfier(),
+		}
+	}
+	l.Logger.SetFormatter(formatter)
+}
+
+func (l *Log) setFileHook() {
+	ex, err := os.Executable()
+	if err != nil {
+		panic(err)
+	}
+	basePath := filepath.Clean(filepath.Dir(ex))
+	fileHook := NewFilekHook(
+		l.Logger.Level,
+		filepath.Join(
+			basePath,
+			"logs",
+		),
+		l.config.FileName,
+	)
+	if l.config.NeedCaller {
+		fileHook.SetReportCaller(true, l.callerPrettyfier())
+	}
+	l.Logger.AddHook(fileHook)
+}
+
+func (l *Log) setSlackHook() {
+	if !l.config.LinkSlack {
+		return
+	}
+	l.Logger.AddHook(NewSlackHook())
+}
+
+func (l *Log) callerPrettyfier() func(*runtime.Frame) (string, string) {
+	return func(frame *runtime.Frame) (string, string) {
+		path := frame.File
+		caller := []string{}
+		for filepath.Base(filepath.Dir(path)) != "toc-machine-trading" {
+			caller = append(caller, filepath.Base(path))
+			path = filepath.Dir(path)
+		}
+		for i, j := 0, len(caller)-1; i < j; i, j = i+1, j-1 {
+			caller[i], caller[j] = caller[j], caller[i]
+		}
+		if l.config.Format == formatJSON {
+			return fmt.Sprintf("%s:%d", filepath.Join(caller...), frame.Line), ""
+		}
+		return fmt.Sprintf("[%s:%d]", filepath.Join(caller...), frame.Line), ""
 	}
 }

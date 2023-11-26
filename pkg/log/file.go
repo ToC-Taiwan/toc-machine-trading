@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"runtime"
 	"strings"
 	"sync"
 	"time"
@@ -19,8 +20,10 @@ const (
 )
 
 type fileHook struct {
-	logPath string
-	appName string
+	logPath          string
+	appName          string
+	reportCaller     bool
+	callerPrettyfier func(*runtime.Frame) (function string, file string)
 
 	levels   []logrus.Level
 	f        *os.File
@@ -41,6 +44,11 @@ func NewFilekHook(level logrus.Level, path, appName string) *fileHook {
 	}
 
 	return hook
+}
+
+func (h *fileHook) SetReportCaller(reportCaller bool, f func(*runtime.Frame) (function string, file string)) {
+	h.reportCaller = reportCaller
+	h.callerPrettyfier = f
 }
 
 func (h *fileHook) Levels() []logrus.Level {
@@ -78,7 +86,13 @@ func (h *fileHook) Format(entry *logrus.Entry) ([]byte, error) {
 	}
 
 	levelText := strings.ToUpper(entry.Level.String())[0:4]
-	_, e := b.WriteString(fmt.Sprintf("%s[%s] %s\n", levelText, entry.Time.Format(_defaultTimeFormat), entry.Message))
+	msg := fmt.Sprintf("%s[%s] %s\n", levelText, entry.Time.Format(_defaultTimeFormat), entry.Message)
+	if h.reportCaller && h.callerPrettyfier != nil {
+		caller, _ := h.callerPrettyfier(entry.Caller)
+		msg = fmt.Sprintf("%s[%s]%s %s\n", levelText, entry.Time.Format(_defaultTimeFormat), caller, entry.Message)
+	}
+
+	_, e := b.WriteString(msg)
 	if e != nil {
 		return nil, e
 	}

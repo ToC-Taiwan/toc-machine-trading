@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"google.golang.org/grpc"
@@ -95,7 +96,7 @@ func (s *ConnPool) Put(conn *grpc.ClientConn) {
 
 func (s *ConnPool) Infof(format string, args ...interface{}) {
 	if s.logger != nil {
-		s.logger.Infof(format, args...)
+		s.logger.Infof(strings.ReplaceAll(format, "\n", ""), args...)
 	} else {
 		fmt.Printf(format, args...)
 	}
@@ -103,7 +104,7 @@ func (s *ConnPool) Infof(format string, args ...interface{}) {
 
 func (s *ConnPool) Errorf(format string, args ...interface{}) {
 	if s.logger != nil {
-		s.logger.Errorf(format, args...)
+		s.logger.Errorf(strings.ReplaceAll(format, "\n", ""), args...)
 	} else {
 		fmt.Printf(format, args...)
 	}

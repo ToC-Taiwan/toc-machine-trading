@@ -4,6 +4,7 @@ package rabbitmq
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	amqp "github.com/rabbitmq/amqp091-go"
@@ -157,7 +158,7 @@ func (c *Connection) Publish(key string, message []byte) error {
 
 func (c *Connection) Infof(format string, args ...interface{}) {
 	if c.logger != nil {
-		c.logger.Infof(format, args...)
+		c.logger.Infof(strings.ReplaceAll(format, "\n", ""), args...)
 	} else {
 		fmt.Printf(format, args...)
 	}
@@ -165,7 +166,7 @@ func (c *Connection) Infof(format string, args ...interface{}) {
 
 func (c *Connection) Errorf(format string, args ...interface{}) {
 	if c.logger != nil {
-		c.logger.Errorf(format, args...)
+		c.logger.Errorf(strings.ReplaceAll(format, "\n", ""), args...)
 	} else {
 		fmt.Printf(format, args...)
 	}

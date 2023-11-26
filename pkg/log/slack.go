@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"sync"
 
+	"github.com/ilyakaznacheev/cleanenv"
 	"github.com/sirupsen/logrus"
 	"github.com/slack-go/slack"
 )
@@ -31,10 +32,21 @@ type SlackHook struct {
 	msgLock sync.Mutex
 }
 
-func NewSlackHook(token, channelID string, level logrus.Level) *SlackHook {
+type SlackSetting struct {
+	SlackToken     string `env:"SLACK_TOKEN"`
+	SlackChannelID string `env:"SLACK_CHANNEL_ID"`
+	SlackLogLevel  string `env:"SLACK_LOG_LEVEL"`
+}
+
+func NewSlackHook() *SlackHook {
+	setting := SlackSetting{}
+	if err := cleanenv.ReadEnv(&setting); err != nil {
+		return nil
+	}
+
 	hook := &SlackHook{
 		api: slack.New(
-			token,
+			setting.SlackToken,
 			slack.OptionHTTPClient(
 				&http.Client{
 					Transport: &http.Transport{
@@ -45,8 +57,13 @@ func NewSlackHook(token, channelID string, level logrus.Level) *SlackHook {
 				},
 			),
 		),
-		channelID: channelID,
+		channelID: setting.SlackLogLevel,
 		msgChan:   make(chan string),
+	}
+
+	level, err := logrus.ParseLevel(setting.SlackLogLevel)
+	if err != nil {
+		level = logrus.WarnLevel
 	}
 
 	for _, l := range logrus.AllLevels {

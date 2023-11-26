@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/Masterminds/squirrel"
@@ -104,7 +105,7 @@ func (p *Postgres) EndTransaction(tx pgx.Tx, err error) {
 
 func (p *Postgres) Infof(format string, args ...interface{}) {
 	if p.logger != nil {
-		p.logger.Infof(format, args...)
+		p.logger.Infof(strings.ReplaceAll(format, "\n", ""), args...)
 	} else {
 		fmt.Printf(format, args...)
 	}
@@ -112,7 +113,7 @@ func (p *Postgres) Infof(format string, args ...interface{}) {
 
 func (p *Postgres) Warnf(format string, args ...interface{}) {
 	if p.logger != nil {
-		p.logger.Warnf(format, args...)
+		p.logger.Warnf(strings.ReplaceAll(format, "\n", ""), args...)
 	} else {
 		fmt.Printf(format, args...)
 	}
@@ -120,7 +121,7 @@ func (p *Postgres) Warnf(format string, args ...interface{}) {
 
 func (p *Postgres) Errorf(format string, args ...interface{}) {
 	if p.logger != nil {
-		p.logger.Errorf(format, args...)
+		p.logger.Errorf(strings.ReplaceAll(format, "\n", ""), args...)
 	} else {
 		fmt.Printf(format, args...)
 	}

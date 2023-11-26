@@ -7,6 +7,7 @@ import (
 	olog "log"
 	"net"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -47,7 +48,7 @@ func New(handler http.Handler, opts ...Option) *Server {
 
 func (s *Server) Infof(format string, args ...interface{}) {
 	if s.logger != nil {
-		s.logger.Infof(format, args...)
+		s.logger.Infof(strings.ReplaceAll(format, "\n", ""), args...)
 	} else {
 		fmt.Printf(format, args...)
 	}
@@ -55,7 +56,7 @@ func (s *Server) Infof(format string, args ...interface{}) {
 
 func (s *Server) Errorf(format string, args ...interface{}) {
 	if s.logger != nil {
-		s.logger.Errorf(format, args...)
+		s.logger.Errorf(strings.ReplaceAll(format, "\n", ""), args...)
 	} else {
 		fmt.Printf(format, args...)
 	}
@@ -63,7 +64,7 @@ func (s *Server) Errorf(format string, args ...interface{}) {
 
 func (s *Server) Fatalf(format string, args ...interface{}) {
 	if s.logger != nil {
-		s.logger.Fatalf(format, args...)
+		s.logger.Fatalf(strings.ReplaceAll(format, "\n", ""), args...)
 	} else {
 		panic(fmt.Errorf(format, args...))
 	}
