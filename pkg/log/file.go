@@ -104,7 +104,7 @@ func (h *fileHook) getFile() {
 		_ = h.f.Close()
 	}
 
-	if e := os.MkdirAll(h.logPath, os.ModePerm); e != nil {
+	if e := os.MkdirAll(h.logPath, 0o640); e != nil {
 		panic(e)
 	}
 

@@ -71,28 +71,25 @@ func (l *Log) readConfig() {
 	if err := cleanenv.ReadEnv(&cfg); err != nil {
 		panic(err)
 	}
-	l.config = &cfg
 
 	l.Logger.SetReportCaller(cfg.NeedCaller)
-
 	if cfg.Format != formatJSON && cfg.Format != formatText {
 		cfg.Format = _defaultLogFormat
 	}
-
 	_, err := time.Parse(cfg.TimeFormat, "2006-01-02")
 	if err != nil {
 		cfg.TimeFormat = _defaultTimeFormat
 	}
-
 	level, err := logrus.ParseLevel(cfg.Level)
 	if err != nil {
-		cfg.Level = _defaultLogLevel.String()
+		level = _defaultLogLevel
 	}
 	l.Logger.SetLevel(level)
-
 	if cfg.FileName == "" {
 		cfg.FileName = _defaultFileName
 	}
+
+	l.config = &cfg
 }
 
 func (l *Log) setFormatter() {
