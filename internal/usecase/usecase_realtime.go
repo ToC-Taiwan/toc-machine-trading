@@ -199,20 +199,9 @@ func (uc *RealTimeUseCase) periodUpdateTradeIndex() {
 }
 
 func (uc *RealTimeUseCase) updateNasdaqIndex() {
-	var abnormalTime int64
 	for range time.NewTicker(time.Second * 5).C {
-		if data, err := uc.GetNasdaqClose(); err != nil {
-			if !errors.Is(err, errNasdaqPriceAbnormal) {
-				uc.logger.Error(err)
-			} else {
-				if abnormalTime == 0 {
-					abnormalTime = time.Now().Unix()
-					continue
-				}
-				if time.Now().Unix()-abnormalTime < 30 {
-					uc.logger.Fatal("nasdaq price abnormal, exit")
-				}
-			}
+		if data, err := uc.GetNasdaqClose(); err != nil && !errors.Is(err, errNasdaqPriceAbnormal) {
+			uc.logger.Error(err)
 		} else if data != nil {
 			uc.tradeIndex.Nasdaq.UpdateIndexStatus(data.Price - data.Last)
 		}
@@ -220,20 +209,9 @@ func (uc *RealTimeUseCase) updateNasdaqIndex() {
 }
 
 func (uc *RealTimeUseCase) updateNFIndex() {
-	var abnormalTime int64
 	for range time.NewTicker(time.Second * 5).C {
-		if data, err := uc.GetNasdaqFutureClose(); err != nil {
-			if !errors.Is(err, errNFQPriceAbnormal) {
-				uc.logger.Error(err)
-			} else {
-				if abnormalTime == 0 {
-					abnormalTime = time.Now().Unix()
-					continue
-				}
-				if time.Now().Unix()-abnormalTime < 30 {
-					uc.logger.Fatal("nfq price abnormal, exit")
-				}
-			}
+		if data, err := uc.GetNasdaqFutureClose(); err != nil && !errors.Is(err, errNFQPriceAbnormal) {
+			uc.logger.Error(err)
 		} else if data != nil {
 			uc.tradeIndex.NF.UpdateIndexStatus(data.Price - data.Last)
 		}
