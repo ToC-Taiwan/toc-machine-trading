@@ -57,7 +57,7 @@ func NewSlackHook() *SlackHook {
 				},
 			),
 		),
-		channelID: setting.SlackLogLevel,
+		channelID: setting.SlackChannelID,
 		msgChan:   make(chan string),
 	}
 
