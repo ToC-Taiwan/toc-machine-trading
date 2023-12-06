@@ -28,7 +28,7 @@ type TradeUseCase struct {
 	Fugle   TradegRPCAPI
 
 	quota    *quota.Quota
-	tradeDay *calendar.TradeDay
+	tradeDay *calendar.Calendar
 
 	stockTradeDay  calendar.TradePeriod
 	futureTradeDay calendar.TradePeriod

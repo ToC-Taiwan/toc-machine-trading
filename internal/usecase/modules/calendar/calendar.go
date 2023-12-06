@@ -18,10 +18,10 @@ const (
 	endTradeYear   int = 2023
 )
 
-var singleton *TradeDay
+var singleton *Calendar
 
-// TradeDay -.
-type TradeDay struct {
+// Calendar -.
+type Calendar struct {
 	holidayTimeMap map[time.Time]struct{}
 	tradeDayMap    map[time.Time]struct{}
 }
@@ -30,12 +30,12 @@ type holidayArr struct {
 	DateArr []string `json:"date_arr"`
 }
 
-func Get() *TradeDay {
+func Get() *Calendar {
 	if singleton != nil {
 		return singleton
 	}
 
-	t := &TradeDay{
+	t := &Calendar{
 		holidayTimeMap: make(map[time.Time]struct{}),
 		tradeDayMap:    make(map[time.Time]struct{}),
 	}
@@ -48,7 +48,7 @@ func Get() *TradeDay {
 }
 
 // GetStockTradeDay -.
-func (t *TradeDay) GetStockTradeDay() TradePeriod {
+func (t *Calendar) GetStockTradeDay() TradePeriod {
 	var nowTime time.Time
 	if time.Now().Hour() >= 14 {
 		nowTime = time.Now().AddDate(0, 0, 1)
@@ -70,7 +70,7 @@ func (t *TradeDay) GetStockTradeDay() TradePeriod {
 }
 
 // GetFutureTradeDay -.
-func (t *TradeDay) GetFutureTradeDay() TradePeriod {
+func (t *Calendar) GetFutureTradeDay() TradePeriod {
 	var nowTime time.Time
 	if time.Now().Hour() >= 14 {
 		nowTime = time.Now().AddDate(0, 0, 1)
@@ -102,7 +102,7 @@ func (t *TradeDay) GetFutureTradeDay() TradePeriod {
 }
 
 // GetStockTradePeriodByDate -.
-func (t *TradeDay) GetStockTradePeriodByDate(date string) (TradePeriod, error) {
+func (t *Calendar) GetStockTradePeriodByDate(date string) (TradePeriod, error) {
 	d, err := time.ParseInLocation(entity.ShortTimeLayout, date, time.Local)
 	if err != nil {
 		return TradePeriod{}, err
@@ -119,7 +119,7 @@ func (t *TradeDay) GetStockTradePeriodByDate(date string) (TradePeriod, error) {
 }
 
 // GetFutureTradePeriodByDate -.
-func (t *TradeDay) GetFutureTradePeriodByDate(date string) (TradePeriod, error) {
+func (t *Calendar) GetFutureTradePeriodByDate(date string) (TradePeriod, error) {
 	d, err := time.ParseInLocation(entity.ShortTimeLayout, date, time.Local)
 	if err != nil {
 		return TradePeriod{}, err
@@ -146,7 +146,7 @@ func (t *TradeDay) GetFutureTradePeriodByDate(date string) (TradePeriod, error) 
 }
 
 // GetLastNFutureTradeDay -.
-func (t *TradeDay) GetLastNFutureTradeDay(count int) []TradePeriod {
+func (t *Calendar) GetLastNFutureTradeDay(count int) []TradePeriod {
 	firstDay := t.GetFutureTradeDay()
 	d := firstDay.TradeDay.AddDate(0, 0, -1)
 
@@ -181,7 +181,7 @@ func (t *TradeDay) GetLastNFutureTradeDay(count int) []TradePeriod {
 	return tradePeriodArr
 }
 
-func (t *TradeDay) parseHolidayFile() {
+func (t *Calendar) parseHolidayFile() {
 	tmp := holidayArr{}
 	content, err := files.ReadFile("holidays.json")
 	if err != nil {
@@ -202,7 +202,7 @@ func (t *TradeDay) parseHolidayFile() {
 	}
 }
 
-func (t *TradeDay) fillTradeDay() {
+func (t *Calendar) fillTradeDay() {
 	tm := time.Date(startTradeYear, 1, 1, 0, 0, 0, 0, time.Local)
 	for {
 		if tm.Year() > endTradeYear {
@@ -217,14 +217,14 @@ func (t *TradeDay) fillTradeDay() {
 	}
 }
 
-func (t *TradeDay) isHoliday(date time.Time) bool {
+func (t *Calendar) isHoliday(date time.Time) bool {
 	if _, ok := t.holidayTimeMap[date]; ok {
 		return true
 	}
 	return false
 }
 
-func (t *TradeDay) isTradeDay(date time.Time) bool {
+func (t *Calendar) isTradeDay(date time.Time) bool {
 	if _, ok := t.tradeDayMap[date]; ok {
 		return true
 	}
@@ -232,7 +232,7 @@ func (t *TradeDay) isTradeDay(date time.Time) bool {
 }
 
 // GetAllCalendar -.
-func (t *TradeDay) GetAllCalendar() []*entity.CalendarDate {
+func (t *Calendar) GetAllCalendar() []*entity.CalendarDate {
 	var calendarArr []*entity.CalendarDate
 	for k := range t.tradeDayMap {
 		calendarArr = append(calendarArr, &entity.CalendarDate{
@@ -244,7 +244,7 @@ func (t *TradeDay) GetAllCalendar() []*entity.CalendarDate {
 }
 
 // GetAbsNextTradeDayTime -.
-func (t *TradeDay) GetAbsNextTradeDayTime(dt time.Time) time.Time {
+func (t *Calendar) GetAbsNextTradeDayTime(dt time.Time) time.Time {
 	d := time.Date(dt.Year(), dt.Month(), dt.Day(), 0, 0, 0, 0, time.Local).AddDate(0, 0, 1)
 	if !t.isTradeDay(d) {
 		dt = dt.AddDate(0, 0, 1)
@@ -254,7 +254,7 @@ func (t *TradeDay) GetAbsNextTradeDayTime(dt time.Time) time.Time {
 }
 
 // GetLastNTradeDayByDate -.
-func (t *TradeDay) GetLastNTradeDayByDate(n int64, firstDay time.Time) []time.Time {
+func (t *Calendar) GetLastNTradeDayByDate(n int64, firstDay time.Time) []time.Time {
 	var arr []time.Time
 	for {
 		if t.isTradeDay(firstDay.AddDate(0, 0, -1)) {
@@ -268,7 +268,7 @@ func (t *TradeDay) GetLastNTradeDayByDate(n int64, firstDay time.Time) []time.Ti
 	return arr
 }
 
-func (t *TradeDay) GetLastNStockTradeDay(n int64) []time.Time {
+func (t *Calendar) GetLastNStockTradeDay(n int64) []time.Time {
 	firstDay := t.GetStockTradeDay().TradeDay
 	var arr []time.Time
 	for {
@@ -288,7 +288,7 @@ type TradePeriod struct {
 	StartTime time.Time
 	EndTime   time.Time
 	TradeDay  time.Time
-	base      *TradeDay
+	base      *Calendar
 }
 
 func (tp *TradePeriod) ToTimeRange(firstMinute, secondMinute int64) [][]time.Time {

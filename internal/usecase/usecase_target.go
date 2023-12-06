@@ -25,7 +25,7 @@ type TargetUseCase struct {
 
 	targetFilter *target.Filter
 	cfg          *config.Config
-	tradeDay     *calendar.TradeDay
+	tradeDay     *calendar.Calendar
 
 	logger *log.Log
 	cc     *cache.Cache

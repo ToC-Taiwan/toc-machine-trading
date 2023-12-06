@@ -24,7 +24,7 @@ type AnalyzeUseCase struct {
 	rebornMap        map[time.Time][]entity.Stock
 	rebornLock       sync.Mutex
 
-	tradeDay *calendar.TradeDay
+	tradeDay *calendar.Calendar
 
 	logger *log.Log
 	cc     *cache.Cache

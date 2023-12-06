@@ -29,7 +29,7 @@ type HistoryUseCase struct {
 	fetchList map[string]*entity.StockTarget
 	mutex     sync.Mutex
 
-	tradeDay *calendar.TradeDay
+	tradeDay *calendar.Calendar
 	cfg      *config.Config
 
 	slackMsgChan chan string

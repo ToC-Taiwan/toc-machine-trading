@@ -23,7 +23,7 @@ type BasicUseCase struct {
 	sc       BasicgRPCAPI
 	fugle    BasicgRPCAPI
 	cfg      *config.Config
-	tradeDay *calendar.TradeDay
+	tradeDay *calendar.Calendar
 
 	allStockDetail  []*entity.Stock
 	allFutureDetail []*entity.Future
