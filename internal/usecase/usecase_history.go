@@ -12,7 +12,7 @@ import (
 	"tmt/internal/entity"
 	"tmt/internal/usecase/grpc"
 	"tmt/internal/usecase/modules/cache"
-	"tmt/internal/usecase/modules/tradeday"
+	"tmt/internal/usecase/modules/calendar"
 	"tmt/internal/usecase/repo"
 	"tmt/pkg/eventbus"
 	"tmt/pkg/log"
@@ -29,7 +29,7 @@ type HistoryUseCase struct {
 	fetchList map[string]*entity.StockTarget
 	mutex     sync.Mutex
 
-	tradeDay *tradeday.TradeDay
+	tradeDay *calendar.TradeDay
 	cfg      *config.Config
 
 	slackMsgChan chan string
@@ -46,7 +46,7 @@ func NewHistory() History {
 		repo:            repo.NewHistory(cfg.GetPostgresPool()),
 		grpcapi:         grpc.NewHistory(cfg.GetSinopacPool()),
 		fetchList:       make(map[string]*entity.StockTarget),
-		tradeDay:        tradeday.Get(),
+		tradeDay:        calendar.Get(),
 		analyzeStockCfg: cfg.AnalyzeStock,
 		cfg:             cfg,
 		slackMsgChan:    make(chan string),
@@ -531,7 +531,7 @@ func (uc *HistoryUseCase) processKbarArr(arr []*entity.StockHistoryKbar) {
 }
 
 // FetchFutureHistoryTick -.
-func (uc *HistoryUseCase) FetchFutureHistoryTick(code string, date tradeday.TradePeriod) ([]*entity.FutureHistoryTick, error) {
+func (uc *HistoryUseCase) FetchFutureHistoryTick(code string, date calendar.TradePeriod) ([]*entity.FutureHistoryTick, error) {
 	dbTicks, err := uc.repo.QueryFutureHistoryTickArrByTime(context.Background(), code, date.StartTime, date.EndTime)
 	if err != nil {
 		return []*entity.FutureHistoryTick{}, err

@@ -10,8 +10,8 @@ import (
 
 	"tmt/internal/entity"
 	"tmt/internal/usecase/grpc"
+	"tmt/internal/usecase/modules/calendar"
 	"tmt/internal/usecase/modules/quota"
-	"tmt/internal/usecase/modules/tradeday"
 	"tmt/internal/usecase/repo"
 	"tmt/pkg/eventbus"
 	"tmt/pkg/log"
@@ -28,10 +28,10 @@ type TradeUseCase struct {
 	Fugle   TradegRPCAPI
 
 	quota    *quota.Quota
-	tradeDay *tradeday.TradeDay
+	tradeDay *calendar.TradeDay
 
-	stockTradeDay  tradeday.TradePeriod
-	futureTradeDay tradeday.TradePeriod
+	stockTradeDay  calendar.TradePeriod
+	futureTradeDay calendar.TradePeriod
 
 	finishedStockOrderMap  map[string]*entity.StockOrder
 	finishedFutureOrderMap map[string]*entity.FutureOrder
@@ -44,7 +44,7 @@ type TradeUseCase struct {
 
 func NewTrade() Trade {
 	cfg := config.Get()
-	tradeDay := tradeday.Get()
+	tradeDay := calendar.Get()
 	return &TradeUseCase{
 		simulation: cfg.Simulation,
 		Sinopac:    grpc.NewTrade(cfg.GetSinopacPool(), cfg.Simulation),

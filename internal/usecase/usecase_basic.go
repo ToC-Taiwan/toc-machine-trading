@@ -12,7 +12,7 @@ import (
 	"tmt/internal/entity"
 	"tmt/internal/usecase/grpc"
 	"tmt/internal/usecase/modules/cache"
-	"tmt/internal/usecase/modules/tradeday"
+	"tmt/internal/usecase/modules/calendar"
 	"tmt/internal/usecase/repo"
 	"tmt/pkg/log"
 	"tmt/pkg/utils"
@@ -23,7 +23,7 @@ type BasicUseCase struct {
 	sc       BasicgRPCAPI
 	fugle    BasicgRPCAPI
 	cfg      *config.Config
-	tradeDay *tradeday.TradeDay
+	tradeDay *calendar.TradeDay
 
 	allStockDetail  []*entity.Stock
 	allFutureDetail []*entity.Future
@@ -40,7 +40,7 @@ func NewBasic() Basic {
 		sc:       grpc.NewBasic(cfg.GetSinopacPool()),
 		fugle:    grpc.NewBasic(cfg.GetFuglePool()),
 		cfg:      cfg,
-		tradeDay: tradeday.Get(),
+		tradeDay: calendar.Get(),
 	}
 }
 

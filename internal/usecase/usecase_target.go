@@ -11,8 +11,8 @@ import (
 	"tmt/internal/entity"
 	"tmt/internal/usecase/grpc"
 	"tmt/internal/usecase/modules/cache"
+	"tmt/internal/usecase/modules/calendar"
 	"tmt/internal/usecase/modules/target"
-	"tmt/internal/usecase/modules/tradeday"
 	"tmt/internal/usecase/repo"
 	"tmt/pkg/eventbus"
 	"tmt/pkg/log"
@@ -25,7 +25,7 @@ type TargetUseCase struct {
 
 	targetFilter *target.Filter
 	cfg          *config.Config
-	tradeDay     *tradeday.TradeDay
+	tradeDay     *calendar.TradeDay
 
 	logger *log.Log
 	cc     *cache.Cache
@@ -38,7 +38,7 @@ func NewTarget() Target {
 		repo:         repo.NewTarget(cfg.GetPostgresPool()),
 		gRPCAPI:      grpc.NewRealTime(cfg.GetSinopacPool()),
 		cfg:          cfg,
-		tradeDay:     tradeday.Get(),
+		tradeDay:     calendar.Get(),
 		targetFilter: target.NewFilter(cfg.TargetStock),
 	}
 }

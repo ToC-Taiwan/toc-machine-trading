@@ -1,5 +1,5 @@
-// Package tradeday package tradeday
-package tradeday
+// Package calendar package calendar
+package calendar
 
 import (
 	"embed"

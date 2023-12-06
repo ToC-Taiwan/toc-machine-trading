@@ -8,7 +8,7 @@ import (
 	"tmt/internal/config"
 	"tmt/internal/entity"
 	"tmt/internal/usecase/modules/cache"
-	"tmt/internal/usecase/modules/tradeday"
+	"tmt/internal/usecase/modules/calendar"
 	"tmt/internal/usecase/repo"
 	"tmt/pkg/eventbus"
 	"tmt/pkg/log"
@@ -24,7 +24,7 @@ type AnalyzeUseCase struct {
 	rebornMap        map[time.Time][]entity.Stock
 	rebornLock       sync.Mutex
 
-	tradeDay *tradeday.TradeDay
+	tradeDay *calendar.TradeDay
 
 	logger *log.Log
 	cc     *cache.Cache
@@ -36,7 +36,7 @@ func NewAnalyze() Analyze {
 		repo:             repo.NewHistory(config.Get().GetPostgresPool()),
 		lastBelowMAStock: make(map[string]*entity.StockHistoryAnalyze),
 		rebornMap:        make(map[time.Time][]entity.Stock),
-		tradeDay:         tradeday.Get(),
+		tradeDay:         calendar.Get(),
 	}
 }
 

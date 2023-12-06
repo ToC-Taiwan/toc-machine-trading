@@ -11,10 +11,10 @@ import (
 	"tmt/internal/entity"
 	"tmt/internal/usecase/grpc"
 	"tmt/internal/usecase/modules/cache"
+	"tmt/internal/usecase/modules/calendar"
 	"tmt/internal/usecase/modules/dt"
 	"tmt/internal/usecase/modules/hadger"
 	"tmt/internal/usecase/modules/quota"
-	"tmt/internal/usecase/modules/tradeday"
 	"tmt/internal/usecase/mqtt"
 	"tmt/internal/usecase/repo"
 	"tmt/pkg/eventbus"
@@ -125,7 +125,7 @@ func (uc *RealTimeUseCase) checkStockTradeSwitch() {
 	if !uc.cfg.TradeStock.AllowTrade || uc.cfg.ManualTrade {
 		return
 	}
-	stockTradeDay := tradeday.Get().GetStockTradeDay().TradeDay
+	stockTradeDay := calendar.Get().GetStockTradeDay().TradeDay
 	openTime := stockTradeDay.Add(9 * time.Hour).Add(time.Duration(uc.cfg.TradeStock.HoldTimeFromOpen) * time.Second)
 	tradeInEndTime := stockTradeDay.Add(9 * time.Hour).Add(time.Duration(uc.cfg.TradeStock.TradeInEndTime) * time.Minute)
 
@@ -153,7 +153,7 @@ func (uc *RealTimeUseCase) checkFutureTradeSwitch() {
 	if !uc.cfg.TradeFuture.AllowTrade || uc.inventoryIsNotEmpty || uc.cfg.ManualTrade {
 		return
 	}
-	futureTradeDay := tradeday.Get().GetFutureTradeDay()
+	futureTradeDay := calendar.Get().GetFutureTradeDay()
 
 	timeRange := [][]time.Time{}
 	firstStart := futureTradeDay.StartTime
