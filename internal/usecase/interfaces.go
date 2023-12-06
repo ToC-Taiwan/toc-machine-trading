@@ -6,21 +6,16 @@ import (
 
 	"tmt/internal/config"
 	"tmt/internal/entity"
-	"tmt/internal/usecase/modules/cache"
 	"tmt/pb"
-	"tmt/pkg/eventbus"
-	"tmt/pkg/log"
 )
 
 //go:generate mockgen -source=interfaces.go -destination=./mocks_test.go -package=usecase
 
 type Analyze interface {
-	Init(logger *log.Log, cc *cache.Cache, bus *eventbus.Bus) Analyze
 	GetRebornMap(ctx context.Context) map[time.Time][]entity.Stock
 }
 
 type Basic interface {
-	Init(logger *log.Log, cc *cache.Cache) Basic
 	GetAllRepoStock(ctx context.Context) ([]*entity.Stock, error)
 	GetConfig() *config.Config
 	GetShioajiUsage() (*entity.ShioajiUsage, error)
@@ -54,7 +49,6 @@ type BasicgRPCAPI interface {
 }
 
 type History interface {
-	Init(logger *log.Log, cc *cache.Cache, bus *eventbus.Bus) History
 	GetTradeDay() time.Time
 
 	GetDayKbarByStockNumDate(stockNum string, date time.Time) *entity.StockHistoryKbar
@@ -93,7 +87,6 @@ type HistorygRPCAPI interface {
 }
 
 type RealTime interface {
-	Init(logger *log.Log, cc *cache.Cache, bus *eventbus.Bus) RealTime
 	GetStockSnapshotByNumArr(stockNumArr []string) ([]*entity.StockSnapShot, error)
 	GetTradeIndex() *entity.TradeIndex
 	GetTSESnapshot(ctx context.Context) (*entity.StockSnapShot, error)
@@ -149,7 +142,6 @@ type Rabbit interface {
 }
 
 type Target interface {
-	Init(logger *log.Log, cc *cache.Cache, bus *eventbus.Bus) Target
 	GetTargets(ctx context.Context) []*entity.StockTarget
 }
 
@@ -160,8 +152,6 @@ type TargetRepo interface {
 }
 
 type Trade interface {
-	Init(logger *log.Log, bus *eventbus.Bus) Trade
-
 	CalculateBuyCost(price float64, quantity int64) int64
 	CalculateSellCost(price float64, quantity int64) int64
 	CalculateTradeDiscount(price float64, quantity int64) int64

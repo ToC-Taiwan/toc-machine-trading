@@ -32,18 +32,15 @@ type TargetUseCase struct {
 	bus    *eventbus.Bus
 }
 
-func NewTarget() Target {
+func NewTarget(logger *log.Log, cc *cache.Cache, bus *eventbus.Bus) Target {
 	cfg := config.Get()
-	return &TargetUseCase{
+	uc := &TargetUseCase{
 		repo:         repo.NewTarget(cfg.GetPostgresPool()),
 		gRPCAPI:      grpc.NewRealTime(cfg.GetSinopacPool()),
 		cfg:          cfg,
 		tradeDay:     calendar.Get(),
 		targetFilter: target.NewFilter(cfg.TargetStock),
 	}
-}
-
-func (uc *TargetUseCase) Init(logger *log.Log, cc *cache.Cache, bus *eventbus.Bus) Target {
 	uc.logger = logger
 	uc.cc = cc
 	uc.bus = bus

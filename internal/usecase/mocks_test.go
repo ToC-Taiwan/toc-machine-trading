@@ -10,10 +10,7 @@ import (
 	time "time"
 	config "tmt/internal/config"
 	entity "tmt/internal/entity"
-	cache "tmt/internal/usecase/modules/cache"
 	pb "tmt/pb"
-	eventbus "tmt/pkg/eventbus"
-	log "tmt/pkg/log"
 
 	gomock "github.com/golang/mock/gomock"
 )
@@ -53,20 +50,6 @@ func (m *MockAnalyze) GetRebornMap(ctx context.Context) map[time.Time][]entity.S
 func (mr *MockAnalyzeMockRecorder) GetRebornMap(ctx interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRebornMap", reflect.TypeOf((*MockAnalyze)(nil).GetRebornMap), ctx)
-}
-
-// Init mocks base method.
-func (m *MockAnalyze) Init(logger *log.Log, cc *cache.Cache, bus *eventbus.Bus) Analyze {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Init", logger, cc, bus)
-	ret0, _ := ret[0].(Analyze)
-	return ret0
-}
-
-// Init indicates an expected call of Init.
-func (mr *MockAnalyzeMockRecorder) Init(logger, cc, bus interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Init", reflect.TypeOf((*MockAnalyze)(nil).Init), logger, cc, bus)
 }
 
 // MockBasic is a mock of Basic interface.
@@ -134,20 +117,6 @@ func (m *MockBasic) GetShioajiUsage() (*entity.ShioajiUsage, error) {
 func (mr *MockBasicMockRecorder) GetShioajiUsage() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetShioajiUsage", reflect.TypeOf((*MockBasic)(nil).GetShioajiUsage))
-}
-
-// Init mocks base method.
-func (m *MockBasic) Init(logger *log.Log, cc *cache.Cache) Basic {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Init", logger, cc)
-	ret0, _ := ret[0].(Basic)
-	return ret0
-}
-
-// Init indicates an expected call of Init.
-func (mr *MockBasicMockRecorder) Init(logger, cc interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Init", reflect.TypeOf((*MockBasic)(nil).Init), logger, cc)
 }
 
 // MockBasicRepo is a mock of BasicRepo interface.
@@ -522,20 +491,6 @@ func (m *MockHistory) GetTradeDay() time.Time {
 func (mr *MockHistoryMockRecorder) GetTradeDay() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTradeDay", reflect.TypeOf((*MockHistory)(nil).GetTradeDay))
-}
-
-// Init mocks base method.
-func (m *MockHistory) Init(logger *log.Log, cc *cache.Cache, bus *eventbus.Bus) History {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Init", logger, cc, bus)
-	ret0, _ := ret[0].(History)
-	return ret0
-}
-
-// Init indicates an expected call of Init.
-func (mr *MockHistoryMockRecorder) Init(logger, cc, bus interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Init", reflect.TypeOf((*MockHistory)(nil).Init), logger, cc, bus)
 }
 
 // MockHistoryRepo is a mock of HistoryRepo interface.
@@ -1073,20 +1028,6 @@ func (mr *MockRealTimeMockRecorder) GetTradeIndex() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTradeIndex", reflect.TypeOf((*MockRealTime)(nil).GetTradeIndex))
 }
 
-// Init mocks base method.
-func (m *MockRealTime) Init(logger *log.Log, cc *cache.Cache, bus *eventbus.Bus) RealTime {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Init", logger, cc, bus)
-	ret0, _ := ret[0].(RealTime)
-	return ret0
-}
-
-// Init indicates an expected call of Init.
-func (mr *MockRealTimeMockRecorder) Init(logger, cc, bus interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Init", reflect.TypeOf((*MockRealTime)(nil).Init), logger, cc, bus)
-}
-
 // NewFutureRealTimeClient mocks base method.
 func (m *MockRealTime) NewFutureRealTimeClient(tickChan chan *entity.RealTimeFutureTick, orderStatusChan chan interface{}, connectionID string) {
 	m.ctrl.T.Helper()
@@ -1620,20 +1561,6 @@ func (mr *MockTargetMockRecorder) GetTargets(ctx interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTargets", reflect.TypeOf((*MockTarget)(nil).GetTargets), ctx)
 }
 
-// Init mocks base method.
-func (m *MockTarget) Init(logger *log.Log, cc *cache.Cache, bus *eventbus.Bus) Target {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Init", logger, cc, bus)
-	ret0, _ := ret[0].(Target)
-	return ret0
-}
-
-// Init indicates an expected call of Init.
-func (mr *MockTargetMockRecorder) Init(logger, cc, bus interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Init", reflect.TypeOf((*MockTarget)(nil).Init), logger, cc, bus)
-}
-
 // MockTargetRepo is a mock of TargetRepo interface.
 type MockTargetRepo struct {
 	ctrl     *gomock.Controller
@@ -1931,20 +1858,6 @@ func (m *MockTrade) GetLastStockTradeBalance(ctx context.Context) (*entity.Stock
 func (mr *MockTradeMockRecorder) GetLastStockTradeBalance(ctx interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetLastStockTradeBalance", reflect.TypeOf((*MockTrade)(nil).GetLastStockTradeBalance), ctx)
-}
-
-// Init mocks base method.
-func (m *MockTrade) Init(logger *log.Log, bus *eventbus.Bus) Trade {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Init", logger, bus)
-	ret0, _ := ret[0].(Trade)
-	return ret0
-}
-
-// Init indicates an expected call of Init.
-func (mr *MockTradeMockRecorder) Init(logger, bus interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Init", reflect.TypeOf((*MockTrade)(nil).Init), logger, bus)
 }
 
 // IsFutureTradeTime mocks base method.

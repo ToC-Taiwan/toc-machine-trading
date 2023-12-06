@@ -26,12 +26,12 @@ func Run() {
 	logger.Warnf("Simulation Mode: %v", cfg.Simulation)
 
 	// Do not adjust the order
-	basic := usecase.NewBasic().Init(logger, cc)
-	trade := usecase.NewTrade().Init(logger, bus)
-	analyze := usecase.NewAnalyze().Init(logger, cc, bus)
-	history := usecase.NewHistory().Init(logger, cc, bus)
-	realTime := usecase.NewRealTime().Init(logger, cc, bus)
-	target := usecase.NewTarget().Init(logger, cc, bus)
+	basic := usecase.NewBasic(logger, cc)
+	trade := usecase.NewTrade(logger, bus)
+	analyze := usecase.NewAnalyze(logger, cc, bus)
+	history := usecase.NewHistory(logger, cc, bus)
+	realTime := usecase.NewRealTime(logger, cc, bus)
+	target := usecase.NewTarget(logger, cc, bus)
 
 	// HTTP Server
 	r := router.NewRouter().

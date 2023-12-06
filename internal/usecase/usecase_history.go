@@ -40,9 +40,9 @@ type HistoryUseCase struct {
 }
 
 // NewHistory -.
-func NewHistory() History {
+func NewHistory(logger *log.Log, cc *cache.Cache, bus *eventbus.Bus) History {
 	cfg := config.Get()
-	return &HistoryUseCase{
+	uc := &HistoryUseCase{
 		repo:            repo.NewHistory(cfg.GetPostgresPool()),
 		grpcapi:         grpc.NewHistory(cfg.GetSinopacPool()),
 		fetchList:       make(map[string]*entity.StockTarget),
@@ -51,9 +51,6 @@ func NewHistory() History {
 		cfg:             cfg,
 		slackMsgChan:    make(chan string),
 	}
-}
-
-func (uc *HistoryUseCase) Init(logger *log.Log, cc *cache.Cache, bus *eventbus.Bus) History {
 	uc.logger = logger
 	uc.cc = cc
 	uc.bus = bus

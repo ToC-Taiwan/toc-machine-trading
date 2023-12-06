@@ -42,10 +42,10 @@ type TradeUseCase struct {
 	bus    *eventbus.Bus
 }
 
-func NewTrade() Trade {
+func NewTrade(logger *log.Log, bus *eventbus.Bus) Trade {
 	cfg := config.Get()
 	tradeDay := calendar.Get()
-	return &TradeUseCase{
+	uc := &TradeUseCase{
 		simulation: cfg.Simulation,
 		Sinopac:    grpc.NewTrade(cfg.GetSinopacPool(), cfg.Simulation),
 		Fugle:      grpc.NewTrade(cfg.GetFuglePool(), cfg.Simulation),
@@ -59,9 +59,6 @@ func NewTrade() Trade {
 		finishedStockOrderMap:  make(map[string]*entity.StockOrder),
 		finishedFutureOrderMap: make(map[string]*entity.FutureOrder),
 	}
-}
-
-func (uc *TradeUseCase) Init(logger *log.Log, bus *eventbus.Bus) Trade {
 	uc.logger = logger
 	uc.bus = bus
 

@@ -54,9 +54,9 @@ type RealTimeUseCase struct {
 	bus    *eventbus.Bus
 }
 
-func NewRealTime() RealTime {
+func NewRealTime(logger *log.Log, cc *cache.Cache, bus *eventbus.Bus) RealTime {
 	cfg := config.Get()
-	return &RealTimeUseCase{
+	uc := &RealTimeUseCase{
 		quota: quota.NewQuota(cfg.Quota),
 		repo:  repo.NewRealTime(cfg.GetPostgresPool()),
 
@@ -75,9 +75,6 @@ func NewRealTime() RealTime {
 
 		clientRabbitMap: make(map[string]Rabbit),
 	}
-}
-
-func (uc *RealTimeUseCase) Init(logger *log.Log, cc *cache.Cache, bus *eventbus.Bus) RealTime {
 	uc.logger = logger
 	uc.cc = cc
 	uc.bus = bus

@@ -33,18 +33,15 @@ type BasicUseCase struct {
 	cc     *cache.Cache
 }
 
-func NewBasic() Basic {
+func NewBasic(logger *log.Log, cc *cache.Cache) Basic {
 	cfg := config.Get()
-	return &BasicUseCase{
+	uc := &BasicUseCase{
 		repo:     repo.NewBasic(cfg.GetPostgresPool()),
 		sc:       grpc.NewBasic(cfg.GetSinopacPool()),
 		fugle:    grpc.NewBasic(cfg.GetFuglePool()),
 		cfg:      cfg,
 		tradeDay: calendar.Get(),
 	}
-}
-
-func (uc *BasicUseCase) Init(logger *log.Log, cc *cache.Cache) Basic {
 	uc.logger = logger
 	uc.cc = cc
 
