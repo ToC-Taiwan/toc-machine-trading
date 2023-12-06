@@ -10,6 +10,7 @@ import (
 	time "time"
 	config "tmt/internal/config"
 	entity "tmt/internal/entity"
+	cache "tmt/internal/usecase/modules/cache"
 	pb "tmt/pb"
 	eventbus "tmt/pkg/eventbus"
 	log "tmt/pkg/log"
@@ -55,7 +56,7 @@ func (mr *MockAnalyzeMockRecorder) GetRebornMap(ctx interface{}) *gomock.Call {
 }
 
 // Init mocks base method.
-func (m *MockAnalyze) Init(logger *log.Log, cc *Cache, bus *eventbus.Bus) Analyze {
+func (m *MockAnalyze) Init(logger *log.Log, cc *cache.Cache, bus *eventbus.Bus) Analyze {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Init", logger, cc, bus)
 	ret0, _ := ret[0].(Analyze)
@@ -136,7 +137,7 @@ func (mr *MockBasicMockRecorder) GetShioajiUsage() *gomock.Call {
 }
 
 // Init mocks base method.
-func (m *MockBasic) Init(logger *log.Log, cc *Cache) Basic {
+func (m *MockBasic) Init(logger *log.Log, cc *cache.Cache) Basic {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Init", logger, cc)
 	ret0, _ := ret[0].(Basic)
@@ -524,7 +525,7 @@ func (mr *MockHistoryMockRecorder) GetTradeDay() *gomock.Call {
 }
 
 // Init mocks base method.
-func (m *MockHistory) Init(logger *log.Log, cc *Cache, bus *eventbus.Bus) History {
+func (m *MockHistory) Init(logger *log.Log, cc *cache.Cache, bus *eventbus.Bus) History {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Init", logger, cc, bus)
 	ret0, _ := ret[0].(History)
@@ -1073,7 +1074,7 @@ func (mr *MockRealTimeMockRecorder) GetTradeIndex() *gomock.Call {
 }
 
 // Init mocks base method.
-func (m *MockRealTime) Init(logger *log.Log, cc *Cache, bus *eventbus.Bus) RealTime {
+func (m *MockRealTime) Init(logger *log.Log, cc *cache.Cache, bus *eventbus.Bus) RealTime {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Init", logger, cc, bus)
 	ret0, _ := ret[0].(RealTime)
@@ -1620,7 +1621,7 @@ func (mr *MockTargetMockRecorder) GetTargets(ctx interface{}) *gomock.Call {
 }
 
 // Init mocks base method.
-func (m *MockTarget) Init(logger *log.Log, cc *Cache, bus *eventbus.Bus) Target {
+func (m *MockTarget) Init(logger *log.Log, cc *cache.Cache, bus *eventbus.Bus) Target {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Init", logger, cc, bus)
 	ret0, _ := ret[0].(Target)

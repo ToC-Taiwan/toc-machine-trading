@@ -11,6 +11,7 @@ import (
 
 	"tmt/internal/entity"
 	"tmt/internal/usecase/grpc"
+	"tmt/internal/usecase/modules/cache"
 	"tmt/internal/usecase/modules/tradeday"
 	"tmt/internal/usecase/repo"
 	"tmt/pkg/log"
@@ -29,7 +30,7 @@ type BasicUseCase struct {
 	allOptionDetail []*entity.Option
 
 	logger *log.Log
-	cc     *Cache
+	cc     *cache.Cache
 }
 
 func NewBasic() Basic {
@@ -43,7 +44,7 @@ func NewBasic() Basic {
 	}
 }
 
-func (uc *BasicUseCase) Init(logger *log.Log, cc *Cache) Basic {
+func (uc *BasicUseCase) Init(logger *log.Log, cc *cache.Cache) Basic {
 	uc.logger = logger
 	uc.cc = cc
 

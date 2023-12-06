@@ -10,6 +10,7 @@ import (
 	"tmt/internal/config"
 	"tmt/internal/entity"
 	"tmt/internal/usecase/grpc"
+	"tmt/internal/usecase/modules/cache"
 	"tmt/internal/usecase/modules/dt"
 	"tmt/internal/usecase/modules/hadger"
 	"tmt/internal/usecase/modules/quota"
@@ -49,7 +50,7 @@ type RealTimeUseCase struct {
 	inventoryIsNotEmpty bool
 
 	logger *log.Log
-	cc     *Cache
+	cc     *cache.Cache
 	bus    *eventbus.Bus
 }
 
@@ -76,7 +77,7 @@ func NewRealTime() RealTime {
 	}
 }
 
-func (uc *RealTimeUseCase) Init(logger *log.Log, cc *Cache, bus *eventbus.Bus) RealTime {
+func (uc *RealTimeUseCase) Init(logger *log.Log, cc *cache.Cache, bus *eventbus.Bus) RealTime {
 	uc.logger = logger
 	uc.cc = cc
 	uc.bus = bus
@@ -97,9 +98,9 @@ func (uc *RealTimeUseCase) Init(logger *log.Log, cc *Cache, bus *eventbus.Bus) R
 	go uc.ReceiveEvent(context.Background())
 	go uc.ReceiveOrderStatus(context.Background())
 
-	uc.bus.SubscribeAsync(TopicSubscribeStockTickTargets, true, uc.ReceiveStockSubscribeData)
-	uc.bus.SubscribeAsync(TopicUnSubscribeStockTickTargets, false, uc.UnSubscribeStockTick, uc.UnSubscribeStockBidAsk)
-	uc.bus.SubscribeAsync(TopicSubscribeFutureTickTargets, true, uc.SetMainFuture)
+	uc.bus.SubscribeAsync(topicSubscribeStockTickTargets, true, uc.ReceiveStockSubscribeData)
+	uc.bus.SubscribeAsync(topicUnSubscribeStockTickTargets, false, uc.UnSubscribeStockTick, uc.UnSubscribeStockBidAsk)
+	uc.bus.SubscribeAsync(topicSubscribeFutureTickTargets, true, uc.SetMainFuture)
 
 	return uc
 }
@@ -264,9 +265,9 @@ func (uc *RealTimeUseCase) ReceiveOrderStatus(ctx context.Context) {
 			order := <-orderStatusChan
 			switch t := order.(type) {
 			case *entity.StockOrder:
-				uc.bus.PublishTopicEvent(TopicInsertOrUpdateStockOrder, t)
+				uc.bus.PublishTopicEvent(topicInsertOrUpdateStockOrder, t)
 			case *entity.FutureOrder:
-				uc.bus.PublishTopicEvent(TopicInsertOrUpdateFutureOrder, t)
+				uc.bus.PublishTopicEvent(topicInsertOrUpdateFutureOrder, t)
 			}
 		}
 	}()

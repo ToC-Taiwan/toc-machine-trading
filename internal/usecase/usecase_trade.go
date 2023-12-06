@@ -65,8 +65,8 @@ func (uc *TradeUseCase) Init(logger *log.Log, bus *eventbus.Bus) Trade {
 	uc.logger = logger
 	uc.bus = bus
 
-	uc.bus.SubscribeAsync(TopicInsertOrUpdateStockOrder, true, uc.updateStockOrderCacheAndInsertDB)
-	uc.bus.SubscribeAsync(TopicInsertOrUpdateFutureOrder, true, uc.updateFutureOrderCacheAndInsertDB)
+	uc.bus.SubscribeAsync(topicInsertOrUpdateStockOrder, true, uc.updateStockOrderCacheAndInsertDB)
+	uc.bus.SubscribeAsync(topicInsertOrUpdateFutureOrder, true, uc.updateFutureOrderCacheAndInsertDB)
 
 	if uc.simulation {
 		go uc.askSimulateOrderStatus()

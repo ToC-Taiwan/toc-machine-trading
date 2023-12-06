@@ -10,6 +10,7 @@ import (
 
 	"tmt/internal/entity"
 	"tmt/internal/usecase/grpc"
+	"tmt/internal/usecase/modules/cache"
 	"tmt/internal/usecase/modules/target"
 	"tmt/internal/usecase/modules/tradeday"
 	"tmt/internal/usecase/repo"
@@ -27,7 +28,7 @@ type TargetUseCase struct {
 	tradeDay     *tradeday.TradeDay
 
 	logger *log.Log
-	cc     *Cache
+	cc     *cache.Cache
 	bus    *eventbus.Bus
 }
 
@@ -42,7 +43,7 @@ func NewTarget() Target {
 	}
 }
 
-func (uc *TargetUseCase) Init(logger *log.Log, cc *Cache, bus *eventbus.Bus) Target {
+func (uc *TargetUseCase) Init(logger *log.Log, cc *cache.Cache, bus *eventbus.Bus) Target {
 	uc.logger = logger
 	uc.cc = cc
 	uc.bus = bus
@@ -95,14 +96,14 @@ func (uc *TargetUseCase) publishNewStockTargets(targetArr []*entity.StockTarget)
 	if err := uc.repo.InsertOrUpdateTargetArr(context.Background(), targetArr); err != nil {
 		uc.logger.Fatal(err)
 	}
-	uc.bus.PublishTopicEvent(TopicFetchStockHistory, targetArr)
+	uc.bus.PublishTopicEvent(topicFetchStockHistory, targetArr)
 }
 
 func (uc *TargetUseCase) publishNewFutureTargets() {
 	if futureTarget, err := uc.getFutureTarget(); err != nil {
 		uc.logger.Fatal(err)
 	} else {
-		uc.bus.PublishTopicEvent(TopicFetchFutureHistory, futureTarget)
+		uc.bus.PublishTopicEvent(topicFetchFutureHistory, futureTarget)
 	}
 }
 
