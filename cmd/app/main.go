@@ -18,5 +18,6 @@ func main() {
 		panic(err)
 	}
 	app.InitDB()
+	app.SetupCronJob()
 	app.Run()
 }
