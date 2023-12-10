@@ -1,4 +1,5 @@
-package log
+// Package slack package slack
+package slack
 
 import (
 	"bytes"
@@ -22,7 +23,12 @@ const (
 	slackEmojiTrace string = ":microscope:"
 )
 
-type SlackHook struct {
+var (
+	singlton *slackHook
+	once     sync.Once
+)
+
+type slackHook struct {
 	api       *slack.Client
 	channelID string
 
@@ -32,51 +38,54 @@ type SlackHook struct {
 	msgLock sync.Mutex
 }
 
-type SlackSetting struct {
+type slackSetting struct {
 	SlackToken     string `env:"SLACK_TOKEN"`
 	SlackChannelID string `env:"SLACK_CHANNEL_ID"`
 	SlackLogLevel  string `env:"SLACK_LOG_LEVEL"`
 }
 
-func NewSlackHook() *SlackHook {
-	setting := SlackSetting{}
-	if err := cleanenv.ReadEnv(&setting); err != nil {
-		return nil
+func Get() *slackHook {
+	if singlton != nil {
+		return singlton
 	}
 
-	hook := &SlackHook{
-		api: slack.New(
-			setting.SlackToken,
-			slack.OptionHTTPClient(
-				&http.Client{
-					Transport: &http.Transport{
-						TLSClientConfig: &tls.Config{
-							InsecureSkipVerify: true,
+	once.Do(func() {
+		setting := slackSetting{}
+		if err := cleanenv.ReadEnv(&setting); err != nil {
+			panic(err)
+		}
+		hook := &slackHook{
+			api: slack.New(
+				setting.SlackToken,
+				slack.OptionHTTPClient(
+					&http.Client{
+						Transport: &http.Transport{
+							TLSClientConfig: &tls.Config{
+								InsecureSkipVerify: true,
+							},
 						},
 					},
-				},
+				),
 			),
-		),
-		channelID: setting.SlackChannelID,
-		msgChan:   make(chan string),
-	}
-
-	level, err := logrus.ParseLevel(setting.SlackLogLevel)
-	if err != nil {
-		level = logrus.WarnLevel
-	}
-
-	for _, l := range logrus.AllLevels {
-		if l <= level {
-			hook.levels = append(hook.levels, l)
+			channelID: setting.SlackChannelID,
+			msgChan:   make(chan string),
 		}
-	}
-
-	go hook.PostMessage()
-	return hook
+		level, err := logrus.ParseLevel(setting.SlackLogLevel)
+		if err != nil {
+			level = logrus.WarnLevel
+		}
+		for _, l := range logrus.AllLevels {
+			if l <= level {
+				hook.levels = append(hook.levels, l)
+			}
+		}
+		go hook.postMessage()
+		singlton = hook
+	})
+	return singlton
 }
 
-func (s *SlackHook) PostMessage() {
+func (s *slackHook) postMessage() {
 	for {
 		message := <-s.msgChan
 		go func() {
@@ -91,11 +100,11 @@ func (s *SlackHook) PostMessage() {
 	}
 }
 
-func (s *SlackHook) Levels() []logrus.Level {
+func (s *slackHook) Levels() []logrus.Level {
 	return s.levels
 }
 
-func (s *SlackHook) Fire(entry *logrus.Entry) error {
+func (s *slackHook) Fire(entry *logrus.Entry) error {
 	msg, err := s.Format(entry)
 	if err != nil {
 		return err
@@ -105,7 +114,7 @@ func (s *SlackHook) Fire(entry *logrus.Entry) error {
 	return nil
 }
 
-func (s *SlackHook) Format(entry *logrus.Entry) ([]byte, error) {
+func (s *slackHook) Format(entry *logrus.Entry) ([]byte, error) {
 	var b *bytes.Buffer
 	if entry.Buffer != nil {
 		b = entry.Buffer

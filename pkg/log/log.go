@@ -2,19 +2,23 @@
 package log
 
 import (
+	"embed"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"runtime"
-	"sync"
+	"strings"
 	"time"
+
+	"tmt/pkg/log/hook/file"
+	"tmt/pkg/log/hook/slack"
 
 	"github.com/ilyakaznacheev/cleanenv"
 	"github.com/sirupsen/logrus"
 )
 
 const (
-	_defaultNeedCaller = false
 	_defaultLogLevel   = logrus.InfoLevel
 	_defaultLogFormat  = formatText
 	_defaultTimeFormat = time.RFC3339
@@ -32,33 +36,20 @@ type Log struct {
 }
 
 type config struct {
-	NeedCaller bool   `env:"LOG_NEED_CALLER"`
-	Format     string `env:"LOG_FORMAT"`
-	TimeFormat string `env:"LOG_TIME_FORMAT"`
-	Level      string `env:"LOG_LEVEL"`
-	FileName   string `env:"LOG_FILE_NAME"`
-	LinkSlack  bool   `env:"LOG_LINK_SLACK"`
+	NeedCaller     bool   `env:"LOG_NEED_CALLER"`
+	Format         string `env:"LOG_FORMAT"`
+	TimeFormat     string `env:"LOG_TIME_FORMAT"`
+	Level          string `env:"LOG_LEVEL"`
+	LinkSlack      bool   `env:"LOG_LINK_SLACK"`
+	DisableConsole bool   `env:"LOG_DISABLE_CONSOLE"`
+	DisableFile    bool   `env:"LOG_DISABLE_FILE"`
+	FileName       string `env:"LOG_FILE_NAME"`
 }
-
-var (
-	global *Log
-	once   sync.Once
-)
 
 func Get() *Log {
-	if global != nil {
-		return global
+	l := &Log{
+		Logger: logrus.New(),
 	}
-	once.Do(func() {
-		global = newLogger()
-	})
-	return global
-}
-
-func newLogger() *Log {
-	l := new(Log)
-	l.Logger = logrus.New()
-
 	l.readConfig()
 	l.setFormatter()
 	l.setFileHook()
@@ -72,11 +63,13 @@ func (l *Log) readConfig() {
 		panic(err)
 	}
 
-	l.Logger.SetReportCaller(cfg.NeedCaller)
+	if cfg.FileName == "" {
+		cfg.FileName = _defaultFileName
+	}
 	if cfg.Format != formatJSON && cfg.Format != formatText {
 		cfg.Format = _defaultLogFormat
 	}
-	_, err := time.Parse(cfg.TimeFormat, "2006-01-02")
+	_, err := time.Parse(cfg.TimeFormat, time.DateOnly)
 	if err != nil {
 		cfg.TimeFormat = _defaultTimeFormat
 	}
@@ -85,10 +78,10 @@ func (l *Log) readConfig() {
 		level = _defaultLogLevel
 	}
 	l.Logger.SetLevel(level)
-	if cfg.FileName == "" {
-		cfg.FileName = _defaultFileName
+	if cfg.DisableConsole {
+		l.Logger.SetOutput(io.Discard)
 	}
-
+	l.Logger.SetReportCaller(cfg.NeedCaller)
 	l.config = &cfg
 }
 
@@ -105,7 +98,6 @@ func (l *Log) setFormatter() {
 		formatter = &logrus.TextFormatter{
 			TimestampFormat:  l.config.TimeFormat,
 			FullTimestamp:    true,
-			QuoteEmptyFields: true,
 			PadLevelText:     false,
 			ForceColors:      true,
 			CallerPrettyfier: l.callerPrettyfier(),
@@ -115,22 +107,19 @@ func (l *Log) setFormatter() {
 }
 
 func (l *Log) setFileHook() {
+	if l.config.DisableFile {
+		return
+	}
 	ex, err := os.Executable()
 	if err != nil {
 		panic(err)
 	}
-	basePath := filepath.Clean(filepath.Dir(ex))
-	fileHook := NewFilekHook(
+	fileHook := file.Get(
 		l.Logger.Level,
-		filepath.Join(
-			basePath,
-			"logs",
-		),
+		filepath.Join(filepath.Clean(filepath.Dir(ex)), "logs"),
 		l.config.FileName,
 	)
-	if l.config.NeedCaller {
-		fileHook.SetReportCaller(true, l.callerPrettyfier())
-	}
+	fileHook.SetReportCaller(l.config.NeedCaller, l.callerPrettyfier())
 	l.Logger.AddHook(fileHook)
 }
 
@@ -138,17 +127,33 @@ func (l *Log) setSlackHook() {
 	if !l.config.LinkSlack {
 		return
 	}
-	l.Logger.AddHook(NewSlackHook())
+	l.Logger.AddHook(slack.Get())
 }
 
+//go:generate sh -c "./generate_repo_name.sh"
+
+//go:embed repo_name
+var repoName embed.FS
+
 func (l *Log) callerPrettyfier() func(*runtime.Frame) (string, string) {
+	if !l.config.NeedCaller {
+		return nil
+	}
+
+	data, err := repoName.ReadFile("repo_name")
+	if err != nil {
+		panic(err)
+	}
+	repoName := strings.ReplaceAll(string(data), "\n", "")
+
 	return func(frame *runtime.Frame) (string, string) {
 		path := frame.File
 		caller := []string{}
-		for filepath.Base(filepath.Dir(path)) != "toc-machine-trading" {
+		for filepath.Base(filepath.Dir(path)) != repoName {
 			caller = append(caller, filepath.Base(path))
 			path = filepath.Dir(path)
 		}
+		caller = append(caller, filepath.Base(path))
 		for i, j := 0, len(caller)-1; i < j; i, j = i+1, j-1 {
 			caller[i], caller[j] = caller[j], caller[i]
 		}
