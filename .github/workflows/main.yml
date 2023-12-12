@@ -27,6 +27,7 @@ jobs:
 
             - name: go generate
               run: |
+                  go install github.com/golang/mock/mockgen@latest
                   go generate ./...
 
             - name: golangci-lint
