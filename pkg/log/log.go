@@ -2,7 +2,6 @@
 package log
 
 import (
-	"embed"
 	"fmt"
 	"io"
 	"os"
@@ -130,36 +129,47 @@ func (l *Log) setSlackHook() {
 	l.Logger.AddHook(slack.Get())
 }
 
-//go:generate sh -c "./generate_repo_name.sh"
-
-//go:embed repo_name
-var repoName embed.FS
-
 func (l *Log) callerPrettyfier() func(*runtime.Frame) (string, string) {
 	if !l.config.NeedCaller {
 		return nil
 	}
-
-	data, err := repoName.ReadFile("repo_name")
-	if err != nil {
-		panic(err)
+	_, file, _, ok := runtime.Caller(0)
+	if !ok {
+		return nil
 	}
-	repoName := strings.ReplaceAll(string(data), "\n", "")
-
+	var repoPath string
+	var walkFunc filepath.WalkFunc = func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if info.IsDir() && info.Name() == ".git" {
+			repoPath = filepath.Dir(path)
+			return filepath.SkipDir
+		}
+		return nil
+	}
+	for {
+		e := filepath.Dir(file)
+		if err := filepath.Walk(e, walkFunc); err != nil {
+			return nil
+		}
+		if repoPath != "" {
+			break
+		}
+		file = e
+	}
 	return func(frame *runtime.Frame) (string, string) {
 		path := frame.File
-		caller := []string{}
-		for filepath.Base(filepath.Dir(path)) != repoName {
-			caller = append(caller, filepath.Base(path))
-			path = filepath.Dir(path)
+		if path == "" {
+			return "", ""
 		}
-		caller = append(caller, filepath.Base(path))
-		for i, j := 0, len(caller)-1; i < j; i, j = i+1, j-1 {
-			caller[i], caller[j] = caller[j], caller[i]
+		split := strings.Split(path, fmt.Sprintf("%s/", repoPath))
+		if len(split) < 2 {
+			return "", ""
 		}
 		if l.config.Format == formatJSON {
-			return fmt.Sprintf("%s:%d", filepath.Join(caller...), frame.Line), ""
+			return fmt.Sprintf("%s:%d", split[len(split)-1], frame.Line), ""
 		}
-		return fmt.Sprintf("[%s:%d]", filepath.Join(caller...), frame.Line), ""
+		return fmt.Sprintf("[%s:%d]", split[len(split)-1], frame.Line), ""
 	}
 }

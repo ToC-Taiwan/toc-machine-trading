@@ -37,4 +37,3 @@ config.yml
 .env
 toc-machine-trading
 coverage.txt
-repo_name
