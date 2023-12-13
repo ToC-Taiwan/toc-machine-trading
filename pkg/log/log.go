@@ -133,37 +133,12 @@ func (l *Log) callerPrettyfier() func(*runtime.Frame) (string, string) {
 	if !l.config.NeedCaller {
 		return nil
 	}
-	_, file, _, ok := runtime.Caller(0)
-	if !ok {
-		return nil
-	}
-	var repoPath string
-	var walkFunc filepath.WalkFunc = func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-		if info.IsDir() && info.Name() == ".git" {
-			repoPath = filepath.Dir(path)
-			return filepath.SkipDir
-		}
-		return nil
-	}
-	for {
-		e := filepath.Dir(file)
-		if err := filepath.Walk(e, walkFunc); err != nil {
-			return nil
-		}
-		if repoPath != "" {
-			break
-		}
-		file = e
-	}
 	return func(frame *runtime.Frame) (string, string) {
 		path := frame.File
 		if path == "" {
 			return "", ""
 		}
-		split := strings.Split(path, fmt.Sprintf("%s/", repoPath))
+		split := strings.Split(path, "/")
 		if len(split) < 2 {
 			return "", ""
 		}
