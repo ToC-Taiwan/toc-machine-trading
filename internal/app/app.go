@@ -9,7 +9,7 @@ import (
 	"tmt/internal/config"
 	"tmt/internal/controller/http/router"
 	"tmt/internal/usecase"
-	"tmt/internal/usecase/modules/cache"
+	"tmt/internal/usecase/cache"
 	"tmt/pkg/eventbus"
 	"tmt/pkg/httpserver"
 	"tmt/pkg/log"

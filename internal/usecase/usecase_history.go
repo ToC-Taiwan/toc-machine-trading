@@ -10,8 +10,8 @@ import (
 	"tmt/internal/config"
 
 	"tmt/internal/entity"
+	"tmt/internal/usecase/cache"
 	"tmt/internal/usecase/grpc"
-	"tmt/internal/usecase/modules/cache"
 	"tmt/internal/usecase/modules/calendar"
 	"tmt/internal/usecase/repo"
 	"tmt/pkg/eventbus"
