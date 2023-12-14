@@ -39,7 +39,7 @@ type reborn struct {
 //	@Accept			json
 //	@Produce		json
 //	@Success		200	{object}	[]reborn{}
-//	@Router			/analyze/reborn [get]
+//	@Router			/v1/analyze/reborn [get]
 func (r *analyzeRoutes) getRebornTargets(c *gin.Context) {
 	mapData := r.t.GetRebornMap(c.Request.Context())
 	result := []reborn{}

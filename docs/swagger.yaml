@@ -109,8 +109,6 @@ definitions:
         type: string
       http:
         type: string
-      routerDebugMode:
-        type: string
     type: object
   config.Sinopac:
     properties:
@@ -565,25 +563,9 @@ info:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
   title: TOC MACHINE TRADING
-  version: 0.0.1
+  version: 1.0.0
 paths:
-  /-/health:
-    get:
-      consumes:
-      - application/json
-      description: healthCheck
-      operationId: healthCheck
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: string
-      summary: healthCheck
-      tags:
-      - healthCheck
-  /analyze/reborn:
+  /v1/analyze/reborn:
     get:
       consumes:
       - application/json
@@ -601,7 +583,7 @@ paths:
       summary: getRebornTargets
       tags:
       - analyze
-  /basic/config:
+  /v1/basic/config:
     get:
       consumes:
       - application/json
@@ -621,7 +603,7 @@ paths:
       summary: getAllConfig
       tags:
       - system
-  /basic/stock:
+  /v1/basic/stock:
     get:
       consumes:
       - application/json
@@ -650,7 +632,7 @@ paths:
       summary: getAllRepoStock
       tags:
       - basic
-  /basic/usage/shioaji:
+  /v1/basic/usage/shioaji:
     get:
       consumes:
       - application/json
@@ -670,7 +652,7 @@ paths:
       summary: getShioajiUsage
       tags:
       - system
-  /history/day-kbar/{stock}/{start_date}/{interval}:
+  /v1/history/day-kbar/{stock}/{start_date}/{interval}:
     get:
       consumes:
       - application/json
@@ -708,7 +690,7 @@ paths:
       summary: getKbarData
       tags:
       - history
-  /order:
+  /v1/order:
     post:
       consumes:
       - application/json
@@ -733,7 +715,7 @@ paths:
       summary: manualInsertFutureOrder
       tags:
       - order
-  /order/account/balance:
+  /v1/order/account/balance:
     get:
       consumes:
       - application/json
@@ -753,7 +735,7 @@ paths:
       summary: getAccountBalance
       tags:
       - account
-  /order/all:
+  /v1/order/all:
     get:
       consumes:
       - application/json
@@ -773,7 +755,7 @@ paths:
       summary: getAllOrder
       tags:
       - order
-  /order/balance:
+  /v1/order/balance:
     get:
       consumes:
       - application/json
@@ -793,7 +775,7 @@ paths:
       summary: getAllTradeBalance
       tags:
       - order
-  /order/balance/future/last:
+  /v1/order/balance/future/last:
     get:
       consumes:
       - application/json
@@ -813,7 +795,7 @@ paths:
       summary: getLastFutureTradeBalance
       tags:
       - order
-  /order/balance/stock/last:
+  /v1/order/balance/stock/last:
     get:
       consumes:
       - application/json
@@ -833,7 +815,7 @@ paths:
       summary: getLastStockTradeBalance
       tags:
       - order
-  /order/date/{tradeday}:
+  /v1/order/date/{tradeday}:
     get:
       consumes:
       - application/json
@@ -884,7 +866,7 @@ paths:
       summary: updateTradeBalanceByTradeDay
       tags:
       - order
-  /order/day-trade/forward:
+  /v1/order/day-trade/forward:
     get:
       consumes:
       - application/json
@@ -925,7 +907,7 @@ paths:
       summary: calculateForwardDayTradeBalance
       tags:
       - order
-  /order/day-trade/reverse:
+  /v1/order/day-trade/reverse:
     get:
       consumes:
       - application/json
@@ -966,7 +948,7 @@ paths:
       summary: calculateReverseDayTradeBalance
       tags:
       - order
-  /order/future/{order-id}:
+  /v1/order/future/{order-id}:
     patch:
       consumes:
       - application/json
@@ -990,7 +972,7 @@ paths:
       summary: moveFutureOrderToLatestTradeDay
       tags:
       - order
-  /order/stock/{order-id}:
+  /v1/order/stock/{order-id}:
     patch:
       consumes:
       - application/json
@@ -1014,7 +996,7 @@ paths:
       summary: moveStockOrderToLatestTradeDay
       tags:
       - order
-  /stream/index:
+  /v1/stream/index:
     get:
       consumes:
       - application/json
@@ -1030,7 +1012,7 @@ paths:
       summary: getIndex
       tags:
       - stream
-  /stream/tse/snapshot:
+  /v1/stream/tse/snapshot:
     get:
       consumes:
       - application/json
@@ -1050,7 +1032,7 @@ paths:
       summary: getTSESnapshot
       tags:
       - stream
-  /targets:
+  /v1/targets:
     get:
       consumes:
       - application/json

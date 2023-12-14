@@ -45,7 +45,7 @@ func NewRealTimeRoutes(handler *gin.RouterGroup, t usecase.RealTime, o usecase.T
 //	@Produce		json
 //	@Success		200	{object}	entity.StockSnapShot
 //	@Failure		500	{object}	resp.Response{}
-//	@Router			/stream/tse/snapshot [get]
+//	@Router			/v1/stream/tse/snapshot [get]
 func (r *realTimeRoutes) getTSESnapshot(c *gin.Context) {
 	snapshot, err := r.t.GetTSESnapshot(c.Request.Context())
 	if err != nil {
@@ -64,7 +64,7 @@ func (r *realTimeRoutes) getTSESnapshot(c *gin.Context) {
 //	@Accept			json
 //	@Produce		json
 //	@Success		200	{object}	entity.TradeIndex
-//	@Router			/stream/index [get]
+//	@Router			/v1/stream/index [get]
 func (r *realTimeRoutes) getIndex(c *gin.Context) {
 	c.JSON(http.StatusOK, r.t.GetTradeIndex())
 }

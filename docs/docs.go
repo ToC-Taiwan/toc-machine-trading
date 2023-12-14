@@ -19,31 +19,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/-/health": {
-            "get": {
-                "description": "healthCheck",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "healthCheck"
-                ],
-                "summary": "healthCheck",
-                "operationId": "healthCheck",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/analyze/reborn": {
+        "/v1/analyze/reborn": {
             "get": {
                 "description": "getRebornTargets",
                 "consumes": [
@@ -70,7 +46,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/basic/config": {
+        "/v1/basic/config": {
             "get": {
                 "description": "getAllConfig",
                 "consumes": [
@@ -100,7 +76,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/basic/stock": {
+        "/v1/basic/stock": {
             "get": {
                 "description": "getAllRepoStock",
                 "consumes": [
@@ -144,7 +120,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/basic/usage/shioaji": {
+        "/v1/basic/usage/shioaji": {
             "get": {
                 "description": "getShioajiUsage",
                 "consumes": [
@@ -174,7 +150,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/history/day-kbar/{stock}/{start_date}/{interval}": {
+        "/v1/history/day-kbar/{stock}/{start_date}/{interval}": {
             "get": {
                 "description": "getKbarData",
                 "consumes": [
@@ -230,7 +206,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/order": {
+        "/v1/order": {
             "post": {
                 "description": "manualInsertFutureOrder",
                 "consumes": [
@@ -268,7 +244,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/order/account/balance": {
+        "/v1/order/account/balance": {
             "get": {
                 "description": "getAccountBalance",
                 "consumes": [
@@ -298,7 +274,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/order/all": {
+        "/v1/order/all": {
             "get": {
                 "description": "getAllOrder",
                 "consumes": [
@@ -328,7 +304,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/order/balance": {
+        "/v1/order/balance": {
             "get": {
                 "description": "getAllTradeBalance",
                 "consumes": [
@@ -358,7 +334,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/order/balance/future/last": {
+        "/v1/order/balance/future/last": {
             "get": {
                 "description": "getLastFutureTradeBalance",
                 "consumes": [
@@ -388,7 +364,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/order/balance/stock/last": {
+        "/v1/order/balance/stock/last": {
             "get": {
                 "description": "getLastStockTradeBalance",
                 "consumes": [
@@ -418,7 +394,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/order/date/{tradeday}": {
+        "/v1/order/date/{tradeday}": {
             "get": {
                 "description": "getAllOrderByTradeDay",
                 "consumes": [
@@ -494,7 +470,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/order/day-trade/forward": {
+        "/v1/order/day-trade/forward": {
             "get": {
                 "description": "calculateForwardDayTradeBalance",
                 "consumes": [
@@ -554,7 +530,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/order/day-trade/reverse": {
+        "/v1/order/day-trade/reverse": {
             "get": {
                 "description": "calculateReverseDayTradeBalance",
                 "consumes": [
@@ -614,7 +590,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/order/future/{order-id}": {
+        "/v1/order/future/{order-id}": {
             "patch": {
                 "description": "moveFutureOrderToLatestTradeDay",
                 "consumes": [
@@ -650,7 +626,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/order/stock/{order-id}": {
+        "/v1/order/stock/{order-id}": {
             "patch": {
                 "description": "moveStockOrderToLatestTradeDay",
                 "consumes": [
@@ -686,7 +662,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/stream/index": {
+        "/v1/stream/index": {
             "get": {
                 "description": "getIndex",
                 "consumes": [
@@ -710,7 +686,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/stream/tse/snapshot": {
+        "/v1/stream/tse/snapshot": {
             "get": {
                 "description": "getTSESnapshot",
                 "consumes": [
@@ -740,7 +716,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/targets": {
+        "/v1/targets": {
             "get": {
                 "description": "getTargets",
                 "consumes": [
@@ -938,9 +914,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "http": {
-                    "type": "string"
-                },
-                "routerDebugMode": {
                     "type": "string"
                 }
             }
@@ -1622,7 +1595,7 @@ const docTemplate = `{
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "0.0.1",
+	Version:          "1.0.0",
 	Host:             "",
 	BasePath:         "",
 	Schemes:          []string{},

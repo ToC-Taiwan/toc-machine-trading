@@ -17,13 +17,13 @@ import (
 )
 
 const (
-	prefixV1 = "/tmt/v1"
+	prefix = "/tmt"
 )
 
 // Router -.
 type Router struct {
-	public  *gin.RouterGroup
-	handler *gin.Engine
+	v1Public    *gin.RouterGroup
+	rootHandler *gin.Engine
 }
 
 // NewRouter -.
@@ -34,78 +34,63 @@ type Router struct {
 //	@license.name	Apache 2.0
 //	@license.url	http://www.apache.org/licenses/LICENSE-2.0.html
 func NewRouter() *Router {
-	gin.SetMode(os.Getenv("GIN_MODE"))
-	docs.SwaggerInfo.BasePath = prefixV1
+	g := gin.New()
+	g.Use(gin.Recovery())
+	g.GET("/metrics", gin.WrapH(promhttp.Handler()))
+	g.GET("/-/health", healthCheck)
 
-	handler := gin.New()
-	handler.Use(gin.Recovery())
-
-	// Swagger
-	if os.Getenv("DISABLE_SWAGGER_HTTP_HANDLER") != "" {
-		handler.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-	} else {
-		handler.Use(swaggerMiddleware())
+	if os.Getenv("DISABLE_SWAGGER_HTTP_HANDLER") == "" {
+		docs.SwaggerInfo.BasePath = prefix
+		g.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+		g.Use(swaggerMiddleware())
 	}
 
-	handler.GET("/metrics", gin.WrapH(promhttp.Handler()))
-	handler.GET(fmt.Sprintf("%s/-/health", prefixV1), healthCheck)
-
 	return &Router{
-		public:  handler.Group(prefixV1),
-		handler: handler,
+		v1Public:    g.Group(fmt.Sprintf("%s/v1", prefix)),
+		rootHandler: g,
 	}
 }
 
 func (r *Router) GetHandler() *gin.Engine {
-	return r.handler
+	return r.rootHandler
 }
 
 // AddV1BasicRoutes -.
 func (r *Router) AddV1BasicRoutes(basic usecase.Basic) *Router {
-	v1.NewBasicRoutes(r.public, basic)
+	v1.NewBasicRoutes(r.v1Public, basic)
 	return r
 }
 
 // AddV1AnalyzeRoutes -.
 func (r *Router) AddV1AnalyzeRoutes(analyze usecase.Analyze) *Router {
-	v1.NewAnalyzeRoutes(r.public, analyze)
+	v1.NewAnalyzeRoutes(r.v1Public, analyze)
 	return r
 }
 
 // AddV1TargetRoutes -.
 func (r *Router) AddV1TargetRoutes(target usecase.Target) *Router {
-	v1.NewTargetRoutes(r.public, target)
+	v1.NewTargetRoutes(r.v1Public, target)
 	return r
 }
 
 // AddV1TradeRoutes -.
 func (r *Router) AddV1TradeRoutes(trade usecase.Trade) *Router {
-	v1.NewTradeRoutes(r.public, trade)
+	v1.NewTradeRoutes(r.v1Public, trade)
 	return r
 }
 
 // AddV1HistoryRoutes -.
 func (r *Router) AddV1HistoryRoutes(history usecase.History) *Router {
-	v1.NewHistoryRoutes(r.public, history)
+	v1.NewHistoryRoutes(r.v1Public, history)
 	return r
 }
 
 // AddV1RealTimeRoutes -.
 func (r *Router) AddV1RealTimeRoutes(realTime usecase.RealTime, trade usecase.Trade, history usecase.History) *Router {
-	v1.NewRealTimeRoutes(r.public, realTime, trade, history)
+	v1.NewRealTimeRoutes(r.v1Public, realTime, trade, history)
 	return r
 }
 
-// healthCheck -.
-//
-//	@Summary		healthCheck
-//	@Description	healthCheck
-//	@ID				healthCheck
-//	@Tags			healthCheck
-//	@Accept			json
-//	@Produce		json
-//	@Success		200	{string}	string
-//	@Router			/-/health [get]
 func healthCheck(c *gin.Context) {
 	c.JSON(http.StatusOK, "OK")
 }
