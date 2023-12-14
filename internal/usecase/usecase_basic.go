@@ -33,7 +33,7 @@ type BasicUseCase struct {
 	cc     *cache.Cache
 }
 
-func NewBasic(logger *log.Log, cc *cache.Cache) Basic {
+func NewBasic() Basic {
 	cfg := config.Get()
 	uc := &BasicUseCase{
 		repo:     repo.NewBasic(cfg.GetPostgresPool()),
@@ -41,9 +41,9 @@ func NewBasic(logger *log.Log, cc *cache.Cache) Basic {
 		fugle:    grpc.NewBasic(cfg.GetFuglePool()),
 		cfg:      cfg,
 		tradeDay: calendar.Get(),
+		logger:   log.Get(),
+		cc:       cache.Get(),
 	}
-	uc.logger = logger
-	uc.cc = cc
 
 	uc.loginAll()
 	uc.checkgRPCHealth()

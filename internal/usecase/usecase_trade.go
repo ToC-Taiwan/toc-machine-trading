@@ -42,7 +42,7 @@ type TradeUseCase struct {
 	bus    *eventbus.Bus
 }
 
-func NewTrade(logger *log.Log, bus *eventbus.Bus) Trade {
+func NewTrade() Trade {
 	cfg := config.Get()
 	tradeDay := calendar.Get()
 	uc := &TradeUseCase{
@@ -58,9 +58,10 @@ func NewTrade(logger *log.Log, bus *eventbus.Bus) Trade {
 
 		finishedStockOrderMap:  make(map[string]*entity.StockOrder),
 		finishedFutureOrderMap: make(map[string]*entity.FutureOrder),
+
+		logger: log.Get(),
+		bus:    eventbus.New(),
 	}
-	uc.logger = logger
-	uc.bus = bus
 
 	uc.bus.SubscribeAsync(topicInsertOrUpdateStockOrder, true, uc.updateStockOrderCacheAndInsertDB)
 	uc.bus.SubscribeAsync(topicInsertOrUpdateFutureOrder, true, uc.updateFutureOrderCacheAndInsertDB)

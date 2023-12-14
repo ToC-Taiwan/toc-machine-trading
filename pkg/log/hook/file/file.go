@@ -40,21 +40,21 @@ type fileHook struct {
 }
 
 func Get(level logrus.Level, path, appName string) *fileHook {
-	if singlton != nil {
-		return singlton
-	}
-	once.Do(func() {
-		hook := &fileHook{
-			logFolder: path,
-			appName:   appName,
-		}
-		for _, l := range logrus.AllLevels {
-			if l <= level {
-				hook.levels = append(hook.levels, l)
+	if singlton == nil {
+		once.Do(func() {
+			hook := &fileHook{
+				logFolder: path,
+				appName:   appName,
 			}
-		}
-		singlton = hook
-	})
+			for _, l := range logrus.AllLevels {
+				if l <= level {
+					hook.levels = append(hook.levels, l)
+				}
+			}
+			singlton = hook
+		})
+		return Get(level, path, appName)
+	}
 	return singlton
 }
 

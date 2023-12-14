@@ -54,7 +54,7 @@ type RealTimeUseCase struct {
 	bus    *eventbus.Bus
 }
 
-func NewRealTime(logger *log.Log, cc *cache.Cache, bus *eventbus.Bus) RealTime {
+func NewRealTime() RealTime {
 	cfg := config.Get()
 	uc := &RealTimeUseCase{
 		quota: quota.NewQuota(cfg.Quota),
@@ -74,10 +74,11 @@ func NewRealTime(logger *log.Log, cc *cache.Cache, bus *eventbus.Bus) RealTime {
 		stockSwitchChanMap:  make(map[string]chan bool),
 
 		clientRabbitMap: make(map[string]Rabbit),
+
+		logger: log.Get(),
+		cc:     cache.Get(),
+		bus:    eventbus.New(),
 	}
-	uc.logger = logger
-	uc.cc = cc
-	uc.bus = bus
 
 	// unsubscriba all first
 	if e := uc.UnSubscribeAll(); e != nil {

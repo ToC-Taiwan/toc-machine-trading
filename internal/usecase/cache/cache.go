@@ -3,6 +3,7 @@ package cache
 
 import (
 	"fmt"
+	"sync"
 	"time"
 
 	"tmt/internal/entity"
@@ -24,14 +25,25 @@ const (
 	cacheStaticIndexTargets string = "targets"
 )
 
+var (
+	singleton *Cache
+	once      sync.Once
+)
+
 type Cache struct {
 	*cache.Cache
 }
 
-func New() *Cache {
-	return &Cache{
-		Cache: cache.New(),
+func Get() *Cache {
+	if singleton == nil {
+		once.Do(func() {
+			singleton = &Cache{
+				Cache: cache.New(),
+			}
+		})
+		return Get()
 	}
+	return singleton
 }
 
 func (c *Cache) key(category int64, index ...string) string {

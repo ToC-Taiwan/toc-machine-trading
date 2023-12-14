@@ -9,8 +9,6 @@ import (
 	"tmt/internal/config"
 	"tmt/internal/controller/http/router"
 	"tmt/internal/usecase"
-	"tmt/internal/usecase/cache"
-	"tmt/pkg/eventbus"
 	"tmt/pkg/httpserver"
 	"tmt/pkg/log"
 )
@@ -19,19 +17,16 @@ func Run() {
 	logger := log.Get()
 	cfg := config.Get()
 
-	bus := eventbus.New()
-	cc := cache.New()
-
 	logger.Warn("TMT is running")
 	logger.Warnf("Simulation Mode: %v", cfg.Simulation)
 
 	// Do not adjust the order
-	basic := usecase.NewBasic(logger, cc)
-	trade := usecase.NewTrade(logger, bus)
-	analyze := usecase.NewAnalyze(logger, cc, bus)
-	history := usecase.NewHistory(logger, cc, bus)
-	realTime := usecase.NewRealTime(logger, cc, bus)
-	target := usecase.NewTarget(logger, cc, bus)
+	basic := usecase.NewBasic()
+	trade := usecase.NewTrade()
+	analyze := usecase.NewAnalyze()
+	history := usecase.NewHistory()
+	realTime := usecase.NewRealTime()
+	target := usecase.NewTarget()
 
 	// HTTP Server
 	r := router.NewRouter().

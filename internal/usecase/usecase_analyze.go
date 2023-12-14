@@ -31,16 +31,16 @@ type AnalyzeUseCase struct {
 	bus    *eventbus.Bus
 }
 
-func NewAnalyze(logger *log.Log, cc *cache.Cache, bus *eventbus.Bus) Analyze {
+func NewAnalyze() Analyze {
 	uc := &AnalyzeUseCase{
 		repo:             repo.NewHistory(config.Get().GetPostgresPool()),
 		lastBelowMAStock: make(map[string]*entity.StockHistoryAnalyze),
 		rebornMap:        make(map[time.Time][]entity.Stock),
 		tradeDay:         calendar.Get(),
+		logger:           log.Get(),
+		cc:               cache.Get(),
+		bus:              eventbus.New(),
 	}
-	uc.logger = logger
-	uc.cc = cc
-	uc.bus = bus
 
 	uc.bus.SubscribeAsync(topicAnalyzeStockTargets, true, uc.findBelowQuaterMATargets)
 	return uc

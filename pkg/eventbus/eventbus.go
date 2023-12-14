@@ -2,12 +2,15 @@
 package eventbus
 
 import (
+	"sync"
+
 	"github.com/asaskevich/EventBus"
 )
 
 var (
 	singleton *Bus
 	terminal  *busTerminal = newBusTerminal()
+	once      sync.Once
 )
 
 // Bus Bus
@@ -17,25 +20,27 @@ type Bus struct {
 
 // New if route is empty, return singleton
 func New(route ...string) *Bus {
-	if singleton == nil {
-		singleton = &Bus{
-			bus: EventBus.New(),
-		}
-	}
-
 	switch len(route) {
 	case 0:
+		if singleton == nil {
+			once.Do(func() {
+				singleton = &Bus{
+					bus: EventBus.New(),
+				}
+			})
+			return New()
+		}
 		return singleton
 	case 1:
-		if v := terminal.getBus(route[0]); v != nil {
-			return v
+		v := terminal.getBus(route[0])
+		if v == nil {
+			bus := &Bus{
+				bus: EventBus.New(),
+			}
+			terminal.addBus(route[0], bus)
+			return New(route[0])
 		}
-
-		bus := &Bus{
-			bus: EventBus.New(),
-		}
-		terminal.addBus(route[0], bus)
-		return bus
+		return v
 	default:
 		panic("route length must be 0 or 1")
 	}

@@ -45,43 +45,42 @@ type slackSetting struct {
 }
 
 func Get() *slackHook {
-	if singlton != nil {
-		return singlton
-	}
-
-	once.Do(func() {
-		setting := slackSetting{}
-		if err := cleanenv.ReadEnv(&setting); err != nil {
-			panic(err)
-		}
-		hook := &slackHook{
-			api: slack.New(
-				setting.SlackToken,
-				slack.OptionHTTPClient(
-					&http.Client{
-						Transport: &http.Transport{
-							TLSClientConfig: &tls.Config{
-								InsecureSkipVerify: true,
+	if singlton == nil {
+		once.Do(func() {
+			setting := slackSetting{}
+			if err := cleanenv.ReadEnv(&setting); err != nil {
+				panic(err)
+			}
+			hook := &slackHook{
+				api: slack.New(
+					setting.SlackToken,
+					slack.OptionHTTPClient(
+						&http.Client{
+							Transport: &http.Transport{
+								TLSClientConfig: &tls.Config{
+									InsecureSkipVerify: true,
+								},
 							},
 						},
-					},
+					),
 				),
-			),
-			channelID: setting.SlackChannelID,
-			msgChan:   make(chan string),
-		}
-		level, err := logrus.ParseLevel(setting.SlackLogLevel)
-		if err != nil {
-			level = logrus.WarnLevel
-		}
-		for _, l := range logrus.AllLevels {
-			if l <= level {
-				hook.levels = append(hook.levels, l)
+				channelID: setting.SlackChannelID,
+				msgChan:   make(chan string),
 			}
-		}
-		go hook.postMessage()
-		singlton = hook
-	})
+			level, err := logrus.ParseLevel(setting.SlackLogLevel)
+			if err != nil {
+				level = logrus.WarnLevel
+			}
+			for _, l := range logrus.AllLevels {
+				if l <= level {
+					hook.levels = append(hook.levels, l)
+				}
+			}
+			go hook.postMessage()
+			singlton = hook
+		})
+		return Get()
+	}
 	return singlton
 }
 

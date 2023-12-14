@@ -5,6 +5,7 @@ import (
 	"embed"
 	"encoding/json"
 	"errors"
+	"sync"
 	"time"
 
 	"tmt/internal/entity"
@@ -18,7 +19,10 @@ const (
 	endTradeYear   int = 2023
 )
 
-var singleton *Calendar
+var (
+	singleton *Calendar
+	once      sync.Once
+)
 
 // Calendar -.
 type Calendar struct {
@@ -31,20 +35,21 @@ type holidayArr struct {
 }
 
 func Get() *Calendar {
-	if singleton != nil {
-		return singleton
+	if singleton == nil {
+		once.Do(func() {
+			t := &Calendar{
+				holidayTimeMap: make(map[time.Time]struct{}),
+				tradeDayMap:    make(map[time.Time]struct{}),
+			}
+
+			t.parseHolidayFile()
+			t.fillTradeDay()
+
+			singleton = t
+		})
+		return Get()
 	}
-
-	t := &Calendar{
-		holidayTimeMap: make(map[time.Time]struct{}),
-		tradeDayMap:    make(map[time.Time]struct{}),
-	}
-
-	t.parseHolidayFile()
-	t.fillTradeDay()
-
-	singleton = t
-	return t
+	return singleton
 }
 
 // GetStockTradeDay -.

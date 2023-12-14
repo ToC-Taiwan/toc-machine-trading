@@ -32,7 +32,7 @@ type TargetUseCase struct {
 	bus    *eventbus.Bus
 }
 
-func NewTarget(logger *log.Log, cc *cache.Cache, bus *eventbus.Bus) Target {
+func NewTarget() Target {
 	cfg := config.Get()
 	uc := &TargetUseCase{
 		repo:         repo.NewTarget(cfg.GetPostgresPool()),
@@ -40,10 +40,10 @@ func NewTarget(logger *log.Log, cc *cache.Cache, bus *eventbus.Bus) Target {
 		cfg:          cfg,
 		tradeDay:     calendar.Get(),
 		targetFilter: target.NewFilter(cfg.TargetStock),
+		logger:       log.Get(),
+		cc:           cache.Get(),
+		bus:          eventbus.New(),
 	}
-	uc.logger = logger
-	uc.cc = cc
-	uc.bus = bus
 
 	// query targets from db
 	tDay := uc.tradeDay.GetStockTradeDay().TradeDay
