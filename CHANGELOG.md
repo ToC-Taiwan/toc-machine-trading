@@ -1,8 +1,108 @@
 # CHANGELOG
 
-## [v2.3.1](https://github.com/ToC-Taiwan/toc-machine-trading/compare/v2.3.0...v2.3.1)
+## [v2.4.0](https://github.com/ToC-Taiwan/toc-machine-trading/compare/v2.3.1...v2.4.0) (2023-12-15)
 
-> 2023-03-06
+### Bug Fixes (8)
+
+* refine API usage and enhance testing robustness
+* remove logger warnings for 0 references in transactions
+* check for non-empty inventory before deleting stock
+* **account:** add limit to update account detail in trade time
+* **postgres:** remove max idle timeout, move ws router pkg to http server
+* **rabbit:** fix connection attempts not work, refactor new method
+* **runtime:** try fix too much memory when simulate
+* **trade:** modify check times method, add generate conds back, notify result to slack
+
+### Code Refactoring (62)
+
+* refactor cron job setup and removal functions
+* refactor application initialization and logging
+* using viper to load config instead of built-in yaml
+* refactor codebase for thread safety and dependency reduction
+* refactor `cache` module location and update imports
+* refactor router
+* refactor API and middleware for Swagger integration
+* refactor logging system and optimize caller prettyfier
+* refactor cron job setup to main app initialization
+* refactor use cases by removing `Init` method
+* refactor `TradeDay` struct to `Calendar` across codebase
+* refactor 'tradeday' module to 'calendar'
+* refactor cache implementation and update dependencies
+* standardize documentation and command outputs
+* refactor error handling and logging in index updates
+* let logger package make sense
+* improve code clarity and test robustness
+* refactor codebase for package relocation and function renaming
+* refactor time formatting and global package usage
+* refactor modules directory and update import paths
+* refactor mq package to mqtt and update usages
+* put all usecase from standalone to together
+* refactor file handling and update testing parameters
+* update proto for odd stock order
+* relayout and rename some package name
+* refactor database initialization and migration functions
+* refactor config and log packages for thread safety and modularity
+* refine calculation precision and API usage
+* improve accuracy of `TrafficUsagePercents` calculation
+* refine calculations and broaden testing scope
+* refine traffic usage calculation in GetShioajiUsage function
+* refine error handling and update holiday data
+* refactor TradeUseCase struct and enhance BuyFuture tests
+* refactor singleton usage in cache and eventbus modules
+* refactor global logger to local instances
+* refactor all usecase position
+* remove logout sinopac method
+* refactor Sinopac logout to universal logout function
+* refactor logging and testing for code optimization
+* refactor termination process and update test tolerances
+* refactor health check between grpc server
+* refactor logging and environment handling logic
+* refactor and optimize `RunApp` function
+* refactor usecase architecture
+* refactor interface and some package, turn shioaji usage to mb
+* refactor router and http server
+* refactor stock and future subscription functions
+* refactor code logic and improve caching efficiency
+* improve error handling in updateRepoStock() function
+* remove key struct in cache but all use string as category key
+* refactor code to remove unused variable and functions
+* remove unnecessary functions and mocks
+* refactor mutex handling and remove unused code
+* refactor usecase package functions
+* refactor logging and Slack messaging implementation
+* update Slack logging with emoji support
+* refactor logging format to reduce verbosity
+* refactor logging interfaces in postgres and rabbitmq code
+* refactor directory structure and imports in pkg/utils directory
+* add foreign key constraints and indexes for inventory tables
+* **basic:** refactor basci cache, fix some wrong error
+* **grpc:** improve grpc method performance
+
+### Features (21)
+
+* refactor trade logic and add manual trade option
+* "Implement empty date check in UpdateTradeBalanceByTradeDay"
+* "Refactor RabbitMQ URL configuration and logging"
+* add update stock inventory to database
+* add shioaji usage percent
+* a commit of the type feat introduces a new feature to the codebase: refactor env variables handling and implement Sinopac logout
+* "Refactor Docker entrypoint and update dependencies"
+* refactor Shioaji usage and config routes
+* add get shioaji usage
+* add odd stock trade
+* implement financial module and update trade options
+* "Improve code generation and index update handling"
+* **account:** add get current account status router
+* **account:** add update account margin, balance to database
+* **balance:** add margin, account balance, and settlements method in grpc
+* **logger:** move slack to logger hook
+* **performance:** use worker pool to improve simulate performance, modify last gap to one second
+* **position:** add check finished order to decide insert db, add get stock position rpc
+* **rabbit:** let all ws future trade client has own rabbit connection
+* **realtime:** merge tick and order new connection method
+* **slack:** remove new ws future slack message
+
+## [v2.3.1](https://github.com/ToC-Taiwan/toc-machine-trading/compare/v2.3.0...v2.3.1) (2023-03-06)
 
 ### Bug Fixes (1)
 
@@ -12,9 +112,7 @@
 
 * **common:** rename common to global
 
-## [v2.3.0](https://github.com/ToC-Taiwan/toc-machine-trading/compare/v2.2.0...v2.3.0)
-
-> 2023-03-06
+## [v2.3.0](https://github.com/ToC-Taiwan/toc-machine-trading/compare/v2.2.0...v2.3.0) (2023-03-06)
 
 ### Bug Fixes (5)
 
@@ -31,9 +129,7 @@
 * **simulation:** add simulation to history router
 * **simulation:** add simulation for future back, extend max idle time for postgres
 
-## [v2.2.0](https://github.com/ToC-Taiwan/toc-machine-trading/compare/v2.1.0...v2.2.0)
-
-> 2023-02-24
+## [v2.2.0](https://github.com/ToC-Taiwan/toc-machine-trading/compare/v2.1.0...v2.2.0) (2023-02-24)
 
 ### Bug Fixes (4)
 
@@ -52,9 +148,7 @@
 * **slack:** add place and filled message for slack
 * **trade:** add back check current order is cancelled or not
 
-## [v2.1.0](https://github.com/ToC-Taiwan/toc-machine-trading/compare/v2.0.1...v2.1.0)
-
-> 2023-02-23
+## [v2.1.0](https://github.com/ToC-Taiwan/toc-machine-trading/compare/v2.0.1...v2.1.0) (2023-02-23)
 
 ### Bug Fixes (9)
 
@@ -82,17 +176,13 @@
 * **trade:** add check gap between tick if is lower than 1 second
 * **trade:** remove cancel wait time, use buy sell wait time instead
 
-## [v2.0.1](https://github.com/ToC-Taiwan/toc-machine-trading/compare/v2.0.0...v2.0.1)
-
-> 2023-02-09
+## [v2.0.1](https://github.com/ToC-Taiwan/toc-machine-trading/compare/v2.0.0...v2.0.1) (2023-02-09)
 
 ### Bug Fixes (1)
 
 * **trade:** fix check wait time fail when last tick is nil
 
-## [v2.0.0](https://github.com/ToC-Taiwan/toc-machine-trading/compare/v1.7.0...v2.0.0)
-
-> 2023-02-09
+## [v2.0.0](https://github.com/ToC-Taiwan/toc-machine-trading/compare/v1.7.0...v2.0.0) (2023-02-09)
 
 ### Bug Fixes (22)
 
@@ -166,9 +256,7 @@
 * **trader:** add day trader for future alpha
 * **usecase:** add usecase base, add hadger alpha, split interfaces, config read once
 
-## [v1.7.0](https://github.com/ToC-Taiwan/toc-machine-trading/compare/v1.5.0...v1.7.0)
-
-> 2023-02-09
+## [v1.7.0](https://github.com/ToC-Taiwan/toc-machine-trading/compare/v1.5.0...v1.7.0) (2023-02-09)
 
 ### Bug Fixes (33)
 
@@ -258,9 +346,7 @@
 * **websocket:** add nasdaq future to stream
 * **ws:** add lock for future trade ws
 
-## [v1.5.0](https://github.com/ToC-Taiwan/toc-machine-trading/compare/v1.4.0...v1.5.0)
-
-> 2023-02-09
+## [v1.5.0](https://github.com/ToC-Taiwan/toc-machine-trading/compare/v1.4.0...v1.5.0) (2023-02-09)
 
 ### Bug Fixes (10)
 
@@ -290,9 +376,7 @@
 * **ws:** add log for new future ws and done log
 * **ws:** modify ws layout, add send snapshot in future stream ws
 
-## [v1.4.0](https://github.com/ToC-Taiwan/toc-machine-trading/compare/v1.3.0...v1.4.0)
-
-> 2023-02-09
+## [v1.4.0](https://github.com/ToC-Taiwan/toc-machine-trading/compare/v1.3.0...v1.4.0) (2023-02-09)
 
 ### Features (8)
 
@@ -305,9 +389,7 @@
 * **strategy:** modify future trade strategy default config
 * **trader:** add kbar analyze to future trader
 
-## [v1.3.0](https://github.com/ToC-Taiwan/toc-machine-trading/compare/v1.2.0...v1.3.0)
-
-> 2023-02-09
+## [v1.3.0](https://github.com/ToC-Taiwan/toc-machine-trading/compare/v1.2.0...v1.3.0) (2023-02-09)
 
 ### Features (3)
 
@@ -315,13 +397,9 @@
 * **router:** add future trade balance to get balance
 * **strategy:** modify future trader strategy
 
-## [v1.2.0](https://github.com/ToC-Taiwan/toc-machine-trading/compare/v1.6.0...v1.2.0)
+## [v1.2.0](https://github.com/ToC-Taiwan/toc-machine-trading/compare/v1.6.0...v1.2.0) (2023-02-09)
 
-> 2023-02-09
-
-## [v1.6.0](https://github.com/ToC-Taiwan/toc-machine-trading/compare/v1.1.0...v1.6.0)
-
-> 2023-02-09
+## [v1.6.0](https://github.com/ToC-Taiwan/toc-machine-trading/compare/v1.1.0...v1.6.0) (2023-02-09)
 
 ### Bug Fixes (35)
 
@@ -423,9 +501,7 @@
 * **ws:** add log for new future ws and done log
 * **ws:** modify ws layout, add send snapshot in future stream ws
 
-## [v1.1.0](https://github.com/ToC-Taiwan/toc-machine-trading/compare/v1.0.0...v1.1.0)
-
-> 2023-02-09
+## [v1.1.0](https://github.com/ToC-Taiwan/toc-machine-trading/compare/v1.0.0...v1.1.0) (2023-02-09)
 
 ### Bug Fixes (1)
 
@@ -439,9 +515,7 @@
 * **module:** move all trader to trader module, remove simulate stock trader
 * **tradeday:** add new future trade day method, modify query order method to time range
 
-## v1.0.0
-
-> 2023-02-09
+## v1.0.0 (2023-02-09)
 
 ### Bug Fixes (32)
 

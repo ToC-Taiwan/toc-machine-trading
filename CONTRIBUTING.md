@@ -32,8 +32,23 @@ pre-commit run --all-files
 
 ### Modify CHANGELOG
 
+- git-chglog
+
 ```sh
+brew tap git-chglog/git-chglog
+brew install git-chglog
+```
+
+- new tag
+
+```sh
+COMMIT_HASH=03618905f651fb169164dffdb36601b06d17cba4
+VERSION=2.4.0
+git tag -a v$VERSION $COMMIT_HASH -m $VERSION
 git-chglog -o CHANGELOG.md
+
+git push -u origin --all
+git push -u origin --tags
 ```
 
 ### Find ignored files
