@@ -37,3 +37,4 @@ config.yml
 .env
 toc-machine-trading
 coverage.txt
+!.chglog/config.yml
