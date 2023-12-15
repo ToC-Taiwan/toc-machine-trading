@@ -2,18 +2,27 @@
 package config
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
 	"sync"
+	"time"
 
 	"tmt/pkg/grpc"
 	"tmt/pkg/log"
 	"tmt/pkg/postgres"
 	"tmt/pkg/rabbitmq"
 
+	"github.com/golang-migrate/migrate/v4"
+	"github.com/jackc/pgx/v4"
 	"github.com/joho/godotenv"
 	"github.com/spf13/viper"
+
+	// migrate tools
+	_ "github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
 
 // Config -.
@@ -164,7 +173,81 @@ func Get() *Config {
 	return singleton
 }
 
+const (
+	_defaultAttempts = 20
+	_defaultTimeout  = time.Second
+)
+
+func (c *Config) createDB() {
+	pg, err := postgres.New(
+		c.Database.URL,
+		postgres.MaxPoolSize(c.Database.PoolMax),
+		postgres.AddLogger(c.logger),
+	)
+	if err != nil {
+		c.logger.Fatalf("postgres create db error: %s", err)
+	}
+	defer pg.Close()
+
+	var name string
+	if err := pg.Pool().QueryRow(context.Background(),
+		"SELECT datname FROM pg_catalog.pg_database WHERE datname = $1", c.Database.DBName).
+		Scan(&name); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			_, err = pg.Pool().Exec(context.Background(), fmt.Sprintf("CREATE DATABASE %s", c.Database.DBName))
+			if err != nil {
+				c.logger.Fatalf("postgres create db error: %s", err)
+			}
+			return
+		}
+		c.logger.Fatalf("postgres create db error: %s", err)
+	}
+}
+
+func (c *Config) migrateScheme() {
+	m := &migrate.Migrate{}
+
+	path := fmt.Sprintf("%s%s%s", c.Database.URL, c.Database.DBName, "?sslmode=disable")
+	attempts := _defaultAttempts
+	var err error
+	for attempts > 0 {
+		m, err = migrate.New("file://migrations", path)
+		if err == nil {
+			break
+		}
+
+		c.logger.Infof("Migrate: postgres is trying to connect, attempts left: %d", attempts)
+		time.Sleep(_defaultTimeout)
+		attempts--
+	}
+
+	if err != nil {
+		c.logger.Fatal(fmt.Errorf("postgres connect error in migrate: %s", err))
+	}
+
+	defer func() {
+		_, _ = m.Close()
+	}()
+	err = m.Up()
+	if err != nil {
+		switch err {
+		case migrate.ErrNoChange:
+			c.logger.Info("Migrate: no change")
+		default:
+			c.logger.Errorf("Migrate: up error: %s", err)
+		}
+		return
+	}
+	c.logger.Info("Migrate: up success")
+}
+
+func (c *Config) migrateDB() {
+	c.createDB()
+	c.migrateScheme()
+}
+
 func (c *Config) setPostgresPool() {
+	c.migrateDB()
 	pg, err := postgres.New(
 		fmt.Sprintf("%s%s", c.Database.URL, c.Database.DBName),
 		postgres.MaxPoolSize(c.Database.PoolMax),
