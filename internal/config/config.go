@@ -72,7 +72,6 @@ func (c *Config) readConfig() {
 	if err != nil {
 		c.logger.Fatalf("fatal error config file: %s", err)
 	}
-	c.logger.Info(c.Simulation)
 }
 
 func (c *Config) readEnv() {
@@ -96,7 +95,7 @@ func (c *Config) readEnv() {
 	c.vp.SetDefault("DB_NAME", "machine_trade")
 	c.vp.SetDefault("DB_POOL_MAX", 80)
 
-	c.vp.SetDefault("RABBITMQ_URL", "amqp://admin:password@127.0.0.1:5672/%2f")
+	c.vp.SetDefault("RABBITMQ_URL", "amqp://admin:password@127.0.0.1:5672/%2f?heartbeat=0")
 	c.vp.SetDefault("RABBITMQ_EXCHANGE", "toc")
 	c.vp.SetDefault("RABBITMQ_WAIT_TIME", 5)
 	c.vp.SetDefault("RABBITMQ_ATTEMPTS", 10)
@@ -131,7 +130,6 @@ func (c *Config) readEnv() {
 		},
 	}
 	c.EnvConfig = env
-	c.logger.Info(c.EnvConfig.RabbitMQ.URL)
 }
 
 func (c *Config) checkValid() {
