@@ -20,6 +20,5 @@ func main() {
 	}
 	config.Init()
 	app.InitDB()
-	app.SetupCronJob()
 	app.Run()
 }
