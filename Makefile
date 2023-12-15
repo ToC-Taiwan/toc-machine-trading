@@ -8,6 +8,8 @@ run: swag ### swag run
 	@cp ./configs/default.config.yml ./configs/config.yml
 	@echo "Building $(BIN_NAME)..."
 	@go build -o $(BIN_NAME) ./cmd/app
+	@echo "Running $(BIN_NAME)..."
+	@./$(BIN_NAME)
 .PHONY: run
 
 build: ### build

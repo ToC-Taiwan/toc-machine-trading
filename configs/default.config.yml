@@ -1,94 +1,94 @@
-simulation: false
-manual_trade: true
+Simulation: false
+ManualTrade: true
 
-trade_stock:
-    allow_trade: false
-    subscribe: true
-    odd: true
+TradeStock:
+    AllowTrade: false
+    Subscribe: true
+    Odd: true
 
     # unit: second
-    hold_time_from_open: 45
-    trade_in_wait_time: 45
-    trade_out_wait_time: 60
-    cancel_wait_time: 30
+    HoldTimeFromOpen: 45
+    TradeInWaitTime: 45
+    TradeOutWaitTime: 60
+    CancelWaitTime: 30
 
     # unit: minute
-    total_open_time: 270
-    trade_in_end_time: 90
+    TotalOpenTime: 0
+    TradeInEndTime: 0
 
-trade_future:
-    allow_trade: false
-    subscribe: true
-    quantity: 2
+TradeFuture:
+    AllowTrade: false
+    Subscribe: true
+    Quantity: 2
 
     # unit: dollar
-    target_balance_high: 5
-    target_balance_low: -5
+    TargetBalanceHigh: 5
+    TargetBalanceLow: -5
 
     # unit: times
-    trade_out_wait_times: 20
+    TradeOutWaitTimes: 20
 
     # unit: seccond
-    buy_sell_wait_time: 5
-    tick_interval: 8
+    BuySellWaitTime: 5
+    TickInterval: 8
 
     # duration: minute
-    trade_time_range:
-        first_part_duration: 720
-        second_part_duration: 285
-    max_hold_time: 15
+    TradeTimeRange:
+        FirstPartDuration: 720
+        SecondPartDuration: 285
+    MaxHoldTime: 15
 
     # unit: volume/second
-    rate_limit: 14
+    RateLimit: 14
 
     # unit: %
-    rate_change_ratio: 10
-    out_in_ratio: 55
-    in_out_ratio: 75
+    RateChangeRatio: 10
+    OutInRatio: 55
+    InOutRatio: 75
 
-history:
+History:
     # unit: day
-    history_close_period: 65
-    history_tick_period: 12
-    history_kbar_period: 65
+    HistoryClosePeriod: 65
+    HistoryTickPeriod: 12
+    HistoryKbarPeriod: 65
 
-quota:
-    stock_trade_quota: 1000000
-    stock_fee_discount: 0.28
-    future_trade_fee: 15
+Quota:
+    StockTradeQuota: 1000000
+    StockFeeDiscount: 0.28
+    FutureTradeFee: 15
 
-target_stock:
-    real_time_rank: 20
-    black_category:
+TargetStock:
+    RealTimeRank: 20
+    BlackCategory:
         - 17
-    black_stock:
+    BlackStock:
         - 2317
         - 1314
         - 3481
         - 2412
         - 2002
         - 1102
-    limit_volume: 1000
-    price_limit:
-        - low: 10
-          high: 35
+    LimitVolume: 1000
+    PriceLimit:
+        - Low: 10
+          High: 35
 
-analyze_stock:
+AnalyzeStock:
     # unit: minute
-    max_hold_time: 60
+    MaxHoldTime: 60
 
     # unit: %
-    close_change_ratio_low: -2
-    close_change_ratio_high: 2
-    volume_pr_limit: 95
-    all_out_in_ratio: 75
-    all_in_out_ratio: 75
+    CloseChangeRatioLow: -2
+    CloseChangeRatioHigh: 2
+    VolumePRLimit: 95
+    AllOutInRatio: 75
+    AllInOutRatio: 75
 
     # unit: millisecond
-    tick_analyze_period: 15000
+    TickAnalyzePeriod: 15000
 
     # unit: times
-    rsi_min_count: 150
+    RSIMinCount: 150
 
     # unit: day
-    ma_period: 60
+    MAPeriod: 60

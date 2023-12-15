@@ -1,7 +1,6 @@
 package config
 
 type EnvConfig struct {
-	// from env no need tag
 	Database Database
 	Server   Server
 	Sinopac  Sinopac
@@ -10,32 +9,32 @@ type EnvConfig struct {
 }
 
 type Database struct {
-	DBName  string `env:"DB_NAME" env-required:"true"`
-	URL     string `env:"DB_URL" env-required:"true"`
-	PoolMax int    `env:"DB_POOL_MAX" env-required:"true"`
+	DBName  string
+	URL     string
+	PoolMax int
 }
 
 type Server struct {
-	HTTP                      string `env:"HTTP" env-required:"true"`
-	DisableSwaggerHTTPHandler string `env:"DISABLE_SWAGGER_HTTP_HANDLER" env-required:"true"`
+	HTTP                      string
+	DisableSwaggerHTTPHandler string
 }
 
 // Sinopac -.
 type Sinopac struct {
-	PoolMax int    `env:"SINOPAC_POOL_MAX" env-required:"true"`
-	URL     string `env:"SINOPAC_URL" env-required:"true"`
+	PoolMax int
+	URL     string
 }
 
 // Fugle -.
 type Fugle struct {
-	PoolMax int    `env:"FUGLE_POOL_MAX" env-required:"true"`
-	URL     string `env:"FUGLE_URL" env-required:"true"`
+	PoolMax int
+	URL     string
 }
 
 // RabbitMQ -.
 type RabbitMQ struct {
-	URL      string `env:"RABBITMQ_URL" env-required:"true"`
-	Exchange string `env:"RABBITMQ_EXCHANGE" env-required:"true"`
-	WaitTime int64  `env:"RABBITMQ_WAIT_TIME" env-required:"true"`
-	Attempts int    `env:"RABBITMQ_ATTEMPTS" env-required:"true"`
+	URL      string
+	Exchange string
+	WaitTime int64
+	Attempts int
 }

@@ -4,6 +4,7 @@ package config
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"sync"
 
 	"tmt/pkg/grpc"
@@ -11,74 +12,150 @@ import (
 	"tmt/pkg/postgres"
 	"tmt/pkg/rabbitmq"
 
-	"github.com/ilyakaznacheev/cleanenv"
+	"github.com/joho/godotenv"
+	"github.com/spf13/viper"
 )
 
 // Config -.
 type Config struct {
-	Simulation   bool         `yaml:"simulation"`
-	ManualTrade  bool         `yaml:"manual_trade"`
-	History      History      `yaml:"history"`
-	Quota        Quota        `yaml:"quota"`
-	TargetStock  TargetStock  `yaml:"target_stock"`
-	AnalyzeStock AnalyzeStock `yaml:"analyze_stock"`
-	TradeStock   TradeStock   `yaml:"trade_stock"`
-	TradeFuture  TradeFuture  `yaml:"trade_future"`
+	Simulation   bool         `yaml:"Simulation"`
+	ManualTrade  bool         `yaml:"ManualTrade"`
+	TradeStock   TradeStock   `yaml:"TradeStock"`
+	History      History      `yaml:"History"`
+	Quota        Quota        `yaml:"Quota"`
+	TargetStock  TargetStock  `yaml:"TargetStock"`
+	AnalyzeStock AnalyzeStock `yaml:"AnalyzeStock"`
+	TradeFuture  TradeFuture  `yaml:"TradeFuture"`
 
 	dbPool      *postgres.Postgres
 	sinopacPool *grpc.ConnPool
 	fuglePool   *grpc.ConnPool
-
-	logger *log.Log
-
-	// env must be the last field
 	EnvConfig
+
+	logger   *log.Log
+	vp       *viper.Viper
+	basePath string
 }
 
 var (
 	singleton *Config
-	initOnce  sync.Once
+	once      sync.Once
 )
+
+func newConfig() *Config {
+	logger := log.Get()
+	ex, err := os.Executable()
+	if err != nil {
+		panic(err)
+	}
+	if err = godotenv.Load(filepath.Join(filepath.Dir(ex), ".env")); err != nil {
+		if os.IsNotExist(err) {
+			logger.Warn("No .env file found, using default env values")
+		}
+	}
+	return &Config{
+		logger:   logger,
+		vp:       viper.New(),
+		basePath: filepath.Dir(ex),
+	}
+}
+
+func (c *Config) readConfig() {
+	c.vp.SetConfigName("config")
+	c.vp.SetConfigType("yml")
+	c.vp.AddConfigPath(filepath.Join(c.basePath, "configs"))
+	err := c.vp.ReadInConfig()
+	if err != nil {
+		c.logger.Fatalf("fatal error config file: %s", err)
+	}
+	err = c.vp.Unmarshal(c)
+	if err != nil {
+		c.logger.Fatalf("fatal error config file: %s", err)
+	}
+	c.logger.Info(c.Simulation)
+}
+
+func (c *Config) readEnv() {
+	c.vp.SetDefault("HTTP", "26670")
+	c.vp.SetDefault("DISABLE_SWAGGER_HTTP_HANDLER", "")
+
+	c.vp.SetDefault("LOG_LEVEL", "info")
+	c.vp.SetDefault("LOG_FORMAT", "text")
+	c.vp.SetDefault("LOG_NEED_CALLER", false)
+	c.vp.SetDefault("LOG_TIME_FORMAT", "")
+	c.vp.SetDefault("LOG_LINK_SLACK", false)
+	c.vp.SetDefault("LOG_DISABLE_CONSOLE", false)
+	c.vp.SetDefault("LOG_DISABLE_FILE", false)
+
+	c.vp.SetDefault("SINOPAC_URL", "127.0.0.1:56666")
+	c.vp.SetDefault("SINOPAC_POOL_MAX", 20)
+	c.vp.SetDefault("FUGLE_URL", "127.0.0.1:58888")
+	c.vp.SetDefault("FUGLE_POOL_MAX", 20)
+
+	c.vp.SetDefault("DB_URL", "postgres://postgres:asdf0000@127.0.0.1:5432/")
+	c.vp.SetDefault("DB_NAME", "machine_trade")
+	c.vp.SetDefault("DB_POOL_MAX", 80)
+
+	c.vp.SetDefault("RABBITMQ_URL", "amqp://admin:password@127.0.0.1:5672/%2f")
+	c.vp.SetDefault("RABBITMQ_EXCHANGE", "toc")
+	c.vp.SetDefault("RABBITMQ_WAIT_TIME", 5)
+	c.vp.SetDefault("RABBITMQ_ATTEMPTS", 10)
+
+	c.vp.SetDefault("SLACK_TOKEN", "")
+	c.vp.SetDefault("SLACK_CHANNEL_ID", "")
+	c.vp.SetDefault("SLACK_LOG_LEVEL", "warn")
+	c.vp.AutomaticEnv()
+	env := EnvConfig{
+		Database: Database{
+			DBName:  c.vp.GetString("DB_NAME"),
+			URL:     c.vp.GetString("DB_URL"),
+			PoolMax: c.vp.GetInt("DB_POOL_MAX"),
+		},
+		Server: Server{
+			HTTP:                      c.vp.GetString("HTTP"),
+			DisableSwaggerHTTPHandler: c.vp.GetString("DISABLE_SWAGGER_HTTP_HANDLER"),
+		},
+		Sinopac: Sinopac{
+			PoolMax: c.vp.GetInt("SINOPAC_POOL_MAX"),
+			URL:     c.vp.GetString("SINOPAC_URL"),
+		},
+		Fugle: Fugle{
+			PoolMax: c.vp.GetInt("FUGLE_POOL_MAX"),
+			URL:     c.vp.GetString("FUGLE_URL"),
+		},
+		RabbitMQ: RabbitMQ{
+			URL:      c.vp.GetString("RABBITMQ_URL"),
+			Exchange: c.vp.GetString("RABBITMQ_EXCHANGE"),
+			WaitTime: c.vp.GetInt64("RABBITMQ_WAIT_TIME"),
+			Attempts: c.vp.GetInt("RABBITMQ_ATTEMPTS"),
+		},
+	}
+	c.EnvConfig = env
+	c.logger.Info(c.EnvConfig.RabbitMQ.URL)
+}
+
+func (c *Config) checkValid() {
+	if c.TradeStock.AllowTrade && !c.TradeStock.Subscribe {
+		c.logger.Fatalf("stock trade switch allow trade but not subscribe")
+	}
+
+	if c.TradeFuture.AllowTrade && !c.TradeFuture.Subscribe {
+		c.logger.Fatalf("stock trade switch allow trade but not subscribe")
+	}
+}
 
 // Get -.
 func Get() *Config {
-	if singleton != nil {
-		return singleton
+	if singleton == nil {
+		once.Do(func() {
+			data := newConfig()
+			data.readConfig()
+			data.readEnv()
+			data.checkValid()
+			singleton = data
+		})
+		return Get()
 	}
-
-	initOnce.Do(func() {
-		cfg := Config{
-			logger: log.Get(),
-		}
-
-		filePath := "configs/config.yml"
-		fileStat, err := os.Stat(filePath)
-		if err != nil || fileStat.IsDir() {
-			cfg.logger.Fatalf("config file not found: %v", err)
-		}
-
-		if fileStat.Size() > 0 {
-			err = cleanenv.ReadConfig(filePath, &cfg)
-			if err != nil {
-				cfg.logger.Fatalf("config file read error: %v", err)
-			}
-		}
-
-		if err := cleanenv.ReadEnv(&cfg); err != nil {
-			cfg.logger.Fatalf("config env read error: %v", err)
-		}
-
-		if cfg.TradeStock.AllowTrade && !cfg.TradeStock.Subscribe {
-			cfg.logger.Fatalf("stock trade switch allow trade but not subscribe")
-		}
-
-		if cfg.TradeFuture.AllowTrade && !cfg.TradeFuture.Subscribe {
-			cfg.logger.Fatalf("stock trade switch allow trade but not subscribe")
-		}
-
-		singleton = &cfg
-	})
-
 	return singleton
 }
 
