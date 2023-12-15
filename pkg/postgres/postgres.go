@@ -28,7 +28,8 @@ type Postgres struct {
 	Builder squirrel.StatementBuilderType
 	pool    *pgxpool.Pool
 
-	logger Logger
+	logger    Logger
+	connected time.Time
 }
 
 // New -.
@@ -56,6 +57,7 @@ func New(url string, opts ...Option) (*Postgres, error) {
 	for pg.connAttempts > 0 {
 		pg.pool, err = pgxpool.ConnectConfig(context.Background(), poolConfig)
 		if err == nil {
+			pg.connected = time.Now()
 			return pg, nil
 		}
 
@@ -71,6 +73,8 @@ func New(url string, opts ...Option) (*Postgres, error) {
 func (p *Postgres) Close() {
 	if p.pool != nil {
 		p.pool.Close()
+		totalTime := time.Since(p.connected).String()
+		p.Infof("Postgres: closed, total connection time: %s\n", totalTime)
 	}
 }
 

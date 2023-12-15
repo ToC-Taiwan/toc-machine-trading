@@ -142,25 +142,29 @@ func (c *Config) checkValid() {
 	}
 }
 
+func Init() {
+	once.Do(func() {
+		data := newConfig()
+		data.readConfig()
+		data.readEnv()
+		data.checkValid()
+		data.setPostgresPool()
+		data.setSinopacPool()
+		data.setFuglePool()
+		singleton = data
+	})
+}
+
 // Get -.
 func Get() *Config {
 	if singleton == nil {
-		once.Do(func() {
-			data := newConfig()
-			data.readConfig()
-			data.readEnv()
-			data.checkValid()
-			singleton = data
-		})
+		once.Do(Init)
 		return Get()
 	}
 	return singleton
 }
 
-func (c *Config) GetPostgresPool() *postgres.Postgres {
-	if c.dbPool != nil {
-		return c.dbPool
-	}
+func (c *Config) setPostgresPool() {
 	pg, err := postgres.New(
 		fmt.Sprintf("%s%s", c.Database.URL, c.Database.DBName),
 		postgres.MaxPoolSize(c.Database.PoolMax),
@@ -170,13 +174,16 @@ func (c *Config) GetPostgresPool() *postgres.Postgres {
 		c.logger.Fatal(err)
 	}
 	c.dbPool = pg
-	return pg
 }
 
-func (c *Config) GetSinopacPool() *grpc.ConnPool {
-	if c.sinopacPool != nil {
-		return c.sinopacPool
+func (c *Config) GetPostgresPool() *postgres.Postgres {
+	if c.dbPool == nil {
+		c.logger.Fatal("postgres not connected")
 	}
+	return c.dbPool
+}
+
+func (c *Config) setSinopacPool() {
 	c.logger.Info("Connecting to sinopac gRPC server")
 	sc, err := grpc.New(
 		c.Sinopac.URL,
@@ -187,13 +194,16 @@ func (c *Config) GetSinopacPool() *grpc.ConnPool {
 		c.logger.Fatal(err)
 	}
 	c.sinopacPool = sc
-	return sc
 }
 
-func (c *Config) GetFuglePool() *grpc.ConnPool {
-	if c.fuglePool != nil {
-		return c.fuglePool
+func (c *Config) GetSinopacPool() *grpc.ConnPool {
+	if c.sinopacPool == nil {
+		c.logger.Fatal("sinopac gRPC server not connected")
 	}
+	return c.sinopacPool
+}
+
+func (c *Config) setFuglePool() {
 	c.logger.Info("Connecting to fugle gRPC server")
 	fg, err := grpc.New(
 		c.Fugle.URL,
@@ -204,7 +214,13 @@ func (c *Config) GetFuglePool() *grpc.ConnPool {
 		c.logger.Fatal(err)
 	}
 	c.fuglePool = fg
-	return fg
+}
+
+func (c *Config) GetFuglePool() *grpc.ConnPool {
+	if c.fuglePool == nil {
+		c.logger.Fatal("fugle gRPC server not connected")
+	}
+	return c.fuglePool
 }
 
 func (c *Config) GetRabbitConn() *rabbitmq.Connection {
@@ -223,6 +239,5 @@ func (c *Config) GetRabbitConn() *rabbitmq.Connection {
 func (c *Config) CloseDB() {
 	if c.dbPool != nil {
 		c.dbPool.Close()
-		c.logger.Warn("TMT is shutting down")
 	}
 }

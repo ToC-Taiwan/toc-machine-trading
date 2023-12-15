@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 
 	"tmt/internal/app"
+	"tmt/internal/config"
 
 	"github.com/joho/godotenv"
 )
@@ -17,6 +18,7 @@ func main() {
 	if err := godotenv.Load(filepath.Join(filepath.Dir(ex), ".env")); err != nil {
 		panic(err)
 	}
+	config.Init()
 	app.InitDB()
 	app.SetupCronJob()
 	app.Run()

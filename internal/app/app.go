@@ -49,5 +49,8 @@ func Run() {
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
 	<-interrupt
+
+	// post process
 	cfg.CloseDB()
+	logger.Warn("TMT is shutting down")
 }
