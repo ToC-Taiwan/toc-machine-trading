@@ -26,7 +26,6 @@ RUN apt update -y && \
     mkdir toc-machine-trading/migrations && \
     mkdir toc-machine-trading/configs && \
     mkdir toc-machine-trading/logs && \
-    mkdir toc-machine-trading/scripts && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /toc-machine-trading
