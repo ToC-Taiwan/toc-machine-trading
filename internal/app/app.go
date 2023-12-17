@@ -70,5 +70,6 @@ func setupCronJob(interrupt chan os.Signal) {
 	if _, e := job.AddFunc("40 14 * * *", exit); e != nil {
 		panic(e)
 	}
+
 	go job.Start()
 }

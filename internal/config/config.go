@@ -231,13 +231,10 @@ func (c *Config) migrateScheme() {
 	c.logger.Info("Migrate: up success")
 }
 
-func (c *Config) migrateDB() {
+func (c *Config) setPostgresPool() {
 	c.createDB()
 	c.migrateScheme()
-}
 
-func (c *Config) setPostgresPool() {
-	c.migrateDB()
 	pg, err := postgres.New(
 		fmt.Sprintf("%s%s", c.Database.URL, c.Database.DBName),
 		postgres.MaxPoolSize(c.Database.PoolMax),
