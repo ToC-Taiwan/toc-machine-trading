@@ -13,7 +13,7 @@ gsed -i "$ a listen_addresses = '*'" ./data/toc-machine-trading/postgresql.conf
 pg_ctl -D ./data/toc-machine-trading -l ./data/toc-machine-trading/logfile start
 
 echo "\du
-CREATE ROLE postgres WITH LOGIN PASSWORD 'asdf0000';
+CREATE ROLE postgres WITH LOGIN PASSWORD 'password';
 ALTER USER postgres WITH SUPERUSER;
 \du" >sql_script
 

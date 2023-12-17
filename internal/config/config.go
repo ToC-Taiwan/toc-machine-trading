@@ -84,34 +84,24 @@ func (c *Config) readConfig() {
 }
 
 func (c *Config) readEnv() {
+	c.vp.SetDefault("DB_NAME", "machine_trade")
+	c.vp.SetDefault("DB_URL", "postgres://postgres:password@127.0.0.1:5432/")
+	c.vp.SetDefault("DB_POOL_MAX", 80)
+
 	c.vp.SetDefault("HTTP", "26670")
 	c.vp.SetDefault("DISABLE_SWAGGER_HTTP_HANDLER", "")
 
-	c.vp.SetDefault("LOG_LEVEL", "info")
-	c.vp.SetDefault("LOG_FORMAT", "text")
-	c.vp.SetDefault("LOG_NEED_CALLER", false)
-	c.vp.SetDefault("LOG_TIME_FORMAT", "")
-	c.vp.SetDefault("LOG_LINK_SLACK", false)
-	c.vp.SetDefault("LOG_DISABLE_CONSOLE", false)
-	c.vp.SetDefault("LOG_DISABLE_FILE", false)
-
-	c.vp.SetDefault("SINOPAC_URL", "127.0.0.1:56666")
 	c.vp.SetDefault("SINOPAC_POOL_MAX", 20)
-	c.vp.SetDefault("FUGLE_URL", "127.0.0.1:58888")
-	c.vp.SetDefault("FUGLE_POOL_MAX", 20)
+	c.vp.SetDefault("SINOPAC_URL", "127.0.0.1:56666")
 
-	c.vp.SetDefault("DB_URL", "postgres://postgres:asdf0000@127.0.0.1:5432/")
-	c.vp.SetDefault("DB_NAME", "machine_trade")
-	c.vp.SetDefault("DB_POOL_MAX", 80)
+	c.vp.SetDefault("FUGLE_POOL_MAX", 20)
+	c.vp.SetDefault("FUGLE_URL", "127.0.0.1:58888")
 
 	c.vp.SetDefault("RABBITMQ_URL", "amqp://admin:password@127.0.0.1:5672/%2f?heartbeat=0")
 	c.vp.SetDefault("RABBITMQ_EXCHANGE", "toc")
 	c.vp.SetDefault("RABBITMQ_WAIT_TIME", 5)
 	c.vp.SetDefault("RABBITMQ_ATTEMPTS", 10)
 
-	c.vp.SetDefault("SLACK_TOKEN", "")
-	c.vp.SetDefault("SLACK_CHANNEL_ID", "")
-	c.vp.SetDefault("SLACK_LOG_LEVEL", "warn")
 	c.vp.AutomaticEnv()
 	env := EnvConfig{
 		Database: Database{
