@@ -1184,7 +1184,7 @@ paths:
       - application/json
       description: active user
       parameters:
-      - description: User
+      - description: user
         in: header
         name: user
         required: true

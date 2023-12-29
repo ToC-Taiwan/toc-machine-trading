@@ -868,7 +868,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "User",
+                        "description": "user",
                         "name": "user",
                         "in": "header",
                         "required": true
