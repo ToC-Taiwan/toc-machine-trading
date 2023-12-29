@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"crypto/tls"
 	"errors"
 	"fmt"
 	"sync"
@@ -96,6 +97,7 @@ func (uc *SystemUseCase) SendOTP(ctx context.Context, t *entity.User) error {
 	)
 
 	d := gomail.NewDialer(uc.smtpCfg.Host, 587, uc.smtpCfg.Username, uc.smtpCfg.Password)
+	d.TLSConfig = &tls.Config{InsecureSkipVerify: true}
 	if err := d.DialAndSend(m); err != nil {
 		return err
 	}
