@@ -29,4 +29,6 @@ const (
 	tableNameInventoryFuture string = "inventory_future"
 
 	tableNameEvent string = "sinopac_event"
+
+	tableNameSystemAccount string = "system_account"
 )

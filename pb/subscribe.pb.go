@@ -21,7 +21,6 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-// SubscribeResponse is the response for subscribe
 type SubscribeResponse struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache

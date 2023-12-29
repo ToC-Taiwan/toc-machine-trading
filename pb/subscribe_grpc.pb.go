@@ -36,25 +36,15 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type SubscribeDataInterfaceClient interface {
-	// SubscribeStockTick is the interface for subscribe stock tick
 	SubscribeStockTick(ctx context.Context, in *StockNumArr, opts ...grpc.CallOption) (*SubscribeResponse, error)
-	// UnSubscribeStockTick is the interface for unsubscribe stock tick
 	UnSubscribeStockTick(ctx context.Context, in *StockNumArr, opts ...grpc.CallOption) (*SubscribeResponse, error)
-	// SubscribeStockBidAsk is the interface for subscribe stock bid ask
 	SubscribeStockBidAsk(ctx context.Context, in *StockNumArr, opts ...grpc.CallOption) (*SubscribeResponse, error)
-	// UnSubscribeStockBidAsk is the interface for unsubscribe stock bid ask
 	UnSubscribeStockBidAsk(ctx context.Context, in *StockNumArr, opts ...grpc.CallOption) (*SubscribeResponse, error)
-	// SubscribeFutureTick is the interface for subscribe stock all tick
 	SubscribeFutureTick(ctx context.Context, in *FutureCodeArr, opts ...grpc.CallOption) (*SubscribeResponse, error)
-	// UnSubscribeFutureTick is the interface for unsubscribe stock all tick
 	UnSubscribeFutureTick(ctx context.Context, in *FutureCodeArr, opts ...grpc.CallOption) (*SubscribeResponse, error)
-	// SubscribeFutureBidAsk is the interface for subscribe stock all bid ask
 	SubscribeFutureBidAsk(ctx context.Context, in *FutureCodeArr, opts ...grpc.CallOption) (*SubscribeResponse, error)
-	// UnSubscribeFutureBidAsk is the interface for unsubscribe stock all bid ask
 	UnSubscribeFutureBidAsk(ctx context.Context, in *FutureCodeArr, opts ...grpc.CallOption) (*SubscribeResponse, error)
-	// UnSubscribeAllTick is the interface for unsubscribe stock all tick
 	UnSubscribeAllTick(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ErrorMessage, error)
-	// UnSubscribeStockAllBidAsk is the interface for unsubscribe stock all bid ask
 	UnSubscribeAllBidAsk(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ErrorMessage, error)
 }
 
@@ -160,25 +150,15 @@ func (c *subscribeDataInterfaceClient) UnSubscribeAllBidAsk(ctx context.Context,
 // All implementations must embed UnimplementedSubscribeDataInterfaceServer
 // for forward compatibility
 type SubscribeDataInterfaceServer interface {
-	// SubscribeStockTick is the interface for subscribe stock tick
 	SubscribeStockTick(context.Context, *StockNumArr) (*SubscribeResponse, error)
-	// UnSubscribeStockTick is the interface for unsubscribe stock tick
 	UnSubscribeStockTick(context.Context, *StockNumArr) (*SubscribeResponse, error)
-	// SubscribeStockBidAsk is the interface for subscribe stock bid ask
 	SubscribeStockBidAsk(context.Context, *StockNumArr) (*SubscribeResponse, error)
-	// UnSubscribeStockBidAsk is the interface for unsubscribe stock bid ask
 	UnSubscribeStockBidAsk(context.Context, *StockNumArr) (*SubscribeResponse, error)
-	// SubscribeFutureTick is the interface for subscribe stock all tick
 	SubscribeFutureTick(context.Context, *FutureCodeArr) (*SubscribeResponse, error)
-	// UnSubscribeFutureTick is the interface for unsubscribe stock all tick
 	UnSubscribeFutureTick(context.Context, *FutureCodeArr) (*SubscribeResponse, error)
-	// SubscribeFutureBidAsk is the interface for subscribe stock all bid ask
 	SubscribeFutureBidAsk(context.Context, *FutureCodeArr) (*SubscribeResponse, error)
-	// UnSubscribeFutureBidAsk is the interface for unsubscribe stock all bid ask
 	UnSubscribeFutureBidAsk(context.Context, *FutureCodeArr) (*SubscribeResponse, error)
-	// UnSubscribeAllTick is the interface for unsubscribe stock all tick
 	UnSubscribeAllTick(context.Context, *emptypb.Empty) (*ErrorMessage, error)
-	// UnSubscribeStockAllBidAsk is the interface for unsubscribe stock all bid ask
 	UnSubscribeAllBidAsk(context.Context, *emptypb.Empty) (*ErrorMessage, error)
 	mustEmbedUnimplementedSubscribeDataInterfaceServer()
 }

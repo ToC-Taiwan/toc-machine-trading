@@ -34,21 +34,13 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type RealTimeDataInterfaceClient interface {
-	// GetAllStockSnapshot get all stock snapshot
 	GetAllStockSnapshot(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*SnapshotResponse, error)
-	// GetStockSnapshotByNumArr get stock snapshot by num array
 	GetStockSnapshotByNumArr(ctx context.Context, in *StockNumArr, opts ...grpc.CallOption) (*SnapshotResponse, error)
-	// GetStockSnapshotTSE get stock snapshot by num array
 	GetStockSnapshotTSE(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*SnapshotMessage, error)
-	// GetStockSnapshotOTC get stock snapshot by num array
 	GetStockSnapshotOTC(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*SnapshotMessage, error)
-	// GetNasdaq get stock snapshot by num array
 	GetNasdaq(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*YahooFinancePrice, error)
-	// GetNasdaqFuture get stock snapshot by num array
 	GetNasdaqFuture(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*YahooFinancePrice, error)
-	// GetStockVolumeRank get stock volume rank
 	GetStockVolumeRank(ctx context.Context, in *VolumeRankRequest, opts ...grpc.CallOption) (*StockVolumeRankResponse, error)
-	// GetFutureSnapshotByCodeArr get future snapshot by code array
 	GetFutureSnapshotByCodeArr(ctx context.Context, in *FutureCodeArr, opts ...grpc.CallOption) (*SnapshotResponse, error)
 }
 
@@ -136,21 +128,13 @@ func (c *realTimeDataInterfaceClient) GetFutureSnapshotByCodeArr(ctx context.Con
 // All implementations must embed UnimplementedRealTimeDataInterfaceServer
 // for forward compatibility
 type RealTimeDataInterfaceServer interface {
-	// GetAllStockSnapshot get all stock snapshot
 	GetAllStockSnapshot(context.Context, *emptypb.Empty) (*SnapshotResponse, error)
-	// GetStockSnapshotByNumArr get stock snapshot by num array
 	GetStockSnapshotByNumArr(context.Context, *StockNumArr) (*SnapshotResponse, error)
-	// GetStockSnapshotTSE get stock snapshot by num array
 	GetStockSnapshotTSE(context.Context, *emptypb.Empty) (*SnapshotMessage, error)
-	// GetStockSnapshotOTC get stock snapshot by num array
 	GetStockSnapshotOTC(context.Context, *emptypb.Empty) (*SnapshotMessage, error)
-	// GetNasdaq get stock snapshot by num array
 	GetNasdaq(context.Context, *emptypb.Empty) (*YahooFinancePrice, error)
-	// GetNasdaqFuture get stock snapshot by num array
 	GetNasdaqFuture(context.Context, *emptypb.Empty) (*YahooFinancePrice, error)
-	// GetStockVolumeRank get stock volume rank
 	GetStockVolumeRank(context.Context, *VolumeRankRequest) (*StockVolumeRankResponse, error)
-	// GetFutureSnapshotByCodeArr get future snapshot by code array
 	GetFutureSnapshotByCodeArr(context.Context, *FutureCodeArr) (*SnapshotResponse, error)
 	mustEmbedUnimplementedRealTimeDataInterfaceServer()
 }

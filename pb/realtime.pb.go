@@ -21,7 +21,6 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-// SnapshotResponse is the response of snapshot
 type SnapshotResponse struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -69,7 +68,6 @@ func (x *SnapshotResponse) GetData() []*SnapshotMessage {
 	return nil
 }
 
-// YahooFinancePrice is the response of yahoo finance price
 type YahooFinancePrice struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -125,7 +123,6 @@ func (x *YahooFinancePrice) GetLast() float64 {
 	return 0
 }
 
-// VolumeRankRequest is the request of volume rank
 type VolumeRankRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -181,7 +178,6 @@ func (x *VolumeRankRequest) GetDate() string {
 	return ""
 }
 
-// SnapshotMessage is the message of snapshot
 type SnapshotMessage struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -397,7 +393,6 @@ func (x *SnapshotMessage) GetVolumeRatio() float64 {
 	return 0
 }
 
-// StockVolumeRankResponse is the response of stock volume rank
 type StockVolumeRankResponse struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -445,7 +440,6 @@ func (x *StockVolumeRankResponse) GetData() []*StockVolumeRankMessage {
 	return nil
 }
 
-// StockVolumeRankMessage is the message of stock volume rank
 type StockVolumeRankMessage struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache

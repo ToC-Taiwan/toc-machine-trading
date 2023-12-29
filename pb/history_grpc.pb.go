@@ -35,25 +35,15 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type HistoryDataInterfaceClient interface {
-	// GetStockHistoryTick
 	GetStockHistoryTick(ctx context.Context, in *StockNumArrWithDate, opts ...grpc.CallOption) (*HistoryTickResponse, error)
-	// GetStockHistoryKbar
 	GetStockHistoryKbar(ctx context.Context, in *StockNumArrWithDate, opts ...grpc.CallOption) (*HistoryKbarResponse, error)
-	// GetStockHistoryClose
 	GetStockHistoryClose(ctx context.Context, in *StockNumArrWithDate, opts ...grpc.CallOption) (*HistoryCloseResponse, error)
-	// GetStockHistoryCloseByDateArr
 	GetStockHistoryCloseByDateArr(ctx context.Context, in *StockNumArrWithDateArr, opts ...grpc.CallOption) (*HistoryCloseResponse, error)
-	// GetFutureHistoryTick
 	GetFutureHistoryTick(ctx context.Context, in *FutureCodeArrWithDate, opts ...grpc.CallOption) (*HistoryTickResponse, error)
-	// GetFutureHistoryKbar
 	GetFutureHistoryKbar(ctx context.Context, in *FutureCodeArrWithDate, opts ...grpc.CallOption) (*HistoryKbarResponse, error)
-	// GetFutureHistoryClose
 	GetFutureHistoryClose(ctx context.Context, in *FutureCodeArrWithDate, opts ...grpc.CallOption) (*HistoryCloseResponse, error)
-	// GetStockTSEHistoryTick
 	GetStockTSEHistoryTick(ctx context.Context, in *Date, opts ...grpc.CallOption) (*HistoryTickResponse, error)
-	// GetStockTSEHistoryKbar
 	GetStockTSEHistoryKbar(ctx context.Context, in *Date, opts ...grpc.CallOption) (*HistoryKbarResponse, error)
-	// GetStockTSEHistoryClose
 	GetStockTSEHistoryClose(ctx context.Context, in *Date, opts ...grpc.CallOption) (*HistoryCloseResponse, error)
 }
 
@@ -159,25 +149,15 @@ func (c *historyDataInterfaceClient) GetStockTSEHistoryClose(ctx context.Context
 // All implementations must embed UnimplementedHistoryDataInterfaceServer
 // for forward compatibility
 type HistoryDataInterfaceServer interface {
-	// GetStockHistoryTick
 	GetStockHistoryTick(context.Context, *StockNumArrWithDate) (*HistoryTickResponse, error)
-	// GetStockHistoryKbar
 	GetStockHistoryKbar(context.Context, *StockNumArrWithDate) (*HistoryKbarResponse, error)
-	// GetStockHistoryClose
 	GetStockHistoryClose(context.Context, *StockNumArrWithDate) (*HistoryCloseResponse, error)
-	// GetStockHistoryCloseByDateArr
 	GetStockHistoryCloseByDateArr(context.Context, *StockNumArrWithDateArr) (*HistoryCloseResponse, error)
-	// GetFutureHistoryTick
 	GetFutureHistoryTick(context.Context, *FutureCodeArrWithDate) (*HistoryTickResponse, error)
-	// GetFutureHistoryKbar
 	GetFutureHistoryKbar(context.Context, *FutureCodeArrWithDate) (*HistoryKbarResponse, error)
-	// GetFutureHistoryClose
 	GetFutureHistoryClose(context.Context, *FutureCodeArrWithDate) (*HistoryCloseResponse, error)
-	// GetStockTSEHistoryTick
 	GetStockTSEHistoryTick(context.Context, *Date) (*HistoryTickResponse, error)
-	// GetStockTSEHistoryKbar
 	GetStockTSEHistoryKbar(context.Context, *Date) (*HistoryKbarResponse, error)
-	// GetStockTSEHistoryClose
 	GetStockTSEHistoryClose(context.Context, *Date) (*HistoryCloseResponse, error)
 	mustEmbedUnimplementedHistoryDataInterfaceServer()
 }

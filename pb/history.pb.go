@@ -20,7 +20,6 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-// StockNumArrWithDate
 type StockNumArrWithDate struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -76,7 +75,6 @@ func (x *StockNumArrWithDate) GetDate() string {
 	return ""
 }
 
-// FutureCodeArrWithDate
 type FutureCodeArrWithDate struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -132,7 +130,6 @@ func (x *FutureCodeArrWithDate) GetDate() string {
 	return ""
 }
 
-// StockNumArrWithDateArr
 type StockNumArrWithDateArr struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -188,7 +185,6 @@ func (x *StockNumArrWithDateArr) GetDateArr() []string {
 	return nil
 }
 
-// HistoryTickResponse
 type HistoryTickResponse struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -236,7 +232,6 @@ func (x *HistoryTickResponse) GetData() []*HistoryTickMessage {
 	return nil
 }
 
-// HistoryKbarResponse
 type HistoryKbarResponse struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -284,7 +279,6 @@ func (x *HistoryKbarResponse) GetData() []*HistoryKbarMessage {
 	return nil
 }
 
-// HistoryCloseResponse
 type HistoryCloseResponse struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -332,7 +326,6 @@ func (x *HistoryCloseResponse) GetData() []*HistoryCloseMessage {
 	return nil
 }
 
-// HistoryTickMessage
 type HistoryTickMessage struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -444,7 +437,6 @@ func (x *HistoryTickMessage) GetCode() string {
 	return ""
 }
 
-// HistoryKbarMessage
 type HistoryKbarMessage struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -540,7 +532,6 @@ func (x *HistoryKbarMessage) GetCode() string {
 	return ""
 }
 
-// HistoryCloseMessage
 type HistoryCloseMessage struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -604,7 +595,6 @@ func (x *HistoryCloseMessage) GetClose() float64 {
 	return 0
 }
 
-// Date
 type Date struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache

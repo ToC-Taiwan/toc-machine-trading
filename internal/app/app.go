@@ -29,10 +29,12 @@ func Run() {
 	history := usecase.NewHistory()
 	realTime := usecase.NewRealTime()
 	target := usecase.NewTarget()
+	system := usecase.NewSystem()
 
 	// HTTP Server
-	r := router.NewRouter().
+	r := router.NewRouter(system).
 		AddV1BasicRoutes(basic).
+		AddV1OrderRoutes(trade).
 		AddV1TradeRoutes(trade).
 		AddV1RealTimeRoutes(realTime, trade, history).
 		AddV1AnalyzeRoutes(analyze).

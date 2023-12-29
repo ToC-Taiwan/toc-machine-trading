@@ -6,6 +6,7 @@ type EnvConfig struct {
 	Sinopac  Sinopac
 	Fugle    Fugle
 	RabbitMQ RabbitMQ
+	SMTP     SMTP
 }
 
 type Database struct {
@@ -37,4 +38,11 @@ type RabbitMQ struct {
 	Exchange string
 	WaitTime int64
 	Attempts int
+}
+
+type SMTP struct {
+	Host     string
+	Port     int
+	Username string
+	Password string
 }

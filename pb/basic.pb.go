@@ -21,7 +21,6 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-// BeatMessage is the message for heartbeat
 type BeatMessage struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -148,7 +147,6 @@ func (x *ShioajiUsage) GetRemainingBytes() int64 {
 	return 0
 }
 
-// StockDetailResponse is the response for stock detail
 type StockDetailResponse struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -196,7 +194,6 @@ func (x *StockDetailResponse) GetStock() []*StockDetailMessage {
 	return nil
 }
 
-// FutureDetailResponse is the response for future detail
 type FutureDetailResponse struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -244,7 +241,6 @@ func (x *FutureDetailResponse) GetFuture() []*FutureDetailMessage {
 	return nil
 }
 
-// OptionDetailResponse is the response for option detail
 type OptionDetailResponse struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -292,7 +288,6 @@ func (x *OptionDetailResponse) GetOption() []*OptionDetailMessage {
 	return nil
 }
 
-// StockDetailMessage is the message for stock detail
 type StockDetailMessage struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -388,7 +383,6 @@ func (x *StockDetailMessage) GetDayTrade() string {
 	return ""
 }
 
-// FutureDetailMessage is the message for future detail
 type FutureDetailMessage struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -524,7 +518,6 @@ func (x *FutureDetailMessage) GetUpdateDate() string {
 	return ""
 }
 
-// OptionDetailMessage is the message for option detail
 type OptionDetailMessage struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache

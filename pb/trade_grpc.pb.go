@@ -49,51 +49,28 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type TradeInterfaceClient interface {
-	// BuyStock is the interface for buying stock
 	BuyStock(ctx context.Context, in *StockOrderDetail, opts ...grpc.CallOption) (*TradeResult, error)
-	// SellStock is the interface for selling stock
 	SellStock(ctx context.Context, in *StockOrderDetail, opts ...grpc.CallOption) (*TradeResult, error)
-	// BuyStock is the interface for buying stock
 	BuyOddStock(ctx context.Context, in *OddStockOrderDetail, opts ...grpc.CallOption) (*TradeResult, error)
-	// SellStock is the interface for selling stock
 	SellOddStock(ctx context.Context, in *OddStockOrderDetail, opts ...grpc.CallOption) (*TradeResult, error)
-	// SellFirstStock is the interface for selling first stock
 	SellFirstStock(ctx context.Context, in *StockOrderDetail, opts ...grpc.CallOption) (*TradeResult, error)
-	// CancelStock is the interface for canceling stock
 	CancelStock(ctx context.Context, in *OrderID, opts ...grpc.CallOption) (*TradeResult, error)
-	// BuyFuture is the interface for buying future
 	BuyFuture(ctx context.Context, in *FutureOrderDetail, opts ...grpc.CallOption) (*TradeResult, error)
-	// SellFuture is the interface for selling future
 	SellFuture(ctx context.Context, in *FutureOrderDetail, opts ...grpc.CallOption) (*TradeResult, error)
-	// SellFirstFuture is the interface for selling first future
 	SellFirstFuture(ctx context.Context, in *FutureOrderDetail, opts ...grpc.CallOption) (*TradeResult, error)
-	// CancelFuture is the interface for canceling future
 	CancelFuture(ctx context.Context, in *FutureOrderID, opts ...grpc.CallOption) (*TradeResult, error)
-	// BuyFuture is the interface for buying future
 	BuyOption(ctx context.Context, in *OptionOrderDetail, opts ...grpc.CallOption) (*TradeResult, error)
-	// SellFuture is the interface for selling future
 	SellOption(ctx context.Context, in *OptionOrderDetail, opts ...grpc.CallOption) (*TradeResult, error)
-	// SellFirstFuture is the interface for selling first future
 	SellFirstOption(ctx context.Context, in *OptionOrderDetail, opts ...grpc.CallOption) (*TradeResult, error)
-	// CancelFuture is the interface for canceling future
 	CancelOption(ctx context.Context, in *OptionOrderID, opts ...grpc.CallOption) (*TradeResult, error)
-	// GetLocalOrderStatusArr is the interface for getting local order status array
 	GetLocalOrderStatusArr(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	// GetSimulateOrderStatusArr is the interface for getting simulate order status array
 	GetSimulateOrderStatusArr(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	// GetOrderStatusByID is the interface for getting order status by id
 	GetOrderStatusByID(ctx context.Context, in *OrderID, opts ...grpc.CallOption) (*TradeResult, error)
-	// GetNonBlockOrderStatusArr is the interface for getting non block order status array
 	GetNonBlockOrderStatusArr(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ErrorMessage, error)
-	// GetFuturePosition is the interface for getting future position
 	GetFuturePosition(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*FuturePositionArr, error)
-	// GetStockPosition is the interface for getting stock position
 	GetStockPosition(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*StockPositionArr, error)
-	// GetSettlement is the interface for getting settlement
 	GetSettlement(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*SettlementList, error)
-	// GetAccountBalance is the interface for getting account balance
 	GetAccountBalance(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*AccountBalance, error)
-	// GetMargin is the interface for getting margin
 	GetMargin(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*Margin, error)
 }
 
@@ -316,51 +293,28 @@ func (c *tradeInterfaceClient) GetMargin(ctx context.Context, in *emptypb.Empty,
 // All implementations must embed UnimplementedTradeInterfaceServer
 // for forward compatibility
 type TradeInterfaceServer interface {
-	// BuyStock is the interface for buying stock
 	BuyStock(context.Context, *StockOrderDetail) (*TradeResult, error)
-	// SellStock is the interface for selling stock
 	SellStock(context.Context, *StockOrderDetail) (*TradeResult, error)
-	// BuyStock is the interface for buying stock
 	BuyOddStock(context.Context, *OddStockOrderDetail) (*TradeResult, error)
-	// SellStock is the interface for selling stock
 	SellOddStock(context.Context, *OddStockOrderDetail) (*TradeResult, error)
-	// SellFirstStock is the interface for selling first stock
 	SellFirstStock(context.Context, *StockOrderDetail) (*TradeResult, error)
-	// CancelStock is the interface for canceling stock
 	CancelStock(context.Context, *OrderID) (*TradeResult, error)
-	// BuyFuture is the interface for buying future
 	BuyFuture(context.Context, *FutureOrderDetail) (*TradeResult, error)
-	// SellFuture is the interface for selling future
 	SellFuture(context.Context, *FutureOrderDetail) (*TradeResult, error)
-	// SellFirstFuture is the interface for selling first future
 	SellFirstFuture(context.Context, *FutureOrderDetail) (*TradeResult, error)
-	// CancelFuture is the interface for canceling future
 	CancelFuture(context.Context, *FutureOrderID) (*TradeResult, error)
-	// BuyFuture is the interface for buying future
 	BuyOption(context.Context, *OptionOrderDetail) (*TradeResult, error)
-	// SellFuture is the interface for selling future
 	SellOption(context.Context, *OptionOrderDetail) (*TradeResult, error)
-	// SellFirstFuture is the interface for selling first future
 	SellFirstOption(context.Context, *OptionOrderDetail) (*TradeResult, error)
-	// CancelFuture is the interface for canceling future
 	CancelOption(context.Context, *OptionOrderID) (*TradeResult, error)
-	// GetLocalOrderStatusArr is the interface for getting local order status array
 	GetLocalOrderStatusArr(context.Context, *emptypb.Empty) (*emptypb.Empty, error)
-	// GetSimulateOrderStatusArr is the interface for getting simulate order status array
 	GetSimulateOrderStatusArr(context.Context, *emptypb.Empty) (*emptypb.Empty, error)
-	// GetOrderStatusByID is the interface for getting order status by id
 	GetOrderStatusByID(context.Context, *OrderID) (*TradeResult, error)
-	// GetNonBlockOrderStatusArr is the interface for getting non block order status array
 	GetNonBlockOrderStatusArr(context.Context, *emptypb.Empty) (*ErrorMessage, error)
-	// GetFuturePosition is the interface for getting future position
 	GetFuturePosition(context.Context, *emptypb.Empty) (*FuturePositionArr, error)
-	// GetStockPosition is the interface for getting stock position
 	GetStockPosition(context.Context, *emptypb.Empty) (*StockPositionArr, error)
-	// GetSettlement is the interface for getting settlement
 	GetSettlement(context.Context, *emptypb.Empty) (*SettlementList, error)
-	// GetAccountBalance is the interface for getting account balance
 	GetAccountBalance(context.Context, *emptypb.Empty) (*AccountBalance, error)
-	// GetMargin is the interface for getting margin
 	GetMargin(context.Context, *emptypb.Empty) (*Margin, error)
 	mustEmbedUnimplementedTradeInterfaceServer()
 }

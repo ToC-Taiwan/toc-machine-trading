@@ -20,7 +20,6 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-// StockNumArr
 type StockNumArr struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -76,7 +75,6 @@ func (x *StockNumArr) GetOdd() bool {
 	return false
 }
 
-// FutureNumArr
 type FutureCodeArr struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -124,7 +122,6 @@ func (x *FutureCodeArr) GetFutureCodeArr() []string {
 	return nil
 }
 
-// ErrorMssage
 type ErrorMessage struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache

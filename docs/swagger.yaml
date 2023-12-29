@@ -42,6 +42,8 @@ definitions:
         type: boolean
       sinopac:
         $ref: '#/definitions/config.Sinopac'
+      smtp:
+        $ref: '#/definitions/config.SMTP'
       targetStock:
         $ref: '#/definitions/config.TargetStock'
       tradeFuture:
@@ -100,6 +102,17 @@ definitions:
         type: string
       waitTime:
         type: integer
+    type: object
+  config.SMTP:
+    properties:
+      host:
+        type: string
+      password:
+        type: string
+      port:
+        type: integer
+      username:
+        type: string
     type: object
   config.Server:
     properties:
@@ -471,9 +484,34 @@ definitions:
       tse:
         $ref: '#/definitions/entity.IndexStatus'
     type: object
+  entity.User:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+    type: object
   resp.Response:
     properties:
       response:
+        type: string
+    type: object
+  router.loginBody:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  router.loginResponseBody:
+    properties:
+      code:
+        type: integer
+      expire:
+        type: string
+      token:
         type: string
     type: object
   v1.accountSummary:
@@ -526,6 +564,26 @@ definitions:
     - order_time
     - price
     - quantity
+    type: object
+  v1.oddStockRequest:
+    properties:
+      num:
+        type: string
+      price:
+        type: number
+      share:
+        type: integer
+    type: object
+  v1.oddStockResponse:
+    properties:
+      id:
+        type: string
+      price:
+        type: number
+      share:
+        type: integer
+      status:
+        type: string
     type: object
   v1.reborn:
     properties:
@@ -688,6 +746,28 @@ paths:
       summary: getKbarData
       tags:
       - history
+  /v1/login:
+    post:
+      consumes:
+      - application/json
+      description: Every api request will extend token expired time, websocket will
+        not extend.
+      parameters:
+      - description: Body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/router.loginBody'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/router.loginResponseBody'
+      tags:
+      - user
   /v1/order:
     post:
       consumes:
@@ -1048,4 +1128,111 @@ paths:
       summary: getTargets
       tags:
       - targets
+  /v1/trade/stock/buy/odd:
+    put:
+      consumes:
+      - application/json
+      description: buyOddStock
+      operationId: buyOddStock
+      parameters:
+      - description: Body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/v1.oddStockRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.oddStockResponse'
+      summary: buyOddStock
+      tags:
+      - trade
+  /v1/user:
+    post:
+      consumes:
+      - application/json
+      description: add new user
+      parameters:
+      - description: Body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/entity.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      tags:
+      - user
+  /v1/user/activate:
+    post:
+      consumes:
+      - application/json
+      description: active user
+      parameters:
+      - description: User
+        in: header
+        name: user
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      tags:
+      - user
+  /v1/user/verify/{user}/{code}:
+    get:
+      consumes:
+      - application/json
+      description: email verification
+      parameters:
+      - description: user
+        in: path
+        name: user
+        required: true
+        type: string
+      - description: code
+        in: path
+        name: code
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      tags:
+      - user
 swagger: "2.0"

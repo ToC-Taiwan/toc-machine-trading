@@ -127,6 +127,12 @@ func (c *Config) readEnv() {
 			WaitTime: c.vp.GetInt64("RABBITMQ_WAIT_TIME"),
 			Attempts: c.vp.GetInt("RABBITMQ_ATTEMPTS"),
 		},
+		SMTP: SMTP{
+			Host:     c.vp.GetString("SMTP_HOST"),
+			Port:     c.vp.GetInt("SMTP_PORT"),
+			Username: c.vp.GetString("SMTP_USERNAME"),
+			Password: c.vp.GetString("SMTP_PASSWORD"),
+		},
 	}
 	c.EnvConfig = env
 }

@@ -33,19 +33,12 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type BasicDataInterfaceClient interface {
-	// CreateLongConnection is the function to create long connection
 	CreateLongConnection(ctx context.Context, opts ...grpc.CallOption) (BasicDataInterface_CreateLongConnectionClient, error)
-	// Terminate is the terminate function
 	Terminate(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	// CheckUsage get shioaji usage
 	CheckUsage(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ShioajiUsage, error)
-	// Login log in
 	Login(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	// GetAllStockDetail is the function to get stock detail
 	GetAllStockDetail(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*StockDetailResponse, error)
-	// GetAllFutureDetail is the function to get future detail
 	GetAllFutureDetail(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*FutureDetailResponse, error)
-	// GetAllOptionDetail is the function to get option detail
 	GetAllOptionDetail(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*OptionDetailResponse, error)
 }
 
@@ -149,19 +142,12 @@ func (c *basicDataInterfaceClient) GetAllOptionDetail(ctx context.Context, in *e
 // All implementations must embed UnimplementedBasicDataInterfaceServer
 // for forward compatibility
 type BasicDataInterfaceServer interface {
-	// CreateLongConnection is the function to create long connection
 	CreateLongConnection(BasicDataInterface_CreateLongConnectionServer) error
-	// Terminate is the terminate function
 	Terminate(context.Context, *emptypb.Empty) (*emptypb.Empty, error)
-	// CheckUsage get shioaji usage
 	CheckUsage(context.Context, *emptypb.Empty) (*ShioajiUsage, error)
-	// Login log in
 	Login(context.Context, *emptypb.Empty) (*emptypb.Empty, error)
-	// GetAllStockDetail is the function to get stock detail
 	GetAllStockDetail(context.Context, *emptypb.Empty) (*StockDetailResponse, error)
-	// GetAllFutureDetail is the function to get future detail
 	GetAllFutureDetail(context.Context, *emptypb.Empty) (*FutureDetailResponse, error)
-	// GetAllOptionDetail is the function to get option detail
 	GetAllOptionDetail(context.Context, *emptypb.Empty) (*OptionDetailResponse, error)
 	mustEmbedUnimplementedBasicDataInterfaceServer()
 }

@@ -21,7 +21,6 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-// FuturePosition is the struct for future position
 type FuturePosition struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -109,7 +108,6 @@ func (x *FuturePosition) GetPnl() float64 {
 	return 0
 }
 
-// FuturePositionArr is the struct for future position array
 type FuturePositionArr struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -313,7 +311,6 @@ func (x *StockPosition) GetInterest() int32 {
 	return 0
 }
 
-// StockPositionArr is the struct for stock position array
 type StockPositionArr struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -361,7 +358,6 @@ func (x *StockPositionArr) GetPositionArr() []*StockPosition {
 	return nil
 }
 
-// StockOrderDetail is the struct for stock order detail
 type StockOrderDetail struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -433,7 +429,6 @@ func (x *StockOrderDetail) GetSimulate() bool {
 	return false
 }
 
-// OddStockOrderDetail is the struct for stock order detail
 type OddStockOrderDetail struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -497,7 +492,6 @@ func (x *OddStockOrderDetail) GetShare() int64 {
 	return 0
 }
 
-// FutureOrderDetail is the struct for future order detail
 type FutureOrderDetail struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -569,7 +563,6 @@ func (x *FutureOrderDetail) GetSimulate() bool {
 	return false
 }
 
-// OptionOrderDetail is the struct for option order detail
 type OptionOrderDetail struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -641,7 +634,6 @@ func (x *OptionOrderDetail) GetSimulate() bool {
 	return false
 }
 
-// TradeResult is the struct for trade result
 type TradeResult struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -705,7 +697,6 @@ func (x *TradeResult) GetError() string {
 	return ""
 }
 
-// OrderID is the struct for order id
 type OrderID struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -761,7 +752,6 @@ func (x *OrderID) GetSimulate() bool {
 	return false
 }
 
-// FutureOrderID is the struct for future order id
 type FutureOrderID struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -817,7 +807,6 @@ func (x *FutureOrderID) GetSimulate() bool {
 	return false
 }
 
-// OptionOrderID is the struct for option order id
 type OptionOrderID struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache

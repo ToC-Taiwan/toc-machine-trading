@@ -511,6 +511,29 @@ func (uc *TradeUseCase) CancelFutureOrderByID(orderID string) (string, entity.Or
 	return result.GetOrderId(), entity.StringToOrderStatus(result.GetStatus()), nil
 }
 
+func (uc *TradeUseCase) BuyOddStock(num string, price float64, share int64) (string, entity.OrderStatus, error) {
+	if num == "" {
+		return "", entity.StatusUnknow, errors.New("empty stock num")
+	}
+
+	result, err := uc.sc.BuyOddStock(&entity.StockOrder{
+		BaseOrder: entity.BaseOrder{
+			Price:    price,
+			Quantity: share,
+		},
+		StockNum: num,
+	})
+	if err != nil {
+		return "", entity.StatusUnknow, err
+	}
+
+	if e := result.GetError(); e != "" {
+		return "", entity.StatusUnknow, errors.New(e)
+	}
+
+	return result.GetOrderId(), entity.StringToOrderStatus(result.GetStatus()), nil
+}
+
 // calculateFutureTradeBalance -.
 func (uc *TradeUseCase) calculateFutureTradeBalance(allOrders []*entity.FutureOrder, tradeDay time.Time) {
 	var forward, reverse []*entity.FutureOrder

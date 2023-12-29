@@ -1667,6 +1667,22 @@ func (mr *MockTradeMockRecorder) BuyFuture(order interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BuyFuture", reflect.TypeOf((*MockTrade)(nil).BuyFuture), order)
 }
 
+// BuyOddStock mocks base method.
+func (m *MockTrade) BuyOddStock(num string, price float64, share int64) (string, entity.OrderStatus, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "BuyOddStock", num, price, share)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(entity.OrderStatus)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// BuyOddStock indicates an expected call of BuyOddStock.
+func (mr *MockTradeMockRecorder) BuyOddStock(num, price, share interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BuyOddStock", reflect.TypeOf((*MockTrade)(nil).BuyOddStock), num, price, share)
+}
+
 // CalculateBuyCost mocks base method.
 func (m *MockTrade) CalculateBuyCost(price float64, quantity int64) int64 {
 	m.ctrl.T.Helper()
@@ -2625,4 +2641,179 @@ func (m *MockTradegRPCAPI) SellStock(order *entity.StockOrder) (*pb.TradeResult,
 func (mr *MockTradegRPCAPIMockRecorder) SellStock(order interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SellStock", reflect.TypeOf((*MockTradegRPCAPI)(nil).SellStock), order)
+}
+
+// MockSystem is a mock of System interface.
+type MockSystem struct {
+	ctrl     *gomock.Controller
+	recorder *MockSystemMockRecorder
+}
+
+// MockSystemMockRecorder is the mock recorder for MockSystem.
+type MockSystemMockRecorder struct {
+	mock *MockSystem
+}
+
+// NewMockSystem creates a new mock instance.
+func NewMockSystem(ctrl *gomock.Controller) *MockSystem {
+	mock := &MockSystem{ctrl: ctrl}
+	mock.recorder = &MockSystemMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockSystem) EXPECT() *MockSystemMockRecorder {
+	return m.recorder
+}
+
+// ActivateUser mocks base method.
+func (m *MockSystem) ActivateUser(ctx context.Context, username string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ActivateUser", ctx, username)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// ActivateUser indicates an expected call of ActivateUser.
+func (mr *MockSystemMockRecorder) ActivateUser(ctx, username interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ActivateUser", reflect.TypeOf((*MockSystem)(nil).ActivateUser), ctx, username)
+}
+
+// AddUser mocks base method.
+func (m *MockSystem) AddUser(ctx context.Context, t *entity.User) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AddUser", ctx, t)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// AddUser indicates an expected call of AddUser.
+func (mr *MockSystemMockRecorder) AddUser(ctx, t interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddUser", reflect.TypeOf((*MockSystem)(nil).AddUser), ctx, t)
+}
+
+// Login mocks base method.
+func (m *MockSystem) Login(ctx context.Context, username, password string) (bool, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Login", ctx, username, password)
+	ret0, _ := ret[0].(bool)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Login indicates an expected call of Login.
+func (mr *MockSystemMockRecorder) Login(ctx, username, password interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Login", reflect.TypeOf((*MockSystem)(nil).Login), ctx, username, password)
+}
+
+// VerifyEmail mocks base method.
+func (m *MockSystem) VerifyEmail(ctx context.Context, username, code string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "VerifyEmail", ctx, username, code)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// VerifyEmail indicates an expected call of VerifyEmail.
+func (mr *MockSystemMockRecorder) VerifyEmail(ctx, username, code interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "VerifyEmail", reflect.TypeOf((*MockSystem)(nil).VerifyEmail), ctx, username, code)
+}
+
+// MockSystemRepo is a mock of SystemRepo interface.
+type MockSystemRepo struct {
+	ctrl     *gomock.Controller
+	recorder *MockSystemRepoMockRecorder
+}
+
+// MockSystemRepoMockRecorder is the mock recorder for MockSystemRepo.
+type MockSystemRepoMockRecorder struct {
+	mock *MockSystemRepo
+}
+
+// NewMockSystemRepo creates a new mock instance.
+func NewMockSystemRepo(ctrl *gomock.Controller) *MockSystemRepo {
+	mock := &MockSystemRepo{ctrl: ctrl}
+	mock.recorder = &MockSystemRepoMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockSystemRepo) EXPECT() *MockSystemRepoMockRecorder {
+	return m.recorder
+}
+
+// ActivateUser mocks base method.
+func (m *MockSystemRepo) ActivateUser(ctx context.Context, username string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ActivateUser", ctx, username)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// ActivateUser indicates an expected call of ActivateUser.
+func (mr *MockSystemRepoMockRecorder) ActivateUser(ctx, username interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ActivateUser", reflect.TypeOf((*MockSystemRepo)(nil).ActivateUser), ctx, username)
+}
+
+// EmailVerification mocks base method.
+func (m *MockSystemRepo) EmailVerification(ctx context.Context, username string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "EmailVerification", ctx, username)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// EmailVerification indicates an expected call of EmailVerification.
+func (mr *MockSystemRepoMockRecorder) EmailVerification(ctx, username interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EmailVerification", reflect.TypeOf((*MockSystemRepo)(nil).EmailVerification), ctx, username)
+}
+
+// InsertUser mocks base method.
+func (m *MockSystemRepo) InsertUser(ctx context.Context, t *entity.User) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "InsertUser", ctx, t)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// InsertUser indicates an expected call of InsertUser.
+func (mr *MockSystemRepoMockRecorder) InsertUser(ctx, t interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertUser", reflect.TypeOf((*MockSystemRepo)(nil).InsertUser), ctx, t)
+}
+
+// QueryAllUser mocks base method.
+func (m *MockSystemRepo) QueryAllUser(ctx context.Context) ([]*entity.User, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "QueryAllUser", ctx)
+	ret0, _ := ret[0].([]*entity.User)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// QueryAllUser indicates an expected call of QueryAllUser.
+func (mr *MockSystemRepoMockRecorder) QueryAllUser(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryAllUser", reflect.TypeOf((*MockSystemRepo)(nil).QueryAllUser), ctx)
+}
+
+// QueryUserByUsername mocks base method.
+func (m *MockSystemRepo) QueryUserByUsername(ctx context.Context, username string) (*entity.User, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "QueryUserByUsername", ctx, username)
+	ret0, _ := ret[0].(*entity.User)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// QueryUserByUsername indicates an expected call of QueryUserByUsername.
+func (mr *MockSystemRepoMockRecorder) QueryUserByUsername(ctx, username interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryUserByUsername", reflect.TypeOf((*MockSystemRepo)(nil).QueryUserByUsername), ctx, username)
 }

@@ -20,7 +20,6 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-// EventMessage is the message type for event
 type EventMessage struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -100,7 +99,6 @@ func (x *EventMessage) GetEventTime() string {
 	return ""
 }
 
-// StockRealTimeTickMessage is the message type for stock tick
 type StockRealTimeTickMessage struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -308,7 +306,6 @@ func (x *StockRealTimeTickMessage) GetSimtrade() bool {
 	return false
 }
 
-// StockRealTimeBidAskMessage is the message type for stock bid ask
 type StockRealTimeBidAskMessage struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -428,7 +425,6 @@ func (x *StockRealTimeBidAskMessage) GetSimtrade() bool {
 	return false
 }
 
-// FutureRealTimeTickMessage is the message type for stock trade
 type FutureRealTimeTickMessage struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -620,7 +616,6 @@ func (x *FutureRealTimeTickMessage) GetSimtrade() bool {
 	return false
 }
 
-// FutureRealTimeBidAskMessage is the message type for future bid ask
 type FutureRealTimeBidAskMessage struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -788,7 +783,6 @@ func (x *FutureRealTimeBidAskMessage) GetSimtrade() bool {
 	return false
 }
 
-// OrderStatusArr is the message type for order status
 type OrderStatusArr struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -836,7 +830,6 @@ func (x *OrderStatusArr) GetData() []*OrderStatus {
 	return nil
 }
 
-// OrderStatus is the message type for order status
 type OrderStatus struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
