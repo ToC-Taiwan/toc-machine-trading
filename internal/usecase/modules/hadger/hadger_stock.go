@@ -44,7 +44,7 @@ func NewHadgerStock(num string, s, f *grpc.TradegRPCAPI, q *quota.Quota, tradeCo
 		reverseTrader: f,
 		quota:         q,
 		tickArr:       []*entity.RealTimeStockTick{},
-		localBus:      eventbus.New(uuid.NewString()),
+		localBus:      eventbus.Get(uuid.NewString()),
 		tradeConfig:   tradeConfig,
 		traderMap:     make(map[string]*HadgeTraderStock),
 		switchChan:    make(chan bool),

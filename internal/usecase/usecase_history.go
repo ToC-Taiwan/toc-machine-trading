@@ -52,7 +52,7 @@ func NewHistory() History {
 		slackMsgChan:    make(chan string),
 		logger:          log.Get(),
 		cc:              cache.Get(),
-		bus:             eventbus.New(),
+		bus:             eventbus.Get(),
 	}
 
 	go uc.SendMessage()

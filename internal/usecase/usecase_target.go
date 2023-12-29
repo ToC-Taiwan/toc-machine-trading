@@ -42,7 +42,7 @@ func NewTarget() Target {
 		targetFilter: target.NewFilter(cfg.TargetStock),
 		logger:       log.Get(),
 		cc:           cache.Get(),
-		bus:          eventbus.New(),
+		bus:          eventbus.Get(),
 	}
 
 	// query targets from db

@@ -39,7 +39,7 @@ func NewAnalyze() Analyze {
 		tradeDay:         calendar.Get(),
 		logger:           log.Get(),
 		cc:               cache.Get(),
-		bus:              eventbus.New(),
+		bus:              eventbus.Get(),
 	}
 
 	uc.bus.SubscribeAsync(topicAnalyzeStockTargets, true, uc.findBelowQuaterMATargets)

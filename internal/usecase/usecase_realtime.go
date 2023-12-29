@@ -77,7 +77,7 @@ func NewRealTime() RealTime {
 
 		logger: log.Get(),
 		cc:     cache.Get(),
-		bus:    eventbus.New(),
+		bus:    eventbus.Get(),
 	}
 
 	// unsubscriba all first

@@ -5,45 +5,48 @@ import (
 	"sync"
 
 	"github.com/asaskevich/EventBus"
+	"github.com/patrickmn/go-cache"
 )
 
 var (
 	singleton *Bus
-	terminal  *busTerminal = newBusTerminal()
 	once      sync.Once
 )
 
 // Bus Bus
 type Bus struct {
 	bus EventBus.Bus
+	cc  *cache.Cache
 }
 
-// New if route is empty, return singleton
-func New(route ...string) *Bus {
-	switch len(route) {
-	case 0:
-		if singleton == nil {
-			once.Do(func() {
-				singleton = &Bus{
-					bus: EventBus.New(),
-				}
-			})
-			return New()
-		}
-		return singleton
-	case 1:
-		v := terminal.getBus(route[0])
-		if v == nil {
-			bus := &Bus{
+// Get if route is empty, return singleton
+func Get(route ...string) *Bus {
+	if singleton == nil {
+		once.Do(func() {
+			singleton = &Bus{
 				bus: EventBus.New(),
+				cc:  cache.New(0, 0),
 			}
-			terminal.addBus(route[0], bus)
-			return New(route[0])
-		}
-		return v
-	default:
-		panic("route length must be 0 or 1")
+		})
+		return Get(route...)
 	}
+
+	if len(route) == 0 {
+		return singleton
+	}
+
+	bus := singleton
+	for i := 0; i < len(route); i++ {
+		if bus.getRoute(route[i]) == nil {
+			v := &Bus{
+				bus: EventBus.New(),
+				cc:  cache.New(0, 0),
+			}
+			bus.addRoute(route[i], v)
+		}
+		bus = bus.getRoute(route[i])
+	}
+	return bus
 }
 
 func (c *Bus) PublishTopicEvent(topic string, arg ...interface{}) {
@@ -90,4 +93,18 @@ func (c *Bus) UnSubscribe(topic string, fn ...interface{}) {
 			panic(err)
 		}
 	}
+}
+
+func (c *Bus) addRoute(key string, value *Bus) {
+	if _, ok := c.cc.Get(key); ok {
+		return
+	}
+	c.cc.Set(key, value, cache.NoExpiration)
+}
+
+func (c *Bus) getRoute(key string) *Bus {
+	if v, ok := c.cc.Get(key); ok {
+		return v.(*Bus)
+	}
+	return nil
 }
