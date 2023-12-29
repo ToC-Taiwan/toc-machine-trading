@@ -1,4 +1,5 @@
-package router
+// Package auth package auth
+package auth
 
 import (
 	"net/http"
@@ -18,7 +19,7 @@ const (
 	timeOut     = time.Hour
 )
 
-func newAuthMiddleware(system usecase.System) (*jwt.GinJWTMiddleware, error) {
+func NewAuthMiddleware(system usecase.System) (*jwt.GinJWTMiddleware, error) {
 	m := jwt.GinJWTMiddleware{
 		TokenLookup:      "header:Authorization",
 		SigningAlgorithm: "HS256",
@@ -69,14 +70,8 @@ func unauthorized(c *gin.Context, code int, message string) {
 	})
 }
 
-type loginResponseBody struct {
-	Token  string `json:"token"`
-	Expire string `json:"expire"`
-	Code   int    `json:"code"`
-}
-
 func loginResponse(c *gin.Context, code int, token string, expire time.Time) {
-	c.JSON(http.StatusOK, loginResponseBody{
+	c.JSON(http.StatusOK, LoginResponseBody{
 		Token:  token,
 		Expire: expire.Format(time.RFC3339),
 		Code:   http.StatusOK,
@@ -106,14 +101,9 @@ func hTTPStatusMessageFunc(e error, c *gin.Context) string {
 	return e.Error()
 }
 
-type loginBody struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
-}
-
 func authenticator(system usecase.System) func(c *gin.Context) (interface{}, error) {
 	return func(c *gin.Context) (interface{}, error) {
-		var loginVals loginBody
+		var loginVals LoginBody
 		if err := c.ShouldBind(&loginVals); err != nil {
 			return "", jwt.ErrMissingLoginValues
 		}

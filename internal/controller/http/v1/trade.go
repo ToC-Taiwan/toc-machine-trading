@@ -43,9 +43,9 @@ type oddStockResponse struct {
 //	@ID				buyOddStock
 //	@Tags			trade
 //	@Accept			json
-//	@param			body	body	oddStockRequest{}	true	"Body"
 //	@Produce		json
-//	@Success		200 {object} oddStockResponse{}
+//	@param			body	body		oddStockRequest{}	true	"Body"
+//	@Success		200		{object}	oddStockResponse{}
 //	@Router			/v1/trade/stock/buy/odd [put]
 func (r *tradeRoutes) buyOddStock(c *gin.Context) {
 	p := oddStockRequest{}

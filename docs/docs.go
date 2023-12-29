@@ -225,7 +225,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/router.loginBody"
+                            "$ref": "#/definitions/auth.LoginBody"
                         }
                     }
                 ],
@@ -233,7 +233,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/router.loginResponseBody"
+                            "$ref": "#/definitions/auth.LoginResponseBody"
                         }
                     }
                 }
@@ -942,6 +942,31 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "auth.LoginBody": {
+            "type": "object",
+            "properties": {
+                "password": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "auth.LoginResponseBody": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "expire": {
+                    "type": "string"
+                },
+                "token": {
+                    "type": "string"
+                }
+            }
+        },
         "config.AnalyzeStock": {
             "type": "object",
             "properties": {
@@ -1693,31 +1718,6 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "response": {
-                    "type": "string"
-                }
-            }
-        },
-        "router.loginBody": {
-            "type": "object",
-            "properties": {
-                "password": {
-                    "type": "string"
-                },
-                "username": {
-                    "type": "string"
-                }
-            }
-        },
-        "router.loginResponseBody": {
-            "type": "object",
-            "properties": {
-                "code": {
-                    "type": "integer"
-                },
-                "expire": {
-                    "type": "string"
-                },
-                "token": {
                     "type": "string"
                 }
             }

@@ -4,12 +4,11 @@ package router
 import (
 	"fmt"
 	"net/http"
-	"net/mail"
 	"os"
 
 	"tmt/docs"
+	"tmt/internal/controller/http/auth"
 	v1 "tmt/internal/controller/http/v1"
-	"tmt/internal/entity"
 	"tmt/internal/usecase"
 
 	jwt "github.com/appleboy/gin-jwt/v2"
@@ -28,6 +27,7 @@ type Router struct {
 	v1Public    *gin.RouterGroup
 	v1Private   *gin.RouterGroup
 	rootHandler *gin.Engine
+	jwtHandler  *jwt.GinJWTMiddleware
 }
 
 // NewRouter -.
@@ -49,139 +49,30 @@ func NewRouter(system usecase.System) *Router {
 		g.Use(swaggerMiddleware())
 	}
 
-	jwtHandler, err := newAuthMiddleware(system)
+	jwtHandler, err := auth.NewAuthMiddleware(system)
 	if err != nil {
 		panic(err)
 	}
 
 	v1Public := g.Group(fmt.Sprintf("%s/v1", prefix))
-	v1Public.POST("/login", loginHandler(jwtHandler))
-	v1Public.POST("/user", newUserHandler(system))
-	v1Public.GET("/user/verify/:user/:code", verifyEmailHandler(system))
-	v1Public.POST("/user/activate", activateUserHandler(system))
-
 	v1Private := g.Group(fmt.Sprintf("%s/v1", prefix))
 	v1Private.Use(jwtHandler.MiddlewareFunc())
-
 	return &Router{
 		v1Public:    v1Public,
 		v1Private:   v1Private,
 		rootHandler: g,
-	}
-}
-
-// loginHandler loginHandler
-//
-//	@Description	Every api request will extend token expired time, websocket will not extend.
-//	@tags			user
-//	@accept			json
-//	@produce		json
-//	@param			body	body		loginBody{}	true	"Body"
-//	@success		200		{object}	loginResponseBody{}
-//	@router			/v1/login [post]
-func loginHandler(jwtHandler *jwt.GinJWTMiddleware) gin.HandlerFunc {
-	return jwtHandler.LoginHandler
-}
-
-// newUserHandler newUserHandler
-//
-//	@Description	add new user
-//	@tags			user
-//	@accept			json
-//	@produce		json
-//	@param			body	body	entity.User{}	true	"Body"
-//	@success		200
-//	@failure		400	{string}	string	"Bad Request"
-//	@failure		500	{string}	string	"Internal Server Error"
-//	@router			/v1/user [post]
-func newUserHandler(system usecase.System) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		user := entity.User{}
-		if err := c.ShouldBindJSON(&user); err != nil {
-			c.JSON(http.StatusBadRequest, err.Error())
-			return
-		}
-
-		if user.Username == "" || user.Password == "" || user.Email == "" {
-			c.JSON(http.StatusBadRequest, "username, password, email is required")
-			return
-		}
-
-		_, err := mail.ParseAddress(user.Email)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, "email format error")
-			return
-		}
-
-		if err := system.AddUser(c, &user); err != nil {
-			c.JSON(http.StatusInternalServerError, err.Error())
-			return
-		}
-
-		c.JSON(http.StatusOK, nil)
-	}
-}
-
-// verifyEmailHandler verifyEmailHandler
-//
-//	@Description	email verification
-//	@tags			user
-//	@accept			json
-//	@produce		json
-//	@param			user	path	string	true	"user"
-//	@param			code	path	string	true	"code"
-//	@success		200
-//	@failure		400	{string}	string	"Bad Request"
-//	@failure		500	{string}	string	"Internal Server Error"
-//	@router			/v1/user/verify/{user}/{code} [get]
-func verifyEmailHandler(system usecase.System) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		user := c.Param("user")
-		if user == "" || user == "undefined" || user == "{user}" {
-			c.JSON(http.StatusBadRequest, "user is required")
-			return
-		}
-		code := c.Param("code")
-		if code == "" || code == "undefined" || code == "{code}" {
-			c.JSON(http.StatusBadRequest, "code is required")
-			return
-		}
-		if err := system.VerifyEmail(c, user, code); err != nil {
-			c.JSON(http.StatusInternalServerError, err.Error())
-			return
-		}
-		c.JSON(http.StatusOK, "success")
-	}
-}
-
-// activateUserHandler activateUserHandler
-//
-//	@Description	active user
-//	@tags			user
-//	@accept			json
-//	@produce		json
-//	@param			user	header	string	true	"user"
-//	@success		200
-//	@failure		400	{string}	string	"Bad Request"
-//	@failure		500	{string}	string	"Internal Server Error"
-//	@router			/v1/user/activate [post]
-func activateUserHandler(system usecase.System) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		user := c.GetHeader("user")
-		if user == "" {
-			c.JSON(http.StatusBadRequest, "user is required")
-			return
-		}
-		if err := system.ActivateUser(c, user); err != nil {
-			c.JSON(http.StatusInternalServerError, err.Error())
-			return
-		}
-		c.JSON(http.StatusOK, nil)
+		jwtHandler:  jwtHandler,
 	}
 }
 
 func (r *Router) GetHandler() *gin.Engine {
 	return r.rootHandler
+}
+
+// AddV1UserRoutes -.
+func (r *Router) AddV1UserRoutes(system usecase.System) *Router {
+	v1.NewUserRoutes(r.v1Public, r.jwtHandler, system)
+	return r
 }
 
 // AddV1BasicRoutes -.

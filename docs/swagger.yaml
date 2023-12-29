@@ -1,4 +1,20 @@
 definitions:
+  auth.LoginBody:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  auth.LoginResponseBody:
+    properties:
+      code:
+        type: integer
+      expire:
+        type: string
+      token:
+        type: string
+    type: object
   config.AnalyzeStock:
     properties:
       allInOutRatio:
@@ -498,22 +514,6 @@ definitions:
       response:
         type: string
     type: object
-  router.loginBody:
-    properties:
-      password:
-        type: string
-      username:
-        type: string
-    type: object
-  router.loginResponseBody:
-    properties:
-      code:
-        type: integer
-      expire:
-        type: string
-      token:
-        type: string
-    type: object
   v1.accountSummary:
     properties:
       balance:
@@ -758,14 +758,14 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/router.loginBody'
+          $ref: '#/definitions/auth.LoginBody'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/router.loginResponseBody'
+            $ref: '#/definitions/auth.LoginResponseBody'
       tags:
       - user
   /v1/order:
