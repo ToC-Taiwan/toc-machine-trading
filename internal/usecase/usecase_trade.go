@@ -63,12 +63,7 @@ func NewTrade() Trade {
 	uc.bus.SubscribeAsync(topicInsertOrUpdateStockOrder, true, uc.updateStockOrderCacheAndInsertDB)
 	uc.bus.SubscribeAsync(topicInsertOrUpdateFutureOrder, true, uc.updateFutureOrderCacheAndInsertDB)
 
-	if cfg.Simulation {
-		go uc.askSimulateOrderStatus()
-	} else {
-		go uc.askOrderStatus()
-	}
-
+	go uc.askOrderStatus(cfg.Simulation)
 	go uc.updateAccountDetail()
 	go uc.updateAllTradeBalance()
 
@@ -310,33 +305,22 @@ func (uc *TradeUseCase) MoveFutureOrderToLatestTradeDay(ctx context.Context, ord
 	return uc.repo.InsertOrUpdateFutureOrderByOrderID(ctx, order)
 }
 
-func (uc *TradeUseCase) askOrderStatus() {
-	for range time.NewTicker(750 * time.Millisecond).C {
-		if !uc.IsFutureTradeTime() && !uc.IsStockTradeTime() {
-			continue
-		}
-
-		if err := uc.sc.GetLocalOrderStatusArr(); err != nil {
-			uc.logger.Error(err)
-		}
-
-		if err := uc.fg.GetLocalOrderStatusArr(); err != nil {
-			uc.logger.Error(err)
-		}
+func (uc *TradeUseCase) askOrderStatus(sim bool) {
+	scFn, fgFn := uc.sc.GetLocalOrderStatusArr, uc.fg.GetLocalOrderStatusArr
+	if sim {
+		scFn, fgFn = uc.sc.GetSimulateOrderStatusArr, uc.fg.GetSimulateOrderStatusArr
 	}
-}
 
-func (uc *TradeUseCase) askSimulateOrderStatus() {
 	for range time.NewTicker(750 * time.Millisecond).C {
 		if !uc.IsFutureTradeTime() && !uc.IsStockTradeTime() {
 			continue
 		}
 
-		if err := uc.sc.GetSimulateOrderStatusArr(); err != nil {
+		if err := scFn(); err != nil {
 			uc.logger.Error(err)
 		}
 
-		if err := uc.fg.GetSimulateOrderStatusArr(); err != nil {
+		if err := fgFn(); err != nil {
 			uc.logger.Error(err)
 		}
 	}
