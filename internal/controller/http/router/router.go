@@ -135,7 +135,6 @@ func newUserHandler(system usecase.System) gin.HandlerFunc {
 //	@failure		500	{string}	string	"Internal Server Error"
 //	@router			/v1/user/verify/{user}/{code} [get]
 func verifyEmailHandler(system usecase.System) gin.HandlerFunc {
-	// https://trader.tocraw.com/tmt/v1/user/verify/admin/e16ff189-5962-4922-8280-7875e0ff8b00
 	return func(c *gin.Context) {
 		user := c.Param("user")
 		if user == "" || user == "undefined" || user == "{user}" {
@@ -151,7 +150,7 @@ func verifyEmailHandler(system usecase.System) gin.HandlerFunc {
 			c.JSON(http.StatusInternalServerError, err.Error())
 			return
 		}
-		c.JSON(http.StatusOK, gin.H{"result": "success"})
+		c.JSON(http.StatusOK, "success")
 	}
 }
 
@@ -161,24 +160,22 @@ func verifyEmailHandler(system usecase.System) gin.HandlerFunc {
 //	@tags			user
 //	@accept			json
 //	@produce		json
-//	@param			user	header	string	true	"User"
+//	@param			user	header	string	true	"user"
 //	@success		200
 //	@failure		400	{string}	string	"Bad Request"
 //	@failure		500	{string}	string	"Internal Server Error"
 //	@router			/v1/user/activate [post]
 func activateUserHandler(system usecase.System) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		user := c.GetHeader("User")
+		user := c.GetHeader("user")
 		if user == "" {
 			c.JSON(http.StatusBadRequest, "user is required")
 			return
 		}
-
 		if err := system.ActivateUser(c, user); err != nil {
 			c.JSON(http.StatusInternalServerError, err.Error())
 			return
 		}
-
 		c.JSON(http.StatusOK, nil)
 	}
 }
