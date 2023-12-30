@@ -94,7 +94,7 @@ func (uc *SystemUseCase) SendOTP(ctx context.Context, t *entity.User) error {
 	uc.addActivationCode(activationCode)
 
 	m := gomail.NewMessage()
-	m.SetHeader("From", "TMT")
+	m.SetHeader("From", fmt.Sprintf("TMT <%s>", uc.smtpCfg.Username))
 	m.SetHeader("To", t.Email)
 	m.SetHeader("Subject", "Please verify your email address")
 	m.SetBody(
