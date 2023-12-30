@@ -107,16 +107,11 @@ func authenticator(system usecase.System) func(c *gin.Context) (interface{}, err
 		if err := c.ShouldBind(&loginVals); err != nil {
 			return "", jwt.ErrMissingLoginValues
 		}
-		user := loginVals.Username
-		password := loginVals.Password
-		ok, err := system.Login(c.Request.Context(), user, password)
+		err := system.Login(c.Request.Context(), loginVals.Username, loginVals.Password)
 		if err != nil {
 			return nil, err
 		}
-		if !ok {
-			return nil, jwt.ErrFailedAuthentication
-		}
-		return user, nil
+		return loginVals, nil
 	}
 }
 

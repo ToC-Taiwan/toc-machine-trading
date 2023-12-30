@@ -13,6 +13,7 @@ import (
 	"tmt/internal/usecase/repo"
 
 	"github.com/google/uuid"
+	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/gomail.v2"
 )
 
@@ -52,6 +53,10 @@ func (uc *SystemUseCase) AddUser(ctx context.Context, t *entity.User) error {
 		}
 	}
 
+	t.Password, err = uc.EncryptPassword(ctx, t.Password)
+	if err != nil {
+		return err
+	}
 	if err := uc.repo.InsertUser(ctx, t); err != nil {
 		return err
 	}
@@ -59,24 +64,25 @@ func (uc *SystemUseCase) AddUser(ctx context.Context, t *entity.User) error {
 	return uc.SendOTP(ctx, t)
 }
 
-func (uc *SystemUseCase) Login(ctx context.Context, username, password string) (bool, error) {
+func (uc *SystemUseCase) Login(ctx context.Context, username, password string) error {
 	user, err := uc.repo.QueryUserByUsername(ctx, username)
 	if err != nil {
-		return false, err
+		return err
 	}
 	if user == nil {
-		return false, errors.New("username not found")
+		return errors.New("username not found")
 	}
-	if user.Password != password {
-		return false, errors.New("password not match")
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
+	if err != nil {
+		return errors.New("password not match")
 	}
 	if !user.EmailVerified {
-		return false, errors.New("email not verified")
+		return errors.New("email not verified")
 	}
 	if !user.Activated {
-		return false, errors.New("user not activated")
+		return errors.New("user not activated")
 	}
-	return true, nil
+	return nil
 }
 
 func (uc *SystemUseCase) SendOTP(ctx context.Context, t *entity.User) error {
@@ -129,11 +135,9 @@ func (uc *SystemUseCase) VerifyEmail(ctx context.Context, username, code string)
 	if !ok {
 		return errors.New("invalid activation code")
 	}
-
 	if time.Now().After(expire.Add(30 * time.Minute)) {
 		return errors.New("activation code expired")
 	}
-
 	delete(uc.activationCodeMap, code)
 	return uc.repo.EmailVerification(ctx, username)
 }
@@ -142,4 +146,12 @@ func (uc *SystemUseCase) addActivationCode(code string) {
 	defer uc.activationCodeMapLock.Unlock()
 	uc.activationCodeMapLock.Lock()
 	uc.activationCodeMap[code] = time.Now()
+}
+
+func (uc *SystemUseCase) EncryptPassword(ctx context.Context, password string) (string, error) {
+	salt, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return "", err
+	}
+	return string(salt), nil
 }
