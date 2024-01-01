@@ -25,10 +25,11 @@ import (
 type RealTimeUseCase struct {
 	repo RealTimeRepo
 
-	grpcapi    RealTimegRPCAPI
-	subgRPCAPI SubscribegRPCAPI
-	sc         TradegRPCAPI
-	fg         TradegRPCAPI
+	gRPCRealtime RealTimegRPCAPI
+	gRPCSub      SubscribegRPCAPI
+
+	sc TradegRPCAPI
+	fg TradegRPCAPI
 
 	commonRabbit Rabbit
 	futureRabbit Rabbit
@@ -63,8 +64,8 @@ func NewRealTime() RealTime {
 		commonRabbit: mqtt.NewRabbit(cfg.GetRabbitConn()),
 		futureRabbit: mqtt.NewRabbit(cfg.GetRabbitConn()),
 
-		grpcapi:    grpc.NewRealTime(cfg.GetSinopacPool()),
-		subgRPCAPI: grpc.NewSubscribe(cfg.GetSinopacPool()),
+		gRPCRealtime: grpc.NewRealTime(cfg.GetSinopacPool()),
+		gRPCSub:      grpc.NewSubscribe(cfg.GetSinopacPool()),
 
 		sc: grpc.NewTrade(cfg.GetSinopacPool(), cfg.Simulation),
 		fg: grpc.NewTrade(cfg.GetFuglePool(), cfg.Simulation),
@@ -88,8 +89,8 @@ func NewRealTime() RealTime {
 
 	uc.commonRabbit.FillAllBasic(uc.cc.GetAllStockDetail(), uc.cc.GetAllFutureDetail())
 	uc.futureRabbit.FillAllBasic(uc.cc.GetAllStockDetail(), uc.cc.GetAllFutureDetail())
-	uc.periodUpdateTradeIndex()
 
+	uc.periodUpdateTradeIndex()
 	uc.checkFutureTradeSwitch()
 	uc.checkStockTradeSwitch()
 
@@ -275,7 +276,7 @@ func (uc *RealTimeUseCase) ReceiveOrderStatus(ctx context.Context) {
 
 // GetTSESnapshot -.
 func (uc *RealTimeUseCase) GetTSESnapshot(ctx context.Context) (*entity.StockSnapShot, error) {
-	body, err := uc.grpcapi.GetStockSnapshotTSE()
+	body, err := uc.gRPCRealtime.GetStockSnapshotTSE()
 	if err != nil {
 		return nil, err
 	}
@@ -303,7 +304,7 @@ func (uc *RealTimeUseCase) GetTSESnapshot(ctx context.Context) (*entity.StockSna
 
 // GetOTCSnapshot -.
 func (uc *RealTimeUseCase) GetOTCSnapshot(ctx context.Context) (*entity.StockSnapShot, error) {
-	body, err := uc.grpcapi.GetStockSnapshotOTC()
+	body, err := uc.gRPCRealtime.GetStockSnapshotOTC()
 	if err != nil {
 		return nil, err
 	}
@@ -335,7 +336,7 @@ var (
 )
 
 func (uc *RealTimeUseCase) GetNasdaqClose() (*entity.YahooPrice, error) {
-	d, err := uc.grpcapi.GetNasdaq()
+	d, err := uc.gRPCRealtime.GetNasdaq()
 	if err != nil {
 		return nil, err
 	}
@@ -352,7 +353,7 @@ func (uc *RealTimeUseCase) GetNasdaqClose() (*entity.YahooPrice, error) {
 }
 
 func (uc *RealTimeUseCase) GetNasdaqFutureClose() (*entity.YahooPrice, error) {
-	d, err := uc.grpcapi.GetNasdaqFuture()
+	d, err := uc.gRPCRealtime.GetNasdaqFuture()
 	if err != nil {
 		return nil, err
 	}
@@ -379,7 +380,7 @@ func (uc *RealTimeUseCase) GetStockSnapshotByNumArr(stockNumArr []string) ([]*en
 		}
 	}
 
-	snapshot, err := uc.grpcapi.GetStockSnapshotByNumArr(fetchArr)
+	snapshot, err := uc.gRPCRealtime.GetStockSnapshotByNumArr(fetchArr)
 	if err != nil {
 		return nil, err
 	}
@@ -421,7 +422,7 @@ func (uc *RealTimeUseCase) GetStockSnapshotByNumArr(stockNumArr []string) ([]*en
 
 // GetFutureSnapshotByCode -.
 func (uc *RealTimeUseCase) GetFutureSnapshotByCode(code string) (*entity.FutureSnapShot, error) {
-	snapshot, err := uc.grpcapi.GetFutureSnapshotByCode(code)
+	snapshot, err := uc.gRPCRealtime.GetFutureSnapshotByCode(code)
 	if err != nil {
 		return nil, err
 	}
@@ -561,7 +562,7 @@ func (uc *RealTimeUseCase) DeleteFutureRealTimeClient(connectionID string) {
 
 // UnSubscribeAll -.
 func (uc *RealTimeUseCase) UnSubscribeAll() error {
-	result, err := uc.subgRPCAPI.UnSubscribeAllTick()
+	result, err := uc.gRPCSub.UnSubscribeAllTick()
 	if err != nil {
 		return err
 	}
@@ -570,7 +571,7 @@ func (uc *RealTimeUseCase) UnSubscribeAll() error {
 		return errors.New(m)
 	}
 
-	result, err = uc.subgRPCAPI.UnSubscribeAllBidAsk()
+	result, err = uc.gRPCSub.UnSubscribeAllBidAsk()
 	if err != nil {
 		return err
 	}
@@ -593,7 +594,7 @@ func (uc *RealTimeUseCase) SubscribeStockTick(targetArr []*entity.StockTarget) {
 		subArr = append(subArr, v.StockNum)
 	}
 
-	failSubNumArr, err := uc.subgRPCAPI.SubscribeStockTick(subArr, uc.cfg.TradeStock.Odd)
+	failSubNumArr, err := uc.gRPCSub.SubscribeStockTick(subArr, uc.cfg.TradeStock.Odd)
 	if err != nil {
 		uc.logger.Error(err)
 		return
@@ -615,7 +616,7 @@ func (uc *RealTimeUseCase) SubscribeStockBidAsk(targetArr []*entity.StockTarget)
 		subArr = append(subArr, v.StockNum)
 	}
 
-	failSubNumArr, err := uc.subgRPCAPI.SubscribeStockBidAsk(subArr)
+	failSubNumArr, err := uc.gRPCSub.SubscribeStockBidAsk(subArr)
 	if err != nil {
 		return err
 	}
@@ -629,7 +630,7 @@ func (uc *RealTimeUseCase) SubscribeStockBidAsk(targetArr []*entity.StockTarget)
 
 // UnSubscribeStockTick -.
 func (uc *RealTimeUseCase) UnSubscribeStockTick(stockNum string) error {
-	failUnSubNumArr, err := uc.subgRPCAPI.UnSubscribeStockTick([]string{stockNum})
+	failUnSubNumArr, err := uc.gRPCSub.UnSubscribeStockTick([]string{stockNum})
 	if err != nil {
 		return err
 	}
@@ -643,7 +644,7 @@ func (uc *RealTimeUseCase) UnSubscribeStockTick(stockNum string) error {
 
 // UnSubscribeStockBidAsk -.
 func (uc *RealTimeUseCase) UnSubscribeStockBidAsk(stockNum string) error {
-	failUnSubNumArr, err := uc.subgRPCAPI.UnSubscribeStockBidAsk([]string{stockNum})
+	failUnSubNumArr, err := uc.gRPCSub.UnSubscribeStockBidAsk([]string{stockNum})
 	if err != nil {
 		return err
 	}
@@ -661,7 +662,7 @@ func (uc *RealTimeUseCase) SubscribeFutureTick(code string) {
 		return
 	}
 
-	failSubNumArr, err := uc.subgRPCAPI.SubscribeFutureTick([]string{code})
+	failSubNumArr, err := uc.gRPCSub.SubscribeFutureTick([]string{code})
 	if err != nil {
 		uc.logger.Error(err)
 		return
@@ -674,7 +675,7 @@ func (uc *RealTimeUseCase) SubscribeFutureTick(code string) {
 
 // SubscribeFutureBidAsk -.
 func (uc *RealTimeUseCase) SubscribeFutureBidAsk(code string) error {
-	failSubNumArr, err := uc.subgRPCAPI.SubscribeFutureBidAsk([]string{code})
+	failSubNumArr, err := uc.gRPCSub.SubscribeFutureBidAsk([]string{code})
 	if err != nil {
 		return err
 	}
