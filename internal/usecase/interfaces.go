@@ -128,8 +128,6 @@ type SubscribegRPCAPI interface {
 }
 
 type Rabbit interface {
-	FillAllBasic(allStockMap map[string]*entity.Stock, allFutureMap map[string]*entity.Future)
-
 	EventConsumer(eventChan chan *entity.SinopacEvent)
 	OrderStatusConsumer(orderStatusChan chan interface{})
 	OrderStatusArrConsumer(orderStatusChan chan interface{})

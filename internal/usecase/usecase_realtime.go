@@ -85,11 +85,8 @@ func NewRealTime() RealTime {
 	if e := uc.UnSubscribeAll(); e != nil {
 		uc.logger.Fatal(e)
 	}
+
 	uc.checkFutureInventory()
-
-	uc.commonRabbit.FillAllBasic(uc.cc.GetAllStockDetail(), uc.cc.GetAllFutureDetail())
-	uc.futureRabbit.FillAllBasic(uc.cc.GetAllStockDetail(), uc.cc.GetAllFutureDetail())
-
 	uc.periodUpdateTradeIndex()
 	uc.checkFutureTradeSwitch()
 	uc.checkStockTradeSwitch()
@@ -493,7 +490,6 @@ func (uc *RealTimeUseCase) ReceiveStockSubscribeData(targetArr []*entity.StockTa
 		}
 	}()
 	hr := mqtt.NewRabbit(uc.cfg.GetRabbitConn())
-	hr.FillAllBasic(uc.cc.GetAllStockDetail(), uc.cc.GetAllFutureDetail())
 	go hr.OrderStatusConsumer(orderStatusChan)
 	go hr.OrderStatusArrConsumer(orderStatusChan)
 }
@@ -540,7 +536,6 @@ func (uc *RealTimeUseCase) SetMainFuture(code string) {
 
 func (uc *RealTimeUseCase) NewFutureRealTimeClient(tickChan chan *entity.RealTimeFutureTick, orderStatusChan chan interface{}, connectionID string) {
 	r := mqtt.NewRabbit(uc.cfg.GetRabbitConn())
-	r.FillAllBasic(uc.cc.GetAllStockDetail(), uc.cc.GetAllFutureDetail())
 
 	uc.clientRabbitMapLock.Lock()
 	uc.clientRabbitMap[connectionID] = r

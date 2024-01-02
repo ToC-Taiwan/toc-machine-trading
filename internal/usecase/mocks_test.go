@@ -1440,18 +1440,6 @@ func (mr *MockRabbitMockRecorder) EventConsumer(eventChan interface{}) *gomock.C
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EventConsumer", reflect.TypeOf((*MockRabbit)(nil).EventConsumer), eventChan)
 }
 
-// FillAllBasic mocks base method.
-func (m *MockRabbit) FillAllBasic(allStockMap map[string]*entity.Stock, allFutureMap map[string]*entity.Future) {
-	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "FillAllBasic", allStockMap, allFutureMap)
-}
-
-// FillAllBasic indicates an expected call of FillAllBasic.
-func (mr *MockRabbitMockRecorder) FillAllBasic(allStockMap, allFutureMap interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FillAllBasic", reflect.TypeOf((*MockRabbit)(nil).FillAllBasic), allStockMap, allFutureMap)
-}
-
 // FutureBidAskConsumer mocks base method.
 func (m *MockRabbit) FutureBidAskConsumer(code string, bidAskChan chan *entity.FutureRealTimeBidAsk) {
 	m.ctrl.T.Helper()
