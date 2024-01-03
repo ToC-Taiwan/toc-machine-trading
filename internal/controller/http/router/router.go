@@ -32,11 +32,14 @@ type Router struct {
 
 // NewRouter -.
 //
-//	@title			TOC MACHINE TRADING
-//	@description	API docs for Auto Trade
-//	@version		1.0.0
-//	@license.name	Apache 2.0
-//	@license.url	http://www.apache.org/licenses/LICENSE-2.0.html
+//	@title						TOC MACHINE TRADING
+//	@description				API docs for Auto Trade
+//	@version					2.5.0
+//	@securityDefinitions.apikey	JWT
+//	@in							header
+//	@name						Authorization
+//	@license.name				GPLv3
+//	@license.url				https://www.gnu.org/licenses/gpl-3.0.html#license-text
 func NewRouter(system usecase.System) *Router {
 	g := gin.New()
 	g.Use(gin.Recovery())

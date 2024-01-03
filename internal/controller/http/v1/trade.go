@@ -43,15 +43,14 @@ type tradeResponse struct {
 
 // buyOddStock -.
 //
-//	@Summary		buyOddStock
-//	@Description	buyOddStock
-//	@ID				buyOddStock
-//	@Tags			trade
-//	@Accept			json
-//	@Produce		json
-//	@param			body	body		oddStockRequest{}	true	"Body"
-//	@Success		200		{object}	tradeResponse{}
-//	@Router			/v1/trade/stock/buy/odd [put]
+//	@Summary	buyOddStock
+//	@Tags		trade
+//	@security	JWT
+//	@Accept		json
+//	@Produce	json
+//	@param		body	body		oddStockRequest{}	true	"Body"
+//	@Success	200		{object}	tradeResponse{}
+//	@Router		/v1/trade/stock/buy/odd [put]
 func (r *tradeRoutes) buyOddStock(c *gin.Context) {
 	p := oddStockRequest{}
 	if err := c.ShouldBindJSON(&p); err != nil {
@@ -72,15 +71,14 @@ func (r *tradeRoutes) buyOddStock(c *gin.Context) {
 
 // buyLotStock -.
 //
-//	@Summary		buyLotStock
-//	@Description	buyLotStock
-//	@ID				buyLotStock
-//	@Tags			trade
-//	@Accept			json
-//	@Produce		json
-//	@param			body	body		lotStockRequest{}	true	"Body"
-//	@Success		200		{object}	tradeResponse{}
-//	@Router			/v1/trade/stock/buy/lot [put]
+//	@Summary	buyLotStock
+//	@Tags		trade
+//	@security	JWT
+//	@Accept		json
+//	@Produce	json
+//	@param		body	body		lotStockRequest{}	true	"Body"
+//	@Success	200		{object}	tradeResponse{}
+//	@Router		/v1/trade/stock/buy/lot [put]
 func (r *tradeRoutes) buyLotStock(c *gin.Context) {
 	p := lotStockRequest{}
 	if err := c.ShouldBindJSON(&p); err != nil {

@@ -10,10 +10,6 @@ const docTemplate = `{
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
         "contact": {},
-        "license": {
-            "name": "Apache 2.0",
-            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
-        },
         "version": "{{.Version}}"
     },
     "host": "{{.Host}}",
@@ -21,7 +17,6 @@ const docTemplate = `{
     "paths": {
         "/v1/analyze/reborn": {
             "get": {
-                "description": "getRebornTargets",
                 "consumes": [
                     "application/json"
                 ],
@@ -32,7 +27,6 @@ const docTemplate = `{
                     "analyze"
                 ],
                 "summary": "getRebornTargets",
-                "operationId": "getRebornTargets",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -48,7 +42,6 @@ const docTemplate = `{
         },
         "/v1/basic/config": {
             "get": {
-                "description": "getAllConfig",
                 "consumes": [
                     "application/json"
                 ],
@@ -59,7 +52,6 @@ const docTemplate = `{
                     "system"
                 ],
                 "summary": "getAllConfig",
-                "operationId": "getAllConfig",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -78,7 +70,6 @@ const docTemplate = `{
         },
         "/v1/basic/stock": {
             "get": {
-                "description": "getAllRepoStock",
                 "consumes": [
                     "application/json"
                 ],
@@ -89,7 +80,6 @@ const docTemplate = `{
                     "basic"
                 ],
                 "summary": "getAllRepoStock",
-                "operationId": "getAllRepoStock",
                 "parameters": [
                     {
                         "type": "string",
@@ -122,7 +112,6 @@ const docTemplate = `{
         },
         "/v1/basic/usage/shioaji": {
             "get": {
-                "description": "getShioajiUsage",
                 "consumes": [
                     "application/json"
                 ],
@@ -133,7 +122,6 @@ const docTemplate = `{
                     "system"
                 ],
                 "summary": "getShioajiUsage",
-                "operationId": "getShioajiUsage",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -152,7 +140,6 @@ const docTemplate = `{
         },
         "/v1/history/day-kbar/{stock}/{start_date}/{interval}": {
             "get": {
-                "description": "getKbarData",
                 "consumes": [
                     "application/json"
                 ],
@@ -163,7 +150,6 @@ const docTemplate = `{
                     "history"
                 ],
                 "summary": "getKbarData",
-                "operationId": "getKbarData",
                 "parameters": [
                     {
                         "type": "string",
@@ -208,7 +194,6 @@ const docTemplate = `{
         },
         "/v1/login": {
             "post": {
-                "description": "Every api request will extend token expired time, websocket will not extend.",
                 "consumes": [
                     "application/json"
                 ],
@@ -218,6 +203,7 @@ const docTemplate = `{
                 "tags": [
                     "user"
                 ],
+                "summary": "loginHandler",
                 "parameters": [
                     {
                         "description": "Body",
@@ -239,9 +225,35 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/logout": {
+            "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "logutHandler",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/auth.LogoutResponseBody"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/order": {
             "post": {
-                "description": "manualInsertFutureOrder",
                 "consumes": [
                     "application/json"
                 ],
@@ -252,7 +264,6 @@ const docTemplate = `{
                     "order"
                 ],
                 "summary": "manualInsertFutureOrder",
-                "operationId": "manualInsertFutureOrder",
                 "parameters": [
                     {
                         "description": "Body",
@@ -279,7 +290,6 @@ const docTemplate = `{
         },
         "/v1/order/account/balance": {
             "get": {
-                "description": "getAccountBalance",
                 "consumes": [
                     "application/json"
                 ],
@@ -290,7 +300,6 @@ const docTemplate = `{
                     "account"
                 ],
                 "summary": "getAccountBalance",
-                "operationId": "getAccountBalance",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -309,7 +318,6 @@ const docTemplate = `{
         },
         "/v1/order/all": {
             "get": {
-                "description": "getAllOrder",
                 "consumes": [
                     "application/json"
                 ],
@@ -320,7 +328,6 @@ const docTemplate = `{
                     "order"
                 ],
                 "summary": "getAllOrder",
-                "operationId": "getAllOrder",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -339,7 +346,6 @@ const docTemplate = `{
         },
         "/v1/order/balance": {
             "get": {
-                "description": "getAllTradeBalance",
                 "consumes": [
                     "application/json"
                 ],
@@ -350,7 +356,6 @@ const docTemplate = `{
                     "order"
                 ],
                 "summary": "getAllTradeBalance",
-                "operationId": "getAllTradeBalance",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -369,7 +374,6 @@ const docTemplate = `{
         },
         "/v1/order/balance/future/last": {
             "get": {
-                "description": "getLastFutureTradeBalance",
                 "consumes": [
                     "application/json"
                 ],
@@ -380,7 +384,6 @@ const docTemplate = `{
                     "order"
                 ],
                 "summary": "getLastFutureTradeBalance",
-                "operationId": "getLastFutureTradeBalance",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -399,7 +402,6 @@ const docTemplate = `{
         },
         "/v1/order/balance/stock/last": {
             "get": {
-                "description": "getLastStockTradeBalance",
                 "consumes": [
                     "application/json"
                 ],
@@ -410,7 +412,6 @@ const docTemplate = `{
                     "order"
                 ],
                 "summary": "getLastStockTradeBalance",
-                "operationId": "getLastStockTradeBalance",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -429,7 +430,6 @@ const docTemplate = `{
         },
         "/v1/order/date/{tradeday}": {
             "get": {
-                "description": "getAllOrderByTradeDay",
                 "consumes": [
                     "application/json"
                 ],
@@ -440,7 +440,6 @@ const docTemplate = `{
                     "order"
                 ],
                 "summary": "getAllOrderByTradeDay",
-                "operationId": "getAllOrderByTradeDay",
                 "parameters": [
                     {
                         "type": "string",
@@ -466,7 +465,6 @@ const docTemplate = `{
                 }
             },
             "put": {
-                "description": "updateTradeBalanceByTradeDay",
                 "consumes": [
                     "application/json"
                 ],
@@ -477,7 +475,6 @@ const docTemplate = `{
                     "order"
                 ],
                 "summary": "updateTradeBalanceByTradeDay",
-                "operationId": "updateTradeBalanceByTradeDay",
                 "parameters": [
                     {
                         "type": "string",
@@ -505,7 +502,6 @@ const docTemplate = `{
         },
         "/v1/order/day-trade/forward": {
             "get": {
-                "description": "calculateForwardDayTradeBalance",
                 "consumes": [
                     "application/json"
                 ],
@@ -516,7 +512,6 @@ const docTemplate = `{
                     "order"
                 ],
                 "summary": "calculateForwardDayTradeBalance",
-                "operationId": "calculateForwardDayTradeBalance",
                 "parameters": [
                     {
                         "type": "string",
@@ -565,7 +560,6 @@ const docTemplate = `{
         },
         "/v1/order/day-trade/reverse": {
             "get": {
-                "description": "calculateReverseDayTradeBalance",
                 "consumes": [
                     "application/json"
                 ],
@@ -576,7 +570,6 @@ const docTemplate = `{
                     "order"
                 ],
                 "summary": "calculateReverseDayTradeBalance",
-                "operationId": "calculateReverseDayTradeBalance",
                 "parameters": [
                     {
                         "type": "string",
@@ -625,7 +618,6 @@ const docTemplate = `{
         },
         "/v1/order/future/{order-id}": {
             "patch": {
-                "description": "moveFutureOrderToLatestTradeDay",
                 "consumes": [
                     "application/json"
                 ],
@@ -636,7 +628,6 @@ const docTemplate = `{
                     "order"
                 ],
                 "summary": "moveFutureOrderToLatestTradeDay",
-                "operationId": "moveFutureOrderToLatestTradeDay",
                 "parameters": [
                     {
                         "type": "string",
@@ -661,7 +652,6 @@ const docTemplate = `{
         },
         "/v1/order/stock/{order-id}": {
             "patch": {
-                "description": "moveStockOrderToLatestTradeDay",
                 "consumes": [
                     "application/json"
                 ],
@@ -672,7 +662,6 @@ const docTemplate = `{
                     "order"
                 ],
                 "summary": "moveStockOrderToLatestTradeDay",
-                "operationId": "moveStockOrderToLatestTradeDay",
                 "parameters": [
                     {
                         "type": "string",
@@ -695,9 +684,35 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/refresh": {
+            "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "refreshTokenHandler",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/auth.RefreshResponseBody"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/stream/index": {
             "get": {
-                "description": "getIndex",
                 "consumes": [
                     "application/json"
                 ],
@@ -708,7 +723,6 @@ const docTemplate = `{
                     "stream"
                 ],
                 "summary": "getIndex",
-                "operationId": "getIndex",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -721,7 +735,6 @@ const docTemplate = `{
         },
         "/v1/stream/tse/snapshot": {
             "get": {
-                "description": "getTSESnapshot",
                 "consumes": [
                     "application/json"
                 ],
@@ -732,7 +745,6 @@ const docTemplate = `{
                     "stream"
                 ],
                 "summary": "getTSESnapshot",
-                "operationId": "getTSESnapshot",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -751,7 +763,6 @@ const docTemplate = `{
         },
         "/v1/targets": {
             "get": {
-                "description": "getTargets",
                 "consumes": [
                     "application/json"
                 ],
@@ -762,7 +773,6 @@ const docTemplate = `{
                     "targets"
                 ],
                 "summary": "getTargets",
-                "operationId": "getTargets",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -778,7 +788,11 @@ const docTemplate = `{
         },
         "/v1/trade/stock/buy/lot": {
             "put": {
-                "description": "buyLotStock",
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "consumes": [
                     "application/json"
                 ],
@@ -789,7 +803,6 @@ const docTemplate = `{
                     "trade"
                 ],
                 "summary": "buyLotStock",
-                "operationId": "buyLotStock",
                 "parameters": [
                     {
                         "description": "Body",
@@ -813,7 +826,11 @@ const docTemplate = `{
         },
         "/v1/trade/stock/buy/odd": {
             "put": {
-                "description": "buyOddStock",
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "consumes": [
                     "application/json"
                 ],
@@ -824,7 +841,6 @@ const docTemplate = `{
                     "trade"
                 ],
                 "summary": "buyOddStock",
-                "operationId": "buyOddStock",
                 "parameters": [
                     {
                         "description": "Body",
@@ -848,7 +864,6 @@ const docTemplate = `{
         },
         "/v1/user": {
             "post": {
-                "description": "add new user",
                 "consumes": [
                     "application/json"
                 ],
@@ -858,6 +873,7 @@ const docTemplate = `{
                 "tags": [
                     "user"
                 ],
+                "summary": "newUserHandler",
                 "parameters": [
                     {
                         "description": "Body",
@@ -890,7 +906,6 @@ const docTemplate = `{
         },
         "/v1/user/activate": {
             "post": {
-                "description": "active user",
                 "consumes": [
                     "application/json"
                 ],
@@ -900,6 +915,7 @@ const docTemplate = `{
                 "tags": [
                     "user"
                 ],
+                "summary": "activateUserHandler",
                 "parameters": [
                     {
                         "type": "string",
@@ -930,7 +946,6 @@ const docTemplate = `{
         },
         "/v1/user/verify/{user}/{code}": {
             "get": {
-                "description": "email verification",
                 "consumes": [
                     "application/json"
                 ],
@@ -940,6 +955,7 @@ const docTemplate = `{
                 "tags": [
                     "user"
                 ],
+                "summary": "verifyEmailHandler",
                 "parameters": [
                     {
                         "type": "string",
@@ -989,6 +1005,28 @@ const docTemplate = `{
             }
         },
         "auth.LoginResponseBody": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "expire": {
+                    "type": "string"
+                },
+                "token": {
+                    "type": "string"
+                }
+            }
+        },
+        "auth.LogoutResponseBody": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "auth.RefreshResponseBody": {
             "type": "object",
             "properties": {
                 "code": {
@@ -1921,12 +1959,19 @@ const docTemplate = `{
                 }
             }
         }
+    },
+    "securityDefinitions": {
+        "JWT": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
     }
 }`
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "1.0.0",
+	Version:          "2.5.0",
 	Host:             "",
 	BasePath:         "",
 	Schemes:          []string{},

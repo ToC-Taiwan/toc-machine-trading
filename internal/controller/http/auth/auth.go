@@ -41,7 +41,7 @@ func NewAuthMiddleware(system usecase.System) (*jwt.GinJWTMiddleware, error) {
 		CookieName:            "tmt",
 
 		Key:           []byte(uuid.New().String()),
-		MaxRefresh:    time.Hour,
+		MaxRefresh:    timeOut,
 		Authenticator: authenticator(system),
 		PayloadFunc:   payloadFunc,
 
@@ -79,16 +79,16 @@ func loginResponse(c *gin.Context, code int, token string, expire time.Time) {
 }
 
 func logoutResponse(c *gin.Context, code int) {
-	c.JSON(http.StatusOK, gin.H{
-		"code": http.StatusOK,
+	c.JSON(http.StatusOK, LogoutResponseBody{
+		Code: code,
 	})
 }
 
 func refreshResponse(c *gin.Context, code int, token string, expire time.Time) {
-	c.JSON(http.StatusOK, gin.H{
-		"code":   http.StatusOK,
-		"token":  token,
-		"expire": expire.Format(time.RFC3339),
+	c.JSON(http.StatusOK, RefreshResponseBody{
+		Token:  token,
+		Expire: expire.Format(time.RFC3339),
+		Code:   code,
 	})
 }
 

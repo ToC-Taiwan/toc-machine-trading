@@ -15,6 +15,20 @@ definitions:
       token:
         type: string
     type: object
+  auth.LogoutResponseBody:
+    properties:
+      code:
+        type: integer
+    type: object
+  auth.RefreshResponseBody:
+    properties:
+      code:
+        type: integer
+      expire:
+        type: string
+      token:
+        type: string
+    type: object
   config.AnalyzeStock:
     properties:
       allInOutRatio:
@@ -624,18 +638,13 @@ definitions:
 info:
   contact: {}
   description: API docs for Auto Trade
-  license:
-    name: Apache 2.0
-    url: http://www.apache.org/licenses/LICENSE-2.0.html
   title: TOC MACHINE TRADING
-  version: 1.0.0
+  version: 2.5.0
 paths:
   /v1/analyze/reborn:
     get:
       consumes:
       - application/json
-      description: getRebornTargets
-      operationId: getRebornTargets
       produces:
       - application/json
       responses:
@@ -652,8 +661,6 @@ paths:
     get:
       consumes:
       - application/json
-      description: getAllConfig
-      operationId: getAllConfig
       produces:
       - application/json
       responses:
@@ -672,8 +679,6 @@ paths:
     get:
       consumes:
       - application/json
-      description: getAllRepoStock
-      operationId: getAllRepoStock
       parameters:
       - description: num
         in: query
@@ -701,8 +706,6 @@ paths:
     get:
       consumes:
       - application/json
-      description: getShioajiUsage
-      operationId: getShioajiUsage
       produces:
       - application/json
       responses:
@@ -721,8 +724,6 @@ paths:
     get:
       consumes:
       - application/json
-      description: getKbarData
-      operationId: getKbarData
       parameters:
       - description: stock
         in: path
@@ -759,8 +760,6 @@ paths:
     post:
       consumes:
       - application/json
-      description: Every api request will extend token expired time, websocket will
-        not extend.
       parameters:
       - description: Body
         in: body
@@ -775,14 +774,29 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/auth.LoginResponseBody'
+      summary: loginHandler
+      tags:
+      - user
+  /v1/logout:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/auth.LogoutResponseBody'
+      security:
+      - JWT: []
+      summary: logutHandler
       tags:
       - user
   /v1/order:
     post:
       consumes:
       - application/json
-      description: manualInsertFutureOrder
-      operationId: manualInsertFutureOrder
       parameters:
       - description: Body
         in: body
@@ -806,8 +820,6 @@ paths:
     get:
       consumes:
       - application/json
-      description: getAccountBalance
-      operationId: getAccountBalance
       produces:
       - application/json
       responses:
@@ -826,8 +838,6 @@ paths:
     get:
       consumes:
       - application/json
-      description: getAllOrder
-      operationId: getAllOrder
       produces:
       - application/json
       responses:
@@ -846,8 +856,6 @@ paths:
     get:
       consumes:
       - application/json
-      description: getAllTradeBalance
-      operationId: getAllTradeBalance
       produces:
       - application/json
       responses:
@@ -866,8 +874,6 @@ paths:
     get:
       consumes:
       - application/json
-      description: getLastFutureTradeBalance
-      operationId: getLastFutureTradeBalance
       produces:
       - application/json
       responses:
@@ -886,8 +892,6 @@ paths:
     get:
       consumes:
       - application/json
-      description: getLastStockTradeBalance
-      operationId: getLastStockTradeBalance
       produces:
       - application/json
       responses:
@@ -906,8 +910,6 @@ paths:
     get:
       consumes:
       - application/json
-      description: getAllOrderByTradeDay
-      operationId: getAllOrderByTradeDay
       parameters:
       - description: tradeday
         in: path
@@ -931,8 +933,6 @@ paths:
     put:
       consumes:
       - application/json
-      description: updateTradeBalanceByTradeDay
-      operationId: updateTradeBalanceByTradeDay
       parameters:
       - description: tradeday
         in: path
@@ -957,8 +957,6 @@ paths:
     get:
       consumes:
       - application/json
-      description: calculateForwardDayTradeBalance
-      operationId: calculateForwardDayTradeBalance
       parameters:
       - description: buy_price
         in: header
@@ -998,8 +996,6 @@ paths:
     get:
       consumes:
       - application/json
-      description: calculateReverseDayTradeBalance
-      operationId: calculateReverseDayTradeBalance
       parameters:
       - description: sell_first_price
         in: header
@@ -1039,8 +1035,6 @@ paths:
     patch:
       consumes:
       - application/json
-      description: moveFutureOrderToLatestTradeDay
-      operationId: moveFutureOrderToLatestTradeDay
       parameters:
       - description: order-id
         in: path
@@ -1063,8 +1057,6 @@ paths:
     patch:
       consumes:
       - application/json
-      description: moveStockOrderToLatestTradeDay
-      operationId: moveStockOrderToLatestTradeDay
       parameters:
       - description: order-id
         in: path
@@ -1083,12 +1075,26 @@ paths:
       summary: moveStockOrderToLatestTradeDay
       tags:
       - order
+  /v1/refresh:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/auth.RefreshResponseBody'
+      security:
+      - JWT: []
+      summary: refreshTokenHandler
+      tags:
+      - user
   /v1/stream/index:
     get:
       consumes:
       - application/json
-      description: getIndex
-      operationId: getIndex
       produces:
       - application/json
       responses:
@@ -1103,8 +1109,6 @@ paths:
     get:
       consumes:
       - application/json
-      description: getTSESnapshot
-      operationId: getTSESnapshot
       produces:
       - application/json
       responses:
@@ -1123,8 +1127,6 @@ paths:
     get:
       consumes:
       - application/json
-      description: getTargets
-      operationId: getTargets
       produces:
       - application/json
       responses:
@@ -1141,8 +1143,6 @@ paths:
     put:
       consumes:
       - application/json
-      description: buyLotStock
-      operationId: buyLotStock
       parameters:
       - description: Body
         in: body
@@ -1157,6 +1157,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/v1.tradeResponse'
+      security:
+      - JWT: []
       summary: buyLotStock
       tags:
       - trade
@@ -1164,8 +1166,6 @@ paths:
     put:
       consumes:
       - application/json
-      description: buyOddStock
-      operationId: buyOddStock
       parameters:
       - description: Body
         in: body
@@ -1180,6 +1180,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/v1.tradeResponse'
+      security:
+      - JWT: []
       summary: buyOddStock
       tags:
       - trade
@@ -1187,7 +1189,6 @@ paths:
     post:
       consumes:
       - application/json
-      description: add new user
       parameters:
       - description: Body
         in: body
@@ -1208,13 +1209,13 @@ paths:
           description: Internal Server Error
           schema:
             type: string
+      summary: newUserHandler
       tags:
       - user
   /v1/user/activate:
     post:
       consumes:
       - application/json
-      description: active user
       parameters:
       - description: user
         in: header
@@ -1234,13 +1235,13 @@ paths:
           description: Internal Server Error
           schema:
             type: string
+      summary: activateUserHandler
       tags:
       - user
   /v1/user/verify/{user}/{code}:
     get:
       consumes:
       - application/json
-      description: email verification
       parameters:
       - description: user
         in: path
@@ -1265,6 +1266,12 @@ paths:
           description: Internal Server Error
           schema:
             type: string
+      summary: verifyEmailHandler
       tags:
       - user
+securityDefinitions:
+  JWT:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

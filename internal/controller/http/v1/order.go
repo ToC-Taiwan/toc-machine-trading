@@ -50,15 +50,13 @@ type allOrder struct {
 
 // getAllOrder -.
 //
-//	@Summary		getAllOrder
-//	@Description	getAllOrder
-//	@ID				getAllOrder
-//	@Tags			order
-//	@Accept			json
-//	@Produce		json
-//	@Success		200	{object}	allOrder
-//	@Failure		500	{object}	resp.Response{}
-//	@Router			/v1/order/all [get]
+//	@Summary	getAllOrder
+//	@Tags		order
+//	@Accept		json
+//	@Produce	json
+//	@Success	200	{object}	allOrder
+//	@Failure	500	{object}	resp.Response{}
+//	@Router		/v1/order/all [get]
 func (r *orderRoutes) getAllOrder(c *gin.Context) {
 	stockOrderArr, err := r.t.GetAllStockOrder(c.Request.Context())
 	if err != nil {
@@ -83,16 +81,14 @@ type futureOrders struct {
 
 // getAllOrderByTradeDay -.
 //
-//	@Summary		getAllOrderByTradeDay
-//	@Description	getAllOrderByTradeDay
-//	@ID				getAllOrderByTradeDay
-//	@Tags			order
-//	@Accept			json
-//	@Produce		json
-//	@param			tradeday	path		string	true	"tradeday"
-//	@Success		200			{object}	futureOrders
-//	@Failure		500			{object}	resp.Response{}
-//	@Router			/v1/order/date/{tradeday} [get]
+//	@Summary	getAllOrderByTradeDay
+//	@Tags		order
+//	@Accept		json
+//	@Produce	json
+//	@param		tradeday	path		string	true	"tradeday"
+//	@Success	200			{object}	futureOrders
+//	@Failure	500			{object}	resp.Response{}
+//	@Router		/v1/order/date/{tradeday} [get]
 func (r *orderRoutes) getAllOrderByTradeDay(c *gin.Context) {
 	tradeDay := c.Param("tradeday")
 	if tradeDay == "" {
@@ -110,16 +106,14 @@ func (r *orderRoutes) getAllOrderByTradeDay(c *gin.Context) {
 
 // updateTradeBalanceByTradeDay -.
 //
-//	@Summary		updateTradeBalanceByTradeDay
-//	@Description	updateTradeBalanceByTradeDay
-//	@ID				updateTradeBalanceByTradeDay
-//	@Tags			order
-//	@Accept			json
-//	@Produce		json
-//	@param			tradeday	path		string	true	"tradeday"
-//	@Success		200			{object}	futureOrders
-//	@Failure		500			{object}	resp.Response{}
-//	@Router			/v1/order/date/{tradeday} [put]
+//	@Summary	updateTradeBalanceByTradeDay
+//	@Tags		order
+//	@Accept		json
+//	@Produce	json
+//	@param		tradeday	path		string	true	"tradeday"
+//	@Success	200			{object}	futureOrders
+//	@Failure	500			{object}	resp.Response{}
+//	@Router		/v1/order/date/{tradeday} [put]
 func (r *orderRoutes) updateTradeBalanceByTradeDay(c *gin.Context) {
 	tradeDay := c.Param("tradeday")
 	if tradeDay == "" {
@@ -145,16 +139,14 @@ type manualInsertFutureOrderRequest struct {
 
 // manualInsertFutureOrder -.
 //
-//	@Summary		manualInsertFutureOrder
-//	@Description	manualInsertFutureOrder
-//	@ID				manualInsertFutureOrder
-//	@Tags			order
-//	@Accept			json
-//	@Produce		json
-//	@param			body	body	manualInsertFutureOrderRequest{}	true	"Body"
-//	@Success		200
-//	@Failure		500	{object}	resp.Response{}
-//	@Router			/v1/order [post]
+//	@Summary	manualInsertFutureOrder
+//	@Tags		order
+//	@Accept		json
+//	@Produce	json
+//	@param		body	body	manualInsertFutureOrderRequest{}	true	"Body"
+//	@Success	200
+//	@Failure	500	{object}	resp.Response{}
+//	@Router		/v1/order [post]
 func (r *orderRoutes) manualInsertFutureOrder(c *gin.Context) {
 	body := &manualInsertFutureOrderRequest{}
 	if err := c.BindJSON(body); err != nil {
@@ -195,15 +187,13 @@ type tradeBalance struct {
 
 // getAllTradeBalance -.
 //
-//	@Summary		getAllTradeBalance
-//	@Description	getAllTradeBalance
-//	@ID				getAllTradeBalance
-//	@Tags			order
-//	@Accept			json
-//	@Produce		json
-//	@Success		200	{object}	tradeBalance
-//	@Failure		500	{object}	resp.Response{}
-//	@Router			/v1/order/balance [get]
+//	@Summary	getAllTradeBalance
+//	@Tags		order
+//	@Accept		json
+//	@Produce	json
+//	@Success	200	{object}	tradeBalance
+//	@Failure	500	{object}	resp.Response{}
+//	@Router		/v1/order/balance [get]
 func (r *orderRoutes) getAllTradeBalance(c *gin.Context) {
 	allStockArr, err := r.t.GetAllStockTradeBalance(c.Request.Context())
 	if err != nil {
@@ -225,15 +215,13 @@ func (r *orderRoutes) getAllTradeBalance(c *gin.Context) {
 
 // getLastStockTradeBalance -.
 //
-//	@Summary		getLastStockTradeBalance
-//	@Description	getLastStockTradeBalance
-//	@ID				getLastStockTradeBalance
-//	@Tags			order
-//	@Accept			json
-//	@Produce		json
-//	@Success		200	{object}	entity.StockTradeBalance
-//	@Failure		500	{object}	resp.Response{}
-//	@Router			/v1/order/balance/stock/last [get]
+//	@Summary	getLastStockTradeBalance
+//	@Tags		order
+//	@Accept		json
+//	@Produce	json
+//	@Success	200	{object}	entity.StockTradeBalance
+//	@Failure	500	{object}	resp.Response{}
+//	@Router		/v1/order/balance/stock/last [get]
 func (r *orderRoutes) getLastStockTradeBalance(c *gin.Context) {
 	balance, err := r.t.GetLastStockTradeBalance(c.Request.Context())
 	if err != nil {
@@ -246,15 +234,13 @@ func (r *orderRoutes) getLastStockTradeBalance(c *gin.Context) {
 
 // getLastFutureTradeBalance -.
 //
-//	@Summary		getLastFutureTradeBalance
-//	@Description	getLastFutureTradeBalance
-//	@ID				getLastFutureTradeBalance
-//	@Tags			order
-//	@Accept			json
-//	@Produce		json
-//	@Success		200	{object}	entity.FutureTradeBalance
-//	@Failure		500	{object}	resp.Response{}
-//	@Router			/v1/order/balance/future/last [get]
+//	@Summary	getLastFutureTradeBalance
+//	@Tags		order
+//	@Accept		json
+//	@Produce	json
+//	@Success	200	{object}	entity.FutureTradeBalance
+//	@Failure	500	{object}	resp.Response{}
+//	@Router		/v1/order/balance/future/last [get]
 func (r *orderRoutes) getLastFutureTradeBalance(c *gin.Context) {
 	balance, err := r.t.GetLastFutureTradeBalance(c.Request.Context())
 	if err != nil {
@@ -271,19 +257,17 @@ type dayTradeResult struct {
 
 // calculateForwardDayTradeBalance -.
 //
-//	@Summary		calculateForwardDayTradeBalance
-//	@Description	calculateForwardDayTradeBalance
-//	@ID				calculateForwardDayTradeBalance
-//	@Tags			order
-//	@accept			json
-//	@produce		json
-//	@param			buy_price		header		string	true	"buy_price"
-//	@param			buy_quantity	header		string	true	"buy_quantity"
-//	@param			sell_price		header		string	true	"sell_price"
-//	@param			sell_quantity	header		string	true	"sell_quantity"
-//	@success		200				{object}	dayTradeResult
-//	@failure		500				{object}	resp.Response{}
-//	@Router			/v1/order/day-trade/forward [get]
+//	@Summary	calculateForwardDayTradeBalance
+//	@Tags		order
+//	@accept		json
+//	@produce	json
+//	@param		buy_price		header		string	true	"buy_price"
+//	@param		buy_quantity	header		string	true	"buy_quantity"
+//	@param		sell_price		header		string	true	"sell_price"
+//	@param		sell_quantity	header		string	true	"sell_quantity"
+//	@success	200				{object}	dayTradeResult
+//	@failure	500				{object}	resp.Response{}
+//	@Router		/v1/order/day-trade/forward [get]
 func (r *orderRoutes) calculateForwardDayTradeBalance(c *gin.Context) {
 	buyPriceString := c.Request.Header.Get("buy_price")
 	buyPrice, err := strconv.ParseFloat(buyPriceString, 64)
@@ -324,19 +308,17 @@ func (r *orderRoutes) calculateForwardDayTradeBalance(c *gin.Context) {
 
 // calculateReverseDayTradeBalance -.
 //
-//	@Summary		calculateReverseDayTradeBalance
-//	@Description	calculateReverseDayTradeBalance
-//	@ID				calculateReverseDayTradeBalance
-//	@Tags			order
-//	@accept			json
-//	@produce		json
-//	@param			sell_first_price	header		string	true	"sell_first_price"
-//	@param			sell_first_quantity	header		string	true	"sell_first_quantity"
-//	@param			buy_later_price		header		string	true	"buy_later_price"
-//	@param			buy_later_quantity	header		string	true	"buy_later_quantity"
-//	@success		200					{object}	dayTradeResult
-//	@failure		500					{object}	resp.Response{}
-//	@Router			/v1/order/day-trade/reverse [get]
+//	@Summary	calculateReverseDayTradeBalance
+//	@Tags		order
+//	@accept		json
+//	@produce	json
+//	@param		sell_first_price	header		string	true	"sell_first_price"
+//	@param		sell_first_quantity	header		string	true	"sell_first_quantity"
+//	@param		buy_later_price		header		string	true	"buy_later_price"
+//	@param		buy_later_quantity	header		string	true	"buy_later_quantity"
+//	@success	200					{object}	dayTradeResult
+//	@failure	500					{object}	resp.Response{}
+//	@Router		/v1/order/day-trade/reverse [get]
 func (r *orderRoutes) calculateReverseDayTradeBalance(c *gin.Context) {
 	sellFirstPriceString := c.Request.Header.Get("sell_first_price")
 	sellFirstPrice, err := strconv.ParseFloat(sellFirstPriceString, 64)
@@ -377,16 +359,14 @@ func (r *orderRoutes) calculateReverseDayTradeBalance(c *gin.Context) {
 
 // moveFutureOrderToLatestTradeDay -.
 //
-//	@Summary		moveFutureOrderToLatestTradeDay
-//	@Description	moveFutureOrderToLatestTradeDay
-//	@ID				moveFutureOrderToLatestTradeDay
-//	@Tags			order
-//	@Accept			json
-//	@Produce		json
-//	@param			order-id	path	string	true	"order-id"
-//	@Success		200
-//	@Failure		500	{object}	resp.Response{}
-//	@Router			/v1/order/future/{order-id} [patch]
+//	@Summary	moveFutureOrderToLatestTradeDay
+//	@Tags		order
+//	@Accept		json
+//	@Produce	json
+//	@param		order-id	path	string	true	"order-id"
+//	@Success	200
+//	@Failure	500	{object}	resp.Response{}
+//	@Router		/v1/order/future/{order-id} [patch]
 func (r *orderRoutes) moveFutureOrderToLatestTradeDay(c *gin.Context) {
 	id := c.Param("order-id")
 	if id == "" {
@@ -403,16 +383,14 @@ func (r *orderRoutes) moveFutureOrderToLatestTradeDay(c *gin.Context) {
 
 // moveStockOrderToLatestTradeDay -.
 //
-//	@Summary		moveStockOrderToLatestTradeDay
-//	@Description	moveStockOrderToLatestTradeDay
-//	@ID				moveStockOrderToLatestTradeDay
-//	@Tags			order
-//	@Accept			json
-//	@Produce		json
-//	@param			order-id	path	string	true	"order-id"
-//	@Success		200
-//	@Failure		500	{object}	resp.Response{}
-//	@Router			/v1/order/stock/{order-id} [patch]
+//	@Summary	moveStockOrderToLatestTradeDay
+//	@Tags		order
+//	@Accept		json
+//	@Produce	json
+//	@param		order-id	path	string	true	"order-id"
+//	@Success	200
+//	@Failure	500	{object}	resp.Response{}
+//	@Router		/v1/order/stock/{order-id} [patch]
 func (r *orderRoutes) moveStockOrderToLatestTradeDay(c *gin.Context) {
 	id := c.Param("order-id")
 	if id == "" {
@@ -434,15 +412,13 @@ type accountSummary struct {
 
 // getAccountBalance -.
 //
-//	@Summary		getAccountBalance
-//	@Description	getAccountBalance
-//	@ID				getAccountBalance
-//	@Tags			account
-//	@Accept			json
-//	@Produce		json
-//	@Success		200	{object}	accountSummary
-//	@Failure		500	{object}	resp.Response{}
-//	@Router			/v1/order/account/balance [get]
+//	@Summary	getAccountBalance
+//	@Tags		account
+//	@Accept		json
+//	@Produce	json
+//	@Success	200	{object}	accountSummary
+//	@Failure	500	{object}	resp.Response{}
+//	@Router		/v1/order/account/balance [get]
 func (r *orderRoutes) getAccountBalance(c *gin.Context) {
 	balance, err := r.t.GetAccountBalance(c.Request.Context())
 	if err != nil {

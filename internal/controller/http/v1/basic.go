@@ -32,17 +32,15 @@ type stockDetailResponse struct {
 
 // getAllRepoStock -.
 //
-//	@Summary		getAllRepoStock
-//	@Description	getAllRepoStock
-//	@ID				getAllRepoStock
-//	@Tags			basic
-//	@Accept			json
-//	@Produce		json
-//	@Param			num	query		string	false	"num"
-//	@Success		200	{object}	stockDetailResponse
-//	@Failure		404	{object}	resp.Response{}
-//	@Failure		500	{object}	resp.Response{}
-//	@Router			/v1/basic/stock [get]
+//	@Summary	getAllRepoStock
+//	@Tags		basic
+//	@Accept		json
+//	@Produce	json
+//	@Param		num	query		string	false	"num"
+//	@Success	200	{object}	stockDetailResponse
+//	@Failure	404	{object}	resp.Response{}
+//	@Failure	500	{object}	resp.Response{}
+//	@Router		/v1/basic/stock [get]
 func (r *basicRoutes) getAllRepoStock(c *gin.Context) {
 	stockNum := c.Query("num")
 	stockDetail, err := r.t.GetAllRepoStock(c.Request.Context())
@@ -75,30 +73,26 @@ func (r *basicRoutes) getAllRepoStock(c *gin.Context) {
 
 // getAllConfig -.
 //
-//	@Summary		getAllConfig
-//	@Description	getAllConfig
-//	@ID				getAllConfig
-//	@Tags			system
-//	@Accept			json
-//	@Produce		json
-//	@Success		200	{object}	config.Config
-//	@Failure		500	{object}	resp.Response{}
-//	@Router			/v1/basic/config [get]
+//	@Summary	getAllConfig
+//	@Tags		system
+//	@Accept		json
+//	@Produce	json
+//	@Success	200	{object}	config.Config
+//	@Failure	500	{object}	resp.Response{}
+//	@Router		/v1/basic/config [get]
 func (r *basicRoutes) getAllConfig(c *gin.Context) {
 	c.JSON(http.StatusOK, r.t.GetConfig())
 }
 
 // getShioajiUsage -.
 //
-//	@Summary		getShioajiUsage
-//	@Description	getShioajiUsage
-//	@ID				getShioajiUsage
-//	@Tags			system
-//	@Accept			json
-//	@Produce		json
-//	@Success		200	{object}	entity.ShioajiUsage
-//	@Failure		500	{object}	resp.Response{}
-//	@Router			/v1/basic/usage/shioaji [get]
+//	@Summary	getShioajiUsage
+//	@Tags		system
+//	@Accept		json
+//	@Produce	json
+//	@Success	200	{object}	entity.ShioajiUsage
+//	@Failure	500	{object}	resp.Response{}
+//	@Router		/v1/basic/usage/shioaji [get]
 func (r *basicRoutes) getShioajiUsage(c *gin.Context) {
 	usage, err := r.t.GetShioajiUsage()
 	if err != nil {
