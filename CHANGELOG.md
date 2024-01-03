@@ -1,5 +1,29 @@
 # CHANGELOG
 
+## [v2.5.0](https://github.com/ToC-Taiwan/toc-machine-trading/compare/v2.4.0...v2.5.0) (2024-01-03)
+
+### Code Refactoring (9)
+
+* refactor Trade API and improve test accuracy
+* let lot, share and position replace quantity in stock, future order
+* let order source from sinopac or fugle to decide stock or future order
+* refactor variable names in RealTimeUseCase struct
+* refactor and optimize email verification handlers
+* refactor order status retrieval and error handling
+* refactor EventBus and TradeUseCase implementation
+* refactor database setup and improve job scheduling
+* refactor configuration and database setup process
+
+### Features (7)
+
+* implement lot stock buying functionality
+* "Improve email header by adding SMTP username"
+* refactor login function and implement bcrypt encryption
+* "Implement various efficiency and reliability updates"
+* refactor auth routes and update swagger documentation
+* implement insecure TLS configuration for email OTP
+* add auth and email verification, add user table
+
 ## [v2.4.0](https://github.com/ToC-Taiwan/toc-machine-trading/compare/v2.3.1...v2.4.0) (2023-12-15)
 
 ### Bug Fixes (8)
@@ -182,262 +206,249 @@
 
 * **trade:** fix check wait time fail when last tick is nil
 
-## [v2.0.0](https://github.com/ToC-Taiwan/toc-machine-trading/compare/v1.7.0...v2.0.0) (2023-02-09)
+## [v2.0.0](https://github.com/ToC-Taiwan/toc-machine-trading/compare/v1.2.0...v2.0.0) (2023-02-09)
 
-### Bug Fixes (22)
+### Bug Fixes (65)
 
+* **assist:** add lock for process trade, fix bugs in assist trader
 * **assist:** fix not trade out
 * **assist:** fix does not try get more balance
+* **assist:** fix assist trader will kill before start
 * **basic:** fix dupl pkey in update future basic data
+* **ci:** add checkout in deployment to get git hash
+* **ci:** add missing config in go test
 * **ci:** fix golang version missing double quote
 * **ci:** fix wrong golangci-lint version
+* **ci:** temp remove go test from ci
 * **event:** fix wrong sinopac event time, change package naming mq to rabbit
 * **events:** fix stock trade room will start before history data fetch done
+* **future:** add missing future detail
 * **future:** fix ws client get no future tick
+* **health:** if disconnect from grpc not panic but os exit
 * **healthcheck:** fix wrong usage of recover
 * **index:** fix yahoo price is nil
-* **index:** fix if snapshot or yahoo price is nil cause panic
-* **index:** if nasdaq, nf is zero, not return error but log warning
 * **index:** cancel multithreading in get index, yahoo price has new error
+* **index:** if nasdaq, nf is zero, not return error but log warning
+* **index:** fix if snapshot or yahoo price is nil cause panic
+* **kbar:** fix wrong time period of stream kbar, add send kbar every minute
 * **lint:** fix ci lint version
+* **lint:** fix stream routes lint error
+* **log:** remove unknown order code log
+* **migration:** fix wrong table name in migration sql
+* **order:** use timer and reset to fix balance not insert to db
+* **order:** modify send order sequence to avoid stuck
+* **order:** modify get order by trade day will send not filled order
+* **order:** fix order balance calculate wrong, try fix manual order does not insert to db
+* **order:** fix order status chan is not add to rabbit, fix order time is always wrong
+* **order:** add lock for order usecase to update order in postgres
 * **order:** fix order time always now cause will not be cancelled in night market
+* **order:** fix manual order does not insert to db
+* **position:** fix websocket future position has no column in json
+* **postgres:** fix redundant manual future trade balance cause panic
 * **realtime:** fix stuck when new hadger
+* **router:** fix return body of get future trade switch
+* **stream:** fix last trade rate not initial
+* **stream:** add loop lable to avoid index out of range
+* **stream:** fix map is not initail
+* **stuck:** fix missing go in updateAllTradeBalance
+* **subscribe:** remove redundant future bidask subscribe
 * **target:** fix stock future target mixed, refactor target topic
+* **tick:** fix wrong tick time from snapshot to tick
 * **trade:** fix mem leak in check balance, fix order time in rabbit, add cancel order in day trader
-* **trade:** fix balance trader missing equal symbol
 * **trade:** fix wrong trade time in ws future trade
+* **trade:** fix wrong first tick time
+* **trade:** fix order will be cancel multiple times
+* **trade:** fix order will be cancel before 10 seconds
+* **trade:** fix balance trader missing equal symbol
 * **trade:** fix alway get fixed balance
+* **websocket:** fix send data to close channel
+* **websocket:** fix missing format in send websocket data
+* **websocket:** fix concurrency write websocket
+* **websocket:** fix interface cast bug
+* **websocket:** remove period to fix out of index
+* **websocket:** fix wrong scoket data type
+* **websocket:** fix wrong calculation of trade rate
+* **websocket:** fix order map does not initial
+* **websocket:** add missing socketPickStock
 * **wording:** fix wrong wording in last commit
+* **ws:** fix wrong ws message type
+* **ws:** fix ws end abnormal, close connection before gin done
+* **ws:** fix stuck if client disconnect by abort gin
+* **ws:** remove lock for future stream
 
-### Code Refactoring (5)
+### Code Refactoring (9)
 
+* **assist:** refactor assist trader
 * **cache:** refactor cache pkg and module, rename modules to module
 * **db:** modify initail db method
 * **event:** remove event module, refactor event bus pkg
 * **grpc:** refactor attampts method, rename events to topic
+* **logger:** pack log again
 * **usecase:** re-design rpc, add realtime usecase, let method split make sense
+* **ws:** split pick stock and future to different pkg
+* **ws:** refactor websocket split pick stock and future trade
 
-### Features (36)
+### Features (101)
 
-* **assist:** modify trade out method to increase more profit possible
+* **action:** use period tick out in ratio to decide action, and add to simulator
 * **assist:** add trade out price to get more balance
+* **assist:** add assist trader in futrue trade ws
+* **assist:** finish by balance and by time period assist
+* **assist:** add assist done message, limit 1 assist at one time
+* **assist:** let buy sell has same profit loss automation method
+* **assist:** send running status to ws
+* **assist:** modify trade out method to increase more profit possible
+* **balance:** add manual trade balance
 * **balance:** modify judge forward or reverse order method
+* **balance:** exclude unfinish order in calculate balance, modify topic name
+* **balance:** add manual balance router
+* **balance:** add move order and recalculate trade balance router
 * **config:** redesign config naming
 * **dt:** finish dt module without generate order method
 * **fugle:** add fugle grpc to order and basic alpha
+* **future:** use rsi to decide trade in, max hold time to trade out
+* **future:** test new method of future trader
+* **future:** add send future detail in first connect
+* **future:** modify trade out method
+* **future:** split kbar and send last period to stream
+* **future:** add kbar analyze to trade out of future
 * **grpc:** split sinopac and fugle grpc api
 * **hadger:** add rabbit for hadger
 * **healthcheck:** recover panic if manual stop toc-sinopac-python, update go
 * **history:** remove biasrate, update to latest proto, realtime usecase use own rabbit
+* **history:** add future history close fetch and simulate
+* **holiday:** extend trade year to 2023, update holiday.json
+* **index:** add otc, tse, nasdaq index to websocket stream
 * **index:** improve get all index method performance
 * **interface:** make sure all new instance return interface instead of original object
+* **kbar:** add try last day if kbar is empty, slow down query position
+* **log:** move log config to env instead of in config
 * **logger:** replace all panic to fetal
-* **order:** remove tick time in stock, future order
-* **order:** decrease future trade cancel time to 5 seconds
+* **order:** refactor updateAllTradeBalance, increse update order speed
+* **order:** modify all order router to future and stock all order
+* **order:** add receive order arr from rabbitmq
+* **order:** split prod and simulate order get method
+* **order:** add order status stream in websocket
+* **order:** modify new sinopac filling to partfilled
 * **order:** remove trade time in order
+* **order:** remove tick time in stock, future order
+* **order:** remove order status in websocket, modify manual order group id and trade time
+* **order:** decrease future trade cancel time to 5 seconds
+* **order:** remove non block order update mode
+* **order:** add if simulate mode to get order status from mq
+* **order:** add if not stock and not future trade time, cancel update order
 * **order:** remove manual, group id, add dt trader beta
+* **order:** remove ask update api, split update balance and simulate order, product order
+* **ordertime:** modifiy wrong order time to time now, when in night market from 0:00 to 5:00
 * **pkg:** refactor log, config package
+* **position:** increase speed of send future position to every second
 * **position:** add limit get position in ws stream, if not trade time, return
+* **postition:** add future postion, remove manual in stock, future balance
 * **proto:** use new format of proto
+* **protobuf:** change future trade all json message to proto message
 * **rabbit:** let one trader has own rabbit connection
-* **router:** add get trade index api
 * **router:** add last stock or future balance router
+* **router:** add simulate future to history router
+* **router:** add get trade index api
+* **router:** add future trade balance to get balance
+* **router:** add manual insert future order api
+* **router:** add query future order by date api
+* **simulate:** add simulate future trade proto type
 * **simulate:** modify simulate method, fix helath check router
-* **trade:** add hold times and trade out price
-* **trade:** increase check times, fix heartbeat panic fn
-* **trade:** finish first version dt for future
-* **trade:** move try get more balance out of high or low
-* **trade:** add support more than 1 qty in assist trade
-* **trade:** add max hold time, and check switch in dt
-* **trade:** add notify trade switch in dt and hadger
-* **trade:** add trade out wait times in dt
+* **snapshot:** add future detail in future snapshot
+* **strategy:** modify future trade strategy default config
+* **strategy:** modify future trader strategy
+* **stream:** add period update trade index interal stream usecase
+* **stream:** add out in rate chg, modify order entity
+* **stream:** change method process tick arr
+* **stream:** modify out in volume to four period
+* **stream:** add kbar in future trade ws
+* **subscribe:** add whether subscribe stock or future not
+* **switch:** add change future trade switch router
+* **tick:** cut tick arr in every second in stream
+* **tick:** modify future tick chan and connection id
 * **trade:** add balance high, low to day trade future, finish future day trader unit
+* **trade:** add notify trade switch in dt and hadger
 * **trade:** remove switch router, add health check router, change trade index to index status
+* **trade:** finish first version dt for future
+* **trade:** add support more than 1 qty in assist trade
+* **trade:** add manual to order column, check order status in websocket
+* **trade:** add max hold time, and check switch in dt
+* **trade:** add ws trade
+* **trade:** increase check times, fix heartbeat panic fn
+* **trade:** move try get more balance out of high or low
+* **trade:** add auto cancel in stream trade
+* **trade:** add trade out wait times in dt
+* **trade:** add hold times and trade out price
+* **tradeperiod:** add get last 1 trade period for future method
 * **trader:** add day trader for future alpha
+* **trader:** add kbar analyze to future trader
 * **usecase:** add usecase base, add hadger alpha, split interfaces, config read once
+* **websocket:** add nasdaq future to stream
+* **websocket:** ignore CloseNoStatusReceived error
+* **websocket:** add trade rate in websocket
+* **websocket:** modify trade rate content to out, in and period
+* **ws:** modify ws layout, add send snapshot in future stream ws
+* **ws:** add log for new future ws and done log
+* **ws:** add lock for future trade ws
 
-## [v1.7.0](https://github.com/ToC-Taiwan/toc-machine-trading/compare/v1.5.0...v1.7.0) (2023-02-09)
+## [v1.2.0](https://github.com/ToC-Taiwan/toc-machine-trading/compare/v1.3.0...v1.2.0) (2023-02-09)
 
-### Bug Fixes (33)
+## [v1.3.0](https://github.com/ToC-Taiwan/toc-machine-trading/compare/v1.4.0...v1.3.0) (2023-02-09)
 
-* **assist:** add lock for process trade, fix bugs in assist trader
+## [v1.4.0](https://github.com/ToC-Taiwan/toc-machine-trading/compare/v1.5.0...v1.4.0) (2023-02-09)
+
+## [v1.5.0](https://github.com/ToC-Taiwan/toc-machine-trading/compare/v1.6.0...v1.5.0) (2023-02-09)
+
+## [v1.6.0](https://github.com/ToC-Taiwan/toc-machine-trading/compare/v1.7.0...v1.6.0) (2023-02-09)
+
+## [v1.7.0](https://github.com/ToC-Taiwan/toc-machine-trading/compare/v1.1.0...v1.7.0) (2023-02-09)
+
+### Bug Fixes (43)
+
 * **assist:** fix assist trader will kill before start
+* **assist:** add lock for process trade, fix bugs in assist trader
 * **ci:** add checkout in deployment to get git hash
 * **ci:** add missing config in go test
 * **ci:** temp remove go test from ci
 * **future:** add missing future detail
+* **health:** if disconnect from grpc not panic but os exit
 * **kbar:** fix wrong time period of stream kbar, add send kbar every minute
 * **lint:** fix stream routes lint error
 * **log:** remove unknown order code log
+* **migration:** fix wrong table name in migration sql
+* **order:** use timer and reset to fix balance not insert to db
 * **order:** modify get order by trade day will send not filled order
+* **order:** fix manual order does not insert to db
 * **order:** fix order status chan is not add to rabbit, fix order time is always wrong
 * **order:** fix order balance calculate wrong, try fix manual order does not insert to db
-* **order:** fix manual order does not insert to db
 * **order:** add lock for order usecase to update order in postgres
 * **order:** modify send order sequence to avoid stuck
-* **order:** use timer and reset to fix balance not insert to db
 * **position:** fix websocket future position has no column in json
 * **postgres:** fix redundant manual future trade balance cause panic
 * **router:** fix return body of get future trade switch
-* **stream:** add loop lable to avoid index out of range
 * **stream:** fix last trade rate not initial
+* **stream:** add loop lable to avoid index out of range
 * **stream:** fix map is not initail
 * **stuck:** fix missing go in updateAllTradeBalance
+* **subscribe:** remove redundant future bidask subscribe
 * **tick:** fix wrong tick time from snapshot to tick
 * **trade:** fix order will be cancel multiple times
 * **trade:** fix order will be cancel before 10 seconds
 * **trade:** fix wrong first tick time
-* **websocket:** fix order map does not initial
 * **websocket:** fix send data to close channel
+* **websocket:** fix order map does not initial
+* **websocket:** remove period to fix out of index
+* **websocket:** fix wrong scoket data type
+* **websocket:** fix wrong calculation of trade rate
+* **websocket:** fix missing format in send websocket data
+* **websocket:** add missing socketPickStock
+* **websocket:** fix interface cast bug
+* **websocket:** fix concurrency write websocket
 * **ws:** fix stuck if client disconnect by abort gin
-* **ws:** remove lock for future stream
 * **ws:** fix wrong ws message type
 * **ws:** fix ws end abnormal, close connection before gin done
-
-### Code Refactoring (4)
-
-* **assist:** refactor assist trader
-* **logger:** pack log again
-* **ws:** split pick stock and future to different pkg
-* **ws:** refactor websocket split pick stock and future trade
-
-### Features (42)
-
-* **assist:** add assist trader in futrue trade ws
-* **assist:** let buy sell has same profit loss automation method
-* **assist:** add assist done message, limit 1 assist at one time
-* **assist:** send running status to ws
-* **assist:** finish by balance and by time period assist
-* **balance:** add move order and recalculate trade balance router
-* **balance:** add manual balance router
-* **balance:** add manual trade balance
-* **future:** split kbar and send last period to stream
-* **future:** add send future detail in first connect
-* **index:** add otc, tse, nasdaq index to websocket stream
-* **kbar:** add try last day if kbar is empty, slow down query position
-* **log:** move log config to env instead of in config
-* **order:** add if not stock and not future trade time, cancel update order
-* **order:** refactor updateAllTradeBalance, increse update order speed
-* **order:** remove non block order update mode
-* **order:** split prod and simulate order get method
-* **order:** add receive order arr from rabbitmq
-* **order:** add if simulate mode to get order status from mq
-* **order:** remove ask update api, split update balance and simulate order, product order
-* **order:** modify new sinopac filling to partfilled
-* **order:** remove order status in websocket, modify manual order group id and trade time
-* **order:** add order status stream in websocket
-* **ordertime:** modifiy wrong order time to time now, when in night market from 0:00 to 5:00
-* **position:** increase speed of send future position to every second
-* **postition:** add future postion, remove manual in stock, future balance
-* **protobuf:** change future trade all json message to proto message
-* **router:** add manual insert future order api
-* **router:** add query future order by date api
-* **snapshot:** add future detail in future snapshot
-* **stream:** add out in rate chg, modify order entity
-* **stream:** add period update trade index interal stream usecase
-* **stream:** change method process tick arr
-* **stream:** add kbar in future trade ws
-* **stream:** modify out in volume to four period
-* **subscribe:** add whether subscribe stock or future not
-* **switch:** add change future trade switch router
-* **tick:** cut tick arr in every second in stream
-* **trade:** add manual to order column, check order status in websocket
-* **trade:** add auto cancel in stream trade
-* **websocket:** add nasdaq future to stream
-* **ws:** add lock for future trade ws
-
-## [v1.5.0](https://github.com/ToC-Taiwan/toc-machine-trading/compare/v1.4.0...v1.5.0) (2023-02-09)
-
-### Bug Fixes (10)
-
-* **health:** if disconnect from grpc not panic but os exit
-* **migration:** fix wrong table name in migration sql
-* **subscribe:** remove redundant future bidask subscribe
-* **websocket:** remove period to fix out of index
-* **websocket:** fix wrong scoket data type
-* **websocket:** fix wrong calculation of trade rate
-* **websocket:** fix missing format in send websocket data
-* **websocket:** add missing socketPickStock
-* **websocket:** fix interface cast bug
-* **websocket:** fix concurrency write websocket
-
-### Features (12)
-
-* **action:** use period tick out in ratio to decide action, and add to simulator
-* **history:** add future history close fetch and simulate
-* **holiday:** extend trade year to 2023, update holiday.json
-* **order:** modify all order router to future and stock all order
-* **tick:** modify future tick chan and connection id
-* **trade:** add ws trade
-* **tradeperiod:** add get last 1 trade period for future method
-* **websocket:** modify trade rate content to out, in and period
-* **websocket:** add trade rate in websocket
-* **websocket:** ignore CloseNoStatusReceived error
-* **ws:** add log for new future ws and done log
-* **ws:** modify ws layout, add send snapshot in future stream ws
-
-## [v1.4.0](https://github.com/ToC-Taiwan/toc-machine-trading/compare/v1.3.0...v1.4.0) (2023-02-09)
-
-### Features (8)
-
-* **future:** use rsi to decide trade in, max hold time to trade out
-* **future:** test new method of future trader
-* **future:** modify trade out method
-* **future:** add kbar analyze to trade out of future
-* **router:** add simulate future to history router
-* **simulate:** add simulate future trade proto type
-* **strategy:** modify future trade strategy default config
-* **trader:** add kbar analyze to future trader
-
-## [v1.3.0](https://github.com/ToC-Taiwan/toc-machine-trading/compare/v1.2.0...v1.3.0) (2023-02-09)
-
-### Features (3)
-
-* **balance:** exclude unfinish order in calculate balance, modify topic name
-* **router:** add future trade balance to get balance
-* **strategy:** modify future trader strategy
-
-## [v1.2.0](https://github.com/ToC-Taiwan/toc-machine-trading/compare/v1.6.0...v1.2.0) (2023-02-09)
-
-## [v1.6.0](https://github.com/ToC-Taiwan/toc-machine-trading/compare/v1.1.0...v1.6.0) (2023-02-09)
-
-### Bug Fixes (35)
-
-* **assist:** fix assist trader will kill before start
-* **assist:** add lock for process trade, fix bugs in assist trader
-* **ci:** temp remove go test from ci
-* **ci:** add checkout in deployment to get git hash
-* **ci:** add missing config in go test
-* **health:** if disconnect from grpc not panic but os exit
-* **log:** remove unknown order code log
-* **migration:** fix wrong table name in migration sql
-* **order:** fix manual order does not insert to db
-* **order:** modify get order by trade day will send not filled order
-* **order:** use timer and reset to fix balance not insert to db
-* **order:** add lock for order usecase to update order in postgres
-* **order:** fix order status chan is not add to rabbit, fix order time is always wrong
-* **order:** fix order balance calculate wrong, try fix manual order does not insert to db
-* **position:** fix websocket future position has no column in json
-* **postgres:** fix redundant manual future trade balance cause panic
-* **router:** fix return body of get future trade switch
-* **stream:** fix map is not initail
-* **stream:** fix last trade rate not initial
-* **stream:** add loop lable to avoid index out of range
-* **stuck:** fix missing go in updateAllTradeBalance
-* **subscribe:** remove redundant future bidask subscribe
-* **trade:** fix order will be cancel multiple times
-* **trade:** fix order will be cancel before 10 seconds
-* **websocket:** remove period to fix out of index
-* **websocket:** fix send data to close channel
-* **websocket:** fix wrong scoket data type
-* **websocket:** fix wrong calculation of trade rate
-* **websocket:** fix missing format in send websocket data
-* **websocket:** add missing socketPickStock
-* **websocket:** fix interface cast bug
-* **websocket:** fix concurrency write websocket
-* **websocket:** fix order map does not initial
-* **ws:** fix ws end abnormal, close connection before gin done
-* **ws:** fix stuck if client disconnect by abort gin
+* **ws:** remove lock for future stream
 
 ### Code Refactoring (5)
 
@@ -447,59 +458,73 @@
 * **ws:** split pick stock and future to different pkg
 * **ws:** refactor websocket split pick stock and future trade
 
-### Features (51)
+### Features (65)
 
 * **action:** use period tick out in ratio to decide action, and add to simulator
-* **assist:** let buy sell has same profit loss automation method
-* **assist:** add assist done message, limit 1 assist at one time
-* **assist:** finish by balance and by time period assist
 * **assist:** add assist trader in futrue trade ws
+* **assist:** add assist done message, limit 1 assist at one time
+* **assist:** let buy sell has same profit loss automation method
 * **assist:** send running status to ws
+* **assist:** finish by balance and by time period assist
 * **balance:** add manual balance router
-* **balance:** add move order and recalculate trade balance router
-* **balance:** exclude unfinish order in calculate balance, modify topic name
 * **balance:** add manual trade balance
-* **future:** add kbar analyze to trade out of future
+* **balance:** exclude unfinish order in calculate balance, modify topic name
+* **balance:** add move order and recalculate trade balance router
+* **future:** add send future detail in first connect
 * **future:** use rsi to decide trade in, max hold time to trade out
-* **future:** test new method of future trader
 * **future:** modify trade out method
+* **future:** test new method of future trader
+* **future:** split kbar and send last period to stream
+* **future:** add kbar analyze to trade out of future
 * **history:** add future history close fetch and simulate
 * **holiday:** extend trade year to 2023, update holiday.json
 * **index:** add otc, tse, nasdaq index to websocket stream
+* **kbar:** add try last day if kbar is empty, slow down query position
 * **log:** move log config to env instead of in config
-* **order:** modify all order router to future and stock all order
+* **order:** add if not stock and not future trade time, cancel update order
+* **order:** remove non block order update mode
+* **order:** refactor updateAllTradeBalance, increse update order speed
 * **order:** modify new sinopac filling to partfilled
 * **order:** add order status stream in websocket
-* **order:** refactor updateAllTradeBalance, increse update order speed
 * **order:** remove ask update api, split update balance and simulate order, product order
+* **order:** split prod and simulate order get method
+* **order:** modify all order router to future and stock all order
 * **order:** remove order status in websocket, modify manual order group id and trade time
+* **order:** add receive order arr from rabbitmq
+* **order:** add if simulate mode to get order status from mq
 * **ordertime:** modifiy wrong order time to time now, when in night market from 0:00 to 5:00
+* **position:** increase speed of send future position to every second
 * **postition:** add future postion, remove manual in stock, future balance
-* **router:** add query future order by date api
+* **protobuf:** change future trade all json message to proto message
 * **router:** add manual insert future order api
 * **router:** add future trade balance to get balance
+* **router:** add query future order by date api
 * **router:** add simulate future to history router
 * **simulate:** add simulate future trade proto type
+* **snapshot:** add future detail in future snapshot
 * **strategy:** modify future trade strategy default config
 * **strategy:** modify future trader strategy
-* **stream:** add period update trade index interal stream usecase
 * **stream:** add out in rate chg, modify order entity
+* **stream:** add kbar in future trade ws
+* **stream:** add period update trade index interal stream usecase
 * **stream:** change method process tick arr
 * **stream:** modify out in volume to four period
+* **subscribe:** add whether subscribe stock or future not
 * **switch:** add change future trade switch router
-* **tick:** cut tick arr in every second in stream
 * **tick:** modify future tick chan and connection id
-* **trade:** add auto cancel in stream trade
+* **tick:** cut tick arr in every second in stream
 * **trade:** add manual to order column, check order status in websocket
 * **trade:** add ws trade
+* **trade:** add auto cancel in stream trade
 * **tradeperiod:** add get last 1 trade period for future method
 * **trader:** add kbar analyze to future trader
-* **websocket:** add trade rate in websocket
-* **websocket:** ignore CloseNoStatusReceived error
-* **websocket:** modify trade rate content to out, in and period
 * **websocket:** add nasdaq future to stream
-* **ws:** add log for new future ws and done log
+* **websocket:** ignore CloseNoStatusReceived error
+* **websocket:** add trade rate in websocket
+* **websocket:** modify trade rate content to out, in and period
 * **ws:** modify ws layout, add send snapshot in future stream ws
+* **ws:** add lock for future trade ws
+* **ws:** add log for new future ws and done log
 
 ## [v1.1.0](https://github.com/ToC-Taiwan/toc-machine-trading/compare/v1.0.0...v1.1.0) (2023-02-09)
 
