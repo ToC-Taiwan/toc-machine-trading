@@ -707,6 +707,12 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/auth.RefreshResponseBody"
                         }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/auth.UnauthorizedResponseBody"
+                        }
                     }
                 }
             }
@@ -820,6 +826,12 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/v1.tradeResponse"
                         }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/auth.UnauthorizedResponseBody"
+                        }
                     }
                 }
             }
@@ -857,6 +869,12 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/v1.tradeResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/auth.UnauthorizedResponseBody"
                         }
                     }
                 }
@@ -1037,6 +1055,14 @@ const docTemplate = `{
                 },
                 "token": {
                     "type": "string"
+                }
+            }
+        },
+        "auth.UnauthorizedResponseBody": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
                 }
             }
         },

@@ -29,6 +29,11 @@ definitions:
       token:
         type: string
     type: object
+  auth.UnauthorizedResponseBody:
+    properties:
+      code:
+        type: integer
+    type: object
   config.AnalyzeStock:
     properties:
       allInOutRatio:
@@ -1086,6 +1091,10 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/auth.RefreshResponseBody'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/auth.UnauthorizedResponseBody'
       security:
       - JWT: []
       summary: refreshTokenHandler
@@ -1157,6 +1166,10 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/v1.tradeResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/auth.UnauthorizedResponseBody'
       security:
       - JWT: []
       summary: buyLotStock
@@ -1180,6 +1193,10 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/v1.tradeResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/auth.UnauthorizedResponseBody'
       security:
       - JWT: []
       summary: buyOddStock

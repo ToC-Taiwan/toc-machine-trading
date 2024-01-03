@@ -699,6 +699,12 @@
                         "schema": {
                             "$ref": "#/definitions/auth.RefreshResponseBody"
                         }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/auth.UnauthorizedResponseBody"
+                        }
                     }
                 }
             }
@@ -812,6 +818,12 @@
                         "schema": {
                             "$ref": "#/definitions/v1.tradeResponse"
                         }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/auth.UnauthorizedResponseBody"
+                        }
                     }
                 }
             }
@@ -849,6 +861,12 @@
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/v1.tradeResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/auth.UnauthorizedResponseBody"
                         }
                     }
                 }
@@ -1029,6 +1047,14 @@
                 },
                 "token": {
                     "type": "string"
+                }
+            }
+        },
+        "auth.UnauthorizedResponseBody": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
                 }
             }
         },

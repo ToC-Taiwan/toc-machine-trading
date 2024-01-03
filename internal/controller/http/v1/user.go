@@ -64,6 +64,7 @@ func (u *userRoutes) logutHandler(c *gin.Context) {
 //	@accept		json
 //	@produce	json
 //	@success	200	{object}	auth.RefreshResponseBody{}
+//	@failure	401	{object}	auth.UnauthorizedResponseBody{}
 //	@router		/v1/refresh [get]
 func (u *userRoutes) refreshTokenHandler(c *gin.Context) {
 	u.jwtHandler.RefreshHandler(c)
@@ -77,8 +78,8 @@ func (u *userRoutes) refreshTokenHandler(c *gin.Context) {
 //	@produce	json
 //	@param		body	body	entity.User{}	true	"Body"
 //	@success	200
-//	@failure	400	{string}	string	"Bad Request"
-//	@failure	500	{string}	string	"Internal Server Error"
+//	@failure	400	{string}	string
+//	@failure	500	{string}	string
 //	@router		/v1/user [post]
 func (u *userRoutes) newUserHandler(c *gin.Context) {
 	user := entity.User{}
@@ -115,8 +116,8 @@ func (u *userRoutes) newUserHandler(c *gin.Context) {
 //	@param		user	path	string	true	"user"
 //	@param		code	path	string	true	"code"
 //	@success	200
-//	@failure	400	{string}	string	"Bad Request"
-//	@failure	500	{string}	string	"Internal Server Error"
+//	@failure	400	{string}	string
+//	@failure	500	{string}	string
 //	@router		/v1/user/verify/{user}/{code} [get]
 func (u *userRoutes) verifyEmailHandler(c *gin.Context) {
 	user := c.Param("user")
@@ -144,8 +145,8 @@ func (u *userRoutes) verifyEmailHandler(c *gin.Context) {
 //	@produce	json
 //	@param		user	header	string	true	"user"
 //	@success	200
-//	@failure	400	{string}	string	"Bad Request"
-//	@failure	500	{string}	string	"Internal Server Error"
+//	@failure	400	{string}	string
+//	@failure	500	{string}	string
 //	@router		/v1/user/activate [post]
 func (u *userRoutes) activateUserHandler(c *gin.Context) {
 	user := c.GetHeader("user")

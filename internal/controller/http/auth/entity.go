@@ -20,3 +20,7 @@ type RefreshResponseBody struct {
 	Expire string `json:"expire"`
 	Code   int    `json:"code"`
 }
+
+type UnauthorizedResponseBody struct {
+	Code int `json:"code"`
+}

@@ -50,6 +50,7 @@ type tradeResponse struct {
 //	@Produce	json
 //	@param		body	body		oddStockRequest{}	true	"Body"
 //	@Success	200		{object}	tradeResponse{}
+//	@failure	401		{object}	auth.UnauthorizedResponseBody{}
 //	@Router		/v1/trade/stock/buy/odd [put]
 func (r *tradeRoutes) buyOddStock(c *gin.Context) {
 	p := oddStockRequest{}
@@ -78,6 +79,7 @@ func (r *tradeRoutes) buyOddStock(c *gin.Context) {
 //	@Produce	json
 //	@param		body	body		lotStockRequest{}	true	"Body"
 //	@Success	200		{object}	tradeResponse{}
+//	@failure	401		{object}	auth.UnauthorizedResponseBody{}
 //	@Router		/v1/trade/stock/buy/lot [put]
 func (r *tradeRoutes) buyLotStock(c *gin.Context) {
 	p := lotStockRequest{}
