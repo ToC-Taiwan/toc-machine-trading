@@ -26,6 +26,7 @@ const docTemplate = `{
                 "tags": [
                     "Analyze V1"
                 ],
+                "summary": "Get reborn targets",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -50,6 +51,7 @@ const docTemplate = `{
                 "tags": [
                     "Basic V1"
                 ],
+                "summary": "Get all config",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -77,6 +79,7 @@ const docTemplate = `{
                 "tags": [
                     "Basic V1"
                 ],
+                "summary": "Get all repo stock",
                 "parameters": [
                     {
                         "type": "string",
@@ -118,6 +121,7 @@ const docTemplate = `{
                 "tags": [
                     "Basic V1"
                 ],
+                "summary": "Get shioaji usage",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -145,6 +149,7 @@ const docTemplate = `{
                 "tags": [
                     "History V1"
                 ],
+                "summary": "Get kbar data",
                 "parameters": [
                     {
                         "type": "string",
@@ -198,6 +203,7 @@ const docTemplate = `{
                 "tags": [
                     "User V1"
                 ],
+                "summary": "Login",
                 "parameters": [
                     {
                         "description": "Body",
@@ -235,6 +241,7 @@ const docTemplate = `{
                 "tags": [
                     "User V1"
                 ],
+                "summary": "Logout",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -256,6 +263,7 @@ const docTemplate = `{
                 "tags": [
                     "Order V1"
                 ],
+                "summary": "Manual insert future order",
                 "parameters": [
                     {
                         "description": "Body",
@@ -291,6 +299,7 @@ const docTemplate = `{
                 "tags": [
                     "Account V1"
                 ],
+                "summary": "Get account balance",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -318,6 +327,7 @@ const docTemplate = `{
                 "tags": [
                     "Order V1"
                 ],
+                "summary": "Get all order",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -345,6 +355,7 @@ const docTemplate = `{
                 "tags": [
                     "Order V1"
                 ],
+                "summary": "Get all trade balance",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -372,6 +383,7 @@ const docTemplate = `{
                 "tags": [
                     "Order V1"
                 ],
+                "summary": "Get last future trade balance",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -399,6 +411,7 @@ const docTemplate = `{
                 "tags": [
                     "Order V1"
                 ],
+                "summary": "Get last stock trade balance",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -426,6 +439,7 @@ const docTemplate = `{
                 "tags": [
                     "Order V1"
                 ],
+                "summary": "Get all order by trade day",
                 "parameters": [
                     {
                         "type": "string",
@@ -460,6 +474,7 @@ const docTemplate = `{
                 "tags": [
                     "Order V1"
                 ],
+                "summary": "Update trade balance by trade day",
                 "parameters": [
                     {
                         "type": "string",
@@ -496,6 +511,7 @@ const docTemplate = `{
                 "tags": [
                     "Order V1"
                 ],
+                "summary": "Move future order to latest trade day",
                 "parameters": [
                     {
                         "type": "string",
@@ -529,6 +545,7 @@ const docTemplate = `{
                 "tags": [
                     "Order V1"
                 ],
+                "summary": "Move stock order to latest trade day",
                 "parameters": [
                     {
                         "type": "string",
@@ -567,6 +584,7 @@ const docTemplate = `{
                 "tags": [
                     "User V1"
                 ],
+                "summary": "Refresh token",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -594,6 +612,7 @@ const docTemplate = `{
                 "tags": [
                     "Stream V1"
                 ],
+                "summary": "Get index",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -615,6 +634,7 @@ const docTemplate = `{
                 "tags": [
                     "Stream V1"
                 ],
+                "summary": "Get TSE snapshot",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -642,6 +662,7 @@ const docTemplate = `{
                 "tags": [
                     "Targets V1"
                 ],
+                "summary": "Get targets",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -671,6 +692,7 @@ const docTemplate = `{
                 "tags": [
                     "Trade V1"
                 ],
+                "summary": "Buy lot stock",
                 "parameters": [
                     {
                         "description": "Body",
@@ -714,6 +736,7 @@ const docTemplate = `{
                 "tags": [
                     "Trade V1"
                 ],
+                "summary": "Buy odd stock",
                 "parameters": [
                     {
                         "description": "Body",
@@ -752,6 +775,7 @@ const docTemplate = `{
                 "tags": [
                     "User V1"
                 ],
+                "summary": "New user",
                 "parameters": [
                     {
                         "description": "Body",
@@ -793,6 +817,7 @@ const docTemplate = `{
                 "tags": [
                     "User V1"
                 ],
+                "summary": "Activate user",
                 "parameters": [
                     {
                         "type": "string",
@@ -832,6 +857,7 @@ const docTemplate = `{
                 "tags": [
                     "User V1"
                 ],
+                "summary": "Verify email",
                 "parameters": [
                     {
                         "type": "string",

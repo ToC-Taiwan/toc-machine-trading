@@ -33,6 +33,7 @@ type stockDetailResponse struct {
 // getAllRepoStock -.
 //
 //	@Tags		Basic V1
+//	@Summary	Get all repo stock
 //	@Accept		json
 //	@Produce	json
 //	@Param		num	query		string	false	"num"
@@ -73,6 +74,7 @@ func (r *basicRoutes) getAllRepoStock(c *gin.Context) {
 // getAllConfig -.
 //
 //	@Tags		Basic V1
+//	@Summary	Get all config
 //	@Accept		json
 //	@Produce	json
 //	@Success	200	{object}	config.Config
@@ -85,6 +87,7 @@ func (r *basicRoutes) getAllConfig(c *gin.Context) {
 // getShioajiUsage -.
 //
 //	@Tags		Basic V1
+//	@Summary	Get shioaji usage
 //	@Accept		json
 //	@Produce	json
 //	@Success	200	{object}	entity.ShioajiUsage

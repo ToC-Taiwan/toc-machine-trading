@@ -47,6 +47,7 @@ type allOrder struct {
 // getAllOrder -.
 //
 //	@Tags		Order V1
+//	@Summary	Get all order
 //	@Accept		json
 //	@Produce	json
 //	@Success	200	{object}	allOrder
@@ -77,6 +78,7 @@ type futureOrders struct {
 // getAllOrderByTradeDay -.
 //
 //	@Tags		Order V1
+//	@Summary	Get all order by trade day
 //	@Accept		json
 //	@Produce	json
 //	@param		tradeday	path		string	true	"tradeday"
@@ -101,6 +103,7 @@ func (r *orderRoutes) getAllOrderByTradeDay(c *gin.Context) {
 // updateTradeBalanceByTradeDay -.
 //
 //	@Tags		Order V1
+//	@Summary	Update trade balance by trade day
 //	@Accept		json
 //	@Produce	json
 //	@param		tradeday	path		string	true	"tradeday"
@@ -133,6 +136,7 @@ type manualInsertFutureOrderRequest struct {
 // manualInsertFutureOrder -.
 //
 //	@Tags		Order V1
+//	@Summary	Manual insert future order
 //	@Accept		json
 //	@Produce	json
 //	@param		body	body	manualInsertFutureOrderRequest{}	true	"Body"
@@ -180,6 +184,7 @@ type tradeBalance struct {
 // getAllTradeBalance -.
 //
 //	@Tags		Order V1
+//	@Summary	Get all trade balance
 //	@Accept		json
 //	@Produce	json
 //	@Success	200	{object}	tradeBalance
@@ -207,6 +212,7 @@ func (r *orderRoutes) getAllTradeBalance(c *gin.Context) {
 // getLastStockTradeBalance -.
 //
 //	@Tags		Order V1
+//	@Summary	Get last stock trade balance
 //	@Accept		json
 //	@Produce	json
 //	@Success	200	{object}	entity.StockTradeBalance
@@ -225,6 +231,7 @@ func (r *orderRoutes) getLastStockTradeBalance(c *gin.Context) {
 // getLastFutureTradeBalance -.
 //
 //	@Tags		Order V1
+//	@Summary	Get last future trade balance
 //	@Accept		json
 //	@Produce	json
 //	@Success	200	{object}	entity.FutureTradeBalance
@@ -243,6 +250,7 @@ func (r *orderRoutes) getLastFutureTradeBalance(c *gin.Context) {
 // moveFutureOrderToLatestTradeDay -.
 //
 //	@Tags		Order V1
+//	@Summary	Move future order to latest trade day
 //	@Accept		json
 //	@Produce	json
 //	@param		order-id	path	string	true	"order-id"
@@ -266,6 +274,7 @@ func (r *orderRoutes) moveFutureOrderToLatestTradeDay(c *gin.Context) {
 // moveStockOrderToLatestTradeDay -.
 //
 //	@Tags		Order V1
+//	@Summary	Move stock order to latest trade day
 //	@Accept		json
 //	@Produce	json
 //	@param		order-id	path	string	true	"order-id"
@@ -294,6 +303,7 @@ type accountSummary struct {
 // getAccountBalance -.
 //
 //	@Tags		Account V1
+//	@Summary	Get account balance
 //	@Accept		json
 //	@Produce	json
 //	@Success	200	{object}	accountSummary

@@ -44,6 +44,7 @@ type tradeResponse struct {
 // buyOddStock -.
 //
 //	@Tags		Trade V1
+//	@Summary	Buy odd stock
 //	@security	JWT
 //	@Accept		json
 //	@Produce	json
@@ -72,6 +73,7 @@ func (r *tradeRoutes) buyOddStock(c *gin.Context) {
 // buyLotStock -.
 //
 //	@Tags		Trade V1
+//	@Summary	Buy lot stock
 //	@security	JWT
 //	@Accept		json
 //	@Produce	json
