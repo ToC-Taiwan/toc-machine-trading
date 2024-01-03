@@ -167,6 +167,7 @@ type Trade interface {
 	SellFuture(order *entity.FutureOrder) (string, entity.OrderStatus, error)
 	CancelFutureOrderByID(orderID string) (string, entity.OrderStatus, error)
 
+	BuyLotStock(num string, price float64, lot int64) (string, entity.OrderStatus, error)
 	BuyOddStock(num string, price float64, share int64) (string, entity.OrderStatus, error)
 
 	GetFuturePosition() ([]*entity.FuturePosition, error)

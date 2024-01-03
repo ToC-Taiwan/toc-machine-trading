@@ -776,6 +776,41 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/trade/stock/buy/lot": {
+            "put": {
+                "description": "buyLotStock",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "trade"
+                ],
+                "summary": "buyLotStock",
+                "operationId": "buyLotStock",
+                "parameters": [
+                    {
+                        "description": "Body",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/v1.lotStockRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v1.tradeResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/trade/stock/buy/odd": {
             "put": {
                 "description": "buyOddStock",
@@ -805,7 +840,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/v1.oddStockResponse"
+                            "$ref": "#/definitions/v1.tradeResponse"
                         }
                     }
                 }
@@ -1778,6 +1813,20 @@ const docTemplate = `{
                 }
             }
         },
+        "v1.lotStockRequest": {
+            "type": "object",
+            "properties": {
+                "lot": {
+                    "type": "integer"
+                },
+                "num": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "number"
+                }
+            }
+        },
         "v1.manualInsertFutureOrderRequest": {
             "type": "object",
             "required": [
@@ -1816,23 +1865,6 @@ const docTemplate = `{
                 },
                 "share": {
                     "type": "integer"
-                }
-            }
-        },
-        "v1.oddStockResponse": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "string"
-                },
-                "price": {
-                    "type": "number"
-                },
-                "share": {
-                    "type": "integer"
-                },
-                "status": {
-                    "type": "string"
                 }
             }
         },
@@ -1875,6 +1907,17 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/entity.StockTradeBalance"
                     }
+                }
+            }
+        },
+        "v1.tradeResponse": {
+            "type": "object",
+            "properties": {
+                "order_id": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
                 }
             }
         }

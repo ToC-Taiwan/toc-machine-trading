@@ -550,6 +550,15 @@ definitions:
           $ref: '#/definitions/entity.FutureOrder'
         type: array
     type: object
+  v1.lotStockRequest:
+    properties:
+      lot:
+        type: integer
+      num:
+        type: string
+      price:
+        type: number
+    type: object
   v1.manualInsertFutureOrderRequest:
     properties:
       action:
@@ -578,17 +587,6 @@ definitions:
       share:
         type: integer
     type: object
-  v1.oddStockResponse:
-    properties:
-      id:
-        type: string
-      price:
-        type: number
-      share:
-        type: integer
-      status:
-        type: string
-    type: object
   v1.reborn:
     properties:
       date:
@@ -615,6 +613,13 @@ definitions:
         items:
           $ref: '#/definitions/entity.StockTradeBalance'
         type: array
+    type: object
+  v1.tradeResponse:
+    properties:
+      order_id:
+        type: string
+      status:
+        type: string
     type: object
 info:
   contact: {}
@@ -1132,6 +1137,29 @@ paths:
       summary: getTargets
       tags:
       - targets
+  /v1/trade/stock/buy/lot:
+    put:
+      consumes:
+      - application/json
+      description: buyLotStock
+      operationId: buyLotStock
+      parameters:
+      - description: Body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/v1.lotStockRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.tradeResponse'
+      summary: buyLotStock
+      tags:
+      - trade
   /v1/trade/stock/buy/odd:
     put:
       consumes:
@@ -1151,7 +1179,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/v1.oddStockResponse'
+            $ref: '#/definitions/v1.tradeResponse'
       summary: buyOddStock
       tags:
       - trade

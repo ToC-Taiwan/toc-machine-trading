@@ -1655,6 +1655,22 @@ func (mr *MockTradeMockRecorder) BuyFuture(order interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BuyFuture", reflect.TypeOf((*MockTrade)(nil).BuyFuture), order)
 }
 
+// BuyLotStock mocks base method.
+func (m *MockTrade) BuyLotStock(num string, price float64, lot int64) (string, entity.OrderStatus, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "BuyLotStock", num, price, lot)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(entity.OrderStatus)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// BuyLotStock indicates an expected call of BuyLotStock.
+func (mr *MockTradeMockRecorder) BuyLotStock(num, price, lot interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BuyLotStock", reflect.TypeOf((*MockTrade)(nil).BuyLotStock), num, price, lot)
+}
+
 // BuyOddStock mocks base method.
 func (m *MockTrade) BuyOddStock(num string, price float64, share int64) (string, entity.OrderStatus, error) {
 	m.ctrl.T.Helper()
