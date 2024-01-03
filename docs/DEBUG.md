@@ -76,3 +76,17 @@ echo '{
     ]
 }' > .vscode/tasks.json
 ```
+
+## Postman
+
+- add set token in collection
+
+```js
+// jsonData will contain the valid JSON object from the response body
+let jsonData = pm.response.json();
+
+// Variables and JSON Keys are case sensitive!
+pm.collectionVariables.set("apiKey", jsonData.token);
+```
+
+- set baseUrl `https://trader.tocraw.com/tmt`

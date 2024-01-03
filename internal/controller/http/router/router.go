@@ -31,8 +31,8 @@ var swagHandler gin.HandlerFunc
 
 // NewRouter -.
 //
-//	@title						TOC MACHINE TRADING
-//	@description				API docs for Auto Trade
+//	@title						TMT OpenAPI
+//	@description				Toc Machine Trading's API docs
 //	@version					2.5.0
 //	@securityDefinitions.apikey	JWT
 //	@in							header

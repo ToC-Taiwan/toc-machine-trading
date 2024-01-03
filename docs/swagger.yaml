@@ -642,8 +642,8 @@ definitions:
     type: object
 info:
   contact: {}
-  description: API docs for Auto Trade
-  title: TOC MACHINE TRADING
+  description: Toc Machine Trading's API docs
+  title: TMT OpenAPI
   version: 2.5.0
 paths:
   /v1/analyze/reborn:

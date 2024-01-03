@@ -1,8 +1,8 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "API docs for Auto Trade",
-        "title": "TOC MACHINE TRADING",
+        "description": "Toc Machine Trading's API docs",
+        "title": "TMT OpenAPI",
         "contact": {},
         "version": "2.5.0"
     },

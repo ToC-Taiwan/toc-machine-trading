@@ -2,6 +2,7 @@
 package auth
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
@@ -15,8 +16,9 @@ import (
 )
 
 const (
-	identityKey = "tmt_identity"
-	timeOut     = time.Hour
+	tokenHeaderName = "Bearer"
+	identityKey     = "tmt_identity"
+	timeOut         = time.Hour
 )
 
 func NewAuthMiddleware(system usecase.System) (*jwt.GinJWTMiddleware, error) {
@@ -25,7 +27,7 @@ func NewAuthMiddleware(system usecase.System) (*jwt.GinJWTMiddleware, error) {
 		SigningAlgorithm: "HS256",
 		Timeout:          timeOut,
 		TimeFunc:         time.Now,
-		TokenHeadName:    "Bearer",
+		TokenHeadName:    tokenHeaderName,
 		Authorizator: func(interface{}, *gin.Context) bool {
 			return true
 		},
@@ -72,7 +74,7 @@ func unauthorized(c *gin.Context, code int, message string) {
 
 func loginResponse(c *gin.Context, code int, token string, expire time.Time) {
 	c.JSON(http.StatusOK, LoginResponseBody{
-		Token:  token,
+		Token:  fmt.Sprintf("%s %s", tokenHeaderName, token),
 		Expire: expire.Format(time.RFC3339),
 		Code:   http.StatusOK,
 	})
