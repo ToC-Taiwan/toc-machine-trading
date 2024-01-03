@@ -557,11 +557,6 @@ definitions:
           $ref: '#/definitions/entity.StockOrder'
         type: array
     type: object
-  v1.dayTradeResult:
-    properties:
-      balance:
-        type: integer
-    type: object
   v1.futureOrders:
     properties:
       orders:
@@ -937,82 +932,6 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/v1.futureOrders'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/resp.Response'
-      tags:
-      - Order V1
-  /v1/order/day-trade/forward:
-    get:
-      consumes:
-      - application/json
-      parameters:
-      - description: buy_price
-        in: header
-        name: buy_price
-        required: true
-        type: string
-      - description: buy_quantity
-        in: header
-        name: buy_quantity
-        required: true
-        type: string
-      - description: sell_price
-        in: header
-        name: sell_price
-        required: true
-        type: string
-      - description: sell_quantity
-        in: header
-        name: sell_quantity
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/v1.dayTradeResult'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/resp.Response'
-      tags:
-      - Order V1
-  /v1/order/day-trade/reverse:
-    get:
-      consumes:
-      - application/json
-      parameters:
-      - description: sell_first_price
-        in: header
-        name: sell_first_price
-        required: true
-        type: string
-      - description: sell_first_quantity
-        in: header
-        name: sell_first_quantity
-        required: true
-        type: string
-      - description: buy_later_price
-        in: header
-        name: buy_later_price
-        required: true
-        type: string
-      - description: buy_later_quantity
-        in: header
-        name: buy_later_quantity
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/v1.dayTradeResult'
         "500":
           description: Internal Server Error
           schema:

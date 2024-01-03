@@ -3,7 +3,6 @@ package v1
 
 import (
 	"net/http"
-	"strconv"
 	"time"
 
 	"tmt/internal/controller/http/resp"
@@ -35,9 +34,6 @@ func NewOrderRoutes(handler *gin.RouterGroup, t usecase.Trade) {
 
 		h.PATCH("/stock/:order-id", r.moveStockOrderToLatestTradeDay)
 		h.PATCH("/future/:order-id", r.moveFutureOrderToLatestTradeDay)
-
-		h.GET("/day-trade/forward", r.calculateForwardDayTradeBalance)
-		h.GET("/day-trade/reverse", r.calculateReverseDayTradeBalance)
 
 		h.GET("/account/balance", r.getAccountBalance)
 	}
@@ -242,110 +238,6 @@ func (r *orderRoutes) getLastFutureTradeBalance(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, balance)
-}
-
-type dayTradeResult struct {
-	Balance int64 `json:"balance"`
-}
-
-// calculateForwardDayTradeBalance -.
-//
-//	@Tags		Order V1
-//	@accept		json
-//	@produce	json
-//	@param		buy_price		header		string	true	"buy_price"
-//	@param		buy_quantity	header		string	true	"buy_quantity"
-//	@param		sell_price		header		string	true	"sell_price"
-//	@param		sell_quantity	header		string	true	"sell_quantity"
-//	@success	200				{object}	dayTradeResult
-//	@failure	500				{object}	resp.Response{}
-//	@Router		/v1/order/day-trade/forward [get]
-func (r *orderRoutes) calculateForwardDayTradeBalance(c *gin.Context) {
-	buyPriceString := c.Request.Header.Get("buy_price")
-	buyPrice, err := strconv.ParseFloat(buyPriceString, 64)
-	if err != nil {
-		resp.ErrorResponse(c, http.StatusBadRequest, err.Error())
-		return
-	}
-	buyQuantityString := c.Request.Header.Get("buy_quantity")
-	buyQuantity, err := strconv.ParseInt(buyQuantityString, 10, 64)
-	if err != nil {
-		resp.ErrorResponse(c, http.StatusBadRequest, err.Error())
-		return
-	}
-
-	sellPriceString := c.Request.Header.Get("sell_price")
-	sellPrice, err := strconv.ParseFloat(sellPriceString, 64)
-	if err != nil {
-		resp.ErrorResponse(c, http.StatusBadRequest, err.Error())
-		return
-	}
-
-	sellQuantityString := c.Request.Header.Get("sell_quantity")
-	sellQuantity, err := strconv.ParseInt(sellQuantityString, 10, 64)
-	if err != nil {
-		resp.ErrorResponse(c, http.StatusBadRequest, err.Error())
-		return
-	}
-
-	pay := r.t.CalculateBuyCost(buyPrice, buyQuantity, 0)
-	payDiscount := r.t.CalculateTradeDiscount(buyPrice, buyQuantity, 0)
-	earning := r.t.CalculateSellCost(sellPrice, sellQuantity, 0)
-	earningDiscount := r.t.CalculateTradeDiscount(sellPrice, sellQuantity, 0)
-
-	c.JSON(http.StatusOK, dayTradeResult{
-		Balance: -pay + payDiscount + earning + earningDiscount,
-	})
-}
-
-// calculateReverseDayTradeBalance -.
-//
-//	@Tags		Order V1
-//	@accept		json
-//	@produce	json
-//	@param		sell_first_price	header		string	true	"sell_first_price"
-//	@param		sell_first_quantity	header		string	true	"sell_first_quantity"
-//	@param		buy_later_price		header		string	true	"buy_later_price"
-//	@param		buy_later_quantity	header		string	true	"buy_later_quantity"
-//	@success	200					{object}	dayTradeResult
-//	@failure	500					{object}	resp.Response{}
-//	@Router		/v1/order/day-trade/reverse [get]
-func (r *orderRoutes) calculateReverseDayTradeBalance(c *gin.Context) {
-	sellFirstPriceString := c.Request.Header.Get("sell_first_price")
-	sellFirstPrice, err := strconv.ParseFloat(sellFirstPriceString, 64)
-	if err != nil {
-		resp.ErrorResponse(c, http.StatusBadRequest, err.Error())
-		return
-	}
-
-	sellFirstQuantityString := c.Request.Header.Get("sell_first_quantity")
-	sellFirstQuantity, err := strconv.ParseInt(sellFirstQuantityString, 10, 64)
-	if err != nil {
-		resp.ErrorResponse(c, http.StatusBadRequest, err.Error())
-		return
-	}
-
-	buyLaterPriceString := c.Request.Header.Get("buy_later_price")
-	buyLaterPrice, err := strconv.ParseFloat(buyLaterPriceString, 64)
-	if err != nil {
-		resp.ErrorResponse(c, http.StatusBadRequest, err.Error())
-		return
-	}
-	buyLaterQuantityString := c.Request.Header.Get("buy_later_quantity")
-	buyLaterQuantity, err := strconv.ParseInt(buyLaterQuantityString, 10, 64)
-	if err != nil {
-		resp.ErrorResponse(c, http.StatusBadRequest, err.Error())
-		return
-	}
-
-	firstIn := r.t.CalculateSellCost(sellFirstPrice, sellFirstQuantity, 0)
-	firstInDiscount := r.t.CalculateTradeDiscount(sellFirstPrice, sellFirstQuantity, 0)
-	payLater := r.t.CalculateBuyCost(buyLaterPrice, buyLaterQuantity, 0)
-	payLaterDiscount := r.t.CalculateTradeDiscount(buyLaterPrice, buyLaterQuantity, 0)
-
-	c.JSON(http.StatusOK, dayTradeResult{
-		Balance: firstIn + firstInDiscount - payLater + payLaterDiscount,
-	})
 }
 
 // moveFutureOrderToLatestTradeDay -.

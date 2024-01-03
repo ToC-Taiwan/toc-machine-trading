@@ -150,10 +150,6 @@ type TargetRepo interface {
 }
 
 type Trade interface {
-	CalculateBuyCost(price float64, lot, share int64) int64
-	CalculateSellCost(price float64, lot, share int64) int64
-	CalculateTradeDiscount(price float64, lot, share int64) int64
-
 	GetAllStockOrder(ctx context.Context) ([]*entity.StockOrder, error)
 	GetAllFutureOrder(ctx context.Context) ([]*entity.FutureOrder, error)
 	GetAllStockTradeBalance(ctx context.Context) ([]*entity.StockTradeBalance, error)

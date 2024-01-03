@@ -485,120 +485,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/order/day-trade/forward": {
-            "get": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Order V1"
-                ],
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "buy_price",
-                        "name": "buy_price",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "buy_quantity",
-                        "name": "buy_quantity",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "sell_price",
-                        "name": "sell_price",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "sell_quantity",
-                        "name": "sell_quantity",
-                        "in": "header",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/v1.dayTradeResult"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/resp.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/v1/order/day-trade/reverse": {
-            "get": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Order V1"
-                ],
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "sell_first_price",
-                        "name": "sell_first_price",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "sell_first_quantity",
-                        "name": "sell_first_quantity",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "buy_later_price",
-                        "name": "buy_later_price",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "buy_later_quantity",
-                        "name": "buy_later_quantity",
-                        "in": "header",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/v1.dayTradeResult"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/resp.Response"
-                        }
-                    }
-                }
-            }
-        },
         "/v1/order/future/{order-id}": {
             "patch": {
                 "consumes": [
@@ -1827,14 +1713,6 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/entity.StockOrder"
                     }
-                }
-            }
-        },
-        "v1.dayTradeResult": {
-            "type": "object",
-            "properties": {
-                "balance": {
-                    "type": "integer"
                 }
             }
         },

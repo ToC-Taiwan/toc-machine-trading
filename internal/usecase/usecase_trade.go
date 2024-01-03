@@ -682,21 +682,6 @@ func (uc *TradeUseCase) GetLastFutureTradeBalance(ctx context.Context) (*entity.
 	return uc.repo.QueryLastFutureTradeBalance(ctx)
 }
 
-// CalculateBuyCost -.
-func (uc *TradeUseCase) CalculateBuyCost(price float64, lot, share int64) int64 {
-	return uc.quota.GetStockBuyCost(price, lot, share)
-}
-
-// CalculateSellCost -.
-func (uc *TradeUseCase) CalculateSellCost(price float64, lot, share int64) int64 {
-	return uc.quota.GetStockSellCost(price, lot, share)
-}
-
-// CalculateTradeDiscount -.
-func (uc *TradeUseCase) CalculateTradeDiscount(price float64, lot, share int64) int64 {
-	return uc.quota.GetStockTradeFeeDiscount(price, lot, share)
-}
-
 // GetFuturePosition .
 func (uc *TradeUseCase) GetFuturePosition() ([]*entity.FuturePosition, error) {
 	query, err := uc.sc.GetFuturePosition()

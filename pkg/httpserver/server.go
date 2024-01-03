@@ -54,22 +54,6 @@ func (s *Server) Infof(format string, args ...interface{}) {
 	}
 }
 
-func (s *Server) Errorf(format string, args ...interface{}) {
-	if s.logger != nil {
-		s.logger.Errorf(strings.ReplaceAll(format, "\n", ""), args...)
-	} else {
-		fmt.Printf(format, args...)
-	}
-}
-
-func (s *Server) Fatalf(format string, args ...interface{}) {
-	if s.logger != nil {
-		s.logger.Fatalf(strings.ReplaceAll(format, "\n", ""), args...)
-	} else {
-		panic(fmt.Errorf(format, args...))
-	}
-}
-
 func (s *Server) Start() error {
 	if err := s.tryListen(); err != nil {
 		return err
