@@ -46,30 +46,32 @@ func (c *Rabbit) protoToOrder(proto *pb.OrderStatus) interface{} {
 		return nil
 	}
 
+	detail := entity.OrderDetail{
+		OrderID:   proto.GetOrderId(),
+		Action:    entity.StringToOrderAction(proto.GetAction()),
+		Price:     proto.GetPrice(),
+		Status:    entity.StringToOrderStatus(proto.GetStatus()),
+		OrderTime: orderTime,
+	}
+
 	switch proto.GetType() {
-	case pb.OrderType_TYPE_STOCK_LOT, pb.OrderType_TYPE_STOCK_SHARE:
+	case pb.OrderType_TYPE_STOCK_LOT:
 		return &entity.StockOrder{
-			StockNum: proto.GetCode(),
-			BaseOrder: entity.BaseOrder{
-				OrderID:   proto.GetOrderId(),
-				Action:    entity.StringToOrderAction(proto.GetAction()),
-				Price:     proto.GetPrice(),
-				Quantity:  proto.GetQuantity(),
-				Status:    entity.StringToOrderStatus(proto.GetStatus()),
-				OrderTime: orderTime,
-			},
+			StockNum:    proto.GetCode(),
+			Lot:         proto.GetQuantity(),
+			OrderDetail: detail,
+		}
+	case pb.OrderType_TYPE_STOCK_SHARE:
+		return &entity.StockOrder{
+			StockNum:    proto.GetCode(),
+			Share:       proto.GetQuantity(),
+			OrderDetail: detail,
 		}
 	case pb.OrderType_TYPE_FUTURE:
 		return &entity.FutureOrder{
-			Code: proto.GetCode(),
-			BaseOrder: entity.BaseOrder{
-				OrderID:   proto.GetOrderId(),
-				Action:    entity.StringToOrderAction(proto.GetAction()),
-				Price:     proto.GetPrice(),
-				Quantity:  proto.GetQuantity(),
-				Status:    entity.StringToOrderStatus(proto.GetStatus()),
-				OrderTime: orderTime,
-			},
+			Code:        proto.GetCode(),
+			Position:    proto.GetQuantity(),
+			OrderDetail: detail,
 		}
 	default:
 		c.logger.Warnf("protoToOrder: unknown order type")

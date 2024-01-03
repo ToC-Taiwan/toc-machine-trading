@@ -124,17 +124,16 @@ func StringToOrderStatus(s string) OrderStatus {
 	}
 }
 
-// BaseOrder -.
-type BaseOrder struct {
+// OrderDetail -.
+type OrderDetail struct {
 	OrderID   string      `json:"order_id"`
-	Status    OrderStatus `json:"status"`
-	OrderTime time.Time   `json:"order_time"`
-	Action    OrderAction `json:"action"`
 	Price     float64     `json:"price"`
-	Quantity  int64       `json:"quantity"`
+	Status    OrderStatus `json:"status"`
+	Action    OrderAction `json:"action"`
+	OrderTime time.Time   `json:"order_time"`
 }
 
-func (o *BaseOrder) Cancellable() bool {
+func (o *OrderDetail) Cancellable() bool {
 	switch o.Status {
 	case StatusPendingSubmit, StatusPreSubmitted, StatusSubmitted, StatusPartFilled:
 		return true
@@ -143,31 +142,18 @@ func (o *BaseOrder) Cancellable() bool {
 	}
 }
 
-func (o *BaseOrder) FilledQty() int64 {
-	if o.Status != StatusFilled && o.Status != StatusPartFilled {
-		return 0
-	}
-
-	switch o.Action {
-	case ActionBuy:
-		return o.Quantity
-	case ActionSell:
-		return -o.Quantity
-	default:
-		return 0
-	}
-}
-
 // StockOrder -.
 type StockOrder struct {
-	BaseOrder `json:"base_order"`
-
 	StockNum string `json:"stock_num"`
+	Lot      int64  `json:"lot"`
+	Share    int64  `json:"share"`
 	Stock    *Stock `json:"stock"`
+
+	OrderDetail `json:"base_order"`
 }
 
 func (s *StockOrder) StockOrderStatusString() string {
-	return fmt.Sprintf("%s %s %s %.0f x %d", s.BaseOrder.Status.String(), s.BaseOrder.Action.String(), s.StockNum, s.BaseOrder.Price, s.BaseOrder.Quantity)
+	return fmt.Sprintf("%s %s %s %.0f x (%d+%d)", s.OrderDetail.Status.String(), s.OrderDetail.Action.String(), s.StockNum, s.OrderDetail.Price, s.Lot*1000, s.Share)
 }
 
 // func (s *StockOrder) FixTime() *StockOrder {
@@ -179,18 +165,19 @@ func (s *StockOrder) StockOrderStatusString() string {
 
 // FutureOrder -.
 type FutureOrder struct {
-	BaseOrder `json:"base_order"`
+	Code     string  `json:"code"`
+	Position int64   `json:"position"`
+	Future   *Future `json:"future"`
 
-	Code   string  `json:"code"`
-	Future *Future `json:"future"`
+	OrderDetail `json:"base_order"`
 }
 
 func (f *FutureOrder) FutureOrderStatusString() string {
-	return fmt.Sprintf("%s %s %s %.0f x %d", f.BaseOrder.Status.String(), f.BaseOrder.Action.String(), f.Code, f.BaseOrder.Price, f.BaseOrder.Quantity)
+	return fmt.Sprintf("%s %s %s %.0f x %d", f.OrderDetail.Status.String(), f.OrderDetail.Action.String(), f.Code, f.OrderDetail.Price, f.Position)
 }
 
 func (f *FutureOrder) String() string {
-	return fmt.Sprintf("%s %s %.0f x %d", f.BaseOrder.Action.String(), f.Code, f.BaseOrder.Price, f.BaseOrder.Quantity)
+	return fmt.Sprintf("%s %s %.0f x %d", f.OrderDetail.Action.String(), f.Code, f.OrderDetail.Price, f.Position)
 }
 
 // func (f *FutureOrder) FixTime() *FutureOrder {
@@ -226,7 +213,7 @@ type FutureTradeBalance struct {
 type FuturePosition struct {
 	Code      string  `json:"code"`
 	Direction string  `json:"direction"`
-	Quantity  int64   `json:"quantity"`
+	Position  int64   `json:"position"`
 	Price     float64 `json:"price"`
 	LastPrice float64 `json:"last_price"`
 	Pnl       float64 `json:"pnl"`

@@ -19,10 +19,10 @@ type assistTarget struct {
 // toFinishOrder will return a order to finish the assist order
 func (o *assistTarget) toFinishOrder(price float64) *entity.FutureOrder {
 	order := &entity.FutureOrder{
-		Code: o.Code,
-		BaseOrder: entity.BaseOrder{
-			Quantity: o.Quantity,
-			Price:    price,
+		Code:     o.Code,
+		Position: o.Position,
+		OrderDetail: entity.OrderDetail{
+			Price: price,
 		},
 	}
 	switch o.Action {
@@ -115,12 +115,12 @@ func (a *assistTrader) isAssistDone() bool {
 	a.finishOrderMapLock.RLock()
 	for _, o := range a.finishOrderMap {
 		if o.Status == entity.StatusFilled {
-			endQty += o.Quantity
+			endQty += o.Position
 		}
 	}
 	a.finishOrderMapLock.RUnlock()
 
-	if endQty == a.Quantity {
+	if endQty == a.Position {
 		a.UnSubscribe(topicOrderStatus, a.updateOrderStatus)
 		a.PublishTopicEvent(topicAssistDone, a.OrderID)
 		a.SendToClient(newAssistStatusProto(false))

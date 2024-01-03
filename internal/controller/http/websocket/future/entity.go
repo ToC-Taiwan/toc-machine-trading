@@ -35,11 +35,11 @@ func (f *clientOrder) toFutureOrderArr() []*entity.FutureOrder {
 	var orders []*entity.FutureOrder
 	for i := 0; i < int(f.Qty); i++ {
 		orders = append(orders, &entity.FutureOrder{
-			Code: f.Code,
-			BaseOrder: entity.BaseOrder{
-				Action:   f.Action,
-				Quantity: 1,
-				Price:    f.Price,
+			Code:     f.Code,
+			Position: 1, // split order to 1 qty per order
+			OrderDetail: entity.OrderDetail{
+				Action: f.Action,
+				Price:  f.Price,
 			},
 		})
 	}

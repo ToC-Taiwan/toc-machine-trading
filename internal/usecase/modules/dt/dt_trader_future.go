@@ -42,11 +42,11 @@ type DTTraderFuture struct {
 	logger *log.Log
 }
 
-// NewDTTraderFuture create a new DTTraderFuture, if quantity > orderQtyUnit, return nil or place order error, return nil
+// NewDTTraderFuture create a new DTTraderFuture, if position > orderQtyUnit, return nil or place order error, return nil
 func NewDTTraderFuture(orderWithCfg orderWithCfg, s *grpc.TradegRPCAPI, bus *eventbus.Bus) *DTTraderFuture {
 	logger := log.Get()
-	if orderWithCfg.order.Quantity > orderQtyUnit {
-		logger.Warnf("New DTTraderFuture quantity > %d", orderQtyUnit)
+	if orderWithCfg.order.Position > orderQtyUnit {
+		logger.Warnf("New DTTraderFuture position > %d", orderQtyUnit)
 		return nil
 	}
 
@@ -114,11 +114,11 @@ func (d *DTTraderFuture) isTraderDone() bool {
 	var endQty int64
 	for _, o := range d.finishOrderMap {
 		if o.Status == entity.StatusFilled {
-			endQty += o.Quantity
+			endQty += o.Position
 		}
 	}
 
-	if endQty == d.baseOrder.Quantity {
+	if endQty == d.baseOrder.Position {
 		d.postDone()
 		return true
 	}
@@ -179,11 +179,11 @@ func (d *DTTraderFuture) checkByBalance(tick *entity.RealTimeFutureTick) {
 	}
 
 	o := &entity.FutureOrder{
-		Code: tick.Code,
-		BaseOrder: entity.BaseOrder{
-			Action:   d.tradeOutAction,
-			Price:    tick.Close,
-			Quantity: orderQtyUnit,
+		Code:     tick.Code,
+		Position: orderQtyUnit,
+		OrderDetail: entity.OrderDetail{
+			Action: d.tradeOutAction,
+			Price:  tick.Close,
 		},
 	}
 

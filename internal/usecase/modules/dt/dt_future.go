@@ -195,20 +195,20 @@ func (d *DTFuture) generateOrder() *entity.FutureOrder {
 	switch {
 	case outInRatio > d.tradeConfig.OutInRatio:
 		return &entity.FutureOrder{
-			Code: d.code,
-			BaseOrder: entity.BaseOrder{
-				Action:   entity.ActionBuy,
-				Price:    d.lastTick.Close - 1,
-				Quantity: orderQtyUnit,
+			Code:     d.code,
+			Position: orderQtyUnit,
+			OrderDetail: entity.OrderDetail{
+				Action: entity.ActionBuy,
+				Price:  d.lastTick.Close - 1,
 			},
 		}
 	case 100-outInRatio > d.tradeConfig.InOutRatio:
 		return &entity.FutureOrder{
-			Code: d.code,
-			BaseOrder: entity.BaseOrder{
-				Action:   entity.ActionSell,
-				Price:    d.lastTick.Close + 1,
-				Quantity: orderQtyUnit,
+			Code:     d.code,
+			Position: orderQtyUnit,
+			OrderDetail: entity.OrderDetail{
+				Action: entity.ActionSell,
+				Price:  d.lastTick.Close + 1,
 			},
 		}
 	default:

@@ -169,15 +169,15 @@ func (r *orderRoutes) manualInsertFutureOrder(c *gin.Context) {
 	}
 
 	order := &entity.FutureOrder{
-		BaseOrder: entity.BaseOrder{
+		OrderDetail: entity.OrderDetail{
 			OrderID:   utils.RandomASCIILowerOctdigitsString(8),
 			Status:    entity.StatusFilled,
 			Action:    body.Action,
 			Price:     body.Price,
-			Quantity:  body.Quantity,
 			OrderTime: orderTime,
 		},
-		Code: body.Code,
+		Position: body.Quantity,
+		Code:     body.Code,
 	}
 
 	if err := r.t.ManualInsertFutureOrder(c.Request.Context(), order); err != nil {
@@ -312,10 +312,10 @@ func (r *orderRoutes) calculateForwardDayTradeBalance(c *gin.Context) {
 		return
 	}
 
-	pay := r.t.CalculateBuyCost(buyPrice, buyQuantity)
-	payDiscount := r.t.CalculateTradeDiscount(buyPrice, buyQuantity)
-	earning := r.t.CalculateSellCost(sellPrice, sellQuantity)
-	earningDiscount := r.t.CalculateTradeDiscount(sellPrice, sellQuantity)
+	pay := r.t.CalculateBuyCost(buyPrice, buyQuantity, 0)
+	payDiscount := r.t.CalculateTradeDiscount(buyPrice, buyQuantity, 0)
+	earning := r.t.CalculateSellCost(sellPrice, sellQuantity, 0)
+	earningDiscount := r.t.CalculateTradeDiscount(sellPrice, sellQuantity, 0)
 
 	c.JSON(http.StatusOK, dayTradeResult{
 		Balance: -pay + payDiscount + earning + earningDiscount,
@@ -365,10 +365,10 @@ func (r *orderRoutes) calculateReverseDayTradeBalance(c *gin.Context) {
 		return
 	}
 
-	firstIn := r.t.CalculateSellCost(sellFirstPrice, sellFirstQuantity)
-	firstInDiscount := r.t.CalculateTradeDiscount(sellFirstPrice, sellFirstQuantity)
-	payLater := r.t.CalculateBuyCost(buyLaterPrice, buyLaterQuantity)
-	payLaterDiscount := r.t.CalculateTradeDiscount(buyLaterPrice, buyLaterQuantity)
+	firstIn := r.t.CalculateSellCost(sellFirstPrice, sellFirstQuantity, 0)
+	firstInDiscount := r.t.CalculateTradeDiscount(sellFirstPrice, sellFirstQuantity, 0)
+	payLater := r.t.CalculateBuyCost(buyLaterPrice, buyLaterQuantity, 0)
+	payLaterDiscount := r.t.CalculateTradeDiscount(buyLaterPrice, buyLaterQuantity, 0)
 
 	c.JSON(http.StatusOK, dayTradeResult{
 		Balance: firstIn + firstInDiscount - payLater + payLaterDiscount,

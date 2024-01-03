@@ -91,7 +91,7 @@ func (t *TradegRPCAPI) BuyStock(order *entity.StockOrder) (*pb.TradeResult, erro
 	r, err := pb.NewTradeInterfaceClient(conn).BuyStock(context.Background(), &pb.StockOrderDetail{
 		StockNum: order.StockNum,
 		Price:    order.Price,
-		Quantity: order.Quantity,
+		Quantity: order.Lot,
 		Simulate: t.sim,
 	})
 	if err != nil {
@@ -108,7 +108,7 @@ func (t *TradegRPCAPI) SellStock(order *entity.StockOrder) (*pb.TradeResult, err
 	r, err := pb.NewTradeInterfaceClient(conn).SellStock(context.Background(), &pb.StockOrderDetail{
 		StockNum: order.StockNum,
 		Price:    order.Price,
-		Quantity: order.Quantity,
+		Quantity: order.Lot,
 		Simulate: t.sim,
 	})
 	if err != nil {
@@ -124,7 +124,7 @@ func (t *TradegRPCAPI) BuyOddStock(order *entity.StockOrder) (*pb.TradeResult, e
 	r, err := pb.NewTradeInterfaceClient(conn).BuyOddStock(context.Background(), &pb.OddStockOrderDetail{
 		StockNum: order.StockNum,
 		Price:    order.Price,
-		Share:    order.Quantity,
+		Share:    order.Lot,
 	})
 	if err != nil {
 		return nil, err
@@ -139,7 +139,7 @@ func (t *TradegRPCAPI) SellOddStock(order *entity.StockOrder) (*pb.TradeResult, 
 	r, err := pb.NewTradeInterfaceClient(conn).SellOddStock(context.Background(), &pb.OddStockOrderDetail{
 		StockNum: order.StockNum,
 		Price:    order.Price,
-		Share:    order.Quantity,
+		Share:    order.Share,
 	})
 	if err != nil {
 		return nil, err
@@ -155,7 +155,7 @@ func (t *TradegRPCAPI) SellFirstStock(order *entity.StockOrder) (*pb.TradeResult
 	r, err := pb.NewTradeInterfaceClient(conn).SellFirstStock(context.Background(), &pb.StockOrderDetail{
 		StockNum: order.StockNum,
 		Price:    order.Price,
-		Quantity: order.Quantity,
+		Quantity: order.Lot,
 		Simulate: t.sim,
 	})
 	if err != nil {
@@ -238,7 +238,7 @@ func (t *TradegRPCAPI) BuyFuture(order *entity.FutureOrder) (*pb.TradeResult, er
 	r, err := pb.NewTradeInterfaceClient(conn).BuyFuture(context.Background(), &pb.FutureOrderDetail{
 		Code:     order.Code,
 		Price:    order.Price,
-		Quantity: order.Quantity,
+		Quantity: order.Position,
 		Simulate: t.sim,
 	})
 	if err != nil {
@@ -255,7 +255,7 @@ func (t *TradegRPCAPI) SellFuture(order *entity.FutureOrder) (*pb.TradeResult, e
 	r, err := pb.NewTradeInterfaceClient(conn).SellFuture(context.Background(), &pb.FutureOrderDetail{
 		Code:     order.Code,
 		Price:    order.Price,
-		Quantity: order.Quantity,
+		Quantity: order.Position,
 		Simulate: t.sim,
 	})
 	if err != nil {
@@ -272,7 +272,7 @@ func (t *TradegRPCAPI) SellFirstFuture(order *entity.FutureOrder) (*pb.TradeResu
 	r, err := pb.NewTradeInterfaceClient(conn).SellFirstFuture(context.Background(), &pb.FutureOrderDetail{
 		Code:     order.Code,
 		Price:    order.Price,
-		Quantity: order.Quantity,
+		Quantity: order.Position,
 		Simulate: t.sim,
 	})
 	if err != nil {

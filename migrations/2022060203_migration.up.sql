@@ -75,7 +75,8 @@ CREATE TABLE trade_stock_order (
     "stock_num" VARCHAR NOT NULL,
     "action" INT NOT NULL,
     "price" DECIMAL NOT NULL,
-    "quantity" INT NOT NULL
+    "lot" INT NOT NULL,
+    "share" INT NOT NULL
 );
 CREATE INDEX trade_stock_order_order_time_index ON trade_stock_order USING btree ("order_time");
 ALTER TABLE trade_stock_order

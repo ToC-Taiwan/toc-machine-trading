@@ -1314,29 +1314,6 @@ const docTemplate = `{
                 }
             }
         },
-        "entity.BaseOrder": {
-            "type": "object",
-            "properties": {
-                "action": {
-                    "$ref": "#/definitions/entity.OrderAction"
-                },
-                "order_id": {
-                    "type": "string"
-                },
-                "order_time": {
-                    "type": "string"
-                },
-                "price": {
-                    "type": "number"
-                },
-                "quantity": {
-                    "type": "integer"
-                },
-                "status": {
-                    "$ref": "#/definitions/entity.OrderStatus"
-                }
-            }
-        },
         "entity.Future": {
             "type": "object",
             "properties": {
@@ -1382,13 +1359,16 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "base_order": {
-                    "$ref": "#/definitions/entity.BaseOrder"
+                    "$ref": "#/definitions/entity.OrderDetail"
                 },
                 "code": {
                     "type": "string"
                 },
                 "future": {
                     "$ref": "#/definitions/entity.Future"
+                },
+                "position": {
+                    "type": "integer"
                 }
             }
         },
@@ -1438,6 +1418,26 @@ const docTemplate = `{
                 "ActionBuy",
                 "ActionSell"
             ]
+        },
+        "entity.OrderDetail": {
+            "type": "object",
+            "properties": {
+                "action": {
+                    "$ref": "#/definitions/entity.OrderAction"
+                },
+                "order_id": {
+                    "type": "string"
+                },
+                "order_time": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "number"
+                },
+                "status": {
+                    "$ref": "#/definitions/entity.OrderStatus"
+                }
+            }
         },
         "entity.OrderStatus": {
             "type": "integer",
@@ -1565,7 +1565,13 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "base_order": {
-                    "$ref": "#/definitions/entity.BaseOrder"
+                    "$ref": "#/definitions/entity.OrderDetail"
+                },
+                "lot": {
+                    "type": "integer"
+                },
+                "share": {
+                    "type": "integer"
                 },
                 "stock": {
                     "$ref": "#/definitions/entity.Stock"

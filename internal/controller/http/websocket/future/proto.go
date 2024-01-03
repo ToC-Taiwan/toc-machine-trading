@@ -45,7 +45,7 @@ func newFutureOrderProto(f *entity.FutureOrder) *pb.WSMessage {
 					OrderTime: f.OrderTime.Format(entity.LongTimeLayout),
 					Action:    int64(f.Action),
 					Price:     f.Price,
-					Quantity:  f.Quantity,
+					Quantity:  f.Position,
 				},
 			},
 		},
@@ -79,7 +79,7 @@ func newFuturePositionProto(position entity.FuturePositionArr) *pb.WSMessage {
 		ret = append(ret, &pb.Position{
 			Code:      v.Code,
 			Direction: v.Direction,
-			Quantity:  v.Quantity,
+			Quantity:  v.Position,
 			Price:     v.Price,
 			LastPrice: v.LastPrice,
 			Pnl:       v.Pnl,

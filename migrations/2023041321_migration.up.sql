@@ -4,7 +4,8 @@ CREATE TABLE inventory_stock (
     "updated" TIMESTAMPTZ NOT NULL,
     "bank_id" INT NOT NULL,
     "avg_price" DECIMAL NOT NULL,
-    "quantity" INT NOT NULL,
+    "lot" INT NOT NULL,
+    "share" INT NOT NULL,
     "stock_num" VARCHAR NOT NULL
 );
 CREATE INDEX inventory_stock_stock_num_index ON inventory_stock USING btree ("stock_num");
@@ -15,7 +16,7 @@ CREATE TABLE inventory_future (
     "updated" TIMESTAMPTZ NOT NULL,
     "bank_id" INT NOT NULL,
     "avg_price" DECIMAL NOT NULL,
-    "quantity" INT NOT NULL,
+    "position" INT NOT NULL,
     "code" VARCHAR NOT NULL
 );
 CREATE INDEX inventory_future_code_index ON inventory_future USING btree ("code");

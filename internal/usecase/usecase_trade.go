@@ -183,28 +183,31 @@ func (uc *TradeUseCase) updateStockInventory() {
 		uc.logger.Fatal(err)
 	}
 	for _, s := range sinopacInventory.GetPositionArr() {
+		lot, share := int(s.GetQuantity())/1000, int(s.GetQuantity())%1000
 		inv = append(inv, &entity.InventoryStock{
 			StockNum: s.GetCode(),
-			Inventory: entity.Inventory{
+			Lot:      lot,
+			Share:    share,
+			InventoryBankDetail: entity.InventoryBankDetail{
 				BankID:   1,
 				AvgPrice: s.GetPrice(),
-				Quantity: int(s.GetQuantity()),
 				Updated:  queryDate,
 			},
 		})
 	}
-
 	fugleInventory, err := uc.fg.GetStockPosition()
 	if err != nil {
 		uc.logger.Fatal(err)
 	}
 	for _, s := range fugleInventory.GetPositionArr() {
+		lot, share := int(s.GetQuantity())/1000, int(s.GetQuantity())%1000
 		inv = append(inv, &entity.InventoryStock{
 			StockNum: s.GetCode(),
-			Inventory: entity.Inventory{
+			Lot:      lot,
+			Share:    share,
+			InventoryBankDetail: entity.InventoryBankDetail{
 				BankID:   2,
 				AvgPrice: s.GetPrice(),
-				Quantity: int(s.GetQuantity()),
 				Updated:  queryDate,
 			},
 		})
@@ -214,11 +217,9 @@ func (uc *TradeUseCase) updateStockInventory() {
 	if err != nil {
 		uc.logger.Fatal(err)
 	}
-
 	for _, v := range dbData {
 		v.ID = 0
 	}
-
 	if !cmp.Equal(dbData, inv) && len(inv) > 0 {
 		err = uc.repo.DeleteInventoryStockByDate(context.Background(), queryDate)
 		if err != nil {
@@ -359,14 +360,14 @@ func (uc *TradeUseCase) calculateStockTradeBalance(allOrders []*entity.StockOrde
 			} else {
 				reverse = append(reverse, v)
 			}
-			qtyMap[v.StockNum] += v.Quantity
+			qtyMap[v.StockNum] += v.Lot
 		case entity.ActionSell:
 			if qtyMap[v.StockNum] > 0 {
 				forward = append(forward, v)
 			} else {
 				reverse = append(reverse, v)
 			}
-			qtyMap[v.StockNum] -= v.Quantity
+			qtyMap[v.StockNum] -= v.Lot
 		}
 	}
 
@@ -396,13 +397,13 @@ func (uc *TradeUseCase) calculateForwardStockBalance(forward []*entity.StockOrde
 
 		switch v.Action {
 		case entity.ActionBuy:
-			qty += v.Quantity
-			forwardBalance -= uc.quota.GetStockBuyCost(v.Price, v.Quantity)
+			qty += v.Lot
+			forwardBalance -= uc.quota.GetStockBuyCost(v.Price, v.Lot, v.Share)
 		case entity.ActionSell:
-			qty -= v.Quantity
-			forwardBalance += uc.quota.GetStockSellCost(v.Price, v.Quantity)
+			qty -= v.Lot
+			forwardBalance += uc.quota.GetStockSellCost(v.Price, v.Lot, v.Share)
 		}
-		discount += uc.quota.GetStockTradeFeeDiscount(v.Price, v.Quantity)
+		discount += uc.quota.GetStockTradeFeeDiscount(v.Price, v.Lot, v.Share)
 	}
 
 	if qty != 0 {
@@ -420,13 +421,13 @@ func (uc *TradeUseCase) calculateReverseStockBalance(reverse []*entity.StockOrde
 
 		switch v.Action {
 		case entity.ActionSell:
-			qty -= v.Quantity
-			revereBalance += uc.quota.GetStockSellCost(v.Price, v.Quantity)
+			qty -= v.Lot
+			revereBalance += uc.quota.GetStockSellCost(v.Price, v.Lot, v.Share)
 		case entity.ActionBuy:
-			qty += v.Quantity
-			revereBalance -= uc.quota.GetStockBuyCost(v.Price, v.Quantity)
+			qty += v.Lot
+			revereBalance -= uc.quota.GetStockBuyCost(v.Price, v.Lot, v.Share)
 		}
-		discount += uc.quota.GetStockTradeFeeDiscount(v.Price, v.Quantity)
+		discount += uc.quota.GetStockTradeFeeDiscount(v.Price, v.Lot, v.Share)
 	}
 
 	if qty != 0 {
@@ -517,10 +518,10 @@ func (uc *TradeUseCase) BuyOddStock(num string, price float64, share int64) (str
 	}
 
 	result, err := uc.sc.BuyOddStock(&entity.StockOrder{
-		BaseOrder: entity.BaseOrder{
-			Price:    price,
-			Quantity: share,
+		OrderDetail: entity.OrderDetail{
+			Price: price,
 		},
+		Share:    share,
 		StockNum: num,
 	})
 	if err != nil {
@@ -550,14 +551,14 @@ func (uc *TradeUseCase) calculateFutureTradeBalance(allOrders []*entity.FutureOr
 			} else {
 				reverse = append(reverse, v)
 			}
-			qtyMap[v.Code] += v.Quantity
+			qtyMap[v.Code] += v.Position
 		case entity.ActionSell:
 			if qtyMap[v.Code] > 0 {
 				forward = append(forward, v)
 			} else {
 				reverse = append(reverse, v)
 			}
-			qtyMap[v.Code] -= v.Quantity
+			qtyMap[v.Code] -= v.Position
 		}
 	}
 
@@ -585,11 +586,11 @@ func (uc *TradeUseCase) calculateForwardFutureBalance(forward []*entity.FutureOr
 
 		switch v.Action {
 		case entity.ActionBuy:
-			qty += v.Quantity
-			forwardBalance -= uc.quota.GetFutureBuyCost(v.Price, v.Quantity)
+			qty += v.Position
+			forwardBalance -= uc.quota.GetFutureBuyCost(v.Price, v.Position)
 		case entity.ActionSell:
-			qty -= v.Quantity
-			forwardBalance += uc.quota.GetFutureSellCost(v.Price, v.Quantity)
+			qty -= v.Position
+			forwardBalance += uc.quota.GetFutureSellCost(v.Price, v.Position)
 		}
 	}
 
@@ -608,11 +609,11 @@ func (uc *TradeUseCase) calculateReverseFutureBalance(reverse []*entity.FutureOr
 
 		switch v.Action {
 		case entity.ActionSell:
-			qty -= v.Quantity
-			reverseBalance += uc.quota.GetFutureSellCost(v.Price, v.Quantity)
+			qty -= v.Position
+			reverseBalance += uc.quota.GetFutureSellCost(v.Price, v.Position)
 		case entity.ActionBuy:
-			qty += v.Quantity
-			reverseBalance -= uc.quota.GetFutureBuyCost(v.Price, v.Quantity)
+			qty += v.Position
+			reverseBalance -= uc.quota.GetFutureBuyCost(v.Price, v.Position)
 		}
 	}
 
@@ -659,18 +660,18 @@ func (uc *TradeUseCase) GetLastFutureTradeBalance(ctx context.Context) (*entity.
 }
 
 // CalculateBuyCost -.
-func (uc *TradeUseCase) CalculateBuyCost(price float64, quantity int64) int64 {
-	return uc.quota.GetStockBuyCost(price, quantity)
+func (uc *TradeUseCase) CalculateBuyCost(price float64, lot, share int64) int64 {
+	return uc.quota.GetStockBuyCost(price, lot, share)
 }
 
 // CalculateSellCost -.
-func (uc *TradeUseCase) CalculateSellCost(price float64, quantity int64) int64 {
-	return uc.quota.GetStockSellCost(price, quantity)
+func (uc *TradeUseCase) CalculateSellCost(price float64, lot, share int64) int64 {
+	return uc.quota.GetStockSellCost(price, lot, share)
 }
 
 // CalculateTradeDiscount -.
-func (uc *TradeUseCase) CalculateTradeDiscount(price float64, quantity int64) int64 {
-	return uc.quota.GetStockTradeFeeDiscount(price, quantity)
+func (uc *TradeUseCase) CalculateTradeDiscount(price float64, lot, share int64) int64 {
+	return uc.quota.GetStockTradeFeeDiscount(price, lot, share)
 }
 
 // GetFuturePosition .
@@ -684,7 +685,7 @@ func (uc *TradeUseCase) GetFuturePosition() ([]*entity.FuturePosition, error) {
 		result = append(result, &entity.FuturePosition{
 			Code:      v.GetCode(),
 			Direction: v.GetDirection(),
-			Quantity:  int64(v.GetQuantity()),
+			Position:  int64(v.GetQuantity()),
 			Price:     v.GetPrice(),
 			LastPrice: v.GetLastPrice(),
 			Pnl:       v.GetPnl(),

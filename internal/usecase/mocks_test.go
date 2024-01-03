@@ -1672,45 +1672,45 @@ func (mr *MockTradeMockRecorder) BuyOddStock(num, price, share interface{}) *gom
 }
 
 // CalculateBuyCost mocks base method.
-func (m *MockTrade) CalculateBuyCost(price float64, quantity int64) int64 {
+func (m *MockTrade) CalculateBuyCost(price float64, lot, share int64) int64 {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CalculateBuyCost", price, quantity)
+	ret := m.ctrl.Call(m, "CalculateBuyCost", price, lot, share)
 	ret0, _ := ret[0].(int64)
 	return ret0
 }
 
 // CalculateBuyCost indicates an expected call of CalculateBuyCost.
-func (mr *MockTradeMockRecorder) CalculateBuyCost(price, quantity interface{}) *gomock.Call {
+func (mr *MockTradeMockRecorder) CalculateBuyCost(price, lot, share interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CalculateBuyCost", reflect.TypeOf((*MockTrade)(nil).CalculateBuyCost), price, quantity)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CalculateBuyCost", reflect.TypeOf((*MockTrade)(nil).CalculateBuyCost), price, lot, share)
 }
 
 // CalculateSellCost mocks base method.
-func (m *MockTrade) CalculateSellCost(price float64, quantity int64) int64 {
+func (m *MockTrade) CalculateSellCost(price float64, lot, share int64) int64 {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CalculateSellCost", price, quantity)
+	ret := m.ctrl.Call(m, "CalculateSellCost", price, lot, share)
 	ret0, _ := ret[0].(int64)
 	return ret0
 }
 
 // CalculateSellCost indicates an expected call of CalculateSellCost.
-func (mr *MockTradeMockRecorder) CalculateSellCost(price, quantity interface{}) *gomock.Call {
+func (mr *MockTradeMockRecorder) CalculateSellCost(price, lot, share interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CalculateSellCost", reflect.TypeOf((*MockTrade)(nil).CalculateSellCost), price, quantity)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CalculateSellCost", reflect.TypeOf((*MockTrade)(nil).CalculateSellCost), price, lot, share)
 }
 
 // CalculateTradeDiscount mocks base method.
-func (m *MockTrade) CalculateTradeDiscount(price float64, quantity int64) int64 {
+func (m *MockTrade) CalculateTradeDiscount(price float64, lot, share int64) int64 {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CalculateTradeDiscount", price, quantity)
+	ret := m.ctrl.Call(m, "CalculateTradeDiscount", price, lot, share)
 	ret0, _ := ret[0].(int64)
 	return ret0
 }
 
 // CalculateTradeDiscount indicates an expected call of CalculateTradeDiscount.
-func (mr *MockTradeMockRecorder) CalculateTradeDiscount(price, quantity interface{}) *gomock.Call {
+func (mr *MockTradeMockRecorder) CalculateTradeDiscount(price, lot, share interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CalculateTradeDiscount", reflect.TypeOf((*MockTrade)(nil).CalculateTradeDiscount), price, quantity)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CalculateTradeDiscount", reflect.TypeOf((*MockTrade)(nil).CalculateTradeDiscount), price, lot, share)
 }
 
 // CancelFutureOrderByID mocks base method.

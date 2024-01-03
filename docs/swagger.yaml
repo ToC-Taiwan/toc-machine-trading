@@ -241,21 +241,6 @@ definitions:
       yesterday_margin:
         type: number
     type: object
-  entity.BaseOrder:
-    properties:
-      action:
-        $ref: '#/definitions/entity.OrderAction'
-      order_id:
-        type: string
-      order_time:
-        type: string
-      price:
-        type: number
-      quantity:
-        type: integer
-      status:
-        $ref: '#/definitions/entity.OrderStatus'
-    type: object
   entity.Future:
     properties:
       category:
@@ -286,11 +271,13 @@ definitions:
   entity.FutureOrder:
     properties:
       base_order:
-        $ref: '#/definitions/entity.BaseOrder'
+        $ref: '#/definitions/entity.OrderDetail'
       code:
         type: string
       future:
         $ref: '#/definitions/entity.Future'
+      position:
+        type: integer
     type: object
   entity.FutureTradeBalance:
     properties:
@@ -324,6 +311,19 @@ definitions:
     - ActionNone
     - ActionBuy
     - ActionSell
+  entity.OrderDetail:
+    properties:
+      action:
+        $ref: '#/definitions/entity.OrderAction'
+      order_id:
+        type: string
+      order_time:
+        type: string
+      price:
+        type: number
+      status:
+        $ref: '#/definitions/entity.OrderStatus'
+    type: object
   entity.OrderStatus:
     enum:
     - 0
@@ -412,7 +412,11 @@ definitions:
   entity.StockOrder:
     properties:
       base_order:
-        $ref: '#/definitions/entity.BaseOrder'
+        $ref: '#/definitions/entity.OrderDetail'
+      lot:
+        type: integer
+      share:
+        type: integer
       stock:
         $ref: '#/definitions/entity.Stock'
       stock_num:
