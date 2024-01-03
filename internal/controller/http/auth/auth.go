@@ -88,7 +88,7 @@ func logoutResponse(c *gin.Context, code int) {
 
 func refreshResponse(c *gin.Context, code int, token string, expire time.Time) {
 	c.JSON(http.StatusOK, RefreshResponseBody{
-		Token:  token,
+		Token:  fmt.Sprintf("%s %s", tokenHeaderName, token),
 		Expire: expire.Format(time.RFC3339),
 		Code:   code,
 	})
