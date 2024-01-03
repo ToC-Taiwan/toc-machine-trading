@@ -24,7 +24,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "analyze"
+                    "Analyze V1"
                 ],
                 "summary": "getRebornTargets",
                 "responses": {
@@ -49,7 +49,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "system"
+                    "Basic V1"
                 ],
                 "summary": "getAllConfig",
                 "responses": {
@@ -77,7 +77,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "basic"
+                    "Basic V1"
                 ],
                 "summary": "getAllRepoStock",
                 "parameters": [
@@ -119,7 +119,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "system"
+                    "Basic V1"
                 ],
                 "summary": "getShioajiUsage",
                 "responses": {
@@ -147,7 +147,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "history"
+                    "History V1"
                 ],
                 "summary": "getKbarData",
                 "parameters": [
@@ -201,7 +201,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "user"
+                    "User V1"
                 ],
                 "summary": "loginHandler",
                 "parameters": [
@@ -239,7 +239,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "user"
+                    "User V1"
                 ],
                 "summary": "logutHandler",
                 "responses": {
@@ -261,7 +261,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "order"
+                    "Order V1"
                 ],
                 "summary": "manualInsertFutureOrder",
                 "parameters": [
@@ -297,7 +297,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "account"
+                    "Account V1"
                 ],
                 "summary": "getAccountBalance",
                 "responses": {
@@ -325,7 +325,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "order"
+                    "Order V1"
                 ],
                 "summary": "getAllOrder",
                 "responses": {
@@ -353,7 +353,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "order"
+                    "Order V1"
                 ],
                 "summary": "getAllTradeBalance",
                 "responses": {
@@ -381,7 +381,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "order"
+                    "Order V1"
                 ],
                 "summary": "getLastFutureTradeBalance",
                 "responses": {
@@ -409,7 +409,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "order"
+                    "Order V1"
                 ],
                 "summary": "getLastStockTradeBalance",
                 "responses": {
@@ -437,7 +437,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "order"
+                    "Order V1"
                 ],
                 "summary": "getAllOrderByTradeDay",
                 "parameters": [
@@ -472,7 +472,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "order"
+                    "Order V1"
                 ],
                 "summary": "updateTradeBalanceByTradeDay",
                 "parameters": [
@@ -509,7 +509,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "order"
+                    "Order V1"
                 ],
                 "summary": "calculateForwardDayTradeBalance",
                 "parameters": [
@@ -567,7 +567,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "order"
+                    "Order V1"
                 ],
                 "summary": "calculateReverseDayTradeBalance",
                 "parameters": [
@@ -625,7 +625,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "order"
+                    "Order V1"
                 ],
                 "summary": "moveFutureOrderToLatestTradeDay",
                 "parameters": [
@@ -659,7 +659,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "order"
+                    "Order V1"
                 ],
                 "summary": "moveStockOrderToLatestTradeDay",
                 "parameters": [
@@ -698,7 +698,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "user"
+                    "User V1"
                 ],
                 "summary": "refreshTokenHandler",
                 "responses": {
@@ -720,7 +720,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "stream"
+                    "Stream V1"
                 ],
                 "summary": "getIndex",
                 "responses": {
@@ -742,7 +742,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "stream"
+                    "Stream V1"
                 ],
                 "summary": "getTSESnapshot",
                 "responses": {
@@ -770,7 +770,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "targets"
+                    "Targets V1"
                 ],
                 "summary": "getTargets",
                 "responses": {
@@ -800,7 +800,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "trade"
+                    "Trade V1"
                 ],
                 "summary": "buyLotStock",
                 "parameters": [
@@ -838,7 +838,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "trade"
+                    "Trade V1"
                 ],
                 "summary": "buyOddStock",
                 "parameters": [
@@ -871,7 +871,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "user"
+                    "User V1"
                 ],
                 "summary": "newUserHandler",
                 "parameters": [
@@ -913,7 +913,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "user"
+                    "User V1"
                 ],
                 "summary": "activateUserHandler",
                 "parameters": [
@@ -953,7 +953,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "user"
+                    "User V1"
                 ],
                 "summary": "verifyEmailHandler",
                 "parameters": [

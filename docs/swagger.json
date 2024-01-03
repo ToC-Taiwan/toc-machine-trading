@@ -16,7 +16,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "analyze"
+                    "Analyze V1"
                 ],
                 "summary": "getRebornTargets",
                 "responses": {
@@ -41,7 +41,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "system"
+                    "Basic V1"
                 ],
                 "summary": "getAllConfig",
                 "responses": {
@@ -69,7 +69,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "basic"
+                    "Basic V1"
                 ],
                 "summary": "getAllRepoStock",
                 "parameters": [
@@ -111,7 +111,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "system"
+                    "Basic V1"
                 ],
                 "summary": "getShioajiUsage",
                 "responses": {
@@ -139,7 +139,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "history"
+                    "History V1"
                 ],
                 "summary": "getKbarData",
                 "parameters": [
@@ -193,7 +193,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "user"
+                    "User V1"
                 ],
                 "summary": "loginHandler",
                 "parameters": [
@@ -231,7 +231,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "user"
+                    "User V1"
                 ],
                 "summary": "logutHandler",
                 "responses": {
@@ -253,7 +253,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "order"
+                    "Order V1"
                 ],
                 "summary": "manualInsertFutureOrder",
                 "parameters": [
@@ -289,7 +289,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "account"
+                    "Account V1"
                 ],
                 "summary": "getAccountBalance",
                 "responses": {
@@ -317,7 +317,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "order"
+                    "Order V1"
                 ],
                 "summary": "getAllOrder",
                 "responses": {
@@ -345,7 +345,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "order"
+                    "Order V1"
                 ],
                 "summary": "getAllTradeBalance",
                 "responses": {
@@ -373,7 +373,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "order"
+                    "Order V1"
                 ],
                 "summary": "getLastFutureTradeBalance",
                 "responses": {
@@ -401,7 +401,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "order"
+                    "Order V1"
                 ],
                 "summary": "getLastStockTradeBalance",
                 "responses": {
@@ -429,7 +429,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "order"
+                    "Order V1"
                 ],
                 "summary": "getAllOrderByTradeDay",
                 "parameters": [
@@ -464,7 +464,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "order"
+                    "Order V1"
                 ],
                 "summary": "updateTradeBalanceByTradeDay",
                 "parameters": [
@@ -501,7 +501,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "order"
+                    "Order V1"
                 ],
                 "summary": "calculateForwardDayTradeBalance",
                 "parameters": [
@@ -559,7 +559,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "order"
+                    "Order V1"
                 ],
                 "summary": "calculateReverseDayTradeBalance",
                 "parameters": [
@@ -617,7 +617,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "order"
+                    "Order V1"
                 ],
                 "summary": "moveFutureOrderToLatestTradeDay",
                 "parameters": [
@@ -651,7 +651,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "order"
+                    "Order V1"
                 ],
                 "summary": "moveStockOrderToLatestTradeDay",
                 "parameters": [
@@ -690,7 +690,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "user"
+                    "User V1"
                 ],
                 "summary": "refreshTokenHandler",
                 "responses": {
@@ -712,7 +712,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "stream"
+                    "Stream V1"
                 ],
                 "summary": "getIndex",
                 "responses": {
@@ -734,7 +734,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "stream"
+                    "Stream V1"
                 ],
                 "summary": "getTSESnapshot",
                 "responses": {
@@ -762,7 +762,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "targets"
+                    "Targets V1"
                 ],
                 "summary": "getTargets",
                 "responses": {
@@ -792,7 +792,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "trade"
+                    "Trade V1"
                 ],
                 "summary": "buyLotStock",
                 "parameters": [
@@ -830,7 +830,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "trade"
+                    "Trade V1"
                 ],
                 "summary": "buyOddStock",
                 "parameters": [
@@ -863,7 +863,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "user"
+                    "User V1"
                 ],
                 "summary": "newUserHandler",
                 "parameters": [
@@ -905,7 +905,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "user"
+                    "User V1"
                 ],
                 "summary": "activateUserHandler",
                 "parameters": [
@@ -945,7 +945,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "user"
+                    "User V1"
                 ],
                 "summary": "verifyEmailHandler",
                 "parameters": [

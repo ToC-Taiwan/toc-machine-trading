@@ -51,7 +51,7 @@ type allOrder struct {
 // getAllOrder -.
 //
 //	@Summary	getAllOrder
-//	@Tags		order
+//	@Tags		Order V1
 //	@Accept		json
 //	@Produce	json
 //	@Success	200	{object}	allOrder
@@ -82,7 +82,7 @@ type futureOrders struct {
 // getAllOrderByTradeDay -.
 //
 //	@Summary	getAllOrderByTradeDay
-//	@Tags		order
+//	@Tags		Order V1
 //	@Accept		json
 //	@Produce	json
 //	@param		tradeday	path		string	true	"tradeday"
@@ -107,7 +107,7 @@ func (r *orderRoutes) getAllOrderByTradeDay(c *gin.Context) {
 // updateTradeBalanceByTradeDay -.
 //
 //	@Summary	updateTradeBalanceByTradeDay
-//	@Tags		order
+//	@Tags		Order V1
 //	@Accept		json
 //	@Produce	json
 //	@param		tradeday	path		string	true	"tradeday"
@@ -140,7 +140,7 @@ type manualInsertFutureOrderRequest struct {
 // manualInsertFutureOrder -.
 //
 //	@Summary	manualInsertFutureOrder
-//	@Tags		order
+//	@Tags		Order V1
 //	@Accept		json
 //	@Produce	json
 //	@param		body	body	manualInsertFutureOrderRequest{}	true	"Body"
@@ -188,7 +188,7 @@ type tradeBalance struct {
 // getAllTradeBalance -.
 //
 //	@Summary	getAllTradeBalance
-//	@Tags		order
+//	@Tags		Order V1
 //	@Accept		json
 //	@Produce	json
 //	@Success	200	{object}	tradeBalance
@@ -216,7 +216,7 @@ func (r *orderRoutes) getAllTradeBalance(c *gin.Context) {
 // getLastStockTradeBalance -.
 //
 //	@Summary	getLastStockTradeBalance
-//	@Tags		order
+//	@Tags		Order V1
 //	@Accept		json
 //	@Produce	json
 //	@Success	200	{object}	entity.StockTradeBalance
@@ -235,7 +235,7 @@ func (r *orderRoutes) getLastStockTradeBalance(c *gin.Context) {
 // getLastFutureTradeBalance -.
 //
 //	@Summary	getLastFutureTradeBalance
-//	@Tags		order
+//	@Tags		Order V1
 //	@Accept		json
 //	@Produce	json
 //	@Success	200	{object}	entity.FutureTradeBalance
@@ -258,7 +258,7 @@ type dayTradeResult struct {
 // calculateForwardDayTradeBalance -.
 //
 //	@Summary	calculateForwardDayTradeBalance
-//	@Tags		order
+//	@Tags		Order V1
 //	@accept		json
 //	@produce	json
 //	@param		buy_price		header		string	true	"buy_price"
@@ -309,7 +309,7 @@ func (r *orderRoutes) calculateForwardDayTradeBalance(c *gin.Context) {
 // calculateReverseDayTradeBalance -.
 //
 //	@Summary	calculateReverseDayTradeBalance
-//	@Tags		order
+//	@Tags		Order V1
 //	@accept		json
 //	@produce	json
 //	@param		sell_first_price	header		string	true	"sell_first_price"
@@ -360,7 +360,7 @@ func (r *orderRoutes) calculateReverseDayTradeBalance(c *gin.Context) {
 // moveFutureOrderToLatestTradeDay -.
 //
 //	@Summary	moveFutureOrderToLatestTradeDay
-//	@Tags		order
+//	@Tags		Order V1
 //	@Accept		json
 //	@Produce	json
 //	@param		order-id	path	string	true	"order-id"
@@ -384,7 +384,7 @@ func (r *orderRoutes) moveFutureOrderToLatestTradeDay(c *gin.Context) {
 // moveStockOrderToLatestTradeDay -.
 //
 //	@Summary	moveStockOrderToLatestTradeDay
-//	@Tags		order
+//	@Tags		Order V1
 //	@Accept		json
 //	@Produce	json
 //	@param		order-id	path	string	true	"order-id"
@@ -413,7 +413,7 @@ type accountSummary struct {
 // getAccountBalance -.
 //
 //	@Summary	getAccountBalance
-//	@Tags		account
+//	@Tags		Account V1
 //	@Accept		json
 //	@Produce	json
 //	@Success	200	{object}	accountSummary

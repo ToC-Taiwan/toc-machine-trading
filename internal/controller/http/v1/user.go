@@ -33,7 +33,7 @@ func NewUserRoutes(h *gin.RouterGroup, jwtHandler *jwt.GinJWTMiddleware, system 
 // loginHandler _.
 //
 //	@Summary	loginHandler
-//	@tags		user
+//	@tags		User V1
 //	@accept		json
 //	@produce	json
 //	@param		body	body		auth.LoginBody{}	true	"Body"
@@ -46,7 +46,7 @@ func (u *userRoutes) loginHandler(c *gin.Context) {
 // logutHandler _.
 //
 //	@Summary	logutHandler
-//	@tags		user
+//	@tags		User V1
 //	@security	JWT
 //	@accept		json
 //	@produce	json
@@ -59,7 +59,7 @@ func (u *userRoutes) logutHandler(c *gin.Context) {
 // refreshTokenHandler _.
 //
 //	@Summary	refreshTokenHandler
-//	@tags		user
+//	@tags		User V1
 //	@security	JWT
 //	@accept		json
 //	@produce	json
@@ -72,7 +72,7 @@ func (u *userRoutes) refreshTokenHandler(c *gin.Context) {
 // newUserHandler _.
 //
 //	@Summary	newUserHandler
-//	@tags		user
+//	@tags		User V1
 //	@accept		json
 //	@produce	json
 //	@param		body	body	entity.User{}	true	"Body"
@@ -109,7 +109,7 @@ func (u *userRoutes) newUserHandler(c *gin.Context) {
 // verifyEmailHandler _.
 //
 //	@Summary	verifyEmailHandler
-//	@tags		user
+//	@tags		User V1
 //	@accept		json
 //	@produce	json
 //	@param		user	path	string	true	"user"
@@ -139,7 +139,7 @@ func (u *userRoutes) verifyEmailHandler(c *gin.Context) {
 // activateUserHandler _.
 //
 //	@Summary	activateUserHandler
-//	@tags		user
+//	@tags		User V1
 //	@accept		json
 //	@produce	json
 //	@param		user	header	string	true	"user"

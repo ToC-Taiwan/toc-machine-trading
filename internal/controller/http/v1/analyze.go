@@ -33,7 +33,7 @@ type reborn struct {
 // getRebornTargets -.
 //
 //	@Summary	getRebornTargets
-//	@Tags		analyze
+//	@Tags		Analyze V1
 //	@Accept		json
 //	@Produce	json
 //	@Success	200	{object}	[]reborn{}
