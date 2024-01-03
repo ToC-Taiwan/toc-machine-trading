@@ -659,7 +659,6 @@ paths:
             items:
               $ref: '#/definitions/v1.reborn'
             type: array
-      summary: getRebornTargets
       tags:
       - Analyze V1
   /v1/basic/config:
@@ -677,7 +676,6 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/resp.Response'
-      summary: getAllConfig
       tags:
       - Basic V1
   /v1/basic/stock:
@@ -704,7 +702,6 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/resp.Response'
-      summary: getAllRepoStock
       tags:
       - Basic V1
   /v1/basic/usage/shioaji:
@@ -722,7 +719,6 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/resp.Response'
-      summary: getShioajiUsage
       tags:
       - Basic V1
   /v1/history/day-kbar/{stock}/{start_date}/{interval}:
@@ -758,7 +754,6 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/resp.Response'
-      summary: getKbarData
       tags:
       - History V1
   /v1/login:
@@ -779,7 +774,6 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/auth.LoginResponseBody'
-      summary: loginHandler
       tags:
       - User V1
   /v1/logout:
@@ -795,7 +789,6 @@ paths:
             $ref: '#/definitions/auth.LogoutResponseBody'
       security:
       - JWT: []
-      summary: logutHandler
       tags:
       - User V1
   /v1/order:
@@ -818,7 +811,6 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/resp.Response'
-      summary: manualInsertFutureOrder
       tags:
       - Order V1
   /v1/order/account/balance:
@@ -836,7 +828,6 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/resp.Response'
-      summary: getAccountBalance
       tags:
       - Account V1
   /v1/order/all:
@@ -854,7 +845,6 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/resp.Response'
-      summary: getAllOrder
       tags:
       - Order V1
   /v1/order/balance:
@@ -872,7 +862,6 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/resp.Response'
-      summary: getAllTradeBalance
       tags:
       - Order V1
   /v1/order/balance/future/last:
@@ -890,7 +879,6 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/resp.Response'
-      summary: getLastFutureTradeBalance
       tags:
       - Order V1
   /v1/order/balance/stock/last:
@@ -908,7 +896,6 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/resp.Response'
-      summary: getLastStockTradeBalance
       tags:
       - Order V1
   /v1/order/date/{tradeday}:
@@ -932,7 +919,6 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/resp.Response'
-      summary: getAllOrderByTradeDay
       tags:
       - Order V1
     put:
@@ -955,7 +941,6 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/resp.Response'
-      summary: updateTradeBalanceByTradeDay
       tags:
       - Order V1
   /v1/order/day-trade/forward:
@@ -994,7 +979,6 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/resp.Response'
-      summary: calculateForwardDayTradeBalance
       tags:
       - Order V1
   /v1/order/day-trade/reverse:
@@ -1033,7 +1017,6 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/resp.Response'
-      summary: calculateReverseDayTradeBalance
       tags:
       - Order V1
   /v1/order/future/{order-id}:
@@ -1055,7 +1038,6 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/resp.Response'
-      summary: moveFutureOrderToLatestTradeDay
       tags:
       - Order V1
   /v1/order/stock/{order-id}:
@@ -1077,7 +1059,6 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/resp.Response'
-      summary: moveStockOrderToLatestTradeDay
       tags:
       - Order V1
   /v1/refresh:
@@ -1097,7 +1078,6 @@ paths:
             $ref: '#/definitions/auth.UnauthorizedResponseBody'
       security:
       - JWT: []
-      summary: refreshTokenHandler
       tags:
       - User V1
   /v1/stream/index:
@@ -1111,7 +1091,6 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/entity.TradeIndex'
-      summary: getIndex
       tags:
       - Stream V1
   /v1/stream/tse/snapshot:
@@ -1129,7 +1108,6 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/resp.Response'
-      summary: getTSESnapshot
       tags:
       - Stream V1
   /v1/targets:
@@ -1145,7 +1123,6 @@ paths:
             items:
               $ref: '#/definitions/entity.StockTarget'
             type: array
-      summary: getTargets
       tags:
       - Targets V1
   /v1/trade/stock/buy/lot:
@@ -1172,7 +1149,6 @@ paths:
             $ref: '#/definitions/auth.UnauthorizedResponseBody'
       security:
       - JWT: []
-      summary: buyLotStock
       tags:
       - Trade V1
   /v1/trade/stock/buy/odd:
@@ -1199,7 +1175,6 @@ paths:
             $ref: '#/definitions/auth.UnauthorizedResponseBody'
       security:
       - JWT: []
-      summary: buyOddStock
       tags:
       - Trade V1
   /v1/user:
@@ -1226,7 +1201,6 @@ paths:
           description: Internal Server Error
           schema:
             type: string
-      summary: newUserHandler
       tags:
       - User V1
   /v1/user/activate:
@@ -1252,7 +1226,6 @@ paths:
           description: Internal Server Error
           schema:
             type: string
-      summary: activateUserHandler
       tags:
       - User V1
   /v1/user/verify/{user}/{code}:
@@ -1283,7 +1256,6 @@ paths:
           description: Internal Server Error
           schema:
             type: string
-      summary: verifyEmailHandler
       tags:
       - User V1
 securityDefinitions:

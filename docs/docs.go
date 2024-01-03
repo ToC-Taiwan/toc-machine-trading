@@ -26,7 +26,6 @@ const docTemplate = `{
                 "tags": [
                     "Analyze V1"
                 ],
-                "summary": "getRebornTargets",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -51,7 +50,6 @@ const docTemplate = `{
                 "tags": [
                     "Basic V1"
                 ],
-                "summary": "getAllConfig",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -79,7 +77,6 @@ const docTemplate = `{
                 "tags": [
                     "Basic V1"
                 ],
-                "summary": "getAllRepoStock",
                 "parameters": [
                     {
                         "type": "string",
@@ -121,7 +118,6 @@ const docTemplate = `{
                 "tags": [
                     "Basic V1"
                 ],
-                "summary": "getShioajiUsage",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -149,7 +145,6 @@ const docTemplate = `{
                 "tags": [
                     "History V1"
                 ],
-                "summary": "getKbarData",
                 "parameters": [
                     {
                         "type": "string",
@@ -203,7 +198,6 @@ const docTemplate = `{
                 "tags": [
                     "User V1"
                 ],
-                "summary": "loginHandler",
                 "parameters": [
                     {
                         "description": "Body",
@@ -241,7 +235,6 @@ const docTemplate = `{
                 "tags": [
                     "User V1"
                 ],
-                "summary": "logutHandler",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -263,7 +256,6 @@ const docTemplate = `{
                 "tags": [
                     "Order V1"
                 ],
-                "summary": "manualInsertFutureOrder",
                 "parameters": [
                     {
                         "description": "Body",
@@ -299,7 +291,6 @@ const docTemplate = `{
                 "tags": [
                     "Account V1"
                 ],
-                "summary": "getAccountBalance",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -327,7 +318,6 @@ const docTemplate = `{
                 "tags": [
                     "Order V1"
                 ],
-                "summary": "getAllOrder",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -355,7 +345,6 @@ const docTemplate = `{
                 "tags": [
                     "Order V1"
                 ],
-                "summary": "getAllTradeBalance",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -383,7 +372,6 @@ const docTemplate = `{
                 "tags": [
                     "Order V1"
                 ],
-                "summary": "getLastFutureTradeBalance",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -411,7 +399,6 @@ const docTemplate = `{
                 "tags": [
                     "Order V1"
                 ],
-                "summary": "getLastStockTradeBalance",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -439,7 +426,6 @@ const docTemplate = `{
                 "tags": [
                     "Order V1"
                 ],
-                "summary": "getAllOrderByTradeDay",
                 "parameters": [
                     {
                         "type": "string",
@@ -474,7 +460,6 @@ const docTemplate = `{
                 "tags": [
                     "Order V1"
                 ],
-                "summary": "updateTradeBalanceByTradeDay",
                 "parameters": [
                     {
                         "type": "string",
@@ -511,7 +496,6 @@ const docTemplate = `{
                 "tags": [
                     "Order V1"
                 ],
-                "summary": "calculateForwardDayTradeBalance",
                 "parameters": [
                     {
                         "type": "string",
@@ -569,7 +553,6 @@ const docTemplate = `{
                 "tags": [
                     "Order V1"
                 ],
-                "summary": "calculateReverseDayTradeBalance",
                 "parameters": [
                     {
                         "type": "string",
@@ -627,7 +610,6 @@ const docTemplate = `{
                 "tags": [
                     "Order V1"
                 ],
-                "summary": "moveFutureOrderToLatestTradeDay",
                 "parameters": [
                     {
                         "type": "string",
@@ -661,7 +643,6 @@ const docTemplate = `{
                 "tags": [
                     "Order V1"
                 ],
-                "summary": "moveStockOrderToLatestTradeDay",
                 "parameters": [
                     {
                         "type": "string",
@@ -700,7 +681,6 @@ const docTemplate = `{
                 "tags": [
                     "User V1"
                 ],
-                "summary": "refreshTokenHandler",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -728,7 +708,6 @@ const docTemplate = `{
                 "tags": [
                     "Stream V1"
                 ],
-                "summary": "getIndex",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -750,7 +729,6 @@ const docTemplate = `{
                 "tags": [
                     "Stream V1"
                 ],
-                "summary": "getTSESnapshot",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -778,7 +756,6 @@ const docTemplate = `{
                 "tags": [
                     "Targets V1"
                 ],
-                "summary": "getTargets",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -808,7 +785,6 @@ const docTemplate = `{
                 "tags": [
                     "Trade V1"
                 ],
-                "summary": "buyLotStock",
                 "parameters": [
                     {
                         "description": "Body",
@@ -852,7 +828,6 @@ const docTemplate = `{
                 "tags": [
                     "Trade V1"
                 ],
-                "summary": "buyOddStock",
                 "parameters": [
                     {
                         "description": "Body",
@@ -891,7 +866,6 @@ const docTemplate = `{
                 "tags": [
                     "User V1"
                 ],
-                "summary": "newUserHandler",
                 "parameters": [
                     {
                         "description": "Body",
@@ -933,7 +907,6 @@ const docTemplate = `{
                 "tags": [
                     "User V1"
                 ],
-                "summary": "activateUserHandler",
                 "parameters": [
                     {
                         "type": "string",
@@ -973,7 +946,6 @@ const docTemplate = `{
                 "tags": [
                     "User V1"
                 ],
-                "summary": "verifyEmailHandler",
                 "parameters": [
                     {
                         "type": "string",

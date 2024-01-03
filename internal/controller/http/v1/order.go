@@ -50,7 +50,6 @@ type allOrder struct {
 
 // getAllOrder -.
 //
-//	@Summary	getAllOrder
 //	@Tags		Order V1
 //	@Accept		json
 //	@Produce	json
@@ -81,7 +80,6 @@ type futureOrders struct {
 
 // getAllOrderByTradeDay -.
 //
-//	@Summary	getAllOrderByTradeDay
 //	@Tags		Order V1
 //	@Accept		json
 //	@Produce	json
@@ -106,7 +104,6 @@ func (r *orderRoutes) getAllOrderByTradeDay(c *gin.Context) {
 
 // updateTradeBalanceByTradeDay -.
 //
-//	@Summary	updateTradeBalanceByTradeDay
 //	@Tags		Order V1
 //	@Accept		json
 //	@Produce	json
@@ -139,7 +136,6 @@ type manualInsertFutureOrderRequest struct {
 
 // manualInsertFutureOrder -.
 //
-//	@Summary	manualInsertFutureOrder
 //	@Tags		Order V1
 //	@Accept		json
 //	@Produce	json
@@ -187,7 +183,6 @@ type tradeBalance struct {
 
 // getAllTradeBalance -.
 //
-//	@Summary	getAllTradeBalance
 //	@Tags		Order V1
 //	@Accept		json
 //	@Produce	json
@@ -215,7 +210,6 @@ func (r *orderRoutes) getAllTradeBalance(c *gin.Context) {
 
 // getLastStockTradeBalance -.
 //
-//	@Summary	getLastStockTradeBalance
 //	@Tags		Order V1
 //	@Accept		json
 //	@Produce	json
@@ -234,7 +228,6 @@ func (r *orderRoutes) getLastStockTradeBalance(c *gin.Context) {
 
 // getLastFutureTradeBalance -.
 //
-//	@Summary	getLastFutureTradeBalance
 //	@Tags		Order V1
 //	@Accept		json
 //	@Produce	json
@@ -257,7 +250,6 @@ type dayTradeResult struct {
 
 // calculateForwardDayTradeBalance -.
 //
-//	@Summary	calculateForwardDayTradeBalance
 //	@Tags		Order V1
 //	@accept		json
 //	@produce	json
@@ -308,7 +300,6 @@ func (r *orderRoutes) calculateForwardDayTradeBalance(c *gin.Context) {
 
 // calculateReverseDayTradeBalance -.
 //
-//	@Summary	calculateReverseDayTradeBalance
 //	@Tags		Order V1
 //	@accept		json
 //	@produce	json
@@ -359,7 +350,6 @@ func (r *orderRoutes) calculateReverseDayTradeBalance(c *gin.Context) {
 
 // moveFutureOrderToLatestTradeDay -.
 //
-//	@Summary	moveFutureOrderToLatestTradeDay
 //	@Tags		Order V1
 //	@Accept		json
 //	@Produce	json
@@ -383,7 +373,6 @@ func (r *orderRoutes) moveFutureOrderToLatestTradeDay(c *gin.Context) {
 
 // moveStockOrderToLatestTradeDay -.
 //
-//	@Summary	moveStockOrderToLatestTradeDay
 //	@Tags		Order V1
 //	@Accept		json
 //	@Produce	json
@@ -412,7 +401,6 @@ type accountSummary struct {
 
 // getAccountBalance -.
 //
-//	@Summary	getAccountBalance
 //	@Tags		Account V1
 //	@Accept		json
 //	@Produce	json

@@ -4,7 +4,6 @@ package router
 import (
 	"fmt"
 	"net/http"
-	"os"
 
 	"tmt/docs"
 	"tmt/internal/controller/http/auth"
@@ -14,8 +13,6 @@ import (
 	jwt "github.com/appleboy/gin-jwt/v2"
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	swaggerFiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 const (
@@ -29,6 +26,8 @@ type Router struct {
 	rootHandler *gin.Engine
 	jwtHandler  *jwt.GinJWTMiddleware
 }
+
+var swagHandler gin.HandlerFunc
 
 // NewRouter -.
 //
@@ -46,9 +45,9 @@ func NewRouter(system usecase.System) *Router {
 	g.GET("/metrics", gin.WrapH(promhttp.Handler()))
 	g.GET("/-/health", healthCheck)
 
-	if os.Getenv("DISABLE_SWAGGER_HTTP_HANDLER") == "" {
+	if swagHandler != nil {
 		docs.SwaggerInfo.BasePath = prefix
-		g.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+		g.GET("/docs/*any", swagHandler)
 		g.Use(swaggerMiddleware())
 	}
 

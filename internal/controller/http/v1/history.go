@@ -28,7 +28,6 @@ func NewHistoryRoutes(handler *gin.RouterGroup, t usecase.History) {
 
 // getKbarData -.
 //
-//	@Summary	getKbarData
 //	@Tags		History V1
 //	@Accept		json
 //	@Produce	json

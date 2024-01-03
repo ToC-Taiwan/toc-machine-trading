@@ -37,7 +37,6 @@ func NewRealTimeRoutes(handler *gin.RouterGroup, t usecase.RealTime, o usecase.T
 
 // getTSESnapshot -.
 //
-//	@Summary	getTSESnapshot
 //	@Tags		Stream V1
 //	@Accept		json
 //	@Produce	json
@@ -55,7 +54,6 @@ func (r *realTimeRoutes) getTSESnapshot(c *gin.Context) {
 
 // getIndex -.
 //
-//	@Summary	getIndex
 //	@Tags		Stream V1
 //	@Accept		json
 //	@Produce	json
