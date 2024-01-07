@@ -22,6 +22,7 @@ RUN apt update -y && \
     apt autoremove -y && \
     apt clean && \
     mkdir toc-machine-trading && \
+    mkdir toc-machine-trading/templates && \
     mkdir toc-machine-trading/data && \
     mkdir toc-machine-trading/migrations && \
     mkdir toc-machine-trading/configs && \
@@ -32,5 +33,6 @@ WORKDIR /toc-machine-trading
 
 COPY --from=build-stage /build_space/toc-machine-trading ./toc-machine-trading
 COPY --from=build-stage /build_space/migrations ./migrations/
+COPY --from=build-stage /build_space/templates ./templates/
 
 ENTRYPOINT ["/toc-machine-trading/toc-machine-trading"]

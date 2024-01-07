@@ -120,21 +120,19 @@ func (u *userRoutes) newUserHandler(c *gin.Context) {
 //	@failure	500	{string}	string
 //	@router		/v1/user/verify/{user}/{code} [get]
 func (u *userRoutes) verifyEmailHandler(c *gin.Context) {
+	result := "Success"
 	user := c.Param("user")
 	if user == "" || user == "undefined" || user == "{user}" {
-		c.JSON(http.StatusBadRequest, "user is required")
-		return
+		result = "User is required"
 	}
 	code := c.Param("code")
 	if code == "" || code == "undefined" || code == "{code}" {
-		c.JSON(http.StatusBadRequest, "code is required")
-		return
+		result = "Code is required"
 	}
 	if err := u.system.VerifyEmail(c, user, code); err != nil {
-		c.JSON(http.StatusInternalServerError, err.Error())
-		return
+		result = err.Error()
 	}
-	c.JSON(http.StatusOK, "success")
+	c.HTML(http.StatusOK, "mail_verification.tmpl", gin.H{"result": result})
 }
 
 // activateUserHandler _.

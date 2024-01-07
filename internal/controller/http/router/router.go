@@ -44,6 +44,7 @@ func NewRouter(system usecase.System) *Router {
 	g.Use(gin.Recovery())
 	g.GET("/metrics", gin.WrapH(promhttp.Handler()))
 	g.GET("/-/health", healthCheck)
+	g.LoadHTMLGlob("templates/*")
 
 	if swagHandler != nil {
 		docs.SwaggerInfo.BasePath = prefix
