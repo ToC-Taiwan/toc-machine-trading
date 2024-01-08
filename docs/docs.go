@@ -139,7 +139,7 @@ const docTemplate = `{
             }
         },
         "/v1/fcm/announcement": {
-            "get": {
+            "post": {
                 "consumes": [
                     "application/json"
                 ],
