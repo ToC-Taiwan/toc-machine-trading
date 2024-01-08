@@ -18,7 +18,8 @@ ENV TZ=Asia/Taipei
 
 WORKDIR /
 RUN apt update -y && \
-    apt install -y tzdata && \
+    apt install -y tzdata ca-certificates && \
+    update-ca-certificates -f && \
     apt autoremove -y && \
     apt clean && \
     mkdir toc-machine-trading && \
