@@ -36,7 +36,7 @@ type announcementRequest struct {
 //	@Success	200
 //	@Failure	400	{object}	resp.Response{}
 //	@Failure	500	{object}	resp.Response{}
-//	@Router		/v1/fcm/announcement [get]
+//	@Router		/v1/fcm/announcement [post]
 func (r *fcmRoutes) announceMessage(c *gin.Context) {
 	var req announcementRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
