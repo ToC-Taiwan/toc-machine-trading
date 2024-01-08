@@ -2,7 +2,9 @@ package usecase
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"os"
 
 	"tmt/internal/entity"
 	"tmt/internal/usecase/modules/calendar"
@@ -40,9 +42,26 @@ func NewFCM() FCM {
 	return uc
 }
 
+type srvAccount struct {
+	ProjectID string `json:"project_id"`
+}
+
 func newFCM() (*firebase.App, error) {
-	opt := option.WithCredentialsFile("configs/service_account.json")
-	fb, err := firebase.NewApp(context.Background(), nil, opt)
+	serviceAccountFilePath := "configs/service_account.json"
+	opt := option.WithCredentialsFile(serviceAccountFilePath)
+
+	data, err := os.ReadFile(serviceAccountFilePath)
+	if err != nil {
+		return nil, err
+	}
+
+	content := srvAccount{}
+	if err = json.Unmarshal(data, &content); err != nil {
+		return nil, err
+	}
+
+	config := &firebase.Config{ProjectID: content.ProjectID}
+	fb, err := firebase.NewApp(context.Background(), config, opt)
 	if err != nil {
 		return nil, err
 	}
