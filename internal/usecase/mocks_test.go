@@ -2778,3 +2778,26 @@ func (mr *MockSystemRepoMockRecorder) QueryUserByUsername(ctx, username interfac
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryUserByUsername", reflect.TypeOf((*MockSystemRepo)(nil).QueryUserByUsername), ctx, username)
 }
+
+// MockFCM is a mock of FCM interface.
+type MockFCM struct {
+	ctrl     *gomock.Controller
+	recorder *MockFCMMockRecorder
+}
+
+// MockFCMMockRecorder is the mock recorder for MockFCM.
+type MockFCMMockRecorder struct {
+	mock *MockFCM
+}
+
+// NewMockFCM creates a new mock instance.
+func NewMockFCM(ctrl *gomock.Controller) *MockFCM {
+	mock := &MockFCM{ctrl: ctrl}
+	mock.recorder = &MockFCMMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockFCM) EXPECT() *MockFCMMockRecorder {
+	return m.recorder
+}

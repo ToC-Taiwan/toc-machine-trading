@@ -38,3 +38,4 @@ config.yml
 toc-machine-trading
 coverage.txt
 !.chglog/config.yml
+service_account.json

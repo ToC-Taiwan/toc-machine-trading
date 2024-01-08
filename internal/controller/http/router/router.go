@@ -72,6 +72,10 @@ func (r *Router) GetHandler() *gin.Engine {
 	return r.rootHandler
 }
 
+func (r *Router) AddV1FCMRoutes(fcm usecase.FCM) *Router {
+	return r
+}
+
 // AddV1UserRoutes -.
 func (r *Router) AddV1UserRoutes(system usecase.System) *Router {
 	v1.NewUserRoutes(r.v1Public, r.jwtHandler, system)

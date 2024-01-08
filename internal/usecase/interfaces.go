@@ -243,3 +243,5 @@ type SystemRepo interface {
 	EmailVerification(ctx context.Context, username string) error
 	ActivateUser(ctx context.Context, username string) error
 }
+
+type FCM interface{}

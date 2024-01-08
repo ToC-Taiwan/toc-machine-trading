@@ -23,6 +23,7 @@ func Run() {
 	logger.Warnf("Simulation Mode: %v", cfg.Simulation)
 
 	// Do not adjust the order
+	fcm := usecase.NewFCM()
 	basic := usecase.NewBasic()
 	trade := usecase.NewTrade()
 	analyze := usecase.NewAnalyze()
@@ -33,6 +34,7 @@ func Run() {
 
 	// HTTP Server
 	r := router.NewRouter(system).
+		AddV1FCMRoutes(fcm).
 		AddV1UserRoutes(system).
 		AddV1BasicRoutes(basic).
 		AddV1OrderRoutes(trade).
