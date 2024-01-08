@@ -147,9 +147,20 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Basic V1"
+                    "FCM V1"
                 ],
-                "summary": "Get all repo stock",
+                "summary": "Announce message to all devices",
+                "parameters": [
+                    {
+                        "description": "Body",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/v1.announcementRequest"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK"
@@ -1770,6 +1781,14 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/entity.StockOrder"
                     }
+                }
+            }
+        },
+        "v1.announcementRequest": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
                 }
             }
         },

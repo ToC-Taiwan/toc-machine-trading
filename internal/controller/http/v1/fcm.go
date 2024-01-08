@@ -26,12 +26,13 @@ type announcementRequest struct {
 	Message string `json:"message"`
 }
 
-// getAllRepoStock -.
+// announceMessage -.
 //
-//	@Tags		Basic V1
-//	@Summary	Get all repo stock
+//	@Tags		FCM V1
+//	@Summary	Announce message to all devices
 //	@Accept		json
 //	@Produce	json
+//	@param		body	body	announcementRequest{}	true	"Body"
 //	@Success	200
 //	@Failure	400	{object}	resp.Response{}
 //	@Failure	500	{object}	resp.Response{}
