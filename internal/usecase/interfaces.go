@@ -244,4 +244,6 @@ type SystemRepo interface {
 	ActivateUser(ctx context.Context, username string) error
 }
 
-type FCM interface{}
+type FCM interface {
+	AnnounceMessage(msg string) error
+}

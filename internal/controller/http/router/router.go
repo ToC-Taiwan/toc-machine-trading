@@ -73,6 +73,7 @@ func (r *Router) GetHandler() *gin.Engine {
 }
 
 func (r *Router) AddV1FCMRoutes(fcm usecase.FCM) *Router {
+	v1.NewFCMRoutes(r.v1Private, fcm)
 	return r
 }
 

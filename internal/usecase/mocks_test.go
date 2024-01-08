@@ -2801,3 +2801,17 @@ func NewMockFCM(ctrl *gomock.Controller) *MockFCM {
 func (m *MockFCM) EXPECT() *MockFCMMockRecorder {
 	return m.recorder
 }
+
+// AnnounceMessage mocks base method.
+func (m *MockFCM) AnnounceMessage(msg string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AnnounceMessage", msg)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// AnnounceMessage indicates an expected call of AnnounceMessage.
+func (mr *MockFCMMockRecorder) AnnounceMessage(msg interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AnnounceMessage", reflect.TypeOf((*MockFCM)(nil).AnnounceMessage), msg)
+}

@@ -73,3 +73,25 @@ func (uc *FcmUseCase) sendTargets(targetArr []*entity.StockTarget) error {
 	}
 	return nil
 }
+
+func (uc *FcmUseCase) AnnounceMessage(msg string) error {
+	ctx := context.Background()
+	client, err := uc.app.Messaging(ctx)
+	if err != nil {
+		return err
+	}
+
+	message := &messaging.Message{
+		Notification: &messaging.Notification{
+			Title: "Announcement",
+			Body:  msg,
+		},
+		Topic: "announcement",
+	}
+
+	_, err = client.Send(ctx, message)
+	if err != nil {
+		return err
+	}
+	return nil
+}
