@@ -30,6 +30,7 @@ type announcementRequest struct {
 //
 //	@Tags		FCM V1
 //	@Summary	Announce message to all devices
+//	@security	JWT
 //	@Accept		json
 //	@Produce	json
 //	@param		body	body	announcementRequest{}	true	"Body"

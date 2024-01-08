@@ -749,6 +749,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/resp.Response'
+      security:
+      - JWT: []
       summary: Announce message to all devices
       tags:
       - FCM V1

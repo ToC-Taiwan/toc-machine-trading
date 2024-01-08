@@ -140,6 +140,11 @@ const docTemplate = `{
         },
         "/v1/fcm/announcement": {
             "post": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "consumes": [
                     "application/json"
                 ],
