@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"net/mail"
 
+	"tmt/internal/controller/http/resp"
 	"tmt/internal/entity"
 	"tmt/internal/usecase"
 
@@ -45,23 +46,23 @@ func NewUserRoutes(h *gin.RouterGroup, jwtHandler *jwt.GinJWTMiddleware, system 
 func (u *userRoutes) newUserHandler(c *gin.Context) {
 	user := entity.User{}
 	if err := c.ShouldBindJSON(&user); err != nil {
-		c.JSON(http.StatusBadRequest, err.Error())
+		resp.ErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	if user.Username == "" || user.Password == "" || user.Email == "" {
-		c.JSON(http.StatusBadRequest, "username, password, email is required")
+		resp.ErrorResponse(c, http.StatusBadRequest, "username, password, email is required")
 		return
 	}
 
 	_, err := mail.ParseAddress(user.Email)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, "email format error")
+		resp.ErrorResponse(c, http.StatusBadRequest, "email format error")
 		return
 	}
 
 	if err := u.system.AddUser(c, &user); err != nil {
-		c.JSON(http.StatusInternalServerError, err.Error())
+		resp.ErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 

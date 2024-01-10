@@ -44,7 +44,7 @@ type tradeResponse struct {
 
 func (r *tradeRoutes) checkUserAuth(c *gin.Context) {
 	if !r.t.IsAuthUser(auth.ExtractUsername(c)) {
-		resp.ErrorResponse(c, http.StatusBadRequest, "user is not auth")
+		resp.ErrorResponse(c, http.StatusBadRequest, "user is not auth trader")
 		return
 	}
 	c.Next()
