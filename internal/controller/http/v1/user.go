@@ -21,53 +21,13 @@ func NewUserRoutes(h *gin.RouterGroup, jwtHandler *jwt.GinJWTMiddleware, system 
 		system:     system,
 		jwtHandler: jwtHandler,
 	}
+
 	h.POST("/login", r.loginHandler)
 	h.GET("/logout", r.logutHandler)
 	h.GET("/refresh", r.refreshTokenHandler)
 
 	h.POST("/user", r.newUserHandler)
 	h.GET("/user/verify/:user/:code", r.verifyEmailHandler)
-	h.POST("/user/activate", r.activateUserHandler)
-}
-
-// loginHandler _.
-//
-//	@tags		User V1
-//	@Summary	Login
-//	@accept		json
-//	@produce	json
-//	@param		body	body		auth.LoginBody{}	true	"Body"
-//	@success	200		{object}	auth.LoginResponseBody{}
-//	@router		/v1/login [post]
-func (u *userRoutes) loginHandler(c *gin.Context) {
-	u.jwtHandler.LoginHandler(c)
-}
-
-// logutHandler _.
-//
-//	@tags		User V1
-//	@Summary	Logout
-//	@security	JWT
-//	@accept		json
-//	@produce	json
-//	@success	200	{object}	auth.LogoutResponseBody{}
-//	@router		/v1/logout [get]
-func (u *userRoutes) logutHandler(c *gin.Context) {
-	u.jwtHandler.LogoutHandler(c)
-}
-
-// refreshTokenHandler _.
-//
-//	@tags		User V1
-//	@Summary	Refresh token
-//	@security	JWT
-//	@accept		json
-//	@produce	json
-//	@success	200	{object}	auth.RefreshResponseBody{}
-//	@failure	401	{object}	auth.UnauthorizedResponseBody{}
-//	@router		/v1/refresh [get]
-func (u *userRoutes) refreshTokenHandler(c *gin.Context) {
-	u.jwtHandler.RefreshHandler(c)
 }
 
 // newUserHandler _.
@@ -135,26 +95,42 @@ func (u *userRoutes) verifyEmailHandler(c *gin.Context) {
 	c.HTML(http.StatusOK, "mail_verification.tmpl", gin.H{"result": result})
 }
 
-// activateUserHandler _.
+// loginHandler _.
 //
 //	@tags		User V1
-//	@Summary	Activate user
+//	@Summary	Login
 //	@accept		json
 //	@produce	json
-//	@param		user	header	string	true	"user"
-//	@success	200
-//	@failure	400	{string}	string
-//	@failure	500	{string}	string
-//	@router		/v1/user/activate [post]
-func (u *userRoutes) activateUserHandler(c *gin.Context) {
-	user := c.GetHeader("user")
-	if user == "" {
-		c.JSON(http.StatusBadRequest, "user is required")
-		return
-	}
-	if err := u.system.ActivateUser(c, user); err != nil {
-		c.JSON(http.StatusInternalServerError, err.Error())
-		return
-	}
-	c.JSON(http.StatusOK, nil)
+//	@param		body	body		auth.LoginBody{}	true	"Body"
+//	@success	200		{object}	auth.LoginResponseBody{}
+//	@router		/v1/login [post]
+func (u *userRoutes) loginHandler(c *gin.Context) {
+	u.jwtHandler.LoginHandler(c)
+}
+
+// logutHandler _.
+//
+//	@tags		User V1
+//	@Summary	Logout
+//	@security	JWT
+//	@accept		json
+//	@produce	json
+//	@success	200	{object}	auth.LogoutResponseBody{}
+//	@router		/v1/logout [get]
+func (u *userRoutes) logutHandler(c *gin.Context) {
+	u.jwtHandler.LogoutHandler(c)
+}
+
+// refreshTokenHandler _.
+//
+//	@tags		User V1
+//	@Summary	Refresh token
+//	@security	JWT
+//	@accept		json
+//	@produce	json
+//	@success	200	{object}	auth.RefreshResponseBody{}
+//	@failure	401	{object}	auth.UnauthorizedResponseBody{}
+//	@router		/v1/refresh [get]
+func (u *userRoutes) refreshTokenHandler(c *gin.Context) {
+	u.jwtHandler.RefreshHandler(c)
 }

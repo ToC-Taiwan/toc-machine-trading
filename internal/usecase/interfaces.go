@@ -232,7 +232,6 @@ type TradegRPCAPI interface {
 type System interface {
 	AddUser(ctx context.Context, t *entity.User) error
 	Login(ctx context.Context, username, password string) error
-	ActivateUser(ctx context.Context, username string) error
 	VerifyEmail(ctx context.Context, username, code string) error
 }
 
@@ -241,7 +240,6 @@ type SystemRepo interface {
 	QueryUserByUsername(ctx context.Context, username string) (*entity.User, error)
 	QueryAllUser(ctx context.Context) ([]*entity.User, error)
 	EmailVerification(ctx context.Context, username string) error
-	ActivateUser(ctx context.Context, username string) error
 }
 
 type FCM interface {

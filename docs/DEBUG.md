@@ -89,4 +89,4 @@ let jsonData = pm.response.json();
 pm.collectionVariables.set("apiKey", jsonData.token);
 ```
 
-- set baseUrl `https://trader.tocraw.com/tmt`
+- set baseUrl `https://tocraw.com/tmt`

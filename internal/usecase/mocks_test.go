@@ -2628,20 +2628,6 @@ func (m *MockSystem) EXPECT() *MockSystemMockRecorder {
 	return m.recorder
 }
 
-// ActivateUser mocks base method.
-func (m *MockSystem) ActivateUser(ctx context.Context, username string) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ActivateUser", ctx, username)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// ActivateUser indicates an expected call of ActivateUser.
-func (mr *MockSystemMockRecorder) ActivateUser(ctx, username interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ActivateUser", reflect.TypeOf((*MockSystem)(nil).ActivateUser), ctx, username)
-}
-
 // AddUser mocks base method.
 func (m *MockSystem) AddUser(ctx context.Context, t *entity.User) error {
 	m.ctrl.T.Helper()
@@ -2705,20 +2691,6 @@ func NewMockSystemRepo(ctrl *gomock.Controller) *MockSystemRepo {
 // EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockSystemRepo) EXPECT() *MockSystemRepoMockRecorder {
 	return m.recorder
-}
-
-// ActivateUser mocks base method.
-func (m *MockSystemRepo) ActivateUser(ctx context.Context, username string) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ActivateUser", ctx, username)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// ActivateUser indicates an expected call of ActivateUser.
-func (mr *MockSystemRepoMockRecorder) ActivateUser(ctx, username interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ActivateUser", reflect.TypeOf((*MockSystemRepo)(nil).ActivateUser), ctx, username)
 }
 
 // EmailVerification mocks base method.

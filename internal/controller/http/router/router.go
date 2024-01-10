@@ -21,10 +21,12 @@ const (
 
 // Router -.
 type Router struct {
-	v1Public    *gin.RouterGroup
-	v1Private   *gin.RouterGroup
 	rootHandler *gin.Engine
-	jwtHandler  *jwt.GinJWTMiddleware
+
+	v1Public  *gin.RouterGroup
+	v1Private *gin.RouterGroup
+
+	jwtHandler *jwt.GinJWTMiddleware
 }
 
 var swagHandler gin.HandlerFunc
@@ -57,13 +59,18 @@ func NewRouter(system usecase.System) *Router {
 		panic(err)
 	}
 
-	v1Public := g.Group(fmt.Sprintf("%s/v1", prefix))
-	v1Private := g.Group(fmt.Sprintf("%s/v1", prefix))
+	v1Prefix := fmt.Sprintf("%s/v1", prefix)
+
+	v1Public := g.Group(v1Prefix)
+	v1.NewUserRoutes(v1Public, jwtHandler, system)
+
+	v1Private := g.Group(v1Prefix)
 	v1Private.Use(jwtHandler.MiddlewareFunc())
+
 	return &Router{
+		rootHandler: g,
 		v1Public:    v1Public,
 		v1Private:   v1Private,
-		rootHandler: g,
 		jwtHandler:  jwtHandler,
 	}
 }
@@ -77,49 +84,36 @@ func (r *Router) AddV1FCMRoutes(fcm usecase.FCM) *Router {
 	return r
 }
 
-// AddV1UserRoutes -.
-func (r *Router) AddV1UserRoutes(system usecase.System) *Router {
-	v1.NewUserRoutes(r.v1Public, r.jwtHandler, system)
-	return r
-}
-
-// AddV1BasicRoutes -.
-func (r *Router) AddV1BasicRoutes(basic usecase.Basic) *Router {
-	v1.NewBasicRoutes(r.v1Public, basic)
-	return r
-}
-
-// AddV1AnalyzeRoutes -.
-func (r *Router) AddV1AnalyzeRoutes(analyze usecase.Analyze) *Router {
-	v1.NewAnalyzeRoutes(r.v1Public, analyze)
-	return r
-}
-
-// AddV1TargetRoutes -.
-func (r *Router) AddV1TargetRoutes(target usecase.Target) *Router {
-	v1.NewTargetRoutes(r.v1Public, target)
-	return r
-}
-
-// AddV1OrderRoutes -.
-func (r *Router) AddV1OrderRoutes(trade usecase.Trade) *Router {
-	v1.NewOrderRoutes(r.v1Public, trade)
-	return r
-}
-
-// AddV1TradeRoutes -.
 func (r *Router) AddV1TradeRoutes(trade usecase.Trade) *Router {
 	v1.NewTradeRoutes(r.v1Private, trade)
 	return r
 }
 
-// AddV1HistoryRoutes -.
+func (r *Router) AddV1BasicRoutes(basic usecase.Basic) *Router {
+	v1.NewBasicRoutes(r.v1Private, basic)
+	return r
+}
+
+func (r *Router) AddV1AnalyzeRoutes(analyze usecase.Analyze) *Router {
+	v1.NewAnalyzeRoutes(r.v1Public, analyze)
+	return r
+}
+
+func (r *Router) AddV1TargetRoutes(target usecase.Target) *Router {
+	v1.NewTargetRoutes(r.v1Public, target)
+	return r
+}
+
+func (r *Router) AddV1OrderRoutes(trade usecase.Trade) *Router {
+	v1.NewOrderRoutes(r.v1Public, trade)
+	return r
+}
+
 func (r *Router) AddV1HistoryRoutes(history usecase.History) *Router {
 	v1.NewHistoryRoutes(r.v1Public, history)
 	return r
 }
 
-// AddV1RealTimeRoutes -.
 func (r *Router) AddV1RealTimeRoutes(realTime usecase.RealTime, trade usecase.Trade, history usecase.History) *Router {
 	v1.NewRealTimeRoutes(r.v1Public, realTime, trade, history)
 	return r

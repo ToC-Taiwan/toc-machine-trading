@@ -1180,32 +1180,6 @@ paths:
       summary: New user
       tags:
       - User V1
-  /v1/user/activate:
-    post:
-      consumes:
-      - application/json
-      parameters:
-      - description: user
-        in: header
-        name: user
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-        "400":
-          description: Bad Request
-          schema:
-            type: string
-        "500":
-          description: Internal Server Error
-          schema:
-            type: string
-      summary: Activate user
-      tags:
-      - User V1
   /v1/user/verify/{user}/{code}:
     get:
       consumes:

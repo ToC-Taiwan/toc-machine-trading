@@ -79,9 +79,6 @@ func (uc *SystemUseCase) Login(ctx context.Context, username, password string) e
 	if !user.EmailVerified {
 		return errors.New("email not verified")
 	}
-	if !user.Activated {
-		return errors.New("user not activated")
-	}
 	return nil
 }
 
@@ -99,7 +96,7 @@ func (uc *SystemUseCase) SendOTP(ctx context.Context, t *entity.User) error {
 	m.SetHeader("Subject", "Please verify your email address")
 	m.SetBody(
 		"text/html",
-		fmt.Sprintf("Please click the following link in 30 minutes to verify your email address: <a href='https://trader.tocraw.com/tmt/v1/user/verify/%s/%s'>Verify</a>", t.Username, activationCode),
+		fmt.Sprintf("Please click the following link in 30 minutes to verify your email address: <a href='https://tocraw.com/tmt/v1/user/verify/%s/%s'>Verify</a>", t.Username, activationCode),
 	)
 
 	d := gomail.NewDialer(uc.smtpCfg.Host, 587, uc.smtpCfg.Username, uc.smtpCfg.Password)
@@ -108,23 +105,6 @@ func (uc *SystemUseCase) SendOTP(ctx context.Context, t *entity.User) error {
 		return err
 	}
 	return nil
-}
-
-func (uc *SystemUseCase) ActivateUser(ctx context.Context, username string) error {
-	user, err := uc.repo.QueryUserByUsername(ctx, username)
-	if err != nil {
-		return err
-	}
-	if user == nil {
-		return errors.New("username not found")
-	}
-	if user.Activated {
-		return errors.New("user already activated")
-	}
-	if !user.EmailVerified {
-		return errors.New("email not verified")
-	}
-	return uc.repo.ActivateUser(ctx, username)
 }
 
 func (uc *SystemUseCase) VerifyEmail(ctx context.Context, username, code string) error {

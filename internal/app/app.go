@@ -35,7 +35,6 @@ func Run() {
 	// HTTP Server
 	r := router.NewRouter(system).
 		AddV1FCMRoutes(fcm).
-		AddV1UserRoutes(system).
 		AddV1BasicRoutes(basic).
 		AddV1OrderRoutes(trade).
 		AddV1TradeRoutes(trade).

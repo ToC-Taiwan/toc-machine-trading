@@ -853,46 +853,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/user/activate": {
-            "post": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "User V1"
-                ],
-                "summary": "Activate user",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "user",
-                        "name": "user",
-                        "in": "header",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
         "/v1/user/verify/{user}/{code}": {
             "get": {
                 "consumes": [

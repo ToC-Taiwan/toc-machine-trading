@@ -118,5 +118,10 @@ func authenticator(system usecase.System) func(c *gin.Context) (interface{}, err
 }
 
 func payloadFunc(data interface{}) jwt.MapClaims {
+	if v, ok := data.(LoginBody); ok {
+		return jwt.MapClaims{
+			"username": v.Username,
+		}
+	}
 	return nil
 }
