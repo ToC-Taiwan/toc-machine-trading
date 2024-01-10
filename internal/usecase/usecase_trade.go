@@ -38,6 +38,9 @@ type TradeUseCase struct {
 
 	logger *log.Log
 	bus    *eventbus.Bus
+
+	authUserMap     map[string]struct{}
+	authUserMapLock sync.RWMutex
 }
 
 func NewTrade() Trade {
@@ -62,6 +65,7 @@ func NewTrade() Trade {
 
 	uc.bus.SubscribeAsync(topicInsertOrUpdateStockOrder, true, uc.updateStockOrderCacheAndInsertDB)
 	uc.bus.SubscribeAsync(topicInsertOrUpdateFutureOrder, true, uc.updateFutureOrderCacheAndInsertDB)
+	uc.bus.SubscribeAsync(topicUpdateAuthTradeUser, true, uc.updateAuthUserMap)
 
 	go uc.askOrderStatus(cfg.Simulation)
 	go uc.updateAccountDetail()
@@ -92,6 +96,27 @@ func (uc *TradeUseCase) updateAccountDetail() {
 		uc.updateStockInventory()
 		uc.updateFutureInventory()
 	}
+}
+
+func (uc *TradeUseCase) updateAuthUserMap(username []string) {
+	uc.authUserMapLock.Lock()
+	defer uc.authUserMapLock.Unlock()
+
+	uc.authUserMap = make(map[string]struct{})
+	for _, v := range username {
+		uc.logger.Warnf("auth user: %s", v)
+		uc.authUserMap[v] = struct{}{}
+	}
+}
+
+func (uc *TradeUseCase) IsAuthUser(username string) bool {
+	uc.authUserMapLock.RLock()
+	defer uc.authUserMapLock.RUnlock()
+
+	if _, ok := uc.authUserMap[username]; ok {
+		return true
+	}
+	return false
 }
 
 func (uc *TradeUseCase) getSinopacAccountBalance() *entity.AccountBalance {

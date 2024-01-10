@@ -125,3 +125,11 @@ func payloadFunc(data interface{}) jwt.MapClaims {
 	}
 	return nil
 }
+
+func ExtractUsername(c *gin.Context) string {
+	claims := jwt.ExtractClaims(c)
+	if v, ok := claims["username"]; ok {
+		return v.(string)
+	}
+	return ""
+}

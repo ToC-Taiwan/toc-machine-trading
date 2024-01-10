@@ -853,6 +853,36 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/user/update": {
+            "put": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User V1"
+                ],
+                "summary": "Update auth trade user",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/auth.UnauthorizedResponseBody"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/user/verify/{user}/{code}": {
             "get": {
                 "consumes": [

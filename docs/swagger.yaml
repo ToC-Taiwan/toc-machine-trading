@@ -1180,6 +1180,24 @@ paths:
       summary: New user
       tags:
       - User V1
+  /v1/user/update:
+    put:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/auth.UnauthorizedResponseBody'
+      security:
+      - JWT: []
+      summary: Update auth trade user
+      tags:
+      - User V1
   /v1/user/verify/{user}/{code}:
     get:
       consumes:

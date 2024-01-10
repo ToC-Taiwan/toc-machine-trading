@@ -6,4 +6,5 @@ type User struct {
 	Password      string `json:"password"`
 	Email         string `json:"email"`
 	EmailVerified bool   `json:"-"`
+	AuthTrade     bool   `json:"-"`
 }

@@ -4,6 +4,7 @@ package v1
 import (
 	"net/http"
 
+	"tmt/internal/controller/http/auth"
 	"tmt/internal/controller/http/resp"
 	"tmt/internal/usecase"
 
@@ -19,8 +20,8 @@ func NewTradeRoutes(handler *gin.RouterGroup, t usecase.Trade) {
 
 	h := handler.Group("/trade")
 	{
-		h.PUT("/stock/buy/odd", r.buyOddStock)
-		h.PUT("/stock/buy/lot", r.buyLotStock)
+		h.PUT("/stock/buy/odd", r.checkUserAuth, r.buyOddStock)
+		h.PUT("/stock/buy/lot", r.checkUserAuth, r.buyLotStock)
 	}
 }
 
@@ -39,6 +40,14 @@ type lotStockRequest struct {
 type tradeResponse struct {
 	OrderID string `json:"order_id"`
 	Status  string `json:"status"`
+}
+
+func (r *tradeRoutes) checkUserAuth(c *gin.Context) {
+	if !r.t.IsAuthUser(auth.ExtractUsername(c)) {
+		resp.ErrorResponse(c, http.StatusBadRequest, "user is not auth")
+		return
+	}
+	c.Next()
 }
 
 // buyOddStock -.

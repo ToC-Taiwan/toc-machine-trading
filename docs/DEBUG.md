@@ -89,4 +89,5 @@ let jsonData = pm.response.json();
 pm.collectionVariables.set("apiKey", jsonData.token);
 ```
 
-- set baseUrl `https://tocraw.com/tmt`
+- set baseUrl for prod `https://tocraw.com/tmt`
+- set baseUrl for dev `http://localhost:26670/tmt`

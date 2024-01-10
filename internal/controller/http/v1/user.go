@@ -27,6 +27,7 @@ func NewUserRoutes(h *gin.RouterGroup, jwtHandler *jwt.GinJWTMiddleware, system 
 	h.GET("/refresh", r.refreshTokenHandler)
 
 	h.POST("/user", r.newUserHandler)
+	h.PUT("/user/update", r.updateAuthTradeUser)
 	h.GET("/user/verify/:user/:code", r.verifyEmailHandler)
 }
 
@@ -133,4 +134,19 @@ func (u *userRoutes) logutHandler(c *gin.Context) {
 //	@router		/v1/refresh [get]
 func (u *userRoutes) refreshTokenHandler(c *gin.Context) {
 	u.jwtHandler.RefreshHandler(c)
+}
+
+// updateAuthTradeUser _.
+//
+//	@tags		User V1
+//	@Summary	Update auth trade user
+//	@security	JWT
+//	@accept		json
+//	@produce	json
+//	@success	200
+//	@failure	401	{object}	auth.UnauthorizedResponseBody{}
+//	@router		/v1/user/update [put]
+func (u *userRoutes) updateAuthTradeUser(c *gin.Context) {
+	u.system.UpdateAuthTradeUser()
+	c.JSON(http.StatusOK, nil)
 }

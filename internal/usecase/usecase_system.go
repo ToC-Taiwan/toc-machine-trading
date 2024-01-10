@@ -11,6 +11,8 @@ import (
 	"tmt/internal/config"
 	"tmt/internal/entity"
 	"tmt/internal/usecase/repo"
+	"tmt/pkg/eventbus"
+	"tmt/pkg/log"
 
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
@@ -23,15 +25,39 @@ type SystemUseCase struct {
 
 	activationCodeMap     map[string]time.Time
 	activationCodeMapLock sync.RWMutex
+
+	logger *log.Log
+	bus    *eventbus.Bus
 }
 
 func NewSystem() *SystemUseCase {
 	cfg := config.Get()
-	return &SystemUseCase{
+	uc := &SystemUseCase{
 		repo:              repo.NewSystemRepo(cfg.GetPostgresPool()),
 		activationCodeMap: make(map[string]time.Time),
 		smtpCfg:           config.Get().SMTP,
+		logger:            log.Get(),
+		bus:               eventbus.Get(),
 	}
+
+	uc.UpdateAuthTradeUser()
+	return uc
+}
+
+func (uc *SystemUseCase) UpdateAuthTradeUser() {
+	allUser, err := uc.repo.QueryAllUser(context.Background())
+	if err != nil {
+		uc.logger.Fatal(err)
+	}
+
+	authUserName := []string{}
+	for _, user := range allUser {
+		if user.AuthTrade {
+			authUserName = append(authUserName, user.Username)
+		}
+	}
+
+	uc.bus.PublishTopicEvent(topicUpdateAuthTradeUser, authUserName)
 }
 
 func (uc *SystemUseCase) AddUser(ctx context.Context, t *entity.User) error {
@@ -40,9 +66,9 @@ func (uc *SystemUseCase) AddUser(ctx context.Context, t *entity.User) error {
 		return err
 	}
 
-	if len(allUser) >= 10 {
-		return errors.New("user limit exceeded")
-	}
+	// if len(allUser) >= 10 {
+	// 	return errors.New("user limit exceeded")
+	// }
 
 	for _, user := range allUser {
 		if user.Username == t.Username {

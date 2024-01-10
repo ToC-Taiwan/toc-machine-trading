@@ -175,6 +175,7 @@ type Trade interface {
 	MoveFutureOrderToLatestTradeDay(ctx context.Context, orderID string) error
 
 	GetAccountBalance(ctx context.Context) ([]*entity.AccountBalance, error)
+	IsAuthUser(username string) bool
 }
 
 type TradeRepo interface {
@@ -233,6 +234,7 @@ type System interface {
 	AddUser(ctx context.Context, t *entity.User) error
 	Login(ctx context.Context, username, password string) error
 	VerifyEmail(ctx context.Context, username, code string) error
+	UpdateAuthTradeUser()
 }
 
 type SystemRepo interface {

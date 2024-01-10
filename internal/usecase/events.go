@@ -24,3 +24,7 @@ const (
 
 	// topicUnSubscribeFutureTickTargets string = "unsubscribe_future_targets"
 )
+
+const (
+	topicUpdateAuthTradeUser string = "update_auth_trade_user"
+)

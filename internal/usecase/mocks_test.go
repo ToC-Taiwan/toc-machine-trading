@@ -1838,6 +1838,20 @@ func (mr *MockTradeMockRecorder) GetLastStockTradeBalance(ctx interface{}) *gomo
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetLastStockTradeBalance", reflect.TypeOf((*MockTrade)(nil).GetLastStockTradeBalance), ctx)
 }
 
+// IsAuthUser mocks base method.
+func (m *MockTrade) IsAuthUser(username string) bool {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "IsAuthUser", username)
+	ret0, _ := ret[0].(bool)
+	return ret0
+}
+
+// IsAuthUser indicates an expected call of IsAuthUser.
+func (mr *MockTradeMockRecorder) IsAuthUser(username interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsAuthUser", reflect.TypeOf((*MockTrade)(nil).IsAuthUser), username)
+}
+
 // IsFutureTradeTime mocks base method.
 func (m *MockTrade) IsFutureTradeTime() bool {
 	m.ctrl.T.Helper()
@@ -2654,6 +2668,18 @@ func (m *MockSystem) Login(ctx context.Context, username, password string) error
 func (mr *MockSystemMockRecorder) Login(ctx, username, password interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Login", reflect.TypeOf((*MockSystem)(nil).Login), ctx, username, password)
+}
+
+// UpdateAuthTradeUser mocks base method.
+func (m *MockSystem) UpdateAuthTradeUser() {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "UpdateAuthTradeUser")
+}
+
+// UpdateAuthTradeUser indicates an expected call of UpdateAuthTradeUser.
+func (mr *MockSystemMockRecorder) UpdateAuthTradeUser() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateAuthTradeUser", reflect.TypeOf((*MockSystem)(nil).UpdateAuthTradeUser))
 }
 
 // VerifyEmail mocks base method.
