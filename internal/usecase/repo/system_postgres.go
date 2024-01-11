@@ -90,7 +90,7 @@ func (r *SystemRepo) EmailVerification(ctx context.Context, username string) err
 
 func (r *SystemRepo) QueryUserByUsername(ctx context.Context, username string) (*entity.User, error) {
 	sql, arg, err := r.Builder.
-		Select("username, password, email, email_verified, auth_trade, push_token").
+		Select("username, password, email, email_verified, auth_trade").
 		From(tableNameSystemAccount).
 		Where("username = ?", username).
 		ToSql()
@@ -100,7 +100,7 @@ func (r *SystemRepo) QueryUserByUsername(ctx context.Context, username string) (
 
 	row := r.Pool().QueryRow(ctx, sql, arg...)
 	e := entity.User{}
-	if err := row.Scan(&e.Username, &e.Password, &e.Email, &e.EmailVerified, &e.AuthTrade, &e.PushToken); err != nil {
+	if err := row.Scan(&e.Username, &e.Password, &e.Email, &e.EmailVerified, &e.AuthTrade); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, nil
 		}
