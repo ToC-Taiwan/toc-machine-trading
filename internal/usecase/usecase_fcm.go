@@ -49,7 +49,8 @@ func NewFCM() FCM {
 	}
 
 	uc.updatePushToken()
-	uc.bus.Subscribe(topicUpdatePushUser, uc.updatePushToken)
+
+	uc.bus.SubscribeAsync(topicUpdatePushUser, true, uc.updatePushToken)
 	uc.bus.SubscribeAsync(topicFetchStockHistory, true, uc.sendTargets)
 
 	return uc
