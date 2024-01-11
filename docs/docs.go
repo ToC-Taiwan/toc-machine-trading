@@ -1736,9 +1736,6 @@ const docTemplate = `{
                 "password": {
                     "type": "string"
                 },
-                "push_token": {
-                    "type": "string"
-                },
                 "username": {
                     "type": "string"
                 }

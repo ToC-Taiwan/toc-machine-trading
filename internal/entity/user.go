@@ -5,7 +5,7 @@ type User struct {
 	Username      string `json:"username"`
 	Password      string `json:"password"`
 	Email         string `json:"email"`
-	PushToken     string `json:"push_token"`
+	PushToken     string `json:"-"`
 	EmailVerified bool   `json:"-"`
 	AuthTrade     bool   `json:"-"`
 }
