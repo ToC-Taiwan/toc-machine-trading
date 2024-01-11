@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"net/mail"
 
+	"tmt/internal/controller/http/auth"
 	"tmt/internal/controller/http/resp"
 	"tmt/internal/entity"
 	"tmt/internal/usecase"
@@ -28,7 +29,8 @@ func NewUserRoutes(h *gin.RouterGroup, jwtHandler *jwt.GinJWTMiddleware, system 
 	h.GET("/refresh", r.refreshTokenHandler)
 
 	h.POST("/user", r.newUserHandler)
-	h.PUT("/user/update", r.updateAuthTradeUser)
+	h.PUT("/user/auth", r.updateAuthTradeUser)
+	h.PUT("/user/push-token", r.updateUserPushToken)
 	h.GET("/user/verify/:user/:code", r.verifyEmailHandler)
 }
 
@@ -137,6 +139,44 @@ func (u *userRoutes) refreshTokenHandler(c *gin.Context) {
 	u.jwtHandler.RefreshHandler(c)
 }
 
+type userPushTokenRequest struct {
+	PushToken string `json:"push_token"`
+}
+
+// updateUserPushToken _.
+//
+//	@tags		User V1
+//	@Summary	Update user push token
+//	@security	JWT
+//	@accept		json
+//	@produce	json
+//	@param		body	body	userPushTokenRequest{}	true	"Body"
+//	@success	200
+//	@failure	400	{object}	resp.Response{}
+//	@failure	401	{object}	auth.UnauthorizedResponseBody{}
+//	@failure	500	{object}	resp.Response{}
+//	@router		/v1/user/push-token [put]
+func (u *userRoutes) updateUserPushToken(c *gin.Context) {
+	p := userPushTokenRequest{}
+	if err := c.ShouldBindJSON(&p); err != nil {
+		resp.ErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	username := auth.ExtractUsername(c)
+	if username == "" {
+		resp.ErrorResponse(c, http.StatusBadRequest, "username is required in token")
+		return
+	}
+
+	if err := u.system.UpdateUserPushToken(c.Request.Context(), username, p.PushToken); err != nil {
+		resp.ErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, nil)
+}
+
 // updateAuthTradeUser _.
 //
 //	@tags		User V1
@@ -146,7 +186,7 @@ func (u *userRoutes) refreshTokenHandler(c *gin.Context) {
 //	@produce	json
 //	@success	200
 //	@failure	401	{object}	auth.UnauthorizedResponseBody{}
-//	@router		/v1/user/update [put]
+//	@router		/v1/user/auth [put]
 func (u *userRoutes) updateAuthTradeUser(c *gin.Context) {
 	u.system.UpdateAuthTradeUser()
 	c.JSON(http.StatusOK, nil)

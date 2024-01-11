@@ -39,6 +39,7 @@ func NewFCM() FCM {
 	}
 
 	uc.bus.SubscribeAsync(topicFetchStockHistory, true, uc.sendTargets)
+
 	return uc
 }
 
@@ -68,6 +69,12 @@ func newFCM() (*firebase.App, error) {
 	return fb, nil
 }
 
+func (uc *FcmUseCase) getAllPushToken() []string {
+	dataChan := make(chan []string)
+	uc.bus.PublishTopicEvent(topicQueryAllPushUser, dataChan)
+	return <-dataChan
+}
+
 func (uc *FcmUseCase) sendTargets(targetArr []*entity.StockTarget) error {
 	ctx := context.Background()
 	client, err := uc.app.Messaging(ctx)
@@ -75,7 +82,7 @@ func (uc *FcmUseCase) sendTargets(targetArr []*entity.StockTarget) error {
 		return err
 	}
 
-	message := &messaging.Message{
+	message := &messaging.MulticastMessage{
 		Notification: &messaging.Notification{
 			Title: "Found New Targets",
 			Body:  fmt.Sprintf("%s has %d targets", uc.tradeDay.GetStockTradeDay().TradeDay.Format(entity.ShortTimeLayout), len(targetArr)),
@@ -83,10 +90,10 @@ func (uc *FcmUseCase) sendTargets(targetArr []*entity.StockTarget) error {
 		Data: map[string]string{
 			"new_targets_count": fmt.Sprintf("%d", len(targetArr)),
 		},
-		Topic: "new_targets",
+		Tokens: uc.getAllPushToken(),
 	}
 
-	_, err = client.Send(ctx, message)
+	_, err = client.SendEachForMulticast(ctx, message)
 	if err != nil {
 		return err
 	}
@@ -109,6 +116,28 @@ func (uc *FcmUseCase) AnnounceMessage(msg string) error {
 	}
 
 	_, err = client.Send(ctx, message)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (uc *FcmUseCase) PushNotification(msg string) error {
+	ctx := context.Background()
+	client, err := uc.app.Messaging(ctx)
+	if err != nil {
+		return err
+	}
+
+	message := &messaging.MulticastMessage{
+		Notification: &messaging.Notification{
+			Title: "Announcement",
+			Body:  msg,
+		},
+		Tokens: uc.getAllPushToken(),
+	}
+
+	_, err = client.SendEachForMulticast(ctx, message)
 	if err != nil {
 		return err
 	}

@@ -28,3 +28,7 @@ const (
 const (
 	topicUpdateAuthTradeUser string = "update_auth_trade_user"
 )
+
+const (
+	topicQueryAllPushUser string = "query_all_push_user"
+)

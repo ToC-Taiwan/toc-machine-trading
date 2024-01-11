@@ -29,8 +29,8 @@ func Run() {
 	analyze := usecase.NewAnalyze()
 	history := usecase.NewHistory()
 	realTime := usecase.NewRealTime()
-	target := usecase.NewTarget()
 	system := usecase.NewSystem()
+	target := usecase.NewTarget()
 
 	// HTTP Server
 	r := router.NewRouter(system).

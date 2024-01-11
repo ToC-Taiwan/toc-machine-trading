@@ -2682,6 +2682,20 @@ func (mr *MockSystemMockRecorder) UpdateAuthTradeUser() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateAuthTradeUser", reflect.TypeOf((*MockSystem)(nil).UpdateAuthTradeUser))
 }
 
+// UpdateUserPushToken mocks base method.
+func (m *MockSystem) UpdateUserPushToken(ctx context.Context, username, pushToken string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateUserPushToken", ctx, username, pushToken)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateUserPushToken indicates an expected call of UpdateUserPushToken.
+func (mr *MockSystemMockRecorder) UpdateUserPushToken(ctx, username, pushToken interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateUserPushToken", reflect.TypeOf((*MockSystem)(nil).UpdateUserPushToken), ctx, username, pushToken)
+}
+
 // VerifyEmail mocks base method.
 func (m *MockSystem) VerifyEmail(ctx context.Context, username, code string) error {
 	m.ctrl.T.Helper()
@@ -2733,6 +2747,21 @@ func (mr *MockSystemRepoMockRecorder) EmailVerification(ctx, username interface{
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EmailVerification", reflect.TypeOf((*MockSystemRepo)(nil).EmailVerification), ctx, username)
 }
 
+// GetAllPushTokens mocks base method.
+func (m *MockSystemRepo) GetAllPushTokens(ctx context.Context) ([]string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAllPushTokens", ctx)
+	ret0, _ := ret[0].([]string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAllPushTokens indicates an expected call of GetAllPushTokens.
+func (mr *MockSystemRepoMockRecorder) GetAllPushTokens(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllPushTokens", reflect.TypeOf((*MockSystemRepo)(nil).GetAllPushTokens), ctx)
+}
+
 // InsertUser mocks base method.
 func (m *MockSystemRepo) InsertUser(ctx context.Context, t *entity.User) error {
 	m.ctrl.T.Helper()
@@ -2777,6 +2806,20 @@ func (mr *MockSystemRepoMockRecorder) QueryUserByUsername(ctx, username interfac
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryUserByUsername", reflect.TypeOf((*MockSystemRepo)(nil).QueryUserByUsername), ctx, username)
 }
 
+// UpdateUserPushToken mocks base method.
+func (m *MockSystemRepo) UpdateUserPushToken(ctx context.Context, username, pushToken string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateUserPushToken", ctx, username, pushToken)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateUserPushToken indicates an expected call of UpdateUserPushToken.
+func (mr *MockSystemRepoMockRecorder) UpdateUserPushToken(ctx, username, pushToken interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateUserPushToken", reflect.TypeOf((*MockSystemRepo)(nil).UpdateUserPushToken), ctx, username, pushToken)
+}
+
 // MockFCM is a mock of FCM interface.
 type MockFCM struct {
 	ctrl     *gomock.Controller
@@ -2812,4 +2855,18 @@ func (m *MockFCM) AnnounceMessage(msg string) error {
 func (mr *MockFCMMockRecorder) AnnounceMessage(msg interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AnnounceMessage", reflect.TypeOf((*MockFCM)(nil).AnnounceMessage), msg)
+}
+
+// PushNotification mocks base method.
+func (m *MockFCM) PushNotification(msg string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "PushNotification", msg)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// PushNotification indicates an expected call of PushNotification.
+func (mr *MockFCMMockRecorder) PushNotification(msg interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PushNotification", reflect.TypeOf((*MockFCM)(nil).PushNotification), msg)
 }

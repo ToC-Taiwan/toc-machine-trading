@@ -162,7 +162,54 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/v1.announcementRequest"
+                            "$ref": "#/definitions/v1.msgRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/resp.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/fcm/push": {
+            "post": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "FCM V1"
+                ],
+                "summary": "Push message to devices which has push token",
+                "parameters": [
+                    {
+                        "description": "Body",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/v1.msgRequest"
                         }
                     }
                 ],
@@ -853,7 +900,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/user/update": {
+        "/v1/user/auth": {
             "put": {
                 "security": [
                     {
@@ -878,6 +925,59 @@ const docTemplate = `{
                         "description": "Unauthorized",
                         "schema": {
                             "$ref": "#/definitions/auth.UnauthorizedResponseBody"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/user/push-token": {
+            "put": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User V1"
+                ],
+                "summary": "Update user push token",
+                "parameters": [
+                    {
+                        "description": "Body",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/v1.userPushTokenRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/resp.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/auth.UnauthorizedResponseBody"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.Response"
                         }
                     }
                 }
@@ -990,31 +1090,31 @@ const docTemplate = `{
         "config.AnalyzeStock": {
             "type": "object",
             "properties": {
-                "allInOutRatio": {
+                "AllInOutRatio": {
                     "type": "number"
                 },
-                "allOutInRatio": {
+                "AllOutInRatio": {
                     "type": "number"
                 },
-                "closeChangeRatioHigh": {
+                "CloseChangeRatioHigh": {
                     "type": "number"
                 },
-                "closeChangeRatioLow": {
+                "CloseChangeRatioLow": {
                     "type": "number"
                 },
-                "maperiod": {
+                "MAPeriod": {
                     "type": "integer"
                 },
-                "maxHoldTime": {
+                "MaxHoldTime": {
                     "type": "number"
                 },
-                "rsiminCount": {
+                "RSIMinCount": {
                     "type": "integer"
                 },
-                "tickAnalyzePeriod": {
+                "TickAnalyzePeriod": {
                     "type": "number"
                 },
-                "volumePRLimit": {
+                "VolumePRLimit": {
                     "type": "number"
                 }
             }
@@ -1022,85 +1122,42 @@ const docTemplate = `{
         "config.Config": {
             "type": "object",
             "properties": {
-                "analyzeStock": {
+                "AnalyzeStock": {
                     "$ref": "#/definitions/config.AnalyzeStock"
                 },
-                "database": {
-                    "$ref": "#/definitions/config.Database"
-                },
-                "fugle": {
-                    "$ref": "#/definitions/config.Fugle"
-                },
-                "history": {
+                "History": {
                     "$ref": "#/definitions/config.History"
                 },
-                "manualTrade": {
+                "ManualTrade": {
                     "type": "boolean"
                 },
-                "quota": {
+                "Quota": {
                     "$ref": "#/definitions/config.Quota"
                 },
-                "rabbitMQ": {
-                    "$ref": "#/definitions/config.RabbitMQ"
-                },
-                "server": {
-                    "$ref": "#/definitions/config.Server"
-                },
-                "simulation": {
+                "Simulation": {
                     "type": "boolean"
                 },
-                "sinopac": {
-                    "$ref": "#/definitions/config.Sinopac"
-                },
-                "smtp": {
-                    "$ref": "#/definitions/config.SMTP"
-                },
-                "targetStock": {
+                "TargetStock": {
                     "$ref": "#/definitions/config.TargetStock"
                 },
-                "tradeFuture": {
+                "TradeFuture": {
                     "$ref": "#/definitions/config.TradeFuture"
                 },
-                "tradeStock": {
+                "TradeStock": {
                     "$ref": "#/definitions/config.TradeStock"
-                }
-            }
-        },
-        "config.Database": {
-            "type": "object",
-            "properties": {
-                "dbname": {
-                    "type": "string"
-                },
-                "poolMax": {
-                    "type": "integer"
-                },
-                "url": {
-                    "type": "string"
-                }
-            }
-        },
-        "config.Fugle": {
-            "type": "object",
-            "properties": {
-                "poolMax": {
-                    "type": "integer"
-                },
-                "url": {
-                    "type": "string"
                 }
             }
         },
         "config.History": {
             "type": "object",
             "properties": {
-                "historyClosePeriod": {
+                "HistoryClosePeriod": {
                     "type": "integer"
                 },
-                "historyKbarPeriod": {
+                "HistoryKbarPeriod": {
                     "type": "integer"
                 },
-                "historyTickPeriod": {
+                "HistoryTickPeriod": {
                     "type": "integer"
                 }
             }
@@ -1108,10 +1165,10 @@ const docTemplate = `{
         "config.PriceLimit": {
             "type": "object",
             "properties": {
-                "high": {
+                "High": {
                     "type": "number"
                 },
-                "low": {
+                "Low": {
                     "type": "number"
                 }
             }
@@ -1119,98 +1176,42 @@ const docTemplate = `{
         "config.Quota": {
             "type": "object",
             "properties": {
-                "futureTradeFee": {
+                "FutureTradeFee": {
                     "type": "integer"
                 },
-                "stockFeeDiscount": {
+                "StockFeeDiscount": {
                     "type": "number"
                 },
-                "stockTradeQuota": {
+                "StockTradeQuota": {
                     "type": "integer"
-                }
-            }
-        },
-        "config.RabbitMQ": {
-            "type": "object",
-            "properties": {
-                "attempts": {
-                    "type": "integer"
-                },
-                "exchange": {
-                    "type": "string"
-                },
-                "url": {
-                    "type": "string"
-                },
-                "waitTime": {
-                    "type": "integer"
-                }
-            }
-        },
-        "config.SMTP": {
-            "type": "object",
-            "properties": {
-                "host": {
-                    "type": "string"
-                },
-                "password": {
-                    "type": "string"
-                },
-                "port": {
-                    "type": "integer"
-                },
-                "username": {
-                    "type": "string"
-                }
-            }
-        },
-        "config.Server": {
-            "type": "object",
-            "properties": {
-                "disableSwaggerHTTPHandler": {
-                    "type": "string"
-                },
-                "http": {
-                    "type": "string"
-                }
-            }
-        },
-        "config.Sinopac": {
-            "type": "object",
-            "properties": {
-                "poolMax": {
-                    "type": "integer"
-                },
-                "url": {
-                    "type": "string"
                 }
             }
         },
         "config.TargetStock": {
             "type": "object",
             "properties": {
-                "blackCategory": {
+                "BlackCategory": {
                     "type": "array",
                     "items": {
                         "type": "string"
                     }
                 },
-                "blackStock": {
+                "BlackStock": {
                     "type": "array",
                     "items": {
                         "type": "string"
                     }
                 },
-                "limitVolume": {
+                "LimitVolume": {
                     "type": "integer"
                 },
-                "priceLimit": {
+                "PriceLimit": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/config.PriceLimit"
                     }
                 },
-                "realTimeRank": {
+                "RealTimeRank": {
                     "type": "integer"
                 }
             }
@@ -1218,46 +1219,46 @@ const docTemplate = `{
         "config.TradeFuture": {
             "type": "object",
             "properties": {
-                "allowTrade": {
+                "AllowTrade": {
                     "type": "boolean"
                 },
-                "buySellWaitTime": {
+                "BuySellWaitTime": {
                     "type": "integer"
                 },
-                "inOutRatio": {
+                "InOutRatio": {
                     "type": "number"
                 },
-                "maxHoldTime": {
+                "MaxHoldTime": {
                     "type": "integer"
                 },
-                "outInRatio": {
+                "OutInRatio": {
                     "type": "number"
                 },
-                "quantity": {
+                "Quantity": {
                     "type": "integer"
                 },
-                "rateChangeRatio": {
+                "RateChangeRatio": {
                     "type": "number"
                 },
-                "rateLimit": {
+                "RateLimit": {
                     "type": "number"
                 },
-                "subscribe": {
+                "Subscribe": {
                     "type": "boolean"
                 },
-                "targetBalanceHigh": {
+                "TargetBalanceHigh": {
                     "type": "number"
                 },
-                "targetBalanceLow": {
+                "TargetBalanceLow": {
                     "type": "number"
                 },
-                "tickInterval": {
+                "TickInterval": {
                     "type": "integer"
                 },
-                "tradeOutWaitTimes": {
+                "TradeOutWaitTimes": {
                     "type": "integer"
                 },
-                "tradeTimeRange": {
+                "TradeTimeRange": {
                     "$ref": "#/definitions/config.TradeTimeRange"
                 }
             }
@@ -1265,31 +1266,31 @@ const docTemplate = `{
         "config.TradeStock": {
             "type": "object",
             "properties": {
-                "allowTrade": {
+                "AllowTrade": {
                     "type": "boolean"
                 },
-                "cancelWaitTime": {
+                "CancelWaitTime": {
                     "type": "integer"
                 },
-                "holdTimeFromOpen": {
+                "HoldTimeFromOpen": {
                     "type": "number"
                 },
-                "odd": {
+                "Odd": {
                     "type": "boolean"
                 },
-                "subscribe": {
+                "Subscribe": {
                     "type": "boolean"
                 },
-                "totalOpenTime": {
+                "TotalOpenTime": {
                     "type": "number"
                 },
-                "tradeInEndTime": {
+                "TradeInEndTime": {
                     "type": "number"
                 },
-                "tradeInWaitTime": {
+                "TradeInWaitTime": {
                     "type": "integer"
                 },
-                "tradeOutWaitTime": {
+                "TradeOutWaitTime": {
                     "type": "integer"
                 }
             }
@@ -1297,10 +1298,10 @@ const docTemplate = `{
         "config.TradeTimeRange": {
             "type": "object",
             "properties": {
-                "firstPartDuration": {
+                "FirstPartDuration": {
                     "type": "integer"
                 },
-                "secondPartDuration": {
+                "SecondPartDuration": {
                     "type": "integer"
                 }
             }
@@ -1735,6 +1736,9 @@ const docTemplate = `{
                 "password": {
                     "type": "string"
                 },
+                "push_token": {
+                    "type": "string"
+                },
                 "username": {
                     "type": "string"
                 }
@@ -1776,14 +1780,6 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/entity.StockOrder"
                     }
-                }
-            }
-        },
-        "v1.announcementRequest": {
-            "type": "object",
-            "properties": {
-                "message": {
-                    "type": "string"
                 }
             }
         },
@@ -1836,6 +1832,14 @@ const docTemplate = `{
                 },
                 "quantity": {
                     "type": "integer"
+                }
+            }
+        },
+        "v1.msgRequest": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
                 }
             }
         },
@@ -1902,6 +1906,14 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "v1.userPushTokenRequest": {
+            "type": "object",
+            "properties": {
+                "push_token": {
                     "type": "string"
                 }
             }
