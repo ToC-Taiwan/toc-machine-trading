@@ -39,6 +39,7 @@ func NewRealTimeRoutes(handler *gin.RouterGroup, t usecase.RealTime, o usecase.T
 //
 //	@Tags		Stream V1
 //	@Summary	Get TSE snapshot
+//	@security	JWT
 //	@Accept		json
 //	@Produce	json
 //	@Success	200	{object}	entity.StockSnapShot
@@ -57,6 +58,7 @@ func (r *realTimeRoutes) getTSESnapshot(c *gin.Context) {
 //
 //	@Tags		Stream V1
 //	@Summary	Get index
+//	@security	JWT
 //	@Accept		json
 //	@Produce	json
 //	@Success	200	{object}	entity.TradeIndex

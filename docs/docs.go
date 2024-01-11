@@ -17,6 +17,11 @@ const docTemplate = `{
     "paths": {
         "/v1/analyze/reborn": {
             "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "consumes": [
                     "application/json"
                 ],
@@ -42,6 +47,11 @@ const docTemplate = `{
         },
         "/v1/basic/config": {
             "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "consumes": [
                     "application/json"
                 ],
@@ -70,6 +80,11 @@ const docTemplate = `{
         },
         "/v1/basic/stock": {
             "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "consumes": [
                     "application/json"
                 ],
@@ -112,6 +127,11 @@ const docTemplate = `{
         },
         "/v1/basic/usage/shioaji": {
             "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "consumes": [
                     "application/json"
                 ],
@@ -234,6 +254,11 @@ const docTemplate = `{
         },
         "/v1/history/day-kbar/{stock}/{start_date}/{interval}": {
             "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "consumes": [
                     "application/json"
                 ],
@@ -348,6 +373,11 @@ const docTemplate = `{
         },
         "/v1/order": {
             "post": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "consumes": [
                     "application/json"
                 ],
@@ -384,6 +414,11 @@ const docTemplate = `{
         },
         "/v1/order/account/balance": {
             "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "consumes": [
                     "application/json"
                 ],
@@ -412,6 +447,11 @@ const docTemplate = `{
         },
         "/v1/order/all": {
             "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "consumes": [
                     "application/json"
                 ],
@@ -440,6 +480,11 @@ const docTemplate = `{
         },
         "/v1/order/balance": {
             "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "consumes": [
                     "application/json"
                 ],
@@ -468,6 +513,11 @@ const docTemplate = `{
         },
         "/v1/order/balance/future/last": {
             "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "consumes": [
                     "application/json"
                 ],
@@ -496,6 +546,11 @@ const docTemplate = `{
         },
         "/v1/order/balance/stock/last": {
             "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "consumes": [
                     "application/json"
                 ],
@@ -524,6 +579,11 @@ const docTemplate = `{
         },
         "/v1/order/date/{tradeday}": {
             "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "consumes": [
                     "application/json"
                 ],
@@ -559,6 +619,11 @@ const docTemplate = `{
                 }
             },
             "put": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "consumes": [
                     "application/json"
                 ],
@@ -596,6 +661,11 @@ const docTemplate = `{
         },
         "/v1/order/future/{order-id}": {
             "patch": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "consumes": [
                     "application/json"
                 ],
@@ -630,6 +700,11 @@ const docTemplate = `{
         },
         "/v1/order/stock/{order-id}": {
             "patch": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "consumes": [
                     "application/json"
                 ],
@@ -697,6 +772,11 @@ const docTemplate = `{
         },
         "/v1/stream/index": {
             "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "consumes": [
                     "application/json"
                 ],
@@ -719,6 +799,11 @@ const docTemplate = `{
         },
         "/v1/stream/tse/snapshot": {
             "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "consumes": [
                     "application/json"
                 ],
@@ -747,6 +832,11 @@ const docTemplate = `{
         },
         "/v1/targets": {
             "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "consumes": [
                     "application/json"
                 ],

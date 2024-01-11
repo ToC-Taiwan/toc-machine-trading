@@ -26,6 +26,7 @@ func NewTargetRoutes(handler *gin.RouterGroup, t usecase.Target) {
 //
 //	@Tags		Targets V1
 //	@Summary	Get targets
+//	@security	JWT
 //	@Accept		json
 //	@Produce	json
 //	@Success	200	{object}	[]entity.StockTarget

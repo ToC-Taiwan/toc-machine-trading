@@ -48,6 +48,7 @@ type allOrder struct {
 //
 //	@Tags		Order V1
 //	@Summary	Get all order
+//	@security	JWT
 //	@Accept		json
 //	@Produce	json
 //	@Success	200	{object}	allOrder
@@ -79,6 +80,7 @@ type futureOrders struct {
 //
 //	@Tags		Order V1
 //	@Summary	Get all order by trade day
+//	@security	JWT
 //	@Accept		json
 //	@Produce	json
 //	@param		tradeday	path		string	true	"tradeday"
@@ -104,6 +106,7 @@ func (r *orderRoutes) getAllOrderByTradeDay(c *gin.Context) {
 //
 //	@Tags		Order V1
 //	@Summary	Update trade balance by trade day
+//	@security	JWT
 //	@Accept		json
 //	@Produce	json
 //	@param		tradeday	path		string	true	"tradeday"
@@ -137,6 +140,7 @@ type manualInsertFutureOrderRequest struct {
 //
 //	@Tags		Order V1
 //	@Summary	Manual insert future order
+//	@security	JWT
 //	@Accept		json
 //	@Produce	json
 //	@param		body	body	manualInsertFutureOrderRequest{}	true	"Body"
@@ -185,6 +189,7 @@ type tradeBalance struct {
 //
 //	@Tags		Order V1
 //	@Summary	Get all trade balance
+//	@security	JWT
 //	@Accept		json
 //	@Produce	json
 //	@Success	200	{object}	tradeBalance
@@ -213,6 +218,7 @@ func (r *orderRoutes) getAllTradeBalance(c *gin.Context) {
 //
 //	@Tags		Order V1
 //	@Summary	Get last stock trade balance
+//	@security	JWT
 //	@Accept		json
 //	@Produce	json
 //	@Success	200	{object}	entity.StockTradeBalance
@@ -232,6 +238,7 @@ func (r *orderRoutes) getLastStockTradeBalance(c *gin.Context) {
 //
 //	@Tags		Order V1
 //	@Summary	Get last future trade balance
+//	@security	JWT
 //	@Accept		json
 //	@Produce	json
 //	@Success	200	{object}	entity.FutureTradeBalance
@@ -251,6 +258,7 @@ func (r *orderRoutes) getLastFutureTradeBalance(c *gin.Context) {
 //
 //	@Tags		Order V1
 //	@Summary	Move future order to latest trade day
+//	@security	JWT
 //	@Accept		json
 //	@Produce	json
 //	@param		order-id	path	string	true	"order-id"
@@ -275,6 +283,7 @@ func (r *orderRoutes) moveFutureOrderToLatestTradeDay(c *gin.Context) {
 //
 //	@Tags		Order V1
 //	@Summary	Move stock order to latest trade day
+//	@security	JWT
 //	@Accept		json
 //	@Produce	json
 //	@param		order-id	path	string	true	"order-id"
@@ -304,6 +313,7 @@ type accountSummary struct {
 //
 //	@Tags		Account V1
 //	@Summary	Get account balance
+//	@security	JWT
 //	@Accept		json
 //	@Produce	json
 //	@Success	200	{object}	accountSummary

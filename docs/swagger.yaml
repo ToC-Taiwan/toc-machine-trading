@@ -600,6 +600,8 @@ paths:
             items:
               $ref: '#/definitions/v1.reborn'
             type: array
+      security:
+      - JWT: []
       summary: Get reborn targets
       tags:
       - Analyze V1
@@ -618,6 +620,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/resp.Response'
+      security:
+      - JWT: []
       summary: Get all config
       tags:
       - Basic V1
@@ -645,6 +649,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/resp.Response'
+      security:
+      - JWT: []
       summary: Get all repo stock
       tags:
       - Basic V1
@@ -663,6 +669,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/resp.Response'
+      security:
+      - JWT: []
       summary: Get shioaji usage
       tags:
       - Basic V1
@@ -757,6 +765,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/resp.Response'
+      security:
+      - JWT: []
       summary: Get kbar data
       tags:
       - History V1
@@ -817,6 +827,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/resp.Response'
+      security:
+      - JWT: []
       summary: Manual insert future order
       tags:
       - Order V1
@@ -835,6 +847,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/resp.Response'
+      security:
+      - JWT: []
       summary: Get account balance
       tags:
       - Account V1
@@ -853,6 +867,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/resp.Response'
+      security:
+      - JWT: []
       summary: Get all order
       tags:
       - Order V1
@@ -871,6 +887,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/resp.Response'
+      security:
+      - JWT: []
       summary: Get all trade balance
       tags:
       - Order V1
@@ -889,6 +907,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/resp.Response'
+      security:
+      - JWT: []
       summary: Get last future trade balance
       tags:
       - Order V1
@@ -907,6 +927,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/resp.Response'
+      security:
+      - JWT: []
       summary: Get last stock trade balance
       tags:
       - Order V1
@@ -931,6 +953,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/resp.Response'
+      security:
+      - JWT: []
       summary: Get all order by trade day
       tags:
       - Order V1
@@ -954,6 +978,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/resp.Response'
+      security:
+      - JWT: []
       summary: Update trade balance by trade day
       tags:
       - Order V1
@@ -976,6 +1002,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/resp.Response'
+      security:
+      - JWT: []
       summary: Move future order to latest trade day
       tags:
       - Order V1
@@ -998,6 +1026,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/resp.Response'
+      security:
+      - JWT: []
       summary: Move stock order to latest trade day
       tags:
       - Order V1
@@ -1032,6 +1062,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/entity.TradeIndex'
+      security:
+      - JWT: []
       summary: Get index
       tags:
       - Stream V1
@@ -1050,6 +1082,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/resp.Response'
+      security:
+      - JWT: []
       summary: Get TSE snapshot
       tags:
       - Stream V1
@@ -1066,6 +1100,8 @@ paths:
             items:
               $ref: '#/definitions/entity.StockTarget'
             type: array
+      security:
+      - JWT: []
       summary: Get targets
       tags:
       - Targets V1

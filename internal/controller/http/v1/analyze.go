@@ -34,6 +34,7 @@ type reborn struct {
 //
 //	@Tags		Analyze V1
 //	@Summary	Get reborn targets
+//	@security	JWT
 //	@Accept		json
 //	@Produce	json
 //	@Success	200	{object}	[]reborn{}

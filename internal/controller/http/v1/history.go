@@ -30,6 +30,7 @@ func NewHistoryRoutes(handler *gin.RouterGroup, t usecase.History) {
 //
 //	@Tags		History V1
 //	@Summary	Get kbar data
+//	@security	JWT
 //	@Accept		json
 //	@Produce	json
 //	@param		stock		path		string	true	"stock"

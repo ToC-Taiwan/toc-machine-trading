@@ -3,7 +3,6 @@ package router
 
 import (
 	"fmt"
-	"net/http"
 
 	"tmt/docs"
 	"tmt/internal/controller/http/auth"
@@ -22,11 +21,8 @@ const (
 // Router -.
 type Router struct {
 	rootHandler *gin.Engine
-
-	v1Public  *gin.RouterGroup
-	v1Private *gin.RouterGroup
-
-	jwtHandler *jwt.GinJWTMiddleware
+	v1Group     *gin.RouterGroup
+	jwtHandler  *jwt.GinJWTMiddleware
 }
 
 var swagHandler gin.HandlerFunc
@@ -45,7 +41,6 @@ func NewRouter(system usecase.System) *Router {
 	g := gin.New()
 	g.Use(gin.Recovery())
 	g.GET("/metrics", gin.WrapH(promhttp.Handler()))
-	g.GET("/-/health", healthCheck)
 	g.LoadHTMLGlob("templates/*")
 
 	if swagHandler != nil {
@@ -69,8 +64,7 @@ func NewRouter(system usecase.System) *Router {
 
 	return &Router{
 		rootHandler: g,
-		v1Public:    v1Public,
-		v1Private:   v1Private,
+		v1Group:     v1Private,
 		jwtHandler:  jwtHandler,
 	}
 }
@@ -80,47 +74,43 @@ func (r *Router) GetHandler() *gin.Engine {
 }
 
 func (r *Router) AddV1FCMRoutes(fcm usecase.FCM) *Router {
-	v1.NewFCMRoutes(r.v1Private, fcm)
+	v1.NewFCMRoutes(r.v1Group, fcm)
 	return r
 }
 
 func (r *Router) AddV1TradeRoutes(trade usecase.Trade) *Router {
-	v1.NewTradeRoutes(r.v1Private, trade)
+	v1.NewTradeRoutes(r.v1Group, trade)
 	return r
 }
 
 func (r *Router) AddV1BasicRoutes(basic usecase.Basic) *Router {
-	v1.NewBasicRoutes(r.v1Private, basic)
+	v1.NewBasicRoutes(r.v1Group, basic)
 	return r
 }
 
 func (r *Router) AddV1AnalyzeRoutes(analyze usecase.Analyze) *Router {
-	v1.NewAnalyzeRoutes(r.v1Public, analyze)
+	v1.NewAnalyzeRoutes(r.v1Group, analyze)
 	return r
 }
 
 func (r *Router) AddV1TargetRoutes(target usecase.Target) *Router {
-	v1.NewTargetRoutes(r.v1Public, target)
+	v1.NewTargetRoutes(r.v1Group, target)
 	return r
 }
 
 func (r *Router) AddV1OrderRoutes(trade usecase.Trade) *Router {
-	v1.NewOrderRoutes(r.v1Public, trade)
+	v1.NewOrderRoutes(r.v1Group, trade)
 	return r
 }
 
 func (r *Router) AddV1HistoryRoutes(history usecase.History) *Router {
-	v1.NewHistoryRoutes(r.v1Public, history)
+	v1.NewHistoryRoutes(r.v1Group, history)
 	return r
 }
 
 func (r *Router) AddV1RealTimeRoutes(realTime usecase.RealTime, trade usecase.Trade, history usecase.History) *Router {
-	v1.NewRealTimeRoutes(r.v1Public, realTime, trade, history)
+	v1.NewRealTimeRoutes(r.v1Group, realTime, trade, history)
 	return r
-}
-
-func healthCheck(c *gin.Context) {
-	c.JSON(http.StatusOK, "OK")
 }
 
 func swaggerMiddleware() gin.HandlerFunc {
