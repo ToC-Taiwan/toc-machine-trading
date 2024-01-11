@@ -76,6 +76,11 @@ func (uc *FcmUseCase) getAllPushToken() []string {
 }
 
 func (uc *FcmUseCase) sendTargets(targetArr []*entity.StockTarget) error {
+	tokens := uc.getAllPushToken()
+	if len(tokens) == 0 {
+		return nil
+	}
+
 	ctx := context.Background()
 	client, err := uc.app.Messaging(ctx)
 	if err != nil {
@@ -90,7 +95,7 @@ func (uc *FcmUseCase) sendTargets(targetArr []*entity.StockTarget) error {
 		Data: map[string]string{
 			"new_targets_count": fmt.Sprintf("%d", len(targetArr)),
 		},
-		Tokens: uc.getAllPushToken(),
+		Tokens: tokens,
 	}
 
 	_, err = client.SendEachForMulticast(ctx, message)
@@ -123,6 +128,11 @@ func (uc *FcmUseCase) AnnounceMessage(msg string) error {
 }
 
 func (uc *FcmUseCase) PushNotification(msg string) error {
+	tokens := uc.getAllPushToken()
+	if len(tokens) == 0 {
+		return nil
+	}
+
 	ctx := context.Background()
 	client, err := uc.app.Messaging(ctx)
 	if err != nil {
@@ -134,7 +144,7 @@ func (uc *FcmUseCase) PushNotification(msg string) error {
 			Title: "Announcement",
 			Body:  msg,
 		},
-		Tokens: uc.getAllPushToken(),
+		Tokens: tokens,
 	}
 
 	_, err = client.SendEachForMulticast(ctx, message)
