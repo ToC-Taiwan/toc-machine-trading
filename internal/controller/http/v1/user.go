@@ -18,20 +18,21 @@ type userRoutes struct {
 	jwtHandler *jwt.GinJWTMiddleware
 }
 
-func NewUserRoutes(h *gin.RouterGroup, jwtHandler *jwt.GinJWTMiddleware, system usecase.System) {
+func NewUserRoutes(public *gin.RouterGroup, private *gin.RouterGroup, jwtHandler *jwt.GinJWTMiddleware, system usecase.System) {
 	r := &userRoutes{
 		system:     system,
 		jwtHandler: jwtHandler,
 	}
 
-	h.POST("/login", r.loginHandler)
-	h.GET("/logout", r.logutHandler)
-	h.GET("/refresh", r.refreshTokenHandler)
+	public.POST("/login", r.loginHandler)
+	public.GET("/logout", r.logutHandler)
+	public.GET("/refresh", r.refreshTokenHandler)
 
-	h.POST("/user", r.newUserHandler)
-	h.PUT("/user/auth", r.updateAuthTradeUser)
-	h.PUT("/user/push-token", r.updateUserPushToken)
-	h.GET("/user/verify/:user/:code", r.verifyEmailHandler)
+	public.POST("/user", r.newUserHandler)
+	public.GET("/user/verify/:user/:code", r.verifyEmailHandler)
+
+	private.PUT("/user/auth", r.updateAuthTradeUser)
+	private.PUT("/user/push-token", r.updateUserPushToken)
 }
 
 // newUserHandler _.

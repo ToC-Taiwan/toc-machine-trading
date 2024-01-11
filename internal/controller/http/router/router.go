@@ -62,10 +62,10 @@ func NewRouter(system usecase.System) *Router {
 	v1Prefix := fmt.Sprintf("%s/v1", prefix)
 
 	v1Public := g.Group(v1Prefix)
-	v1.NewUserRoutes(v1Public, jwtHandler, system)
-
 	v1Private := g.Group(v1Prefix)
+
 	v1Private.Use(jwtHandler.MiddlewareFunc())
+	v1.NewUserRoutes(v1Public, v1Private, jwtHandler, system)
 
 	return &Router{
 		rootHandler: g,
