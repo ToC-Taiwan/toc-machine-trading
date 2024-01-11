@@ -27,23 +27,23 @@ import (
 
 // Config -.
 type Config struct {
-	Simulation   bool         `yaml:"Simulation"`
-	ManualTrade  bool         `yaml:"ManualTrade"`
-	TradeStock   TradeStock   `yaml:"TradeStock"`
-	History      History      `yaml:"History"`
-	Quota        Quota        `yaml:"Quota"`
-	TargetStock  TargetStock  `yaml:"TargetStock"`
-	AnalyzeStock AnalyzeStock `yaml:"AnalyzeStock"`
-	TradeFuture  TradeFuture  `yaml:"TradeFuture"`
+	Simulation   bool         `json:"Simulation" yaml:"Simulation"`
+	ManualTrade  bool         `json:"ManualTrade" yaml:"ManualTrade"`
+	TradeStock   TradeStock   `json:"TradeStock" yaml:"TradeStock"`
+	History      History      `json:"History" yaml:"History"`
+	Quota        Quota        `json:"Quota" yaml:"Quota"`
+	TargetStock  TargetStock  `json:"TargetStock" yaml:"TargetStock"`
+	AnalyzeStock AnalyzeStock `json:"AnalyzeStock" yaml:"AnalyzeStock"`
+	TradeFuture  TradeFuture  `json:"TradeFuture" yaml:"TradeFuture"`
 
-	dbPool      *postgres.Postgres
-	sinopacPool *grpc.ConnPool
-	fuglePool   *grpc.ConnPool
-	EnvConfig
+	dbPool      *postgres.Postgres `json:"-" yaml:"-"`
+	sinopacPool *grpc.ConnPool     `json:"-" yaml:"-"`
+	fuglePool   *grpc.ConnPool     `json:"-" yaml:"-"`
+	EnvConfig   `json:"-" yaml:"-"`
 
-	logger   *log.Log
-	vp       *viper.Viper
-	basePath string
+	logger   *log.Log     `json:"-" yaml:"-"`
+	vp       *viper.Viper `json:"-" yaml:"-"`
+	basePath string       `json:"-" yaml:"-"`
 }
 
 var (
@@ -89,7 +89,6 @@ func (c *Config) readEnv() {
 	c.vp.SetDefault("DB_POOL_MAX", 80)
 
 	c.vp.SetDefault("HTTP", "26670")
-	c.vp.SetDefault("DISABLE_SWAGGER_HTTP_HANDLER", "")
 
 	c.vp.SetDefault("SINOPAC_POOL_MAX", 20)
 	c.vp.SetDefault("SINOPAC_URL", "127.0.0.1:56666")
@@ -110,8 +109,7 @@ func (c *Config) readEnv() {
 			PoolMax: c.vp.GetInt("DB_POOL_MAX"),
 		},
 		Server: Server{
-			HTTP:                      c.vp.GetString("HTTP"),
-			DisableSwaggerHTTPHandler: c.vp.GetString("DISABLE_SWAGGER_HTTP_HANDLER"),
+			HTTP: c.vp.GetString("HTTP"),
 		},
 		Sinopac: Sinopac{
 			PoolMax: c.vp.GetInt("SINOPAC_POOL_MAX"),
