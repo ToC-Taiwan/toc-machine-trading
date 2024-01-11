@@ -41,7 +41,6 @@ func NewSystem() *SystemUseCase {
 	}
 
 	uc.UpdateAuthTradeUser()
-	uc.bus.SubscribeAsync(topicQueryAllPushUser, true, uc.publishAllPushUser)
 	return uc
 }
 
@@ -164,15 +163,9 @@ func (uc *SystemUseCase) EncryptPassword(ctx context.Context, password string) (
 }
 
 func (uc *SystemUseCase) UpdateUserPushToken(ctx context.Context, username, pushToken string) error {
-	return uc.repo.UpdateUserPushToken(ctx, username, pushToken)
-}
-
-func (uc *SystemUseCase) publishAllPushUser(dataChan chan []string) {
-	allUser, err := uc.repo.GetAllPushTokens(context.Background())
-	if err != nil {
-		uc.logger.Fatal(err)
+	if err := uc.repo.UpdateUserPushToken(ctx, username, pushToken); err != nil {
+		return err
 	}
-
-	dataChan <- allUser
-	close(dataChan)
+	uc.bus.PublishTopicEvent(topicUpdatePushUser)
+	return nil
 }

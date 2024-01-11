@@ -5,9 +5,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"sync"
 
+	"tmt/internal/config"
 	"tmt/internal/entity"
 	"tmt/internal/usecase/modules/calendar"
+	"tmt/internal/usecase/repo"
 	"tmt/pkg/eventbus"
 	"tmt/pkg/log"
 
@@ -17,10 +20,15 @@ import (
 )
 
 type FcmUseCase struct {
+	repo SystemRepo
+
 	app      *firebase.App
 	logger   *log.Log
 	bus      *eventbus.Bus
 	tradeDay *calendar.Calendar
+
+	pushTokens     []string
+	pushTokensLock sync.RWMutex
 }
 
 // NewFCM -.
@@ -31,13 +39,17 @@ func NewFCM() FCM {
 		logger.Fatal(err)
 	}
 
+	cfg := config.Get()
 	uc := &FcmUseCase{
+		repo:     repo.NewSystemRepo(cfg.GetPostgresPool()),
 		app:      fb,
 		logger:   logger,
 		bus:      eventbus.Get(),
 		tradeDay: calendar.Get(),
 	}
 
+	uc.updatePushToken()
+	uc.bus.Subscribe(topicUpdatePushUser, uc.updatePushToken)
 	uc.bus.SubscribeAsync(topicFetchStockHistory, true, uc.sendTargets)
 
 	return uc
@@ -69,10 +81,22 @@ func newFCM() (*firebase.App, error) {
 	return fb, nil
 }
 
+func (uc *FcmUseCase) updatePushToken() {
+	uc.pushTokensLock.Lock()
+	defer uc.pushTokensLock.Unlock()
+
+	tokens, err := uc.repo.GetAllPushTokens(context.Background())
+	if err != nil {
+		uc.logger.Error(err)
+		return
+	}
+	uc.pushTokens = tokens
+}
+
 func (uc *FcmUseCase) getAllPushToken() []string {
-	dataChan := make(chan []string)
-	uc.bus.PublishTopicEvent(topicQueryAllPushUser, dataChan)
-	return <-dataChan
+	uc.pushTokensLock.RLock()
+	defer uc.pushTokensLock.RUnlock()
+	return uc.pushTokens
 }
 
 func (uc *FcmUseCase) sendTargets(targetArr []*entity.StockTarget) error {
