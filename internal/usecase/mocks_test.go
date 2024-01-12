@@ -2657,17 +2657,17 @@ func (mr *MockSystemMockRecorder) AddUser(ctx, t interface{}) *gomock.Call {
 }
 
 // InsertPushToken mocks base method.
-func (m *MockSystem) InsertPushToken(ctx context.Context, username, pushToken string) error {
+func (m *MockSystem) InsertPushToken(ctx context.Context, token, username string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "InsertPushToken", ctx, username, pushToken)
+	ret := m.ctrl.Call(m, "InsertPushToken", ctx, token, username)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // InsertPushToken indicates an expected call of InsertPushToken.
-func (mr *MockSystemMockRecorder) InsertPushToken(ctx, username, pushToken interface{}) *gomock.Call {
+func (mr *MockSystemMockRecorder) InsertPushToken(ctx, token, username interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertPushToken", reflect.TypeOf((*MockSystem)(nil).InsertPushToken), ctx, username, pushToken)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertPushToken", reflect.TypeOf((*MockSystem)(nil).InsertPushToken), ctx, token, username)
 }
 
 // Login mocks base method.

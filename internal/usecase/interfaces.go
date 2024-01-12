@@ -232,7 +232,7 @@ type TradegRPCAPI interface {
 
 type System interface {
 	AddUser(ctx context.Context, t *entity.User) error
-	InsertPushToken(ctx context.Context, username, pushToken string) error
+	InsertPushToken(ctx context.Context, token, username string) error
 	Login(ctx context.Context, username, password string) error
 	VerifyEmail(ctx context.Context, username, code string) error
 	UpdateAuthTradeUser()

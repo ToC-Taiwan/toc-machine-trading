@@ -175,7 +175,7 @@ func (u *userRoutes) updateUserPushToken(c *gin.Context) {
 		return
 	}
 
-	if err := u.system.InsertPushToken(c.Request.Context(), username, p.PushToken); err != nil {
+	if err := u.system.InsertPushToken(c.Request.Context(), p.PushToken, username); err != nil {
 		resp.ErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
