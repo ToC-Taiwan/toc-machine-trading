@@ -12,7 +12,7 @@
 
 ## Structure
 
-![Example](docs/assets/layers.png)
+![Example](./assets/layers.png)
 
 ### Config
 
@@ -46,7 +46,9 @@ make
 docker run -it registry.gitlab.com/gitlab-org/gitlab-build-images:golangci-lint-alpine cat /golangci/.golangci.yml
 ```
 
-## [Debug](./docs/DEBUG.md)
+## [Debug](./assets/DEBUG.md)
+
+## [Google IAM](./assets/GOOGLE_IAM.md)
 
 ## Authors
 

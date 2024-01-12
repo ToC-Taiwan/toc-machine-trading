@@ -42,13 +42,14 @@ brew install git-chglog
 - new tag
 
 ```sh
-COMMIT_HASH=5404565e8614936feb8f04c597f7063cebb27d7d
-VERSION=2.5.0
+COMMIT_HASH=a8d79fe8d00881948a3c42e04fc160a3a90cb4f1
+VERSION=2.6.0
 git tag -a v$VERSION $COMMIT_HASH -m $VERSION
 git-chglog -o CHANGELOG.md
+git commit
 
-git push -u origin --all
 git push -u origin --tags
+git push -u origin --all
 ```
 
 ### Find ignored files

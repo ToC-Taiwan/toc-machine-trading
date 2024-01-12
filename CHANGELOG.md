@@ -1,5 +1,34 @@
 # CHANGELOG
 
+## [v2.6.0](https://github.com/ToC-Taiwan/toc-machine-trading/compare/v2.5.0...v2.6.0) (2024-01-12)
+
+### Code Refactoring (8)
+
+* reorganize user routes into public and private groups
+* optimize push notification token retrieval and usage
+* refactor codebase for improved performance and testing
+* "Update system_account schema and test tolerances"
+* refactor structs and remove unused field
+* refactor error handling and messages in user and trade modules
+* optimize API calls and test tolerances
+* let swagger document not built in product mode, remove all summary
+
+### Features (13)
+
+* let all api with auth, except login, new user
+* refactor FCM use case for push token handling
+* add push token and push to all register api
+* implement trade user authentication feature
+* remove user activation functionality from system
+* implement Firebase app initialization with ProjectID
+* "Implement JWT authentication for /v1/fcm/announcement endpoint"
+* "Implement FCM V1 for device-wide announcements"
+* implement FCM announcement endpoint
+* implement Firebase Cloud Messaging feature
+* integrate HTML templates for email verification responses
+* enhance token handling in refreshResponse
+* enhance API response handling and documentation
+
 ## [v2.5.0](https://github.com/ToC-Taiwan/toc-machine-trading/compare/v2.4.0...v2.5.0) (2024-01-03)
 
 ### Code Refactoring (9)
