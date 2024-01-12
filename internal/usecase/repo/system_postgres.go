@@ -111,7 +111,7 @@ func (r *SystemRepo) QueryUserByUsername(ctx context.Context, username string) (
 
 func (r *SystemRepo) QueryAllUser(ctx context.Context) ([]*entity.User, error) {
 	sql, arg, err := r.Builder.
-		Select("username, email, email_verified, auth_trade, push_token").
+		Select("username, email, email_verified, auth_trade").
 		From(tableNameSystemAccount).
 		ToSql()
 	if err != nil {
@@ -127,7 +127,7 @@ func (r *SystemRepo) QueryAllUser(ctx context.Context) ([]*entity.User, error) {
 	var result []*entity.User
 	for rows.Next() {
 		e := entity.User{}
-		if err := rows.Scan(&e.Username, &e.Email, &e.EmailVerified, &e.AuthTrade, &e.PushToken); err != nil {
+		if err := rows.Scan(&e.Username, &e.Email, &e.EmailVerified, &e.AuthTrade); err != nil {
 			return nil, err
 		}
 		result = append(result, &e)
