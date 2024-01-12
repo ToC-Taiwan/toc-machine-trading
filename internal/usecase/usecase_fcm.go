@@ -118,6 +118,7 @@ func (uc *FcmUseCase) sendTargets(targetArr []*entity.StockTarget) error {
 			Body:  fmt.Sprintf("%s has %d targets", uc.tradeDay.GetStockTradeDay().TradeDay.Format(entity.ShortTimeLayout), len(targetArr)),
 		},
 		Data: map[string]string{
+			"type":              "new_targets",
 			"new_targets_count": fmt.Sprintf("%d", len(targetArr)),
 		},
 		Tokens: tokens,
@@ -152,7 +153,7 @@ func (uc *FcmUseCase) AnnounceMessage(msg string) error {
 	return nil
 }
 
-func (uc *FcmUseCase) PushNotification(msg string) error {
+func (uc *FcmUseCase) PushNotification(title, msg string) error {
 	tokens := uc.getAllPushToken()
 	if len(tokens) == 0 {
 		return nil
@@ -166,7 +167,7 @@ func (uc *FcmUseCase) PushNotification(msg string) error {
 
 	message := &messaging.MulticastMessage{
 		Notification: &messaging.Notification{
-			Title: "Announcement",
+			Title: title,
 			Body:  msg,
 		},
 		Tokens: tokens,

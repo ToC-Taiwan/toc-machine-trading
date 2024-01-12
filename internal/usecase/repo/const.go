@@ -30,5 +30,6 @@ const (
 
 	tableNameEvent string = "sinopac_event"
 
-	tableNameSystemAccount string = "system_account"
+	tableNameSystemAccount   string = "system_account"
+	tableNameSystemPushToken string = "system_push_token"
 )

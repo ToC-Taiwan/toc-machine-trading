@@ -232,22 +232,22 @@ type TradegRPCAPI interface {
 
 type System interface {
 	AddUser(ctx context.Context, t *entity.User) error
-	UpdateUserPushToken(ctx context.Context, username, pushToken string) error
+	InsertPushToken(ctx context.Context, username, pushToken string) error
 	Login(ctx context.Context, username, password string) error
 	VerifyEmail(ctx context.Context, username, code string) error
 	UpdateAuthTradeUser()
 }
 
 type SystemRepo interface {
-	InsertUser(ctx context.Context, t *entity.User) error
-	UpdateUserPushToken(ctx context.Context, username, pushToken string) error
-	GetAllPushTokens(ctx context.Context) ([]string, error)
-	QueryUserByUsername(ctx context.Context, username string) (*entity.User, error)
-	QueryAllUser(ctx context.Context) ([]*entity.User, error)
 	EmailVerification(ctx context.Context, username string) error
+	InsertUser(ctx context.Context, t *entity.User) error
+	QueryAllUser(ctx context.Context) ([]*entity.User, error)
+	QueryUserByUsername(ctx context.Context, username string) (*entity.User, error)
+	InsertPushToken(ctx context.Context, token, username string) error
+	GetAllPushTokens(ctx context.Context) ([]string, error)
 }
 
 type FCM interface {
 	AnnounceMessage(msg string) error
-	PushNotification(msg string) error
+	PushNotification(title, msg string) error
 }

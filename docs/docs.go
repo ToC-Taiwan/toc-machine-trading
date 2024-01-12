@@ -182,7 +182,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/v1.msgRequest"
+                            "$ref": "#/definitions/v1.announceRequest"
                         }
                     }
                 ],
@@ -229,7 +229,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/v1.msgRequest"
+                            "$ref": "#/definitions/v1.pushRequest"
                         }
                     }
                 ],
@@ -1870,6 +1870,14 @@ const docTemplate = `{
                 }
             }
         },
+        "v1.announceRequest": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
         "v1.futureOrders": {
             "type": "object",
             "properties": {
@@ -1922,14 +1930,6 @@ const docTemplate = `{
                 }
             }
         },
-        "v1.msgRequest": {
-            "type": "object",
-            "properties": {
-                "message": {
-                    "type": "string"
-                }
-            }
-        },
         "v1.oddStockRequest": {
             "type": "object",
             "properties": {
@@ -1941,6 +1941,17 @@ const docTemplate = `{
                 },
                 "share": {
                     "type": "integer"
+                }
+            }
+        },
+        "v1.pushRequest": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
                 }
             }
         },

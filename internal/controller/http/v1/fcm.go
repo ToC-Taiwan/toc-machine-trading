@@ -23,7 +23,7 @@ func NewFCMRoutes(handler *gin.RouterGroup, t usecase.FCM) {
 	}
 }
 
-type msgRequest struct {
+type announceRequest struct {
 	Message string `json:"message"`
 }
 
@@ -34,13 +34,13 @@ type msgRequest struct {
 //	@security	JWT
 //	@Accept		json
 //	@Produce	json
-//	@param		body	body	msgRequest{}	true	"Body"
+//	@param		body	body	announceRequest{}	true	"Body"
 //	@Success	200
 //	@Failure	400	{object}	resp.Response{}
 //	@Failure	500	{object}	resp.Response{}
 //	@Router		/v1/fcm/announcement [post]
 func (r *fcmRoutes) announceMessage(c *gin.Context) {
-	var req msgRequest
+	var req announceRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		resp.ErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
@@ -54,6 +54,11 @@ func (r *fcmRoutes) announceMessage(c *gin.Context) {
 	c.JSON(http.StatusOK, nil)
 }
 
+type pushRequest struct {
+	Title   string `json:"title"`
+	Message string `json:"message"`
+}
+
 // pushMessage -.
 //
 //	@Tags		FCM V1
@@ -61,19 +66,19 @@ func (r *fcmRoutes) announceMessage(c *gin.Context) {
 //	@security	JWT
 //	@Accept		json
 //	@Produce	json
-//	@param		body	body	msgRequest{}	true	"Body"
+//	@param		body	body	pushRequest{}	true	"Body"
 //	@Success	200
 //	@Failure	400	{object}	resp.Response{}
 //	@Failure	500	{object}	resp.Response{}
 //	@Router		/v1/fcm/push [post]
 func (r *fcmRoutes) pushMessage(c *gin.Context) {
-	var req msgRequest
+	var req pushRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		resp.ErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	if err := r.t.PushNotification(req.Message); err != nil {
+	if err := r.t.PushNotification(req.Title, req.Message); err != nil {
 		resp.ErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}

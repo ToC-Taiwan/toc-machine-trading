@@ -174,7 +174,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/v1.msgRequest"
+                            "$ref": "#/definitions/v1.announceRequest"
                         }
                     }
                 ],
@@ -221,7 +221,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/v1.msgRequest"
+                            "$ref": "#/definitions/v1.pushRequest"
                         }
                     }
                 ],
@@ -1862,6 +1862,14 @@
                 }
             }
         },
+        "v1.announceRequest": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
         "v1.futureOrders": {
             "type": "object",
             "properties": {
@@ -1914,14 +1922,6 @@
                 }
             }
         },
-        "v1.msgRequest": {
-            "type": "object",
-            "properties": {
-                "message": {
-                    "type": "string"
-                }
-            }
-        },
         "v1.oddStockRequest": {
             "type": "object",
             "properties": {
@@ -1933,6 +1933,17 @@
                 },
                 "share": {
                     "type": "integer"
+                }
+            }
+        },
+        "v1.pushRequest": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
                 }
             }
         },

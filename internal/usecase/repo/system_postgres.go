@@ -3,6 +3,7 @@ package repo
 import (
 	"context"
 	"errors"
+	"time"
 
 	"tmt/internal/entity"
 	"tmt/pkg/postgres"
@@ -23,33 +24,6 @@ func (r *SystemRepo) InsertUser(ctx context.Context, t *entity.User) error {
 	builder := r.Builder.Insert(tableNameSystemAccount).
 		Columns("username, password, email").
 		Values(t.Username, t.Password, t.Email)
-
-	tx, err := r.BeginTransaction()
-	if err != nil {
-		return err
-	}
-	defer r.EndTransaction(tx, err)
-	var sql string
-	var args []interface{}
-
-	if sql, args, err = builder.ToSql(); err != nil {
-		return err
-	} else if _, err = tx.Exec(ctx, sql, args...); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (r *SystemRepo) UpdateUserPushToken(ctx context.Context, username, pushToken string) error {
-	if user, err := r.QueryUserByUsername(ctx, username); err != nil {
-		return err
-	} else if user == nil {
-		return errors.New("user not found")
-	}
-
-	builder := r.Builder.Update(tableNameSystemAccount).
-		Set("push_token", pushToken).
-		Where("username = ?", username)
 
 	tx, err := r.BeginTransaction()
 	if err != nil {
@@ -109,6 +83,27 @@ func (r *SystemRepo) QueryUserByUsername(ctx context.Context, username string) (
 	return &e, nil
 }
 
+func (r *SystemRepo) queryUserIDByUsername(ctx context.Context, username string) (int, error) {
+	sql, arg, err := r.Builder.
+		Select("id").
+		From(tableNameSystemAccount).
+		Where("username = ?", username).
+		ToSql()
+	if err != nil {
+		return 0, err
+	}
+
+	row := r.Pool().QueryRow(ctx, sql, arg...)
+	var id int
+	if err := row.Scan(&id); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return 0, nil
+		}
+		return 0, err
+	}
+	return id, nil
+}
+
 func (r *SystemRepo) QueryAllUser(ctx context.Context) ([]*entity.User, error) {
 	sql, arg, err := r.Builder.
 		Select("username, email, email_verified, auth_trade").
@@ -135,11 +130,38 @@ func (r *SystemRepo) QueryAllUser(ctx context.Context) ([]*entity.User, error) {
 	return result, nil
 }
 
+func (r *SystemRepo) InsertPushToken(ctx context.Context, token, username string) error {
+	userID, err := r.queryUserIDByUsername(ctx, username)
+	if err != nil {
+		return err
+	} else if userID == 0 {
+		return errors.New("user not found")
+	}
+
+	builder := r.Builder.Insert(tableNameSystemPushToken).
+		Columns("created, token, user_id").
+		Values(time.Now(), token, userID)
+
+	tx, err := r.BeginTransaction()
+	if err != nil {
+		return err
+	}
+	defer r.EndTransaction(tx, err)
+	var sql string
+	var args []interface{}
+
+	if sql, args, err = builder.ToSql(); err != nil {
+		return err
+	} else if _, err = tx.Exec(ctx, sql, args...); err != nil {
+		return err
+	}
+	return nil
+}
+
 func (r *SystemRepo) GetAllPushTokens(ctx context.Context) ([]string, error) {
 	sql, arg, err := r.Builder.
-		Select("push_token").
-		From(tableNameSystemAccount).
-		Where("push_token IS NOT NULL").
+		Select("token").
+		From(tableNameSystemPushToken).
 		ToSql()
 	if err != nil {
 		return nil, err
@@ -153,11 +175,11 @@ func (r *SystemRepo) GetAllPushTokens(ctx context.Context) ([]string, error) {
 
 	var result []string
 	for rows.Next() {
-		var pushToken string
-		if err := rows.Scan(&pushToken); err != nil {
+		var token string
+		if err := rows.Scan(&token); err != nil {
 			return nil, err
 		}
-		result = append(result, pushToken)
+		result = append(result, token)
 	}
 	return result, nil
 }

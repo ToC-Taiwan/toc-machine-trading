@@ -164,13 +164,18 @@ func (u *userRoutes) updateUserPushToken(c *gin.Context) {
 		return
 	}
 
+	if p.PushToken == "" {
+		resp.ErrorResponse(c, http.StatusBadRequest, "push_token is required")
+		return
+	}
+
 	username := auth.ExtractUsername(c)
 	if username == "" {
 		resp.ErrorResponse(c, http.StatusBadRequest, "username is required in token")
 		return
 	}
 
-	if err := u.system.UpdateUserPushToken(c.Request.Context(), username, p.PushToken); err != nil {
+	if err := u.system.InsertPushToken(c.Request.Context(), username, p.PushToken); err != nil {
 		resp.ErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}

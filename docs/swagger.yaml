@@ -493,6 +493,11 @@ definitions:
           $ref: '#/definitions/entity.StockOrder'
         type: array
     type: object
+  v1.announceRequest:
+    properties:
+      message:
+        type: string
+    type: object
   v1.futureOrders:
     properties:
       orders:
@@ -528,11 +533,6 @@ definitions:
     - price
     - quantity
     type: object
-  v1.msgRequest:
-    properties:
-      message:
-        type: string
-    type: object
   v1.oddStockRequest:
     properties:
       num:
@@ -541,6 +541,13 @@ definitions:
         type: number
       share:
         type: integer
+    type: object
+  v1.pushRequest:
+    properties:
+      message:
+        type: string
+      title:
+        type: string
     type: object
   v1.reborn:
     properties:
@@ -684,7 +691,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/v1.msgRequest'
+          $ref: '#/definitions/v1.announceRequest'
       produces:
       - application/json
       responses:
@@ -713,7 +720,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/v1.msgRequest'
+          $ref: '#/definitions/v1.pushRequest'
       produces:
       - application/json
       responses:
