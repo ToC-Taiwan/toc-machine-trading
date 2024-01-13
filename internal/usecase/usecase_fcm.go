@@ -121,6 +121,13 @@ func (uc *FcmUseCase) sendTargets(targetArr []*entity.StockTarget) error {
 			"type":              "new_targets",
 			"new_targets_count": fmt.Sprintf("%d", len(targetArr)),
 		},
+		APNS: &messaging.APNSConfig{
+			Payload: &messaging.APNSPayload{
+				Aps: &messaging.Aps{
+					Sound: "default",
+				},
+			},
+		},
 		Tokens: tokens,
 	}
 
