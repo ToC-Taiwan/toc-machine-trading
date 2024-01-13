@@ -130,7 +130,14 @@ func (r *SystemRepo) QueryAllUser(ctx context.Context) ([]*entity.User, error) {
 	return result, nil
 }
 
-func (r *SystemRepo) InsertPushToken(ctx context.Context, token, username string) error {
+func (r *SystemRepo) InsertOrUpdatePushToken(ctx context.Context, token, username string) error {
+	dbToken, err := r.getPushToken(ctx, token)
+	if err != nil {
+		return err
+	} else if dbToken != nil {
+		return r.updatePushToken(ctx, token)
+	}
+
 	userID, err := r.queryUserIDByUsername(ctx, username)
 	if err != nil {
 		return err
@@ -156,6 +163,48 @@ func (r *SystemRepo) InsertPushToken(ctx context.Context, token, username string
 		return err
 	}
 	return nil
+}
+
+func (r *SystemRepo) updatePushToken(ctx context.Context, token string) error {
+	builder := r.Builder.Update(tableNameSystemPushToken).
+		Set("created", time.Now()).
+		Where("token = ?", token)
+
+	tx, err := r.BeginTransaction()
+	if err != nil {
+		return err
+	}
+	defer r.EndTransaction(tx, err)
+	var sql string
+	var args []interface{}
+
+	if sql, args, err = builder.ToSql(); err != nil {
+		return err
+	} else if _, err = tx.Exec(ctx, sql, args...); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *SystemRepo) getPushToken(ctx context.Context, token string) (*entity.PushToken, error) {
+	sql, arg, err := r.Builder.
+		Select("created, token, user_id").
+		From(tableNameSystemPushToken).
+		Where("token = ?", token).
+		ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	row := r.Pool().QueryRow(ctx, sql, arg...)
+	e := entity.PushToken{}
+	if err := row.Scan(&e.Created, &e.Token, &e.UserID); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &e, nil
 }
 
 func (r *SystemRepo) GetAllPushTokens(ctx context.Context) ([]string, error) {

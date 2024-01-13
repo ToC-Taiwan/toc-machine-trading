@@ -243,7 +243,7 @@ type SystemRepo interface {
 	InsertUser(ctx context.Context, t *entity.User) error
 	QueryAllUser(ctx context.Context) ([]*entity.User, error)
 	QueryUserByUsername(ctx context.Context, username string) (*entity.User, error)
-	InsertPushToken(ctx context.Context, token, username string) error
+	InsertOrUpdatePushToken(ctx context.Context, token, username string) error
 	GetAllPushTokens(ctx context.Context) ([]string, error)
 }
 
