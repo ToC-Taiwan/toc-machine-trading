@@ -236,6 +236,7 @@ type System interface {
 	Login(ctx context.Context, username, password string) error
 	VerifyEmail(ctx context.Context, username, code string) error
 	UpdateAuthTradeUser()
+	DeleteAllPushTokens(ctx context.Context) error
 }
 
 type SystemRepo interface {
@@ -245,6 +246,7 @@ type SystemRepo interface {
 	QueryUserByUsername(ctx context.Context, username string) (*entity.User, error)
 	InsertOrUpdatePushToken(ctx context.Context, token, username string) error
 	GetAllPushTokens(ctx context.Context) ([]string, error)
+	DeleteAllPushTokens(ctx context.Context) error
 }
 
 type FCM interface {

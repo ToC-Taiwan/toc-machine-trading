@@ -169,3 +169,11 @@ func (uc *SystemUseCase) InsertPushToken(ctx context.Context, token, username st
 	uc.bus.PublishTopicEvent(topicUpdatePushUser)
 	return nil
 }
+
+func (uc *SystemUseCase) DeleteAllPushTokens(ctx context.Context) error {
+	if err := uc.repo.DeleteAllPushTokens(ctx); err != nil {
+		return err
+	}
+	uc.bus.PublishTopicEvent(topicUpdatePushUser)
+	return nil
+}

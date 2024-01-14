@@ -228,7 +228,29 @@ func (r *SystemRepo) GetAllPushTokens(ctx context.Context) ([]string, error) {
 		if err := rows.Scan(&token); err != nil {
 			return nil, err
 		}
+		if token == "" {
+			continue
+		}
 		result = append(result, token)
 	}
 	return result, nil
+}
+
+func (r *SystemRepo) DeleteAllPushTokens(ctx context.Context) error {
+	builder := r.Builder.Delete(tableNameSystemPushToken)
+
+	tx, err := r.BeginTransaction()
+	if err != nil {
+		return err
+	}
+	defer r.EndTransaction(tx, err)
+	var sql string
+	var args []interface{}
+
+	if sql, args, err = builder.ToSql(); err != nil {
+		return err
+	} else if _, err = tx.Exec(ctx, sql, args...); err != nil {
+		return err
+	}
+	return nil
 }

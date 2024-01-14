@@ -2656,6 +2656,20 @@ func (mr *MockSystemMockRecorder) AddUser(ctx, t interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddUser", reflect.TypeOf((*MockSystem)(nil).AddUser), ctx, t)
 }
 
+// DeleteAllPushTokens mocks base method.
+func (m *MockSystem) DeleteAllPushTokens(ctx context.Context) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteAllPushTokens", ctx)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteAllPushTokens indicates an expected call of DeleteAllPushTokens.
+func (mr *MockSystemMockRecorder) DeleteAllPushTokens(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteAllPushTokens", reflect.TypeOf((*MockSystem)(nil).DeleteAllPushTokens), ctx)
+}
+
 // InsertPushToken mocks base method.
 func (m *MockSystem) InsertPushToken(ctx context.Context, token, username string) error {
 	m.ctrl.T.Helper()
@@ -2731,6 +2745,20 @@ func NewMockSystemRepo(ctrl *gomock.Controller) *MockSystemRepo {
 // EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockSystemRepo) EXPECT() *MockSystemRepoMockRecorder {
 	return m.recorder
+}
+
+// DeleteAllPushTokens mocks base method.
+func (m *MockSystemRepo) DeleteAllPushTokens(ctx context.Context) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteAllPushTokens", ctx)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteAllPushTokens indicates an expected call of DeleteAllPushTokens.
+func (mr *MockSystemRepoMockRecorder) DeleteAllPushTokens(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteAllPushTokens", reflect.TypeOf((*MockSystemRepo)(nil).DeleteAllPushTokens), ctx)
 }
 
 // EmailVerification mocks base method.

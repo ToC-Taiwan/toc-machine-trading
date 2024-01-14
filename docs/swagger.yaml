@@ -1212,6 +1212,23 @@ paths:
       tags:
       - User V1
   /v1/user/push-token:
+    delete:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.Response'
+      security:
+      - JWT: []
+      summary: Clear all push token
+      tags:
+      - User V1
     put:
       consumes:
       - application/json

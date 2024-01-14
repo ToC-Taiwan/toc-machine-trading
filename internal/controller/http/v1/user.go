@@ -33,6 +33,7 @@ func NewUserRoutes(public *gin.RouterGroup, private *gin.RouterGroup, jwtHandler
 
 	private.PUT("/user/auth", r.updateAuthTradeUser)
 	private.PUT("/user/push-token", r.updateUserPushToken)
+	private.DELETE("/user/push-token", r.clearAllPushToken)
 }
 
 // newUserHandler _.
@@ -180,6 +181,24 @@ func (u *userRoutes) updateUserPushToken(c *gin.Context) {
 		return
 	}
 
+	c.JSON(http.StatusOK, nil)
+}
+
+// clearAllPushToken _.
+//
+//	@tags		User V1
+//	@Summary	Clear all push token
+//	@security	JWT
+//	@accept		json
+//	@produce	json
+//	@success	200
+//	@failure	500	{object}	resp.Response{}
+//	@router		/v1/user/push-token [delete]
+func (u *userRoutes) clearAllPushToken(c *gin.Context) {
+	if err := u.system.DeleteAllPushTokens(c); err != nil {
+		resp.ErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
 	c.JSON(http.StatusOK, nil)
 }
 

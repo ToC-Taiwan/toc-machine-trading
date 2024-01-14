@@ -177,6 +177,13 @@ func (uc *FcmUseCase) PushNotification(title, msg string) error {
 			Title: title,
 			Body:  msg,
 		},
+		APNS: &messaging.APNSConfig{
+			Payload: &messaging.APNSPayload{
+				Aps: &messaging.Aps{
+					Sound: "default",
+				},
+			},
+		},
 		Tokens: tokens,
 	}
 
