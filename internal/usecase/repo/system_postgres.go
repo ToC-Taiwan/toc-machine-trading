@@ -212,6 +212,7 @@ func (r *SystemRepo) GetAllPushTokens(ctx context.Context) ([]string, error) {
 	sql, arg, err := r.Builder.
 		Select("token").
 		From(tableNameSystemPushToken).
+		Where("enabled = ?", true).
 		ToSql()
 	if err != nil {
 		return nil, err
