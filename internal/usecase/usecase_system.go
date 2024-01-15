@@ -170,6 +170,9 @@ func (uc *SystemUseCase) IsPushTokenEnabled(ctx context.Context, token string) (
 	if err != nil {
 		return false, err
 	}
+	if dbToken == nil {
+		return false, nil
+	}
 	return dbToken.Enabled, nil
 }
 
