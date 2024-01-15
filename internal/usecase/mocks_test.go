@@ -2671,17 +2671,17 @@ func (mr *MockSystemMockRecorder) DeleteAllPushTokens(ctx interface{}) *gomock.C
 }
 
 // InsertPushToken mocks base method.
-func (m *MockSystem) InsertPushToken(ctx context.Context, token, username string) error {
+func (m *MockSystem) InsertPushToken(ctx context.Context, token, username string, enabled bool) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "InsertPushToken", ctx, token, username)
+	ret := m.ctrl.Call(m, "InsertPushToken", ctx, token, username, enabled)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // InsertPushToken indicates an expected call of InsertPushToken.
-func (mr *MockSystemMockRecorder) InsertPushToken(ctx, token, username interface{}) *gomock.Call {
+func (mr *MockSystemMockRecorder) InsertPushToken(ctx, token, username, enabled interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertPushToken", reflect.TypeOf((*MockSystem)(nil).InsertPushToken), ctx, token, username)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertPushToken", reflect.TypeOf((*MockSystem)(nil).InsertPushToken), ctx, token, username, enabled)
 }
 
 // Login mocks base method.
@@ -2791,17 +2791,17 @@ func (mr *MockSystemRepoMockRecorder) GetAllPushTokens(ctx interface{}) *gomock.
 }
 
 // InsertOrUpdatePushToken mocks base method.
-func (m *MockSystemRepo) InsertOrUpdatePushToken(ctx context.Context, token, username string) error {
+func (m *MockSystemRepo) InsertOrUpdatePushToken(ctx context.Context, token, username string, enabled bool) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "InsertOrUpdatePushToken", ctx, token, username)
+	ret := m.ctrl.Call(m, "InsertOrUpdatePushToken", ctx, token, username, enabled)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // InsertOrUpdatePushToken indicates an expected call of InsertOrUpdatePushToken.
-func (mr *MockSystemRepoMockRecorder) InsertOrUpdatePushToken(ctx, token, username interface{}) *gomock.Call {
+func (mr *MockSystemRepoMockRecorder) InsertOrUpdatePushToken(ctx, token, username, enabled interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertOrUpdatePushToken", reflect.TypeOf((*MockSystemRepo)(nil).InsertOrUpdatePushToken), ctx, token, username)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertOrUpdatePushToken", reflect.TypeOf((*MockSystemRepo)(nil).InsertOrUpdatePushToken), ctx, token, username, enabled)
 }
 
 // InsertUser mocks base method.

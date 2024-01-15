@@ -15,5 +15,6 @@ type PushToken struct {
 	ID      int
 	Token   string
 	UserID  int
+	Enabled bool
 	Created time.Time
 }

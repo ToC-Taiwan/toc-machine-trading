@@ -130,12 +130,12 @@ func (r *SystemRepo) QueryAllUser(ctx context.Context) ([]*entity.User, error) {
 	return result, nil
 }
 
-func (r *SystemRepo) InsertOrUpdatePushToken(ctx context.Context, token, username string) error {
+func (r *SystemRepo) InsertOrUpdatePushToken(ctx context.Context, token, username string, enabled bool) error {
 	dbToken, err := r.getPushToken(ctx, token)
 	if err != nil {
 		return err
 	} else if dbToken != nil {
-		return r.updatePushToken(ctx, token)
+		return r.updatePushToken(ctx, token, enabled)
 	}
 
 	userID, err := r.queryUserIDByUsername(ctx, username)
@@ -146,8 +146,8 @@ func (r *SystemRepo) InsertOrUpdatePushToken(ctx context.Context, token, usernam
 	}
 
 	builder := r.Builder.Insert(tableNameSystemPushToken).
-		Columns("created, token, user_id").
-		Values(time.Now(), token, userID)
+		Columns("created, token, user_id, enabled").
+		Values(time.Now(), token, userID, enabled)
 
 	tx, err := r.BeginTransaction()
 	if err != nil {
@@ -165,9 +165,10 @@ func (r *SystemRepo) InsertOrUpdatePushToken(ctx context.Context, token, usernam
 	return nil
 }
 
-func (r *SystemRepo) updatePushToken(ctx context.Context, token string) error {
+func (r *SystemRepo) updatePushToken(ctx context.Context, token string, enabled bool) error {
 	builder := r.Builder.Update(tableNameSystemPushToken).
 		Set("created", time.Now()).
+		Set("enabled", enabled).
 		Where("token = ?", token)
 
 	tx, err := r.BeginTransaction()

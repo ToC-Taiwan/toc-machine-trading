@@ -2039,6 +2039,9 @@ const docTemplate = `{
         "v1.userPushTokenRequest": {
             "type": "object",
             "properties": {
+                "enabled": {
+                    "type": "boolean"
+                },
                 "push_token": {
                     "type": "string"
                 }

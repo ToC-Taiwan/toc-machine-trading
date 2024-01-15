@@ -585,6 +585,8 @@ definitions:
     type: object
   v1.userPushTokenRequest:
     properties:
+      enabled:
+        type: boolean
       push_token:
         type: string
     type: object

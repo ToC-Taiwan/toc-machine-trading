@@ -11,6 +11,7 @@ CREATE TABLE system_push_token (
     "id" SERIAL PRIMARY KEY,
     "created" TIMESTAMPTZ NOT NULL,
     "token" VARCHAR NOT NULL UNIQUE,
+    "enabled" BOOLEAN NOT NULL DEFAULT FALSE,
     "user_id" INT NOT NULL
 );
 CREATE INDEX system_push_token_user_index ON system_push_token USING btree ("created");

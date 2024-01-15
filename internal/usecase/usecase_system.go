@@ -162,8 +162,8 @@ func (uc *SystemUseCase) EncryptPassword(ctx context.Context, password string) (
 	return string(salt), nil
 }
 
-func (uc *SystemUseCase) InsertPushToken(ctx context.Context, token, username string) error {
-	if err := uc.repo.InsertOrUpdatePushToken(ctx, token, username); err != nil {
+func (uc *SystemUseCase) InsertPushToken(ctx context.Context, token, username string, enabled bool) error {
+	if err := uc.repo.InsertOrUpdatePushToken(ctx, token, username, enabled); err != nil {
 		return err
 	}
 	uc.bus.PublishTopicEvent(topicUpdatePushUser)

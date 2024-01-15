@@ -143,6 +143,7 @@ func (u *userRoutes) refreshTokenHandler(c *gin.Context) {
 
 type userPushTokenRequest struct {
 	PushToken string `json:"push_token"`
+	Enabled   bool   `json:"enabled"`
 }
 
 // updateUserPushToken _.
@@ -176,7 +177,7 @@ func (u *userRoutes) updateUserPushToken(c *gin.Context) {
 		return
 	}
 
-	if err := u.system.InsertPushToken(c.Request.Context(), p.PushToken, username); err != nil {
+	if err := u.system.InsertPushToken(c.Request.Context(), p.PushToken, username, p.Enabled); err != nil {
 		resp.ErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
