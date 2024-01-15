@@ -189,7 +189,7 @@ func (r *SystemRepo) updatePushToken(ctx context.Context, token string, enabled 
 
 func (r *SystemRepo) GetPushToken(ctx context.Context, token string) (*entity.PushToken, error) {
 	sql, arg, err := r.Builder.
-		Select("created, token, user_id").
+		Select("created, token, user_id, enabled").
 		From(tableNameSystemPushToken).
 		Where("token = ?", token).
 		ToSql()
@@ -199,7 +199,7 @@ func (r *SystemRepo) GetPushToken(ctx context.Context, token string) (*entity.Pu
 
 	row := r.Pool().QueryRow(ctx, sql, arg...)
 	e := entity.PushToken{}
-	if err := row.Scan(&e.Created, &e.Token, &e.UserID); err != nil {
+	if err := row.Scan(&e.Created, &e.Token, &e.UserID, &e.Enabled); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, nil
 		}
