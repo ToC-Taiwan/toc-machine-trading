@@ -32,6 +32,7 @@ func NewUserRoutes(public *gin.RouterGroup, private *gin.RouterGroup, jwtHandler
 	public.GET("/user/verify/:user/:code", r.verifyEmailHandler)
 
 	private.PUT("/user/auth", r.updateAuthTradeUser)
+	private.GET("/user/push-token", r.getUserPushTokenStatus)
 	private.PUT("/user/push-token", r.updateUserPushToken)
 	private.DELETE("/user/push-token", r.clearAllPushToken)
 }
@@ -183,6 +184,37 @@ func (u *userRoutes) updateUserPushToken(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, nil)
+}
+
+type pushTokenStatusResponse struct {
+	Enabled bool `json:"enabled"`
+}
+
+// getUserPushTokenStatus _.
+//
+//	@tags		User V1
+//	@Summary	Get user push token status
+//	@security	JWT
+//	@accept		json
+//	@produce	json
+//	@param		token	header		string	true	"token"
+//	@success	200		{object}	pushTokenStatusResponse{}
+//	@failure	400		{object}	resp.Response{}
+//	@failure	401		{object}	auth.UnauthorizedResponseBody{}
+//	@failure	500		{object}	resp.Response{}
+//	@router		/v1/user/push-token [get]
+func (u *userRoutes) getUserPushTokenStatus(c *gin.Context) {
+	token := c.GetHeader("token")
+	if token == "" {
+		resp.ErrorResponse(c, http.StatusBadRequest, "token is required")
+		return
+	}
+	enabled, err := u.system.IsPushTokenEnabled(c.Request.Context(), token)
+	if err != nil {
+		resp.ErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	c.JSON(http.StatusOK, pushTokenStatusResponse{Enabled: enabled})
 }
 
 // clearAllPushToken _.

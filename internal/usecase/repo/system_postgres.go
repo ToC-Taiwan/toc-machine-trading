@@ -131,7 +131,7 @@ func (r *SystemRepo) QueryAllUser(ctx context.Context) ([]*entity.User, error) {
 }
 
 func (r *SystemRepo) InsertOrUpdatePushToken(ctx context.Context, token, username string, enabled bool) error {
-	dbToken, err := r.getPushToken(ctx, token)
+	dbToken, err := r.GetPushToken(ctx, token)
 	if err != nil {
 		return err
 	} else if dbToken != nil {
@@ -187,7 +187,7 @@ func (r *SystemRepo) updatePushToken(ctx context.Context, token string, enabled 
 	return nil
 }
 
-func (r *SystemRepo) getPushToken(ctx context.Context, token string) (*entity.PushToken, error) {
+func (r *SystemRepo) GetPushToken(ctx context.Context, token string) (*entity.PushToken, error) {
 	sql, arg, err := r.Builder.
 		Select("created, token, user_id").
 		From(tableNameSystemPushToken).

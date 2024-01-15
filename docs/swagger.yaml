@@ -549,6 +549,11 @@ definitions:
       title:
         type: string
     type: object
+  v1.pushTokenStatusResponse:
+    properties:
+      enabled:
+        type: boolean
+    type: object
   v1.reborn:
     properties:
       date:
@@ -1229,6 +1234,39 @@ paths:
       security:
       - JWT: []
       summary: Clear all push token
+      tags:
+      - User V1
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: token
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.pushTokenStatusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resp.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/auth.UnauthorizedResponseBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.Response'
+      security:
+      - JWT: []
+      summary: Get user push token status
       tags:
       - User V1
     put:

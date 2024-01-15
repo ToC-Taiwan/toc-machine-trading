@@ -162,6 +162,17 @@ func (uc *SystemUseCase) EncryptPassword(ctx context.Context, password string) (
 	return string(salt), nil
 }
 
+func (uc *SystemUseCase) IsPushTokenEnabled(ctx context.Context, token string) (bool, error) {
+	if token == "" {
+		return false, nil
+	}
+	dbToken, err := uc.repo.GetPushToken(ctx, token)
+	if err != nil {
+		return false, err
+	}
+	return dbToken.Enabled, nil
+}
+
 func (uc *SystemUseCase) InsertPushToken(ctx context.Context, token, username string, enabled bool) error {
 	if err := uc.repo.InsertOrUpdatePushToken(ctx, token, username, enabled); err != nil {
 		return err

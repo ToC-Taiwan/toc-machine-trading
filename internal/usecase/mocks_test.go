@@ -2684,6 +2684,21 @@ func (mr *MockSystemMockRecorder) InsertPushToken(ctx, token, username, enabled 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertPushToken", reflect.TypeOf((*MockSystem)(nil).InsertPushToken), ctx, token, username, enabled)
 }
 
+// IsPushTokenEnabled mocks base method.
+func (m *MockSystem) IsPushTokenEnabled(ctx context.Context, token string) (bool, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "IsPushTokenEnabled", ctx, token)
+	ret0, _ := ret[0].(bool)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// IsPushTokenEnabled indicates an expected call of IsPushTokenEnabled.
+func (mr *MockSystemMockRecorder) IsPushTokenEnabled(ctx, token interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsPushTokenEnabled", reflect.TypeOf((*MockSystem)(nil).IsPushTokenEnabled), ctx, token)
+}
+
 // Login mocks base method.
 func (m *MockSystem) Login(ctx context.Context, username, password string) error {
 	m.ctrl.T.Helper()
@@ -2788,6 +2803,21 @@ func (m *MockSystemRepo) GetAllPushTokens(ctx context.Context) ([]string, error)
 func (mr *MockSystemRepoMockRecorder) GetAllPushTokens(ctx interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllPushTokens", reflect.TypeOf((*MockSystemRepo)(nil).GetAllPushTokens), ctx)
+}
+
+// GetPushToken mocks base method.
+func (m *MockSystemRepo) GetPushToken(ctx context.Context, token string) (*entity.PushToken, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetPushToken", ctx, token)
+	ret0, _ := ret[0].(*entity.PushToken)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetPushToken indicates an expected call of GetPushToken.
+func (mr *MockSystemRepoMockRecorder) GetPushToken(ctx, token interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPushToken", reflect.TypeOf((*MockSystemRepo)(nil).GetPushToken), ctx, token)
 }
 
 // InsertOrUpdatePushToken mocks base method.
