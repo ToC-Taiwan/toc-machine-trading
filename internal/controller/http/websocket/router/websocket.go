@@ -1,4 +1,5 @@
-package httpserver
+// Package router package router
+package router
 
 import (
 	"context"
@@ -17,15 +18,13 @@ type WSRouter struct {
 	msgChan chan interface{}
 	conn    *websocket.Conn
 	ctx     context.Context
-	logger  Logger
 }
 
 // NewWSRouter -.
-func NewWSRouter(c *gin.Context, logger Logger) *WSRouter {
+func NewWSRouter(c *gin.Context) *WSRouter {
 	r := &WSRouter{
 		msgChan: make(chan interface{}),
 		ctx:     c.Request.Context(),
-		logger:  logger,
 	}
 	r.upgrade(c)
 	return r
@@ -43,7 +42,6 @@ func (w *WSRouter) upgrade(gin *gin.Context) {
 
 	c, err := upGrader.Upgrade(gin.Writer, gin.Request, nil)
 	if err != nil {
-		w.logger.Errorf("upgrade websocket err: %v", err)
 		return
 	}
 
@@ -99,10 +97,7 @@ func (w *WSRouter) ReadFromClient(forwardChan chan []byte) {
 
 		forwardChan <- message
 	}
-
-	if err := w.conn.Close(); err != nil {
-		w.logger.Errorf("websocket close err: %v", err)
-	}
+	_ = w.conn.Close()
 }
 
 func (w *WSRouter) SendToClient(msg interface{}) {

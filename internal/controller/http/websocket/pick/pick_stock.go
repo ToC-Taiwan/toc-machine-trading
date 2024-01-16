@@ -6,15 +6,14 @@ import (
 	"sync"
 	"time"
 
+	"tmt/internal/controller/http/websocket/router"
 	"tmt/internal/usecase"
-	"tmt/pkg/httpserver"
-	"tmt/pkg/log"
 
 	"github.com/gin-gonic/gin"
 )
 
 type WSPickStock struct {
-	*httpserver.WSRouter
+	*router.WSRouter
 
 	s usecase.RealTime
 
@@ -26,7 +25,7 @@ type WSPickStock struct {
 func StartWSPickStock(c *gin.Context, s usecase.RealTime) {
 	w := &WSPickStock{
 		s:        s,
-		WSRouter: httpserver.NewWSRouter(c, log.Get()),
+		WSRouter: router.NewWSRouter(c),
 	}
 
 	forwardChan := make(chan []byte)
