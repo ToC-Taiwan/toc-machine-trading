@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"tmt/internal/controller/http/websocket/router"
+	"tmt/internal/controller/http/websocket/ginws"
 	"tmt/internal/entity"
 	"tmt/internal/usecase"
 	"tmt/pkg/eventbus"
@@ -16,8 +16,8 @@ import (
 )
 
 type WSFutureTrade struct {
-	*router.WSRouter // ws router
-	*eventbus.Bus    // event bus
+	*ginws.WSRouter // ws router
+	*eventbus.Bus   // event bus
 
 	s usecase.RealTime // RealTime
 	o usecase.Trade    // order
@@ -57,7 +57,7 @@ func StartWSFutureTrade(c *gin.Context, s usecase.RealTime, o usecase.Trade, h u
 		assistTargetWaitingMap: make(map[string]*assistTarget),
 		orderMap:               make(map[string]*entity.FutureOrder),
 		cancelOrderMap:         make(map[string]*entity.FutureOrder),
-		WSRouter:               router.NewWSRouter(c),
+		WSRouter:               ginws.NewWSRouter(c),
 		Bus:                    eventbus.Get(uuid.NewString()),
 		waitingList:            newWaitingList(),
 		orderTradeTime:         newOrderTradeTime(),

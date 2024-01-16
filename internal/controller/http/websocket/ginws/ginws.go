@@ -1,5 +1,5 @@
-// Package router package router
-package router
+// Package ginws package ginws
+package ginws
 
 import (
 	"context"
