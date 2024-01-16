@@ -297,7 +297,7 @@ func (c *Config) GetFuglePool() *grpc.ConnPool {
 	return c.fuglePool
 }
 
-func (c *Config) GetRabbitConn() *rabbitmq.Connection {
+func (c *Config) NewRabbitConn() *rabbitmq.Connection {
 	conn, err := rabbitmq.New(
 		c.RabbitMQ.Exchange, c.RabbitMQ.URL,
 		rabbitmq.Attempts(c.RabbitMQ.Attempts),

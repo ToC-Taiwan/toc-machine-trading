@@ -61,8 +61,8 @@ func NewRealTime() RealTime {
 		quota: quota.NewQuota(cfg.Quota),
 		repo:  repo.NewRealTime(cfg.GetPostgresPool()),
 
-		commonRabbit: mqtt.NewRabbit(cfg.GetRabbitConn()),
-		futureRabbit: mqtt.NewRabbit(cfg.GetRabbitConn()),
+		commonRabbit: mqtt.NewRabbit(cfg.NewRabbitConn()),
+		futureRabbit: mqtt.NewRabbit(cfg.NewRabbitConn()),
 
 		gRPCRealtime: grpc.NewRealTime(cfg.GetSinopacPool()),
 		gRPCSub:      grpc.NewSubscribe(cfg.GetSinopacPool()),
@@ -95,7 +95,6 @@ func NewRealTime() RealTime {
 	go uc.ReceiveOrderStatus(context.Background())
 
 	uc.bus.SubscribeAsync(topicSubscribeStockTickTargets, true, uc.ReceiveStockSubscribeData)
-	uc.bus.SubscribeAsync(topicUnSubscribeStockTickTargets, false, uc.UnSubscribeStockTick, uc.UnSubscribeStockBidAsk)
 	uc.bus.SubscribeAsync(topicSubscribeFutureTickTargets, true, uc.SetMainFuture)
 
 	return uc
@@ -471,7 +470,7 @@ func (uc *RealTimeUseCase) ReceiveStockSubscribeData(targetArr []*entity.StockTa
 		uc.stockSwitchChanMapLock.Unlock()
 
 		uc.logger.Infof("Stock room %s <-> %s <-> %s", t.Stock.Name, t.Stock.Future.Name, t.Stock.Future.Code)
-		r := mqtt.NewRabbit(uc.cfg.GetRabbitConn())
+		r := mqtt.NewRabbit(uc.cfg.NewRabbitConn())
 		go r.StockTickConsumer(t.StockNum, hadger.TickChan())
 	}
 
@@ -489,7 +488,7 @@ func (uc *RealTimeUseCase) ReceiveStockSubscribeData(targetArr []*entity.StockTa
 			}
 		}
 	}()
-	hr := mqtt.NewRabbit(uc.cfg.GetRabbitConn())
+	hr := mqtt.NewRabbit(uc.cfg.NewRabbitConn())
 	go hr.OrderStatusConsumer(orderStatusChan)
 	go hr.OrderStatusArrConsumer(orderStatusChan)
 }
@@ -535,7 +534,7 @@ func (uc *RealTimeUseCase) SetMainFuture(code string) {
 }
 
 func (uc *RealTimeUseCase) NewFutureRealTimeClient(tickChan chan *entity.RealTimeFutureTick, orderStatusChan chan interface{}, connectionID string) {
-	r := mqtt.NewRabbit(uc.cfg.GetRabbitConn())
+	r := mqtt.NewRabbit(uc.cfg.NewRabbitConn())
 
 	uc.clientRabbitMapLock.Lock()
 	uc.clientRabbitMap[connectionID] = r
@@ -618,34 +617,6 @@ func (uc *RealTimeUseCase) SubscribeStockBidAsk(targetArr []*entity.StockTarget)
 
 	if len(failSubNumArr) != 0 {
 		return fmt.Errorf("subscribe fail %v", failSubNumArr)
-	}
-
-	return nil
-}
-
-// UnSubscribeStockTick -.
-func (uc *RealTimeUseCase) UnSubscribeStockTick(stockNum string) error {
-	failUnSubNumArr, err := uc.gRPCSub.UnSubscribeStockTick([]string{stockNum})
-	if err != nil {
-		return err
-	}
-
-	if len(failUnSubNumArr) != 0 {
-		return fmt.Errorf("unsubscribe fail %v", failUnSubNumArr)
-	}
-
-	return nil
-}
-
-// UnSubscribeStockBidAsk -.
-func (uc *RealTimeUseCase) UnSubscribeStockBidAsk(stockNum string) error {
-	failUnSubNumArr, err := uc.gRPCSub.UnSubscribeStockBidAsk([]string{stockNum})
-	if err != nil {
-		return err
-	}
-
-	if len(failUnSubNumArr) != 0 {
-		return fmt.Errorf("unsubscribe fail %v", failUnSubNumArr)
 	}
 
 	return nil
