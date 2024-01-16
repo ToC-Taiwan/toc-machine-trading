@@ -172,6 +172,7 @@ func (uc *FcmUseCase) PushNotification(title, msg string) error {
 		return err
 	}
 
+	badge := 1
 	message := &messaging.MulticastMessage{
 		Notification: &messaging.Notification{
 			Title: title,
@@ -181,6 +182,7 @@ func (uc *FcmUseCase) PushNotification(title, msg string) error {
 			Payload: &messaging.APNSPayload{
 				Aps: &messaging.Aps{
 					Sound: "default",
+					Badge: &badge,
 				},
 			},
 		},
