@@ -12,6 +12,7 @@ import (
 	entity "tmt/internal/entity"
 	pb "tmt/pb"
 
+	gin "github.com/gin-gonic/gin"
 	gomock "github.com/golang/mock/gomock"
 )
 
@@ -2700,7 +2701,7 @@ func (mr *MockSystemMockRecorder) IsPushTokenEnabled(ctx, token interface{}) *go
 }
 
 // Login mocks base method.
-func (m *MockSystem) Login(ctx context.Context, username, password string) error {
+func (m *MockSystem) Login(ctx *gin.Context, username, password string) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Login", ctx, username, password)
 	ret0, _ := ret[0].(error)

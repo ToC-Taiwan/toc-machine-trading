@@ -22,5 +22,6 @@ type RefreshResponseBody struct {
 }
 
 type UnauthorizedResponseBody struct {
-	Code int `json:"code"`
+	Code    int    `json:"code"`
+	Message string `json:"message"`
 }

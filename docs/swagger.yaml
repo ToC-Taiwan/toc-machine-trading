@@ -33,6 +33,8 @@ definitions:
     properties:
       code:
         type: integer
+      message:
+        type: string
     type: object
   config.AnalyzeStock:
     properties:

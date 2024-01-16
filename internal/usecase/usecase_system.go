@@ -14,6 +14,7 @@ import (
 	"tmt/pkg/eventbus"
 	"tmt/pkg/log"
 
+	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/gomail.v2"
@@ -72,10 +73,10 @@ func (uc *SystemUseCase) AddUser(ctx context.Context, t *entity.User) error {
 
 	for _, user := range allUser {
 		if user.Username == t.Username {
-			return errors.New("username already exists")
+			return ErrUsernameAlreadyExists
 		}
 		if user.Email == t.Email {
-			return errors.New("email already exists")
+			return ErrEmailAlreadyExists
 		}
 	}
 
@@ -90,20 +91,24 @@ func (uc *SystemUseCase) AddUser(ctx context.Context, t *entity.User) error {
 	return uc.SendOTP(ctx, t)
 }
 
-func (uc *SystemUseCase) Login(ctx context.Context, username, password string) error {
+func (uc *SystemUseCase) Login(ctx *gin.Context, username, password string) error {
 	user, err := uc.repo.QueryUserByUsername(ctx, username)
 	if err != nil {
 		return err
 	}
+
 	if user == nil {
-		return errors.New("username not found")
+		ctx.Set("USECASE_ERROR", ErrUserNotFound)
+		return ErrUserNotFound
 	}
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 	if err != nil {
-		return errors.New("password not match")
+		ctx.Set("USECASE_ERROR", ErrPasswordNotMatch)
+		return ErrPasswordNotMatch
 	}
 	if !user.EmailVerified {
-		return errors.New("email not verified")
+		ctx.Set("USECASE_ERROR", ErrEmailNotVerified)
+		return ErrEmailNotVerified
 	}
 	return nil
 }

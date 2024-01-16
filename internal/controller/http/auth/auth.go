@@ -65,10 +65,22 @@ func NewAuthMiddleware(system usecase.System) (*jwt.GinJWTMiddleware, error) {
 	return jwt.New(&m)
 }
 
+func hTTPStatusMessageFunc(e error, c *gin.Context) string {
+	return e.Error()
+}
+
 func unauthorized(c *gin.Context, code int, message string) {
-	c.JSON(code, gin.H{
-		"code":    code,
-		"message": message,
+	value, _ := c.Get("USECASE_ERROR")
+	if value != nil {
+		c.JSON(code, UnauthorizedResponseBody{
+			Code:    value.(*usecase.UseCaseError).Code,
+			Message: value.(*usecase.UseCaseError).Error(),
+		})
+		return
+	}
+	c.JSON(code, UnauthorizedResponseBody{
+		Code:    code,
+		Message: message,
 	})
 }
 
@@ -99,17 +111,13 @@ func identityHandler(c *gin.Context) interface{} {
 	return claims[identityKey]
 }
 
-func hTTPStatusMessageFunc(e error, c *gin.Context) string {
-	return e.Error()
-}
-
 func authenticator(system usecase.System) func(c *gin.Context) (interface{}, error) {
 	return func(c *gin.Context) (interface{}, error) {
 		var loginVals LoginBody
 		if err := c.ShouldBind(&loginVals); err != nil {
 			return "", jwt.ErrMissingLoginValues
 		}
-		err := system.Login(c.Request.Context(), loginVals.Username, loginVals.Password)
+		err := system.Login(c, loginVals.Username, loginVals.Password)
 		if err != nil {
 			return nil, err
 		}

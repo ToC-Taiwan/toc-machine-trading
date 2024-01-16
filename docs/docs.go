@@ -1254,6 +1254,9 @@ const docTemplate = `{
             "properties": {
                 "code": {
                     "type": "integer"
+                },
+                "message": {
+                    "type": "string"
                 }
             }
         },
