@@ -363,10 +363,7 @@ const docTemplate = `{
                 "summary": "Logout",
                 "responses": {
                     "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/auth.LogoutResponseBody"
-                        }
+                        "description": "OK"
                     }
                 }
             }
@@ -758,13 +755,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/auth.RefreshResponseBody"
+                            "$ref": "#/definitions/auth.LoginResponseBody"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/auth.UnauthorizedResponseBody"
+                            "$ref": "#/definitions/resp.Response"
                         }
                     }
                 }
@@ -898,7 +895,7 @@ const docTemplate = `{
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/auth.UnauthorizedResponseBody"
+                            "$ref": "#/definitions/resp.Response"
                         }
                     }
                 }
@@ -942,7 +939,7 @@ const docTemplate = `{
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/auth.UnauthorizedResponseBody"
+                            "$ref": "#/definitions/resp.Response"
                         }
                     }
                 }
@@ -978,13 +975,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/resp.Response"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/resp.Response"
                         }
                     }
                 }
@@ -1014,7 +1011,7 @@ const docTemplate = `{
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/auth.UnauthorizedResponseBody"
+                            "$ref": "#/definitions/resp.Response"
                         }
                     }
                 }
@@ -1062,7 +1059,7 @@ const docTemplate = `{
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/auth.UnauthorizedResponseBody"
+                            "$ref": "#/definitions/resp.Response"
                         }
                     },
                     "500": {
@@ -1113,7 +1110,7 @@ const docTemplate = `{
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/auth.UnauthorizedResponseBody"
+                            "$ref": "#/definitions/resp.Response"
                         }
                     },
                     "500": {
@@ -1223,39 +1220,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "token": {
-                    "type": "string"
-                }
-            }
-        },
-        "auth.LogoutResponseBody": {
-            "type": "object",
-            "properties": {
-                "code": {
-                    "type": "integer"
-                }
-            }
-        },
-        "auth.RefreshResponseBody": {
-            "type": "object",
-            "properties": {
-                "code": {
-                    "type": "integer"
-                },
-                "expire": {
-                    "type": "string"
-                },
-                "token": {
-                    "type": "string"
-                }
-            }
-        },
-        "auth.UnauthorizedResponseBody": {
-            "type": "object",
-            "properties": {
-                "code": {
-                    "type": "integer"
-                },
-                "message": {
                     "type": "string"
                 }
             }
@@ -1917,6 +1881,9 @@ const docTemplate = `{
         "resp.Response": {
             "type": "object",
             "properties": {
+                "code": {
+                    "type": "integer"
+                },
                 "response": {
                     "type": "string"
                 }

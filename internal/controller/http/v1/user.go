@@ -2,7 +2,6 @@ package v1
 
 import (
 	"net/http"
-	"net/mail"
 
 	"tmt/internal/controller/http/auth"
 	"tmt/internal/controller/http/resp"
@@ -45,32 +44,19 @@ func NewUserRoutes(public *gin.RouterGroup, private *gin.RouterGroup, jwtHandler
 //	@produce	json
 //	@param		body	body	entity.User{}	true	"Body"
 //	@success	200
-//	@failure	400	{string}	string
-//	@failure	500	{string}	string
+//	@failure	400	{object}	resp.Response{}
+//	@failure	500	{object}	resp.Response{}
 //	@router		/v1/user [post]
 func (u *userRoutes) newUserHandler(c *gin.Context) {
 	user := entity.User{}
 	if err := c.ShouldBindJSON(&user); err != nil {
-		resp.ErrorResponse(c, http.StatusBadRequest, err.Error())
+		resp.ErrorResponse(c, http.StatusBadRequest, err)
 		return
 	}
-
-	if user.Username == "" || user.Password == "" || user.Email == "" {
-		resp.ErrorResponse(c, http.StatusBadRequest, "username, password, email is required")
-		return
-	}
-
-	_, err := mail.ParseAddress(user.Email)
-	if err != nil {
-		resp.ErrorResponse(c, http.StatusBadRequest, "email format error")
-		return
-	}
-
 	if err := u.system.AddUser(c, &user); err != nil {
-		resp.ErrorResponse(c, http.StatusInternalServerError, err.Error())
+		resp.ErrorResponse(c, http.StatusInternalServerError, err)
 		return
 	}
-
 	c.JSON(http.StatusOK, nil)
 }
 
@@ -122,7 +108,7 @@ func (u *userRoutes) loginHandler(c *gin.Context) {
 //	@security	JWT
 //	@accept		json
 //	@produce	json
-//	@success	200	{object}	auth.LogoutResponseBody{}
+//	@success	200
 //	@router		/v1/logout [get]
 func (u *userRoutes) logutHandler(c *gin.Context) {
 	u.jwtHandler.LogoutHandler(c)
@@ -135,8 +121,8 @@ func (u *userRoutes) logutHandler(c *gin.Context) {
 //	@security	JWT
 //	@accept		json
 //	@produce	json
-//	@success	200	{object}	auth.RefreshResponseBody{}
-//	@failure	401	{object}	auth.UnauthorizedResponseBody{}
+//	@success	200	{object}	auth.LoginResponseBody{}
+//	@failure	401	{object}	resp.Response{}
 //	@router		/v1/refresh [get]
 func (u *userRoutes) refreshTokenHandler(c *gin.Context) {
 	u.jwtHandler.RefreshHandler(c)
@@ -157,13 +143,13 @@ type userPushTokenRequest struct {
 //	@param		body	body	userPushTokenRequest{}	true	"Body"
 //	@success	200
 //	@failure	400	{object}	resp.Response{}
-//	@failure	401	{object}	auth.UnauthorizedResponseBody{}
+//	@failure	401	{object}	resp.Response{}
 //	@failure	500	{object}	resp.Response{}
 //	@router		/v1/user/push-token [put]
 func (u *userRoutes) updateUserPushToken(c *gin.Context) {
 	p := userPushTokenRequest{}
 	if err := c.ShouldBindJSON(&p); err != nil {
-		resp.ErrorResponse(c, http.StatusBadRequest, err.Error())
+		resp.ErrorResponse(c, http.StatusBadRequest, err)
 		return
 	}
 
@@ -179,7 +165,7 @@ func (u *userRoutes) updateUserPushToken(c *gin.Context) {
 	}
 
 	if err := u.system.InsertPushToken(c.Request.Context(), p.PushToken, username, p.Enabled); err != nil {
-		resp.ErrorResponse(c, http.StatusInternalServerError, err.Error())
+		resp.ErrorResponse(c, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -200,7 +186,7 @@ type pushTokenStatusResponse struct {
 //	@param		token	header		string	true	"token"
 //	@success	200		{object}	pushTokenStatusResponse{}
 //	@failure	400		{object}	resp.Response{}
-//	@failure	401		{object}	auth.UnauthorizedResponseBody{}
+//	@failure	401		{object}	resp.Response{}
 //	@failure	500		{object}	resp.Response{}
 //	@router		/v1/user/push-token [get]
 func (u *userRoutes) getUserPushTokenStatus(c *gin.Context) {
@@ -211,7 +197,7 @@ func (u *userRoutes) getUserPushTokenStatus(c *gin.Context) {
 	}
 	enabled, err := u.system.IsPushTokenEnabled(c.Request.Context(), token)
 	if err != nil {
-		resp.ErrorResponse(c, http.StatusInternalServerError, err.Error())
+		resp.ErrorResponse(c, http.StatusInternalServerError, err)
 		return
 	}
 	c.JSON(http.StatusOK, pushTokenStatusResponse{Enabled: enabled})
@@ -229,7 +215,7 @@ func (u *userRoutes) getUserPushTokenStatus(c *gin.Context) {
 //	@router		/v1/user/push-token [delete]
 func (u *userRoutes) clearAllPushToken(c *gin.Context) {
 	if err := u.system.DeleteAllPushTokens(c); err != nil {
-		resp.ErrorResponse(c, http.StatusInternalServerError, err.Error())
+		resp.ErrorResponse(c, http.StatusInternalServerError, err)
 		return
 	}
 	c.JSON(http.StatusOK, nil)
@@ -243,7 +229,7 @@ func (u *userRoutes) clearAllPushToken(c *gin.Context) {
 //	@accept		json
 //	@produce	json
 //	@success	200
-//	@failure	401	{object}	auth.UnauthorizedResponseBody{}
+//	@failure	401	{object}	resp.Response{}
 //	@router		/v1/user/auth [put]
 func (u *userRoutes) updateAuthTradeUser(c *gin.Context) {
 	u.system.UpdateAuthTradeUser()

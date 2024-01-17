@@ -43,13 +43,13 @@ func (r *historyRoutes) getKbarData(c *gin.Context) {
 	stockNum := c.Param("stock")
 	interval, err := strconv.Atoi(c.Param("interval"))
 	if err != nil {
-		resp.ErrorResponse(c, http.StatusBadRequest, err.Error())
+		resp.ErrorResponse(c, http.StatusBadRequest, err)
 		return
 	}
 	startDate := c.Param("start_date")
 	startDateTime, err := time.Parse(entity.ShortTimeLayout, startDate)
 	if err != nil {
-		resp.ErrorResponse(c, http.StatusBadRequest, err.Error())
+		resp.ErrorResponse(c, http.StatusBadRequest, err)
 		return
 	}
 

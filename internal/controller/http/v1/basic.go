@@ -46,7 +46,7 @@ func (r *basicRoutes) getAllRepoStock(c *gin.Context) {
 	stockNum := c.Query("num")
 	stockDetail, err := r.t.GetAllRepoStock(c.Request.Context())
 	if err != nil {
-		resp.ErrorResponse(c, http.StatusInternalServerError, err.Error())
+		resp.ErrorResponse(c, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -99,7 +99,7 @@ func (r *basicRoutes) getAllConfig(c *gin.Context) {
 func (r *basicRoutes) getShioajiUsage(c *gin.Context) {
 	usage, err := r.t.GetShioajiUsage()
 	if err != nil {
-		resp.ErrorResponse(c, http.StatusInternalServerError, err.Error())
+		resp.ErrorResponse(c, http.StatusInternalServerError, err)
 		return
 	}
 

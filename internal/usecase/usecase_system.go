@@ -5,6 +5,7 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
+	"net/mail"
 	"sync"
 	"time"
 
@@ -14,7 +15,6 @@ import (
 	"tmt/pkg/eventbus"
 	"tmt/pkg/log"
 
-	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/gomail.v2"
@@ -62,14 +62,15 @@ func (uc *SystemUseCase) UpdateAuthTradeUser() {
 }
 
 func (uc *SystemUseCase) AddUser(ctx context.Context, t *entity.User) error {
+	_, err := mail.ParseAddress(t.Email)
+	if err != nil {
+		return ErrEmailFormatInvalid
+	}
+
 	allUser, err := uc.repo.QueryAllUser(ctx)
 	if err != nil {
 		return err
 	}
-
-	// if len(allUser) >= 10 {
-	// 	return errors.New("user limit exceeded")
-	// }
 
 	for _, user := range allUser {
 		if user.Username == t.Username {
@@ -91,23 +92,20 @@ func (uc *SystemUseCase) AddUser(ctx context.Context, t *entity.User) error {
 	return uc.SendOTP(ctx, t)
 }
 
-func (uc *SystemUseCase) Login(ctx *gin.Context, username, password string) error {
+func (uc *SystemUseCase) Login(ctx context.Context, username, password string) error {
 	user, err := uc.repo.QueryUserByUsername(ctx, username)
 	if err != nil {
 		return err
 	}
 
 	if user == nil {
-		ctx.Set("USECASE_ERROR", ErrUserNotFound)
 		return ErrUserNotFound
 	}
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 	if err != nil {
-		ctx.Set("USECASE_ERROR", ErrPasswordNotMatch)
 		return ErrPasswordNotMatch
 	}
 	if !user.EmailVerified {
-		ctx.Set("USECASE_ERROR", ErrEmailNotVerified)
 		return ErrEmailNotVerified
 	}
 	return nil

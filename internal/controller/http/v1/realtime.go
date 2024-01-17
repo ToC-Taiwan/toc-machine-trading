@@ -48,7 +48,7 @@ func NewRealTimeRoutes(handler *gin.RouterGroup, t usecase.RealTime, o usecase.T
 func (r *realTimeRoutes) getTSESnapshot(c *gin.Context) {
 	snapshot, err := r.t.GetTSESnapshot(c.Request.Context())
 	if err != nil {
-		resp.ErrorResponse(c, http.StatusInternalServerError, err.Error())
+		resp.ErrorResponse(c, http.StatusInternalServerError, err)
 		return
 	}
 	c.JSON(http.StatusOK, snapshot)

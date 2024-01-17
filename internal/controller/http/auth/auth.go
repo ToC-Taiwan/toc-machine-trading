@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"time"
 
+	"tmt/internal/controller/http/resp"
 	"tmt/internal/usecase"
 
 	jwt "github.com/appleboy/gin-jwt/v2"
@@ -66,21 +67,20 @@ func NewAuthMiddleware(system usecase.System) (*jwt.GinJWTMiddleware, error) {
 }
 
 func hTTPStatusMessageFunc(e error, c *gin.Context) string {
+	if ucErr, ok := e.(*usecase.UseCaseError); ok {
+		c.Set("USECASE_ERROR_CODE", ucErr.Code)
+	}
 	return e.Error()
 }
 
 func unauthorized(c *gin.Context, code int, message string) {
-	value, _ := c.Get("USECASE_ERROR")
-	if value != nil {
-		c.JSON(code, UnauthorizedResponseBody{
-			Code:    value.(*usecase.UseCaseError).Code,
-			Message: value.(*usecase.UseCaseError).Error(),
-		})
-		return
+	useCaseErrCode := c.GetInt("USECASE_ERROR_CODE")
+	if useCaseErrCode == 0 {
+		useCaseErrCode = code
 	}
-	c.JSON(code, UnauthorizedResponseBody{
-		Code:    code,
-		Message: message,
+	c.JSON(code, resp.Response{
+		Code:     useCaseErrCode,
+		Response: message,
 	})
 }
 
@@ -93,13 +93,11 @@ func loginResponse(c *gin.Context, code int, token string, expire time.Time) {
 }
 
 func logoutResponse(c *gin.Context, code int) {
-	c.JSON(http.StatusOK, LogoutResponseBody{
-		Code: code,
-	})
+	c.JSON(http.StatusOK, nil)
 }
 
 func refreshResponse(c *gin.Context, code int, token string, expire time.Time) {
-	c.JSON(http.StatusOK, RefreshResponseBody{
+	c.JSON(http.StatusOK, LoginResponseBody{
 		Token:  fmt.Sprintf("%s %s", tokenHeaderName, token),
 		Expire: expire.Format(time.RFC3339),
 		Code:   code,

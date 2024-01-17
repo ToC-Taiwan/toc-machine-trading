@@ -7,8 +7,6 @@ import (
 	"tmt/internal/config"
 	"tmt/internal/entity"
 	"tmt/pb"
-
-	"github.com/gin-gonic/gin"
 )
 
 //go:generate mockgen -source=interfaces.go -destination=./mocks_test.go -package=usecase
@@ -235,7 +233,7 @@ type TradegRPCAPI interface {
 type System interface {
 	AddUser(ctx context.Context, t *entity.User) error
 	InsertPushToken(ctx context.Context, token, username string, enabled bool) error
-	Login(ctx *gin.Context, username, password string) error
+	Login(ctx context.Context, username, password string) error
 	VerifyEmail(ctx context.Context, username, code string) error
 	UpdateAuthTradeUser()
 	DeleteAllPushTokens(ctx context.Context) error

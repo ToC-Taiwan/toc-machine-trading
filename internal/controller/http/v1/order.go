@@ -57,13 +57,13 @@ type allOrder struct {
 func (r *orderRoutes) getAllOrder(c *gin.Context) {
 	stockOrderArr, err := r.t.GetAllStockOrder(c.Request.Context())
 	if err != nil {
-		resp.ErrorResponse(c, http.StatusInternalServerError, err.Error())
+		resp.ErrorResponse(c, http.StatusInternalServerError, err)
 		return
 	}
 
 	futureOrderArr, err := r.t.GetAllFutureOrder(c.Request.Context())
 	if err != nil {
-		resp.ErrorResponse(c, http.StatusInternalServerError, err.Error())
+		resp.ErrorResponse(c, http.StatusInternalServerError, err)
 		return
 	}
 	c.JSON(http.StatusOK, allOrder{
@@ -96,7 +96,7 @@ func (r *orderRoutes) getAllOrderByTradeDay(c *gin.Context) {
 
 	futureOrderArr, err := r.t.GetFutureOrderByTradeDay(c.Request.Context(), tradeDay)
 	if err != nil {
-		resp.ErrorResponse(c, http.StatusInternalServerError, err.Error())
+		resp.ErrorResponse(c, http.StatusInternalServerError, err)
 		return
 	}
 	c.JSON(http.StatusOK, futureOrders{futureOrderArr})
@@ -121,7 +121,7 @@ func (r *orderRoutes) updateTradeBalanceByTradeDay(c *gin.Context) {
 	}
 
 	if err := r.t.UpdateTradeBalanceByTradeDay(c.Request.Context(), tradeDay); err != nil {
-		resp.ErrorResponse(c, http.StatusInternalServerError, err.Error())
+		resp.ErrorResponse(c, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -150,13 +150,13 @@ type manualInsertFutureOrderRequest struct {
 func (r *orderRoutes) manualInsertFutureOrder(c *gin.Context) {
 	body := &manualInsertFutureOrderRequest{}
 	if err := c.BindJSON(body); err != nil {
-		resp.ErrorResponse(c, http.StatusInternalServerError, err.Error())
+		resp.ErrorResponse(c, http.StatusInternalServerError, err)
 		return
 	}
 
 	orderTime, err := time.ParseInLocation(entity.LongTimeLayout, body.OrderTime, time.Local)
 	if err != nil {
-		resp.ErrorResponse(c, http.StatusInternalServerError, err.Error())
+		resp.ErrorResponse(c, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -173,7 +173,7 @@ func (r *orderRoutes) manualInsertFutureOrder(c *gin.Context) {
 	}
 
 	if err := r.t.ManualInsertFutureOrder(c.Request.Context(), order); err != nil {
-		resp.ErrorResponse(c, http.StatusInternalServerError, err.Error())
+		resp.ErrorResponse(c, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -198,13 +198,13 @@ type tradeBalance struct {
 func (r *orderRoutes) getAllTradeBalance(c *gin.Context) {
 	allStockArr, err := r.t.GetAllStockTradeBalance(c.Request.Context())
 	if err != nil {
-		resp.ErrorResponse(c, http.StatusInternalServerError, err.Error())
+		resp.ErrorResponse(c, http.StatusInternalServerError, err)
 		return
 	}
 
 	allFutureArr, err := r.t.GetAllFutureTradeBalance(c.Request.Context())
 	if err != nil {
-		resp.ErrorResponse(c, http.StatusInternalServerError, err.Error())
+		resp.ErrorResponse(c, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -227,7 +227,7 @@ func (r *orderRoutes) getAllTradeBalance(c *gin.Context) {
 func (r *orderRoutes) getLastStockTradeBalance(c *gin.Context) {
 	balance, err := r.t.GetLastStockTradeBalance(c.Request.Context())
 	if err != nil {
-		resp.ErrorResponse(c, http.StatusInternalServerError, err.Error())
+		resp.ErrorResponse(c, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -247,7 +247,7 @@ func (r *orderRoutes) getLastStockTradeBalance(c *gin.Context) {
 func (r *orderRoutes) getLastFutureTradeBalance(c *gin.Context) {
 	balance, err := r.t.GetLastFutureTradeBalance(c.Request.Context())
 	if err != nil {
-		resp.ErrorResponse(c, http.StatusInternalServerError, err.Error())
+		resp.ErrorResponse(c, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -322,7 +322,7 @@ type accountSummary struct {
 func (r *orderRoutes) getAccountBalance(c *gin.Context) {
 	balance, err := r.t.GetAccountBalance(c.Request.Context())
 	if err != nil {
-		resp.ErrorResponse(c, http.StatusInternalServerError, err.Error())
+		resp.ErrorResponse(c, http.StatusInternalServerError, err)
 		return
 	}
 

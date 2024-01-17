@@ -15,27 +15,6 @@ definitions:
       token:
         type: string
     type: object
-  auth.LogoutResponseBody:
-    properties:
-      code:
-        type: integer
-    type: object
-  auth.RefreshResponseBody:
-    properties:
-      code:
-        type: integer
-      expire:
-        type: string
-      token:
-        type: string
-    type: object
-  auth.UnauthorizedResponseBody:
-    properties:
-      code:
-        type: integer
-      message:
-        type: string
-    type: object
   config.AnalyzeStock:
     properties:
       AllInOutRatio:
@@ -472,6 +451,8 @@ definitions:
     type: object
   resp.Response:
     properties:
+      code:
+        type: integer
       response:
         type: string
     type: object
@@ -816,8 +797,6 @@ paths:
       responses:
         "200":
           description: OK
-          schema:
-            $ref: '#/definitions/auth.LogoutResponseBody'
       security:
       - JWT: []
       summary: Logout
@@ -1057,11 +1036,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/auth.RefreshResponseBody'
+            $ref: '#/definitions/auth.LoginResponseBody'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/auth.UnauthorizedResponseBody'
+            $ref: '#/definitions/resp.Response'
       security:
       - JWT: []
       summary: Refresh token
@@ -1142,7 +1121,7 @@ paths:
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/auth.UnauthorizedResponseBody'
+            $ref: '#/definitions/resp.Response'
       security:
       - JWT: []
       summary: Buy lot stock
@@ -1169,7 +1148,7 @@ paths:
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/auth.UnauthorizedResponseBody'
+            $ref: '#/definitions/resp.Response'
       security:
       - JWT: []
       summary: Buy odd stock
@@ -1194,11 +1173,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            type: string
+            $ref: '#/definitions/resp.Response'
         "500":
           description: Internal Server Error
           schema:
-            type: string
+            $ref: '#/definitions/resp.Response'
       summary: New user
       tags:
       - User V1
@@ -1214,7 +1193,7 @@ paths:
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/auth.UnauthorizedResponseBody'
+            $ref: '#/definitions/resp.Response'
       security:
       - JWT: []
       summary: Update auth trade user
@@ -1261,7 +1240,7 @@ paths:
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/auth.UnauthorizedResponseBody'
+            $ref: '#/definitions/resp.Response'
         "500":
           description: Internal Server Error
           schema:
@@ -1293,7 +1272,7 @@ paths:
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/auth.UnauthorizedResponseBody'
+            $ref: '#/definitions/resp.Response'
         "500":
           description: Internal Server Error
           schema:

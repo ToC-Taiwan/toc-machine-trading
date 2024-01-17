@@ -59,18 +59,18 @@ func (r *tradeRoutes) checkUserAuth(c *gin.Context) {
 //	@Produce	json
 //	@param		body	body		oddStockRequest{}	true	"Body"
 //	@Success	200		{object}	tradeResponse{}
-//	@failure	401		{object}	auth.UnauthorizedResponseBody{}
+//	@failure	401		{object}	resp.Response{}
 //	@Router		/v1/trade/stock/buy/odd [put]
 func (r *tradeRoutes) buyOddStock(c *gin.Context) {
 	p := oddStockRequest{}
 	if err := c.ShouldBindJSON(&p); err != nil {
-		resp.ErrorResponse(c, http.StatusBadRequest, err.Error())
+		resp.ErrorResponse(c, http.StatusBadRequest, err)
 		return
 	}
 
 	id, status, err := r.t.BuyOddStock(p.Num, p.Price, p.Share)
 	if err != nil {
-		resp.ErrorResponse(c, http.StatusInternalServerError, err.Error())
+		resp.ErrorResponse(c, http.StatusInternalServerError, err)
 		return
 	}
 	c.JSON(http.StatusOK, tradeResponse{
@@ -88,18 +88,18 @@ func (r *tradeRoutes) buyOddStock(c *gin.Context) {
 //	@Produce	json
 //	@param		body	body		lotStockRequest{}	true	"Body"
 //	@Success	200		{object}	tradeResponse{}
-//	@failure	401		{object}	auth.UnauthorizedResponseBody{}
+//	@failure	401		{object}	resp.Response{}
 //	@Router		/v1/trade/stock/buy/lot [put]
 func (r *tradeRoutes) buyLotStock(c *gin.Context) {
 	p := lotStockRequest{}
 	if err := c.ShouldBindJSON(&p); err != nil {
-		resp.ErrorResponse(c, http.StatusBadRequest, err.Error())
+		resp.ErrorResponse(c, http.StatusBadRequest, err)
 		return
 	}
 
 	id, status, err := r.t.BuyLotStock(p.Num, p.Price, p.Lot)
 	if err != nil {
-		resp.ErrorResponse(c, http.StatusInternalServerError, err.Error())
+		resp.ErrorResponse(c, http.StatusInternalServerError, err)
 		return
 	}
 	c.JSON(http.StatusOK, tradeResponse{

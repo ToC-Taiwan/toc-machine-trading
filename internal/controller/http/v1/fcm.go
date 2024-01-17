@@ -42,12 +42,12 @@ type announceRequest struct {
 func (r *fcmRoutes) announceMessage(c *gin.Context) {
 	var req announceRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		resp.ErrorResponse(c, http.StatusBadRequest, err.Error())
+		resp.ErrorResponse(c, http.StatusBadRequest, err)
 		return
 	}
 
 	if err := r.t.AnnounceMessage(req.Message); err != nil {
-		resp.ErrorResponse(c, http.StatusInternalServerError, err.Error())
+		resp.ErrorResponse(c, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -74,12 +74,12 @@ type pushRequest struct {
 func (r *fcmRoutes) pushMessage(c *gin.Context) {
 	var req pushRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		resp.ErrorResponse(c, http.StatusBadRequest, err.Error())
+		resp.ErrorResponse(c, http.StatusBadRequest, err)
 		return
 	}
 
 	if err := r.t.PushNotification(req.Title, req.Message); err != nil {
-		resp.ErrorResponse(c, http.StatusInternalServerError, err.Error())
+		resp.ErrorResponse(c, http.StatusInternalServerError, err)
 		return
 	}
 
