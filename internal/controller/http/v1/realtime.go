@@ -7,6 +7,8 @@ import (
 	"tmt/internal/controller/http/resp"
 	"tmt/internal/controller/http/websocket/future"
 	"tmt/internal/controller/http/websocket/pick"
+	pickV2 "tmt/internal/controller/http/websocket/pick/v2"
+
 	"tmt/internal/usecase"
 
 	"github.com/gin-gonic/gin"
@@ -27,10 +29,12 @@ func NewRealTimeRoutes(handler *gin.RouterGroup, t usecase.RealTime, o usecase.T
 
 	h := handler.Group("/stream")
 	{
-		h.GET("/tse/snapshot", r.getTSESnapshot)
 		h.GET("/index", r.getIndex)
+		h.PUT("/snapshot", r.getSnapshots)
+		h.GET("/snapshot/tse", r.getTSESnapshot)
 
 		h.GET("/ws/pick-stock", r.servePickStockWS)
+		h.GET("/ws/pick-stock/v2", r.servePickStockWSV2)
 		h.GET("/ws/future", r.serveFutureWS)
 	}
 }
@@ -44,9 +48,43 @@ func NewRealTimeRoutes(handler *gin.RouterGroup, t usecase.RealTime, o usecase.T
 //	@Produce	json
 //	@Success	200	{object}	entity.StockSnapShot
 //	@Failure	500	{object}	resp.Response{}
-//	@Router		/v1/stream/tse/snapshot [get]
+//	@Router		/v1/stream/snapshot/tse [get]
 func (r *realTimeRoutes) getTSESnapshot(c *gin.Context) {
 	snapshot, err := r.t.GetTSESnapshot(c.Request.Context())
+	if err != nil {
+		resp.ErrorResponse(c, http.StatusInternalServerError, err)
+		return
+	}
+	c.JSON(http.StatusOK, snapshot)
+}
+
+type snapshotRequest struct {
+	StockList []string `json:"stock_list"`
+}
+
+// getSnapshots -.
+//
+//	@Tags		Stream V1
+//	@Summary	Get snapshots
+//	@security	JWT
+//	@Accept		json
+//	@param		body	body	snapshotRequest{}	true	"Body"
+//	@Produce	json
+//	@Success	200	{object}	[]entity.StockSnapShot
+//	@Failure	400	{object}	resp.Response{}
+//	@Failure	500	{object}	resp.Response{}
+//	@Router		/v1/stream/snapshot [put]
+func (r *realTimeRoutes) getSnapshots(c *gin.Context) {
+	p := snapshotRequest{}
+	if err := c.ShouldBindJSON(&p); err != nil {
+		resp.ErrorResponse(c, http.StatusBadRequest, err)
+		return
+	}
+	if len(p.StockList) == 0 {
+		resp.ErrorResponse(c, http.StatusBadRequest, "stock list is empty")
+		return
+	}
+	snapshot, err := r.t.GetStockSnapshotByNumArr(p.StockList)
 	if err != nil {
 		resp.ErrorResponse(c, http.StatusInternalServerError, err)
 		return
@@ -69,6 +107,10 @@ func (r *realTimeRoutes) getIndex(c *gin.Context) {
 
 func (r *realTimeRoutes) servePickStockWS(c *gin.Context) {
 	pick.StartWSPickStock(c, r.t)
+}
+
+func (r *realTimeRoutes) servePickStockWSV2(c *gin.Context) {
+	pickV2.StartWSPickStock(c, r.t)
 }
 
 func (r *realTimeRoutes) serveFutureWS(c *gin.Context) {

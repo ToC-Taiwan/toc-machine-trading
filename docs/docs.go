@@ -794,7 +794,60 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/stream/tse/snapshot": {
+        "/v1/stream/snapshot": {
+            "put": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Stream V1"
+                ],
+                "summary": "Get snapshots",
+                "parameters": [
+                    {
+                        "description": "Body",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/v1.snapshotRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entity.StockSnapShot"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/resp.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/stream/snapshot/tse": {
             "get": {
                 "security": [
                     {
@@ -1380,9 +1433,6 @@ const docTemplate = `{
                 "RateLimit": {
                     "type": "number"
                 },
-                "Subscribe": {
-                    "type": "boolean"
-                },
                 "TargetBalanceHigh": {
                     "type": "number"
                 },
@@ -1413,9 +1463,6 @@ const docTemplate = `{
                     "type": "number"
                 },
                 "Odd": {
-                    "type": "boolean"
-                },
-                "Subscribe": {
                     "type": "boolean"
                 },
                 "TotalOpenTime": {
@@ -1640,17 +1687,8 @@ const docTemplate = `{
                 "category": {
                     "type": "string"
                 },
-                "code": {
-                    "type": "string"
-                },
                 "day_trade": {
                     "type": "boolean"
-                },
-                "delivery_date": {
-                    "type": "string"
-                },
-                "delivery_month": {
-                    "type": "string"
                 },
                 "exchange": {
                     "type": "string"
@@ -1658,29 +1696,11 @@ const docTemplate = `{
                 "last_close": {
                     "type": "number"
                 },
-                "limit_down": {
-                    "type": "number"
-                },
-                "limit_up": {
-                    "type": "number"
-                },
                 "name": {
                     "type": "string"
                 },
                 "number": {
                     "type": "string"
-                },
-                "reference": {
-                    "type": "number"
-                },
-                "symbol": {
-                    "type": "string"
-                },
-                "underlying_kind": {
-                    "type": "string"
-                },
-                "unit": {
-                    "type": "integer"
                 },
                 "update_date": {
                     "type": "string"
@@ -2023,6 +2043,17 @@ const docTemplate = `{
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/entity.Stock"
+                    }
+                }
+            }
+        },
+        "v1.snapshotRequest": {
+            "type": "object",
+            "properties": {
+                "stock_list": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
                     }
                 }
             }

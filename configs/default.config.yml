@@ -3,8 +3,7 @@ ManualTrade: true
 
 TradeStock:
     AllowTrade: false
-    Subscribe: true
-    Odd: true
+    Odd: false
 
     # unit: second
     HoldTimeFromOpen: 45
@@ -18,7 +17,6 @@ TradeStock:
 
 TradeFuture:
     AllowTrade: false
-    Subscribe: true
     Quantity: 2
 
     # unit: dollar

@@ -10,8 +10,6 @@ const (
 )
 
 const (
-	topicSubscribeStockTickTargets string = "subscribe_stock_tick_targets"
-
 	topicInsertOrUpdateStockOrder string = "insert_or_update_order"
 )
 

@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.3.0
 // - protoc             v4.25.2
-// source: realtime.proto
+// source: forwarder/realtime.proto
 
 package pb
 
@@ -20,14 +20,14 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	RealTimeDataInterface_GetAllStockSnapshot_FullMethodName        = "/toc_python_forwarder.RealTimeDataInterface/GetAllStockSnapshot"
-	RealTimeDataInterface_GetStockSnapshotByNumArr_FullMethodName   = "/toc_python_forwarder.RealTimeDataInterface/GetStockSnapshotByNumArr"
-	RealTimeDataInterface_GetStockSnapshotTSE_FullMethodName        = "/toc_python_forwarder.RealTimeDataInterface/GetStockSnapshotTSE"
-	RealTimeDataInterface_GetStockSnapshotOTC_FullMethodName        = "/toc_python_forwarder.RealTimeDataInterface/GetStockSnapshotOTC"
-	RealTimeDataInterface_GetNasdaq_FullMethodName                  = "/toc_python_forwarder.RealTimeDataInterface/GetNasdaq"
-	RealTimeDataInterface_GetNasdaqFuture_FullMethodName            = "/toc_python_forwarder.RealTimeDataInterface/GetNasdaqFuture"
-	RealTimeDataInterface_GetStockVolumeRank_FullMethodName         = "/toc_python_forwarder.RealTimeDataInterface/GetStockVolumeRank"
-	RealTimeDataInterface_GetFutureSnapshotByCodeArr_FullMethodName = "/toc_python_forwarder.RealTimeDataInterface/GetFutureSnapshotByCodeArr"
+	RealTimeDataInterface_GetAllStockSnapshot_FullMethodName        = "/forwarder.RealTimeDataInterface/GetAllStockSnapshot"
+	RealTimeDataInterface_GetStockSnapshotByNumArr_FullMethodName   = "/forwarder.RealTimeDataInterface/GetStockSnapshotByNumArr"
+	RealTimeDataInterface_GetStockSnapshotTSE_FullMethodName        = "/forwarder.RealTimeDataInterface/GetStockSnapshotTSE"
+	RealTimeDataInterface_GetStockSnapshotOTC_FullMethodName        = "/forwarder.RealTimeDataInterface/GetStockSnapshotOTC"
+	RealTimeDataInterface_GetNasdaq_FullMethodName                  = "/forwarder.RealTimeDataInterface/GetNasdaq"
+	RealTimeDataInterface_GetNasdaqFuture_FullMethodName            = "/forwarder.RealTimeDataInterface/GetNasdaqFuture"
+	RealTimeDataInterface_GetStockVolumeRank_FullMethodName         = "/forwarder.RealTimeDataInterface/GetStockVolumeRank"
+	RealTimeDataInterface_GetFutureSnapshotByCodeArr_FullMethodName = "/forwarder.RealTimeDataInterface/GetFutureSnapshotByCodeArr"
 )
 
 // RealTimeDataInterfaceClient is the client API for RealTimeDataInterface service.
@@ -328,7 +328,7 @@ func _RealTimeDataInterface_GetFutureSnapshotByCodeArr_Handler(srv interface{}, 
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var RealTimeDataInterface_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "toc_python_forwarder.RealTimeDataInterface",
+	ServiceName: "forwarder.RealTimeDataInterface",
 	HandlerType: (*RealTimeDataInterfaceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -365,5 +365,5 @@ var RealTimeDataInterface_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "realtime.proto",
+	Metadata: "forwarder/realtime.proto",
 }

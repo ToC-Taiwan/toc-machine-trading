@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.3.0
 // - protoc             v4.25.2
-// source: basic.proto
+// source: forwarder/basic.proto
 
 package pb
 
@@ -20,13 +20,13 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	BasicDataInterface_CreateLongConnection_FullMethodName = "/toc_python_forwarder.BasicDataInterface/CreateLongConnection"
-	BasicDataInterface_Terminate_FullMethodName            = "/toc_python_forwarder.BasicDataInterface/Terminate"
-	BasicDataInterface_CheckUsage_FullMethodName           = "/toc_python_forwarder.BasicDataInterface/CheckUsage"
-	BasicDataInterface_Login_FullMethodName                = "/toc_python_forwarder.BasicDataInterface/Login"
-	BasicDataInterface_GetAllStockDetail_FullMethodName    = "/toc_python_forwarder.BasicDataInterface/GetAllStockDetail"
-	BasicDataInterface_GetAllFutureDetail_FullMethodName   = "/toc_python_forwarder.BasicDataInterface/GetAllFutureDetail"
-	BasicDataInterface_GetAllOptionDetail_FullMethodName   = "/toc_python_forwarder.BasicDataInterface/GetAllOptionDetail"
+	BasicDataInterface_CreateLongConnection_FullMethodName = "/forwarder.BasicDataInterface/CreateLongConnection"
+	BasicDataInterface_Terminate_FullMethodName            = "/forwarder.BasicDataInterface/Terminate"
+	BasicDataInterface_CheckUsage_FullMethodName           = "/forwarder.BasicDataInterface/CheckUsage"
+	BasicDataInterface_Login_FullMethodName                = "/forwarder.BasicDataInterface/Login"
+	BasicDataInterface_GetAllStockDetail_FullMethodName    = "/forwarder.BasicDataInterface/GetAllStockDetail"
+	BasicDataInterface_GetAllFutureDetail_FullMethodName   = "/forwarder.BasicDataInterface/GetAllFutureDetail"
+	BasicDataInterface_GetAllOptionDetail_FullMethodName   = "/forwarder.BasicDataInterface/GetAllOptionDetail"
 )
 
 // BasicDataInterfaceClient is the client API for BasicDataInterface service.
@@ -328,7 +328,7 @@ func _BasicDataInterface_GetAllOptionDetail_Handler(srv interface{}, ctx context
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var BasicDataInterface_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "toc_python_forwarder.BasicDataInterface",
+	ServiceName: "forwarder.BasicDataInterface",
 	HandlerType: (*BasicDataInterfaceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -363,5 +363,5 @@ var BasicDataInterface_ServiceDesc = grpc.ServiceDesc{
 			ClientStreams: true,
 		},
 	},
-	Metadata: "basic.proto",
+	Metadata: "forwarder/basic.proto",
 }

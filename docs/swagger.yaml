@@ -117,8 +117,6 @@ definitions:
         type: number
       RateLimit:
         type: number
-      Subscribe:
-        type: boolean
       TargetBalanceHigh:
         type: number
       TargetBalanceLow:
@@ -139,8 +137,6 @@ definitions:
       HoldTimeFromOpen:
         type: number
       Odd:
-        type: boolean
-      Subscribe:
         type: boolean
       TotalOpenTime:
         type: number
@@ -293,34 +289,16 @@ definitions:
     properties:
       category:
         type: string
-      code:
-        type: string
       day_trade:
         type: boolean
-      delivery_date:
-        type: string
-      delivery_month:
-        type: string
       exchange:
         type: string
       last_close:
-        type: number
-      limit_down:
-        type: number
-      limit_up:
         type: number
       name:
         type: string
       number:
         type: string
-      reference:
-        type: number
-      symbol:
-        type: string
-      underlying_kind:
-        type: string
-      unit:
-        type: integer
       update_date:
         type: string
     type: object
@@ -544,6 +522,13 @@ definitions:
       stocks:
         items:
           $ref: '#/definitions/entity.Stock'
+        type: array
+    type: object
+  v1.snapshotRequest:
+    properties:
+      stock_list:
+        items:
+          type: string
         type: array
     type: object
   v1.stockDetailResponse:
@@ -1062,7 +1047,40 @@ paths:
       summary: Get index
       tags:
       - Stream V1
-  /v1/stream/tse/snapshot:
+  /v1/stream/snapshot:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/v1.snapshotRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.StockSnapShot'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resp.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.Response'
+      security:
+      - JWT: []
+      summary: Get snapshots
+      tags:
+      - Stream V1
+  /v1/stream/snapshot/tse:
     get:
       consumes:
       - application/json

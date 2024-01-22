@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.3.0
 // - protoc             v4.25.2
-// source: history.proto
+// source: forwarder/history.proto
 
 package pb
 
@@ -19,16 +19,16 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	HistoryDataInterface_GetStockHistoryTick_FullMethodName           = "/toc_python_forwarder.HistoryDataInterface/GetStockHistoryTick"
-	HistoryDataInterface_GetStockHistoryKbar_FullMethodName           = "/toc_python_forwarder.HistoryDataInterface/GetStockHistoryKbar"
-	HistoryDataInterface_GetStockHistoryClose_FullMethodName          = "/toc_python_forwarder.HistoryDataInterface/GetStockHistoryClose"
-	HistoryDataInterface_GetStockHistoryCloseByDateArr_FullMethodName = "/toc_python_forwarder.HistoryDataInterface/GetStockHistoryCloseByDateArr"
-	HistoryDataInterface_GetFutureHistoryTick_FullMethodName          = "/toc_python_forwarder.HistoryDataInterface/GetFutureHistoryTick"
-	HistoryDataInterface_GetFutureHistoryKbar_FullMethodName          = "/toc_python_forwarder.HistoryDataInterface/GetFutureHistoryKbar"
-	HistoryDataInterface_GetFutureHistoryClose_FullMethodName         = "/toc_python_forwarder.HistoryDataInterface/GetFutureHistoryClose"
-	HistoryDataInterface_GetStockTSEHistoryTick_FullMethodName        = "/toc_python_forwarder.HistoryDataInterface/GetStockTSEHistoryTick"
-	HistoryDataInterface_GetStockTSEHistoryKbar_FullMethodName        = "/toc_python_forwarder.HistoryDataInterface/GetStockTSEHistoryKbar"
-	HistoryDataInterface_GetStockTSEHistoryClose_FullMethodName       = "/toc_python_forwarder.HistoryDataInterface/GetStockTSEHistoryClose"
+	HistoryDataInterface_GetStockHistoryTick_FullMethodName           = "/forwarder.HistoryDataInterface/GetStockHistoryTick"
+	HistoryDataInterface_GetStockHistoryKbar_FullMethodName           = "/forwarder.HistoryDataInterface/GetStockHistoryKbar"
+	HistoryDataInterface_GetStockHistoryClose_FullMethodName          = "/forwarder.HistoryDataInterface/GetStockHistoryClose"
+	HistoryDataInterface_GetStockHistoryCloseByDateArr_FullMethodName = "/forwarder.HistoryDataInterface/GetStockHistoryCloseByDateArr"
+	HistoryDataInterface_GetFutureHistoryTick_FullMethodName          = "/forwarder.HistoryDataInterface/GetFutureHistoryTick"
+	HistoryDataInterface_GetFutureHistoryKbar_FullMethodName          = "/forwarder.HistoryDataInterface/GetFutureHistoryKbar"
+	HistoryDataInterface_GetFutureHistoryClose_FullMethodName         = "/forwarder.HistoryDataInterface/GetFutureHistoryClose"
+	HistoryDataInterface_GetStockTSEHistoryTick_FullMethodName        = "/forwarder.HistoryDataInterface/GetStockTSEHistoryTick"
+	HistoryDataInterface_GetStockTSEHistoryKbar_FullMethodName        = "/forwarder.HistoryDataInterface/GetStockTSEHistoryKbar"
+	HistoryDataInterface_GetStockTSEHistoryClose_FullMethodName       = "/forwarder.HistoryDataInterface/GetStockTSEHistoryClose"
 )
 
 // HistoryDataInterfaceClient is the client API for HistoryDataInterface service.
@@ -393,7 +393,7 @@ func _HistoryDataInterface_GetStockTSEHistoryClose_Handler(srv interface{}, ctx 
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var HistoryDataInterface_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "toc_python_forwarder.HistoryDataInterface",
+	ServiceName: "forwarder.HistoryDataInterface",
 	HandlerType: (*HistoryDataInterfaceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -438,5 +438,5 @@ var HistoryDataInterface_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "history.proto",
+	Metadata: "forwarder/history.proto",
 }

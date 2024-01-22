@@ -135,22 +135,11 @@ func (c *Config) readEnv() {
 	c.EnvConfig = env
 }
 
-func (c *Config) checkValid() {
-	if c.TradeStock.AllowTrade && !c.TradeStock.Subscribe {
-		c.logger.Fatalf("stock trade switch allow trade but not subscribe")
-	}
-
-	if c.TradeFuture.AllowTrade && !c.TradeFuture.Subscribe {
-		c.logger.Fatalf("stock trade switch allow trade but not subscribe")
-	}
-}
-
 func Init() {
 	once.Do(func() {
 		data := newConfig()
 		data.readConfig()
 		data.readEnv()
-		data.checkValid()
 		data.setPostgresPool()
 		data.setSinopacPool()
 		data.setFuglePool()

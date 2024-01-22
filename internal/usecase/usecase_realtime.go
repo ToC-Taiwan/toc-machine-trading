@@ -13,10 +13,10 @@ import (
 	"tmt/internal/usecase/grpc"
 	"tmt/internal/usecase/modules/calendar"
 	"tmt/internal/usecase/modules/dt"
-	"tmt/internal/usecase/modules/hadger"
 	"tmt/internal/usecase/modules/quota"
 	"tmt/internal/usecase/mqtt"
 	"tmt/internal/usecase/repo"
+	"tmt/pb"
 	"tmt/pkg/eventbus"
 	"tmt/pkg/log"
 )
@@ -53,6 +53,9 @@ type RealTimeUseCase struct {
 	logger *log.Log
 	cc     *cache.Cache
 	bus    *eventbus.Bus
+
+	subscribeStock     map[string]struct{}
+	subscribeStockLock sync.RWMutex
 }
 
 func NewRealTime() RealTime {
@@ -79,6 +82,8 @@ func NewRealTime() RealTime {
 		logger: log.Get(),
 		cc:     cache.Get(),
 		bus:    eventbus.Get(),
+
+		subscribeStock: make(map[string]struct{}),
 	}
 
 	// unsubscriba all first
@@ -94,7 +99,6 @@ func NewRealTime() RealTime {
 	go uc.ReceiveEvent(context.Background())
 	go uc.ReceiveOrderStatus(context.Background())
 
-	uc.bus.SubscribeAsync(topicSubscribeStockTickTargets, true, uc.ReceiveStockSubscribeData)
 	uc.bus.SubscribeAsync(topicSubscribeFutureTickTargets, true, uc.SetMainFuture)
 
 	return uc
@@ -451,48 +455,6 @@ func (uc *RealTimeUseCase) GetMainFuture() *entity.Future {
 	return uc.cc.GetFutureDetail(uc.mainFutureCode)
 }
 
-// ReceiveStockSubscribeData - receive target data, start goroutine to trade
-func (uc *RealTimeUseCase) ReceiveStockSubscribeData(targetArr []*entity.StockTarget) {
-	defer uc.SubscribeStockTick(targetArr)
-	notifyChanMap := make(map[string]chan *entity.StockOrder)
-	for _, t := range targetArr {
-		hadger := hadger.NewHadgerStock(
-			t.StockNum,
-			uc.sc.(*grpc.TradegRPCAPI),
-			uc.fg.(*grpc.TradegRPCAPI),
-			uc.quota,
-			&uc.cfg.TradeStock,
-		)
-		notifyChanMap[t.StockNum] = hadger.Notify()
-
-		uc.stockSwitchChanMapLock.Lock()
-		uc.stockSwitchChanMap[t.StockNum] = hadger.SwitchChan()
-		uc.stockSwitchChanMapLock.Unlock()
-
-		uc.logger.Infof("Stock room %s <-> %s <-> %s", t.Stock.Name, t.Stock.Future.Name, t.Stock.Future.Code)
-		r := mqtt.NewRabbit(uc.cfg.NewRabbitConn())
-		go r.StockTickConsumer(t.StockNum, hadger.TickChan())
-	}
-
-	orderStatusChan := make(chan interface{})
-	go func() {
-		for {
-			order := <-orderStatusChan
-			o, ok := order.(*entity.StockOrder)
-			if !ok {
-				continue
-			}
-
-			if ch := notifyChanMap[o.StockNum]; ch != nil {
-				ch <- o
-			}
-		}
-	}()
-	hr := mqtt.NewRabbit(uc.cfg.NewRabbitConn())
-	go hr.OrderStatusConsumer(orderStatusChan)
-	go hr.OrderStatusArrConsumer(orderStatusChan)
-}
-
 // ReceiveFutureSubscribeData -.
 func (uc *RealTimeUseCase) ReceiveFutureSubscribeData(code string) {
 	defer uc.SubscribeFutureTick(code)
@@ -579,12 +541,15 @@ func (uc *RealTimeUseCase) UnSubscribeAll() error {
 
 // SubscribeStockTick -.
 func (uc *RealTimeUseCase) SubscribeStockTick(targetArr []*entity.StockTarget) {
-	if !uc.cfg.TradeStock.Subscribe {
-		return
-	}
+	uc.subscribeStockLock.Lock()
+	defer uc.subscribeStockLock.Unlock()
 
 	var subArr []string
 	for _, v := range targetArr {
+		if _, ok := uc.subscribeStock[v.StockNum]; ok {
+			continue
+		}
+		uc.subscribeStock[v.StockNum] = struct{}{}
 		subArr = append(subArr, v.StockNum)
 	}
 
@@ -595,16 +560,14 @@ func (uc *RealTimeUseCase) SubscribeStockTick(targetArr []*entity.StockTarget) {
 	}
 
 	if len(failSubNumArr) != 0 {
-		uc.logger.Errorf("subscribe fail %v", failSubNumArr)
+		for _, v := range failSubNumArr {
+			delete(uc.subscribeStock, v)
+		}
 	}
 }
 
 // SubscribeStockBidAsk -.
 func (uc *RealTimeUseCase) SubscribeStockBidAsk(targetArr []*entity.StockTarget) error {
-	if !uc.cfg.TradeStock.Subscribe {
-		return nil
-	}
-
 	var subArr []string
 	for _, v := range targetArr {
 		subArr = append(subArr, v.StockNum)
@@ -624,10 +587,6 @@ func (uc *RealTimeUseCase) SubscribeStockBidAsk(targetArr []*entity.StockTarget)
 
 // SubscribeFutureTick -.
 func (uc *RealTimeUseCase) SubscribeFutureTick(code string) {
-	if !uc.cfg.TradeFuture.Subscribe {
-		return
-	}
-
 	failSubNumArr, err := uc.gRPCSub.SubscribeFutureTick([]string{code})
 	if err != nil {
 		uc.logger.Error(err)
@@ -649,6 +608,38 @@ func (uc *RealTimeUseCase) SubscribeFutureBidAsk(code string) error {
 	if len(failSubNumArr) != 0 {
 		return fmt.Errorf("subscribe future fail %v", failSubNumArr)
 	}
-
 	return nil
+}
+
+func (uc *RealTimeUseCase) CreateRealTimePick(connectionID string, com chan *pb.PickRealMap, tickChan chan []byte) {
+	r := mqtt.NewRabbit(uc.cfg.NewRabbitConn())
+
+	uc.clientRabbitMapLock.Lock()
+	uc.clientRabbitMap[connectionID] = r
+	uc.clientRabbitMapLock.Unlock()
+
+	contextMap := make(map[string]context.CancelFunc)
+	for {
+		list := <-com
+		subscribeList := []*entity.StockTarget{}
+		for k, v := range list.GetPickMap() {
+			if v == pb.PickListType_TYPE_ADD {
+				if _, ok := contextMap[k]; ok {
+					continue
+				}
+				subscribeList = append(subscribeList, &entity.StockTarget{StockNum: k})
+				ctx, cancel := context.WithCancel(context.Background())
+				contextMap[k] = cancel
+				go r.StockTickPbConsumer(ctx, k, tickChan)
+			} else if v == pb.PickListType_TYPE_REMOVE {
+				if cancel, ok := contextMap[k]; ok {
+					cancel()
+					delete(contextMap, k)
+				}
+			}
+		}
+		if len(subscribeList) != 0 {
+			uc.SubscribeStockTick(subscribeList)
+		}
+	}
 }

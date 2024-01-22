@@ -27,7 +27,7 @@ type Stock struct {
 	LastClose  float64   `json:"last_close"`
 	UpdateDate time.Time `json:"update_date"`
 
-	*Future
+	*Future `json:"-"`
 }
 
 // Future -.

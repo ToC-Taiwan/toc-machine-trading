@@ -15,16 +15,18 @@ import (
 
 // WSRouter -.
 type WSRouter struct {
-	msgChan chan interface{}
-	conn    *websocket.Conn
-	ctx     context.Context
+	msgChan    chan interface{}
+	binaryChan chan []byte
+	conn       *websocket.Conn
+	ctx        context.Context
 }
 
 // NewWSRouter -.
 func NewWSRouter(c *gin.Context) *WSRouter {
 	r := &WSRouter{
-		msgChan: make(chan interface{}),
-		ctx:     c.Request.Context(),
+		msgChan:    make(chan interface{}),
+		binaryChan: make(chan []byte),
+		ctx:        c.Request.Context(),
 	}
 	r.upgrade(c)
 	return r
@@ -70,6 +72,9 @@ func (w *WSRouter) write() {
 					w.sendText(serveMsgStr)
 				}
 			}
+
+		case cl := <-w.binaryChan:
+			w.sendBinary(cl)
 		}
 	}
 }
@@ -102,6 +107,10 @@ func (w *WSRouter) ReadFromClient(forwardChan chan []byte) {
 
 func (w *WSRouter) SendToClient(msg interface{}) {
 	w.msgChan <- msg
+}
+
+func (w *WSRouter) SendBinaryToClient(msg []byte) {
+	w.binaryChan <- msg
 }
 
 func (w *WSRouter) Ctx() context.Context {

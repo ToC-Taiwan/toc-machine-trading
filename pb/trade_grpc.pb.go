@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.3.0
 // - protoc             v4.25.2
-// source: trade.proto
+// source: forwarder/trade.proto
 
 package pb
 
@@ -20,29 +20,29 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	TradeInterface_BuyStock_FullMethodName                  = "/toc_python_forwarder.TradeInterface/BuyStock"
-	TradeInterface_SellStock_FullMethodName                 = "/toc_python_forwarder.TradeInterface/SellStock"
-	TradeInterface_BuyOddStock_FullMethodName               = "/toc_python_forwarder.TradeInterface/BuyOddStock"
-	TradeInterface_SellOddStock_FullMethodName              = "/toc_python_forwarder.TradeInterface/SellOddStock"
-	TradeInterface_SellFirstStock_FullMethodName            = "/toc_python_forwarder.TradeInterface/SellFirstStock"
-	TradeInterface_CancelStock_FullMethodName               = "/toc_python_forwarder.TradeInterface/CancelStock"
-	TradeInterface_BuyFuture_FullMethodName                 = "/toc_python_forwarder.TradeInterface/BuyFuture"
-	TradeInterface_SellFuture_FullMethodName                = "/toc_python_forwarder.TradeInterface/SellFuture"
-	TradeInterface_SellFirstFuture_FullMethodName           = "/toc_python_forwarder.TradeInterface/SellFirstFuture"
-	TradeInterface_CancelFuture_FullMethodName              = "/toc_python_forwarder.TradeInterface/CancelFuture"
-	TradeInterface_BuyOption_FullMethodName                 = "/toc_python_forwarder.TradeInterface/BuyOption"
-	TradeInterface_SellOption_FullMethodName                = "/toc_python_forwarder.TradeInterface/SellOption"
-	TradeInterface_SellFirstOption_FullMethodName           = "/toc_python_forwarder.TradeInterface/SellFirstOption"
-	TradeInterface_CancelOption_FullMethodName              = "/toc_python_forwarder.TradeInterface/CancelOption"
-	TradeInterface_GetLocalOrderStatusArr_FullMethodName    = "/toc_python_forwarder.TradeInterface/GetLocalOrderStatusArr"
-	TradeInterface_GetSimulateOrderStatusArr_FullMethodName = "/toc_python_forwarder.TradeInterface/GetSimulateOrderStatusArr"
-	TradeInterface_GetOrderStatusByID_FullMethodName        = "/toc_python_forwarder.TradeInterface/GetOrderStatusByID"
-	TradeInterface_GetNonBlockOrderStatusArr_FullMethodName = "/toc_python_forwarder.TradeInterface/GetNonBlockOrderStatusArr"
-	TradeInterface_GetFuturePosition_FullMethodName         = "/toc_python_forwarder.TradeInterface/GetFuturePosition"
-	TradeInterface_GetStockPosition_FullMethodName          = "/toc_python_forwarder.TradeInterface/GetStockPosition"
-	TradeInterface_GetSettlement_FullMethodName             = "/toc_python_forwarder.TradeInterface/GetSettlement"
-	TradeInterface_GetAccountBalance_FullMethodName         = "/toc_python_forwarder.TradeInterface/GetAccountBalance"
-	TradeInterface_GetMargin_FullMethodName                 = "/toc_python_forwarder.TradeInterface/GetMargin"
+	TradeInterface_BuyStock_FullMethodName                  = "/forwarder.TradeInterface/BuyStock"
+	TradeInterface_SellStock_FullMethodName                 = "/forwarder.TradeInterface/SellStock"
+	TradeInterface_BuyOddStock_FullMethodName               = "/forwarder.TradeInterface/BuyOddStock"
+	TradeInterface_SellOddStock_FullMethodName              = "/forwarder.TradeInterface/SellOddStock"
+	TradeInterface_SellFirstStock_FullMethodName            = "/forwarder.TradeInterface/SellFirstStock"
+	TradeInterface_CancelStock_FullMethodName               = "/forwarder.TradeInterface/CancelStock"
+	TradeInterface_BuyFuture_FullMethodName                 = "/forwarder.TradeInterface/BuyFuture"
+	TradeInterface_SellFuture_FullMethodName                = "/forwarder.TradeInterface/SellFuture"
+	TradeInterface_SellFirstFuture_FullMethodName           = "/forwarder.TradeInterface/SellFirstFuture"
+	TradeInterface_CancelFuture_FullMethodName              = "/forwarder.TradeInterface/CancelFuture"
+	TradeInterface_BuyOption_FullMethodName                 = "/forwarder.TradeInterface/BuyOption"
+	TradeInterface_SellOption_FullMethodName                = "/forwarder.TradeInterface/SellOption"
+	TradeInterface_SellFirstOption_FullMethodName           = "/forwarder.TradeInterface/SellFirstOption"
+	TradeInterface_CancelOption_FullMethodName              = "/forwarder.TradeInterface/CancelOption"
+	TradeInterface_GetLocalOrderStatusArr_FullMethodName    = "/forwarder.TradeInterface/GetLocalOrderStatusArr"
+	TradeInterface_GetSimulateOrderStatusArr_FullMethodName = "/forwarder.TradeInterface/GetSimulateOrderStatusArr"
+	TradeInterface_GetOrderStatusByID_FullMethodName        = "/forwarder.TradeInterface/GetOrderStatusByID"
+	TradeInterface_GetNonBlockOrderStatusArr_FullMethodName = "/forwarder.TradeInterface/GetNonBlockOrderStatusArr"
+	TradeInterface_GetFuturePosition_FullMethodName         = "/forwarder.TradeInterface/GetFuturePosition"
+	TradeInterface_GetStockPosition_FullMethodName          = "/forwarder.TradeInterface/GetStockPosition"
+	TradeInterface_GetSettlement_FullMethodName             = "/forwarder.TradeInterface/GetSettlement"
+	TradeInterface_GetAccountBalance_FullMethodName         = "/forwarder.TradeInterface/GetAccountBalance"
+	TradeInterface_GetMargin_FullMethodName                 = "/forwarder.TradeInterface/GetMargin"
 )
 
 // TradeInterfaceClient is the client API for TradeInterface service.
@@ -823,7 +823,7 @@ func _TradeInterface_GetMargin_Handler(srv interface{}, ctx context.Context, dec
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var TradeInterface_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "toc_python_forwarder.TradeInterface",
+	ServiceName: "forwarder.TradeInterface",
 	HandlerType: (*TradeInterfaceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -920,5 +920,5 @@ var TradeInterface_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "trade.proto",
+	Metadata: "forwarder/trade.proto",
 }

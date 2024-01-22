@@ -11,8 +11,7 @@ mkdir pb
 protoc \
     --go_out=. \
     --go-grpc_out=. \
-    --proto_path=./toc-trade-protobuf/protos/v3/app \
-    --proto_path=./toc-trade-protobuf/protos/v3/forwarder \
+    --proto_path=./toc-trade-protobuf/protos/v3 \
     ./toc-trade-protobuf/protos/v3/*/*.proto
 
 rm -rf toc-trade-protobuf

@@ -97,6 +97,8 @@ type RealTime interface {
 
 	NewFutureRealTimeClient(tickChan chan *entity.RealTimeFutureTick, orderStatusChan chan interface{}, connectionID string)
 	DeleteFutureRealTimeClient(connectionID string)
+
+	CreateRealTimePick(connectionID string, com chan *pb.PickRealMap, tickChan chan []byte)
 }
 
 type RealTimeRepo interface {
@@ -135,6 +137,8 @@ type Rabbit interface {
 	StockBidAskConsumer(stockNum string, bidAskChan chan *entity.RealTimeStockBidAsk)
 	FutureTickConsumer(code string, tickChan chan *entity.RealTimeFutureTick)
 	FutureBidAskConsumer(code string, bidAskChan chan *entity.FutureRealTimeBidAsk)
+
+	StockTickPbConsumer(ctx context.Context, stockNum string, tickChan chan []byte)
 
 	Close()
 }

@@ -3,7 +3,6 @@ package usecase
 import (
 	"context"
 	"errors"
-	"fmt"
 	"sync"
 	"time"
 
@@ -64,7 +63,6 @@ func NewBasic() Basic {
 		uc.logger.Fatal(err)
 	}
 
-	uc.saveStockFutureCache()
 	return uc
 }
 
@@ -151,6 +149,7 @@ func (uc *BasicUseCase) updateRepoStock() error {
 			UpdateDate: updateTime,
 		}
 		uc.allStockDetail = append(uc.allStockDetail, stock)
+		uc.cc.SetStockDetail(stock)
 	}
 
 	err = uc.repo.UpdateAllStockDayTradeToNo(context.Background())
@@ -203,6 +202,7 @@ func (uc *BasicUseCase) updateRepoFuture() error {
 		if _, ok := duplCodeMap[future.Code]; !ok {
 			duplCodeMap[future.Code] = struct{}{}
 			uc.allFutureDetail = append(uc.allFutureDetail, future)
+			uc.cc.SetFutureDetail(future)
 		}
 	}
 
@@ -257,31 +257,6 @@ func (uc *BasicUseCase) updateRepoOption() error {
 	}
 
 	return uc.repo.InsertOrUpdatetOptionArr(context.Background(), uc.allOptionDetail)
-}
-
-func (uc *BasicUseCase) saveStockFutureCache() {
-	for _, s := range uc.allStockDetail {
-		f, err := uc.repo.QueryFutureByLikeName(context.Background(), s.Name)
-		if err != nil {
-			uc.logger.Error(err)
-		}
-
-		for _, v := range f {
-			if v.Symbol == fmt.Sprintf("%sR1", v.Category) || v.Symbol == fmt.Sprintf("%sR2", v.Category) {
-				continue
-			}
-
-			if time.Now().Before(v.DeliveryDate) {
-				s.Future = v
-				uc.cc.SetStockDetail(s)
-				break
-			}
-		}
-	}
-
-	for _, f := range uc.allFutureDetail {
-		uc.cc.SetFutureDetail(f)
-	}
 }
 
 func (uc *BasicUseCase) GetAllRepoStock(ctx context.Context) ([]*entity.Stock, error) {

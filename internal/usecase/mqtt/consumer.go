@@ -1,6 +1,7 @@
 package mqtt
 
 import (
+	"context"
 	"fmt"
 	"time"
 
@@ -276,6 +277,23 @@ func (c *Rabbit) FutureBidAskConsumer(code string, bidAskChan chan *entity.Futur
 			FirstDerivedAskPrice: body.GetFirstDerivedAskPrice(),
 			FirstDerivedBidVol:   body.GetFirstDerivedBidVol(),
 			FirstDerivedAskVol:   body.GetFirstDerivedAskVol(),
+		}
+	}
+}
+
+// StockTickPbConsumer -.
+func (c *Rabbit) StockTickPbConsumer(ctx context.Context, stockNum string, tickChan chan []byte) {
+	delivery := c.establishDelivery(fmt.Sprintf("%s:%s", routingKeyTick, stockNum))
+	for {
+		select {
+		case <-ctx.Done():
+			return
+
+		case d, opened := <-delivery:
+			if !opened {
+				return
+			}
+			tickChan <- d.Body
 		}
 	}
 }

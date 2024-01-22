@@ -928,6 +928,18 @@ func (m *MockRealTime) EXPECT() *MockRealTimeMockRecorder {
 	return m.recorder
 }
 
+// CreateRealTimePick mocks base method.
+func (m *MockRealTime) CreateRealTimePick(connectionID string, com chan *pb.PickRealMap, tickChan chan []byte) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "CreateRealTimePick", connectionID, com, tickChan)
+}
+
+// CreateRealTimePick indicates an expected call of CreateRealTimePick.
+func (mr *MockRealTimeMockRecorder) CreateRealTimePick(connectionID, com, tickChan interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateRealTimePick", reflect.TypeOf((*MockRealTime)(nil).CreateRealTimePick), connectionID, com, tickChan)
+}
+
 // DeleteFutureRealTimeClient mocks base method.
 func (m *MockRealTime) DeleteFutureRealTimeClient(connectionID string) {
 	m.ctrl.T.Helper()
@@ -1510,6 +1522,18 @@ func (m *MockRabbit) StockTickConsumer(stockNum string, tickChan chan *entity.Re
 func (mr *MockRabbitMockRecorder) StockTickConsumer(stockNum, tickChan interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "StockTickConsumer", reflect.TypeOf((*MockRabbit)(nil).StockTickConsumer), stockNum, tickChan)
+}
+
+// StockTickPbConsumer mocks base method.
+func (m *MockRabbit) StockTickPbConsumer(ctx context.Context, stockNum string, tickChan chan []byte) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "StockTickPbConsumer", ctx, stockNum, tickChan)
+}
+
+// StockTickPbConsumer indicates an expected call of StockTickPbConsumer.
+func (mr *MockRabbitMockRecorder) StockTickPbConsumer(ctx, stockNum, tickChan interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "StockTickPbConsumer", reflect.TypeOf((*MockRabbit)(nil).StockTickPbConsumer), ctx, stockNum, tickChan)
 }
 
 // MockTarget is a mock of Target interface.

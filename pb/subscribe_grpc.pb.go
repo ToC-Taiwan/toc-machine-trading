@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.3.0
 // - protoc             v4.25.2
-// source: subscribe.proto
+// source: forwarder/subscribe.proto
 
 package pb
 
@@ -20,16 +20,16 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	SubscribeDataInterface_SubscribeStockTick_FullMethodName      = "/toc_python_forwarder.SubscribeDataInterface/SubscribeStockTick"
-	SubscribeDataInterface_UnSubscribeStockTick_FullMethodName    = "/toc_python_forwarder.SubscribeDataInterface/UnSubscribeStockTick"
-	SubscribeDataInterface_SubscribeStockBidAsk_FullMethodName    = "/toc_python_forwarder.SubscribeDataInterface/SubscribeStockBidAsk"
-	SubscribeDataInterface_UnSubscribeStockBidAsk_FullMethodName  = "/toc_python_forwarder.SubscribeDataInterface/UnSubscribeStockBidAsk"
-	SubscribeDataInterface_SubscribeFutureTick_FullMethodName     = "/toc_python_forwarder.SubscribeDataInterface/SubscribeFutureTick"
-	SubscribeDataInterface_UnSubscribeFutureTick_FullMethodName   = "/toc_python_forwarder.SubscribeDataInterface/UnSubscribeFutureTick"
-	SubscribeDataInterface_SubscribeFutureBidAsk_FullMethodName   = "/toc_python_forwarder.SubscribeDataInterface/SubscribeFutureBidAsk"
-	SubscribeDataInterface_UnSubscribeFutureBidAsk_FullMethodName = "/toc_python_forwarder.SubscribeDataInterface/UnSubscribeFutureBidAsk"
-	SubscribeDataInterface_UnSubscribeAllTick_FullMethodName      = "/toc_python_forwarder.SubscribeDataInterface/UnSubscribeAllTick"
-	SubscribeDataInterface_UnSubscribeAllBidAsk_FullMethodName    = "/toc_python_forwarder.SubscribeDataInterface/UnSubscribeAllBidAsk"
+	SubscribeDataInterface_SubscribeStockTick_FullMethodName      = "/forwarder.SubscribeDataInterface/SubscribeStockTick"
+	SubscribeDataInterface_UnSubscribeStockTick_FullMethodName    = "/forwarder.SubscribeDataInterface/UnSubscribeStockTick"
+	SubscribeDataInterface_SubscribeStockBidAsk_FullMethodName    = "/forwarder.SubscribeDataInterface/SubscribeStockBidAsk"
+	SubscribeDataInterface_UnSubscribeStockBidAsk_FullMethodName  = "/forwarder.SubscribeDataInterface/UnSubscribeStockBidAsk"
+	SubscribeDataInterface_SubscribeFutureTick_FullMethodName     = "/forwarder.SubscribeDataInterface/SubscribeFutureTick"
+	SubscribeDataInterface_UnSubscribeFutureTick_FullMethodName   = "/forwarder.SubscribeDataInterface/UnSubscribeFutureTick"
+	SubscribeDataInterface_SubscribeFutureBidAsk_FullMethodName   = "/forwarder.SubscribeDataInterface/SubscribeFutureBidAsk"
+	SubscribeDataInterface_UnSubscribeFutureBidAsk_FullMethodName = "/forwarder.SubscribeDataInterface/UnSubscribeFutureBidAsk"
+	SubscribeDataInterface_UnSubscribeAllTick_FullMethodName      = "/forwarder.SubscribeDataInterface/UnSubscribeAllTick"
+	SubscribeDataInterface_UnSubscribeAllBidAsk_FullMethodName    = "/forwarder.SubscribeDataInterface/UnSubscribeAllBidAsk"
 )
 
 // SubscribeDataInterfaceClient is the client API for SubscribeDataInterface service.
@@ -395,7 +395,7 @@ func _SubscribeDataInterface_UnSubscribeAllBidAsk_Handler(srv interface{}, ctx c
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var SubscribeDataInterface_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "toc_python_forwarder.SubscribeDataInterface",
+	ServiceName: "forwarder.SubscribeDataInterface",
 	HandlerType: (*SubscribeDataInterfaceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -440,5 +440,5 @@ var SubscribeDataInterface_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "subscribe.proto",
+	Metadata: "forwarder/subscribe.proto",
 }
