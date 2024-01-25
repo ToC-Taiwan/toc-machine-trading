@@ -180,7 +180,8 @@ func (uc *FcmUseCase) PushNotification(title, msg string) error {
 		APNS: &messaging.APNSConfig{
 			Payload: &messaging.APNSPayload{
 				Aps: &messaging.Aps{
-					Sound: "default",
+					Sound:            "default",
+					ContentAvailable: true,
 				},
 			},
 		},
