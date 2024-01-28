@@ -259,17 +259,12 @@ func (uc *BasicUseCase) updateRepoOption() error {
 	return uc.repo.InsertOrUpdatetOptionArr(context.Background(), uc.allOptionDetail)
 }
 
-func (uc *BasicUseCase) GetAllRepoStock(ctx context.Context) ([]*entity.Stock, error) {
-	data, err := uc.repo.QueryAllStock(ctx)
-	if err != nil {
-		return []*entity.Stock{}, err
-	}
+func (uc *BasicUseCase) GetStockDetail(stockNum string) *entity.Stock {
+	return uc.cc.GetStockDetail(stockNum)
+}
 
-	var result []*entity.Stock
-	for _, v := range data {
-		result = append(result, v)
-	}
-	return result, nil
+func (uc *BasicUseCase) GetFutureDetail(code string) *entity.Future {
+	return uc.cc.GetFutureDetail(code)
 }
 
 func (uc *BasicUseCase) GetConfig() *config.Config {

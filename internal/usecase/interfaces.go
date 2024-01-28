@@ -16,7 +16,8 @@ type Analyze interface {
 }
 
 type Basic interface {
-	GetAllRepoStock(ctx context.Context) ([]*entity.Stock, error)
+	GetStockDetail(stockNum string) *entity.Stock
+	GetFutureDetail(code string) *entity.Future
 	GetConfig() *config.Config
 	GetShioajiUsage() (*entity.ShioajiUsage, error)
 }

@@ -531,6 +531,13 @@ definitions:
           type: string
         type: array
     type: object
+  v1.stockDetailRequest:
+    properties:
+      stock_list:
+        items:
+          type: string
+        type: array
+    type: object
   v1.stockDetailResponse:
     properties:
       stock_detail:
@@ -608,14 +615,16 @@ paths:
       tags:
       - Basic V1
   /v1/basic/stock:
-    get:
+    put:
       consumes:
       - application/json
       parameters:
-      - description: num
-        in: query
-        name: num
-        type: string
+      - description: Body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/v1.stockDetailRequest'
       produces:
       - application/json
       responses:

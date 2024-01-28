@@ -20,56 +20,57 @@ func NewBasicRoutes(handler *gin.RouterGroup, t usecase.Basic) {
 
 	h := handler.Group("/basic")
 	{
-		h.GET("/stock", r.getAllRepoStock)
+		h.PUT("/stock", r.getStockDetail)
 		h.GET("/config", r.getAllConfig)
 		h.GET("/usage/shioaji", r.getShioajiUsage)
 	}
+}
+
+type stockDetailRequest struct {
+	StockList []string `json:"stock_list"`
 }
 
 type stockDetailResponse struct {
 	StockDetail []*entity.Stock `json:"stock_detail"`
 }
 
-// getAllRepoStock -.
+// getStockDetail -.
 //
 //	@Tags		Basic V1
 //	@Summary	Get all repo stock
 //	@security	JWT
 //	@Accept		json
 //	@Produce	json
-//	@Param		num	query		string	false	"num"
-//	@Success	200	{object}	stockDetailResponse
-//	@Failure	404	{object}	resp.Response{}
-//	@Failure	500	{object}	resp.Response{}
-//	@Router		/v1/basic/stock [get]
-func (r *basicRoutes) getAllRepoStock(c *gin.Context) {
-	stockNum := c.Query("num")
-	stockDetail, err := r.t.GetAllRepoStock(c.Request.Context())
-	if err != nil {
-		resp.ErrorResponse(c, http.StatusInternalServerError, err)
+//	@param		body	body		stockDetailRequest{}	true	"Body"
+//	@Success	200		{object}	stockDetailResponse
+//	@Failure	404		{object}	resp.Response{}
+//	@Failure	500		{object}	resp.Response{}
+//	@Router		/v1/basic/stock [put]
+func (r *basicRoutes) getStockDetail(c *gin.Context) {
+	p := stockDetailRequest{}
+	if err := c.ShouldBindJSON(&p); err != nil {
+		resp.ErrorResponse(c, http.StatusBadRequest, err)
 		return
 	}
-
-	if stockNum != "" {
-		result := []*entity.Stock{}
-		for _, stock := range stockDetail {
-			if stockNum == stock.Number {
-				result = append(result, stock)
-				break
-			}
-		}
-		if len(result) == 0 {
-			resp.ErrorResponse(c, http.StatusNotFound, "stock not found")
-			return
-		}
-		c.JSON(http.StatusOK, stockDetailResponse{
-			StockDetail: result,
-		})
-	} else {
-		c.JSON(http.StatusOK, stockDetailResponse{
-			StockDetail: stockDetail,
-		})
+	if len(p.StockList) == 0 {
+		resp.ErrorResponse(c, http.StatusBadRequest, "stock list is empty")
+		return
 	}
+	result := []*entity.Stock{}
+	for _, stockNum := range p.StockList {
+		stockDetail := r.t.GetStockDetail(stockNum)
+		if stockDetail != nil {
+			result = append(result, stockDetail)
+		} else {
+			result = append(result, &entity.Stock{
+				Number: stockNum,
+			})
+		}
+	}
+
+	c.JSON(http.StatusOK, stockDetailResponse{
+		StockDetail: result,
+	})
 }
 
 // getAllConfig -.

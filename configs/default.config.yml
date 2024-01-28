@@ -66,7 +66,7 @@ TargetStock:
         - 2412
         - 2002
         - 1102
-    LimitVolume: 1000
+    LimitVolume: 5000
     PriceLimit:
         - Low: 10
           High: 35

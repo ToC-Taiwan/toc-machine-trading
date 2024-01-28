@@ -75,21 +75,6 @@ func (m *MockBasic) EXPECT() *MockBasicMockRecorder {
 	return m.recorder
 }
 
-// GetAllRepoStock mocks base method.
-func (m *MockBasic) GetAllRepoStock(ctx context.Context) ([]*entity.Stock, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetAllRepoStock", ctx)
-	ret0, _ := ret[0].([]*entity.Stock)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetAllRepoStock indicates an expected call of GetAllRepoStock.
-func (mr *MockBasicMockRecorder) GetAllRepoStock(ctx interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllRepoStock", reflect.TypeOf((*MockBasic)(nil).GetAllRepoStock), ctx)
-}
-
 // GetConfig mocks base method.
 func (m *MockBasic) GetConfig() *config.Config {
 	m.ctrl.T.Helper()
@@ -102,6 +87,20 @@ func (m *MockBasic) GetConfig() *config.Config {
 func (mr *MockBasicMockRecorder) GetConfig() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetConfig", reflect.TypeOf((*MockBasic)(nil).GetConfig))
+}
+
+// GetFutureDetail mocks base method.
+func (m *MockBasic) GetFutureDetail(code string) *entity.Future {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetFutureDetail", code)
+	ret0, _ := ret[0].(*entity.Future)
+	return ret0
+}
+
+// GetFutureDetail indicates an expected call of GetFutureDetail.
+func (mr *MockBasicMockRecorder) GetFutureDetail(code interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFutureDetail", reflect.TypeOf((*MockBasic)(nil).GetFutureDetail), code)
 }
 
 // GetShioajiUsage mocks base method.
@@ -117,6 +116,20 @@ func (m *MockBasic) GetShioajiUsage() (*entity.ShioajiUsage, error) {
 func (mr *MockBasicMockRecorder) GetShioajiUsage() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetShioajiUsage", reflect.TypeOf((*MockBasic)(nil).GetShioajiUsage))
+}
+
+// GetStockDetail mocks base method.
+func (m *MockBasic) GetStockDetail(stockNum string) *entity.Stock {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetStockDetail", stockNum)
+	ret0, _ := ret[0].(*entity.Stock)
+	return ret0
+}
+
+// GetStockDetail indicates an expected call of GetStockDetail.
+func (mr *MockBasicMockRecorder) GetStockDetail(stockNum interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStockDetail", reflect.TypeOf((*MockBasic)(nil).GetStockDetail), stockNum)
 }
 
 // MockBasicRepo is a mock of BasicRepo interface.

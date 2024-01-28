@@ -79,7 +79,7 @@ const docTemplate = `{
             }
         },
         "/v1/basic/stock": {
-            "get": {
+            "put": {
                 "security": [
                     {
                         "JWT": []
@@ -97,10 +97,13 @@ const docTemplate = `{
                 "summary": "Get all repo stock",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "num",
-                        "name": "num",
-                        "in": "query"
+                        "description": "Body",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/v1.stockDetailRequest"
+                        }
                     }
                 ],
                 "responses": {
@@ -2048,6 +2051,17 @@ const docTemplate = `{
             }
         },
         "v1.snapshotRequest": {
+            "type": "object",
+            "properties": {
+                "stock_list": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "v1.stockDetailRequest": {
             "type": "object",
             "properties": {
                 "stock_list": {
