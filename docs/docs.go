@@ -1330,9 +1330,6 @@ const docTemplate = `{
                 "Simulation": {
                     "type": "boolean"
                 },
-                "TargetStock": {
-                    "$ref": "#/definitions/config.TargetStock"
-                },
                 "TradeFuture": {
                     "$ref": "#/definitions/config.TradeFuture"
                 },
@@ -1355,17 +1352,6 @@ const docTemplate = `{
                 }
             }
         },
-        "config.PriceLimit": {
-            "type": "object",
-            "properties": {
-                "High": {
-                    "type": "number"
-                },
-                "Low": {
-                    "type": "number"
-                }
-            }
-        },
         "config.Quota": {
             "type": "object",
             "properties": {
@@ -1376,35 +1362,6 @@ const docTemplate = `{
                     "type": "number"
                 },
                 "StockTradeQuota": {
-                    "type": "integer"
-                }
-            }
-        },
-        "config.TargetStock": {
-            "type": "object",
-            "properties": {
-                "BlackCategory": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "BlackStock": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "LimitVolume": {
-                    "type": "integer"
-                },
-                "PriceLimit": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/config.PriceLimit"
-                    }
-                },
-                "RealTimeRank": {
                     "type": "integer"
                 }
             }

@@ -13,7 +13,6 @@ import (
 	"tmt/internal/usecase/cache"
 	"tmt/internal/usecase/grpc"
 	"tmt/internal/usecase/modules/calendar"
-	"tmt/internal/usecase/modules/target"
 	"tmt/internal/usecase/repo"
 	"tmt/pkg/eventbus"
 	"tmt/pkg/log"
@@ -24,9 +23,8 @@ type TargetUseCase struct {
 	repo    TargetRepo
 	gRPCAPI RealTimegRPCAPI
 
-	targetFilter *target.Filter
-	cfg          *config.Config
-	tradeDay     *calendar.Calendar
+	cfg      *config.Config
+	tradeDay *calendar.Calendar
 
 	logger *log.Log
 	cc     *cache.Cache
@@ -36,14 +34,13 @@ type TargetUseCase struct {
 func NewTarget() Target {
 	cfg := config.Get()
 	uc := &TargetUseCase{
-		repo:         repo.NewTarget(cfg.GetPostgresPool()),
-		gRPCAPI:      grpc.NewRealTime(cfg.GetSinopacPool()),
-		cfg:          cfg,
-		tradeDay:     calendar.Get(),
-		targetFilter: target.NewFilter(cfg.TargetStock),
-		logger:       log.Get(),
-		cc:           cache.Get(),
-		bus:          eventbus.Get(),
+		repo:     repo.NewTarget(cfg.GetPostgresPool()),
+		gRPCAPI:  grpc.NewRealTime(cfg.GetSinopacPool()),
+		cfg:      cfg,
+		tradeDay: calendar.Get(),
+		logger:   log.Get(),
+		cc:       cache.Get(),
+		bus:      eventbus.Get(),
 	}
 
 	// query targets from db
@@ -158,12 +155,12 @@ func (uc *TargetUseCase) searchTradeDayTargets(tradeDay time.Time) ([]*entity.St
 
 	var result []*entity.StockTarget
 	for _, v := range t {
-		stock := uc.cc.GetStockDetail(v.GetCode())
-		if stock == nil {
-			continue
+		if len(result) >= 50 {
+			break
 		}
 
-		if !uc.targetFilter.CheckVolume(v.GetTotalVolume()) || !uc.targetFilter.IsTarget(stock, v.GetClose()) {
+		stock := uc.cc.GetStockDetail(v.GetCode())
+		if stock == nil {
 			continue
 		}
 
@@ -207,8 +204,8 @@ func (uc *TargetUseCase) searchTradeDayTargetsFromAllSnapshot(tradeDay time.Time
 			continue
 		}
 
-		if !uc.targetFilter.CheckVolume(v.GetTotalVolume()) || !uc.targetFilter.IsTarget(stock, v.GetClose()) {
-			continue
+		if len(result) >= 50 {
+			break
 		}
 
 		result = append(result, &entity.StockTarget{

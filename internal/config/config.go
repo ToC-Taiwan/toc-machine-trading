@@ -32,7 +32,6 @@ type Config struct {
 	TradeStock   TradeStock   `json:"TradeStock" yaml:"TradeStock"`
 	History      History      `json:"History" yaml:"History"`
 	Quota        Quota        `json:"Quota" yaml:"Quota"`
-	TargetStock  TargetStock  `json:"TargetStock" yaml:"TargetStock"`
 	AnalyzeStock AnalyzeStock `json:"AnalyzeStock" yaml:"AnalyzeStock"`
 	TradeFuture  TradeFuture  `json:"TradeFuture" yaml:"TradeFuture"`
 

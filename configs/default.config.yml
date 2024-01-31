@@ -46,30 +46,14 @@ TradeFuture:
 
 History:
     # unit: day
-    HistoryClosePeriod: 65
-    HistoryTickPeriod: 12
-    HistoryKbarPeriod: 65
+    HistoryClosePeriod: 60
+    HistoryTickPeriod: 10
+    HistoryKbarPeriod: 60
 
 Quota:
     StockTradeQuota: 1000000
     StockFeeDiscount: 0.28
     FutureTradeFee: 15
-
-TargetStock:
-    RealTimeRank: 20
-    BlackCategory:
-        - 17
-    BlackStock:
-        - 2317
-        - 1314
-        - 3481
-        - 2412
-        - 2002
-        - 1102
-    LimitVolume: 5000
-    PriceLimit:
-        - Low: 10
-          High: 35
 
 AnalyzeStock:
     # unit: minute

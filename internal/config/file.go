@@ -14,15 +14,6 @@ type Quota struct {
 	FutureTradeFee   int64   `json:"FutureTradeFee" yaml:"FutureTradeFee"`
 }
 
-// TargetStock -.
-type TargetStock struct {
-	BlackStock    []string     `json:"BlackStock" yaml:"BlackStock"`
-	BlackCategory []string     `json:"BlackCategory" yaml:"BlackCategory"`
-	RealTimeRank  int64        `json:"RealTimeRank" yaml:"RealTimeRank"`
-	LimitVolume   int64        `json:"LimitVolume" yaml:"LimitVolume"`
-	PriceLimit    []PriceLimit `json:"PriceLimit" yaml:"PriceLimit"`
-}
-
 // PriceLimit -.
 type PriceLimit struct {
 	Low  float64 `json:"Low" yaml:"Low"`

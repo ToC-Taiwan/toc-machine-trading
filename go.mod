@@ -29,7 +29,7 @@ require (
 	github.com/swaggo/gin-swagger v1.6.0
 	github.com/swaggo/swag v1.16.2
 	golang.org/x/crypto v0.18.0
-	google.golang.org/api v0.159.0
+	google.golang.org/api v0.161.0
 	google.golang.org/grpc v1.61.0
 	google.golang.org/protobuf v1.32.0
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df

@@ -48,8 +48,6 @@ definitions:
         $ref: '#/definitions/config.Quota'
       Simulation:
         type: boolean
-      TargetStock:
-        $ref: '#/definitions/config.TargetStock'
       TradeFuture:
         $ref: '#/definitions/config.TradeFuture'
       TradeStock:
@@ -64,13 +62,6 @@ definitions:
       HistoryTickPeriod:
         type: integer
     type: object
-  config.PriceLimit:
-    properties:
-      High:
-        type: number
-      Low:
-        type: number
-    type: object
   config.Quota:
     properties:
       FutureTradeFee:
@@ -78,25 +69,6 @@ definitions:
       StockFeeDiscount:
         type: number
       StockTradeQuota:
-        type: integer
-    type: object
-  config.TargetStock:
-    properties:
-      BlackCategory:
-        items:
-          type: string
-        type: array
-      BlackStock:
-        items:
-          type: string
-        type: array
-      LimitVolume:
-        type: integer
-      PriceLimit:
-        items:
-          $ref: '#/definitions/config.PriceLimit'
-        type: array
-      RealTimeRank:
         type: integer
     type: object
   config.TradeFuture:
