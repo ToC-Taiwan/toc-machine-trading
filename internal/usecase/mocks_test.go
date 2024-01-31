@@ -1245,6 +1245,21 @@ func (mr *MockRealTimegRPCAPIMockRecorder) GetStockVolumeRank(date interface{}) 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStockVolumeRank", reflect.TypeOf((*MockRealTimegRPCAPI)(nil).GetStockVolumeRank), date)
 }
 
+// GetStockVolumeRankPB mocks base method.
+func (m *MockRealTimegRPCAPI) GetStockVolumeRankPB(date string) (*pb.StockVolumeRankResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetStockVolumeRankPB", date)
+	ret0, _ := ret[0].(*pb.StockVolumeRankResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetStockVolumeRankPB indicates an expected call of GetStockVolumeRankPB.
+func (mr *MockRealTimegRPCAPIMockRecorder) GetStockVolumeRankPB(date interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStockVolumeRankPB", reflect.TypeOf((*MockRealTimegRPCAPI)(nil).GetStockVolumeRankPB), date)
+}
+
 // MockSubscribegRPCAPI is a mock of SubscribegRPCAPI interface.
 type MockSubscribegRPCAPI struct {
 	ctrl     *gomock.Controller
@@ -1570,6 +1585,21 @@ func NewMockTarget(ctrl *gomock.Controller) *MockTarget {
 // EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockTarget) EXPECT() *MockTargetMockRecorder {
 	return m.recorder
+}
+
+// GetCurrentVolumeRank mocks base method.
+func (m *MockTarget) GetCurrentVolumeRank() (*pb.StockVolumeRankResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetCurrentVolumeRank")
+	ret0, _ := ret[0].(*pb.StockVolumeRankResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetCurrentVolumeRank indicates an expected call of GetCurrentVolumeRank.
+func (mr *MockTargetMockRecorder) GetCurrentVolumeRank() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCurrentVolumeRank", reflect.TypeOf((*MockTarget)(nil).GetCurrentVolumeRank))
 }
 
 // GetTargets mocks base method.

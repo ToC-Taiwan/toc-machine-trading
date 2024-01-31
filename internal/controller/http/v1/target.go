@@ -4,6 +4,7 @@ package v1
 import (
 	"net/http"
 
+	"tmt/internal/controller/http/websocket/target"
 	"tmt/internal/usecase"
 
 	"github.com/gin-gonic/gin"
@@ -19,6 +20,7 @@ func NewTargetRoutes(handler *gin.RouterGroup, t usecase.Target) {
 	h := handler.Group("/targets")
 	{
 		h.GET("", r.getTargets)
+		h.GET("/ws", r.serveWS)
 	}
 }
 
@@ -33,4 +35,8 @@ func NewTargetRoutes(handler *gin.RouterGroup, t usecase.Target) {
 //	@Router		/v1/targets [get]
 func (r *targetRoutes) getTargets(c *gin.Context) {
 	c.JSON(http.StatusOK, r.t.GetTargets(c.Request.Context()))
+}
+
+func (r *targetRoutes) serveWS(c *gin.Context) {
+	target.StartWSTargetStock(c, r.t)
 }

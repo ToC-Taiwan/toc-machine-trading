@@ -124,3 +124,17 @@ func (t *RealTimegRPCAPI) GetStockVolumeRank(date string) ([]*pb.StockVolumeRank
 	}
 	return r.GetData(), nil
 }
+
+func (t *RealTimegRPCAPI) GetStockVolumeRankPB(date string) (*pb.StockVolumeRankResponse, error) {
+	conn := t.pool.Get()
+	defer t.pool.Put(conn)
+
+	r, err := pb.NewRealTimeDataInterfaceClient(conn).GetStockVolumeRank(context.Background(), &pb.VolumeRankRequest{
+		Count: 200,
+		Date:  date,
+	})
+	if err != nil {
+		return &pb.StockVolumeRankResponse{}, err
+	}
+	return r, nil
+}

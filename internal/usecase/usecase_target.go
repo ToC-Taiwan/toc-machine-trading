@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"tmt/internal/config"
+	"tmt/pb"
 
 	"tmt/internal/entity"
 	"tmt/internal/usecase/cache"
@@ -175,6 +176,14 @@ func (uc *TargetUseCase) searchTradeDayTargets(tradeDay time.Time) ([]*entity.St
 		})
 	}
 	return result, nil
+}
+
+func (uc *TargetUseCase) GetCurrentVolumeRank() (*pb.StockVolumeRankResponse, error) {
+	t, err := uc.gRPCAPI.GetStockVolumeRankPB(time.Now().Format(entity.ShortTimeLayout))
+	if err != nil {
+		return nil, err
+	}
+	return t, nil
 }
 
 func (uc *TargetUseCase) searchTradeDayTargetsFromAllSnapshot(tradeDay time.Time) ([]*entity.StockTarget, error) {

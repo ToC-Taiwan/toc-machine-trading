@@ -115,6 +115,8 @@ type RealTimegRPCAPI interface {
 	GetNasdaqFuture() (*pb.YahooFinancePrice, error)
 	GetStockVolumeRank(date string) ([]*pb.StockVolumeRankMessage, error)
 	GetFutureSnapshotByCode(code string) (*pb.SnapshotMessage, error)
+
+	GetStockVolumeRankPB(date string) (*pb.StockVolumeRankResponse, error)
 }
 
 type SubscribegRPCAPI interface {
@@ -146,6 +148,7 @@ type Rabbit interface {
 
 type Target interface {
 	GetTargets(ctx context.Context) []*entity.StockTarget
+	GetCurrentVolumeRank() (*pb.StockVolumeRankResponse, error)
 }
 
 type TargetRepo interface {
