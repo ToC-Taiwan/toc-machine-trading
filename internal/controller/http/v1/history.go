@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"tmt/internal/controller/http/resp"
+	"tmt/internal/controller/http/websocket/history"
 	"tmt/internal/entity"
 	"tmt/internal/usecase"
 
@@ -23,6 +24,7 @@ func NewHistoryRoutes(handler *gin.RouterGroup, t usecase.History) {
 	h := handler.Group("/history")
 	{
 		h.GET("/day-kbar/:stock/:start_date/:interval", r.getKbarData)
+		h.GET("/ws", r.serveWS)
 	}
 }
 
@@ -68,4 +70,8 @@ func (r *historyRoutes) getKbarData(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, result)
+}
+
+func (r *historyRoutes) serveWS(c *gin.Context) {
+	history.StartWSHistory(c, r.t)
 }

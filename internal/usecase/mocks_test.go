@@ -492,6 +492,21 @@ func (mr *MockHistoryMockRecorder) GetDayKbarByStockNumDate(stockNum, date inter
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetDayKbarByStockNumDate", reflect.TypeOf((*MockHistory)(nil).GetDayKbarByStockNumDate), stockNum, date)
 }
 
+// GetDayKbarByStockNumMultiDate mocks base method.
+func (m *MockHistory) GetDayKbarByStockNumMultiDate(stockNum string, date time.Time, interval int64) ([]*entity.StockHistoryKbar, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetDayKbarByStockNumMultiDate", stockNum, date, interval)
+	ret0, _ := ret[0].([]*entity.StockHistoryKbar)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetDayKbarByStockNumMultiDate indicates an expected call of GetDayKbarByStockNumMultiDate.
+func (mr *MockHistoryMockRecorder) GetDayKbarByStockNumMultiDate(stockNum, date, interval interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetDayKbarByStockNumMultiDate", reflect.TypeOf((*MockHistory)(nil).GetDayKbarByStockNumMultiDate), stockNum, date, interval)
+}
+
 // GetTradeDay mocks base method.
 func (m *MockHistory) GetTradeDay() time.Time {
 	m.ctrl.T.Helper()

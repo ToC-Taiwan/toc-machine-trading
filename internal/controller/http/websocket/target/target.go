@@ -30,6 +30,7 @@ func StartWSTargetStock(c *gin.Context, s usecase.Target) {
 		for {
 			_, ok := <-forwardChan
 			if !ok {
+				close(w.dataChan)
 				return
 			}
 		}

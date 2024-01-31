@@ -53,6 +53,7 @@ type History interface {
 	GetTradeDay() time.Time
 
 	GetDayKbarByStockNumDate(stockNum string, date time.Time) *entity.StockHistoryKbar
+	GetDayKbarByStockNumMultiDate(stockNum string, date time.Time, interval int64) ([]*entity.StockHistoryKbar, error)
 	FetchFutureHistoryKbar(code string, date time.Time) ([]*entity.FutureHistoryKbar, error)
 }
 

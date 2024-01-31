@@ -80,6 +80,62 @@ func (uc *HistoryUseCase) GetDayKbarByStockNumDate(stockNum string, date time.Ti
 	return uc.cc.GetDaykbar(stockNum, date)
 }
 
+// GetDayKbarByStockNumMultiDate -.
+func (uc *HistoryUseCase) GetDayKbarByStockNumMultiDate(stockNum string, date time.Time, interval int64) ([]*entity.StockHistoryKbar, error) {
+	queryDateArr := uc.tradeDay.GetLastNTradeDayByDate(interval, date)
+	result := []*entity.StockHistoryKbar{}
+	for _, d := range queryDateArr {
+		kbar := uc.cc.GetDaykbar(stockNum, d)
+		if kbar == nil {
+			data, err := uc.queryStockKbarByDate(stockNum, d)
+			if err != nil {
+				return nil, err
+			}
+			result = append(result, data)
+		} else {
+			result = append(result, kbar)
+		}
+	}
+	return result, nil
+}
+
+func (uc *HistoryUseCase) queryStockKbarByDate(stockNum string, date time.Time) (*entity.StockHistoryKbar, error) {
+	kbarArrMap, err := uc.repo.QueryMultiStockKbarArrByDate(context.Background(), []string{stockNum}, date)
+	if err != nil {
+		return nil, err
+	}
+	arr := []*entity.StockHistoryKbar{}
+	if len(kbarArrMap[stockNum]) == 0 {
+		tickArr, err := uc.grpcapi.GetStockHistoryKbar([]string{stockNum}, date.Format(entity.ShortTimeLayout))
+		if err != nil {
+			uc.logger.Error(err)
+		}
+		for _, t := range tickArr {
+			arr = append(arr, &entity.StockHistoryKbar{
+				StockNum: t.GetCode(),
+				HistoryKbarBase: entity.HistoryKbarBase{
+					KbarTime: time.Unix(0, t.GetTs()).Add(-8 * time.Hour),
+					Open:     t.GetOpen(), High: t.GetHigh(), Low: t.GetLow(),
+					Close: t.GetClose(), Volume: t.GetVolume(),
+				},
+			})
+		}
+		if len(arr) != 0 {
+			if err := uc.repo.InsertHistoryKbarArr(context.Background(), arr); err != nil {
+				return nil, err
+			}
+		}
+	} else {
+		arr = kbarArrMap[stockNum]
+	}
+
+	if len(arr) == 0 {
+		return nil, fmt.Errorf("fetch History Kbar Failed, Code: %s, Date: %s", stockNum, date.Format(entity.ShortTimeLayout))
+	}
+	uc.processKbarArr(arr)
+	return uc.cc.GetDaykbar(stockNum, date), nil
+}
+
 // FetchStockHistory -.
 func (uc *HistoryUseCase) FetchStockHistory(targetArr []*entity.StockTarget) {
 	defer uc.mutex.Unlock()
