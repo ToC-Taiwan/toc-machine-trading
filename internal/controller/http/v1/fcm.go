@@ -20,6 +20,7 @@ func NewFCMRoutes(handler *gin.RouterGroup, t usecase.FCM) {
 	{
 		h.POST("/announcement", r.announceMessage)
 		h.POST("/push", r.pushMessage)
+		h.POST("/push/target", r.sendTargets)
 	}
 }
 
@@ -83,5 +84,24 @@ func (r *fcmRoutes) pushMessage(c *gin.Context) {
 		return
 	}
 
+	c.JSON(http.StatusOK, nil)
+}
+
+// sendTargets -.
+//
+//	@Tags		FCM V1
+//	@Summary	Send targets to devices which has push token
+//	@security	JWT
+//	@Accept		json
+//	@Produce	json
+//	@Success	200
+//	@Failure	400	{object}	resp.Response{}
+//	@Failure	500	{object}	resp.Response{}
+//	@Router		/v1/fcm/push/target [put]
+func (r *fcmRoutes) sendTargets(c *gin.Context) {
+	if err := r.t.SendTargets(); err != nil {
+		resp.ErrorResponse(c, http.StatusInternalServerError, err)
+		return
+	}
 	c.JSON(http.StatusOK, nil)
 }

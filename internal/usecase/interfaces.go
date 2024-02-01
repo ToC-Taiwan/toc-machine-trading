@@ -263,4 +263,5 @@ type SystemRepo interface {
 type FCM interface {
 	AnnounceMessage(msg string) error
 	PushNotification(title, msg string) error
+	SendTargets() error
 }

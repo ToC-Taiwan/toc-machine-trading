@@ -9,6 +9,7 @@ import (
 
 	"tmt/internal/config"
 	"tmt/internal/entity"
+	"tmt/internal/usecase/cache"
 	"tmt/internal/usecase/modules/calendar"
 	"tmt/internal/usecase/repo"
 	"tmt/pkg/eventbus"
@@ -22,6 +23,7 @@ import (
 type FcmUseCase struct {
 	repo SystemRepo
 
+	cc       *cache.Cache
 	app      *firebase.App
 	logger   *log.Log
 	bus      *eventbus.Bus
@@ -42,6 +44,7 @@ func NewFCM() FCM {
 	cfg := config.Get()
 	uc := &FcmUseCase{
 		repo:     repo.NewSystemRepo(cfg.GetPostgresPool()),
+		cc:       cache.Get(),
 		app:      fb,
 		logger:   logger,
 		bus:      eventbus.Get(),
@@ -51,8 +54,6 @@ func NewFCM() FCM {
 	uc.updatePushToken()
 
 	uc.bus.SubscribeAsync(topicUpdatePushUser, true, uc.updatePushToken)
-	uc.bus.SubscribeAsync(topicFetchStockHistory, true, uc.sendTargets)
-
 	return uc
 }
 
@@ -100,7 +101,7 @@ func (uc *FcmUseCase) getAllPushToken() []string {
 	return uc.pushTokens
 }
 
-func (uc *FcmUseCase) sendTargets(targetArr []*entity.StockTarget) error {
+func (uc *FcmUseCase) SendTargets() error {
 	tokens := uc.getAllPushToken()
 	if len(tokens) == 0 {
 		return nil
@@ -112,6 +113,7 @@ func (uc *FcmUseCase) sendTargets(targetArr []*entity.StockTarget) error {
 		return err
 	}
 
+	targetArr := uc.cc.GetStockTargets()
 	message := &messaging.MulticastMessage{
 		Notification: &messaging.Notification{
 			Title: "Found New Targets",

@@ -172,14 +172,6 @@ func (uc *HistoryUseCase) FetchStockHistory(targetArr []*entity.StockTarget) {
 }
 
 func (uc *HistoryUseCase) FetchFutureHistory(code string) {
-	// td := uc.tradeDay.GetLastNFutureTradeDay(1)
-	// ticks, err := uc.FetchFutureHistoryTick(code, td[0])
-	// if err != nil {
-	// 	uc.logger.Error(err)
-	// 	uc.logger.Warn("Cancel subscribe future tick")
-	// 	return
-	// }
-
 	uc.bus.PublishTopicEvent(topicSubscribeFutureTickTargets, code)
 }
 

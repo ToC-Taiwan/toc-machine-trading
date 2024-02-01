@@ -3010,3 +3010,17 @@ func (mr *MockFCMMockRecorder) PushNotification(title, msg interface{}) *gomock.
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PushNotification", reflect.TypeOf((*MockFCM)(nil).PushNotification), title, msg)
 }
+
+// SendTargets mocks base method.
+func (m *MockFCM) SendTargets() error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SendTargets")
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// SendTargets indicates an expected call of SendTargets.
+func (mr *MockFCMMockRecorder) SendTargets() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendTargets", reflect.TypeOf((*MockFCM)(nil).SendTargets))
+}
