@@ -155,7 +155,7 @@ func (uc *TargetUseCase) searchTradeDayTargets(tradeDay time.Time) ([]*entity.St
 
 	var result []*entity.StockTarget
 	for _, v := range t {
-		if len(result) >= 50 {
+		if len(result) >= 25 {
 			break
 		}
 
@@ -204,7 +204,7 @@ func (uc *TargetUseCase) searchTradeDayTargetsFromAllSnapshot(tradeDay time.Time
 			continue
 		}
 
-		if len(result) >= 50 {
+		if len(result) >= 25 {
 			break
 		}
 
