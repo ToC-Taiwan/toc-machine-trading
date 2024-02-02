@@ -123,13 +123,7 @@ func (uc *FcmUseCase) SendTargets() error {
 			"type":              "new_targets",
 			"new_targets_count": fmt.Sprintf("%d", len(targetArr)),
 		},
-		APNS: &messaging.APNSConfig{
-			Payload: &messaging.APNSPayload{
-				Aps: &messaging.Aps{
-					Sound: "default",
-				},
-			},
-		},
+		APNS:   uc.newAPNS(),
 		Tokens: tokens,
 	}
 
@@ -152,6 +146,7 @@ func (uc *FcmUseCase) AnnounceMessage(msg string) error {
 			Title: "Announcement",
 			Body:  msg,
 		},
+		APNS:  uc.newAPNS(),
 		Topic: "announcement",
 	}
 
@@ -179,14 +174,7 @@ func (uc *FcmUseCase) PushNotification(title, msg string) error {
 			Title: title,
 			Body:  msg,
 		},
-		APNS: &messaging.APNSConfig{
-			Payload: &messaging.APNSPayload{
-				Aps: &messaging.Aps{
-					Sound:            "default",
-					ContentAvailable: true,
-				},
-			},
-		},
+		APNS:   uc.newAPNS(),
 		Tokens: tokens,
 	}
 
@@ -195,4 +183,15 @@ func (uc *FcmUseCase) PushNotification(title, msg string) error {
 		return err
 	}
 	return nil
+}
+
+func (uc *FcmUseCase) newAPNS() *messaging.APNSConfig {
+	return &messaging.APNSConfig{
+		Payload: &messaging.APNSPayload{
+			Aps: &messaging.Aps{
+				Sound:            "default",
+				ContentAvailable: true,
+			},
+		},
+	}
 }
