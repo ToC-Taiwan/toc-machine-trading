@@ -247,6 +247,7 @@ type System interface {
 	UpdateAuthTradeUser()
 	DeleteAllPushTokens(ctx context.Context) error
 	IsPushTokenEnabled(ctx context.Context, token string) (bool, error)
+	GetUserInfo(ctx context.Context, username string) (*entity.User, error)
 }
 
 type SystemRepo interface {

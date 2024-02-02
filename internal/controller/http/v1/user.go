@@ -30,6 +30,7 @@ func NewUserRoutes(public *gin.RouterGroup, private *gin.RouterGroup, jwtHandler
 	public.POST("/user", r.newUserHandler)
 	public.GET("/user/verify/:user/:code", r.verifyEmailHandler)
 
+	private.GET("/user/info", r.getUserInfo)
 	private.PUT("/user/auth", r.updateAuthTradeUser)
 	private.GET("/user/push-token", r.getUserPushTokenStatus)
 	private.PUT("/user/push-token", r.updateUserPushToken)
@@ -234,4 +235,28 @@ func (u *userRoutes) clearAllPushToken(c *gin.Context) {
 func (u *userRoutes) updateAuthTradeUser(c *gin.Context) {
 	u.system.UpdateAuthTradeUser()
 	c.JSON(http.StatusOK, nil)
+}
+
+// getUserInfo _.
+//
+//	@tags		User V1
+//	@Summary	Get user info
+//	@security	JWT
+//	@accept		json
+//	@produce	json
+//	@success	200
+//	@failure	401	{object}	resp.Response{}
+//	@router		/v1/user/info [get]
+func (u *userRoutes) getUserInfo(c *gin.Context) {
+	user := auth.ExtractUsername(c)
+	if user == "" {
+		resp.ErrorResponse(c, http.StatusBadRequest, "username is required in token")
+		return
+	}
+	info, err := u.system.GetUserInfo(c.Request.Context(), user)
+	if err != nil {
+		resp.ErrorResponse(c, http.StatusInternalServerError, err)
+		return
+	}
+	c.JSON(http.StatusOK, info)
 }

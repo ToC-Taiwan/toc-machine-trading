@@ -194,3 +194,7 @@ func (uc *SystemUseCase) DeleteAllPushTokens(ctx context.Context) error {
 	uc.bus.PublishTopicEvent(topicUpdatePushUser)
 	return nil
 }
+
+func (uc *SystemUseCase) GetUserInfo(ctx context.Context, username string) (*entity.User, error) {
+	return uc.repo.QueryUserByUsername(ctx, username)
+}

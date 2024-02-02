@@ -394,8 +394,6 @@ definitions:
     properties:
       email:
         type: string
-      password:
-        type: string
       username:
         type: string
     type: object
@@ -1218,6 +1216,24 @@ paths:
       security:
       - JWT: []
       summary: Update auth trade user
+      tags:
+      - User V1
+  /v1/user/info:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.Response'
+      security:
+      - JWT: []
+      summary: Get user info
       tags:
       - User V1
   /v1/user/push-token:

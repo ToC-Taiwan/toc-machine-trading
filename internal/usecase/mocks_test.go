@@ -2752,6 +2752,21 @@ func (mr *MockSystemMockRecorder) DeleteAllPushTokens(ctx interface{}) *gomock.C
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteAllPushTokens", reflect.TypeOf((*MockSystem)(nil).DeleteAllPushTokens), ctx)
 }
 
+// GetUserInfo mocks base method.
+func (m *MockSystem) GetUserInfo(ctx context.Context, username string) (*entity.User, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetUserInfo", ctx, username)
+	ret0, _ := ret[0].(*entity.User)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetUserInfo indicates an expected call of GetUserInfo.
+func (mr *MockSystemMockRecorder) GetUserInfo(ctx, username interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserInfo", reflect.TypeOf((*MockSystem)(nil).GetUserInfo), ctx, username)
+}
+
 // InsertPushToken mocks base method.
 func (m *MockSystem) InsertPushToken(ctx context.Context, token, username string, enabled bool) error {
 	m.ctrl.T.Helper()
