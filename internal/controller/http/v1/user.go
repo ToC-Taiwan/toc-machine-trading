@@ -43,13 +43,13 @@ func NewUserRoutes(public *gin.RouterGroup, private *gin.RouterGroup, jwtHandler
 //	@Summary	New user
 //	@accept		json
 //	@produce	json
-//	@param		body	body	entity.User{}	true	"Body"
+//	@param		body	body	entity.NewUser{}	true	"Body"
 //	@success	200
 //	@failure	400	{object}	resp.Response{}
 //	@failure	500	{object}	resp.Response{}
 //	@router		/v1/user [post]
 func (u *userRoutes) newUserHandler(c *gin.Context) {
-	user := entity.User{}
+	user := entity.NewUser{}
 	if err := c.ShouldBindJSON(&user); err != nil {
 		resp.ErrorResponse(c, http.StatusBadRequest, err)
 		return

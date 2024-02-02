@@ -11,6 +11,12 @@ type User struct {
 	AuthTrade     bool   `json:"-"`
 }
 
+type NewUser struct {
+	Email    string `json:"email"`
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
 type PushToken struct {
 	ID      int
 	Token   string

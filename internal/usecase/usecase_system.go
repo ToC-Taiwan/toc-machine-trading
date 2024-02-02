@@ -61,7 +61,7 @@ func (uc *SystemUseCase) UpdateAuthTradeUser() {
 	uc.bus.PublishTopicEvent(topicUpdateAuthTradeUser, authUserName)
 }
 
-func (uc *SystemUseCase) AddUser(ctx context.Context, t *entity.User) error {
+func (uc *SystemUseCase) AddUser(ctx context.Context, t *entity.NewUser) error {
 	_, err := mail.ParseAddress(t.Email)
 	if err != nil {
 		return ErrEmailFormatInvalid
@@ -111,7 +111,7 @@ func (uc *SystemUseCase) Login(ctx context.Context, username, password string) e
 	return nil
 }
 
-func (uc *SystemUseCase) SendOTP(ctx context.Context, t *entity.User) error {
+func (uc *SystemUseCase) SendOTP(ctx context.Context, t *entity.NewUser) error {
 	if uc.smtpCfg.Host == "" || uc.smtpCfg.Port == 0 || uc.smtpCfg.Username == "" || uc.smtpCfg.Password == "" {
 		return errors.New("smtp config not set")
 	}

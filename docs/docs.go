@@ -1056,7 +1056,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/entity.User"
+                            "$ref": "#/definitions/entity.NewUser"
                         }
                     }
                 ],
@@ -1637,6 +1637,20 @@ const docTemplate = `{
                 }
             }
         },
+        "entity.NewUser": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
         "entity.OrderAction": {
             "type": "integer",
             "enum": [
@@ -1907,17 +1921,6 @@ const docTemplate = `{
                 },
                 "tse": {
                     "$ref": "#/definitions/entity.IndexStatus"
-                }
-            }
-        },
-        "entity.User": {
-            "type": "object",
-            "properties": {
-                "email": {
-                    "type": "string"
-                },
-                "username": {
-                    "type": "string"
                 }
             }
         },

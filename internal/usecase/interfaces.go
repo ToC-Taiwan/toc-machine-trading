@@ -240,7 +240,7 @@ type TradegRPCAPI interface {
 }
 
 type System interface {
-	AddUser(ctx context.Context, t *entity.User) error
+	AddUser(ctx context.Context, t *entity.NewUser) error
 	InsertPushToken(ctx context.Context, token, username string, enabled bool) error
 	Login(ctx context.Context, username, password string) error
 	VerifyEmail(ctx context.Context, username, code string) error
@@ -252,7 +252,7 @@ type System interface {
 
 type SystemRepo interface {
 	EmailVerification(ctx context.Context, username string) error
-	InsertUser(ctx context.Context, t *entity.User) error
+	InsertUser(ctx context.Context, t *entity.NewUser) error
 	QueryAllUser(ctx context.Context) ([]*entity.User, error)
 	QueryUserByUsername(ctx context.Context, username string) (*entity.User, error)
 	InsertOrUpdatePushToken(ctx context.Context, token, username string, enabled bool) error

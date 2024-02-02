@@ -2725,7 +2725,7 @@ func (m *MockSystem) EXPECT() *MockSystemMockRecorder {
 }
 
 // AddUser mocks base method.
-func (m *MockSystem) AddUser(ctx context.Context, t *entity.User) error {
+func (m *MockSystem) AddUser(ctx context.Context, t *entity.NewUser) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "AddUser", ctx, t)
 	ret0, _ := ret[0].(error)
@@ -2932,7 +2932,7 @@ func (mr *MockSystemRepoMockRecorder) InsertOrUpdatePushToken(ctx, token, userna
 }
 
 // InsertUser mocks base method.
-func (m *MockSystemRepo) InsertUser(ctx context.Context, t *entity.User) error {
+func (m *MockSystemRepo) InsertUser(ctx context.Context, t *entity.NewUser) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "InsertUser", ctx, t)
 	ret0, _ := ret[0].(error)

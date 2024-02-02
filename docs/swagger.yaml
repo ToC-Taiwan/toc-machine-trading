@@ -205,6 +205,15 @@ definitions:
       price_chg:
         type: number
     type: object
+  entity.NewUser:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+    type: object
   entity.OrderAction:
     enum:
     - 0
@@ -389,13 +398,6 @@ definitions:
         $ref: '#/definitions/entity.IndexStatus'
       tse:
         $ref: '#/definitions/entity.IndexStatus'
-    type: object
-  entity.User:
-    properties:
-      email:
-        type: string
-      username:
-        type: string
     type: object
   resp.Response:
     properties:
@@ -1183,7 +1185,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/entity.User'
+          $ref: '#/definitions/entity.NewUser'
       produces:
       - application/json
       responses:

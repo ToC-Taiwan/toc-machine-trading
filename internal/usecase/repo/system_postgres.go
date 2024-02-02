@@ -20,7 +20,7 @@ func NewSystemRepo(pg *postgres.Postgres) *SystemRepo {
 	return &SystemRepo{pg}
 }
 
-func (r *SystemRepo) InsertUser(ctx context.Context, t *entity.User) error {
+func (r *SystemRepo) InsertUser(ctx context.Context, t *entity.NewUser) error {
 	builder := r.Builder.Insert(tableNameSystemAccount).
 		Columns("username, password, email").
 		Values(t.Username, t.Password, t.Email)
