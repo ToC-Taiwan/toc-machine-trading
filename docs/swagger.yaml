@@ -696,7 +696,7 @@ paths:
       tags:
       - FCM V1
   /v1/fcm/push/target:
-    put:
+    post:
       consumes:
       - application/json
       produces:

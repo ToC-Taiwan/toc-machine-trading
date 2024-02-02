@@ -97,7 +97,7 @@ func (r *fcmRoutes) pushMessage(c *gin.Context) {
 //	@Success	200
 //	@Failure	400	{object}	resp.Response{}
 //	@Failure	500	{object}	resp.Response{}
-//	@Router		/v1/fcm/push/target [put]
+//	@Router		/v1/fcm/push/target [post]
 func (r *fcmRoutes) sendTargets(c *gin.Context) {
 	if err := r.t.SendTargets(); err != nil {
 		resp.ErrorResponse(c, http.StatusInternalServerError, err)

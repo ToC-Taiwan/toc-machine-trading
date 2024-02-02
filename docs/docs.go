@@ -256,7 +256,7 @@ const docTemplate = `{
             }
         },
         "/v1/fcm/push/target": {
-            "put": {
+            "post": {
                 "security": [
                     {
                         "JWT": []
