@@ -1786,10 +1786,10 @@ func (mr *MockTradeMockRecorder) CancelFutureOrderByID(orderID interface{}) *gom
 }
 
 // GetAccountBalance mocks base method.
-func (m *MockTrade) GetAccountBalance(ctx context.Context) ([]*entity.AccountBalance, error) {
+func (m *MockTrade) GetAccountBalance(ctx context.Context) (*entity.AccountBalance, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAccountBalance", ctx)
-	ret0, _ := ret[0].([]*entity.AccountBalance)
+	ret0, _ := ret[0].(*entity.AccountBalance)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -2155,19 +2155,19 @@ func (mr *MockTradeRepoMockRecorder) InsertOrUpdateStockTradeBalance(ctx, t inte
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertOrUpdateStockTradeBalance", reflect.TypeOf((*MockTradeRepo)(nil).InsertOrUpdateStockTradeBalance), ctx, t)
 }
 
-// QueryAccountBalanceByDateAndBankID mocks base method.
-func (m *MockTradeRepo) QueryAccountBalanceByDateAndBankID(ctx context.Context, date time.Time, bankID int) (*entity.AccountBalance, error) {
+// QueryAccountBalanceByDate mocks base method.
+func (m *MockTradeRepo) QueryAccountBalanceByDate(ctx context.Context, date time.Time) (*entity.AccountBalance, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "QueryAccountBalanceByDateAndBankID", ctx, date, bankID)
+	ret := m.ctrl.Call(m, "QueryAccountBalanceByDate", ctx, date)
 	ret0, _ := ret[0].(*entity.AccountBalance)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// QueryAccountBalanceByDateAndBankID indicates an expected call of QueryAccountBalanceByDateAndBankID.
-func (mr *MockTradeRepoMockRecorder) QueryAccountBalanceByDateAndBankID(ctx, date, bankID interface{}) *gomock.Call {
+// QueryAccountBalanceByDate indicates an expected call of QueryAccountBalanceByDate.
+func (mr *MockTradeRepoMockRecorder) QueryAccountBalanceByDate(ctx, date interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryAccountBalanceByDateAndBankID", reflect.TypeOf((*MockTradeRepo)(nil).QueryAccountBalanceByDateAndBankID), ctx, date, bankID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryAccountBalanceByDate", reflect.TypeOf((*MockTradeRepo)(nil).QueryAccountBalanceByDate), ctx, date)
 }
 
 // QueryAccountSettlementByDate mocks base method.
@@ -2228,21 +2228,6 @@ func (m *MockTradeRepo) QueryAllFutureTradeBalance(ctx context.Context) ([]*enti
 func (mr *MockTradeRepoMockRecorder) QueryAllFutureTradeBalance(ctx interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryAllFutureTradeBalance", reflect.TypeOf((*MockTradeRepo)(nil).QueryAllFutureTradeBalance), ctx)
-}
-
-// QueryAllLastAccountBalance mocks base method.
-func (m *MockTradeRepo) QueryAllLastAccountBalance(ctx context.Context, bankIDArr []int) ([]*entity.AccountBalance, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "QueryAllLastAccountBalance", ctx, bankIDArr)
-	ret0, _ := ret[0].([]*entity.AccountBalance)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// QueryAllLastAccountBalance indicates an expected call of QueryAllLastAccountBalance.
-func (mr *MockTradeRepoMockRecorder) QueryAllLastAccountBalance(ctx, bankIDArr interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryAllLastAccountBalance", reflect.TypeOf((*MockTradeRepo)(nil).QueryAllLastAccountBalance), ctx, bankIDArr)
 }
 
 // QueryAllStockOrder mocks base method.
@@ -2333,6 +2318,21 @@ func (m *MockTradeRepo) QueryInventoryStockByDate(ctx context.Context, date time
 func (mr *MockTradeRepoMockRecorder) QueryInventoryStockByDate(ctx, date interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryInventoryStockByDate", reflect.TypeOf((*MockTradeRepo)(nil).QueryInventoryStockByDate), ctx, date)
+}
+
+// QueryLastAccountBalance mocks base method.
+func (m *MockTradeRepo) QueryLastAccountBalance(ctx context.Context) (*entity.AccountBalance, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "QueryLastAccountBalance", ctx)
+	ret0, _ := ret[0].(*entity.AccountBalance)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// QueryLastAccountBalance indicates an expected call of QueryLastAccountBalance.
+func (mr *MockTradeRepoMockRecorder) QueryLastAccountBalance(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryLastAccountBalance", reflect.TypeOf((*MockTradeRepo)(nil).QueryLastAccountBalance), ctx)
 }
 
 // QueryLastFutureTradeBalance mocks base method.

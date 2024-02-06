@@ -304,11 +304,6 @@ func (r *orderRoutes) moveStockOrderToLatestTradeDay(c *gin.Context) {
 	c.JSON(http.StatusOK, nil)
 }
 
-type accountSummary struct {
-	Balance []*entity.AccountBalance `json:"balance" yaml:"balance"`
-	Total   float64                  `json:"total" yaml:"total"`
-}
-
 // getAccountBalance -.
 //
 //	@Tags		Account V1
@@ -316,7 +311,7 @@ type accountSummary struct {
 //	@security	JWT
 //	@Accept		json
 //	@Produce	json
-//	@Success	200	{object}	accountSummary
+//	@Success	200	{object}	entity.AccountBalance{}
 //	@Failure	500	{object}	resp.Response{}
 //	@Router		/v1/order/account/balance [get]
 func (r *orderRoutes) getAccountBalance(c *gin.Context) {
@@ -326,14 +321,5 @@ func (r *orderRoutes) getAccountBalance(c *gin.Context) {
 		return
 	}
 
-	var total float64
-	for _, b := range balance {
-		total += b.Balance
-		total += b.TodayMargin
-	}
-
-	c.JSON(http.StatusOK, accountSummary{
-		Balance: balance,
-		Total:   total,
-	})
+	c.JSON(http.StatusOK, balance)
 }

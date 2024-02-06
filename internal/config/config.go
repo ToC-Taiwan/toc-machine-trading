@@ -37,7 +37,6 @@ type Config struct {
 
 	dbPool      *postgres.Postgres `json:"-" yaml:"-"`
 	sinopacPool *grpc.ConnPool     `json:"-" yaml:"-"`
-	fuglePool   *grpc.ConnPool     `json:"-" yaml:"-"`
 	EnvConfig   `json:"-" yaml:"-"`
 
 	logger   *log.Log     `json:"-" yaml:"-"`
@@ -92,9 +91,6 @@ func (c *Config) readEnv() {
 	c.vp.SetDefault("SINOPAC_POOL_MAX", 20)
 	c.vp.SetDefault("SINOPAC_URL", "127.0.0.1:56666")
 
-	c.vp.SetDefault("FUGLE_POOL_MAX", 20)
-	c.vp.SetDefault("FUGLE_URL", "127.0.0.1:58888")
-
 	c.vp.SetDefault("RABBITMQ_URL", "amqp://admin:password@127.0.0.1:5672/%2f?heartbeat=0")
 	c.vp.SetDefault("RABBITMQ_EXCHANGE", "toc")
 	c.vp.SetDefault("RABBITMQ_WAIT_TIME", 5)
@@ -113,10 +109,6 @@ func (c *Config) readEnv() {
 		Sinopac: Sinopac{
 			PoolMax: c.vp.GetInt("SINOPAC_POOL_MAX"),
 			URL:     c.vp.GetString("SINOPAC_URL"),
-		},
-		Fugle: Fugle{
-			PoolMax: c.vp.GetInt("FUGLE_POOL_MAX"),
-			URL:     c.vp.GetString("FUGLE_URL"),
 		},
 		RabbitMQ: RabbitMQ{
 			URL:      c.vp.GetString("RABBITMQ_URL"),
@@ -141,7 +133,6 @@ func Init() {
 		data.readEnv()
 		data.setPostgresPool()
 		data.setSinopacPool()
-		data.setFuglePool()
 		singleton = data
 	})
 }
@@ -263,26 +254,6 @@ func (c *Config) GetSinopacPool() *grpc.ConnPool {
 		c.logger.Fatal("sinopac gRPC server not connected")
 	}
 	return c.sinopacPool
-}
-
-func (c *Config) setFuglePool() {
-	c.logger.Info("Connecting to fugle gRPC server")
-	fg, err := grpc.New(
-		c.Fugle.URL,
-		grpc.MaxPoolSize(c.Fugle.PoolMax),
-		grpc.AddLogger(c.logger),
-	)
-	if err != nil {
-		c.logger.Fatal(err)
-	}
-	c.fuglePool = fg
-}
-
-func (c *Config) GetFuglePool() *grpc.ConnPool {
-	if c.fuglePool == nil {
-		c.logger.Fatal("fugle gRPC server not connected")
-	}
-	return c.fuglePool
 }
 
 func (c *Config) NewRabbitConn() *rabbitmq.Connection {

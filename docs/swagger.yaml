@@ -132,8 +132,6 @@ definitions:
         type: number
       balance:
         type: number
-      bank_id:
-        type: integer
       date:
         type: string
       id:
@@ -405,15 +403,6 @@ definitions:
         type: integer
       response:
         type: string
-    type: object
-  v1.accountSummary:
-    properties:
-      balance:
-        items:
-          $ref: '#/definitions/entity.AccountBalance'
-        type: array
-      total:
-        type: number
     type: object
   v1.allOrder:
     properties:
@@ -825,7 +814,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/v1.accountSummary'
+            $ref: '#/definitions/entity.AccountBalance'
         "500":
           description: Internal Server Error
           schema:

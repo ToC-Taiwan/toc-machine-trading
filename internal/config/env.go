@@ -4,7 +4,6 @@ type EnvConfig struct {
 	Database Database `json:"Database" yaml:"Database"`
 	Server   Server   `json:"Server" yaml:"Server"`
 	Sinopac  Sinopac  `json:"Sinopac" yaml:"Sinopac"`
-	Fugle    Fugle    `json:"Fugle" yaml:"Fugle"`
 	RabbitMQ RabbitMQ `json:"RabbitMQ" yaml:"RabbitMQ"`
 	SMTP     SMTP     `json:"SMTP" yaml:"SMTP"`
 }
@@ -21,12 +20,6 @@ type Server struct {
 
 // Sinopac -.
 type Sinopac struct {
-	PoolMax int    `json:"PoolMax" yaml:"PoolMax"`
-	URL     string `json:"URL" yaml:"URL"`
-}
-
-// Fugle -.
-type Fugle struct {
 	PoolMax int    `json:"PoolMax" yaml:"PoolMax"`
 	URL     string `json:"URL" yaml:"URL"`
 }

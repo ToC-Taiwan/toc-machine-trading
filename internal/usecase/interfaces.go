@@ -183,7 +183,7 @@ type Trade interface {
 	MoveStockOrderToLatestTradeDay(ctx context.Context, orderID string) error
 	MoveFutureOrderToLatestTradeDay(ctx context.Context, orderID string) error
 
-	GetAccountBalance(ctx context.Context) ([]*entity.AccountBalance, error)
+	GetAccountBalance(ctx context.Context) (*entity.AccountBalance, error)
 	IsAuthUser(username string) bool
 }
 
@@ -204,8 +204,8 @@ type TradeRepo interface {
 	InsertOrUpdateFutureOrderByOrderID(ctx context.Context, t *entity.FutureOrder) error
 	QueryAllFutureOrder(ctx context.Context) ([]*entity.FutureOrder, error)
 	QueryAllFutureOrderByDate(ctx context.Context, timeTange []time.Time) ([]*entity.FutureOrder, error)
-	QueryAllLastAccountBalance(ctx context.Context, bankIDArr []int) ([]*entity.AccountBalance, error)
-	QueryAccountBalanceByDateAndBankID(ctx context.Context, date time.Time, bankID int) (*entity.AccountBalance, error)
+	QueryLastAccountBalance(ctx context.Context) (*entity.AccountBalance, error)
+	QueryAccountBalanceByDate(ctx context.Context, date time.Time) (*entity.AccountBalance, error)
 	InsertOrUpdateAccountBalance(ctx context.Context, t *entity.AccountBalance) error
 	QueryAccountSettlementByDate(ctx context.Context, date time.Time) (*entity.Settlement, error)
 	InsertOrUpdateAccountSettlement(ctx context.Context, t *entity.Settlement) error

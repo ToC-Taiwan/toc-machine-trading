@@ -2,8 +2,6 @@ package usecase
 
 import (
 	"context"
-	"errors"
-	"sync"
 	"time"
 
 	"tmt/internal/config"
@@ -20,7 +18,6 @@ import (
 type BasicUseCase struct {
 	repo     BasicRepo
 	sc       BasicgRPCAPI
-	fugle    BasicgRPCAPI
 	cfg      *config.Config
 	tradeDay *calendar.Calendar
 
@@ -37,7 +34,6 @@ func NewBasic() Basic {
 	uc := &BasicUseCase{
 		repo:     repo.NewBasic(cfg.GetPostgresPool()),
 		sc:       grpc.NewBasic(cfg.GetSinopacPool()),
-		fugle:    grpc.NewBasic(cfg.GetFuglePool()),
 		cfg:      cfg,
 		tradeDay: calendar.Get(),
 		logger:   log.Get(),
@@ -68,38 +64,16 @@ func NewBasic() Basic {
 
 func (uc *BasicUseCase) checkgRPCHealth() {
 	go func() {
-		errChan := make(chan error)
-		go func(errChan chan error) {
-			if err := uc.sc.CreateLongConnection(); err != nil {
-				errChan <- errors.New("sinopac CreateLongConnection error")
-			}
-		}(errChan)
-		go func(errChan chan error) {
-			if err := uc.fugle.CreateLongConnection(); err != nil {
-				errChan <- errors.New("fugle CreateLongConnection error")
-			}
-		}(errChan)
-		err := <-errChan
-		uc.logger.Fatal(err)
+		if err := uc.sc.CreateLongConnection(); err != nil {
+			uc.logger.Fatalf("sinopac CreateLongConnection error: %v", err)
+		}
 	}()
 }
 
 func (uc *BasicUseCase) loginAll() {
-	var wg sync.WaitGroup
-	wg.Add(2)
-	go func() {
-		defer wg.Done()
-		if err := uc.sc.Login(); err != nil {
-			uc.logger.Fatal(err)
-		}
-	}()
-	go func() {
-		defer wg.Done()
-		if err := uc.fugle.Login(); err != nil {
-			uc.logger.Fatal(err)
-		}
-	}()
-	wg.Wait()
+	if err := uc.sc.Login(); err != nil {
+		uc.logger.Fatal(err)
+	}
 }
 
 func (uc *BasicUseCase) importCalendarDate() error {

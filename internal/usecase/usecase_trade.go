@@ -23,7 +23,6 @@ import (
 type TradeUseCase struct {
 	repo TradeRepo
 	sc   TradegRPCAPI
-	fg   TradegRPCAPI
 
 	quota    *quota.Quota
 	tradeDay *calendar.Calendar
@@ -48,7 +47,6 @@ func NewTrade() Trade {
 	tradeDay := calendar.Get()
 	uc := &TradeUseCase{
 		sc:    grpc.NewTrade(cfg.GetSinopacPool(), cfg.Simulation),
-		fg:    grpc.NewTrade(cfg.GetFuglePool(), cfg.Simulation),
 		repo:  repo.NewTrade(cfg.GetPostgresPool()),
 		quota: quota.NewQuota(cfg.Quota),
 
@@ -77,11 +75,6 @@ func NewTrade() Trade {
 func (uc *TradeUseCase) updateAccountDetail() {
 	for range time.NewTicker(time.Minute).C {
 		err := uc.repo.InsertOrUpdateAccountBalance(context.Background(), uc.getSinopacAccountBalance())
-		if err != nil {
-			uc.logger.Fatal(err)
-		}
-
-		err = uc.repo.InsertOrUpdateAccountBalance(context.Background(), uc.getFugleAccountBalance())
 		if err != nil {
 			uc.logger.Fatal(err)
 		}
@@ -136,21 +129,6 @@ func (uc *TradeUseCase) getSinopacAccountBalance() *entity.AccountBalance {
 		AvailableMargin: margin.AvailableMargin,
 		YesterdayMargin: margin.YesterdayBalance,
 		RiskIndicator:   margin.RiskIndicator,
-		BankID:          entity.BankIDSinopac,
-	}
-}
-
-func (uc *TradeUseCase) getFugleAccountBalance() *entity.AccountBalance {
-	accountBalance, er := uc.fg.GetAccountBalance()
-	if er != nil {
-		uc.logger.Fatal(er)
-	}
-
-	return &entity.AccountBalance{
-		Date:          time.Date(time.Now().Year(), time.Now().Month(), time.Now().Day(), 0, 0, 0, 0, time.Local),
-		Balance:       accountBalance.Balance,
-		RiskIndicator: 999,
-		BankID:        entity.BankIDFugle,
 	}
 }
 
@@ -167,28 +145,8 @@ func (uc *TradeUseCase) getAccountSettlement() []*entity.Settlement {
 			uc.logger.Fatal(err)
 		}
 		result[dateTime] = &entity.Settlement{
-			Date:    dateTime,
-			Sinopac: v.GetAmount(),
-		}
-	}
-
-	fugleSettlement, er := uc.fg.GetSettlement()
-	if er != nil {
-		uc.logger.Fatal(er)
-	}
-
-	for _, v := range fugleSettlement.GetSettlement() {
-		dateTime, err := time.ParseInLocation(entity.LongTimeLayout, v.GetDate(), time.Local)
-		if err != nil {
-			uc.logger.Fatal(err)
-		}
-		if _, ok := result[dateTime]; ok {
-			result[dateTime].Fugle = v.GetAmount()
-		} else {
-			result[dateTime] = &entity.Settlement{
-				Date:  dateTime,
-				Fugle: v.GetAmount(),
-			}
+			Date:       dateTime,
+			Settlement: v.GetAmount(),
 		}
 	}
 
@@ -213,25 +171,7 @@ func (uc *TradeUseCase) updateStockInventory() {
 			StockNum: s.GetCode(),
 			Lot:      lot,
 			Share:    share,
-			InventoryBankDetail: entity.InventoryBankDetail{
-				BankID:   1,
-				AvgPrice: s.GetPrice(),
-				Updated:  queryDate,
-			},
-		})
-	}
-	fugleInventory, err := uc.fg.GetStockPosition()
-	if err != nil {
-		uc.logger.Fatal(err)
-	}
-	for _, s := range fugleInventory.GetPositionArr() {
-		lot, share := int(s.GetQuantity())/1000, int(s.GetQuantity())%1000
-		inv = append(inv, &entity.InventoryStock{
-			StockNum: s.GetCode(),
-			Lot:      lot,
-			Share:    share,
-			InventoryBankDetail: entity.InventoryBankDetail{
-				BankID:   2,
+			InventoryDetail: entity.InventoryDetail{
 				AvgPrice: s.GetPrice(),
 				Updated:  queryDate,
 			},
@@ -332,9 +272,9 @@ func (uc *TradeUseCase) MoveFutureOrderToLatestTradeDay(ctx context.Context, ord
 }
 
 func (uc *TradeUseCase) askOrderStatus(sim bool) {
-	scFn, fgFn := uc.sc.GetLocalOrderStatusArr, uc.fg.GetLocalOrderStatusArr
+	scFn := uc.sc.GetLocalOrderStatusArr
 	if sim {
-		scFn, fgFn = uc.sc.GetSimulateOrderStatusArr, uc.fg.GetSimulateOrderStatusArr
+		scFn = uc.sc.GetSimulateOrderStatusArr
 	}
 
 	for range time.NewTicker(750 * time.Millisecond).C {
@@ -343,10 +283,6 @@ func (uc *TradeUseCase) askOrderStatus(sim bool) {
 		}
 
 		if err := scFn(); err != nil {
-			uc.logger.Error(err)
-		}
-
-		if err := fgFn(); err != nil {
 			uc.logger.Error(err)
 		}
 	}
@@ -756,9 +692,8 @@ func (uc *TradeUseCase) GetFutureOrderByTradeDay(ctx context.Context, tradeDay s
 	return filledOrder, nil
 }
 
-func (uc *TradeUseCase) GetAccountBalance(ctx context.Context) ([]*entity.AccountBalance, error) {
-	bankIDArr := []int{entity.BankIDSinopac, entity.BankIDFugle}
-	data, err := uc.repo.QueryAllLastAccountBalance(ctx, bankIDArr)
+func (uc *TradeUseCase) GetAccountBalance(ctx context.Context) (*entity.AccountBalance, error) {
+	data, err := uc.repo.QueryLastAccountBalance(ctx)
 	if err != nil {
 		return nil, err
 	}

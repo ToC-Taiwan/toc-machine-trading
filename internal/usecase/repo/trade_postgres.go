@@ -505,37 +505,11 @@ func (r *TradeRepo) InsertOrUpdateFutureTradeBalance(ctx context.Context, t *ent
 	return nil
 }
 
-func (r *TradeRepo) QueryAllLastAccountBalance(ctx context.Context, bankIDArr []int) ([]*entity.AccountBalance, error) {
-	var result []*entity.AccountBalance
-	for _, v := range bankIDArr {
-		sql, arg, err := r.Builder.
-			Select("id, date, balance, today_margin, available_margin, yesterday_margin, risk_indicator, bank_id").
-			From(tableNameAccountBalance).
-			Where(squirrel.Eq{"bank_id": v}).
-			Limit(1).OrderBy("date DESC").
-			ToSql()
-		if err != nil {
-			return nil, err
-		}
-
-		row := r.Pool().QueryRow(ctx, sql, arg...)
-		e := entity.AccountBalance{}
-		if err := row.Scan(&e.ID, &e.Date, &e.Balance, &e.TodayMargin, &e.AvailableMargin, &e.YesterdayMargin, &e.RiskIndicator, &e.BankID); err != nil {
-			if errors.Is(err, pgx.ErrNoRows) {
-				continue
-			}
-			return nil, err
-		}
-		result = append(result, &e)
-	}
-	return result, nil
-}
-
-func (r *TradeRepo) QueryAccountBalanceByDateAndBankID(ctx context.Context, date time.Time, bankID int) (*entity.AccountBalance, error) {
+func (r *TradeRepo) QueryLastAccountBalance(ctx context.Context) (*entity.AccountBalance, error) {
 	sql, arg, err := r.Builder.
-		Select("id, date, balance, today_margin, available_margin, yesterday_margin, risk_indicator, bank_id").
+		Select("id, date, balance, today_margin, available_margin, yesterday_margin, risk_indicator").
 		From(tableNameAccountBalance).
-		Where(squirrel.Eq{"date": date, "bank_id": bankID}).
+		Limit(1).OrderBy("date DESC").
 		ToSql()
 	if err != nil {
 		return nil, err
@@ -543,7 +517,28 @@ func (r *TradeRepo) QueryAccountBalanceByDateAndBankID(ctx context.Context, date
 
 	row := r.Pool().QueryRow(ctx, sql, arg...)
 	e := entity.AccountBalance{}
-	if err := row.Scan(&e.ID, &e.Date, &e.Balance, &e.TodayMargin, &e.AvailableMargin, &e.YesterdayMargin, &e.RiskIndicator, &e.BankID); err != nil {
+	if err := row.Scan(&e.ID, &e.Date, &e.Balance, &e.TodayMargin, &e.AvailableMargin, &e.YesterdayMargin, &e.RiskIndicator); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &e, nil
+}
+
+func (r *TradeRepo) QueryAccountBalanceByDate(ctx context.Context, date time.Time) (*entity.AccountBalance, error) {
+	sql, arg, err := r.Builder.
+		Select("id, date, balance, today_margin, available_margin, yesterday_margin, risk_indicator").
+		From(tableNameAccountBalance).
+		Where(squirrel.Eq{"date": date}).
+		ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	row := r.Pool().QueryRow(ctx, sql, arg...)
+	e := entity.AccountBalance{}
+	if err := row.Scan(&e.ID, &e.Date, &e.Balance, &e.TodayMargin, &e.AvailableMargin, &e.YesterdayMargin, &e.RiskIndicator); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, nil
 		}
@@ -553,7 +548,7 @@ func (r *TradeRepo) QueryAccountBalanceByDateAndBankID(ctx context.Context, date
 }
 
 func (r *TradeRepo) InsertOrUpdateAccountBalance(ctx context.Context, t *entity.AccountBalance) error {
-	dbStatus, err := r.QueryAccountBalanceByDateAndBankID(ctx, t.Date, t.BankID)
+	dbStatus, err := r.QueryAccountBalanceByDate(ctx, t.Date)
 	if err != nil {
 		return err
 	}
@@ -567,8 +562,8 @@ func (r *TradeRepo) InsertOrUpdateAccountBalance(ctx context.Context, t *entity.
 	var args []interface{}
 
 	if dbStatus == nil {
-		builder := r.Builder.Insert(tableNameAccountBalance).Columns("date, balance, today_margin, available_margin, yesterday_margin, risk_indicator, bank_id")
-		builder = builder.Values(t.Date, t.Balance, t.TodayMargin, t.AvailableMargin, t.YesterdayMargin, t.RiskIndicator, t.BankID)
+		builder := r.Builder.Insert(tableNameAccountBalance).Columns("date, balance, today_margin, available_margin, yesterday_margin, risk_indicator")
+		builder = builder.Values(t.Date, t.Balance, t.TodayMargin, t.AvailableMargin, t.YesterdayMargin, t.RiskIndicator)
 		if sql, args, err = builder.ToSql(); err != nil {
 			return err
 		} else if _, err = tx.Exec(ctx, sql, args...); err != nil {
@@ -582,7 +577,7 @@ func (r *TradeRepo) InsertOrUpdateAccountBalance(ctx context.Context, t *entity.
 			Set("available_margin", t.AvailableMargin).
 			Set("yesterday_margin", t.YesterdayMargin).
 			Set("risk_indicator", t.RiskIndicator).
-			Where(squirrel.Eq{"date": t.Date, "bank_id": t.BankID})
+			Where(squirrel.Eq{"date": t.Date})
 		if sql, args, err = builder.ToSql(); err != nil {
 			return err
 		} else if _, err = tx.Exec(ctx, sql, args...); err != nil {
@@ -594,7 +589,7 @@ func (r *TradeRepo) InsertOrUpdateAccountBalance(ctx context.Context, t *entity.
 
 func (r *TradeRepo) QueryAccountSettlementByDate(ctx context.Context, date time.Time) (*entity.Settlement, error) {
 	sql, arg, err := r.Builder.
-		Select("date, sinopac, fugle").
+		Select("date, settlement").
 		From(tableNameAccountSettlement).
 		Where(squirrel.Eq{"date": date}).
 		ToSql()
@@ -604,7 +599,7 @@ func (r *TradeRepo) QueryAccountSettlementByDate(ctx context.Context, date time.
 
 	row := r.Pool().QueryRow(ctx, sql, arg...)
 	e := entity.Settlement{}
-	if err := row.Scan(&e.Date, &e.Sinopac, &e.Fugle); err != nil {
+	if err := row.Scan(&e.Date, &e.Settlement); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, nil
 		}
@@ -628,8 +623,8 @@ func (r *TradeRepo) InsertOrUpdateAccountSettlement(ctx context.Context, t *enti
 	var args []interface{}
 
 	if dbSettle == nil {
-		builder := r.Builder.Insert(tableNameAccountSettlement).Columns("date, sinopac, fugle")
-		builder = builder.Values(t.Date, t.Sinopac, t.Fugle)
+		builder := r.Builder.Insert(tableNameAccountSettlement).Columns("date, settlement")
+		builder = builder.Values(t.Date, t.Settlement)
 		if sql, args, err = builder.ToSql(); err != nil {
 			return err
 		} else if _, err = tx.Exec(ctx, sql, args...); err != nil {
@@ -638,8 +633,7 @@ func (r *TradeRepo) InsertOrUpdateAccountSettlement(ctx context.Context, t *enti
 	} else {
 		builder := r.Builder.
 			Update(tableNameAccountSettlement).
-			Set("sinopac", t.Sinopac).
-			Set("fugle", t.Fugle).
+			Set("settlement", t.Settlement).
 			Where(squirrel.Eq{"date": t.Date})
 		if sql, args, err = builder.ToSql(); err != nil {
 			return err
@@ -652,7 +646,7 @@ func (r *TradeRepo) InsertOrUpdateAccountSettlement(ctx context.Context, t *enti
 
 func (r *TradeRepo) QueryInventoryStockByDate(ctx context.Context, date time.Time) ([]*entity.InventoryStock, error) {
 	sql, arg, err := r.Builder.
-		Select("id, bank_id, avg_price, lot, share, updated, stock_num").
+		Select("id, avg_price, lot, share, updated, stock_num").
 		From(tableNameInventoryStock).
 		Where(squirrel.Eq{"updated": date}).
 		ToSql()
@@ -671,7 +665,6 @@ func (r *TradeRepo) QueryInventoryStockByDate(ctx context.Context, date time.Tim
 		e := entity.InventoryStock{}
 		if err := rows.Scan(
 			&e.ID,
-			&e.BankID,
 			&e.AvgPrice,
 			&e.Lot,
 			&e.Share,
@@ -714,8 +707,8 @@ func (r *TradeRepo) InsertInventoryStock(ctx context.Context, t []*entity.Invent
 	var args []interface{}
 
 	for _, v := range t {
-		builder := r.Builder.Insert(tableNameInventoryStock).Columns("bank_id, avg_price, lot, share, updated, stock_num")
-		builder = builder.Values(v.BankID, v.AvgPrice, v.Lot, v.Share, v.Updated, v.StockNum)
+		builder := r.Builder.Insert(tableNameInventoryStock).Columns("avg_price, lot, share, updated, stock_num")
+		builder = builder.Values(v.AvgPrice, v.Lot, v.Share, v.Updated, v.StockNum)
 		if sql, args, err = builder.ToSql(); err != nil {
 			return err
 		} else if _, err = tx.Exec(ctx, sql, args...); err != nil {

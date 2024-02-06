@@ -6,12 +6,10 @@ CREATE TABLE account_balance (
     "today_margin" DECIMAL NOT NULL,
     "available_margin" DECIMAL NOT NULL,
     "yesterday_margin" DECIMAL NOT NULL,
-    "risk_indicator" DECIMAL NOT NULL,
-    "bank_id" INT NOT NULL
+    "risk_indicator" DECIMAL NOT NULL
 );
 CREATE TABLE account_settlement (
     "date" TIMESTAMPTZ PRIMARY KEY,
-    "sinopac" DECIMAL NOT NULL,
-    "fugle" DECIMAL NOT NULL
+    "settlement" DECIMAL NOT NULL
 );
 COMMIT;

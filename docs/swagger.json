@@ -461,7 +461,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/v1.accountSummary"
+                            "$ref": "#/definitions/entity.AccountBalance"
                         }
                     },
                     "500": {
@@ -1517,9 +1517,6 @@
                 "balance": {
                     "type": "number"
                 },
-                "bank_id": {
-                    "type": "integer"
-                },
                 "date": {
                     "type": "string"
                 },
@@ -1924,20 +1921,6 @@
                 },
                 "response": {
                     "type": "string"
-                }
-            }
-        },
-        "v1.accountSummary": {
-            "type": "object",
-            "properties": {
-                "balance": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/entity.AccountBalance"
-                    }
-                },
-                "total": {
-                    "type": "number"
                 }
             }
         },

@@ -2,7 +2,6 @@ BEGIN;
 CREATE TABLE inventory_stock (
     "id" SERIAL PRIMARY KEY,
     "updated" TIMESTAMPTZ NOT NULL,
-    "bank_id" INT NOT NULL,
     "avg_price" DECIMAL NOT NULL,
     "lot" INT NOT NULL,
     "share" INT NOT NULL,
@@ -14,7 +13,6 @@ ADD CONSTRAINT "fk_inventory_stock_future" FOREIGN KEY ("stock_num") REFERENCES 
 CREATE TABLE inventory_future (
     "id" SERIAL PRIMARY KEY,
     "updated" TIMESTAMPTZ NOT NULL,
-    "bank_id" INT NOT NULL,
     "avg_price" DECIMAL NOT NULL,
     "position" INT NOT NULL,
     "code" VARCHAR NOT NULL

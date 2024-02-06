@@ -4,22 +4,21 @@ import (
 	"time"
 )
 
-type InventoryBankDetail struct {
+type InventoryDetail struct {
 	ID       int       `json:"id" yaml:"id"`
-	BankID   int       `json:"bank_id" yaml:"bank_id"`
 	AvgPrice float64   `json:"avg_price" yaml:"avg_price"`
 	Updated  time.Time `json:"updated" yaml:"updated"`
 }
 
 type InventoryStock struct {
-	InventoryBankDetail
+	InventoryDetail
 	StockNum string `json:"stock_num" yaml:"stock_num"`
 	Lot      int    `json:"lot" yaml:"lot"`
 	Share    int    `json:"share" yaml:"share"`
 }
 
 type InventoryFuture struct {
-	InventoryBankDetail
+	InventoryDetail
 	Code     string `json:"code" yaml:"code"`
 	Position int    `json:"position" yaml:"position"`
 }

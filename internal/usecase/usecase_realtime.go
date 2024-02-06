@@ -29,7 +29,6 @@ type RealTimeUseCase struct {
 	gRPCSub      SubscribegRPCAPI
 
 	sc TradegRPCAPI
-	fg TradegRPCAPI
 
 	commonRabbit Rabbit
 	futureRabbit Rabbit
@@ -71,7 +70,6 @@ func NewRealTime() RealTime {
 		gRPCSub:      grpc.NewSubscribe(cfg.GetSinopacPool()),
 
 		sc: grpc.NewTrade(cfg.GetSinopacPool(), cfg.Simulation),
-		fg: grpc.NewTrade(cfg.GetFuglePool(), cfg.Simulation),
 
 		cfg:                 cfg,
 		futureSwitchChanMap: make(map[string]chan bool),

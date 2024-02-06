@@ -469,7 +469,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/v1.accountSummary"
+                            "$ref": "#/definitions/entity.AccountBalance"
                         }
                     },
                     "500": {
@@ -1525,9 +1525,6 @@ const docTemplate = `{
                 "balance": {
                     "type": "number"
                 },
-                "bank_id": {
-                    "type": "integer"
-                },
                 "date": {
                     "type": "string"
                 },
@@ -1932,20 +1929,6 @@ const docTemplate = `{
                 },
                 "response": {
                     "type": "string"
-                }
-            }
-        },
-        "v1.accountSummary": {
-            "type": "object",
-            "properties": {
-                "balance": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/entity.AccountBalance"
-                    }
-                },
-                "total": {
-                    "type": "number"
                 }
             }
         },
