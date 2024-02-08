@@ -33,6 +33,8 @@ func NewRealTimeRoutes(handler *gin.RouterGroup, t usecase.RealTime, o usecase.T
 		h.PUT("/snapshot", r.getSnapshots)
 		h.GET("/snapshot/tse", r.getTSESnapshot)
 
+		h.PUT("/subscribe/snapshot", r.subscribeTopRankStockTick)
+
 		h.GET("/ws/pick-stock", r.servePickStockWS)
 		h.GET("/ws/pick-stock/v2", r.servePickStockWSV2)
 		h.GET("/ws/future", r.serveFutureWS)
@@ -115,4 +117,34 @@ func (r *realTimeRoutes) servePickStockWSV2(c *gin.Context) {
 
 func (r *realTimeRoutes) serveFutureWS(c *gin.Context) {
 	future.StartWSFutureTrade(c, r.t, r.o, r.h)
+}
+
+type subscribeRequest struct {
+	Count int `json:"count"`
+}
+
+// subscribeTopRankStockTick -.
+//
+//	@Tags		Stream V1
+//	@Summary	Subscribe top rank stock tick
+//	@security	JWT
+//	@Accept		json
+//	@param		body	body	subscribeRequest{}	true	"Body"
+//	@Produce	json
+//	@Success	200
+//	@Failure	400	{object}	resp.Response{}
+//	@Failure	500	{object}	resp.Response{}
+//	@Router		/v1/stream/subscribe/snapshot [put]
+func (r *realTimeRoutes) subscribeTopRankStockTick(c *gin.Context) {
+	p := subscribeRequest{}
+	if err := c.ShouldBindJSON(&p); err != nil {
+		resp.ErrorResponse(c, http.StatusBadRequest, err)
+		return
+	}
+	err := r.t.SubscribeTopRankStockTick(int64(p.Count))
+	if err != nil {
+		resp.ErrorResponse(c, http.StatusInternalServerError, err)
+		return
+	}
+	c.JSON(http.StatusOK, nil)
 }

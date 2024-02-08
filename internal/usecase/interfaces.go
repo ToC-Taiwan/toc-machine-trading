@@ -101,6 +101,7 @@ type RealTime interface {
 	DeleteFutureRealTimeClient(connectionID string)
 
 	CreateRealTimePick(connectionID string, com chan *pb.PickRealMap, tickChan chan []byte)
+	SubscribeTopRankStockTick(count int64) error
 }
 
 type RealTimeRepo interface {

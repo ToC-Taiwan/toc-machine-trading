@@ -29,6 +29,8 @@ type TargetUseCase struct {
 	logger *log.Log
 	cc     *cache.Cache
 	bus    *eventbus.Bus
+
+	rankFromSnapshot *pb.StockVolumeRankResponse
 }
 
 func NewTarget() Target {
@@ -176,6 +178,12 @@ func (uc *TargetUseCase) searchTradeDayTargets(tradeDay time.Time) ([]*entity.St
 }
 
 func (uc *TargetUseCase) GetCurrentVolumeRank() (*pb.StockVolumeRankResponse, error) {
+	tradeStart := uc.tradeDay.GetStockTradeDay().StartTime
+	tradeEnd := uc.tradeDay.GetStockTradeDay().EndTime
+	if time.Now().Before(tradeStart) || time.Now().After(tradeEnd) {
+		return uc.getVolumeRankFromSnapshot()
+	}
+
 	t, err := uc.gRPCAPI.GetStockVolumeRankPB(time.Now().Format(entity.ShortTimeLayout))
 	if err != nil {
 		return nil, err
@@ -216,6 +224,63 @@ func (uc *TargetUseCase) searchTradeDayTargetsFromAllSnapshot(tradeDay time.Time
 			Stock:    stock,
 		})
 	}
+	return result, nil
+}
+
+func (uc *TargetUseCase) getVolumeRankFromSnapshot() (*pb.StockVolumeRankResponse, error) {
+	if uc.rankFromSnapshot != nil {
+		return uc.rankFromSnapshot, nil
+	}
+
+	snapshots, err := uc.gRPCAPI.GetAllStockSnapshot()
+	if err != nil {
+		return nil, err
+	}
+
+	sort.Slice(snapshots, func(i, j int) bool {
+		return snapshots[i].GetTotalVolume() > snapshots[j].GetTotalVolume()
+	})
+
+	result := &pb.StockVolumeRankResponse{}
+	for _, v := range snapshots {
+		if len(result.GetData()) >= 200 {
+			break
+		}
+		stock := uc.cc.GetStockDetail(v.GetCode())
+		if stock == nil {
+			continue
+		}
+
+		tickType := 1
+		if v.GetTickType() == "Buy" {
+			tickType = 2
+		}
+		date := time.Unix(0, v.GetTs()).Format(entity.ShortTimeLayout)
+		result.Data = append(result.Data, &pb.StockVolumeRankMessage{
+			Date:            date,
+			Code:            v.GetCode(),
+			Name:            stock.Name,
+			Ts:              v.GetTs(),
+			Open:            v.GetOpen(),
+			High:            v.GetHigh(),
+			Low:             v.GetLow(),
+			Close:           v.GetClose(),
+			TickType:        int64(tickType),
+			ChangePrice:     v.GetChangePrice(),
+			AveragePrice:    v.GetAveragePrice(),
+			Volume:          v.GetVolume(),
+			TotalVolume:     v.GetTotalVolume(),
+			Amount:          v.GetAmount(),
+			TotalAmount:     v.GetTotalAmount(),
+			YesterdayVolume: int64(v.GetYesterdayVolume()),
+			VolumeRatio:     v.GetVolumeRatio(),
+			BuyPrice:        v.GetBuyPrice(),
+			BuyVolume:       int64(v.GetBuyVolume()),
+			SellPrice:       v.GetSellPrice(),
+			SellVolume:      v.GetSellVolume(),
+		})
+	}
+	uc.rankFromSnapshot = result
 	return result, nil
 }
 

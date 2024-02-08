@@ -1080,6 +1080,20 @@ func (mr *MockRealTimeMockRecorder) NewFutureRealTimeClient(tickChan, orderStatu
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NewFutureRealTimeClient", reflect.TypeOf((*MockRealTime)(nil).NewFutureRealTimeClient), tickChan, orderStatusChan, connectionID)
 }
 
+// SubscribeTopRankStockTick mocks base method.
+func (m *MockRealTime) SubscribeTopRankStockTick(count int64) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SubscribeTopRankStockTick", count)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// SubscribeTopRankStockTick indicates an expected call of SubscribeTopRankStockTick.
+func (mr *MockRealTimeMockRecorder) SubscribeTopRankStockTick(count interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SubscribeTopRankStockTick", reflect.TypeOf((*MockRealTime)(nil).SubscribeTopRankStockTick), count)
+}
+
 // MockRealTimeRepo is a mock of RealTimeRepo interface.
 type MockRealTimeRepo struct {
 	ctrl     *gomock.Controller
