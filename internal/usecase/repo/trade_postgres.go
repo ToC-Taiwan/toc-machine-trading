@@ -2,8 +2,11 @@
 package repo
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
+	"sort"
 	"time"
 
 	"tmt/internal/entity"
@@ -38,7 +41,9 @@ func (r *TradeRepo) InsertOrUpdateOrderByOrderID(ctx context.Context, t *entity.
 	var args []interface{}
 
 	if dbOrder == nil {
-		builder := r.Builder.Insert(tableNameTradeStockOrder).Columns("order_id, status, order_time, stock_num, action, price, lot, share")
+		builder := r.Builder.
+			Insert(tableNameTradeStockOrder).
+			Columns("order_id, status, order_time, stock_num, action, price, lot, share")
 		builder = builder.Values(t.OrderID, t.Status, t.OrderTime, t.StockNum, t.Action, t.Price, t.Lot, t.Share)
 		if sql, args, err = builder.ToSql(); err != nil {
 			return err
@@ -164,7 +169,9 @@ func (r *TradeRepo) InsertOrUpdateStockTradeBalance(ctx context.Context, t *enti
 	var args []interface{}
 
 	if dbTradeBalance == nil {
-		builder := r.Builder.Insert(tableNameTradeStockBalance).Columns("trade_count, forward, reverse, original_balance, discount, total, trade_day")
+		builder := r.Builder.
+			Insert(tableNameTradeStockBalance).
+			Columns("trade_count, forward, reverse, original_balance, discount, total, trade_day")
 		builder = builder.Values(t.TradeCount, t.Forward, t.Reverse, t.OriginalBalance, t.Discount, t.Total, t.TradeDay)
 		if sql, args, err = builder.ToSql(); err != nil {
 			return err
@@ -356,7 +363,9 @@ func (r *TradeRepo) InsertOrUpdateFutureOrderByOrderID(ctx context.Context, t *e
 	var args []interface{}
 
 	if dbOrder == nil {
-		builder := r.Builder.Insert(tableNameTradeFutureOrder).Columns("order_id, status, order_time, code, action, price, position")
+		builder := r.Builder.
+			Insert(tableNameTradeFutureOrder).
+			Columns("order_id, status, order_time, code, action, price, position")
 		builder = builder.Values(t.OrderID, t.Status, t.OrderTime, t.Code, t.Action, t.Price, t.Position)
 		if sql, args, err = builder.ToSql(); err != nil {
 			return err
@@ -480,7 +489,9 @@ func (r *TradeRepo) InsertOrUpdateFutureTradeBalance(ctx context.Context, t *ent
 	var args []interface{}
 
 	if dbTradeBalance == nil {
-		builder := r.Builder.Insert(tableNameFutureTradeBalance).Columns("trade_count, forward, reverse, total, trade_day")
+		builder := r.Builder.
+			Insert(tableNameFutureTradeBalance).
+			Columns("trade_count, forward, reverse, total, trade_day")
 		builder = builder.Values(t.TradeCount, t.Forward, t.Reverse, t.Total, t.TradeDay)
 		if sql, args, err = builder.ToSql(); err != nil {
 			return err
@@ -562,7 +573,9 @@ func (r *TradeRepo) InsertOrUpdateAccountBalance(ctx context.Context, t *entity.
 	var args []interface{}
 
 	if dbStatus == nil {
-		builder := r.Builder.Insert(tableNameAccountBalance).Columns("date, balance, today_margin, available_margin, yesterday_margin, risk_indicator")
+		builder := r.Builder.
+			Insert(tableNameAccountBalance).
+			Columns("date, balance, today_margin, available_margin, yesterday_margin, risk_indicator")
 		builder = builder.Values(t.Date, t.Balance, t.TodayMargin, t.AvailableMargin, t.YesterdayMargin, t.RiskIndicator)
 		if sql, args, err = builder.ToSql(); err != nil {
 			return err
@@ -623,7 +636,9 @@ func (r *TradeRepo) InsertOrUpdateAccountSettlement(ctx context.Context, t *enti
 	var args []interface{}
 
 	if dbSettle == nil {
-		builder := r.Builder.Insert(tableNameAccountSettlement).Columns("date, settlement")
+		builder := r.Builder.
+			Insert(tableNameAccountSettlement).
+			Columns("date, settlement")
 		builder = builder.Values(t.Date, t.Settlement)
 		if sql, args, err = builder.ToSql(); err != nil {
 			return err
@@ -644,32 +659,112 @@ func (r *TradeRepo) InsertOrUpdateAccountSettlement(ctx context.Context, t *enti
 	return nil
 }
 
-func (r *TradeRepo) QueryInventoryStockByDate(ctx context.Context, date time.Time) ([]*entity.InventoryStock, error) {
+func (r *TradeRepo) QueryInventoryUUIDStockByDate(ctx context.Context, date time.Time) (map[string]string, error) {
 	sql, arg, err := r.Builder.
-		Select("id, avg_price, lot, share, updated, stock_num").
+		Select("uuid, stock_num").
 		From(tableNameInventoryStock).
-		Where(squirrel.Eq{"updated": date}).
+		Where(squirrel.Eq{"date": date}).
 		ToSql()
 	if err != nil {
 		return nil, err
 	}
 
+	result := make(map[string]string)
 	rows, err := r.Pool().Query(ctx, sql, arg...)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	var result []*entity.InventoryStock
 	for rows.Next() {
 		e := entity.InventoryStock{}
 		if err := rows.Scan(
-			&e.ID,
-			&e.AvgPrice,
-			&e.Lot,
-			&e.Share,
-			&e.Updated,
+			&e.UUID,
 			&e.StockNum,
+		); err != nil {
+			return nil, err
+		}
+		result[e.StockNum] = e.UUID
+	}
+	return result, nil
+}
+
+func (r *TradeRepo) getInventoryStockByUUID(ctx context.Context, tx pgx.Tx, uuid string) (*entity.InventoryStock, error) {
+	sql, args, err := r.Builder.
+		Select("uuid, avg_price, lot, share, date, stock_num").
+		From(tableNameInventoryStock).
+		Where(squirrel.Eq{"uuid": uuid}).
+		ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	row := tx.QueryRow(ctx, sql, args...)
+	e := entity.InventoryStock{}
+	if err := row.Scan(&e.UUID, &e.AvgPrice, &e.Lot, &e.Share, &e.Date, &e.StockNum); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &e, nil
+}
+
+func (r *TradeRepo) insertInventoryStock(ctx context.Context, tx pgx.Tx, t *entity.InventoryStock) error {
+	builder := r.Builder.
+		Insert(tableNameInventoryStock).
+		Columns("uuid, avg_price, lot, share, date, stock_num")
+	builder = builder.Values(t.UUID, t.AvgPrice, t.Lot, t.Share, t.Date, t.StockNum)
+	if sql, args, err := builder.ToSql(); err != nil {
+		return err
+	} else if _, err = tx.Exec(ctx, sql, args...); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *TradeRepo) deleteInventoryStockByUUID(ctx context.Context, tx pgx.Tx, uuid string) error {
+	builder := r.Builder.
+		Delete(tableNameInventoryStock).
+		Where(squirrel.Eq{"uuid": uuid})
+	if sql, args, err := builder.ToSql(); err != nil {
+		return err
+	} else if _, err = tx.Exec(ctx, sql, args...); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *TradeRepo) getPositionStockByInvID(ctx context.Context, tx pgx.Tx, invID string) ([]*entity.PositionStock, error) {
+	sql, args, err := r.Builder.
+		Select("inv_id, stock_num, date, quantity, price, last_price, dseq, direction, pnl, fee").
+		From(tableNameInventoryPositionStock).
+		Where(squirrel.Eq{"inv_id": invID}).
+		ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	rows, err := tx.Query(ctx, sql, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var result []*entity.PositionStock
+	for rows.Next() {
+		e := entity.PositionStock{}
+		if err = rows.Scan(
+			&e.InvID,
+			&e.StockNum,
+			&e.Date,
+			&e.Quantity,
+			&e.Price,
+			&e.LastPrice,
+			&e.Dseq,
+			&e.Direction,
+			&e.Pnl,
+			&e.Fee,
 		); err != nil {
 			return nil, err
 		}
@@ -678,18 +773,11 @@ func (r *TradeRepo) QueryInventoryStockByDate(ctx context.Context, date time.Tim
 	return result, nil
 }
 
-func (r *TradeRepo) DeleteInventoryStockByDate(ctx context.Context, date time.Time) error {
-	tx, err := r.BeginTransaction()
-	if err != nil {
-		return err
-	}
-	defer r.EndTransaction(tx, err)
-	var sql string
-	var args []interface{}
-
-	builder := r.Builder.Delete(tableNameInventoryStock).
-		Where(squirrel.Eq{"updated": date})
-	if sql, args, err = builder.ToSql(); err != nil {
+func (r *TradeRepo) deletePositionStockByInvID(ctx context.Context, tx pgx.Tx, invID string) error {
+	builder := r.Builder.
+		Delete(tableNameInventoryPositionStock).
+		Where(squirrel.Eq{"inv_id": invID})
+	if sql, args, err := builder.ToSql(); err != nil {
 		return err
 	} else if _, err = tx.Exec(ctx, sql, args...); err != nil {
 		return err
@@ -697,23 +785,104 @@ func (r *TradeRepo) DeleteInventoryStockByDate(ctx context.Context, date time.Ti
 	return nil
 }
 
-func (r *TradeRepo) InsertInventoryStock(ctx context.Context, t []*entity.InventoryStock) error {
+func (r *TradeRepo) insertPositionStock(ctx context.Context, tx pgx.Tx, t []*entity.PositionStock) error {
+	builder := r.Builder.
+		Insert(tableNameInventoryPositionStock).
+		Columns("inv_id, stock_num, date, quantity, price, last_price, dseq, direction, pnl, fee")
+	for _, v := range t {
+		builder = builder.Values(v.InvID, v.StockNum, v.Date, v.Quantity, v.Price, v.LastPrice, v.Dseq, v.Direction, v.Pnl, v.Fee)
+	}
+	if sql, args, err := builder.ToSql(); err != nil {
+		return err
+	} else if _, err = tx.Exec(ctx, sql, args...); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *TradeRepo) replaceInventoryPositionStock(ctx context.Context, tx pgx.Tx, t []*entity.PositionStock) error {
+	if err := r.deletePositionStockByInvID(ctx, tx, t[0].InvID); err != nil {
+		return err
+	}
+	return r.insertPositionStock(ctx, tx, t)
+}
+
+func (r *TradeRepo) marshalPosition(position []*entity.PositionStock) []byte {
+	sort.SliceStable(position, func(i, j int) bool {
+		if position[i].Date.Equal(position[j].Date) {
+			if position[i].Price == position[j].Price {
+				return position[i].Dseq < position[j].Dseq
+			}
+			return position[i].Price < position[j].Price
+		}
+		return position[i].Date.Before(position[j].Date)
+	})
+	b, err := json.Marshal(map[string]any{"position": position})
+	if err != nil {
+		return nil
+	}
+	return b
+}
+
+func (r *TradeRepo) insertOrUpdateInventoryPositionStock(ctx context.Context, tx pgx.Tx, invID string, position []*entity.PositionStock) error {
+	if len(position) == 0 {
+		return nil
+	}
+
+	if dbPosition, err := r.getPositionStockByInvID(ctx, tx, invID); err != nil {
+		return err
+	} else if len(dbPosition) == 0 {
+		if err = r.insertPositionStock(ctx, tx, position); err != nil {
+			return err
+		}
+	} else if !bytes.Equal(r.marshalPosition(position), r.marshalPosition(dbPosition)) {
+		if err = r.replaceInventoryPositionStock(ctx, tx, position); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (r *TradeRepo) InsertOrUpdateInventoryStock(ctx context.Context, t []*entity.InventoryStock) error {
 	tx, err := r.BeginTransaction()
 	if err != nil {
 		return err
 	}
 	defer r.EndTransaction(tx, err)
-	var sql string
-	var args []interface{}
-
 	for _, v := range t {
-		builder := r.Builder.Insert(tableNameInventoryStock).Columns("avg_price, lot, share, updated, stock_num")
-		builder = builder.Values(v.AvgPrice, v.Lot, v.Share, v.Updated, v.StockNum)
-		if sql, args, err = builder.ToSql(); err != nil {
-			return err
-		} else if _, err = tx.Exec(ctx, sql, args...); err != nil {
+		if err = r.insertOrUpdateInventoryPositionStock(ctx, tx, v.UUID, v.Position); err != nil {
 			return err
 		}
+		dbStock, err := r.getInventoryStockByUUID(ctx, tx, v.UUID)
+		if err != nil {
+			return err
+		}
+		if dbStock == nil {
+			if err = r.insertInventoryStock(ctx, tx, v); err != nil {
+				return err
+			}
+		} else if !cmp.Equal(v, dbStock) {
+			if err = r.deleteInventoryStockByUUID(ctx, tx, v.UUID); err != nil {
+				return err
+			} else if err = r.insertInventoryStock(ctx, tx, v); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func (r *TradeRepo) ClearInventoryStockByUUID(ctx context.Context, uuid string) error {
+	tx, err := r.BeginTransaction()
+	if err != nil {
+		return err
+	}
+	defer r.EndTransaction(tx, err)
+	if err := r.deleteInventoryStockByUUID(ctx, tx, uuid); err != nil {
+		return err
+	}
+	if err := r.deletePositionStockByInvID(ctx, tx, uuid); err != nil {
+		return err
 	}
 	return nil
 }

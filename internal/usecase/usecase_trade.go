@@ -16,7 +16,7 @@ import (
 	"tmt/pkg/eventbus"
 	"tmt/pkg/log"
 
-	"github.com/google/go-cmp/cmp"
+	"github.com/google/uuid"
 )
 
 // TradeUseCase -.
@@ -74,18 +74,8 @@ func NewTrade() Trade {
 
 func (uc *TradeUseCase) updateAccountDetail() {
 	for range time.NewTicker(time.Minute).C {
-		err := uc.repo.InsertOrUpdateAccountBalance(context.Background(), uc.getSinopacAccountBalance())
-		if err != nil {
-			uc.logger.Fatal(err)
-		}
-
-		accountSettlement := uc.getAccountSettlement()
-		for _, v := range accountSettlement {
-			err := uc.repo.InsertOrUpdateAccountSettlement(context.Background(), v)
-			if err != nil {
-				uc.logger.Fatal(err)
-			}
-		}
+		uc.updateAccountBalance()
+		uc.updateAccountSettlement()
 		uc.updateStockInventory()
 		uc.updateFutureInventory()
 	}
@@ -112,17 +102,18 @@ func (uc *TradeUseCase) IsAuthUser(username string) bool {
 	return false
 }
 
-func (uc *TradeUseCase) getSinopacAccountBalance() *entity.AccountBalance {
+func (uc *TradeUseCase) updateAccountBalance() {
 	margin, err := uc.sc.GetMargin()
 	if err != nil {
 		uc.logger.Fatal(err)
 	}
+
 	accountBalance, er := uc.sc.GetAccountBalance()
 	if err != nil {
 		uc.logger.Fatal(er)
 	}
 
-	return &entity.AccountBalance{
+	balance := &entity.AccountBalance{
 		Date:            time.Date(time.Now().Year(), time.Now().Month(), time.Now().Day(), 0, 0, 0, 0, time.Local),
 		Balance:         accountBalance.Balance,
 		TodayMargin:     margin.TodayBalance,
@@ -130,10 +121,14 @@ func (uc *TradeUseCase) getSinopacAccountBalance() *entity.AccountBalance {
 		YesterdayMargin: margin.YesterdayBalance,
 		RiskIndicator:   margin.RiskIndicator,
 	}
+
+	err = uc.repo.InsertOrUpdateAccountBalance(context.Background(), balance)
+	if err != nil {
+		uc.logger.Fatal(err)
+	}
 }
 
-func (uc *TradeUseCase) getAccountSettlement() []*entity.Settlement {
-	result := make(map[time.Time]*entity.Settlement)
+func (uc *TradeUseCase) updateAccountSettlement() {
 	sinopacSettlement, err := uc.sc.GetSettlement()
 	if err != nil {
 		uc.logger.Fatal(err)
@@ -144,57 +139,75 @@ func (uc *TradeUseCase) getAccountSettlement() []*entity.Settlement {
 		if err != nil {
 			uc.logger.Fatal(err)
 		}
-		result[dateTime] = &entity.Settlement{
+		err = uc.repo.InsertOrUpdateAccountSettlement(context.Background(), &entity.Settlement{
 			Date:       dateTime,
 			Settlement: v.GetAmount(),
+		})
+		if err != nil {
+			uc.logger.Fatal(err)
 		}
 	}
-
-	var settlement []*entity.Settlement
-	for _, v := range result {
-		settlement = append(settlement, v)
-	}
-	return settlement
 }
 
 func (uc *TradeUseCase) updateStockInventory() {
 	inv := []*entity.InventoryStock{}
-	queryDate := time.Date(time.Now().Year(), time.Now().Month(), time.Now().Day(), 0, 0, 0, 0, time.Local)
-
-	sinopacInventory, err := uc.sc.GetStockPosition()
+	timeNowZero := time.Date(time.Now().Year(), time.Now().Month(), time.Now().Day(), 0, 0, 0, 0, time.Local)
+	queryData, err := uc.sc.GetStockPosition()
 	if err != nil {
 		uc.logger.Fatal(err)
 	}
-	for _, s := range sinopacInventory.GetPositionArr() {
+
+	dbInvMap, err := uc.repo.QueryInventoryUUIDStockByDate(context.Background(), timeNowZero)
+	if err != nil {
+		uc.logger.Fatal(err)
+	}
+	for _, s := range queryData.GetPositionArr() {
+		invID := dbInvMap[s.GetCode()]
+		if invID == "" {
+			invID = uuid.NewString()
+		} else {
+			delete(dbInvMap, s.GetCode())
+		}
 		lot, share := int(s.GetQuantity())/1000, int(s.GetQuantity())%1000
+		position := []*entity.PositionStock{}
+		for _, p := range s.GetDetailArr() {
+			date, pErr := time.ParseInLocation(entity.ShortTimeLayout, p.GetDate(), time.Local)
+			if pErr != nil {
+				continue
+			}
+			position = append(position, &entity.PositionStock{
+				StockNum:  s.GetCode(),
+				Date:      date,
+				Quantity:  int(p.GetQuantity()),
+				Price:     p.GetPrice(),
+				LastPrice: p.GetLastPrice(),
+				Dseq:      p.GetDseq(),
+				Direction: p.GetDirection(),
+				Pnl:       p.GetPnl(),
+				Fee:       p.GetFee(),
+				InvID:     invID,
+			})
+		}
 		inv = append(inv, &entity.InventoryStock{
+			InventoryBase: entity.InventoryBase{
+				UUID:     invID,
+				AvgPrice: s.GetPrice(),
+				Date:     timeNowZero,
+			},
 			StockNum: s.GetCode(),
 			Lot:      lot,
 			Share:    share,
-			InventoryDetail: entity.InventoryDetail{
-				AvgPrice: s.GetPrice(),
-				Updated:  queryDate,
-			},
+			Position: position,
 		})
 	}
-
-	dbData, err := uc.repo.QueryInventoryStockByDate(context.Background(), queryDate)
-	if err != nil {
+	if len(inv) == 0 {
+		return
+	}
+	if err = uc.repo.InsertOrUpdateInventoryStock(context.Background(), inv); err != nil {
 		uc.logger.Fatal(err)
 	}
-	for _, v := range dbData {
-		v.ID = 0
-	}
-	if !cmp.Equal(dbData, inv) && len(inv) > 0 {
-		err = uc.repo.DeleteInventoryStockByDate(context.Background(), queryDate)
-		if err != nil {
-			uc.logger.Fatal(err)
-		}
-
-		err = uc.repo.InsertInventoryStock(context.Background(), inv)
-		if err != nil {
-			uc.logger.Fatal(err)
-		}
+	for _, v := range dbInvMap {
+		_ = uc.repo.ClearInventoryStockByUUID(context.Background(), v)
 	}
 }
 
@@ -218,57 +231,6 @@ func (uc *TradeUseCase) updateAllTradeBalance() {
 			uc.calculateFutureTradeBalance(futureOrders, uc.futureTradeDay.TradeDay)
 		}
 	}
-}
-
-// UpdateTradeBalanceByTradeDay -.
-func (uc *TradeUseCase) UpdateTradeBalanceByTradeDay(ctx context.Context, date string) error {
-	if date == "" {
-		return errors.New("empty date")
-	}
-
-	stockTradePeriod, err := uc.tradeDay.GetStockTradePeriodByDate(date)
-	if err != nil {
-		return err
-	}
-
-	futureTradePeriod, err := uc.tradeDay.GetFutureTradePeriodByDate(date)
-	if err != nil {
-		return err
-	}
-
-	stockOrders, err := uc.repo.QueryAllStockOrderByDate(ctx, stockTradePeriod.ToStartEndArray())
-	if err != nil {
-		return err
-	}
-	uc.calculateStockTradeBalance(stockOrders, stockTradePeriod.TradeDay)
-
-	futureOrders, err := uc.repo.QueryAllFutureOrderByDate(ctx, futureTradePeriod.ToStartEndArray())
-	if err != nil {
-		return err
-	}
-	uc.calculateFutureTradeBalance(futureOrders, futureTradePeriod.TradeDay)
-
-	return nil
-}
-
-func (uc *TradeUseCase) MoveStockOrderToLatestTradeDay(ctx context.Context, orderID string) error {
-	order, err := uc.repo.QueryStockOrderByID(ctx, orderID)
-	if err != nil {
-		return err
-	}
-
-	order.OrderTime = uc.stockTradeDay.StartTime
-	return uc.repo.InsertOrUpdateOrderByOrderID(ctx, order)
-}
-
-func (uc *TradeUseCase) MoveFutureOrderToLatestTradeDay(ctx context.Context, orderID string) error {
-	order, err := uc.repo.QueryFutureOrderByID(ctx, orderID)
-	if err != nil {
-		return err
-	}
-
-	order.OrderTime = uc.futureTradeDay.StartTime
-	return uc.repo.InsertOrUpdateFutureOrderByOrderID(ctx, order)
 }
 
 func (uc *TradeUseCase) askOrderStatus(sim bool) {
@@ -413,18 +375,6 @@ func (uc *TradeUseCase) updateFutureOrderCacheAndInsertDB(order *entity.FutureOr
 	if !order.Cancellable() {
 		uc.finishedFutureOrderMap[order.OrderID] = order
 	}
-}
-
-func (uc *TradeUseCase) ManualInsertFutureOrder(ctx context.Context, order *entity.FutureOrder) error {
-	defer uc.updateFutureOrderLock.Unlock()
-	uc.updateFutureOrderLock.Lock()
-
-	// insert or update order to db
-	if err := uc.repo.InsertOrUpdateFutureOrderByOrderID(context.Background(), order); err != nil {
-		return err
-	}
-
-	return nil
 }
 
 // BuyFuture -.

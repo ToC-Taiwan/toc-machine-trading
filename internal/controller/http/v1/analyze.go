@@ -47,7 +47,7 @@ func (r *analyzeRoutes) getRebornTargets(c *gin.Context) {
 		dateArr = append(dateArr, date)
 	}
 
-	sort.Slice(dateArr, func(i, j int) bool {
+	sort.SliceStable(dateArr, func(i, j int) bool {
 		return dateArr[i].After(dateArr[j])
 	})
 

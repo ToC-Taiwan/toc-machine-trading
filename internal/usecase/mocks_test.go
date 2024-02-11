@@ -1962,48 +1962,6 @@ func (mr *MockTradeMockRecorder) IsFutureTradeTime() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsFutureTradeTime", reflect.TypeOf((*MockTrade)(nil).IsFutureTradeTime))
 }
 
-// ManualInsertFutureOrder mocks base method.
-func (m *MockTrade) ManualInsertFutureOrder(ctx context.Context, order *entity.FutureOrder) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ManualInsertFutureOrder", ctx, order)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// ManualInsertFutureOrder indicates an expected call of ManualInsertFutureOrder.
-func (mr *MockTradeMockRecorder) ManualInsertFutureOrder(ctx, order interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ManualInsertFutureOrder", reflect.TypeOf((*MockTrade)(nil).ManualInsertFutureOrder), ctx, order)
-}
-
-// MoveFutureOrderToLatestTradeDay mocks base method.
-func (m *MockTrade) MoveFutureOrderToLatestTradeDay(ctx context.Context, orderID string) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "MoveFutureOrderToLatestTradeDay", ctx, orderID)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// MoveFutureOrderToLatestTradeDay indicates an expected call of MoveFutureOrderToLatestTradeDay.
-func (mr *MockTradeMockRecorder) MoveFutureOrderToLatestTradeDay(ctx, orderID interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "MoveFutureOrderToLatestTradeDay", reflect.TypeOf((*MockTrade)(nil).MoveFutureOrderToLatestTradeDay), ctx, orderID)
-}
-
-// MoveStockOrderToLatestTradeDay mocks base method.
-func (m *MockTrade) MoveStockOrderToLatestTradeDay(ctx context.Context, orderID string) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "MoveStockOrderToLatestTradeDay", ctx, orderID)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// MoveStockOrderToLatestTradeDay indicates an expected call of MoveStockOrderToLatestTradeDay.
-func (mr *MockTradeMockRecorder) MoveStockOrderToLatestTradeDay(ctx, orderID interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "MoveStockOrderToLatestTradeDay", reflect.TypeOf((*MockTrade)(nil).MoveStockOrderToLatestTradeDay), ctx, orderID)
-}
-
 // SellFuture mocks base method.
 func (m *MockTrade) SellFuture(order *entity.FutureOrder) (string, entity.OrderStatus, error) {
 	m.ctrl.T.Helper()
@@ -2018,20 +1976,6 @@ func (m *MockTrade) SellFuture(order *entity.FutureOrder) (string, entity.OrderS
 func (mr *MockTradeMockRecorder) SellFuture(order interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SellFuture", reflect.TypeOf((*MockTrade)(nil).SellFuture), order)
-}
-
-// UpdateTradeBalanceByTradeDay mocks base method.
-func (m *MockTrade) UpdateTradeBalanceByTradeDay(ctx context.Context, date string) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateTradeBalanceByTradeDay", ctx, date)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// UpdateTradeBalanceByTradeDay indicates an expected call of UpdateTradeBalanceByTradeDay.
-func (mr *MockTradeMockRecorder) UpdateTradeBalanceByTradeDay(ctx, date interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateTradeBalanceByTradeDay", reflect.TypeOf((*MockTrade)(nil).UpdateTradeBalanceByTradeDay), ctx, date)
 }
 
 // MockTradeRepo is a mock of TradeRepo interface.
@@ -2057,32 +2001,18 @@ func (m *MockTradeRepo) EXPECT() *MockTradeRepoMockRecorder {
 	return m.recorder
 }
 
-// DeleteInventoryStockByDate mocks base method.
-func (m *MockTradeRepo) DeleteInventoryStockByDate(ctx context.Context, date time.Time) error {
+// ClearInventoryStockByUUID mocks base method.
+func (m *MockTradeRepo) ClearInventoryStockByUUID(ctx context.Context, uuid string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DeleteInventoryStockByDate", ctx, date)
+	ret := m.ctrl.Call(m, "ClearInventoryStockByUUID", ctx, uuid)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// DeleteInventoryStockByDate indicates an expected call of DeleteInventoryStockByDate.
-func (mr *MockTradeRepoMockRecorder) DeleteInventoryStockByDate(ctx, date interface{}) *gomock.Call {
+// ClearInventoryStockByUUID indicates an expected call of ClearInventoryStockByUUID.
+func (mr *MockTradeRepoMockRecorder) ClearInventoryStockByUUID(ctx, uuid interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteInventoryStockByDate", reflect.TypeOf((*MockTradeRepo)(nil).DeleteInventoryStockByDate), ctx, date)
-}
-
-// InsertInventoryStock mocks base method.
-func (m *MockTradeRepo) InsertInventoryStock(ctx context.Context, t []*entity.InventoryStock) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "InsertInventoryStock", ctx, t)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// InsertInventoryStock indicates an expected call of InsertInventoryStock.
-func (mr *MockTradeRepoMockRecorder) InsertInventoryStock(ctx, t interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertInventoryStock", reflect.TypeOf((*MockTradeRepo)(nil).InsertInventoryStock), ctx, t)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ClearInventoryStockByUUID", reflect.TypeOf((*MockTradeRepo)(nil).ClearInventoryStockByUUID), ctx, uuid)
 }
 
 // InsertOrUpdateAccountBalance mocks base method.
@@ -2139,6 +2069,20 @@ func (m *MockTradeRepo) InsertOrUpdateFutureTradeBalance(ctx context.Context, t 
 func (mr *MockTradeRepoMockRecorder) InsertOrUpdateFutureTradeBalance(ctx, t interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertOrUpdateFutureTradeBalance", reflect.TypeOf((*MockTradeRepo)(nil).InsertOrUpdateFutureTradeBalance), ctx, t)
+}
+
+// InsertOrUpdateInventoryStock mocks base method.
+func (m *MockTradeRepo) InsertOrUpdateInventoryStock(ctx context.Context, t []*entity.InventoryStock) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "InsertOrUpdateInventoryStock", ctx, t)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// InsertOrUpdateInventoryStock indicates an expected call of InsertOrUpdateInventoryStock.
+func (mr *MockTradeRepoMockRecorder) InsertOrUpdateInventoryStock(ctx, t interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertOrUpdateInventoryStock", reflect.TypeOf((*MockTradeRepo)(nil).InsertOrUpdateInventoryStock), ctx, t)
 }
 
 // InsertOrUpdateOrderByOrderID mocks base method.
@@ -2319,19 +2263,19 @@ func (mr *MockTradeRepoMockRecorder) QueryFutureTradeBalanceByDate(ctx, date int
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryFutureTradeBalanceByDate", reflect.TypeOf((*MockTradeRepo)(nil).QueryFutureTradeBalanceByDate), ctx, date)
 }
 
-// QueryInventoryStockByDate mocks base method.
-func (m *MockTradeRepo) QueryInventoryStockByDate(ctx context.Context, date time.Time) ([]*entity.InventoryStock, error) {
+// QueryInventoryUUIDStockByDate mocks base method.
+func (m *MockTradeRepo) QueryInventoryUUIDStockByDate(ctx context.Context, date time.Time) (map[string]string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "QueryInventoryStockByDate", ctx, date)
-	ret0, _ := ret[0].([]*entity.InventoryStock)
+	ret := m.ctrl.Call(m, "QueryInventoryUUIDStockByDate", ctx, date)
+	ret0, _ := ret[0].(map[string]string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// QueryInventoryStockByDate indicates an expected call of QueryInventoryStockByDate.
-func (mr *MockTradeRepoMockRecorder) QueryInventoryStockByDate(ctx, date interface{}) *gomock.Call {
+// QueryInventoryUUIDStockByDate indicates an expected call of QueryInventoryUUIDStockByDate.
+func (mr *MockTradeRepoMockRecorder) QueryInventoryUUIDStockByDate(ctx, date interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryInventoryStockByDate", reflect.TypeOf((*MockTradeRepo)(nil).QueryInventoryStockByDate), ctx, date)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryInventoryUUIDStockByDate", reflect.TypeOf((*MockTradeRepo)(nil).QueryInventoryUUIDStockByDate), ctx, date)
 }
 
 // QueryLastAccountBalance mocks base method.

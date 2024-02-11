@@ -459,7 +459,7 @@ func (uc *HistoryUseCase) findExistHistoryKbar(fetchTradeDayArr []time.Time, sto
 }
 
 func (uc *HistoryUseCase) processCloseArr(arr []*entity.StockHistoryClose) {
-	sort.Slice(arr, func(i, j int) bool {
+	sort.SliceStable(arr, func(i, j int) bool {
 		return arr[i].Date.After(arr[j].Date)
 	})
 
@@ -495,7 +495,7 @@ func (uc *HistoryUseCase) processTickArr(arr []*entity.StockHistoryTick) {
 		return
 	}
 
-	sort.Slice(arr, func(i, j int) bool {
+	sort.SliceStable(arr, func(i, j int) bool {
 		return arr[i].TickTime.Before(arr[j].TickTime)
 	})
 
@@ -533,7 +533,7 @@ func (uc *HistoryUseCase) processTickArr(arr []*entity.StockHistoryTick) {
 }
 
 func (uc *HistoryUseCase) processKbarArr(arr []*entity.StockHistoryKbar) {
-	sort.Slice(arr, func(i, j int) bool {
+	sort.SliceStable(arr, func(i, j int) bool {
 		return arr[i].KbarTime.Before(arr[j].KbarTime)
 	})
 	firstKbar := arr[0]

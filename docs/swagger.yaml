@@ -436,25 +436,6 @@ definitions:
       price:
         type: number
     type: object
-  v1.manualInsertFutureOrderRequest:
-    properties:
-      action:
-        $ref: '#/definitions/entity.OrderAction'
-      code:
-        type: string
-      order_time:
-        type: string
-      price:
-        type: number
-      quantity:
-        type: integer
-    required:
-    - action
-    - code
-    - order_time
-    - price
-    - quantity
-    type: object
   v1.oddStockRequest:
     properties:
       num:
@@ -784,31 +765,6 @@ paths:
       summary: Logout
       tags:
       - User V1
-  /v1/order:
-    post:
-      consumes:
-      - application/json
-      parameters:
-      - description: Body
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/v1.manualInsertFutureOrderRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/resp.Response'
-      security:
-      - JWT: []
-      summary: Manual insert future order
-      tags:
-      - Order V1
   /v1/order/account/balance:
     get:
       consumes:
@@ -933,79 +889,6 @@ paths:
       security:
       - JWT: []
       summary: Get all order by trade day
-      tags:
-      - Order V1
-    put:
-      consumes:
-      - application/json
-      parameters:
-      - description: tradeday
-        in: path
-        name: tradeday
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/v1.futureOrders'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/resp.Response'
-      security:
-      - JWT: []
-      summary: Update trade balance by trade day
-      tags:
-      - Order V1
-  /v1/order/future/{order-id}:
-    patch:
-      consumes:
-      - application/json
-      parameters:
-      - description: order-id
-        in: path
-        name: order-id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/resp.Response'
-      security:
-      - JWT: []
-      summary: Move future order to latest trade day
-      tags:
-      - Order V1
-  /v1/order/stock/{order-id}:
-    patch:
-      consumes:
-      - application/json
-      parameters:
-      - description: order-id
-        in: path
-        name: order-id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/resp.Response'
-      security:
-      - JWT: []
-      summary: Move stock order to latest trade day
       tags:
       - Order V1
   /v1/refresh:

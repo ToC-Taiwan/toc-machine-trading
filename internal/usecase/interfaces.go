@@ -179,11 +179,6 @@ type Trade interface {
 	GetFuturePosition() ([]*entity.FuturePosition, error)
 	IsFutureTradeTime() bool
 
-	ManualInsertFutureOrder(ctx context.Context, order *entity.FutureOrder) error
-	UpdateTradeBalanceByTradeDay(ctx context.Context, date string) error
-	MoveStockOrderToLatestTradeDay(ctx context.Context, orderID string) error
-	MoveFutureOrderToLatestTradeDay(ctx context.Context, orderID string) error
-
 	GetAccountBalance(ctx context.Context) (*entity.AccountBalance, error)
 	IsAuthUser(username string) bool
 }
@@ -210,9 +205,9 @@ type TradeRepo interface {
 	InsertOrUpdateAccountBalance(ctx context.Context, t *entity.AccountBalance) error
 	QueryAccountSettlementByDate(ctx context.Context, date time.Time) (*entity.Settlement, error)
 	InsertOrUpdateAccountSettlement(ctx context.Context, t *entity.Settlement) error
-	QueryInventoryStockByDate(ctx context.Context, date time.Time) ([]*entity.InventoryStock, error)
-	DeleteInventoryStockByDate(ctx context.Context, date time.Time) error
-	InsertInventoryStock(ctx context.Context, t []*entity.InventoryStock) error
+	QueryInventoryUUIDStockByDate(ctx context.Context, date time.Time) (map[string]string, error)
+	InsertOrUpdateInventoryStock(ctx context.Context, t []*entity.InventoryStock) error
+	ClearInventoryStockByUUID(ctx context.Context, uuid string) error
 }
 
 type TradegRPCAPI interface {

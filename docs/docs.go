@@ -407,47 +407,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/order": {
-            "post": {
-                "security": [
-                    {
-                        "JWT": []
-                    }
-                ],
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Order V1"
-                ],
-                "summary": "Manual insert future order",
-                "parameters": [
-                    {
-                        "description": "Body",
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/v1.manualInsertFutureOrderRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/resp.Response"
-                        }
-                    }
-                }
-            }
-        },
         "/v1/order/account/balance": {
             "get": {
                 "security": [
@@ -645,124 +604,6 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/v1.futureOrders"
                         }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/resp.Response"
-                        }
-                    }
-                }
-            },
-            "put": {
-                "security": [
-                    {
-                        "JWT": []
-                    }
-                ],
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Order V1"
-                ],
-                "summary": "Update trade balance by trade day",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "tradeday",
-                        "name": "tradeday",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/v1.futureOrders"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/resp.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/v1/order/future/{order-id}": {
-            "patch": {
-                "security": [
-                    {
-                        "JWT": []
-                    }
-                ],
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Order V1"
-                ],
-                "summary": "Move future order to latest trade day",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "order-id",
-                        "name": "order-id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/resp.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/v1/order/stock/{order-id}": {
-            "patch": {
-                "security": [
-                    {
-                        "JWT": []
-                    }
-                ],
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Order V1"
-                ],
-                "summary": "Move stock order to latest trade day",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "order-id",
-                        "name": "order-id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
                     },
                     "500": {
                         "description": "Internal Server Error",
@@ -2026,33 +1867,6 @@ const docTemplate = `{
                 },
                 "price": {
                     "type": "number"
-                }
-            }
-        },
-        "v1.manualInsertFutureOrderRequest": {
-            "type": "object",
-            "required": [
-                "action",
-                "code",
-                "order_time",
-                "price",
-                "quantity"
-            ],
-            "properties": {
-                "action": {
-                    "$ref": "#/definitions/entity.OrderAction"
-                },
-                "code": {
-                    "type": "string"
-                },
-                "order_time": {
-                    "type": "string"
-                },
-                "price": {
-                    "type": "number"
-                },
-                "quantity": {
-                    "type": "integer"
                 }
             }
         },

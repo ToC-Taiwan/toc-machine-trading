@@ -201,7 +201,7 @@ func (uc *TargetUseCase) searchTradeDayTargetsFromAllSnapshot(tradeDay time.Time
 		return []*entity.StockTarget{}, errors.New("no all snapshots")
 	}
 
-	sort.Slice(data, func(i, j int) bool {
+	sort.SliceStable(data, func(i, j int) bool {
 		return data[i].GetTotalVolume() > data[j].GetTotalVolume()
 	})
 
@@ -237,7 +237,7 @@ func (uc *TargetUseCase) getVolumeRankFromSnapshot() (*pb.StockVolumeRankRespons
 		return nil, err
 	}
 
-	sort.Slice(snapshots, func(i, j int) bool {
+	sort.SliceStable(snapshots, func(i, j int) bool {
 		return snapshots[i].GetTotalVolume() > snapshots[j].GetTotalVolume()
 	})
 
@@ -296,7 +296,7 @@ func (uc *TargetUseCase) getVolumeRankFromSnapshot() (*pb.StockVolumeRankRespons
 // 		return nil
 // 	}
 
-// 	sort.Slice(data, func(i, j int) bool {
+// 	sort.SliceStable(data, func(i, j int) bool {
 // 		return data[i].GetTotalVolume() > data[j].GetTotalVolume()
 // 	})
 // 	data = data[:uc.targetFilter.RealTimeRank]

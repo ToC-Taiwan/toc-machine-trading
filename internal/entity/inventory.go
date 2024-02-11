@@ -4,21 +4,36 @@ import (
 	"time"
 )
 
-type InventoryDetail struct {
-	ID       int       `json:"id" yaml:"id"`
-	AvgPrice float64   `json:"avg_price" yaml:"avg_price"`
-	Updated  time.Time `json:"updated" yaml:"updated"`
+type PositionStock struct {
+	ID        int       `json:"-"`
+	StockNum  string    `json:"StockNum"`
+	Date      time.Time `json:"Date"`
+	Quantity  int       `json:"Quantity"`
+	Price     float64   `json:"Price"`
+	LastPrice float64   `json:"LastPrice"`
+	Dseq      string    `json:"Dseq"`
+	Direction string    `json:"Direction"`
+	Pnl       float64   `json:"Pnl"`
+	Fee       float64   `json:"Fee"`
+	InvID     string    `json:"InvID"`
+}
+
+type InventoryBase struct {
+	UUID     string
+	AvgPrice float64
+	Date     time.Time
 }
 
 type InventoryStock struct {
-	InventoryDetail
-	StockNum string `json:"stock_num" yaml:"stock_num"`
-	Lot      int    `json:"lot" yaml:"lot"`
-	Share    int    `json:"share" yaml:"share"`
+	InventoryBase
+	StockNum string
+	Lot      int
+	Share    int
+	Position []*PositionStock
 }
 
 type InventoryFuture struct {
-	InventoryDetail
-	Code     string `json:"code" yaml:"code"`
-	Position int    `json:"position" yaml:"position"`
+	InventoryBase
+	Code     string
+	Position int
 }

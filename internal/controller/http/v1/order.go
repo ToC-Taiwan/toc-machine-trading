@@ -3,12 +3,10 @@ package v1
 
 import (
 	"net/http"
-	"time"
 
 	"tmt/internal/controller/http/resp"
 	"tmt/internal/entity"
 	"tmt/internal/usecase"
-	"tmt/pkg/utils"
 
 	"github.com/gin-gonic/gin"
 )
@@ -22,19 +20,12 @@ func NewOrderRoutes(handler *gin.RouterGroup, t usecase.Trade) {
 
 	h := handler.Group("/order")
 	{
-		h.POST("", r.manualInsertFutureOrder)
-
 		h.GET("/all", r.getAllOrder)
 		h.GET("/balance", r.getAllTradeBalance)
 		h.GET("/balance/stock/last", r.getLastStockTradeBalance)
 		h.GET("/balance/future/last", r.getLastFutureTradeBalance)
 
 		h.GET("/date/:tradeday", r.getAllOrderByTradeDay)
-		h.PUT("/date/:tradeday", r.updateTradeBalanceByTradeDay)
-
-		h.PATCH("/stock/:order-id", r.moveStockOrderToLatestTradeDay)
-		h.PATCH("/future/:order-id", r.moveFutureOrderToLatestTradeDay)
-
 		h.GET("/account/balance", r.getAccountBalance)
 	}
 }
@@ -100,84 +91,6 @@ func (r *orderRoutes) getAllOrderByTradeDay(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, futureOrders{futureOrderArr})
-}
-
-// updateTradeBalanceByTradeDay -.
-//
-//	@Tags		Order V1
-//	@Summary	Update trade balance by trade day
-//	@security	JWT
-//	@Accept		json
-//	@Produce	json
-//	@param		tradeday	path		string	true	"tradeday"
-//	@Success	200			{object}	futureOrders
-//	@Failure	500			{object}	resp.Response{}
-//	@Router		/v1/order/date/{tradeday} [put]
-func (r *orderRoutes) updateTradeBalanceByTradeDay(c *gin.Context) {
-	tradeDay := c.Param("tradeday")
-	if tradeDay == "" {
-		resp.ErrorResponse(c, http.StatusInternalServerError, "tradeday is empty")
-		return
-	}
-
-	if err := r.t.UpdateTradeBalanceByTradeDay(c.Request.Context(), tradeDay); err != nil {
-		resp.ErrorResponse(c, http.StatusInternalServerError, err)
-		return
-	}
-
-	c.JSON(http.StatusOK, nil)
-}
-
-type manualInsertFutureOrderRequest struct {
-	Code      string             `json:"code"       binding:"required"`
-	Price     float64            `json:"price"      binding:"required"`
-	Quantity  int64              `json:"quantity"   binding:"required"`
-	OrderTime string             `json:"order_time" binding:"required"`
-	Action    entity.OrderAction `json:"action"     binding:"required"`
-}
-
-// manualInsertFutureOrder -.
-//
-//	@Tags		Order V1
-//	@Summary	Manual insert future order
-//	@security	JWT
-//	@Accept		json
-//	@Produce	json
-//	@param		body	body	manualInsertFutureOrderRequest{}	true	"Body"
-//	@Success	200
-//	@Failure	500	{object}	resp.Response{}
-//	@Router		/v1/order [post]
-func (r *orderRoutes) manualInsertFutureOrder(c *gin.Context) {
-	body := &manualInsertFutureOrderRequest{}
-	if err := c.BindJSON(body); err != nil {
-		resp.ErrorResponse(c, http.StatusInternalServerError, err)
-		return
-	}
-
-	orderTime, err := time.ParseInLocation(entity.LongTimeLayout, body.OrderTime, time.Local)
-	if err != nil {
-		resp.ErrorResponse(c, http.StatusInternalServerError, err)
-		return
-	}
-
-	order := &entity.FutureOrder{
-		OrderDetail: entity.OrderDetail{
-			OrderID:   utils.RandomASCIILowerOctdigitsString(8),
-			Status:    entity.StatusFilled,
-			Action:    body.Action,
-			Price:     body.Price,
-			OrderTime: orderTime,
-		},
-		Position: body.Quantity,
-		Code:     body.Code,
-	}
-
-	if err := r.t.ManualInsertFutureOrder(c.Request.Context(), order); err != nil {
-		resp.ErrorResponse(c, http.StatusInternalServerError, err)
-		return
-	}
-
-	c.JSON(http.StatusOK, nil)
 }
 
 type tradeBalance struct {
@@ -252,56 +165,6 @@ func (r *orderRoutes) getLastFutureTradeBalance(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, balance)
-}
-
-// moveFutureOrderToLatestTradeDay -.
-//
-//	@Tags		Order V1
-//	@Summary	Move future order to latest trade day
-//	@security	JWT
-//	@Accept		json
-//	@Produce	json
-//	@param		order-id	path	string	true	"order-id"
-//	@Success	200
-//	@Failure	500	{object}	resp.Response{}
-//	@Router		/v1/order/future/{order-id} [patch]
-func (r *orderRoutes) moveFutureOrderToLatestTradeDay(c *gin.Context) {
-	id := c.Param("order-id")
-	if id == "" {
-		resp.ErrorResponse(c, http.StatusInternalServerError, "order-id is empty")
-		return
-	}
-
-	if e := r.t.MoveFutureOrderToLatestTradeDay(c.Request.Context(), id); e != nil {
-		resp.ErrorResponse(c, http.StatusInternalServerError, e.Error())
-		return
-	}
-	c.JSON(http.StatusOK, nil)
-}
-
-// moveStockOrderToLatestTradeDay -.
-//
-//	@Tags		Order V1
-//	@Summary	Move stock order to latest trade day
-//	@security	JWT
-//	@Accept		json
-//	@Produce	json
-//	@param		order-id	path	string	true	"order-id"
-//	@Success	200
-//	@Failure	500	{object}	resp.Response{}
-//	@Router		/v1/order/stock/{order-id} [patch]
-func (r *orderRoutes) moveStockOrderToLatestTradeDay(c *gin.Context) {
-	id := c.Param("order-id")
-	if id == "" {
-		resp.ErrorResponse(c, http.StatusInternalServerError, "order-id is empty")
-		return
-	}
-
-	if e := r.t.MoveStockOrderToLatestTradeDay(c.Request.Context(), id); e != nil {
-		resp.ErrorResponse(c, http.StatusInternalServerError, e.Error())
-		return
-	}
-	c.JSON(http.StatusOK, nil)
 }
 
 // getAccountBalance -.
