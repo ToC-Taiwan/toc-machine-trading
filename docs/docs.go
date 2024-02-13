@@ -45,39 +45,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/basic/config": {
-            "get": {
-                "security": [
-                    {
-                        "JWT": []
-                    }
-                ],
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Basic V1"
-                ],
-                "summary": "Get all config",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/config.Config"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/resp.Response"
-                        }
-                    }
-                }
-            }
-        },
         "/v1/basic/stock": {
             "put": {
                 "security": [
@@ -94,7 +61,7 @@ const docTemplate = `{
                 "tags": [
                     "Basic V1"
                 ],
-                "summary": "Get all repo stock",
+                "summary": "Get stock detail by stock number",
                 "parameters": [
                     {
                         "description": "Body",
@@ -255,42 +222,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/fcm/push/target": {
-            "post": {
-                "security": [
-                    {
-                        "JWT": []
-                    }
-                ],
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "FCM V1"
-                ],
-                "summary": "Send targets to devices which has push token",
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/resp.Response"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/resp.Response"
-                        }
-                    }
-                }
-            }
-        },
         "/v1/history/day-kbar/{stock}/{start_date}/{interval}": {
             "get": {
                 "security": [
@@ -407,72 +338,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/order/account/balance": {
-            "get": {
-                "security": [
-                    {
-                        "JWT": []
-                    }
-                ],
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Account V1"
-                ],
-                "summary": "Get account balance",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/entity.AccountBalance"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/resp.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/v1/order/all": {
-            "get": {
-                "security": [
-                    {
-                        "JWT": []
-                    }
-                ],
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Order V1"
-                ],
-                "summary": "Get all order",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/v1.allOrder"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/resp.Response"
-                        }
-                    }
-                }
-            }
-        },
         "/v1/order/balance": {
             "get": {
                 "security": [
@@ -506,7 +371,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/order/balance/future/last": {
+        "/v1/order/future/all": {
             "get": {
                 "security": [
                     {
@@ -522,12 +387,12 @@ const docTemplate = `{
                 "tags": [
                     "Order V1"
                 ],
-                "summary": "Get last future trade balance",
+                "summary": "Get all order",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/entity.FutureTradeBalance"
+                            "$ref": "#/definitions/v1.allOrder"
                         }
                     },
                     "500": {
@@ -539,8 +404,8 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/order/balance/stock/last": {
-            "get": {
+        "/v1/order/future/{tradeday}": {
+            "post": {
                 "security": [
                     {
                         "JWT": []
@@ -555,40 +420,7 @@ const docTemplate = `{
                 "tags": [
                     "Order V1"
                 ],
-                "summary": "Get last stock trade balance",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/entity.StockTradeBalance"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/resp.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/v1/order/date/{tradeday}": {
-            "get": {
-                "security": [
-                    {
-                        "JWT": []
-                    }
-                ],
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Order V1"
-                ],
-                "summary": "Get all order by trade day",
+                "summary": "Get all future order by trade day",
                 "parameters": [
                     {
                         "type": "string",
@@ -647,33 +479,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/stream/index": {
-            "get": {
-                "security": [
-                    {
-                        "JWT": []
-                    }
-                ],
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Stream V1"
-                ],
-                "summary": "Get index",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/entity.TradeIndex"
-                        }
-                    }
-                }
-            }
-        },
         "/v1/stream/snapshot": {
             "put": {
                 "security": [
@@ -711,86 +516,6 @@ const docTemplate = `{
                                 "$ref": "#/definitions/entity.StockSnapShot"
                             }
                         }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/resp.Response"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/resp.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/v1/stream/snapshot/tse": {
-            "get": {
-                "security": [
-                    {
-                        "JWT": []
-                    }
-                ],
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Stream V1"
-                ],
-                "summary": "Get TSE snapshot",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/entity.StockSnapShot"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/resp.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/v1/stream/subscribe/snapshot": {
-            "put": {
-                "security": [
-                    {
-                        "JWT": []
-                    }
-                ],
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Stream V1"
-                ],
-                "summary": "Subscribe top rank stock tick",
-                "parameters": [
-                    {
-                        "description": "Body",
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/v1.subscribeRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
                     },
                     "400": {
                         "description": "Bad Request",
@@ -1234,202 +959,6 @@ const docTemplate = `{
                 }
             }
         },
-        "config.AnalyzeStock": {
-            "type": "object",
-            "properties": {
-                "AllInOutRatio": {
-                    "type": "number"
-                },
-                "AllOutInRatio": {
-                    "type": "number"
-                },
-                "CloseChangeRatioHigh": {
-                    "type": "number"
-                },
-                "CloseChangeRatioLow": {
-                    "type": "number"
-                },
-                "MAPeriod": {
-                    "type": "integer"
-                },
-                "MaxHoldTime": {
-                    "type": "number"
-                },
-                "RSIMinCount": {
-                    "type": "integer"
-                },
-                "TickAnalyzePeriod": {
-                    "type": "number"
-                },
-                "VolumePRLimit": {
-                    "type": "number"
-                }
-            }
-        },
-        "config.Config": {
-            "type": "object",
-            "properties": {
-                "AnalyzeStock": {
-                    "$ref": "#/definitions/config.AnalyzeStock"
-                },
-                "History": {
-                    "$ref": "#/definitions/config.History"
-                },
-                "ManualTrade": {
-                    "type": "boolean"
-                },
-                "Quota": {
-                    "$ref": "#/definitions/config.Quota"
-                },
-                "Simulation": {
-                    "type": "boolean"
-                },
-                "TradeFuture": {
-                    "$ref": "#/definitions/config.TradeFuture"
-                },
-                "TradeStock": {
-                    "$ref": "#/definitions/config.TradeStock"
-                }
-            }
-        },
-        "config.History": {
-            "type": "object",
-            "properties": {
-                "HistoryClosePeriod": {
-                    "type": "integer"
-                },
-                "HistoryKbarPeriod": {
-                    "type": "integer"
-                },
-                "HistoryTickPeriod": {
-                    "type": "integer"
-                }
-            }
-        },
-        "config.Quota": {
-            "type": "object",
-            "properties": {
-                "FutureTradeFee": {
-                    "type": "integer"
-                },
-                "StockFeeDiscount": {
-                    "type": "number"
-                },
-                "StockTradeQuota": {
-                    "type": "integer"
-                }
-            }
-        },
-        "config.TradeFuture": {
-            "type": "object",
-            "properties": {
-                "AllowTrade": {
-                    "type": "boolean"
-                },
-                "BuySellWaitTime": {
-                    "type": "integer"
-                },
-                "InOutRatio": {
-                    "type": "number"
-                },
-                "MaxHoldTime": {
-                    "type": "integer"
-                },
-                "OutInRatio": {
-                    "type": "number"
-                },
-                "Quantity": {
-                    "type": "integer"
-                },
-                "RateChangeRatio": {
-                    "type": "number"
-                },
-                "RateLimit": {
-                    "type": "number"
-                },
-                "TargetBalanceHigh": {
-                    "type": "number"
-                },
-                "TargetBalanceLow": {
-                    "type": "number"
-                },
-                "TickInterval": {
-                    "type": "integer"
-                },
-                "TradeOutWaitTimes": {
-                    "type": "integer"
-                },
-                "TradeTimeRange": {
-                    "$ref": "#/definitions/config.TradeTimeRange"
-                }
-            }
-        },
-        "config.TradeStock": {
-            "type": "object",
-            "properties": {
-                "AllowTrade": {
-                    "type": "boolean"
-                },
-                "CancelWaitTime": {
-                    "type": "integer"
-                },
-                "HoldTimeFromOpen": {
-                    "type": "number"
-                },
-                "Odd": {
-                    "type": "boolean"
-                },
-                "TotalOpenTime": {
-                    "type": "number"
-                },
-                "TradeInEndTime": {
-                    "type": "number"
-                },
-                "TradeInWaitTime": {
-                    "type": "integer"
-                },
-                "TradeOutWaitTime": {
-                    "type": "integer"
-                }
-            }
-        },
-        "config.TradeTimeRange": {
-            "type": "object",
-            "properties": {
-                "FirstPartDuration": {
-                    "type": "integer"
-                },
-                "SecondPartDuration": {
-                    "type": "integer"
-                }
-            }
-        },
-        "entity.AccountBalance": {
-            "type": "object",
-            "properties": {
-                "available_margin": {
-                    "type": "number"
-                },
-                "balance": {
-                    "type": "number"
-                },
-                "date": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "risk_indicator": {
-                    "type": "number"
-                },
-                "today_margin": {
-                    "type": "number"
-                },
-                "yesterday_margin": {
-                    "type": "number"
-                }
-            }
-        },
         "entity.Future": {
             "type": "object",
             "properties": {
@@ -1508,17 +1037,6 @@ const docTemplate = `{
                 },
                 "trade_day": {
                     "type": "string"
-                }
-            }
-        },
-        "entity.IndexStatus": {
-            "type": "object",
-            "properties": {
-                "break_count": {
-                    "type": "integer"
-                },
-                "price_chg": {
-                    "type": "number"
                 }
             }
         },
@@ -1792,23 +1310,6 @@ const docTemplate = `{
                 }
             }
         },
-        "entity.TradeIndex": {
-            "type": "object",
-            "properties": {
-                "nasdaq": {
-                    "$ref": "#/definitions/entity.IndexStatus"
-                },
-                "nf": {
-                    "$ref": "#/definitions/entity.IndexStatus"
-                },
-                "otc": {
-                    "$ref": "#/definitions/entity.IndexStatus"
-                },
-                "tse": {
-                    "$ref": "#/definitions/entity.IndexStatus"
-                }
-            }
-        },
         "resp.Response": {
             "type": "object",
             "properties": {
@@ -1947,14 +1448,6 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/entity.Stock"
                     }
-                }
-            }
-        },
-        "v1.subscribeRequest": {
-            "type": "object",
-            "properties": {
-                "count": {
-                    "type": "integer"
                 }
             }
         },

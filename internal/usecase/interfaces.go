@@ -101,7 +101,6 @@ type RealTime interface {
 	DeleteFutureRealTimeClient(connectionID string)
 
 	CreateRealTimePick(connectionID string, com chan *pb.PickRealMap, tickChan chan []byte)
-	SubscribeTopRankStockTick(count int64) error
 }
 
 type RealTimeRepo interface {
@@ -164,8 +163,6 @@ type Trade interface {
 	GetAllFutureOrder(ctx context.Context) ([]*entity.FutureOrder, error)
 	GetAllStockTradeBalance(ctx context.Context) ([]*entity.StockTradeBalance, error)
 	GetAllFutureTradeBalance(ctx context.Context) ([]*entity.FutureTradeBalance, error)
-	GetLastStockTradeBalance(ctx context.Context) (*entity.StockTradeBalance, error)
-	GetLastFutureTradeBalance(ctx context.Context) (*entity.FutureTradeBalance, error)
 
 	GetFutureOrderByTradeDay(ctx context.Context, tradeDay string) ([]*entity.FutureOrder, error)
 
@@ -178,18 +175,14 @@ type Trade interface {
 
 	GetFuturePosition() ([]*entity.FuturePosition, error)
 	IsFutureTradeTime() bool
-
-	GetAccountBalance(ctx context.Context) (*entity.AccountBalance, error)
 	IsAuthUser(username string) bool
 }
 
 type TradeRepo interface {
 	QueryAllStockTradeBalance(ctx context.Context) ([]*entity.StockTradeBalance, error)
-	QueryLastStockTradeBalance(ctx context.Context) (*entity.StockTradeBalance, error)
 	QueryStockTradeBalanceByDate(ctx context.Context, date time.Time) (*entity.StockTradeBalance, error)
 	InsertOrUpdateStockTradeBalance(ctx context.Context, t *entity.StockTradeBalance) error
 	QueryAllFutureTradeBalance(ctx context.Context) ([]*entity.FutureTradeBalance, error)
-	QueryLastFutureTradeBalance(ctx context.Context) (*entity.FutureTradeBalance, error)
 	QueryFutureTradeBalanceByDate(ctx context.Context, date time.Time) (*entity.FutureTradeBalance, error)
 	InsertOrUpdateFutureTradeBalance(ctx context.Context, t *entity.FutureTradeBalance) error
 	QueryStockOrderByID(ctx context.Context, orderID string) (*entity.StockOrder, error)
@@ -260,5 +253,4 @@ type SystemRepo interface {
 type FCM interface {
 	AnnounceMessage(msg string) error
 	PushNotification(title, msg string) error
-	SendTargets() error
 }

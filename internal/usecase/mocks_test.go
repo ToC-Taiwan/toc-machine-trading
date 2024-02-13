@@ -1080,20 +1080,6 @@ func (mr *MockRealTimeMockRecorder) NewFutureRealTimeClient(tickChan, orderStatu
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NewFutureRealTimeClient", reflect.TypeOf((*MockRealTime)(nil).NewFutureRealTimeClient), tickChan, orderStatusChan, connectionID)
 }
 
-// SubscribeTopRankStockTick mocks base method.
-func (m *MockRealTime) SubscribeTopRankStockTick(count int64) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SubscribeTopRankStockTick", count)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// SubscribeTopRankStockTick indicates an expected call of SubscribeTopRankStockTick.
-func (mr *MockRealTimeMockRecorder) SubscribeTopRankStockTick(count interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SubscribeTopRankStockTick", reflect.TypeOf((*MockRealTime)(nil).SubscribeTopRankStockTick), count)
-}
-
 // MockRealTimeRepo is a mock of RealTimeRepo interface.
 type MockRealTimeRepo struct {
 	ctrl     *gomock.Controller
@@ -1799,21 +1785,6 @@ func (mr *MockTradeMockRecorder) CancelFutureOrderByID(orderID interface{}) *gom
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CancelFutureOrderByID", reflect.TypeOf((*MockTrade)(nil).CancelFutureOrderByID), orderID)
 }
 
-// GetAccountBalance mocks base method.
-func (m *MockTrade) GetAccountBalance(ctx context.Context) (*entity.AccountBalance, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetAccountBalance", ctx)
-	ret0, _ := ret[0].(*entity.AccountBalance)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetAccountBalance indicates an expected call of GetAccountBalance.
-func (mr *MockTradeMockRecorder) GetAccountBalance(ctx interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAccountBalance", reflect.TypeOf((*MockTrade)(nil).GetAccountBalance), ctx)
-}
-
 // GetAllFutureOrder mocks base method.
 func (m *MockTrade) GetAllFutureOrder(ctx context.Context) ([]*entity.FutureOrder, error) {
 	m.ctrl.T.Helper()
@@ -1902,36 +1873,6 @@ func (m *MockTrade) GetFuturePosition() ([]*entity.FuturePosition, error) {
 func (mr *MockTradeMockRecorder) GetFuturePosition() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFuturePosition", reflect.TypeOf((*MockTrade)(nil).GetFuturePosition))
-}
-
-// GetLastFutureTradeBalance mocks base method.
-func (m *MockTrade) GetLastFutureTradeBalance(ctx context.Context) (*entity.FutureTradeBalance, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetLastFutureTradeBalance", ctx)
-	ret0, _ := ret[0].(*entity.FutureTradeBalance)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetLastFutureTradeBalance indicates an expected call of GetLastFutureTradeBalance.
-func (mr *MockTradeMockRecorder) GetLastFutureTradeBalance(ctx interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetLastFutureTradeBalance", reflect.TypeOf((*MockTrade)(nil).GetLastFutureTradeBalance), ctx)
-}
-
-// GetLastStockTradeBalance mocks base method.
-func (m *MockTrade) GetLastStockTradeBalance(ctx context.Context) (*entity.StockTradeBalance, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetLastStockTradeBalance", ctx)
-	ret0, _ := ret[0].(*entity.StockTradeBalance)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetLastStockTradeBalance indicates an expected call of GetLastStockTradeBalance.
-func (mr *MockTradeMockRecorder) GetLastStockTradeBalance(ctx interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetLastStockTradeBalance", reflect.TypeOf((*MockTrade)(nil).GetLastStockTradeBalance), ctx)
 }
 
 // IsAuthUser mocks base method.
@@ -2291,36 +2232,6 @@ func (m *MockTradeRepo) QueryLastAccountBalance(ctx context.Context) (*entity.Ac
 func (mr *MockTradeRepoMockRecorder) QueryLastAccountBalance(ctx interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryLastAccountBalance", reflect.TypeOf((*MockTradeRepo)(nil).QueryLastAccountBalance), ctx)
-}
-
-// QueryLastFutureTradeBalance mocks base method.
-func (m *MockTradeRepo) QueryLastFutureTradeBalance(ctx context.Context) (*entity.FutureTradeBalance, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "QueryLastFutureTradeBalance", ctx)
-	ret0, _ := ret[0].(*entity.FutureTradeBalance)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// QueryLastFutureTradeBalance indicates an expected call of QueryLastFutureTradeBalance.
-func (mr *MockTradeRepoMockRecorder) QueryLastFutureTradeBalance(ctx interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryLastFutureTradeBalance", reflect.TypeOf((*MockTradeRepo)(nil).QueryLastFutureTradeBalance), ctx)
-}
-
-// QueryLastStockTradeBalance mocks base method.
-func (m *MockTradeRepo) QueryLastStockTradeBalance(ctx context.Context) (*entity.StockTradeBalance, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "QueryLastStockTradeBalance", ctx)
-	ret0, _ := ret[0].(*entity.StockTradeBalance)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// QueryLastStockTradeBalance indicates an expected call of QueryLastStockTradeBalance.
-func (mr *MockTradeRepoMockRecorder) QueryLastStockTradeBalance(ctx interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryLastStockTradeBalance", reflect.TypeOf((*MockTradeRepo)(nil).QueryLastStockTradeBalance), ctx)
 }
 
 // QueryStockOrderByID mocks base method.
@@ -2982,18 +2893,4 @@ func (m *MockFCM) PushNotification(title, msg string) error {
 func (mr *MockFCMMockRecorder) PushNotification(title, msg interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PushNotification", reflect.TypeOf((*MockFCM)(nil).PushNotification), title, msg)
-}
-
-// SendTargets mocks base method.
-func (m *MockFCM) SendTargets() error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SendTargets")
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// SendTargets indicates an expected call of SendTargets.
-func (mr *MockFCMMockRecorder) SendTargets() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendTargets", reflect.TypeOf((*MockFCM)(nil).SendTargets))
 }

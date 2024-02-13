@@ -3,12 +3,10 @@ package usecase
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"os"
 	"sync"
 
 	"tmt/internal/config"
-	"tmt/internal/entity"
 	"tmt/internal/usecase/cache"
 	"tmt/internal/usecase/modules/calendar"
 	"tmt/internal/usecase/repo"
@@ -99,39 +97,6 @@ func (uc *FcmUseCase) getAllPushToken() []string {
 	uc.pushTokensLock.RLock()
 	defer uc.pushTokensLock.RUnlock()
 	return uc.pushTokens
-}
-
-func (uc *FcmUseCase) SendTargets() error {
-	tokens := uc.getAllPushToken()
-	if len(tokens) == 0 {
-		return nil
-	}
-
-	ctx := context.Background()
-	client, err := uc.app.Messaging(ctx)
-	if err != nil {
-		return err
-	}
-
-	targetArr := uc.cc.GetStockTargets()
-	message := &messaging.MulticastMessage{
-		Notification: &messaging.Notification{
-			Title: "Found New Targets",
-			Body:  fmt.Sprintf("%s has %d targets", uc.tradeDay.GetStockTradeDay().TradeDay.Format(entity.ShortTimeLayout), len(targetArr)),
-		},
-		Data: map[string]string{
-			"type":              "new_targets",
-			"new_targets_count": fmt.Sprintf("%d", len(targetArr)),
-		},
-		APNS:   uc.newAPNS(),
-		Tokens: tokens,
-	}
-
-	_, err = client.SendEachForMulticast(ctx, message)
-	if err != nil {
-		return err
-	}
-	return nil
 }
 
 func (uc *FcmUseCase) AnnounceMessage(msg string) error {

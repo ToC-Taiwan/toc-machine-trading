@@ -585,14 +585,6 @@ func (uc *TradeUseCase) GetAllFutureTradeBalance(ctx context.Context) ([]*entity
 	return tradeBalanceArr, nil
 }
 
-func (uc *TradeUseCase) GetLastStockTradeBalance(ctx context.Context) (*entity.StockTradeBalance, error) {
-	return uc.repo.QueryLastStockTradeBalance(ctx)
-}
-
-func (uc *TradeUseCase) GetLastFutureTradeBalance(ctx context.Context) (*entity.FutureTradeBalance, error) {
-	return uc.repo.QueryLastFutureTradeBalance(ctx)
-}
-
 // GetFuturePosition .
 func (uc *TradeUseCase) GetFuturePosition() ([]*entity.FuturePosition, error) {
 	query, err := uc.sc.GetFuturePosition()

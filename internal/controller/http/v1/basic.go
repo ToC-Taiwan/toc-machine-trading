@@ -21,7 +21,6 @@ func NewBasicRoutes(handler *gin.RouterGroup, t usecase.Basic) {
 	h := handler.Group("/basic")
 	{
 		h.PUT("/stock", r.getStockDetail)
-		h.GET("/config", r.getAllConfig)
 		h.GET("/usage/shioaji", r.getShioajiUsage)
 	}
 }
@@ -37,7 +36,7 @@ type stockDetailResponse struct {
 // getStockDetail -.
 //
 //	@Tags		Basic V1
-//	@Summary	Get all repo stock
+//	@Summary	Get stock detail by stock number
 //	@security	JWT
 //	@Accept		json
 //	@Produce	json
@@ -67,24 +66,9 @@ func (r *basicRoutes) getStockDetail(c *gin.Context) {
 			})
 		}
 	}
-
 	c.JSON(http.StatusOK, stockDetailResponse{
 		StockDetail: result,
 	})
-}
-
-// getAllConfig -.
-//
-//	@Tags		Basic V1
-//	@Summary	Get all config
-//	@security	JWT
-//	@Accept		json
-//	@Produce	json
-//	@Success	200	{object}	config.Config
-//	@Failure	500	{object}	resp.Response{}
-//	@Router		/v1/basic/config [get]
-func (r *basicRoutes) getAllConfig(c *gin.Context) {
-	c.JSON(http.StatusOK, r.t.GetConfig())
 }
 
 // getShioajiUsage -.

@@ -641,21 +641,3 @@ func (uc *RealTimeUseCase) CreateRealTimePick(connectionID string, com chan *pb.
 		}
 	}
 }
-
-func (uc *RealTimeUseCase) SubscribeTopRankStockTick(count int64) error {
-	snapshots, err := uc.gRPCRealtime.GetAllStockSnapshot()
-	if err != nil {
-		return err
-	}
-
-	var arr []*entity.StockTarget
-	for _, v := range snapshots {
-		if len(arr) == int(count) {
-			break
-		}
-		arr = append(arr, &entity.StockTarget{StockNum: v.GetCode()})
-	}
-
-	uc.SubscribeStockTick(arr)
-	return nil
-}

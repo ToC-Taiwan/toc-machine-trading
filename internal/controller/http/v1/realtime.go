@@ -29,35 +29,11 @@ func NewRealTimeRoutes(handler *gin.RouterGroup, t usecase.RealTime, o usecase.T
 
 	h := handler.Group("/stream")
 	{
-		h.GET("/index", r.getIndex)
 		h.PUT("/snapshot", r.getSnapshots)
-		h.GET("/snapshot/tse", r.getTSESnapshot)
-
-		h.PUT("/subscribe/snapshot", r.subscribeTopRankStockTick)
-
 		h.GET("/ws/pick-stock", r.servePickStockWS)
-		h.GET("/ws/pick-stock/v2", r.servePickStockWSV2)
+		h.GET("/ws/v2/pick-stock", r.servePickStockWSV2)
 		h.GET("/ws/future", r.serveFutureWS)
 	}
-}
-
-// getTSESnapshot -.
-//
-//	@Tags		Stream V1
-//	@Summary	Get TSE snapshot
-//	@security	JWT
-//	@Accept		json
-//	@Produce	json
-//	@Success	200	{object}	entity.StockSnapShot
-//	@Failure	500	{object}	resp.Response{}
-//	@Router		/v1/stream/snapshot/tse [get]
-func (r *realTimeRoutes) getTSESnapshot(c *gin.Context) {
-	snapshot, err := r.t.GetTSESnapshot(c.Request.Context())
-	if err != nil {
-		resp.ErrorResponse(c, http.StatusInternalServerError, err)
-		return
-	}
-	c.JSON(http.StatusOK, snapshot)
 }
 
 type snapshotRequest struct {
@@ -94,19 +70,6 @@ func (r *realTimeRoutes) getSnapshots(c *gin.Context) {
 	c.JSON(http.StatusOK, snapshot)
 }
 
-// getIndex -.
-//
-//	@Tags		Stream V1
-//	@Summary	Get index
-//	@security	JWT
-//	@Accept		json
-//	@Produce	json
-//	@Success	200	{object}	entity.TradeIndex
-//	@Router		/v1/stream/index [get]
-func (r *realTimeRoutes) getIndex(c *gin.Context) {
-	c.JSON(http.StatusOK, r.t.GetTradeIndex())
-}
-
 func (r *realTimeRoutes) servePickStockWS(c *gin.Context) {
 	pick.StartWSPickStock(c, r.t)
 }
@@ -117,34 +80,4 @@ func (r *realTimeRoutes) servePickStockWSV2(c *gin.Context) {
 
 func (r *realTimeRoutes) serveFutureWS(c *gin.Context) {
 	future.StartWSFutureTrade(c, r.t, r.o, r.h)
-}
-
-type subscribeRequest struct {
-	Count int `json:"count"`
-}
-
-// subscribeTopRankStockTick -.
-//
-//	@Tags		Stream V1
-//	@Summary	Subscribe top rank stock tick
-//	@security	JWT
-//	@Accept		json
-//	@param		body	body	subscribeRequest{}	true	"Body"
-//	@Produce	json
-//	@Success	200
-//	@Failure	400	{object}	resp.Response{}
-//	@Failure	500	{object}	resp.Response{}
-//	@Router		/v1/stream/subscribe/snapshot [put]
-func (r *realTimeRoutes) subscribeTopRankStockTick(c *gin.Context) {
-	p := subscribeRequest{}
-	if err := c.ShouldBindJSON(&p); err != nil {
-		resp.ErrorResponse(c, http.StatusBadRequest, err)
-		return
-	}
-	err := r.t.SubscribeTopRankStockTick(int64(p.Count))
-	if err != nil {
-		resp.ErrorResponse(c, http.StatusInternalServerError, err)
-		return
-	}
-	c.JSON(http.StatusOK, nil)
 }

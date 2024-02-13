@@ -20,13 +20,9 @@ func NewOrderRoutes(handler *gin.RouterGroup, t usecase.Trade) {
 
 	h := handler.Group("/order")
 	{
-		h.GET("/all", r.getAllOrder)
 		h.GET("/balance", r.getAllTradeBalance)
-		h.GET("/balance/stock/last", r.getLastStockTradeBalance)
-		h.GET("/balance/future/last", r.getLastFutureTradeBalance)
-
-		h.GET("/date/:tradeday", r.getAllOrderByTradeDay)
-		h.GET("/account/balance", r.getAccountBalance)
+		h.GET("/future/all", r.getAllFutureOrder)
+		h.POST("/future/:tradeday", r.getAllFutureOrderByTradeDay)
 	}
 }
 
@@ -44,8 +40,8 @@ type allOrder struct {
 //	@Produce	json
 //	@Success	200	{object}	allOrder
 //	@Failure	500	{object}	resp.Response{}
-//	@Router		/v1/order/all [get]
-func (r *orderRoutes) getAllOrder(c *gin.Context) {
+//	@Router		/v1/order/future/all [get]
+func (r *orderRoutes) getAllFutureOrder(c *gin.Context) {
 	stockOrderArr, err := r.t.GetAllStockOrder(c.Request.Context())
 	if err != nil {
 		resp.ErrorResponse(c, http.StatusInternalServerError, err)
@@ -67,24 +63,23 @@ type futureOrders struct {
 	Orders []*entity.FutureOrder `json:"orders"`
 }
 
-// getAllOrderByTradeDay -.
+// getAllFutureOrderByTradeDay -.
 //
 //	@Tags		Order V1
-//	@Summary	Get all order by trade day
+//	@Summary	Get all future order by trade day
 //	@security	JWT
 //	@Accept		json
 //	@Produce	json
 //	@param		tradeday	path		string	true	"tradeday"
 //	@Success	200			{object}	futureOrders
 //	@Failure	500			{object}	resp.Response{}
-//	@Router		/v1/order/date/{tradeday} [get]
-func (r *orderRoutes) getAllOrderByTradeDay(c *gin.Context) {
+//	@Router		/v1/order/future/{tradeday} [post]
+func (r *orderRoutes) getAllFutureOrderByTradeDay(c *gin.Context) {
 	tradeDay := c.Param("tradeday")
 	if tradeDay == "" {
 		resp.ErrorResponse(c, http.StatusInternalServerError, "tradeday is empty")
 		return
 	}
-
 	futureOrderArr, err := r.t.GetFutureOrderByTradeDay(c.Request.Context(), tradeDay)
 	if err != nil {
 		resp.ErrorResponse(c, http.StatusInternalServerError, err)
@@ -125,64 +120,4 @@ func (r *orderRoutes) getAllTradeBalance(c *gin.Context) {
 		Stock:  allStockArr,
 		Future: allFutureArr,
 	})
-}
-
-// getLastStockTradeBalance -.
-//
-//	@Tags		Order V1
-//	@Summary	Get last stock trade balance
-//	@security	JWT
-//	@Accept		json
-//	@Produce	json
-//	@Success	200	{object}	entity.StockTradeBalance
-//	@Failure	500	{object}	resp.Response{}
-//	@Router		/v1/order/balance/stock/last [get]
-func (r *orderRoutes) getLastStockTradeBalance(c *gin.Context) {
-	balance, err := r.t.GetLastStockTradeBalance(c.Request.Context())
-	if err != nil {
-		resp.ErrorResponse(c, http.StatusInternalServerError, err)
-		return
-	}
-
-	c.JSON(http.StatusOK, balance)
-}
-
-// getLastFutureTradeBalance -.
-//
-//	@Tags		Order V1
-//	@Summary	Get last future trade balance
-//	@security	JWT
-//	@Accept		json
-//	@Produce	json
-//	@Success	200	{object}	entity.FutureTradeBalance
-//	@Failure	500	{object}	resp.Response{}
-//	@Router		/v1/order/balance/future/last [get]
-func (r *orderRoutes) getLastFutureTradeBalance(c *gin.Context) {
-	balance, err := r.t.GetLastFutureTradeBalance(c.Request.Context())
-	if err != nil {
-		resp.ErrorResponse(c, http.StatusInternalServerError, err)
-		return
-	}
-
-	c.JSON(http.StatusOK, balance)
-}
-
-// getAccountBalance -.
-//
-//	@Tags		Account V1
-//	@Summary	Get account balance
-//	@security	JWT
-//	@Accept		json
-//	@Produce	json
-//	@Success	200	{object}	entity.AccountBalance{}
-//	@Failure	500	{object}	resp.Response{}
-//	@Router		/v1/order/account/balance [get]
-func (r *orderRoutes) getAccountBalance(c *gin.Context) {
-	balance, err := r.t.GetAccountBalance(c.Request.Context())
-	if err != nil {
-		resp.ErrorResponse(c, http.StatusInternalServerError, err)
-		return
-	}
-
-	c.JSON(http.StatusOK, balance)
 }
