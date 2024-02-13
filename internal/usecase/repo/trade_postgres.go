@@ -878,12 +878,15 @@ func (r *TradeRepo) QueryInventoryStockByDate(ctx context.Context, date time.Tim
 		); err != nil {
 			return nil, err
 		}
-		position, err := r.getPositionStockByInvID(ctx, tx, e.UUID)
+		result = append(result, &e)
+	}
+
+	for i, v := range result {
+		position, err := r.getPositionStockByInvID(ctx, tx, v.UUID)
 		if err != nil {
 			continue
 		}
-		e.Position = position
-		result = append(result, &e)
+		result[i].Position = position
 	}
 	return result, nil
 }
