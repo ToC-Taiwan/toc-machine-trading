@@ -1484,6 +1484,21 @@ func (mr *MockTradeMockRecorder) GetFuturePosition() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFuturePosition", reflect.TypeOf((*MockTrade)(nil).GetFuturePosition))
 }
 
+// GetLatestInventoryStock mocks base method.
+func (m *MockTrade) GetLatestInventoryStock() ([]*entity.InventoryStock, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetLatestInventoryStock")
+	ret0, _ := ret[0].([]*entity.InventoryStock)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetLatestInventoryStock indicates an expected call of GetLatestInventoryStock.
+func (mr *MockTradeMockRecorder) GetLatestInventoryStock() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetLatestInventoryStock", reflect.TypeOf((*MockTrade)(nil).GetLatestInventoryStock))
+}
+
 // IsAuthUser mocks base method.
 func (m *MockTrade) IsAuthUser(username string) bool {
 	m.ctrl.T.Helper()
@@ -1751,6 +1766,21 @@ func (m *MockTradeRepo) QueryAllStockTradeBalance(ctx context.Context) ([]*entit
 func (mr *MockTradeRepoMockRecorder) QueryAllStockTradeBalance(ctx interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryAllStockTradeBalance", reflect.TypeOf((*MockTradeRepo)(nil).QueryAllStockTradeBalance), ctx)
+}
+
+// QueryInventoryStockByDate mocks base method.
+func (m *MockTradeRepo) QueryInventoryStockByDate(ctx context.Context, date time.Time) ([]*entity.InventoryStock, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "QueryInventoryStockByDate", ctx, date)
+	ret0, _ := ret[0].([]*entity.InventoryStock)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// QueryInventoryStockByDate indicates an expected call of QueryInventoryStockByDate.
+func (mr *MockTradeRepoMockRecorder) QueryInventoryStockByDate(ctx, date interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryInventoryStockByDate", reflect.TypeOf((*MockTradeRepo)(nil).QueryInventoryStockByDate), ctx, date)
 }
 
 // QueryInventoryUUIDStockByDate mocks base method.

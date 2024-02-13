@@ -503,6 +503,42 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/trade/inventory/stock": {
+            "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Trade V1"
+                ],
+                "summary": "Get latest inventory stock",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entity.InventoryStock"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/resp.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/trade/stock/buy/odd": {
             "put": {
                 "security": [
@@ -937,6 +973,35 @@ const docTemplate = `{
                 }
             }
         },
+        "entity.InventoryStock": {
+            "type": "object",
+            "properties": {
+                "AvgPrice": {
+                    "type": "number"
+                },
+                "Date": {
+                    "type": "string"
+                },
+                "Lot": {
+                    "type": "integer"
+                },
+                "Position": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entity.PositionStock"
+                    }
+                },
+                "Share": {
+                    "type": "integer"
+                },
+                "StockNum": {
+                    "type": "string"
+                },
+                "UUID": {
+                    "type": "string"
+                }
+            }
+        },
         "entity.NewUser": {
             "type": "object",
             "properties": {
@@ -1006,6 +1071,41 @@ const docTemplate = `{
                 "StatusFilled",
                 "StatusPartFilled"
             ]
+        },
+        "entity.PositionStock": {
+            "type": "object",
+            "properties": {
+                "Date": {
+                    "type": "string"
+                },
+                "Direction": {
+                    "type": "string"
+                },
+                "Dseq": {
+                    "type": "string"
+                },
+                "Fee": {
+                    "type": "number"
+                },
+                "InvID": {
+                    "type": "string"
+                },
+                "LastPrice": {
+                    "type": "number"
+                },
+                "Pnl": {
+                    "type": "number"
+                },
+                "Price": {
+                    "type": "number"
+                },
+                "Quantity": {
+                    "type": "integer"
+                },
+                "StockNum": {
+                    "type": "string"
+                }
+            }
         },
         "entity.ShioajiUsage": {
             "type": "object",

@@ -842,3 +842,48 @@ func (r *TradeRepo) ClearInventoryStockByUUID(ctx context.Context, uuid string) 
 	}
 	return nil
 }
+
+func (r *TradeRepo) QueryInventoryStockByDate(ctx context.Context, date time.Time) ([]*entity.InventoryStock, error) {
+	tx, err := r.BeginTransaction()
+	if err != nil {
+		return nil, err
+	}
+	defer r.EndTransaction(tx, err)
+
+	sql, arg, err := r.Builder.
+		Select("uuid, avg_price, lot, share, date, stock_num").
+		From(tableNameInventoryStock).
+		Where(squirrel.Eq{"date": date}).
+		ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	result := []*entity.InventoryStock{}
+	rows, err := tx.Query(ctx, sql, arg...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		e := entity.InventoryStock{}
+		if err := rows.Scan(
+			&e.UUID,
+			&e.AvgPrice,
+			&e.Lot,
+			&e.Share,
+			&e.Date,
+			&e.StockNum,
+		); err != nil {
+			return nil, err
+		}
+		position, err := r.getPositionStockByInvID(ctx, tx, e.UUID)
+		if err != nil {
+			continue
+		}
+		e.Position = position
+		result = append(result, &e)
+	}
+	return result, nil
+}

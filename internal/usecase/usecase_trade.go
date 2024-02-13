@@ -213,6 +213,10 @@ func (uc *TradeUseCase) updateStockInventory() {
 
 func (uc *TradeUseCase) updateFutureInventory() {}
 
+func (uc *TradeUseCase) GetLatestInventoryStock() ([]*entity.InventoryStock, error) {
+	return uc.repo.QueryInventoryStockByDate(context.Background(), time.Date(time.Now().Year(), time.Now().Month(), time.Now().Day(), 0, 0, 0, 0, time.Local))
+}
+
 func (uc *TradeUseCase) updateAllTradeBalance() {
 	for range time.NewTicker(time.Second * 20).C {
 		if uc.IsStockTradeTime() {

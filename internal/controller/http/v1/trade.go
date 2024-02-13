@@ -21,6 +21,7 @@ func NewTradeRoutes(handler *gin.RouterGroup, t usecase.Trade) {
 	h := handler.Group("/trade")
 	{
 		h.PUT("/stock/buy/odd", r.checkUserAuth, r.buyOddStock)
+		h.GET("/inventory/stock", r.getLatestInventoryStock)
 	}
 }
 
@@ -70,4 +71,23 @@ func (r *tradeRoutes) buyOddStock(c *gin.Context) {
 		OrderID: id,
 		Status:  status.String(),
 	})
+}
+
+// getLatestInventoryStock -.
+//
+//	@Tags		Trade V1
+//	@Summary	Get latest inventory stock
+//	@security	JWT
+//	@Accept		json
+//	@Produce	json
+//	@Success	200	{object}	[]entity.InventoryStock{}
+//	@failure	401	{object}	resp.Response{}
+//	@Router		/v1/trade/inventory/stock [get]
+func (r *tradeRoutes) getLatestInventoryStock(c *gin.Context) {
+	stocks, err := r.t.GetLatestInventoryStock()
+	if err != nil {
+		resp.ErrorResponse(c, http.StatusInternalServerError, err)
+		return
+	}
+	c.JSON(http.StatusOK, stocks)
 }

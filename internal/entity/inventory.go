@@ -19,17 +19,17 @@ type PositionStock struct {
 }
 
 type InventoryBase struct {
-	UUID     string
-	AvgPrice float64
-	Date     time.Time
+	UUID     string    `json:"UUID"`
+	AvgPrice float64   `json:"AvgPrice"`
+	Date     time.Time `json:"Date"`
 }
 
 type InventoryStock struct {
 	InventoryBase
-	StockNum string
-	Lot      int
-	Share    int
-	Position []*PositionStock
+	StockNum string           `json:"StockNum"`
+	Lot      int              `json:"Lot"`
+	Share    int              `json:"Share"`
+	Position []*PositionStock `json:"Position"`
 }
 
 type InventoryFuture struct {

@@ -135,6 +135,7 @@ type Trade interface {
 	GetFuturePosition() ([]*entity.FuturePosition, error)
 	IsFutureTradeTime() bool
 	IsAuthUser(username string) bool
+	GetLatestInventoryStock() ([]*entity.InventoryStock, error)
 }
 
 type TradeRepo interface {
@@ -154,6 +155,7 @@ type TradeRepo interface {
 	QueryInventoryUUIDStockByDate(ctx context.Context, date time.Time) (map[string]string, error)
 	InsertOrUpdateInventoryStock(ctx context.Context, t []*entity.InventoryStock) error
 	ClearInventoryStockByUUID(ctx context.Context, uuid string) error
+	QueryInventoryStockByDate(ctx context.Context, date time.Time) ([]*entity.InventoryStock, error)
 }
 
 type TradegRPCAPI interface {
