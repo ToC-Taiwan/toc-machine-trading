@@ -179,21 +179,6 @@ func (t *TradegRPCAPI) CancelStock(orderID string) (*pb.TradeResult, error) {
 	return r, nil
 }
 
-// GetOrderStatusByID GetOrderStatusByID
-func (t *TradegRPCAPI) GetOrderStatusByID(orderID string) (*pb.TradeResult, error) {
-	conn := t.pool.Get()
-	defer t.pool.Put(conn)
-
-	r, err := pb.NewTradeInterfaceClient(conn).GetOrderStatusByID(context.Background(), &pb.OrderID{
-		OrderId:  orderID,
-		Simulate: t.sim,
-	})
-	if err != nil {
-		return nil, err
-	}
-	return r, nil
-}
-
 // GetLocalOrderStatusArr -.
 func (t *TradegRPCAPI) GetLocalOrderStatusArr() error {
 	conn := t.pool.Get()
@@ -216,18 +201,6 @@ func (t *TradegRPCAPI) GetSimulateOrderStatusArr() error {
 		return err
 	}
 	return nil
-}
-
-// GetNonBlockOrderStatusArr GetNonBlockOrderStatusArr
-func (t *TradegRPCAPI) GetNonBlockOrderStatusArr() (*pb.ErrorMessage, error) {
-	conn := t.pool.Get()
-	defer t.pool.Put(conn)
-
-	r, err := pb.NewTradeInterfaceClient(conn).GetNonBlockOrderStatusArr(context.Background(), &emptypb.Empty{})
-	if err != nil {
-		return nil, err
-	}
-	return r, nil
 }
 
 // BuyFuture -.

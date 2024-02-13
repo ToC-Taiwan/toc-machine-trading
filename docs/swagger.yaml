@@ -146,27 +146,6 @@ definitions:
       update_date:
         type: string
     type: object
-  entity.StockHistoryKbar:
-    properties:
-      close:
-        type: number
-      high:
-        type: number
-      id:
-        type: integer
-      kbar_time:
-        type: string
-      low:
-        type: number
-      open:
-        type: number
-      stock:
-        $ref: '#/definitions/entity.Stock'
-      stock_num:
-        type: string
-      volume:
-        type: integer
-    type: object
   entity.StockOrder:
     properties:
       base_order:
@@ -280,15 +259,6 @@ definitions:
         items:
           $ref: '#/definitions/entity.FutureOrder'
         type: array
-    type: object
-  v1.lotStockRequest:
-    properties:
-      lot:
-        type: integer
-      num:
-        type: string
-      price:
-        type: number
     type: object
   v1.oddStockRequest:
     properties:
@@ -499,44 +469,6 @@ paths:
       summary: Push message to devices which has push token
       tags:
       - FCM V1
-  /v1/history/day-kbar/{stock}/{start_date}/{interval}:
-    get:
-      consumes:
-      - application/json
-      parameters:
-      - description: stock
-        in: path
-        name: stock
-        required: true
-        type: string
-      - description: start_date
-        in: path
-        name: start_date
-        required: true
-        type: string
-      - description: interval
-        in: path
-        name: interval
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/entity.StockHistoryKbar'
-            type: array
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/resp.Response'
-      security:
-      - JWT: []
-      summary: Get kbar data
-      tags:
-      - History V1
   /v1/login:
     post:
       consumes:
@@ -709,33 +641,6 @@ paths:
       summary: Get targets
       tags:
       - Targets V1
-  /v1/trade/stock/buy/lot:
-    put:
-      consumes:
-      - application/json
-      parameters:
-      - description: Body
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/v1.lotStockRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/v1.tradeResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/resp.Response'
-      security:
-      - JWT: []
-      summary: Buy lot stock
-      tags:
-      - Trade V1
   /v1/trade/stock/buy/odd:
     put:
       consumes:

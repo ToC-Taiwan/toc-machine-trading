@@ -40,18 +40,6 @@ func (t *BasicgRPCAPI) CreateLongConnection() error {
 	}
 }
 
-// Terminate -.
-func (t *BasicgRPCAPI) Terminate() error {
-	conn := t.pool.Get()
-	defer t.pool.Put(conn)
-
-	_, err := pb.NewBasicDataInterfaceClient(conn).Terminate(context.Background(), &emptypb.Empty{})
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
 // GetAllStockDetail GetAllStockDetail
 func (t *BasicgRPCAPI) GetAllStockDetail() ([]*pb.StockDetailMessage, error) {
 	conn := t.pool.Get()

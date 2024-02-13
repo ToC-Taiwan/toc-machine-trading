@@ -14,9 +14,6 @@ const (
 	tableNameHistoryStockKbar    string = "history_stock_kbar"
 	tableNameHistoryStockTick    string = "history_stock_tick"
 
-	tableNameHistoryFutureClose string = "history_future_close"
-	tableNameHistoryFutureTick  string = "history_future_tick"
-
 	tableNameTradeStockOrder    string = "trade_stock_order"
 	tableNameTradeStockBalance  string = "trade_stock_balance"
 	tableNameTradeFutureOrder   string = "trade_future_order"

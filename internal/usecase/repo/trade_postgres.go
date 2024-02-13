@@ -27,7 +27,7 @@ func NewTrade(pg *postgres.Postgres) *TradeRepo {
 
 // InsertOrUpdateOrderByOrderID -.
 func (r *TradeRepo) InsertOrUpdateOrderByOrderID(ctx context.Context, t *entity.StockOrder) error {
-	dbOrder, err := r.QueryStockOrderByID(ctx, t.OrderID)
+	dbOrder, err := r.queryStockOrderByID(ctx, t.OrderID)
 	if err != nil {
 		return err
 	}
@@ -71,8 +71,8 @@ func (r *TradeRepo) InsertOrUpdateOrderByOrderID(ctx context.Context, t *entity.
 	return nil
 }
 
-// QueryStockOrderByID -.
-func (r *TradeRepo) QueryStockOrderByID(ctx context.Context, orderID string) (*entity.StockOrder, error) {
+// queryStockOrderByID -.
+func (r *TradeRepo) queryStockOrderByID(ctx context.Context, orderID string) (*entity.StockOrder, error) {
 	sql, arg, err := r.Builder.
 		Select("order_id, status, order_time, stock_num, action, price, lot, share, number, name, exchange, category, day_trade, last_close, update_date").
 		From(tableNameTradeStockOrder).
@@ -155,7 +155,7 @@ func (r *TradeRepo) QueryAllStockOrder(ctx context.Context) ([]*entity.StockOrde
 
 // InsertOrUpdateStockTradeBalance -.
 func (r *TradeRepo) InsertOrUpdateStockTradeBalance(ctx context.Context, t *entity.StockTradeBalance) error {
-	dbTradeBalance, err := r.QueryStockTradeBalanceByDate(ctx, t.TradeDay)
+	dbTradeBalance, err := r.queryStockTradeBalanceByDate(ctx, t.TradeDay)
 	if err != nil {
 		return err
 	}
@@ -198,8 +198,8 @@ func (r *TradeRepo) InsertOrUpdateStockTradeBalance(ctx context.Context, t *enti
 	return nil
 }
 
-// QueryStockTradeBalanceByDate -.
-func (r *TradeRepo) QueryStockTradeBalanceByDate(ctx context.Context, date time.Time) (*entity.StockTradeBalance, error) {
+// queryStockTradeBalanceByDate -.
+func (r *TradeRepo) queryStockTradeBalanceByDate(ctx context.Context, date time.Time) (*entity.StockTradeBalance, error) {
 	sql, arg, err := r.Builder.
 		Select("trade_count, forward, reverse, original_balance, discount, total, trade_day").
 		From(tableNameTradeStockBalance).
@@ -280,8 +280,8 @@ func (r *TradeRepo) QueryAllFutureTradeBalance(ctx context.Context) ([]*entity.F
 	return result, nil
 }
 
-// QueryFutureOrderByID -.
-func (r *TradeRepo) QueryFutureOrderByID(ctx context.Context, orderID string) (*entity.FutureOrder, error) {
+// queryFutureOrderByID -.
+func (r *TradeRepo) queryFutureOrderByID(ctx context.Context, orderID string) (*entity.FutureOrder, error) {
 	sql, arg, err := r.Builder.
 		Select("order_id, status, order_time, trade_future_order.code, action, price, position, basic_future.code, symbol, name, category, delivery_month, delivery_date, underlying_kind, unit, limit_up, limit_down, reference, update_date").
 		From(tableNameTradeFutureOrder).
@@ -305,7 +305,7 @@ func (r *TradeRepo) QueryFutureOrderByID(ctx context.Context, orderID string) (*
 
 // InsertOrUpdateFutureOrderByOrderID -.
 func (r *TradeRepo) InsertOrUpdateFutureOrderByOrderID(ctx context.Context, t *entity.FutureOrder) error {
-	dbOrder, err := r.QueryFutureOrderByID(ctx, t.OrderID)
+	dbOrder, err := r.queryFutureOrderByID(ctx, t.OrderID)
 	if err != nil {
 		return err
 	}
@@ -407,8 +407,8 @@ func (r *TradeRepo) QueryAllFutureOrderByDate(ctx context.Context, timeRange []t
 	return result, nil
 }
 
-// QueryFutureTradeBalanceByDate -.
-func (r *TradeRepo) QueryFutureTradeBalanceByDate(ctx context.Context, date time.Time) (*entity.FutureTradeBalance, error) {
+// queryFutureTradeBalanceByDate -.
+func (r *TradeRepo) queryFutureTradeBalanceByDate(ctx context.Context, date time.Time) (*entity.FutureTradeBalance, error) {
 	sql, arg, err := r.Builder.
 		Select("trade_count, forward, reverse, total, trade_day").
 		From(tableNameFutureTradeBalance).
@@ -431,7 +431,7 @@ func (r *TradeRepo) QueryFutureTradeBalanceByDate(ctx context.Context, date time
 
 // InsertOrUpdateFutureTradeBalance -.
 func (r *TradeRepo) InsertOrUpdateFutureTradeBalance(ctx context.Context, t *entity.FutureTradeBalance) error {
-	dbTradeBalance, err := r.QueryFutureTradeBalanceByDate(ctx, t.TradeDay)
+	dbTradeBalance, err := r.queryFutureTradeBalanceByDate(ctx, t.TradeDay)
 	if err != nil {
 		return err
 	}
@@ -493,7 +493,7 @@ func (r *TradeRepo) QueryLastAccountBalance(ctx context.Context) (*entity.Accoun
 	return &e, nil
 }
 
-func (r *TradeRepo) QueryAccountBalanceByDate(ctx context.Context, date time.Time) (*entity.AccountBalance, error) {
+func (r *TradeRepo) queryAccountBalanceByDate(ctx context.Context, date time.Time) (*entity.AccountBalance, error) {
 	sql, arg, err := r.Builder.
 		Select("id, date, balance, today_margin, available_margin, yesterday_margin, risk_indicator").
 		From(tableNameAccountBalance).
@@ -515,7 +515,7 @@ func (r *TradeRepo) QueryAccountBalanceByDate(ctx context.Context, date time.Tim
 }
 
 func (r *TradeRepo) InsertOrUpdateAccountBalance(ctx context.Context, t *entity.AccountBalance) error {
-	dbStatus, err := r.QueryAccountBalanceByDate(ctx, t.Date)
+	dbStatus, err := r.queryAccountBalanceByDate(ctx, t.Date)
 	if err != nil {
 		return err
 	}
@@ -556,7 +556,7 @@ func (r *TradeRepo) InsertOrUpdateAccountBalance(ctx context.Context, t *entity.
 	return nil
 }
 
-func (r *TradeRepo) QueryAccountSettlementByDate(ctx context.Context, date time.Time) (*entity.Settlement, error) {
+func (r *TradeRepo) queryAccountSettlementByDate(ctx context.Context, date time.Time) (*entity.Settlement, error) {
 	sql, arg, err := r.Builder.
 		Select("date, settlement").
 		From(tableNameAccountSettlement).
@@ -578,7 +578,7 @@ func (r *TradeRepo) QueryAccountSettlementByDate(ctx context.Context, date time.
 }
 
 func (r *TradeRepo) InsertOrUpdateAccountSettlement(ctx context.Context, t *entity.Settlement) error {
-	dbSettle, err := r.QueryAccountSettlementByDate(ctx, t.Date)
+	dbSettle, err := r.queryAccountSettlementByDate(ctx, t.Date)
 	if err != nil {
 		return err
 	}

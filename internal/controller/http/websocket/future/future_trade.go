@@ -171,7 +171,7 @@ func (w *WSFutureTrade) sendFuture() {
 
 	<-w.Ctx().Done()
 
-	w.s.DeleteFutureRealTimeClient(connectionID)
+	w.s.DeleteRealTimeClient(connectionID)
 	close(tickChan)
 	close(orderStatusChan)
 }
@@ -407,7 +407,7 @@ func (w *WSFutureTrade) fetchKbar() []*entity.FutureHistoryKbar {
 	firstTry := time.Now()
 
 	for {
-		if kbarArr, err = w.h.FetchFutureHistoryKbar(w.s.GetMainFuture().Code, firstTry); err != nil {
+		if kbarArr, err = w.h.GetFutureHistoryKbarByDate(w.s.GetMainFuture().Code, firstTry); err != nil {
 			w.SendToClient(newErrMessageProto(errGetKbarFail))
 			return nil
 		} else if len(kbarArr) > 0 {

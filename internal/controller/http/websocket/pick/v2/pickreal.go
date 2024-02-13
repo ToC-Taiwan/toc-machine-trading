@@ -44,7 +44,7 @@ func StartWSPickStock(c *gin.Context, s usecase.RealTime) {
 		}
 	}()
 	w.ReadFromClient(forwardChan)
-	w.s.DeleteFutureRealTimeClient(connectionID)
+	w.s.DeleteRealTimeClient(connectionID)
 	close(w.tickChan)
 }
 

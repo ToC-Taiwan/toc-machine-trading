@@ -4,7 +4,6 @@ import (
 	"context"
 	"time"
 
-	"tmt/internal/config"
 	"tmt/internal/entity"
 	"tmt/pb"
 )
@@ -17,31 +16,19 @@ type Analyze interface {
 
 type Basic interface {
 	GetStockDetail(stockNum string) *entity.Stock
-	GetFutureDetail(code string) *entity.Future
-	GetConfig() *config.Config
 	GetShioajiUsage() (*entity.ShioajiUsage, error)
 }
 
 type BasicRepo interface {
-	QueryAllStock(ctx context.Context) (map[string]*entity.Stock, error)
-	InsertOrUpdatetStockArr(ctx context.Context, t []*entity.Stock) error
 	UpdateAllStockDayTradeToNo(ctx context.Context) error
-
-	QueryAllCalendar(ctx context.Context) (map[time.Time]*entity.CalendarDate, error)
+	InsertOrUpdatetStockArr(ctx context.Context, t []*entity.Stock) error
 	InsertOrUpdatetCalendarDateArr(ctx context.Context, t []*entity.CalendarDate) error
-
-	QueryAllFuture(ctx context.Context) (map[string]*entity.Future, error)
-	QueryFutureByLikeName(ctx context.Context, name string) ([]*entity.Future, error)
 	InsertOrUpdatetFutureArr(ctx context.Context, t []*entity.Future) error
-
-	QueryAllOption(ctx context.Context) (map[string]*entity.Option, error)
-	QueryOptionByLikeName(ctx context.Context, name string) ([]*entity.Option, error)
 	InsertOrUpdatetOptionArr(ctx context.Context, t []*entity.Option) error
 }
 
 type BasicgRPCAPI interface {
 	CreateLongConnection() error
-	Terminate() error
 	Login() error
 	CheckUsage() (*pb.ShioajiUsage, error)
 	GetAllStockDetail() ([]*pb.StockDetailMessage, error)
@@ -50,11 +37,8 @@ type BasicgRPCAPI interface {
 }
 
 type History interface {
-	GetTradeDay() time.Time
-
-	GetDayKbarByStockNumDate(stockNum string, date time.Time) *entity.StockHistoryKbar
 	GetDayKbarByStockNumMultiDate(stockNum string, date time.Time, interval int64) ([]*entity.StockHistoryKbar, error)
-	FetchFutureHistoryKbar(code string, date time.Time) ([]*entity.FutureHistoryKbar, error)
+	GetFutureHistoryKbarByDate(code string, date time.Time) ([]*entity.FutureHistoryKbar, error)
 }
 
 type HistoryRepo interface {
@@ -69,37 +53,22 @@ type HistoryRepo interface {
 	DeleteHistoryKbarByStockAndDate(ctx context.Context, stockNumArr []string, date time.Time) error
 	DeleteHistoryTickByStockAndDate(ctx context.Context, stockNumArr []string, date time.Time) error
 	DeleteHistoryCloseByStockAndDate(ctx context.Context, stockNumArr []string, date time.Time) error
-	InsertFutureHistoryTickArr(ctx context.Context, t []*entity.FutureHistoryTick) error
-	QueryFutureHistoryTickArrByTime(ctx context.Context, code string, startTime, endTime time.Time) ([]*entity.FutureHistoryTick, error)
-	InsertFutureHistoryClose(ctx context.Context, c *entity.FutureHistoryClose) error
-	QueryFutureHistoryCloseByDate(ctx context.Context, code string, tradeDay time.Time) (*entity.FutureHistoryClose, error)
 }
 
 type HistorygRPCAPI interface {
 	GetStockHistoryTick(stockNumArr []string, date string) ([]*pb.HistoryTickMessage, error)
 	GetStockHistoryKbar(stockNumArr []string, date string) ([]*pb.HistoryKbarMessage, error)
 	GetStockHistoryClose(stockNumArr []string, date string) ([]*pb.HistoryCloseMessage, error)
-	GetStockHistoryCloseByDateArr(stockNumArr []string, date []string) ([]*pb.HistoryCloseMessage, error)
-	GetStockTSEHistoryTick(date string) ([]*pb.HistoryTickMessage, error)
-	GetStockTSEHistoryKbar(date string) ([]*pb.HistoryKbarMessage, error)
-	GetStockTSEHistoryClose(date string) ([]*pb.HistoryCloseMessage, error)
-	GetFutureHistoryTick(codeArr []string, date string) ([]*pb.HistoryTickMessage, error)
 	GetFutureHistoryKbar(codeArr []string, date string) ([]*pb.HistoryKbarMessage, error)
-	GetFutureHistoryClose(codeArr []string, date string) ([]*pb.HistoryCloseMessage, error)
 }
 
 type RealTime interface {
 	GetStockSnapshotByNumArr(stockNumArr []string) ([]*entity.StockSnapShot, error)
 	GetTradeIndex() *entity.TradeIndex
-	GetTSESnapshot(ctx context.Context) (*entity.StockSnapShot, error)
-	GetOTCSnapshot(ctx context.Context) (*entity.StockSnapShot, error)
-
 	GetMainFuture() *entity.Future
 	GetFutureSnapshotByCode(code string) (*entity.FutureSnapShot, error)
-
 	NewFutureRealTimeClient(tickChan chan *entity.RealTimeFutureTick, orderStatusChan chan interface{}, connectionID string)
-	DeleteFutureRealTimeClient(connectionID string)
-
+	DeleteRealTimeClient(connectionID string)
 	CreateRealTimePick(connectionID string, com chan *pb.PickRealMap, tickChan chan []byte)
 }
 
@@ -116,7 +85,6 @@ type RealTimegRPCAPI interface {
 	GetNasdaqFuture() (*pb.YahooFinancePrice, error)
 	GetStockVolumeRank(date string) ([]*pb.StockVolumeRankMessage, error)
 	GetFutureSnapshotByCode(code string) (*pb.SnapshotMessage, error)
-
 	GetStockVolumeRankPB(date string) (*pb.StockVolumeRankResponse, error)
 }
 
@@ -127,6 +95,7 @@ type SubscribegRPCAPI interface {
 	SubscribeStockBidAsk(stockNumArr []string) ([]string, error)
 	UnSubscribeStockBidAsk(stockNumArr []string) ([]string, error)
 	UnSubscribeAllBidAsk() (*pb.ErrorMessage, error)
+
 	SubscribeFutureTick(codeArr []string) ([]string, error)
 	UnSubscribeFutureTick(codeArr []string) ([]string, error)
 	SubscribeFutureBidAsk(codeArr []string) ([]string, error)
@@ -137,13 +106,8 @@ type Rabbit interface {
 	EventConsumer(eventChan chan *entity.SinopacEvent)
 	OrderStatusConsumer(orderStatusChan chan interface{})
 	OrderStatusArrConsumer(orderStatusChan chan interface{})
-	StockTickConsumer(stockNum string, tickChan chan *entity.RealTimeStockTick)
-	StockBidAskConsumer(stockNum string, bidAskChan chan *entity.RealTimeStockBidAsk)
-	FutureTickConsumer(code string, tickChan chan *entity.RealTimeFutureTick)
-	FutureBidAskConsumer(code string, bidAskChan chan *entity.FutureRealTimeBidAsk)
-
 	StockTickPbConsumer(ctx context.Context, stockNum string, tickChan chan []byte)
-
+	FutureTickConsumer(code string, tickChan chan *entity.RealTimeFutureTick)
 	Close()
 }
 
@@ -163,16 +127,11 @@ type Trade interface {
 	GetAllFutureOrder(ctx context.Context) ([]*entity.FutureOrder, error)
 	GetAllStockTradeBalance(ctx context.Context) ([]*entity.StockTradeBalance, error)
 	GetAllFutureTradeBalance(ctx context.Context) ([]*entity.FutureTradeBalance, error)
-
 	GetFutureOrderByTradeDay(ctx context.Context, tradeDay string) ([]*entity.FutureOrder, error)
-
+	BuyOddStock(num string, price float64, share int64) (string, entity.OrderStatus, error)
 	BuyFuture(order *entity.FutureOrder) (string, entity.OrderStatus, error)
 	SellFuture(order *entity.FutureOrder) (string, entity.OrderStatus, error)
 	CancelFutureOrderByID(orderID string) (string, entity.OrderStatus, error)
-
-	BuyLotStock(num string, price float64, lot int64) (string, entity.OrderStatus, error)
-	BuyOddStock(num string, price float64, share int64) (string, entity.OrderStatus, error)
-
 	GetFuturePosition() ([]*entity.FuturePosition, error)
 	IsFutureTradeTime() bool
 	IsAuthUser(username string) bool
@@ -180,23 +139,17 @@ type Trade interface {
 
 type TradeRepo interface {
 	QueryAllStockTradeBalance(ctx context.Context) ([]*entity.StockTradeBalance, error)
-	QueryStockTradeBalanceByDate(ctx context.Context, date time.Time) (*entity.StockTradeBalance, error)
 	InsertOrUpdateStockTradeBalance(ctx context.Context, t *entity.StockTradeBalance) error
 	QueryAllFutureTradeBalance(ctx context.Context) ([]*entity.FutureTradeBalance, error)
-	QueryFutureTradeBalanceByDate(ctx context.Context, date time.Time) (*entity.FutureTradeBalance, error)
 	InsertOrUpdateFutureTradeBalance(ctx context.Context, t *entity.FutureTradeBalance) error
-	QueryStockOrderByID(ctx context.Context, orderID string) (*entity.StockOrder, error)
 	InsertOrUpdateOrderByOrderID(ctx context.Context, t *entity.StockOrder) error
 	QueryAllStockOrder(ctx context.Context) ([]*entity.StockOrder, error)
 	QueryAllStockOrderByDate(ctx context.Context, timeTange []time.Time) ([]*entity.StockOrder, error)
-	QueryFutureOrderByID(ctx context.Context, orderID string) (*entity.FutureOrder, error)
 	InsertOrUpdateFutureOrderByOrderID(ctx context.Context, t *entity.FutureOrder) error
 	QueryAllFutureOrder(ctx context.Context) ([]*entity.FutureOrder, error)
 	QueryAllFutureOrderByDate(ctx context.Context, timeTange []time.Time) ([]*entity.FutureOrder, error)
 	QueryLastAccountBalance(ctx context.Context) (*entity.AccountBalance, error)
-	QueryAccountBalanceByDate(ctx context.Context, date time.Time) (*entity.AccountBalance, error)
 	InsertOrUpdateAccountBalance(ctx context.Context, t *entity.AccountBalance) error
-	QueryAccountSettlementByDate(ctx context.Context, date time.Time) (*entity.Settlement, error)
 	InsertOrUpdateAccountSettlement(ctx context.Context, t *entity.Settlement) error
 	QueryInventoryUUIDStockByDate(ctx context.Context, date time.Time) (map[string]string, error)
 	InsertOrUpdateInventoryStock(ctx context.Context, t []*entity.InventoryStock) error
@@ -206,21 +159,20 @@ type TradeRepo interface {
 type TradegRPCAPI interface {
 	BuyStock(order *entity.StockOrder) (*pb.TradeResult, error)
 	SellStock(order *entity.StockOrder) (*pb.TradeResult, error)
-	BuyOddStock(order *entity.StockOrder) (*pb.TradeResult, error)
-	SellOddStock(order *entity.StockOrder) (*pb.TradeResult, error)
 	SellFirstStock(order *entity.StockOrder) (*pb.TradeResult, error)
 	CancelStock(orderID string) (*pb.TradeResult, error)
+
+	BuyOddStock(order *entity.StockOrder) (*pb.TradeResult, error)
+	SellOddStock(order *entity.StockOrder) (*pb.TradeResult, error)
 
 	BuyFuture(order *entity.FutureOrder) (*pb.TradeResult, error)
 	SellFuture(order *entity.FutureOrder) (*pb.TradeResult, error)
 	SellFirstFuture(order *entity.FutureOrder) (*pb.TradeResult, error)
 	CancelFuture(orderID string) (*pb.TradeResult, error)
 
-	GetOrderStatusByID(orderID string) (*pb.TradeResult, error)
 	GetLocalOrderStatusArr() error
 	GetSimulateOrderStatusArr() error
 
-	GetNonBlockOrderStatusArr() (*pb.ErrorMessage, error)
 	GetFuturePosition() (*pb.FuturePositionArr, error)
 	GetStockPosition() (*pb.StockPositionArr, error)
 	GetSettlement() (*pb.SettlementList, error)

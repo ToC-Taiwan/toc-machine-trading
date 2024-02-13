@@ -21,7 +21,6 @@ func NewTradeRoutes(handler *gin.RouterGroup, t usecase.Trade) {
 	h := handler.Group("/trade")
 	{
 		h.PUT("/stock/buy/odd", r.checkUserAuth, r.buyOddStock)
-		h.PUT("/stock/buy/lot", r.checkUserAuth, r.buyLotStock)
 	}
 }
 
@@ -29,12 +28,6 @@ type oddStockRequest struct {
 	Num   string  `json:"num"`
 	Price float64 `json:"price"`
 	Share int64   `json:"share"`
-}
-
-type lotStockRequest struct {
-	Num   string  `json:"num"`
-	Price float64 `json:"price"`
-	Lot   int64   `json:"lot"`
 }
 
 type tradeResponse struct {
@@ -69,35 +62,6 @@ func (r *tradeRoutes) buyOddStock(c *gin.Context) {
 	}
 
 	id, status, err := r.t.BuyOddStock(p.Num, p.Price, p.Share)
-	if err != nil {
-		resp.ErrorResponse(c, http.StatusInternalServerError, err)
-		return
-	}
-	c.JSON(http.StatusOK, tradeResponse{
-		OrderID: id,
-		Status:  status.String(),
-	})
-}
-
-// buyLotStock -.
-//
-//	@Tags		Trade V1
-//	@Summary	Buy lot stock
-//	@security	JWT
-//	@Accept		json
-//	@Produce	json
-//	@param		body	body		lotStockRequest{}	true	"Body"
-//	@Success	200		{object}	tradeResponse{}
-//	@failure	401		{object}	resp.Response{}
-//	@Router		/v1/trade/stock/buy/lot [put]
-func (r *tradeRoutes) buyLotStock(c *gin.Context) {
-	p := lotStockRequest{}
-	if err := c.ShouldBindJSON(&p); err != nil {
-		resp.ErrorResponse(c, http.StatusBadRequest, err)
-		return
-	}
-
-	id, status, err := r.t.BuyLotStock(p.Num, p.Price, p.Lot)
 	if err != nil {
 		resp.ErrorResponse(c, http.StatusInternalServerError, err)
 		return

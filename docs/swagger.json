@@ -214,65 +214,6 @@
                 }
             }
         },
-        "/v1/history/day-kbar/{stock}/{start_date}/{interval}": {
-            "get": {
-                "security": [
-                    {
-                        "JWT": []
-                    }
-                ],
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "History V1"
-                ],
-                "summary": "Get kbar data",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "stock",
-                        "name": "stock",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "start_date",
-                        "name": "start_date",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "interval",
-                        "name": "interval",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/entity.StockHistoryKbar"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/resp.Response"
-                        }
-                    }
-                }
-            }
-        },
         "/v1/login": {
             "post": {
                 "consumes": [
@@ -549,50 +490,6 @@
                             "items": {
                                 "$ref": "#/definitions/entity.StockTarget"
                             }
-                        }
-                    }
-                }
-            }
-        },
-        "/v1/trade/stock/buy/lot": {
-            "put": {
-                "security": [
-                    {
-                        "JWT": []
-                    }
-                ],
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Trade V1"
-                ],
-                "summary": "Buy lot stock",
-                "parameters": [
-                    {
-                        "description": "Body",
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/v1.lotStockRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/v1.tradeResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/resp.Response"
                         }
                     }
                 }
@@ -1142,38 +1039,6 @@
                 }
             }
         },
-        "entity.StockHistoryKbar": {
-            "type": "object",
-            "properties": {
-                "close": {
-                    "type": "number"
-                },
-                "high": {
-                    "type": "number"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "kbar_time": {
-                    "type": "string"
-                },
-                "low": {
-                    "type": "number"
-                },
-                "open": {
-                    "type": "number"
-                },
-                "stock": {
-                    "$ref": "#/definitions/entity.Stock"
-                },
-                "stock_num": {
-                    "type": "string"
-                },
-                "volume": {
-                    "type": "integer"
-                }
-            }
-        },
         "entity.StockOrder": {
             "type": "object",
             "properties": {
@@ -1346,20 +1211,6 @@
                     "items": {
                         "$ref": "#/definitions/entity.FutureOrder"
                     }
-                }
-            }
-        },
-        "v1.lotStockRequest": {
-            "type": "object",
-            "properties": {
-                "lot": {
-                    "type": "integer"
-                },
-                "num": {
-                    "type": "string"
-                },
-                "price": {
-                    "type": "number"
                 }
             }
         },

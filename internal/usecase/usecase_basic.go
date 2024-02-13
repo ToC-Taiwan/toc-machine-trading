@@ -236,11 +236,3 @@ func (uc *BasicUseCase) updateRepoOption() error {
 func (uc *BasicUseCase) GetStockDetail(stockNum string) *entity.Stock {
 	return uc.cc.GetStockDetail(stockNum)
 }
-
-func (uc *BasicUseCase) GetFutureDetail(code string) *entity.Future {
-	return uc.cc.GetFutureDetail(code)
-}
-
-func (uc *BasicUseCase) GetConfig() *config.Config {
-	return uc.cfg
-}

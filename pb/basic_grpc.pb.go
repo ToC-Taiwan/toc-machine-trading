@@ -21,7 +21,6 @@ const _ = grpc.SupportPackageIsVersion7
 
 const (
 	BasicDataInterface_CreateLongConnection_FullMethodName = "/forwarder.BasicDataInterface/CreateLongConnection"
-	BasicDataInterface_Terminate_FullMethodName            = "/forwarder.BasicDataInterface/Terminate"
 	BasicDataInterface_CheckUsage_FullMethodName           = "/forwarder.BasicDataInterface/CheckUsage"
 	BasicDataInterface_Login_FullMethodName                = "/forwarder.BasicDataInterface/Login"
 	BasicDataInterface_GetAllStockDetail_FullMethodName    = "/forwarder.BasicDataInterface/GetAllStockDetail"
@@ -34,7 +33,6 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type BasicDataInterfaceClient interface {
 	CreateLongConnection(ctx context.Context, opts ...grpc.CallOption) (BasicDataInterface_CreateLongConnectionClient, error)
-	Terminate(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	CheckUsage(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ShioajiUsage, error)
 	Login(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	GetAllStockDetail(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*StockDetailResponse, error)
@@ -82,15 +80,6 @@ func (x *basicDataInterfaceCreateLongConnectionClient) CloseAndRecv() (*emptypb.
 		return nil, err
 	}
 	return m, nil
-}
-
-func (c *basicDataInterfaceClient) Terminate(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, BasicDataInterface_Terminate_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
 }
 
 func (c *basicDataInterfaceClient) CheckUsage(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ShioajiUsage, error) {
@@ -143,7 +132,6 @@ func (c *basicDataInterfaceClient) GetAllOptionDetail(ctx context.Context, in *e
 // for forward compatibility
 type BasicDataInterfaceServer interface {
 	CreateLongConnection(BasicDataInterface_CreateLongConnectionServer) error
-	Terminate(context.Context, *emptypb.Empty) (*emptypb.Empty, error)
 	CheckUsage(context.Context, *emptypb.Empty) (*ShioajiUsage, error)
 	Login(context.Context, *emptypb.Empty) (*emptypb.Empty, error)
 	GetAllStockDetail(context.Context, *emptypb.Empty) (*StockDetailResponse, error)
@@ -158,9 +146,6 @@ type UnimplementedBasicDataInterfaceServer struct {
 
 func (UnimplementedBasicDataInterfaceServer) CreateLongConnection(BasicDataInterface_CreateLongConnectionServer) error {
 	return status.Errorf(codes.Unimplemented, "method CreateLongConnection not implemented")
-}
-func (UnimplementedBasicDataInterfaceServer) Terminate(context.Context, *emptypb.Empty) (*emptypb.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Terminate not implemented")
 }
 func (UnimplementedBasicDataInterfaceServer) CheckUsage(context.Context, *emptypb.Empty) (*ShioajiUsage, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CheckUsage not implemented")
@@ -214,24 +199,6 @@ func (x *basicDataInterfaceCreateLongConnectionServer) Recv() (*emptypb.Empty, e
 		return nil, err
 	}
 	return m, nil
-}
-
-func _BasicDataInterface_Terminate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(emptypb.Empty)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(BasicDataInterfaceServer).Terminate(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: BasicDataInterface_Terminate_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(BasicDataInterfaceServer).Terminate(ctx, req.(*emptypb.Empty))
-	}
-	return interceptor(ctx, in, info, handler)
 }
 
 func _BasicDataInterface_CheckUsage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -331,10 +298,6 @@ var BasicDataInterface_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "forwarder.BasicDataInterface",
 	HandlerType: (*BasicDataInterfaceServer)(nil),
 	Methods: []grpc.MethodDesc{
-		{
-			MethodName: "Terminate",
-			Handler:    _BasicDataInterface_Terminate_Handler,
-		},
 		{
 			MethodName: "CheckUsage",
 			Handler:    _BasicDataInterface_CheckUsage_Handler,

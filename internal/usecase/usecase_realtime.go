@@ -89,7 +89,6 @@ func NewRealTime() RealTime {
 		uc.logger.Fatal(e)
 	}
 
-	uc.checkFutureInventory()
 	uc.periodUpdateTradeIndex()
 	uc.checkFutureTradeSwitch()
 	uc.checkStockTradeSwitch()
@@ -100,22 +99,6 @@ func NewRealTime() RealTime {
 	uc.bus.SubscribeAsync(topicSubscribeFutureTickTargets, true, uc.SetMainFuture)
 
 	return uc
-}
-
-func (uc *RealTimeUseCase) checkFutureInventory() {
-	position, err := uc.sc.GetFuturePosition()
-	if err != nil {
-		uc.logger.Fatal(err)
-		return
-	}
-
-	for _, v := range position.GetPositionArr() {
-		if uc.cc.GetFutureDetail(v.GetCode()) != nil {
-			uc.logger.Warnf("future inventory is not empty, code: %s", v.GetCode())
-			uc.inventoryIsNotEmpty = true
-			return
-		}
-	}
 }
 
 func (uc *RealTimeUseCase) checkStockTradeSwitch() {
@@ -218,7 +201,7 @@ func (uc *RealTimeUseCase) updateNFIndex() {
 
 func (uc *RealTimeUseCase) updateTSEIndex() {
 	for range time.NewTicker(time.Second * 3).C {
-		if data, err := uc.GetTSESnapshot(context.Background()); err != nil {
+		if data, err := uc.getTSESnapshot(); err != nil {
 			uc.logger.Error(err)
 		} else {
 			uc.tradeIndex.TSE.UpdateIndexStatus(data.PriceChg)
@@ -228,7 +211,7 @@ func (uc *RealTimeUseCase) updateTSEIndex() {
 
 func (uc *RealTimeUseCase) updateOTCIndex() {
 	for range time.NewTicker(time.Second * 3).C {
-		if data, err := uc.GetOTCSnapshot(context.Background()); err != nil {
+		if data, err := uc.getOTCSnapshot(); err != nil {
 			uc.logger.Error(err)
 		} else {
 			uc.tradeIndex.OTC.UpdateIndexStatus(data.PriceChg)
@@ -272,8 +255,8 @@ func (uc *RealTimeUseCase) ReceiveOrderStatus(ctx context.Context) {
 	go uc.commonRabbit.OrderStatusArrConsumer(orderStatusChan)
 }
 
-// GetTSESnapshot -.
-func (uc *RealTimeUseCase) GetTSESnapshot(ctx context.Context) (*entity.StockSnapShot, error) {
+// getTSESnapshot -.
+func (uc *RealTimeUseCase) getTSESnapshot() (*entity.StockSnapShot, error) {
 	body, err := uc.gRPCRealtime.GetStockSnapshotTSE()
 	if err != nil {
 		return nil, err
@@ -300,8 +283,8 @@ func (uc *RealTimeUseCase) GetTSESnapshot(ctx context.Context) (*entity.StockSna
 	}, nil
 }
 
-// GetOTCSnapshot -.
-func (uc *RealTimeUseCase) GetOTCSnapshot(ctx context.Context) (*entity.StockSnapShot, error) {
+// getOTCSnapshot -.
+func (uc *RealTimeUseCase) getOTCSnapshot() (*entity.StockSnapShot, error) {
 	body, err := uc.gRPCRealtime.GetStockSnapshotOTC()
 	if err != nil {
 		return nil, err
@@ -505,7 +488,7 @@ func (uc *RealTimeUseCase) NewFutureRealTimeClient(tickChan chan *entity.RealTim
 	go r.FutureTickConsumer(uc.mainFutureCode, tickChan)
 }
 
-func (uc *RealTimeUseCase) DeleteFutureRealTimeClient(connectionID string) {
+func (uc *RealTimeUseCase) DeleteRealTimeClient(connectionID string) {
 	uc.clientRabbitMapLock.Lock()
 	defer uc.clientRabbitMapLock.Unlock()
 	if r, ok := uc.clientRabbitMap[connectionID]; ok {

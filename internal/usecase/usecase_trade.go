@@ -446,29 +446,6 @@ func (uc *TradeUseCase) BuyOddStock(num string, price float64, share int64) (str
 	return result.GetOrderId(), entity.StringToOrderStatus(result.GetStatus()), nil
 }
 
-func (uc *TradeUseCase) BuyLotStock(num string, price float64, lot int64) (string, entity.OrderStatus, error) {
-	if num == "" {
-		return "", entity.StatusUnknow, errors.New("empty stock num")
-	}
-
-	result, err := uc.sc.BuyStock(&entity.StockOrder{
-		OrderDetail: entity.OrderDetail{
-			Price: price,
-		},
-		Lot:      lot,
-		StockNum: num,
-	})
-	if err != nil {
-		return "", entity.StatusUnknow, err
-	}
-
-	if e := result.GetError(); e != "" {
-		return "", entity.StatusUnknow, errors.New(e)
-	}
-
-	return result.GetOrderId(), entity.StringToOrderStatus(result.GetStatus()), nil
-}
-
 // calculateFutureTradeBalance -.
 func (uc *TradeUseCase) calculateFutureTradeBalance(allOrders []*entity.FutureOrder, tradeDay time.Time) {
 	var forward, reverse []*entity.FutureOrder

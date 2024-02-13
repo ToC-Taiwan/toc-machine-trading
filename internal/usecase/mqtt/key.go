@@ -10,8 +10,4 @@ const (
 	routingKeyTick = "tick"
 
 	routingKeyFutureTick = "future_tick"
-
-	routingKeyBidAsk = "bid_ask"
-
-	routingKeyFutureBidAsk = "future_bid_ask"
 )

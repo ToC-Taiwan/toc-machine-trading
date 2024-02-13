@@ -70,16 +70,6 @@ func (uc *HistoryUseCase) SendMessage() {
 	}
 }
 
-// GetTradeDay -.
-func (uc *HistoryUseCase) GetTradeDay() time.Time {
-	return uc.tradeDay.GetStockTradeDay().TradeDay
-}
-
-// GetDayKbarByStockNumDate -.
-func (uc *HistoryUseCase) GetDayKbarByStockNumDate(stockNum string, date time.Time) *entity.StockHistoryKbar {
-	return uc.cc.GetDaykbar(stockNum, date)
-}
-
 // GetDayKbarByStockNumMultiDate -.
 func (uc *HistoryUseCase) GetDayKbarByStockNumMultiDate(stockNum string, date time.Time, interval int64) ([]*entity.StockHistoryKbar, error) {
 	queryDateArr := uc.tradeDay.GetLastNTradeDayByDate(interval, date)
@@ -575,49 +565,8 @@ func (uc *HistoryUseCase) processKbarArr(arr []*entity.StockHistoryKbar) {
 	})
 }
 
-// FetchFutureHistoryTick -.
-func (uc *HistoryUseCase) FetchFutureHistoryTick(code string, date calendar.TradePeriod) ([]*entity.FutureHistoryTick, error) {
-	dbTicks, err := uc.repo.QueryFutureHistoryTickArrByTime(context.Background(), code, date.StartTime, date.EndTime)
-	if err != nil {
-		return []*entity.FutureHistoryTick{}, err
-	}
-
-	if len(dbTicks) > 0 {
-		return dbTicks, nil
-	}
-
-	result := []*entity.FutureHistoryTick{}
-	tickArr, err := uc.grpcapi.GetFutureHistoryTick([]string{code}, date.TradeDay.Format(entity.ShortTimeLayout))
-	if err != nil {
-		return nil, err
-	}
-
-	if len(tickArr) == 0 {
-		return nil, fmt.Errorf("fetch Future History Tick Failed, Code: %s, Date: %s", code, date.TradeDay.Format(entity.ShortTimeLayout))
-	}
-
-	for _, t := range tickArr {
-		result = append(result, &entity.FutureHistoryTick{
-			Code: t.GetCode(),
-			HistoryTickBase: entity.HistoryTickBase{
-				TickTime: time.Unix(0, t.GetTs()).Add(-8 * time.Hour), Close: t.GetClose(),
-				TickType: t.GetTickType(), Volume: t.GetVolume(),
-				BidPrice: t.GetBidPrice(), BidVolume: t.GetBidVolume(),
-				AskPrice: t.GetAskPrice(), AskVolume: t.GetAskVolume(),
-			},
-		})
-	}
-
-	e := uc.repo.InsertFutureHistoryTickArr(context.Background(), result)
-	if e != nil {
-		return nil, e
-	}
-
-	return result, nil
-}
-
-// FetchFutureHistoryKbar -.
-func (uc *HistoryUseCase) FetchFutureHistoryKbar(code string, date time.Time) ([]*entity.FutureHistoryKbar, error) {
+// GetFutureHistoryKbarByDate -.
+func (uc *HistoryUseCase) GetFutureHistoryKbarByDate(code string, date time.Time) ([]*entity.FutureHistoryKbar, error) {
 	result := []*entity.FutureHistoryKbar{}
 	kbarArr, err := uc.grpcapi.GetFutureHistoryKbar([]string{code}, date.Format(entity.ShortTimeLayout))
 	if err != nil {

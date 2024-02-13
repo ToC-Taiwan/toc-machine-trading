@@ -3,13 +3,11 @@ package repo
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"tmt/internal/entity"
 	"tmt/pkg/postgres"
 
-	"github.com/Masterminds/squirrel"
 	"github.com/google/go-cmp/cmp"
 )
 
@@ -25,7 +23,7 @@ func NewBasic(pg *postgres.Postgres) *BasicRepo {
 
 // InsertOrUpdatetStockArr -.
 func (r *BasicRepo) InsertOrUpdatetStockArr(ctx context.Context, t []*entity.Stock) error {
-	inDBStock, err := r.QueryAllStock(ctx)
+	inDBStock, err := r.queryAllStock(ctx)
 	if err != nil {
 		return err
 	}
@@ -99,8 +97,8 @@ func (r *BasicRepo) UpdateAllStockDayTradeToNo(ctx context.Context) error {
 	return nil
 }
 
-// QueryAllStock -.
-func (r *BasicRepo) QueryAllStock(ctx context.Context) (map[string]*entity.Stock, error) {
+// queryAllStock -.
+func (r *BasicRepo) queryAllStock(ctx context.Context) (map[string]*entity.Stock, error) {
 	sql, _, err := r.Builder.
 		Select("number, name, exchange, category, day_trade, last_close, update_date").
 		From(tableNameStock).ToSql()
@@ -127,7 +125,7 @@ func (r *BasicRepo) QueryAllStock(ctx context.Context) (map[string]*entity.Stock
 
 // InsertOrUpdatetCalendarDateArr -.
 func (r *BasicRepo) InsertOrUpdatetCalendarDateArr(ctx context.Context, t []*entity.CalendarDate) error {
-	inDBCalendar, err := r.QueryAllCalendar(ctx)
+	inDBCalendar, err := r.queryAllCalendar(ctx)
 	if err != nil {
 		return err
 	}
@@ -172,8 +170,8 @@ func (r *BasicRepo) InsertOrUpdatetCalendarDateArr(ctx context.Context, t []*ent
 	return nil
 }
 
-// QueryAllCalendar -.
-func (r *BasicRepo) QueryAllCalendar(ctx context.Context) (map[time.Time]*entity.CalendarDate, error) {
+// queryAllCalendar -.
+func (r *BasicRepo) queryAllCalendar(ctx context.Context) (map[time.Time]*entity.CalendarDate, error) {
 	sql, _, err := r.Builder.
 		Select("date, is_trade_day").
 		From(tableNameCalendar).
@@ -201,7 +199,7 @@ func (r *BasicRepo) QueryAllCalendar(ctx context.Context) (map[time.Time]*entity
 
 // InsertOrUpdatetFutureArr -.
 func (r *BasicRepo) InsertOrUpdatetFutureArr(ctx context.Context, t []*entity.Future) error {
-	inDBFuture, err := r.QueryAllFuture(ctx)
+	inDBFuture, err := r.queryAllFuture(ctx)
 	if err != nil {
 		return err
 	}
@@ -256,8 +254,8 @@ func (r *BasicRepo) InsertOrUpdatetFutureArr(ctx context.Context, t []*entity.Fu
 	return nil
 }
 
-// QueryAllFuture -.
-func (r *BasicRepo) QueryAllFuture(ctx context.Context) (map[string]*entity.Future, error) {
+// queryAllFuture -.
+func (r *BasicRepo) queryAllFuture(ctx context.Context) (map[string]*entity.Future, error) {
 	sql, _, err := r.Builder.
 		Select("code, symbol, name, category, delivery_month, delivery_date, underlying_kind, unit, limit_up, limit_down, reference, update_date").
 		OrderBy("delivery_date ASC").
@@ -283,36 +281,8 @@ func (r *BasicRepo) QueryAllFuture(ctx context.Context) (map[string]*entity.Futu
 	return entities, nil
 }
 
-// QueryFutureByLikeName -.
-func (r *BasicRepo) QueryFutureByLikeName(ctx context.Context, name string) ([]*entity.Future, error) {
-	sql, arg, err := r.Builder.
-		Select("code, symbol, name, category, delivery_month, delivery_date, underlying_kind, unit, limit_up, limit_down, reference, update_date").
-		OrderBy("delivery_date ASC").
-		Where(squirrel.Like{"name": fmt.Sprintf("%s%%", name)}).
-		From(tableNameFuture).ToSql()
-	if err != nil {
-		return nil, err
-	}
-
-	rows, err := r.Pool().Query(ctx, sql, arg...)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	entities := []*entity.Future{}
-	for rows.Next() {
-		e := entity.Future{}
-		if err = rows.Scan(&e.Code, &e.Symbol, &e.Name, &e.Category, &e.DeliveryMonth, &e.DeliveryDate, &e.UnderlyingKind, &e.Unit, &e.LimitUp, &e.LimitDown, &e.Reference, &e.UpdateDate); err != nil {
-			return nil, err
-		}
-		entities = append(entities, &e)
-	}
-	return entities, nil
-}
-
 func (r *BasicRepo) InsertOrUpdatetOptionArr(ctx context.Context, t []*entity.Option) error {
-	inDBOption, err := r.QueryAllOption(ctx)
+	inDBOption, err := r.queryAllOption(ctx)
 	if err != nil {
 		return err
 	}
@@ -374,7 +344,7 @@ func (r *BasicRepo) InsertOrUpdatetOptionArr(ctx context.Context, t []*entity.Op
 	return nil
 }
 
-func (r *BasicRepo) QueryAllOption(ctx context.Context) (map[string]*entity.Option, error) {
+func (r *BasicRepo) queryAllOption(ctx context.Context) (map[string]*entity.Option, error) {
 	sql, _, err := r.Builder.
 		Select("code, symbol, name, category, delivery_month, delivery_date, strike_price, option_right, underlying_kind, unit, limit_up, limit_down, reference, update_date").
 		OrderBy("delivery_date ASC").
@@ -396,33 +366,6 @@ func (r *BasicRepo) QueryAllOption(ctx context.Context) (map[string]*entity.Opti
 			return nil, err
 		}
 		entities[e.Code] = &e
-	}
-	return entities, nil
-}
-
-func (r *BasicRepo) QueryOptionByLikeName(ctx context.Context, name string) ([]*entity.Option, error) {
-	sql, arg, err := r.Builder.
-		Select("code, symbol, name, category, delivery_month, delivery_date, strike_price, option_right, underlying_kind, unit, limit_up, limit_down, reference, update_date").
-		OrderBy("delivery_date ASC").
-		Where(squirrel.Like{"name": fmt.Sprintf("%s%%", name)}).
-		From(tableNameOption).ToSql()
-	if err != nil {
-		return nil, err
-	}
-
-	rows, err := r.Pool().Query(ctx, sql, arg...)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	entities := []*entity.Option{}
-	for rows.Next() {
-		e := entity.Option{}
-		if err = rows.Scan(&e.Code, &e.Symbol, &e.Name, &e.Category, &e.DeliveryMonth, &e.DeliveryDate, &e.StrikePrice, &e.OptionRight, &e.UnderlyingKind, &e.Unit, &e.LimitUp, &e.LimitDown, &e.Reference, &e.UpdateDate); err != nil {
-			return nil, err
-		}
-		entities = append(entities, &e)
 	}
 	return entities, nil
 }

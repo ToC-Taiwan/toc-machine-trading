@@ -36,8 +36,6 @@ const (
 	TradeInterface_CancelOption_FullMethodName              = "/forwarder.TradeInterface/CancelOption"
 	TradeInterface_GetLocalOrderStatusArr_FullMethodName    = "/forwarder.TradeInterface/GetLocalOrderStatusArr"
 	TradeInterface_GetSimulateOrderStatusArr_FullMethodName = "/forwarder.TradeInterface/GetSimulateOrderStatusArr"
-	TradeInterface_GetOrderStatusByID_FullMethodName        = "/forwarder.TradeInterface/GetOrderStatusByID"
-	TradeInterface_GetNonBlockOrderStatusArr_FullMethodName = "/forwarder.TradeInterface/GetNonBlockOrderStatusArr"
 	TradeInterface_GetFuturePosition_FullMethodName         = "/forwarder.TradeInterface/GetFuturePosition"
 	TradeInterface_GetStockPosition_FullMethodName          = "/forwarder.TradeInterface/GetStockPosition"
 	TradeInterface_GetSettlement_FullMethodName             = "/forwarder.TradeInterface/GetSettlement"
@@ -65,8 +63,6 @@ type TradeInterfaceClient interface {
 	CancelOption(ctx context.Context, in *OptionOrderID, opts ...grpc.CallOption) (*TradeResult, error)
 	GetLocalOrderStatusArr(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	GetSimulateOrderStatusArr(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	GetOrderStatusByID(ctx context.Context, in *OrderID, opts ...grpc.CallOption) (*TradeResult, error)
-	GetNonBlockOrderStatusArr(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ErrorMessage, error)
 	GetFuturePosition(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*FuturePositionArr, error)
 	GetStockPosition(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*StockPositionArr, error)
 	GetSettlement(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*SettlementList, error)
@@ -226,24 +222,6 @@ func (c *tradeInterfaceClient) GetSimulateOrderStatusArr(ctx context.Context, in
 	return out, nil
 }
 
-func (c *tradeInterfaceClient) GetOrderStatusByID(ctx context.Context, in *OrderID, opts ...grpc.CallOption) (*TradeResult, error) {
-	out := new(TradeResult)
-	err := c.cc.Invoke(ctx, TradeInterface_GetOrderStatusByID_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *tradeInterfaceClient) GetNonBlockOrderStatusArr(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ErrorMessage, error) {
-	out := new(ErrorMessage)
-	err := c.cc.Invoke(ctx, TradeInterface_GetNonBlockOrderStatusArr_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *tradeInterfaceClient) GetFuturePosition(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*FuturePositionArr, error) {
 	out := new(FuturePositionArr)
 	err := c.cc.Invoke(ctx, TradeInterface_GetFuturePosition_FullMethodName, in, out, opts...)
@@ -309,8 +287,6 @@ type TradeInterfaceServer interface {
 	CancelOption(context.Context, *OptionOrderID) (*TradeResult, error)
 	GetLocalOrderStatusArr(context.Context, *emptypb.Empty) (*emptypb.Empty, error)
 	GetSimulateOrderStatusArr(context.Context, *emptypb.Empty) (*emptypb.Empty, error)
-	GetOrderStatusByID(context.Context, *OrderID) (*TradeResult, error)
-	GetNonBlockOrderStatusArr(context.Context, *emptypb.Empty) (*ErrorMessage, error)
 	GetFuturePosition(context.Context, *emptypb.Empty) (*FuturePositionArr, error)
 	GetStockPosition(context.Context, *emptypb.Empty) (*StockPositionArr, error)
 	GetSettlement(context.Context, *emptypb.Empty) (*SettlementList, error)
@@ -370,12 +346,6 @@ func (UnimplementedTradeInterfaceServer) GetLocalOrderStatusArr(context.Context,
 }
 func (UnimplementedTradeInterfaceServer) GetSimulateOrderStatusArr(context.Context, *emptypb.Empty) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetSimulateOrderStatusArr not implemented")
-}
-func (UnimplementedTradeInterfaceServer) GetOrderStatusByID(context.Context, *OrderID) (*TradeResult, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetOrderStatusByID not implemented")
-}
-func (UnimplementedTradeInterfaceServer) GetNonBlockOrderStatusArr(context.Context, *emptypb.Empty) (*ErrorMessage, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetNonBlockOrderStatusArr not implemented")
 }
 func (UnimplementedTradeInterfaceServer) GetFuturePosition(context.Context, *emptypb.Empty) (*FuturePositionArr, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetFuturePosition not implemented")
@@ -693,42 +663,6 @@ func _TradeInterface_GetSimulateOrderStatusArr_Handler(srv interface{}, ctx cont
 	return interceptor(ctx, in, info, handler)
 }
 
-func _TradeInterface_GetOrderStatusByID_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(OrderID)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(TradeInterfaceServer).GetOrderStatusByID(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: TradeInterface_GetOrderStatusByID_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TradeInterfaceServer).GetOrderStatusByID(ctx, req.(*OrderID))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _TradeInterface_GetNonBlockOrderStatusArr_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(emptypb.Empty)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(TradeInterfaceServer).GetNonBlockOrderStatusArr(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: TradeInterface_GetNonBlockOrderStatusArr_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TradeInterfaceServer).GetNonBlockOrderStatusArr(ctx, req.(*emptypb.Empty))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _TradeInterface_GetFuturePosition_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(emptypb.Empty)
 	if err := dec(in); err != nil {
@@ -889,14 +823,6 @@ var TradeInterface_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetSimulateOrderStatusArr",
 			Handler:    _TradeInterface_GetSimulateOrderStatusArr_Handler,
-		},
-		{
-			MethodName: "GetOrderStatusByID",
-			Handler:    _TradeInterface_GetOrderStatusByID_Handler,
-		},
-		{
-			MethodName: "GetNonBlockOrderStatusArr",
-			Handler:    _TradeInterface_GetNonBlockOrderStatusArr_Handler,
 		},
 		{
 			MethodName: "GetFuturePosition",
