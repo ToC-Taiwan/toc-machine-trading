@@ -580,27 +580,31 @@ func (uc *RealTimeUseCase) CreateRealTimePick(connectionID string, odd bool, com
 	uc.clientRabbitMapLock.Unlock()
 
 	contextMap := make(map[string]context.CancelFunc)
+	defer func() {
+		for _, cancel := range contextMap {
+			cancel()
+		}
+	}()
+
 	consumer := r.StockTickPbConsumer
 	if odd {
 		consumer = r.StockTickOddsPbConsumer
 	}
 	for {
-		list := <-com
+		list, ok := <-com
+		if !ok {
+			return
+		}
 		subscribeList := []string{}
 		for k, v := range list.GetPickMap() {
-			if v == pb.PickListType_TYPE_ADD {
-				if _, ok := contextMap[k]; ok {
-					continue
-				}
+			if v == pb.PickListType_TYPE_ADD && contextMap[k] == nil {
 				subscribeList = append(subscribeList, k)
 				ctx, cancel := context.WithCancel(context.Background())
 				contextMap[k] = cancel
 				go consumer(ctx, k, tickChan)
-			} else if v == pb.PickListType_TYPE_REMOVE {
-				if cancel, ok := contextMap[k]; ok {
-					cancel()
-					delete(contextMap, k)
-				}
+			} else if v == pb.PickListType_TYPE_REMOVE && contextMap[k] != nil {
+				contextMap[k]()
+				delete(contextMap, k)
 			}
 		}
 		if len(subscribeList) != 0 {

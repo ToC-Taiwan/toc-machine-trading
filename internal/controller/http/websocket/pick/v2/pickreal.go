@@ -34,6 +34,7 @@ func StartWSPickStock(c *gin.Context, s usecase.RealTime, odd bool) {
 		for {
 			msg, ok := <-forwardChan
 			if !ok {
+				close(w.mapChan)
 				return
 			}
 			var pickRequest pb.PickRealMap
