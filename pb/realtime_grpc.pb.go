@@ -36,8 +36,8 @@ const (
 type RealTimeDataInterfaceClient interface {
 	GetAllStockSnapshot(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*SnapshotResponse, error)
 	GetStockSnapshotByNumArr(ctx context.Context, in *StockNumArr, opts ...grpc.CallOption) (*SnapshotResponse, error)
-	GetStockSnapshotTSE(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*SnapshotMessage, error)
-	GetStockSnapshotOTC(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*SnapshotMessage, error)
+	GetStockSnapshotTSE(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*SnapshotResponse, error)
+	GetStockSnapshotOTC(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*SnapshotResponse, error)
 	GetNasdaq(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*YahooFinancePrice, error)
 	GetNasdaqFuture(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*YahooFinancePrice, error)
 	GetStockVolumeRank(ctx context.Context, in *VolumeRankRequest, opts ...grpc.CallOption) (*StockVolumeRankResponse, error)
@@ -70,8 +70,8 @@ func (c *realTimeDataInterfaceClient) GetStockSnapshotByNumArr(ctx context.Conte
 	return out, nil
 }
 
-func (c *realTimeDataInterfaceClient) GetStockSnapshotTSE(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*SnapshotMessage, error) {
-	out := new(SnapshotMessage)
+func (c *realTimeDataInterfaceClient) GetStockSnapshotTSE(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*SnapshotResponse, error) {
+	out := new(SnapshotResponse)
 	err := c.cc.Invoke(ctx, RealTimeDataInterface_GetStockSnapshotTSE_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -79,8 +79,8 @@ func (c *realTimeDataInterfaceClient) GetStockSnapshotTSE(ctx context.Context, i
 	return out, nil
 }
 
-func (c *realTimeDataInterfaceClient) GetStockSnapshotOTC(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*SnapshotMessage, error) {
-	out := new(SnapshotMessage)
+func (c *realTimeDataInterfaceClient) GetStockSnapshotOTC(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*SnapshotResponse, error) {
+	out := new(SnapshotResponse)
 	err := c.cc.Invoke(ctx, RealTimeDataInterface_GetStockSnapshotOTC_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -130,8 +130,8 @@ func (c *realTimeDataInterfaceClient) GetFutureSnapshotByCodeArr(ctx context.Con
 type RealTimeDataInterfaceServer interface {
 	GetAllStockSnapshot(context.Context, *emptypb.Empty) (*SnapshotResponse, error)
 	GetStockSnapshotByNumArr(context.Context, *StockNumArr) (*SnapshotResponse, error)
-	GetStockSnapshotTSE(context.Context, *emptypb.Empty) (*SnapshotMessage, error)
-	GetStockSnapshotOTC(context.Context, *emptypb.Empty) (*SnapshotMessage, error)
+	GetStockSnapshotTSE(context.Context, *emptypb.Empty) (*SnapshotResponse, error)
+	GetStockSnapshotOTC(context.Context, *emptypb.Empty) (*SnapshotResponse, error)
 	GetNasdaq(context.Context, *emptypb.Empty) (*YahooFinancePrice, error)
 	GetNasdaqFuture(context.Context, *emptypb.Empty) (*YahooFinancePrice, error)
 	GetStockVolumeRank(context.Context, *VolumeRankRequest) (*StockVolumeRankResponse, error)
@@ -149,10 +149,10 @@ func (UnimplementedRealTimeDataInterfaceServer) GetAllStockSnapshot(context.Cont
 func (UnimplementedRealTimeDataInterfaceServer) GetStockSnapshotByNumArr(context.Context, *StockNumArr) (*SnapshotResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetStockSnapshotByNumArr not implemented")
 }
-func (UnimplementedRealTimeDataInterfaceServer) GetStockSnapshotTSE(context.Context, *emptypb.Empty) (*SnapshotMessage, error) {
+func (UnimplementedRealTimeDataInterfaceServer) GetStockSnapshotTSE(context.Context, *emptypb.Empty) (*SnapshotResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetStockSnapshotTSE not implemented")
 }
-func (UnimplementedRealTimeDataInterfaceServer) GetStockSnapshotOTC(context.Context, *emptypb.Empty) (*SnapshotMessage, error) {
+func (UnimplementedRealTimeDataInterfaceServer) GetStockSnapshotOTC(context.Context, *emptypb.Empty) (*SnapshotResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetStockSnapshotOTC not implemented")
 }
 func (UnimplementedRealTimeDataInterfaceServer) GetNasdaq(context.Context, *emptypb.Empty) (*YahooFinancePrice, error) {

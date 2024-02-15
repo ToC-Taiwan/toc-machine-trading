@@ -55,7 +55,10 @@ func (t *RealTimegRPCAPI) GetStockSnapshotTSE() (*pb.SnapshotMessage, error) {
 	if err != nil {
 		return &pb.SnapshotMessage{}, err
 	}
-	return r, nil
+	if len(r.GetData()) > 0 {
+		return r.GetData()[0], nil
+	}
+	return &pb.SnapshotMessage{}, nil
 }
 
 // GetStockSnapshotOTC -.
@@ -67,7 +70,10 @@ func (t *RealTimegRPCAPI) GetStockSnapshotOTC() (*pb.SnapshotMessage, error) {
 	if err != nil {
 		return &pb.SnapshotMessage{}, err
 	}
-	return r, nil
+	if len(r.GetData()) > 0 {
+		return r.GetData()[0], nil
+	}
+	return &pb.SnapshotMessage{}, nil
 }
 
 // GetFutureSnapshotByCode -.
