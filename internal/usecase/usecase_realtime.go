@@ -3,7 +3,6 @@ package usecase
 import (
 	"context"
 	"errors"
-	"fmt"
 	"sync"
 	"time"
 
@@ -52,9 +51,6 @@ type RealTimeUseCase struct {
 	logger *log.Log
 	cc     *cache.Cache
 	bus    *eventbus.Bus
-
-	subscribeStock     map[string]struct{}
-	subscribeStockLock sync.RWMutex
 }
 
 func NewRealTime() RealTime {
@@ -80,8 +76,6 @@ func NewRealTime() RealTime {
 		logger: log.Get(),
 		cc:     cache.Get(),
 		bus:    eventbus.Get(),
-
-		subscribeStock: make(map[string]struct{}),
 	}
 
 	// unsubscriba all first
@@ -521,50 +515,36 @@ func (uc *RealTimeUseCase) UnSubscribeAll() error {
 }
 
 // SubscribeStockTick -.
-func (uc *RealTimeUseCase) SubscribeStockTick(targetArr []*entity.StockTarget) {
-	uc.subscribeStockLock.Lock()
-	defer uc.subscribeStockLock.Unlock()
-
-	var subArr []string
-	for _, v := range targetArr {
-		if _, ok := uc.subscribeStock[v.StockNum]; ok {
-			continue
-		}
-		uc.subscribeStock[v.StockNum] = struct{}{}
-		subArr = append(subArr, v.StockNum)
-	}
-
-	failSubNumArr, err := uc.gRPCSub.SubscribeStockTick(subArr, uc.cfg.TradeStock.Odd)
+func (uc *RealTimeUseCase) SubscribeStockTick(subArr []string, odd bool) {
+	failSubNumArr, err := uc.gRPCSub.SubscribeStockTick(subArr, odd)
 	if err != nil {
 		uc.logger.Error(err)
 		return
 	}
 
-	if len(failSubNumArr) != 0 {
-		for _, v := range failSubNumArr {
-			delete(uc.subscribeStock, v)
-		}
+	for _, v := range failSubNumArr {
+		uc.logger.Error("subscribe fail", v)
 	}
 }
 
-// SubscribeStockBidAsk -.
-func (uc *RealTimeUseCase) SubscribeStockBidAsk(targetArr []*entity.StockTarget) error {
-	var subArr []string
-	for _, v := range targetArr {
-		subArr = append(subArr, v.StockNum)
-	}
+// // SubscribeStockBidAsk -.
+// func (uc *RealTimeUseCase) SubscribeStockBidAsk(targetArr []*entity.StockTarget) error {
+// 	var subArr []string
+// 	for _, v := range targetArr {
+// 		subArr = append(subArr, v.StockNum)
+// 	}
 
-	failSubNumArr, err := uc.gRPCSub.SubscribeStockBidAsk(subArr)
-	if err != nil {
-		return err
-	}
+// 	failSubNumArr, err := uc.gRPCSub.SubscribeStockBidAsk(subArr)
+// 	if err != nil {
+// 		return err
+// 	}
 
-	if len(failSubNumArr) != 0 {
-		return fmt.Errorf("subscribe fail %v", failSubNumArr)
-	}
+// 	if len(failSubNumArr) != 0 {
+// 		return fmt.Errorf("subscribe fail %v", failSubNumArr)
+// 	}
 
-	return nil
-}
+// 	return nil
+// }
 
 // SubscribeFutureTick -.
 func (uc *RealTimeUseCase) SubscribeFutureTick(code string) {
@@ -579,20 +559,20 @@ func (uc *RealTimeUseCase) SubscribeFutureTick(code string) {
 	}
 }
 
-// SubscribeFutureBidAsk -.
-func (uc *RealTimeUseCase) SubscribeFutureBidAsk(code string) error {
-	failSubNumArr, err := uc.gRPCSub.SubscribeFutureBidAsk([]string{code})
-	if err != nil {
-		return err
-	}
+// // SubscribeFutureBidAsk -.
+// func (uc *RealTimeUseCase) SubscribeFutureBidAsk(code string) error {
+// 	failSubNumArr, err := uc.gRPCSub.SubscribeFutureBidAsk([]string{code})
+// 	if err != nil {
+// 		return err
+// 	}
 
-	if len(failSubNumArr) != 0 {
-		return fmt.Errorf("subscribe future fail %v", failSubNumArr)
-	}
-	return nil
-}
+// 	if len(failSubNumArr) != 0 {
+// 		return fmt.Errorf("subscribe future fail %v", failSubNumArr)
+// 	}
+// 	return nil
+// }
 
-func (uc *RealTimeUseCase) CreateRealTimePick(connectionID string, com chan *pb.PickRealMap, tickChan chan []byte) {
+func (uc *RealTimeUseCase) CreateRealTimePick(connectionID string, odd bool, com chan *pb.PickRealMap, tickChan chan []byte) {
 	r := mqtt.NewRabbit(uc.cfg.NewRabbitConn())
 
 	uc.clientRabbitMapLock.Lock()
@@ -600,18 +580,22 @@ func (uc *RealTimeUseCase) CreateRealTimePick(connectionID string, com chan *pb.
 	uc.clientRabbitMapLock.Unlock()
 
 	contextMap := make(map[string]context.CancelFunc)
+	consumer := r.StockTickPbConsumer
+	if odd {
+		consumer = r.StockTickOddsPbConsumer
+	}
 	for {
 		list := <-com
-		subscribeList := []*entity.StockTarget{}
+		subscribeList := []string{}
 		for k, v := range list.GetPickMap() {
 			if v == pb.PickListType_TYPE_ADD {
 				if _, ok := contextMap[k]; ok {
 					continue
 				}
-				subscribeList = append(subscribeList, &entity.StockTarget{StockNum: k})
+				subscribeList = append(subscribeList, k)
 				ctx, cancel := context.WithCancel(context.Background())
 				contextMap[k] = cancel
-				go r.StockTickPbConsumer(ctx, k, tickChan)
+				go consumer(ctx, k, tickChan)
 			} else if v == pb.PickListType_TYPE_REMOVE {
 				if cancel, ok := contextMap[k]; ok {
 					cancel()
@@ -620,7 +604,7 @@ func (uc *RealTimeUseCase) CreateRealTimePick(connectionID string, com chan *pb.
 			}
 		}
 		if len(subscribeList) != 0 {
-			uc.SubscribeStockTick(subscribeList)
+			uc.SubscribeStockTick(subscribeList, odd)
 		}
 	}
 }

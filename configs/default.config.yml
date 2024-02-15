@@ -3,7 +3,6 @@ ManualTrade: true
 
 TradeStock:
     AllowTrade: false
-    Odd: false
 
     # unit: second
     HoldTimeFromOpen: 45

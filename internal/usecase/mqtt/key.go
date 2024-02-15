@@ -7,7 +7,9 @@ const (
 
 	routingKeyOrderArr = "order_arr"
 
-	routingKeyTick = "tick"
+	routingKeyStockTick = "stock_tick"
+
+	routingKeyStockTickOdds = "stock_tick_odds"
 
 	routingKeyFutureTick = "future_tick"
 )

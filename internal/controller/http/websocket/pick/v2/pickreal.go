@@ -19,7 +19,7 @@ type WSPickRealStock struct {
 }
 
 // StartWSPickStock -.
-func StartWSPickStock(c *gin.Context, s usecase.RealTime) {
+func StartWSPickStock(c *gin.Context, s usecase.RealTime, odd bool) {
 	w := &WSPickRealStock{
 		s:        s,
 		WSRouter: ginws.NewWSRouter(c),
@@ -29,7 +29,7 @@ func StartWSPickStock(c *gin.Context, s usecase.RealTime) {
 	forwardChan := make(chan []byte)
 	connectionID := uuid.New().String()
 	go w.sendRealStock()
-	go w.s.CreateRealTimePick(connectionID, w.mapChan, w.tickChan)
+	go w.s.CreateRealTimePick(connectionID, odd, w.mapChan, w.tickChan)
 	go func() {
 		for {
 			msg, ok := <-forwardChan

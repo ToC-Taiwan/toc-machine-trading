@@ -648,15 +648,15 @@ func (m *MockRealTime) EXPECT() *MockRealTimeMockRecorder {
 }
 
 // CreateRealTimePick mocks base method.
-func (m *MockRealTime) CreateRealTimePick(connectionID string, com chan *pb.PickRealMap, tickChan chan []byte) {
+func (m *MockRealTime) CreateRealTimePick(connectionID string, odd bool, com chan *pb.PickRealMap, tickChan chan []byte) {
 	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "CreateRealTimePick", connectionID, com, tickChan)
+	m.ctrl.Call(m, "CreateRealTimePick", connectionID, odd, com, tickChan)
 }
 
 // CreateRealTimePick indicates an expected call of CreateRealTimePick.
-func (mr *MockRealTimeMockRecorder) CreateRealTimePick(connectionID, com, tickChan interface{}) *gomock.Call {
+func (mr *MockRealTimeMockRecorder) CreateRealTimePick(connectionID, odd, com, tickChan interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateRealTimePick", reflect.TypeOf((*MockRealTime)(nil).CreateRealTimePick), connectionID, com, tickChan)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateRealTimePick", reflect.TypeOf((*MockRealTime)(nil).CreateRealTimePick), connectionID, odd, com, tickChan)
 }
 
 // DeleteRealTimeClient mocks base method.
@@ -1190,6 +1190,18 @@ func (m *MockRabbit) OrderStatusConsumer(orderStatusChan chan interface{}) {
 func (mr *MockRabbitMockRecorder) OrderStatusConsumer(orderStatusChan interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "OrderStatusConsumer", reflect.TypeOf((*MockRabbit)(nil).OrderStatusConsumer), orderStatusChan)
+}
+
+// StockTickOddsPbConsumer mocks base method.
+func (m *MockRabbit) StockTickOddsPbConsumer(ctx context.Context, stockNum string, tickChan chan []byte) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "StockTickOddsPbConsumer", ctx, stockNum, tickChan)
+}
+
+// StockTickOddsPbConsumer indicates an expected call of StockTickOddsPbConsumer.
+func (mr *MockRabbitMockRecorder) StockTickOddsPbConsumer(ctx, stockNum, tickChan interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "StockTickOddsPbConsumer", reflect.TypeOf((*MockRabbit)(nil).StockTickOddsPbConsumer), ctx, stockNum, tickChan)
 }
 
 // StockTickPbConsumer mocks base method.

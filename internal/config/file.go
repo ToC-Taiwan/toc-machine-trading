@@ -35,9 +35,7 @@ type AnalyzeStock struct {
 
 // TradeStock -.
 type TradeStock struct {
-	AllowTrade bool `json:"AllowTrade" yaml:"AllowTrade"`
-	Odd        bool `json:"Odd" yaml:"Odd"`
-
+	AllowTrade       bool    `json:"AllowTrade" yaml:"AllowTrade"`
 	HoldTimeFromOpen float64 `json:"HoldTimeFromOpen" yaml:"HoldTimeFromOpen"`
 	TotalOpenTime    float64 `json:"TotalOpenTime" yaml:"TotalOpenTime"`
 	TradeInEndTime   float64 `json:"TradeInEndTime" yaml:"TradeInEndTime"`

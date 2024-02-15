@@ -139,7 +139,24 @@ func (c *Rabbit) FutureTickConsumer(code string, tickChan chan *entity.RealTimeF
 
 // StockTickPbConsumer -.
 func (c *Rabbit) StockTickPbConsumer(ctx context.Context, stockNum string, tickChan chan []byte) {
-	delivery := c.establishDelivery(fmt.Sprintf("%s:%s", routingKeyTick, stockNum))
+	delivery := c.establishDelivery(fmt.Sprintf("%s:%s", routingKeyStockTick, stockNum))
+	for {
+		select {
+		case <-ctx.Done():
+			return
+
+		case d, opened := <-delivery:
+			if !opened {
+				return
+			}
+			tickChan <- d.Body
+		}
+	}
+}
+
+// StockTickOddsPbConsumer -.
+func (c *Rabbit) StockTickOddsPbConsumer(ctx context.Context, stockNum string, tickChan chan []byte) {
+	delivery := c.establishDelivery(fmt.Sprintf("%s:%s", routingKeyStockTickOdds, stockNum))
 	for {
 		select {
 		case <-ctx.Done():
