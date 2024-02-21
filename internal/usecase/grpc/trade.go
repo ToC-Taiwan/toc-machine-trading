@@ -164,12 +164,12 @@ func (t *TradegRPCAPI) SellFirstStock(order *entity.StockOrder) (*pb.TradeResult
 	return r, nil
 }
 
-// CancelStock CancelStock
-func (t *TradegRPCAPI) CancelStock(orderID string) (*pb.TradeResult, error) {
+// CancelOrder -.
+func (t *TradegRPCAPI) CancelOrder(orderID string) (*pb.TradeResult, error) {
 	conn := t.pool.Get()
 	defer t.pool.Put(conn)
 
-	r, err := pb.NewTradeInterfaceClient(conn).CancelStock(context.Background(), &pb.OrderID{
+	r, err := pb.NewTradeInterfaceClient(conn).CancelOrder(context.Background(), &pb.OrderID{
 		OrderId:  orderID,
 		Simulate: t.sim,
 	})
@@ -246,21 +246,6 @@ func (t *TradegRPCAPI) SellFirstFuture(order *entity.FutureOrder) (*pb.TradeResu
 		Code:     order.Code,
 		Price:    order.Price,
 		Quantity: order.Position,
-		Simulate: t.sim,
-	})
-	if err != nil {
-		return nil, err
-	}
-	return r, nil
-}
-
-// CancelFuture -.
-func (t *TradegRPCAPI) CancelFuture(orderID string) (*pb.TradeResult, error) {
-	conn := t.pool.Get()
-	defer t.pool.Put(conn)
-
-	r, err := pb.NewTradeInterfaceClient(conn).CancelFuture(context.Background(), &pb.FutureOrderID{
-		OrderId:  orderID,
 		Simulate: t.sim,
 	})
 	if err != nil {

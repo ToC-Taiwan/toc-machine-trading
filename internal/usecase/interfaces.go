@@ -130,9 +130,10 @@ type Trade interface {
 	GetAllFutureTradeBalance(ctx context.Context) ([]*entity.FutureTradeBalance, error)
 	GetFutureOrderByTradeDay(ctx context.Context, tradeDay string) ([]*entity.FutureOrder, error)
 	BuyOddStock(num string, price float64, share int64) (string, entity.OrderStatus, error)
+	SellddStock(num string, price float64, share int64) (string, entity.OrderStatus, error)
 	BuyFuture(order *entity.FutureOrder) (string, entity.OrderStatus, error)
 	SellFuture(order *entity.FutureOrder) (string, entity.OrderStatus, error)
-	CancelFutureOrderByID(orderID string) (string, entity.OrderStatus, error)
+	CancelOrderByID(orderID string) (string, entity.OrderStatus, error)
 	GetFuturePosition() ([]*entity.FuturePosition, error)
 	IsFutureTradeTime() bool
 	IsAuthUser(username string) bool
@@ -160,10 +161,11 @@ type TradeRepo interface {
 }
 
 type TradegRPCAPI interface {
+	CancelOrder(orderID string) (*pb.TradeResult, error)
+
 	BuyStock(order *entity.StockOrder) (*pb.TradeResult, error)
 	SellStock(order *entity.StockOrder) (*pb.TradeResult, error)
 	SellFirstStock(order *entity.StockOrder) (*pb.TradeResult, error)
-	CancelStock(orderID string) (*pb.TradeResult, error)
 
 	BuyOddStock(order *entity.StockOrder) (*pb.TradeResult, error)
 	SellOddStock(order *entity.StockOrder) (*pb.TradeResult, error)
@@ -171,7 +173,6 @@ type TradegRPCAPI interface {
 	BuyFuture(order *entity.FutureOrder) (*pb.TradeResult, error)
 	SellFuture(order *entity.FutureOrder) (*pb.TradeResult, error)
 	SellFirstFuture(order *entity.FutureOrder) (*pb.TradeResult, error)
-	CancelFuture(orderID string) (*pb.TradeResult, error)
 
 	GetLocalOrderStatusArr() error
 	GetSimulateOrderStatusArr() error

@@ -299,7 +299,7 @@ func (w *WSFutureTrade) cancelOverTimeOrder(o *entity.FutureOrder) {
 	}
 
 	if o.Cancellable() && time.Since(tradeTime) > 5*time.Second && w.cancelOrderMap[o.OrderID] == nil {
-		id, s, err := w.o.CancelFutureOrderByID(o.OrderID)
+		id, s, err := w.o.CancelOrderByID(o.OrderID)
 		if err != nil || s != entity.StatusCancelled || id == "" {
 			w.SendToClient(newErrMessageProto(errCancelOrderFailed))
 			return

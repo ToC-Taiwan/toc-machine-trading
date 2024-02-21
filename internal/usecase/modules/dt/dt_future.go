@@ -74,7 +74,7 @@ func (d *DTFuture) cancelOverTimeOrder() {
 				continue
 			}
 
-			result, err := d.sc.CancelFuture(order.OrderID)
+			result, err := d.sc.CancelOrder(order.OrderID)
 			if err != nil {
 				d.logger.Error(err)
 				continue

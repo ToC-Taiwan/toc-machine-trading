@@ -295,6 +295,11 @@ definitions:
       message:
         type: string
     type: object
+  v1.cancelRequest:
+    properties:
+      order_id:
+        type: string
+    type: object
   v1.futureOrders:
     properties:
       orders:
@@ -683,6 +688,31 @@ paths:
       summary: Get targets
       tags:
       - Targets V1
+  /v1/trade/cancel:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/v1.cancelRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.Response'
+      security:
+      - JWT: []
+      summary: Cancel order
+      tags:
+      - Trade V1
   /v1/trade/inventory/stock:
     get:
       consumes:
@@ -730,6 +760,33 @@ paths:
       security:
       - JWT: []
       summary: Buy odd stock
+      tags:
+      - Trade V1
+  /v1/trade/stock/sell/odd:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/v1.oddStockRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.tradeResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.Response'
+      security:
+      - JWT: []
+      summary: Sell odd stock
       tags:
       - Trade V1
   /v1/user:

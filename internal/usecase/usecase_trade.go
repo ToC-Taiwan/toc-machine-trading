@@ -412,9 +412,9 @@ func (uc *TradeUseCase) SellFuture(order *entity.FutureOrder) (string, entity.Or
 	return result.GetOrderId(), entity.StringToOrderStatus(result.GetStatus()), nil
 }
 
-// CancelFutureOrderByID -.
-func (uc *TradeUseCase) CancelFutureOrderByID(orderID string) (string, entity.OrderStatus, error) {
-	result, err := uc.sc.CancelFuture(orderID)
+// CancelOrderByID -.
+func (uc *TradeUseCase) CancelOrderByID(orderID string) (string, entity.OrderStatus, error) {
+	result, err := uc.sc.CancelOrder(orderID)
 	if err != nil {
 		return "", entity.StatusUnknow, err
 	}
@@ -432,6 +432,29 @@ func (uc *TradeUseCase) BuyOddStock(num string, price float64, share int64) (str
 	}
 
 	result, err := uc.sc.BuyOddStock(&entity.StockOrder{
+		OrderDetail: entity.OrderDetail{
+			Price: price,
+		},
+		Share:    share,
+		StockNum: num,
+	})
+	if err != nil {
+		return "", entity.StatusUnknow, err
+	}
+
+	if e := result.GetError(); e != "" {
+		return "", entity.StatusUnknow, errors.New(e)
+	}
+
+	return result.GetOrderId(), entity.StringToOrderStatus(result.GetStatus()), nil
+}
+
+func (uc *TradeUseCase) SellddStock(num string, price float64, share int64) (string, entity.OrderStatus, error) {
+	if num == "" {
+		return "", entity.StatusUnknow, errors.New("empty stock num")
+	}
+
+	result, err := uc.sc.SellOddStock(&entity.StockOrder{
 		OrderDetail: entity.OrderDetail{
 			Price: price,
 		},
