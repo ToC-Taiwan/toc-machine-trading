@@ -198,3 +198,11 @@ func (uc *SystemUseCase) DeleteAllPushTokens(ctx context.Context) error {
 func (uc *SystemUseCase) GetUserInfo(ctx context.Context, username string) (*entity.User, error) {
 	return uc.repo.QueryUserByUsername(ctx, username)
 }
+
+func (uc *SystemUseCase) GetLastJWT(ctx context.Context) (string, error) {
+	return uc.repo.GetLastJWT(ctx)
+}
+
+func (uc *SystemUseCase) InsertJWT(ctx context.Context, jwt string) error {
+	return uc.repo.InsertJWT(ctx, jwt)
+}

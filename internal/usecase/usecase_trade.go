@@ -87,7 +87,6 @@ func (uc *TradeUseCase) updateAuthUserMap(username []string) {
 
 	uc.authUserMap = make(map[string]struct{})
 	for _, v := range username {
-		uc.logger.Warnf("auth user: %s", v)
 		uc.authUserMap[v] = struct{}{}
 	}
 }

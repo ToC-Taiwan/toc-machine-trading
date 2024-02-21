@@ -2152,6 +2152,21 @@ func (mr *MockSystemMockRecorder) DeleteAllPushTokens(ctx interface{}) *gomock.C
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteAllPushTokens", reflect.TypeOf((*MockSystem)(nil).DeleteAllPushTokens), ctx)
 }
 
+// GetLastJWT mocks base method.
+func (m *MockSystem) GetLastJWT(ctx context.Context) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetLastJWT", ctx)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetLastJWT indicates an expected call of GetLastJWT.
+func (mr *MockSystemMockRecorder) GetLastJWT(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetLastJWT", reflect.TypeOf((*MockSystem)(nil).GetLastJWT), ctx)
+}
+
 // GetUserInfo mocks base method.
 func (m *MockSystem) GetUserInfo(ctx context.Context, username string) (*entity.User, error) {
 	m.ctrl.T.Helper()
@@ -2165,6 +2180,20 @@ func (m *MockSystem) GetUserInfo(ctx context.Context, username string) (*entity.
 func (mr *MockSystemMockRecorder) GetUserInfo(ctx, username interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserInfo", reflect.TypeOf((*MockSystem)(nil).GetUserInfo), ctx, username)
+}
+
+// InsertJWT mocks base method.
+func (m *MockSystem) InsertJWT(ctx context.Context, jwt string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "InsertJWT", ctx, jwt)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// InsertJWT indicates an expected call of InsertJWT.
+func (mr *MockSystemMockRecorder) InsertJWT(ctx, jwt interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertJWT", reflect.TypeOf((*MockSystem)(nil).InsertJWT), ctx, jwt)
 }
 
 // InsertPushToken mocks base method.
@@ -2302,6 +2331,21 @@ func (mr *MockSystemRepoMockRecorder) GetAllPushTokens(ctx interface{}) *gomock.
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllPushTokens", reflect.TypeOf((*MockSystemRepo)(nil).GetAllPushTokens), ctx)
 }
 
+// GetLastJWT mocks base method.
+func (m *MockSystemRepo) GetLastJWT(ctx context.Context) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetLastJWT", ctx)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetLastJWT indicates an expected call of GetLastJWT.
+func (mr *MockSystemRepoMockRecorder) GetLastJWT(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetLastJWT", reflect.TypeOf((*MockSystemRepo)(nil).GetLastJWT), ctx)
+}
+
 // GetPushToken mocks base method.
 func (m *MockSystemRepo) GetPushToken(ctx context.Context, token string) (*entity.PushToken, error) {
 	m.ctrl.T.Helper()
@@ -2315,6 +2359,20 @@ func (m *MockSystemRepo) GetPushToken(ctx context.Context, token string) (*entit
 func (mr *MockSystemRepoMockRecorder) GetPushToken(ctx, token interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPushToken", reflect.TypeOf((*MockSystemRepo)(nil).GetPushToken), ctx, token)
+}
+
+// InsertJWT mocks base method.
+func (m *MockSystemRepo) InsertJWT(ctx context.Context, jwt string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "InsertJWT", ctx, jwt)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// InsertJWT indicates an expected call of InsertJWT.
+func (mr *MockSystemRepoMockRecorder) InsertJWT(ctx, jwt interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertJWT", reflect.TypeOf((*MockSystemRepo)(nil).InsertJWT), ctx, jwt)
 }
 
 // InsertOrUpdatePushToken mocks base method.

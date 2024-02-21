@@ -1,6 +1,13 @@
 BEGIN;
 
 CREATE TABLE
+    system_jwt (
+        "id" SERIAL PRIMARY KEY,
+        "key" VARCHAR NOT NULL,
+        "created" TIMESTAMPTZ NOT NULL
+    );
+
+CREATE TABLE
     system_account (
         "id" SERIAL PRIMARY KEY,
         "username" VARCHAR NOT NULL,

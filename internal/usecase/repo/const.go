@@ -30,4 +30,5 @@ const (
 
 	tableNameSystemAccount   string = "system_account"
 	tableNameSystemPushToken string = "system_push_token"
+	tableNameSystemJWT       string = "system_jwt"
 )

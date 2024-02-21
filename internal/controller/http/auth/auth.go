@@ -2,6 +2,7 @@
 package auth
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"time"
@@ -19,10 +20,21 @@ import (
 const (
 	tokenHeaderName = "Bearer"
 	identityKey     = "tmt_identity"
-	timeOut         = time.Hour
+	timeOut         = 24 * time.Hour
 )
 
 func NewAuthMiddleware(system usecase.System) (*jwt.GinJWTMiddleware, error) {
+	key, err := system.GetLastJWT(context.Background())
+	if err != nil {
+		return nil, err
+	} else if key == "" {
+		key = uuid.New().String()
+		err = system.InsertJWT(context.Background(), key)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	m := jwt.GinJWTMiddleware{
 		TokenLookup:      "header:Authorization",
 		SigningAlgorithm: "HS256",
@@ -43,7 +55,7 @@ func NewAuthMiddleware(system usecase.System) (*jwt.GinJWTMiddleware, error) {
 		CookieMaxAge:          timeOut,
 		CookieName:            "tmt",
 
-		Key:           []byte(uuid.New().String()),
+		Key:           []byte(key),
 		MaxRefresh:    timeOut,
 		Authenticator: authenticator(system),
 		PayloadFunc:   payloadFunc,

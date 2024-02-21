@@ -192,6 +192,8 @@ type System interface {
 	DeleteAllPushTokens(ctx context.Context) error
 	IsPushTokenEnabled(ctx context.Context, token string) (bool, error)
 	GetUserInfo(ctx context.Context, username string) (*entity.User, error)
+	GetLastJWT(ctx context.Context) (string, error)
+	InsertJWT(ctx context.Context, jwt string) error
 }
 
 type SystemRepo interface {
@@ -203,6 +205,8 @@ type SystemRepo interface {
 	GetAllPushTokens(ctx context.Context) ([]string, error)
 	GetPushToken(ctx context.Context, token string) (*entity.PushToken, error)
 	DeleteAllPushTokens(ctx context.Context) error
+	GetLastJWT(ctx context.Context) (string, error)
+	InsertJWT(ctx context.Context, jwt string) error
 }
 
 type FCM interface {

@@ -256,3 +256,46 @@ func (r *SystemRepo) DeleteAllPushTokens(ctx context.Context) error {
 	}
 	return nil
 }
+
+func (r *SystemRepo) GetLastJWT(ctx context.Context) (string, error) {
+	sql, arg, err := r.Builder.
+		Select("key").
+		From(tableNameSystemJWT).
+		OrderBy("id DESC").
+		Limit(1).
+		ToSql()
+	if err != nil {
+		return "", err
+	}
+
+	rows := r.Pool().QueryRow(ctx, sql, arg...)
+	var result string
+	if err := rows.Scan(&result); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return "", nil
+		}
+		return "", err
+	}
+	return result, nil
+}
+
+func (r *SystemRepo) InsertJWT(ctx context.Context, jwt string) error {
+	builder := r.Builder.Insert(tableNameSystemJWT).
+		Columns("key, created").
+		Values(jwt, time.Now())
+
+	tx, err := r.BeginTransaction()
+	if err != nil {
+		return err
+	}
+	defer r.EndTransaction(tx, err)
+	var sql string
+	var args []interface{}
+
+	if sql, args, err = builder.ToSql(); err != nil {
+		return err
+	} else if _, err = tx.Exec(ctx, sql, args...); err != nil {
+		return err
+	}
+	return nil
+}
