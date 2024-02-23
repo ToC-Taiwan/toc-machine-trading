@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"tmt/internal/controller/http/resp"
+	"tmt/internal/controller/http/websocket/pick"
 	"tmt/internal/entity"
 	"tmt/internal/usecase"
 
@@ -22,6 +23,8 @@ func NewBasicRoutes(handler *gin.RouterGroup, t usecase.Basic) {
 	{
 		h.PUT("/stock", r.getStockDetail)
 		h.GET("/usage/shioaji", r.getShioajiUsage)
+		h.GET("/search/stock", r.serveStockSerchWS)
+		h.GET("/search/future", r.serveFutureSerchWS)
 	}
 }
 
@@ -89,4 +92,12 @@ func (r *basicRoutes) getShioajiUsage(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, usage)
+}
+
+func (r *basicRoutes) serveStockSerchWS(c *gin.Context) {
+	pick.StartWSTargetSearcher(c, r.t, pick.Stock)
+}
+
+func (r *basicRoutes) serveFutureSerchWS(c *gin.Context) {
+	pick.StartWSTargetSearcher(c, r.t, pick.Future)
 }

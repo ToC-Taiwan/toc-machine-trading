@@ -17,6 +17,8 @@ type Analyze interface {
 type Basic interface {
 	GetStockDetail(stockNum string) *entity.Stock
 	GetShioajiUsage() (*entity.ShioajiUsage, error)
+	CreateStockSearchRoom(com chan string, dataChan chan []*entity.Stock)
+	CreateFutureSearchRoom(com chan string, dataChan chan []*entity.Future)
 }
 
 type BasicRepo interface {
@@ -65,11 +67,10 @@ type HistorygRPCAPI interface {
 type RealTime interface {
 	GetStockSnapshotByNumArr(stockNumArr []string) ([]*entity.StockSnapShot, error)
 	GetTradeIndex() *entity.TradeIndex
-	GetMainFuture() *entity.Future
 	GetFutureSnapshotByCode(code string) (*entity.FutureSnapShot, error)
-	NewFutureRealTimeClient(tickChan chan *entity.RealTimeFutureTick, orderStatusChan chan interface{}, connectionID string)
 	DeleteRealTimeClient(connectionID string)
 	CreateRealTimePick(connectionID string, odd bool, com chan *pb.PickRealMap, tickChan chan []byte)
+	CreateRealTimePickFuture(connectionID string, com chan *pb.PickRealMap, tickChan chan []byte)
 }
 
 type RealTimeRepo interface {
@@ -109,6 +110,7 @@ type Rabbit interface {
 	StockTickPbConsumer(ctx context.Context, stockNum string, tickChan chan []byte)
 	StockTickOddsPbConsumer(ctx context.Context, stockNum string, tickChan chan []byte)
 	FutureTickConsumer(code string, tickChan chan *entity.RealTimeFutureTick)
+	FutureTickPbConsumer(ctx context.Context, code string, tickChan chan []byte)
 	Close()
 }
 
@@ -120,7 +122,6 @@ type Target interface {
 type TargetRepo interface {
 	InsertOrUpdateTargetArr(ctx context.Context, t []*entity.StockTarget) error
 	QueryTargetsByTradeDay(ctx context.Context, tradeDay time.Time) ([]*entity.StockTarget, error)
-	QueryAllMXFFuture(ctx context.Context) ([]*entity.Future, error)
 }
 
 type Trade interface {

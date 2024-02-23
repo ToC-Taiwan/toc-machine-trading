@@ -59,14 +59,14 @@ func (w *WSTargetStock) sender() {
 			return
 
 		case v := <-w.dataChan:
-			w.SendBinaryToClient(v)
+			w.SendBinaryBytesToClient(v)
 
 		case <-time.After(time.Second * 10):
 			m, err := w.getRank()
 			if err != nil {
 				continue
 			}
-			w.SendBinaryToClient(m)
+			w.SendBinaryBytesToClient(m)
 		}
 	}
 }

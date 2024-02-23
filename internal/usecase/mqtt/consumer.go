@@ -170,3 +170,20 @@ func (c *Rabbit) StockTickOddsPbConsumer(ctx context.Context, stockNum string, t
 		}
 	}
 }
+
+// FutureTickPbConsumer -.
+func (c *Rabbit) FutureTickPbConsumer(ctx context.Context, code string, tickChan chan []byte) {
+	delivery := c.establishDelivery(fmt.Sprintf("%s:%s", routingKeyFutureTick, code))
+	for {
+		select {
+		case <-ctx.Done():
+			return
+
+		case d, opened := <-delivery:
+			if !opened {
+				return
+			}
+			tickChan <- d.Body
+		}
+	}
+}

@@ -3,30 +3,27 @@ package ginws
 
 import (
 	"context"
-	"encoding/json"
 	"net/http"
-
-	"tmt/pb"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
-	"google.golang.org/protobuf/proto"
 )
 
 // WSRouter -.
 type WSRouter struct {
-	msgChan    chan interface{}
-	binaryChan chan []byte
-	conn       *websocket.Conn
-	ctx        context.Context
+	binaryBytesChan chan []byte
+	stringBytesChan chan []byte
+
+	conn *websocket.Conn
+	ctx  context.Context
 }
 
 // NewWSRouter -.
 func NewWSRouter(c *gin.Context) *WSRouter {
 	r := &WSRouter{
-		msgChan:    make(chan interface{}),
-		binaryChan: make(chan []byte),
-		ctx:        c.Request.Context(),
+		stringBytesChan: make(chan []byte),
+		binaryBytesChan: make(chan []byte),
+		ctx:             c.Request.Context(),
 	}
 	r.upgrade(c)
 	return r
@@ -57,23 +54,10 @@ func (w *WSRouter) write() {
 		case <-w.Ctx().Done():
 			return
 
-		case cl := <-w.msgChan:
-			switch v := cl.(type) {
-			case string:
-				w.sendText([]byte(v))
+		case cl := <-w.stringBytesChan:
+			w.sendText(cl)
 
-			case *pb.WSMessage:
-				if serveMsgStr, err := proto.Marshal(v); err == nil {
-					w.sendBinary(serveMsgStr)
-				}
-
-			default:
-				if serveMsgStr, err := json.Marshal(v); err == nil {
-					w.sendText(serveMsgStr)
-				}
-			}
-
-		case cl := <-w.binaryChan:
+		case cl := <-w.binaryBytesChan:
 			w.sendBinary(cl)
 		}
 	}
@@ -96,7 +80,7 @@ func (w *WSRouter) ReadFromClient(forwardChan chan []byte) {
 		}
 
 		if string(message) == "ping" {
-			w.msgChan <- "pong"
+			w.stringBytesChan <- []byte("pong")
 			continue
 		}
 
@@ -105,12 +89,12 @@ func (w *WSRouter) ReadFromClient(forwardChan chan []byte) {
 	_ = w.conn.Close()
 }
 
-func (w *WSRouter) SendToClient(msg interface{}) {
-	w.msgChan <- msg
+func (w *WSRouter) SendStringBytesToClient(msg []byte) {
+	w.stringBytesChan <- msg
 }
 
-func (w *WSRouter) SendBinaryToClient(msg []byte) {
-	w.binaryChan <- msg
+func (w *WSRouter) SendBinaryBytesToClient(msg []byte) {
+	w.binaryBytesChan <- msg
 }
 
 func (w *WSRouter) Ctx() context.Context {

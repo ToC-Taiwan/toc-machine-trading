@@ -52,7 +52,7 @@ func (w *WSHistory) sender() {
 			return
 
 		case v := <-w.dataChan:
-			w.SendBinaryToClient(v)
+			w.SendBinaryBytesToClient(v)
 		}
 	}
 }

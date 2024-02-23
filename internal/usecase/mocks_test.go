@@ -74,6 +74,30 @@ func (m *MockBasic) EXPECT() *MockBasicMockRecorder {
 	return m.recorder
 }
 
+// CreateFutureSearchRoom mocks base method.
+func (m *MockBasic) CreateFutureSearchRoom(com chan string, dataChan chan []*entity.Future) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "CreateFutureSearchRoom", com, dataChan)
+}
+
+// CreateFutureSearchRoom indicates an expected call of CreateFutureSearchRoom.
+func (mr *MockBasicMockRecorder) CreateFutureSearchRoom(com, dataChan interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateFutureSearchRoom", reflect.TypeOf((*MockBasic)(nil).CreateFutureSearchRoom), com, dataChan)
+}
+
+// CreateStockSearchRoom mocks base method.
+func (m *MockBasic) CreateStockSearchRoom(com chan string, dataChan chan []*entity.Stock) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "CreateStockSearchRoom", com, dataChan)
+}
+
+// CreateStockSearchRoom indicates an expected call of CreateStockSearchRoom.
+func (mr *MockBasicMockRecorder) CreateStockSearchRoom(com, dataChan interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateStockSearchRoom", reflect.TypeOf((*MockBasic)(nil).CreateStockSearchRoom), com, dataChan)
+}
+
 // GetShioajiUsage mocks base method.
 func (m *MockBasic) GetShioajiUsage() (*entity.ShioajiUsage, error) {
 	m.ctrl.T.Helper()
@@ -659,6 +683,18 @@ func (mr *MockRealTimeMockRecorder) CreateRealTimePick(connectionID, odd, com, t
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateRealTimePick", reflect.TypeOf((*MockRealTime)(nil).CreateRealTimePick), connectionID, odd, com, tickChan)
 }
 
+// CreateRealTimePickFuture mocks base method.
+func (m *MockRealTime) CreateRealTimePickFuture(connectionID string, com chan *pb.PickRealMap, tickChan chan []byte) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "CreateRealTimePickFuture", connectionID, com, tickChan)
+}
+
+// CreateRealTimePickFuture indicates an expected call of CreateRealTimePickFuture.
+func (mr *MockRealTimeMockRecorder) CreateRealTimePickFuture(connectionID, com, tickChan interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateRealTimePickFuture", reflect.TypeOf((*MockRealTime)(nil).CreateRealTimePickFuture), connectionID, com, tickChan)
+}
+
 // DeleteRealTimeClient mocks base method.
 func (m *MockRealTime) DeleteRealTimeClient(connectionID string) {
 	m.ctrl.T.Helper()
@@ -684,20 +720,6 @@ func (m *MockRealTime) GetFutureSnapshotByCode(code string) (*entity.FutureSnapS
 func (mr *MockRealTimeMockRecorder) GetFutureSnapshotByCode(code interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFutureSnapshotByCode", reflect.TypeOf((*MockRealTime)(nil).GetFutureSnapshotByCode), code)
-}
-
-// GetMainFuture mocks base method.
-func (m *MockRealTime) GetMainFuture() *entity.Future {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetMainFuture")
-	ret0, _ := ret[0].(*entity.Future)
-	return ret0
-}
-
-// GetMainFuture indicates an expected call of GetMainFuture.
-func (mr *MockRealTimeMockRecorder) GetMainFuture() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMainFuture", reflect.TypeOf((*MockRealTime)(nil).GetMainFuture))
 }
 
 // GetStockSnapshotByNumArr mocks base method.
@@ -727,18 +749,6 @@ func (m *MockRealTime) GetTradeIndex() *entity.TradeIndex {
 func (mr *MockRealTimeMockRecorder) GetTradeIndex() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTradeIndex", reflect.TypeOf((*MockRealTime)(nil).GetTradeIndex))
-}
-
-// NewFutureRealTimeClient mocks base method.
-func (m *MockRealTime) NewFutureRealTimeClient(tickChan chan *entity.RealTimeFutureTick, orderStatusChan chan interface{}, connectionID string) {
-	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "NewFutureRealTimeClient", tickChan, orderStatusChan, connectionID)
-}
-
-// NewFutureRealTimeClient indicates an expected call of NewFutureRealTimeClient.
-func (mr *MockRealTimeMockRecorder) NewFutureRealTimeClient(tickChan, orderStatusChan, connectionID interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NewFutureRealTimeClient", reflect.TypeOf((*MockRealTime)(nil).NewFutureRealTimeClient), tickChan, orderStatusChan, connectionID)
 }
 
 // MockRealTimeRepo is a mock of RealTimeRepo interface.
@@ -1168,6 +1178,18 @@ func (mr *MockRabbitMockRecorder) FutureTickConsumer(code, tickChan interface{})
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FutureTickConsumer", reflect.TypeOf((*MockRabbit)(nil).FutureTickConsumer), code, tickChan)
 }
 
+// FutureTickPbConsumer mocks base method.
+func (m *MockRabbit) FutureTickPbConsumer(ctx context.Context, code string, tickChan chan []byte) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "FutureTickPbConsumer", ctx, code, tickChan)
+}
+
+// FutureTickPbConsumer indicates an expected call of FutureTickPbConsumer.
+func (mr *MockRabbitMockRecorder) FutureTickPbConsumer(ctx, code, tickChan interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FutureTickPbConsumer", reflect.TypeOf((*MockRabbit)(nil).FutureTickPbConsumer), ctx, code, tickChan)
+}
+
 // OrderStatusArrConsumer mocks base method.
 func (m *MockRabbit) OrderStatusArrConsumer(orderStatusChan chan interface{}) {
 	m.ctrl.T.Helper()
@@ -1303,21 +1325,6 @@ func (m *MockTargetRepo) InsertOrUpdateTargetArr(ctx context.Context, t []*entit
 func (mr *MockTargetRepoMockRecorder) InsertOrUpdateTargetArr(ctx, t interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertOrUpdateTargetArr", reflect.TypeOf((*MockTargetRepo)(nil).InsertOrUpdateTargetArr), ctx, t)
-}
-
-// QueryAllMXFFuture mocks base method.
-func (m *MockTargetRepo) QueryAllMXFFuture(ctx context.Context) ([]*entity.Future, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "QueryAllMXFFuture", ctx)
-	ret0, _ := ret[0].([]*entity.Future)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// QueryAllMXFFuture indicates an expected call of QueryAllMXFFuture.
-func (mr *MockTargetRepoMockRecorder) QueryAllMXFFuture(ctx interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryAllMXFFuture", reflect.TypeOf((*MockTargetRepo)(nil).QueryAllMXFFuture), ctx)
 }
 
 // QueryTargetsByTradeDay mocks base method.

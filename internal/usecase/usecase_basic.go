@@ -10,6 +10,7 @@ import (
 	"tmt/internal/usecase/cache"
 	"tmt/internal/usecase/grpc"
 	"tmt/internal/usecase/modules/calendar"
+	"tmt/internal/usecase/modules/searcher"
 	"tmt/internal/usecase/repo"
 	"tmt/pkg/log"
 	"tmt/pkg/utils"
@@ -98,6 +99,7 @@ func (uc *BasicUseCase) updateRepoStock() error {
 		return err
 	}
 
+	searcher := searcher.Get()
 	for _, v := range stockArr {
 		if v.GetCode() == "001" {
 			continue
@@ -124,6 +126,7 @@ func (uc *BasicUseCase) updateRepoStock() error {
 		}
 		uc.allStockDetail = append(uc.allStockDetail, stock)
 		uc.cc.SetStockDetail(stock)
+		searcher.AddStock(stock)
 	}
 
 	err = uc.repo.UpdateAllStockDayTradeToNo(context.Background())
@@ -140,6 +143,7 @@ func (uc *BasicUseCase) updateRepoFuture() error {
 		return err
 	}
 
+	searcher := searcher.Get()
 	duplCodeMap := make(map[string]struct{})
 	for _, v := range futureArr {
 		if v.GetReference() == 0 {
@@ -177,6 +181,7 @@ func (uc *BasicUseCase) updateRepoFuture() error {
 			duplCodeMap[future.Code] = struct{}{}
 			uc.allFutureDetail = append(uc.allFutureDetail, future)
 			uc.cc.SetFutureDetail(future)
+			searcher.AddFuture(future)
 		}
 	}
 
@@ -189,6 +194,7 @@ func (uc *BasicUseCase) updateRepoOption() error {
 		return err
 	}
 
+	searcher := searcher.Get()
 	duplCodeMap := make(map[string]struct{})
 	for _, v := range optionArr {
 		if v.GetReference() == 0 {
@@ -227,6 +233,7 @@ func (uc *BasicUseCase) updateRepoOption() error {
 		if _, ok := duplCodeMap[option.Code]; !ok {
 			duplCodeMap[option.Code] = struct{}{}
 			uc.allOptionDetail = append(uc.allOptionDetail, option)
+			searcher.AddOption(option)
 		}
 	}
 
@@ -235,4 +242,30 @@ func (uc *BasicUseCase) updateRepoOption() error {
 
 func (uc *BasicUseCase) GetStockDetail(stockNum string) *entity.Stock {
 	return uc.cc.GetStockDetail(stockNum)
+}
+
+func (uc *BasicUseCase) CreateStockSearchRoom(com chan string, dataChan chan []*entity.Stock) {
+	searcher := searcher.Get()
+	for {
+		code, ok := <-com
+		if !ok {
+			return
+		}
+		dataChan <- searcher.SearchStock(code)
+	}
+}
+
+func (uc *BasicUseCase) GetFutureDetail(futureCode string) *entity.Future {
+	return uc.cc.GetFutureDetail(futureCode)
+}
+
+func (uc *BasicUseCase) CreateFutureSearchRoom(com chan string, dataChan chan []*entity.Future) {
+	searcher := searcher.Get()
+	for {
+		code, ok := <-com
+		if !ok {
+			return
+		}
+		dataChan <- searcher.SearchFuture(code)
+	}
 }

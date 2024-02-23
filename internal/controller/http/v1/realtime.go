@@ -5,10 +5,7 @@ import (
 	"net/http"
 
 	"tmt/internal/controller/http/resp"
-	"tmt/internal/controller/http/websocket/future"
 	"tmt/internal/controller/http/websocket/pick"
-	pickV2 "tmt/internal/controller/http/websocket/pick/v2"
-
 	"tmt/internal/usecase"
 
 	"github.com/gin-gonic/gin"
@@ -31,9 +28,7 @@ func NewRealTimeRoutes(handler *gin.RouterGroup, t usecase.RealTime, o usecase.T
 	{
 		h.PUT("/snapshot", r.getSnapshots)
 		h.GET("/ws/pick-stock", r.servePickStockWS)
-		h.GET("/ws/v2/pick-stock", r.servePickStockWSV2)
-		h.GET("/ws/v2/pick-stock/odds", r.servePickStockOddsWSV2)
-		h.GET("/ws/future", r.serveFutureWS)
+		h.GET("/ws/pick-stock/odds", r.servePickStockOddsWS)
 	}
 }
 
@@ -72,17 +67,9 @@ func (r *realTimeRoutes) getSnapshots(c *gin.Context) {
 }
 
 func (r *realTimeRoutes) servePickStockWS(c *gin.Context) {
-	pick.StartWSPickStock(c, r.t)
+	pick.StartWSPickStock(c, r.t, false)
 }
 
-func (r *realTimeRoutes) servePickStockWSV2(c *gin.Context) {
-	pickV2.StartWSPickStock(c, r.t, false)
-}
-
-func (r *realTimeRoutes) servePickStockOddsWSV2(c *gin.Context) {
-	pickV2.StartWSPickStock(c, r.t, true)
-}
-
-func (r *realTimeRoutes) serveFutureWS(c *gin.Context) {
-	future.StartWSFutureTrade(c, r.t, r.o, r.h)
+func (r *realTimeRoutes) servePickStockOddsWS(c *gin.Context) {
+	pick.StartWSPickStock(c, r.t, true)
 }

@@ -55,6 +55,6 @@ func (w *WSPickRealStock) sendRealStock() {
 		if !ok {
 			return
 		}
-		w.SendBinaryToClient(tick)
+		w.SendBinaryBytesToClient(tick)
 	}
 }

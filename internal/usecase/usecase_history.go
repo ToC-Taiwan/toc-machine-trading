@@ -58,7 +58,6 @@ func NewHistory() History {
 	go uc.SendMessage()
 
 	uc.bus.SubscribeAsync(topicFetchStockHistory, true, uc.FetchStockHistory)
-	uc.bus.SubscribeAsync(topicFetchFutureHistory, true, uc.FetchFutureHistory)
 
 	return uc
 }
@@ -159,10 +158,6 @@ func (uc *HistoryUseCase) FetchStockHistory(targetArr []*entity.StockTarget) {
 	}
 
 	uc.bus.PublishTopicEvent(topicAnalyzeStockTargets, fetchArr)
-}
-
-func (uc *HistoryUseCase) FetchFutureHistory(code string) {
-	uc.bus.PublishTopicEvent(topicSubscribeFutureTickTargets, code)
 }
 
 func (uc *HistoryUseCase) fetchHistoryClose(targetArr []*entity.StockTarget) error {

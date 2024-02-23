@@ -11,7 +11,6 @@ import (
 	"tmt/internal/usecase/cache"
 	"tmt/internal/usecase/grpc"
 	"tmt/internal/usecase/modules/calendar"
-	"tmt/internal/usecase/modules/dt"
 	"tmt/internal/usecase/modules/quota"
 	"tmt/internal/usecase/mqtt"
 	"tmt/internal/usecase/repo"
@@ -26,20 +25,15 @@ type RealTimeUseCase struct {
 
 	gRPCRealtime RealTimegRPCAPI
 	gRPCSub      SubscribegRPCAPI
+	sc           TradegRPCAPI
 
-	sc TradegRPCAPI
-
-	commonRabbit Rabbit
-	futureRabbit Rabbit
-
+	commonRabbit        Rabbit
 	clientRabbitMap     map[string]Rabbit
 	clientRabbitMapLock sync.RWMutex
 
 	cfg        *config.Config
 	quota      *quota.Quota
 	tradeIndex *entity.TradeIndex
-
-	mainFutureCode string
 
 	stockSwitchChanMap      map[string]chan bool
 	stockSwitchChanMapLock  sync.RWMutex
@@ -60,7 +54,6 @@ func NewRealTime() RealTime {
 		repo:  repo.NewRealTime(cfg.GetPostgresPool()),
 
 		commonRabbit: mqtt.NewRabbit(cfg.NewRabbitConn()),
-		futureRabbit: mqtt.NewRabbit(cfg.NewRabbitConn()),
 
 		gRPCRealtime: grpc.NewRealTime(cfg.GetSinopacPool()),
 		gRPCSub:      grpc.NewSubscribe(cfg.GetSinopacPool()),
@@ -89,8 +82,6 @@ func NewRealTime() RealTime {
 
 	go uc.ReceiveEvent(context.Background())
 	go uc.ReceiveOrderStatus(context.Background())
-
-	uc.bus.SubscribeAsync(topicSubscribeFutureTickTargets, true, uc.SetMainFuture)
 
 	return uc
 }
@@ -425,62 +416,57 @@ func (uc *RealTimeUseCase) GetFutureSnapshotByCode(code string) (*entity.FutureS
 	}, nil
 }
 
-// GetMainFuture -.
-func (uc *RealTimeUseCase) GetMainFuture() *entity.Future {
-	return uc.cc.GetFutureDetail(uc.mainFutureCode)
-}
+// // ReceiveFutureSubscribeData -.
+// func (uc *RealTimeUseCase) ReceiveFutureSubscribeData(code string) {
+// 	defer uc.SubscribeFutureTick(code)
+// 	t := dt.NewDTFuture(
+// 		code,
+// 		uc.sc.(*grpc.TradegRPCAPI),
+// 		&uc.cfg.TradeFuture,
+// 	)
 
-// ReceiveFutureSubscribeData -.
-func (uc *RealTimeUseCase) ReceiveFutureSubscribeData(code string) {
-	defer uc.SubscribeFutureTick(code)
-	t := dt.NewDTFuture(
-		code,
-		uc.sc.(*grpc.TradegRPCAPI),
-		&uc.cfg.TradeFuture,
-	)
+// 	uc.futureSwitchChanMapLock.Lock()
+// 	uc.futureSwitchChanMap[code] = t.SwitchChan()
+// 	uc.futureSwitchChanMapLock.Unlock()
 
-	uc.futureSwitchChanMapLock.Lock()
-	uc.futureSwitchChanMap[code] = t.SwitchChan()
-	uc.futureSwitchChanMapLock.Unlock()
+// 	orderStatusChan := make(chan interface{})
+// 	go uc.futureRabbit.FutureTickConsumer(code, t.TickChan())
+// 	go func() {
+// 		ch := t.Notify()
+// 		for {
+// 			order := <-orderStatusChan
+// 			o, ok := order.(*entity.FutureOrder)
+// 			if !ok || o.Code != code {
+// 				continue
+// 			}
+// 			ch <- o
+// 		}
+// 	}()
+// 	go uc.futureRabbit.OrderStatusConsumer(orderStatusChan)
+// 	go uc.futureRabbit.OrderStatusArrConsumer(orderStatusChan)
+// }
 
-	orderStatusChan := make(chan interface{})
-	go uc.futureRabbit.FutureTickConsumer(code, t.TickChan())
-	go func() {
-		ch := t.Notify()
-		for {
-			order := <-orderStatusChan
-			o, ok := order.(*entity.FutureOrder)
-			if !ok || o.Code != code {
-				continue
-			}
-			ch <- o
-		}
-	}()
-	go uc.futureRabbit.OrderStatusConsumer(orderStatusChan)
-	go uc.futureRabbit.OrderStatusArrConsumer(orderStatusChan)
-}
+// func (uc *RealTimeUseCase) SetMainFuture(code string) {
+// 	defer uc.ReceiveFutureSubscribeData(code)
 
-func (uc *RealTimeUseCase) SetMainFuture(code string) {
-	defer uc.ReceiveFutureSubscribeData(code)
+// 	if uc.mainFutureCode != "" {
+// 		uc.logger.Fatal("main future code already set, can't set again")
+// 	}
 
-	if uc.mainFutureCode != "" {
-		uc.logger.Fatal("main future code already set, can't set again")
-	}
+// 	uc.mainFutureCode = code
+// }
 
-	uc.mainFutureCode = code
-}
+// func (uc *RealTimeUseCase) NewFutureRealTimeClient(tickChan chan *entity.RealTimeFutureTick, orderStatusChan chan interface{}, connectionID string) {
+// 	r := mqtt.NewRabbit(uc.cfg.NewRabbitConn())
 
-func (uc *RealTimeUseCase) NewFutureRealTimeClient(tickChan chan *entity.RealTimeFutureTick, orderStatusChan chan interface{}, connectionID string) {
-	r := mqtt.NewRabbit(uc.cfg.NewRabbitConn())
+// 	uc.clientRabbitMapLock.Lock()
+// 	uc.clientRabbitMap[connectionID] = r
+// 	uc.clientRabbitMapLock.Unlock()
 
-	uc.clientRabbitMapLock.Lock()
-	uc.clientRabbitMap[connectionID] = r
-	uc.clientRabbitMapLock.Unlock()
-
-	go r.OrderStatusConsumer(orderStatusChan)
-	go r.OrderStatusArrConsumer(orderStatusChan)
-	go r.FutureTickConsumer(uc.mainFutureCode, tickChan)
-}
+// 	go r.OrderStatusConsumer(orderStatusChan)
+// 	go r.OrderStatusArrConsumer(orderStatusChan)
+// 	go r.FutureTickConsumer(uc.mainFutureCode, tickChan)
+// }
 
 func (uc *RealTimeUseCase) DeleteRealTimeClient(connectionID string) {
 	uc.clientRabbitMapLock.Lock()
@@ -547,8 +533,8 @@ func (uc *RealTimeUseCase) SubscribeStockTick(subArr []string, odd bool) {
 // }
 
 // SubscribeFutureTick -.
-func (uc *RealTimeUseCase) SubscribeFutureTick(code string) {
-	failSubNumArr, err := uc.gRPCSub.SubscribeFutureTick([]string{code})
+func (uc *RealTimeUseCase) SubscribeFutureTick(codeArr []string) {
+	failSubNumArr, err := uc.gRPCSub.SubscribeFutureTick(codeArr)
 	if err != nil {
 		uc.logger.Error(err)
 		return
@@ -609,6 +595,43 @@ func (uc *RealTimeUseCase) CreateRealTimePick(connectionID string, odd bool, com
 		}
 		if len(subscribeList) != 0 {
 			uc.SubscribeStockTick(subscribeList, odd)
+		}
+	}
+}
+
+func (uc *RealTimeUseCase) CreateRealTimePickFuture(connectionID string, com chan *pb.PickRealMap, tickChan chan []byte) {
+	r := mqtt.NewRabbit(uc.cfg.NewRabbitConn())
+
+	uc.clientRabbitMapLock.Lock()
+	uc.clientRabbitMap[connectionID] = r
+	uc.clientRabbitMapLock.Unlock()
+
+	contextMap := make(map[string]context.CancelFunc)
+	defer func() {
+		for _, cancel := range contextMap {
+			cancel()
+		}
+	}()
+
+	for {
+		list, ok := <-com
+		if !ok {
+			return
+		}
+		subscribeList := []string{}
+		for k, v := range list.GetPickMap() {
+			if v == pb.PickListType_TYPE_ADD && contextMap[k] == nil {
+				subscribeList = append(subscribeList, k)
+				ctx, cancel := context.WithCancel(context.Background())
+				contextMap[k] = cancel
+				go r.FutureTickPbConsumer(ctx, k, tickChan)
+			} else if v == pb.PickListType_TYPE_REMOVE && contextMap[k] != nil {
+				contextMap[k]()
+				delete(contextMap, k)
+			}
+		}
+		if len(subscribeList) != 0 {
+			uc.SubscribeFutureTick(subscribeList)
 		}
 	}
 }

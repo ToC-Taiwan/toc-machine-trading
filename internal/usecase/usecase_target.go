@@ -68,18 +68,6 @@ func NewTarget() Target {
 
 	uc.cc.AppendStockTargets(targetArr)
 	uc.publishNewStockTargets(targetArr)
-	uc.publishNewFutureTargets()
-
-	// go func() {
-	// 	time.Sleep(time.Until(basic.TradeDay.Add(time.Hour * 9)))
-	// 	for range time.NewTicker(time.Second * 60).C {
-	// 		if uc.stockTradeInSwitch {
-	// 			if err := uc.realTimeAddTargets(); err != nil {
-	// 				uc.logger.Fatal(err)
-	// 			}
-	// 		}
-	// 	}
-	// }()
 
 	return uc
 }
@@ -94,33 +82,6 @@ func (uc *TargetUseCase) publishNewStockTargets(targetArr []*entity.StockTarget)
 		uc.logger.Fatal(err)
 	}
 	uc.bus.PublishTopicEvent(topicFetchStockHistory, targetArr)
-}
-
-func (uc *TargetUseCase) publishNewFutureTargets() {
-	if futureTarget, err := uc.getFutureTarget(); err != nil {
-		uc.logger.Fatal(err)
-	} else {
-		uc.bus.PublishTopicEvent(topicFetchFutureHistory, futureTarget)
-	}
-}
-
-func (uc *TargetUseCase) getFutureTarget() (string, error) {
-	futures, err := uc.repo.QueryAllMXFFuture(context.Background())
-	if err != nil {
-		return "", err
-	}
-
-	for _, v := range futures {
-		if v.Code == "MXFR1" || v.Code == "MXFR2" {
-			continue
-		}
-
-		if time.Now().Before(v.DeliveryDate) {
-			return v.Code, nil
-		}
-	}
-
-	return "", errors.New("no future")
 }
 
 func (uc *TargetUseCase) searchTradeDayTargetsFromDB(tradeDay time.Time) ([]*entity.StockTarget, error) {
