@@ -97,7 +97,7 @@ func (r *tradeRoutes) sellOddStock(c *gin.Context) {
 		return
 	}
 
-	id, status, err := r.t.SellddStock(p.Num, p.Price, p.Share)
+	id, status, err := r.t.SelloddStock(p.Num, p.Price, p.Share)
 	if err != nil {
 		resp.ErrorResponse(c, http.StatusInternalServerError, err)
 		return

@@ -130,7 +130,7 @@ type Trade interface {
 	GetAllFutureTradeBalance(ctx context.Context) ([]*entity.FutureTradeBalance, error)
 	GetFutureOrderByTradeDay(ctx context.Context, tradeDay string) ([]*entity.FutureOrder, error)
 	BuyOddStock(num string, price float64, share int64) (string, entity.OrderStatus, error)
-	SellddStock(num string, price float64, share int64) (string, entity.OrderStatus, error)
+	SelloddStock(num string, price float64, share int64) (string, entity.OrderStatus, error)
 	BuyFuture(order *entity.FutureOrder) (string, entity.OrderStatus, error)
 	SellFuture(order *entity.FutureOrder) (string, entity.OrderStatus, error)
 	CancelOrderByID(orderID string) (string, entity.OrderStatus, error)

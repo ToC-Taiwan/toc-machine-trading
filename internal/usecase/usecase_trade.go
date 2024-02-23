@@ -449,7 +449,7 @@ func (uc *TradeUseCase) BuyOddStock(num string, price float64, share int64) (str
 	return result.GetOrderId(), entity.StringToOrderStatus(result.GetStatus()), nil
 }
 
-func (uc *TradeUseCase) SellddStock(num string, price float64, share int64) (string, entity.OrderStatus, error) {
+func (uc *TradeUseCase) SelloddStock(num string, price float64, share int64) (string, entity.OrderStatus, error) {
 	if num == "" {
 		return "", entity.StatusUnknow, errors.New("empty stock num")
 	}
