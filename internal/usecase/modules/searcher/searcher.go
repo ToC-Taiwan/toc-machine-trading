@@ -55,7 +55,7 @@ func (s *searcher) AddStock(stock *entity.Stock) {
 	defer s.lock.Unlock()
 
 	s.stockMap[stock.Number] = stock
-	s.stockCodeArr = append(s.stockCodeArr, stock.Code)
+	s.stockCodeArr = append(s.stockCodeArr, stock.Number)
 }
 
 func (s *searcher) AddFuture(future *entity.Future) {
