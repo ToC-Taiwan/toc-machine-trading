@@ -67,11 +67,12 @@ func (s *searcher) SearchStock(param string) []*entity.Stock {
 	s.lock.RLock()
 	defer s.lock.RUnlock()
 
+	param = strings.ToLower(param)
 	var result []*entity.Stock
 	for _, v := range s.stockArr {
-		if strings.Contains(v.Number, param) {
+		if strings.Contains(strings.ToLower(v.Number), param) {
 			result = append(result, v)
-		} else if strings.Contains(v.Name, param) {
+		} else if strings.Contains(strings.ToLower(v.Name), param) {
 			result = append(result, v)
 		}
 	}
@@ -87,11 +88,12 @@ func (s *searcher) SearchFuture(param string) []*entity.Future {
 	s.lock.RLock()
 	defer s.lock.RUnlock()
 
+	param = strings.ToLower(param)
 	var result []*entity.Future
 	for _, v := range s.futureArr {
-		if strings.Contains(v.Code, param) {
+		if strings.Contains(strings.ToLower(v.Code), param) {
 			result = append(result, v)
-		} else if strings.Contains(v.Name, param) {
+		} else if strings.Contains(strings.ToLower(v.Name), param) {
 			result = append(result, v)
 		}
 	}
@@ -107,11 +109,12 @@ func (s *searcher) SearchOption(param string) []*entity.Option {
 	s.lock.RLock()
 	defer s.lock.RUnlock()
 
+	param = strings.ToLower(param)
 	var result []*entity.Option
 	for _, v := range s.optionArr {
-		if strings.Contains(v.Code, param) {
+		if strings.Contains(strings.ToLower(v.Code), param) {
 			result = append(result, v)
-		} else if strings.Contains(v.Name, param) {
+		} else if strings.Contains(strings.ToLower(v.Name), param) {
 			result = append(result, v)
 		}
 	}
