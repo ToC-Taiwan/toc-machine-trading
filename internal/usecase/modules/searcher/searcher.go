@@ -2,6 +2,7 @@
 package searcher
 
 import (
+	"sort"
 	"strings"
 	"sync"
 
@@ -26,24 +27,15 @@ type Searcher interface {
 type searcher struct {
 	lock sync.RWMutex
 
-	stockMap     map[string]*entity.Stock
-	stockCodeArr []string
-
-	futureMap     map[string]*entity.Future
-	futureCodeArr []string
-
-	optionMap     map[string]*entity.Option
-	optionCodeArr []string
+	stockArr  []*entity.Stock
+	futureArr []*entity.Future
+	optionArr []*entity.Option
 }
 
 func Get() Searcher {
 	if singleton == nil {
 		once.Do(func() {
-			singleton = &searcher{
-				stockMap:  make(map[string]*entity.Stock),
-				futureMap: make(map[string]*entity.Future),
-				optionMap: make(map[string]*entity.Option),
-			}
+			singleton = &searcher{}
 		})
 		return Get()
 	}
@@ -54,61 +46,79 @@ func (s *searcher) AddStock(stock *entity.Stock) {
 	s.lock.Lock()
 	defer s.lock.Unlock()
 
-	s.stockMap[stock.Number] = stock
-	s.stockCodeArr = append(s.stockCodeArr, stock.Number)
+	s.stockArr = append(s.stockArr, stock)
 }
 
 func (s *searcher) AddFuture(future *entity.Future) {
 	s.lock.Lock()
 	defer s.lock.Unlock()
 
-	s.futureMap[future.Code] = future
-	s.futureCodeArr = append(s.futureCodeArr, future.Code)
+	s.futureArr = append(s.futureArr, future)
 }
 
 func (s *searcher) AddOption(option *entity.Option) {
 	s.lock.Lock()
 	defer s.lock.Unlock()
 
-	s.optionMap[option.Code] = option
-	s.optionCodeArr = append(s.optionCodeArr, option.Code)
+	s.optionArr = append(s.optionArr, option)
 }
 
-func (s *searcher) SearchStock(code string) []*entity.Stock {
+func (s *searcher) SearchStock(param string) []*entity.Stock {
 	s.lock.RLock()
 	defer s.lock.RUnlock()
 
 	var result []*entity.Stock
-	for _, v := range s.stockCodeArr {
-		if strings.Contains(v, code) {
-			result = append(result, s.stockMap[v])
+	for _, v := range s.stockArr {
+		if strings.Contains(v.Number, param) {
+			result = append(result, v)
+		} else if strings.Contains(v.Name, param) {
+			result = append(result, v)
 		}
+	}
+	if len(result) != 0 {
+		sort.SliceStable(result, func(i, j int) bool {
+			return result[i].Number < result[j].Number
+		})
 	}
 	return result
 }
 
-func (s *searcher) SearchFuture(code string) []*entity.Future {
+func (s *searcher) SearchFuture(param string) []*entity.Future {
 	s.lock.RLock()
 	defer s.lock.RUnlock()
 
 	var result []*entity.Future
-	for _, v := range s.futureCodeArr {
-		if strings.Contains(v, code) {
-			result = append(result, s.futureMap[v])
+	for _, v := range s.futureArr {
+		if strings.Contains(v.Code, param) {
+			result = append(result, v)
+		} else if strings.Contains(v.Name, param) {
+			result = append(result, v)
 		}
+	}
+	if len(result) != 0 {
+		sort.SliceStable(result, func(i, j int) bool {
+			return result[i].DeliveryDate.Before(result[j].DeliveryDate)
+		})
 	}
 	return result
 }
 
-func (s *searcher) SearchOption(code string) []*entity.Option {
+func (s *searcher) SearchOption(param string) []*entity.Option {
 	s.lock.RLock()
 	defer s.lock.RUnlock()
 
 	var result []*entity.Option
-	for _, v := range s.optionCodeArr {
-		if strings.Contains(v, code) {
-			result = append(result, s.optionMap[v])
+	for _, v := range s.optionArr {
+		if strings.Contains(v.Code, param) {
+			result = append(result, v)
+		} else if strings.Contains(v.Name, param) {
+			result = append(result, v)
 		}
+	}
+	if len(result) != 0 {
+		sort.SliceStable(result, func(i, j int) bool {
+			return result[i].DeliveryDate.Before(result[j].DeliveryDate)
+		})
 	}
 	return result
 }

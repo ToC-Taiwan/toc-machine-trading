@@ -152,13 +152,11 @@ func (uc *BasicUseCase) updateRepoFuture() error {
 
 		updateTime, pErr := time.ParseInLocation(entity.ShortSlashTimeLayout, v.GetUpdateDate(), time.Local)
 		if pErr != nil {
-			uc.logger.Warnf("future %s update date parse error: %s", v.GetCode(), pErr.Error())
 			continue
 		}
 
 		dDate, e := time.ParseInLocation(entity.ShortSlashTimeLayout, v.GetDeliveryDate(), time.Local)
 		if e != nil {
-			uc.logger.Warnf("future %s delivery date parse error: %s", v.GetCode(), e.Error())
 			continue
 		}
 

@@ -26,8 +26,6 @@ type Stock struct {
 	DayTrade   bool      `json:"day_trade"`
 	LastClose  float64   `json:"last_close"`
 	UpdateDate time.Time `json:"update_date"`
-
-	*Future `json:"-"`
 }
 
 // Future -.
