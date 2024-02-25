@@ -387,33 +387,12 @@ func (uc *RealTimeUseCase) GetStockSnapshotByNumArr(stockNumArr []string) ([]*en
 }
 
 // GetFutureSnapshotByCode -.
-func (uc *RealTimeUseCase) GetFutureSnapshotByCode(code string) (*entity.FutureSnapShot, error) {
+func (uc *RealTimeUseCase) GetFutureSnapshotByCode(code string) (*pb.SnapshotMessage, error) {
 	snapshot, err := uc.gRPCRealtime.GetFutureSnapshotByCode(code)
 	if err != nil {
 		return nil, err
 	}
-
-	return &entity.FutureSnapShot{
-		Code:       snapshot.GetCode(),
-		FutureName: uc.cc.GetFutureDetail(code).Name,
-		SnapShotBase: entity.SnapShotBase{
-			SnapTime:        time.Unix(0, snapshot.GetTs()).Add(-8 * time.Hour),
-			Open:            snapshot.GetOpen(),
-			High:            snapshot.GetHigh(),
-			Low:             snapshot.GetLow(),
-			Close:           snapshot.GetClose(),
-			TickType:        snapshot.GetTickType(),
-			PriceChg:        snapshot.GetChangePrice(),
-			PctChg:          snapshot.GetChangeRate(),
-			ChgType:         snapshot.GetChangeType(),
-			Volume:          snapshot.GetVolume(),
-			VolumeSum:       snapshot.GetTotalVolume(),
-			Amount:          snapshot.GetAmount(),
-			AmountSum:       snapshot.GetTotalAmount(),
-			YesterdayVolume: snapshot.GetYesterdayVolume(),
-			VolumeRatio:     snapshot.GetVolumeRatio(),
-		},
-	}, nil
+	return snapshot, nil
 }
 
 // // ReceiveFutureSubscribeData -.

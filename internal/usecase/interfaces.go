@@ -68,7 +68,7 @@ type HistorygRPCAPI interface {
 type RealTime interface {
 	GetStockSnapshotByNumArr(stockNumArr []string) ([]*entity.StockSnapShot, error)
 	GetTradeIndex() *entity.TradeIndex
-	GetFutureSnapshotByCode(code string) (*entity.FutureSnapShot, error)
+	GetFutureSnapshotByCode(code string) (*pb.SnapshotMessage, error)
 	DeleteRealTimeClient(connectionID string)
 	CreateRealTimePick(connectionID string, odd bool, com chan *pb.PickRealMap, tickChan chan []byte)
 	CreateRealTimePickFuture(ctx context.Context, code string, tickChan chan *pb.FutureRealTimeTickMessage)

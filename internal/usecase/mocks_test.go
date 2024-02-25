@@ -722,10 +722,10 @@ func (mr *MockRealTimeMockRecorder) DeleteRealTimeClient(connectionID interface{
 }
 
 // GetFutureSnapshotByCode mocks base method.
-func (m *MockRealTime) GetFutureSnapshotByCode(code string) (*entity.FutureSnapShot, error) {
+func (m *MockRealTime) GetFutureSnapshotByCode(code string) (*pb.SnapshotMessage, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetFutureSnapshotByCode", code)
-	ret0, _ := ret[0].(*entity.FutureSnapShot)
+	ret0, _ := ret[0].(*pb.SnapshotMessage)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

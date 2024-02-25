@@ -108,9 +108,21 @@ func (w *WSPickRealFuture) getFutureDetail() *pb.WSMessage {
 	}
 }
 
+func (w *WSPickRealFuture) getFutureSnapshot() *pb.WSMessage {
+	snapshot, err := w.s.GetFutureSnapshotByCode(w.code)
+	if err != nil {
+		return nil
+	}
+	return &pb.WSMessage{
+		Data: &pb.WSMessage_Snapshot{
+			Snapshot: snapshot,
+		},
+	}
+}
+
 func (w *WSPickRealFuture) sendData() {
-	if future := w.getFutureDetail(); future != nil {
-		w.sendMessage(future)
+	if data := w.getFutureSnapshot(); data != nil {
+		w.sendMessage(data)
 	}
 
 	if data := w.generateTradeIndex(); data != nil {
@@ -119,6 +131,10 @@ func (w *WSPickRealFuture) sendData() {
 
 	if data := w.fetchKbar(); data != nil {
 		w.sendMessage(data)
+	}
+
+	if future := w.getFutureDetail(); future != nil {
+		w.sendMessage(future)
 	}
 
 	for {
