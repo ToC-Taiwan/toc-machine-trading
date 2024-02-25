@@ -64,6 +64,10 @@ func (s *searcher) AddOption(option *entity.Option) {
 }
 
 func (s *searcher) SearchStock(param string) []*entity.Stock {
+	if param == "" {
+		return nil
+	}
+
 	s.lock.RLock()
 	defer s.lock.RUnlock()
 
@@ -85,6 +89,10 @@ func (s *searcher) SearchStock(param string) []*entity.Stock {
 }
 
 func (s *searcher) SearchFuture(param string) []*entity.Future {
+	if param == "" {
+		return nil
+	}
+
 	s.lock.RLock()
 	defer s.lock.RUnlock()
 
@@ -106,6 +114,10 @@ func (s *searcher) SearchFuture(param string) []*entity.Future {
 }
 
 func (s *searcher) SearchOption(param string) []*entity.Option {
+	if param == "" {
+		return nil
+	}
+
 	s.lock.RLock()
 	defer s.lock.RUnlock()
 
