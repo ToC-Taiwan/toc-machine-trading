@@ -83,15 +83,15 @@ func (w *WSHistory) getData() {
 			if err != nil {
 				continue
 			}
-			result := &pb.WSHistoryKbarMessage{}
+			result := &pb.HistoryKbarResponse{}
 			for _, v := range data {
-				result.Arr = append(result.Arr, &pb.Kbar{
-					Open:     v.Open,
-					Close:    v.Close,
-					High:     v.High,
-					Low:      v.Low,
-					Volume:   v.Volume,
-					KbarTime: v.KbarTime.Format(entity.ShortTimeLayout),
+				result.Data = append(result.Data, &pb.HistoryKbarMessage{
+					Open:   v.Open,
+					Close:  v.Close,
+					High:   v.High,
+					Low:    v.Low,
+					Volume: v.Volume,
+					Ts:     v.KbarTime.UnixNano(),
 				})
 			}
 			b, err := proto.Marshal(result)

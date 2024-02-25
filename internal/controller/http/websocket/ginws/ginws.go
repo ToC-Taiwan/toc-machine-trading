@@ -89,11 +89,27 @@ func (w *WSRouter) ReadFromClient(forwardChan chan []byte) {
 	_ = w.conn.Close()
 }
 
+func (w *WSRouter) Wait() {
+	for {
+		_, _, err := w.conn.ReadMessage()
+		if err != nil {
+			break
+		}
+	}
+	_ = w.conn.Close()
+}
+
 func (w *WSRouter) SendStringBytesToClient(msg []byte) {
+	if msg == nil {
+		return
+	}
 	w.stringBytesChan <- msg
 }
 
 func (w *WSRouter) SendBinaryBytesToClient(msg []byte) {
+	if msg == nil {
+		return
+	}
 	w.binaryBytesChan <- msg
 }
 

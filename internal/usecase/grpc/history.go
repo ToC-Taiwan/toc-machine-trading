@@ -64,7 +64,7 @@ func (t *HistorygRPCAPI) GetStockHistoryClose(stockNumArr []string, date string)
 }
 
 // GetFutureHistoryKbar -.
-func (t *HistorygRPCAPI) GetFutureHistoryKbar(codeArr []string, date string) ([]*pb.HistoryKbarMessage, error) {
+func (t *HistorygRPCAPI) GetFutureHistoryKbar(codeArr []string, date string) (*pb.HistoryKbarResponse, error) {
 	conn := t.pool.Get()
 	defer t.pool.Put(conn)
 
@@ -73,7 +73,7 @@ func (t *HistorygRPCAPI) GetFutureHistoryKbar(codeArr []string, date string) ([]
 		Date:          date,
 	})
 	if err != nil {
-		return []*pb.HistoryKbarMessage{}, err
+		return &pb.HistoryKbarResponse{}, err
 	}
-	return r.GetData(), nil
+	return r, nil
 }

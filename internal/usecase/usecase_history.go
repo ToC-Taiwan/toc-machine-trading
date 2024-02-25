@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"tmt/internal/config"
+	"tmt/pb"
 
 	"tmt/internal/entity"
 	"tmt/internal/usecase/cache"
@@ -560,23 +561,11 @@ func (uc *HistoryUseCase) processKbarArr(arr []*entity.StockHistoryKbar) {
 	})
 }
 
-// GetFutureHistoryKbarByDate -.
-func (uc *HistoryUseCase) GetFutureHistoryKbarByDate(code string, date time.Time) ([]*entity.FutureHistoryKbar, error) {
-	result := []*entity.FutureHistoryKbar{}
+// GetFutureHistoryPBKbarByDate -.
+func (uc *HistoryUseCase) GetFutureHistoryPBKbarByDate(code string, date time.Time) (*pb.HistoryKbarResponse, error) {
 	kbarArr, err := uc.grpcapi.GetFutureHistoryKbar([]string{code}, date.Format(entity.ShortTimeLayout))
 	if err != nil {
 		return nil, err
 	}
-
-	for _, t := range kbarArr {
-		result = append(result, &entity.FutureHistoryKbar{
-			Code: t.GetCode(),
-			HistoryKbarBase: entity.HistoryKbarBase{
-				KbarTime: time.Unix(0, t.GetTs()).Add(-8 * time.Hour),
-				Open:     t.GetOpen(), High: t.GetHigh(), Low: t.GetLow(),
-				Close: t.GetClose(), Volume: t.GetVolume(),
-			},
-		})
-	}
-	return result, nil
+	return kbarArr, nil
 }

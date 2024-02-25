@@ -172,7 +172,7 @@ func (c *Rabbit) StockTickOddsPbConsumer(ctx context.Context, stockNum string, t
 }
 
 // FutureTickPbConsumer -.
-func (c *Rabbit) FutureTickPbConsumer(ctx context.Context, code string, tickChan chan []byte) {
+func (c *Rabbit) FutureTickPbConsumer(ctx context.Context, code string, tickChan chan *pb.FutureRealTimeTickMessage) {
 	delivery := c.establishDelivery(fmt.Sprintf("%s:%s", routingKeyFutureTick, code))
 	for {
 		select {
@@ -183,7 +183,14 @@ func (c *Rabbit) FutureTickPbConsumer(ctx context.Context, code string, tickChan
 			if !opened {
 				return
 			}
-			tickChan <- d.Body
+
+			body := pb.FutureRealTimeTickMessage{}
+			if err := proto.Unmarshal(d.Body, &body); err != nil {
+				c.logger.Error(err)
+				continue
+			}
+
+			tickChan <- &body
 		}
 	}
 }

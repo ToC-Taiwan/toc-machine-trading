@@ -38,7 +38,7 @@ func Run() {
 		AddV1BasicRoutes(basic).
 		AddV1OrderRoutes(trade).
 		AddV1TradeRoutes(trade).
-		AddV1RealTimeRoutes(realTime, trade, history).
+		AddV1RealTimeRoutes(basic, realTime, history).
 		AddV1AnalyzeRoutes(analyze).
 		AddV1HistoryRoutes(history).
 		AddV1TargetRoutes(target)

@@ -98,6 +98,20 @@ func (mr *MockBasicMockRecorder) CreateStockSearchRoom(com, dataChan interface{}
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateStockSearchRoom", reflect.TypeOf((*MockBasic)(nil).CreateStockSearchRoom), com, dataChan)
 }
 
+// GetFutureDetail mocks base method.
+func (m *MockBasic) GetFutureDetail(futureCode string) *entity.Future {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetFutureDetail", futureCode)
+	ret0, _ := ret[0].(*entity.Future)
+	return ret0
+}
+
+// GetFutureDetail indicates an expected call of GetFutureDetail.
+func (mr *MockBasicMockRecorder) GetFutureDetail(futureCode interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFutureDetail", reflect.TypeOf((*MockBasic)(nil).GetFutureDetail), futureCode)
+}
+
 // GetShioajiUsage mocks base method.
 func (m *MockBasic) GetShioajiUsage() (*entity.ShioajiUsage, error) {
 	m.ctrl.T.Helper()
@@ -369,19 +383,19 @@ func (mr *MockHistoryMockRecorder) GetDayKbarByStockNumMultiDate(stockNum, date,
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetDayKbarByStockNumMultiDate", reflect.TypeOf((*MockHistory)(nil).GetDayKbarByStockNumMultiDate), stockNum, date, interval)
 }
 
-// GetFutureHistoryKbarByDate mocks base method.
-func (m *MockHistory) GetFutureHistoryKbarByDate(code string, date time.Time) ([]*entity.FutureHistoryKbar, error) {
+// GetFutureHistoryPBKbarByDate mocks base method.
+func (m *MockHistory) GetFutureHistoryPBKbarByDate(code string, date time.Time) (*pb.HistoryKbarResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetFutureHistoryKbarByDate", code, date)
-	ret0, _ := ret[0].([]*entity.FutureHistoryKbar)
+	ret := m.ctrl.Call(m, "GetFutureHistoryPBKbarByDate", code, date)
+	ret0, _ := ret[0].(*pb.HistoryKbarResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetFutureHistoryKbarByDate indicates an expected call of GetFutureHistoryKbarByDate.
-func (mr *MockHistoryMockRecorder) GetFutureHistoryKbarByDate(code, date interface{}) *gomock.Call {
+// GetFutureHistoryPBKbarByDate indicates an expected call of GetFutureHistoryPBKbarByDate.
+func (mr *MockHistoryMockRecorder) GetFutureHistoryPBKbarByDate(code, date interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFutureHistoryKbarByDate", reflect.TypeOf((*MockHistory)(nil).GetFutureHistoryKbarByDate), code, date)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFutureHistoryPBKbarByDate", reflect.TypeOf((*MockHistory)(nil).GetFutureHistoryPBKbarByDate), code, date)
 }
 
 // MockHistoryRepo is a mock of HistoryRepo interface.
@@ -589,10 +603,10 @@ func (m *MockHistorygRPCAPI) EXPECT() *MockHistorygRPCAPIMockRecorder {
 }
 
 // GetFutureHistoryKbar mocks base method.
-func (m *MockHistorygRPCAPI) GetFutureHistoryKbar(codeArr []string, date string) ([]*pb.HistoryKbarMessage, error) {
+func (m *MockHistorygRPCAPI) GetFutureHistoryKbar(codeArr []string, date string) (*pb.HistoryKbarResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetFutureHistoryKbar", codeArr, date)
-	ret0, _ := ret[0].([]*pb.HistoryKbarMessage)
+	ret0, _ := ret[0].(*pb.HistoryKbarResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -684,15 +698,15 @@ func (mr *MockRealTimeMockRecorder) CreateRealTimePick(connectionID, odd, com, t
 }
 
 // CreateRealTimePickFuture mocks base method.
-func (m *MockRealTime) CreateRealTimePickFuture(connectionID string, com chan *pb.PickRealMap, tickChan chan []byte) {
+func (m *MockRealTime) CreateRealTimePickFuture(ctx context.Context, code string, tickChan chan *pb.FutureRealTimeTickMessage) {
 	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "CreateRealTimePickFuture", connectionID, com, tickChan)
+	m.ctrl.Call(m, "CreateRealTimePickFuture", ctx, code, tickChan)
 }
 
 // CreateRealTimePickFuture indicates an expected call of CreateRealTimePickFuture.
-func (mr *MockRealTimeMockRecorder) CreateRealTimePickFuture(connectionID, com, tickChan interface{}) *gomock.Call {
+func (mr *MockRealTimeMockRecorder) CreateRealTimePickFuture(ctx, code, tickChan interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateRealTimePickFuture", reflect.TypeOf((*MockRealTime)(nil).CreateRealTimePickFuture), connectionID, com, tickChan)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateRealTimePickFuture", reflect.TypeOf((*MockRealTime)(nil).CreateRealTimePickFuture), ctx, code, tickChan)
 }
 
 // DeleteRealTimeClient mocks base method.
@@ -1179,7 +1193,7 @@ func (mr *MockRabbitMockRecorder) FutureTickConsumer(code, tickChan interface{})
 }
 
 // FutureTickPbConsumer mocks base method.
-func (m *MockRabbit) FutureTickPbConsumer(ctx context.Context, code string, tickChan chan []byte) {
+func (m *MockRabbit) FutureTickPbConsumer(ctx context.Context, code string, tickChan chan *pb.FutureRealTimeTickMessage) {
 	m.ctrl.T.Helper()
 	m.ctrl.Call(m, "FutureTickPbConsumer", ctx, code, tickChan)
 }

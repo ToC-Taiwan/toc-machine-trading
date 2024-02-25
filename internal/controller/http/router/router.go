@@ -108,8 +108,8 @@ func (r *Router) AddV1HistoryRoutes(history usecase.History) *Router {
 	return r
 }
 
-func (r *Router) AddV1RealTimeRoutes(realTime usecase.RealTime, trade usecase.Trade, history usecase.History) *Router {
-	v1.NewRealTimeRoutes(r.v1Group, realTime, trade, history)
+func (r *Router) AddV1RealTimeRoutes(basic usecase.Basic, realTime usecase.RealTime, history usecase.History) *Router {
+	v1.NewRealTimeRoutes(r.v1Group, basic, realTime, history)
 	return r
 }
 

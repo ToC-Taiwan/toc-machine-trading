@@ -599,39 +599,11 @@ func (uc *RealTimeUseCase) CreateRealTimePick(connectionID string, odd bool, com
 	}
 }
 
-func (uc *RealTimeUseCase) CreateRealTimePickFuture(connectionID string, com chan *pb.PickRealMap, tickChan chan []byte) {
+func (uc *RealTimeUseCase) CreateRealTimePickFuture(ctx context.Context, code string, tickChan chan *pb.FutureRealTimeTickMessage) {
 	r := mqtt.NewRabbit(uc.cfg.NewRabbitConn())
+	go r.FutureTickPbConsumer(ctx, code, tickChan)
+	uc.SubscribeFutureTick([]string{code})
 
-	uc.clientRabbitMapLock.Lock()
-	uc.clientRabbitMap[connectionID] = r
-	uc.clientRabbitMapLock.Unlock()
-
-	contextMap := make(map[string]context.CancelFunc)
-	defer func() {
-		for _, cancel := range contextMap {
-			cancel()
-		}
-	}()
-
-	for {
-		list, ok := <-com
-		if !ok {
-			return
-		}
-		subscribeList := []string{}
-		for k, v := range list.GetPickMap() {
-			if v == pb.PickListType_TYPE_ADD && contextMap[k] == nil {
-				subscribeList = append(subscribeList, k)
-				ctx, cancel := context.WithCancel(context.Background())
-				contextMap[k] = cancel
-				go r.FutureTickPbConsumer(ctx, k, tickChan)
-			} else if v == pb.PickListType_TYPE_REMOVE && contextMap[k] != nil {
-				contextMap[k]()
-				delete(contextMap, k)
-			}
-		}
-		if len(subscribeList) != 0 {
-			uc.SubscribeFutureTick(subscribeList)
-		}
-	}
+	<-ctx.Done()
+	r.Close()
 }

@@ -16,6 +16,7 @@ type Analyze interface {
 
 type Basic interface {
 	GetStockDetail(stockNum string) *entity.Stock
+	GetFutureDetail(futureCode string) *entity.Future
 	GetShioajiUsage() (*entity.ShioajiUsage, error)
 	CreateStockSearchRoom(com chan string, dataChan chan []*entity.Stock)
 	CreateFutureSearchRoom(com chan string, dataChan chan []*entity.Future)
@@ -40,7 +41,7 @@ type BasicgRPCAPI interface {
 
 type History interface {
 	GetDayKbarByStockNumMultiDate(stockNum string, date time.Time, interval int64) ([]*entity.StockHistoryKbar, error)
-	GetFutureHistoryKbarByDate(code string, date time.Time) ([]*entity.FutureHistoryKbar, error)
+	GetFutureHistoryPBKbarByDate(code string, date time.Time) (*pb.HistoryKbarResponse, error)
 }
 
 type HistoryRepo interface {
@@ -61,7 +62,7 @@ type HistorygRPCAPI interface {
 	GetStockHistoryTick(stockNumArr []string, date string) ([]*pb.HistoryTickMessage, error)
 	GetStockHistoryKbar(stockNumArr []string, date string) ([]*pb.HistoryKbarMessage, error)
 	GetStockHistoryClose(stockNumArr []string, date string) ([]*pb.HistoryCloseMessage, error)
-	GetFutureHistoryKbar(codeArr []string, date string) ([]*pb.HistoryKbarMessage, error)
+	GetFutureHistoryKbar(codeArr []string, date string) (*pb.HistoryKbarResponse, error)
 }
 
 type RealTime interface {
@@ -70,7 +71,7 @@ type RealTime interface {
 	GetFutureSnapshotByCode(code string) (*entity.FutureSnapShot, error)
 	DeleteRealTimeClient(connectionID string)
 	CreateRealTimePick(connectionID string, odd bool, com chan *pb.PickRealMap, tickChan chan []byte)
-	CreateRealTimePickFuture(connectionID string, com chan *pb.PickRealMap, tickChan chan []byte)
+	CreateRealTimePickFuture(ctx context.Context, code string, tickChan chan *pb.FutureRealTimeTickMessage)
 }
 
 type RealTimeRepo interface {
@@ -110,7 +111,7 @@ type Rabbit interface {
 	StockTickPbConsumer(ctx context.Context, stockNum string, tickChan chan []byte)
 	StockTickOddsPbConsumer(ctx context.Context, stockNum string, tickChan chan []byte)
 	FutureTickConsumer(code string, tickChan chan *entity.RealTimeFutureTick)
-	FutureTickPbConsumer(ctx context.Context, code string, tickChan chan []byte)
+	FutureTickPbConsumer(ctx context.Context, code string, tickChan chan *pb.FutureRealTimeTickMessage)
 	Close()
 }
 

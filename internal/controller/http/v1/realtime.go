@@ -12,21 +12,22 @@ import (
 )
 
 type realTimeRoutes struct {
-	t usecase.RealTime
-	o usecase.Trade
-	h usecase.History
+	t     usecase.RealTime
+	h     usecase.History
+	basic usecase.Basic
 }
 
-func NewRealTimeRoutes(handler *gin.RouterGroup, t usecase.RealTime, o usecase.Trade, history usecase.History) {
+func NewRealTimeRoutes(handler *gin.RouterGroup, basic usecase.Basic, t usecase.RealTime, history usecase.History) {
 	r := &realTimeRoutes{
-		t: t,
-		o: o,
-		h: history,
+		t:     t,
+		h:     history,
+		basic: basic,
 	}
 
 	h := handler.Group("/stream")
 	{
 		h.PUT("/snapshot", r.getSnapshots)
+		h.GET("/ws/pick-future", r.servePickFutureWS)
 		h.GET("/ws/pick-stock", r.servePickStockWS)
 		h.GET("/ws/pick-stock/odds", r.servePickStockOddsWS)
 	}
@@ -72,4 +73,14 @@ func (r *realTimeRoutes) servePickStockWS(c *gin.Context) {
 
 func (r *realTimeRoutes) servePickStockOddsWS(c *gin.Context) {
 	pick.StartWSPickStock(c, r.t, true)
+}
+
+func (r *realTimeRoutes) servePickFutureWS(c *gin.Context) {
+	code := c.GetHeader("Code")
+	if code == "" {
+		resp.ErrorResponse(c, http.StatusBadRequest, "code is empty")
+		return
+	}
+
+	pick.StartWSPickRealFuture(c, code, r.t, r.h, r.basic)
 }
