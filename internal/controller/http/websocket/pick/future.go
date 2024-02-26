@@ -15,11 +15,12 @@ import (
 
 type WSPickRealFuture struct {
 	*ginws.WSRouter
-	b        usecase.Basic
-	s        usecase.RealTime
-	h        usecase.History
-	code     string
-	tickChan chan *pb.FutureRealTimeTickMessage
+	b         usecase.Basic
+	s         usecase.RealTime
+	h         usecase.History
+	code      string
+	tickChan  chan *pb.FutureRealTimeTickMessage
+	fetchTime time.Time
 }
 
 // StartWSPickRealFuture -.
@@ -65,15 +66,29 @@ func (w *WSPickRealFuture) generateTradeIndex() *pb.WSMessage {
 }
 
 func (w *WSPickRealFuture) fetchKbar() *pb.WSMessage {
-	fetchTime := time.Now()
+	if w.fetchTime.IsZero() {
+		w.fetchTime = time.Now()
+	}
 	for {
-		fetch, err := w.h.GetFutureHistoryPBKbarByDate(w.code, fetchTime)
+		fetch, err := w.h.GetFutureHistoryPBKbarByDate(w.code, w.fetchTime)
 		if err != nil {
 			return nil
 		} else if len(fetch.Data) == 0 {
-			fetchTime = fetchTime.AddDate(0, 0, -1)
+			w.fetchTime = w.fetchTime.AddDate(0, 0, -1)
 			continue
 		}
+
+		// for i := len(fetch.Data) - 1; i >= 0; i-- {
+		// 	if i == 0 {
+		// 		break
+		// 	}
+
+		// 	if fetch.Data[i].Ts-fetch.Data[i-1].Ts > 60*1000*1000*1000 {
+		// 		fetch.Data = fetch.Data[i:]
+		// 		break
+		// 	}
+		// }
+
 		return &pb.WSMessage{
 			Data: &pb.WSMessage_HistoryKbar{
 				HistoryKbar: fetch,

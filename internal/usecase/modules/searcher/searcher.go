@@ -53,6 +53,10 @@ func (s *searcher) AddFuture(future *entity.Future) {
 	s.lock.Lock()
 	defer s.lock.Unlock()
 
+	if strings.Contains(strings.ToUpper(future.Code), "R1") || strings.Contains(strings.ToUpper(future.Code), "R2") {
+		return
+	}
+
 	s.futureArr = append(s.futureArr, future)
 }
 
