@@ -24,7 +24,6 @@ func NewUserRoutes(public *gin.RouterGroup, private *gin.RouterGroup, jwtHandler
 	}
 
 	public.POST("/login", r.loginHandler)
-	public.GET("/logout", r.logutHandler)
 	public.GET("/refresh", r.refreshTokenHandler)
 
 	public.POST("/user", r.newUserHandler)
@@ -35,6 +34,8 @@ func NewUserRoutes(public *gin.RouterGroup, private *gin.RouterGroup, jwtHandler
 	private.GET("/user/push-token", r.getUserPushTokenStatus)
 	private.PUT("/user/push-token", r.updateUserPushToken)
 	private.DELETE("/user/push-token", r.clearAllPushToken)
+
+	private.GET("/logout", r.logutHandler)
 }
 
 // newUserHandler _.
