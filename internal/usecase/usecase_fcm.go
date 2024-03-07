@@ -7,6 +7,7 @@ import (
 	"sync"
 
 	"tmt/internal/config"
+	"tmt/internal/entity"
 	"tmt/internal/usecase/cache"
 	"tmt/internal/usecase/modules/calendar"
 	"tmt/internal/usecase/repo"
@@ -51,7 +52,9 @@ func NewFCM() FCM {
 
 	uc.updatePushToken()
 
+	uc.bus.SubscribeAsync(topicInsertOrUpdateStockOrder, true, uc.pushStockOrder)
 	uc.bus.SubscribeAsync(topicUpdatePushUser, true, uc.updatePushToken)
+
 	return uc
 }
 
@@ -158,5 +161,36 @@ func (uc *FcmUseCase) newAPNS() *messaging.APNSConfig {
 				ContentAvailable: true,
 			},
 		},
+	}
+}
+
+func (uc *FcmUseCase) pushStockOrder(order *entity.StockOrder) {
+	tokens := uc.getAllPushToken()
+	if len(tokens) == 0 {
+		return
+	}
+
+	ctx := context.Background()
+	client, err := uc.app.Messaging(ctx)
+	if err != nil {
+		return
+	}
+
+	data, err := json.Marshal(order)
+	if err != nil {
+		return
+	}
+
+	message := &messaging.MulticastMessage{
+		APNS:   uc.newAPNS(),
+		Tokens: tokens,
+		Data: map[string]string{
+			"order_update": string(data),
+		},
+	}
+
+	_, err = client.SendEachForMulticast(ctx, message)
+	if err != nil {
+		return
 	}
 }
