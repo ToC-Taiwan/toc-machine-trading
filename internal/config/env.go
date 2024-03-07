@@ -4,7 +4,6 @@ type EnvConfig struct {
 	Database Database `json:"Database" yaml:"Database"`
 	Server   Server   `json:"Server" yaml:"Server"`
 	Sinopac  Sinopac  `json:"Sinopac" yaml:"Sinopac"`
-	RabbitMQ RabbitMQ `json:"RabbitMQ" yaml:"RabbitMQ"`
 	SMTP     SMTP     `json:"SMTP" yaml:"SMTP"`
 }
 
@@ -22,14 +21,6 @@ type Server struct {
 type Sinopac struct {
 	PoolMax int    `json:"PoolMax" yaml:"PoolMax"`
 	URL     string `json:"URL" yaml:"URL"`
-}
-
-// RabbitMQ -.
-type RabbitMQ struct {
-	URL      string `json:"URL" yaml:"URL"`
-	Exchange string `json:"Exchange" yaml:"Exchange"`
-	WaitTime int64  `json:"WaitTime" yaml:"WaitTime"`
-	Attempts int    `json:"Attempts" yaml:"Attempts"`
 }
 
 type SMTP struct {

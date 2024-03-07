@@ -1,15 +1,16 @@
+// Package mqtt package mqtt
 package mqtt
 
 const (
-	routingKeyEvent = "event"
+	RoutingKeyEvent = "event"
 
-	routingKeyOrder = "order"
+	RoutingKeyOrder = "order"
 
-	routingKeyOrderArr = "order_arr"
+	RoutingKeyOrderArr = "order_arr"
 
-	routingKeyStockTick = "stock_tick"
+	RoutingKeyStockTick = "stock_tick"
 
-	routingKeyStockTickOdds = "stock_tick_odds"
+	RoutingKeyStockTickOdds = "stock_tick_odds"
 
-	routingKeyFutureTick = "future_tick"
+	RoutingKeyFutureTick = "future_tick"
 )

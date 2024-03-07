@@ -13,6 +13,7 @@ import (
 	"tmt/internal/usecase/modules/calendar"
 	"tmt/internal/usecase/modules/quota"
 	"tmt/internal/usecase/mqtt"
+	"tmt/internal/usecase/mqtt/inline"
 	"tmt/internal/usecase/repo"
 	"tmt/pb"
 	"tmt/pkg/eventbus"
@@ -27,8 +28,8 @@ type RealTimeUseCase struct {
 	gRPCSub      SubscribegRPCAPI
 	sc           TradegRPCAPI
 
-	commonRabbit        Rabbit
-	clientRabbitMap     map[string]Rabbit
+	commonMQ            mqtt.MQTT
+	clientRabbitMap     map[string]mqtt.MQTT
 	clientRabbitMapLock sync.RWMutex
 
 	cfg        *config.Config
@@ -53,7 +54,7 @@ func NewRealTime() RealTime {
 		quota: quota.NewQuota(cfg.Quota),
 		repo:  repo.NewRealTime(cfg.GetPostgresPool()),
 
-		commonRabbit: mqtt.NewRabbit(cfg.NewRabbitConn()),
+		commonMQ: inline.NewInliner(),
 
 		gRPCRealtime: grpc.NewRealTime(cfg.GetSinopacPool()),
 		gRPCSub:      grpc.NewSubscribe(cfg.GetSinopacPool()),
@@ -64,7 +65,7 @@ func NewRealTime() RealTime {
 		futureSwitchChanMap: make(map[string]chan bool),
 		stockSwitchChanMap:  make(map[string]chan bool),
 
-		clientRabbitMap: make(map[string]Rabbit),
+		clientRabbitMap: make(map[string]mqtt.MQTT),
 
 		logger: log.Get(),
 		cc:     cache.Get(),
@@ -80,8 +81,8 @@ func NewRealTime() RealTime {
 	uc.checkFutureTradeSwitch()
 	uc.checkStockTradeSwitch()
 
-	go uc.ReceiveEvent(context.Background())
-	go uc.ReceiveOrderStatus(context.Background())
+	uc.ReceiveEvent(context.Background())
+	uc.ReceiveOrderStatus(context.Background())
 
 	return uc
 }
@@ -219,7 +220,7 @@ func (uc *RealTimeUseCase) ReceiveEvent(ctx context.Context) {
 			}
 		}
 	}()
-	uc.commonRabbit.EventConsumer(eventChan)
+	uc.commonMQ.EventConsumer(eventChan)
 }
 
 // ReceiveOrderStatus -.
@@ -236,8 +237,7 @@ func (uc *RealTimeUseCase) ReceiveOrderStatus(ctx context.Context) {
 			}
 		}
 	}()
-	go uc.commonRabbit.OrderStatusConsumer(orderStatusChan)
-	go uc.commonRabbit.OrderStatusArrConsumer(orderStatusChan)
+	uc.commonMQ.OrderStatusArrConsumer(orderStatusChan)
 }
 
 // getTSESnapshot -.
@@ -538,7 +538,7 @@ func (uc *RealTimeUseCase) SubscribeFutureTick(codeArr []string) {
 // }
 
 func (uc *RealTimeUseCase) CreateRealTimePick(connectionID string, odd bool, com chan *pb.PickRealMap, tickChan chan []byte) {
-	r := mqtt.NewRabbit(uc.cfg.NewRabbitConn())
+	r := inline.NewInliner()
 
 	uc.clientRabbitMapLock.Lock()
 	uc.clientRabbitMap[connectionID] = r
@@ -579,10 +579,9 @@ func (uc *RealTimeUseCase) CreateRealTimePick(connectionID string, odd bool, com
 }
 
 func (uc *RealTimeUseCase) CreateRealTimePickFuture(ctx context.Context, code string, tickChan chan *pb.FutureRealTimeTickMessage) {
-	r := mqtt.NewRabbit(uc.cfg.NewRabbitConn())
+	r := inline.NewInliner()
 	go r.FutureTickPbConsumer(ctx, code, tickChan)
 	uc.SubscribeFutureTick([]string{code})
-
 	<-ctx.Done()
 	r.Close()
 }

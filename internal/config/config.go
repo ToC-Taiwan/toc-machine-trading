@@ -13,7 +13,6 @@ import (
 	"tmt/pkg/grpc"
 	"tmt/pkg/log"
 	"tmt/pkg/postgres"
-	"tmt/pkg/rabbitmq"
 
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/jackc/pgx/v4"
@@ -91,11 +90,6 @@ func (c *Config) readEnv() {
 	c.vp.SetDefault("SINOPAC_POOL_MAX", 20)
 	c.vp.SetDefault("SINOPAC_URL", "127.0.0.1:56666")
 
-	c.vp.SetDefault("RABBITMQ_URL", "amqp://admin:password@127.0.0.1:5672/%2f?heartbeat=0")
-	c.vp.SetDefault("RABBITMQ_EXCHANGE", "toc")
-	c.vp.SetDefault("RABBITMQ_WAIT_TIME", 5)
-	c.vp.SetDefault("RABBITMQ_ATTEMPTS", 10)
-
 	c.vp.AutomaticEnv()
 	env := EnvConfig{
 		Database: Database{
@@ -109,12 +103,6 @@ func (c *Config) readEnv() {
 		Sinopac: Sinopac{
 			PoolMax: c.vp.GetInt("SINOPAC_POOL_MAX"),
 			URL:     c.vp.GetString("SINOPAC_URL"),
-		},
-		RabbitMQ: RabbitMQ{
-			URL:      c.vp.GetString("RABBITMQ_URL"),
-			Exchange: c.vp.GetString("RABBITMQ_EXCHANGE"),
-			WaitTime: c.vp.GetInt64("RABBITMQ_WAIT_TIME"),
-			Attempts: c.vp.GetInt("RABBITMQ_ATTEMPTS"),
 		},
 		SMTP: SMTP{
 			Host:     c.vp.GetString("SMTP_HOST"),
@@ -254,19 +242,6 @@ func (c *Config) GetSinopacPool() *grpc.ConnPool {
 		c.logger.Fatal("sinopac gRPC server not connected")
 	}
 	return c.sinopacPool
-}
-
-func (c *Config) NewRabbitConn() *rabbitmq.Connection {
-	conn, err := rabbitmq.New(
-		c.RabbitMQ.Exchange, c.RabbitMQ.URL,
-		rabbitmq.Attempts(c.RabbitMQ.Attempts),
-		rabbitmq.WaitTime(int(c.RabbitMQ.WaitTime)),
-		rabbitmq.AddLogger(c.logger),
-	)
-	if err != nil {
-		c.logger.Fatal(err)
-	}
-	return conn
 }
 
 func (c *Config) CloseDB() {

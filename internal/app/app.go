@@ -11,6 +11,7 @@ import (
 	"tmt/internal/usecase"
 	"tmt/pkg/httpserver"
 	"tmt/pkg/log"
+	"tmt/pkg/mq"
 
 	"github.com/robfig/cron/v3"
 )
@@ -18,6 +19,11 @@ import (
 func Run() {
 	logger := log.Get()
 	cfg := config.Get()
+
+	err := mq.Serve()
+	if err != nil {
+		logger.Fatalf("MQ Server error: %s", err)
+	}
 
 	logger.Warn("TMT is running")
 	logger.Warnf("Simulation Mode: %v", cfg.Simulation)
