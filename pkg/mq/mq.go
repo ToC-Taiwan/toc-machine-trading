@@ -30,7 +30,7 @@ type MQSrv struct {
 	server             *mqtt.Server
 	subscriptionTopic  map[int]string
 	subscriptionID     int
-	subscriptionIDLock sync.RWMutex
+	subscriptionIDLock sync.Mutex
 }
 
 func Serve() error {
@@ -38,8 +38,11 @@ func Serve() error {
 	newServer := &MQSrv{
 		subscriptionTopic: make(map[int]string),
 		server: mqtt.New(&mqtt.Options{
-			InlineClient: true,
-			Logger:       slog.New(slog.NewTextHandler(io.Discard, nil)),
+			InlineClient:             true,
+			Logger:                   slog.New(slog.NewTextHandler(io.Discard, nil)),
+			ClientNetWriteBufferSize: 4096,
+			ClientNetReadBufferSize:  4096,
+			SysTopicResendInterval:   10,
 		}),
 	}
 	once.Do(func() {
@@ -86,8 +89,12 @@ func (m *MQSrv) getSubscriptionID(topic string) int {
 }
 
 func (m *MQSrv) getTopic(id int) string {
-	m.subscriptionIDLock.RLock()
-	defer m.subscriptionIDLock.RUnlock()
+	if id < 0 {
+		return ""
+	}
+
+	m.subscriptionIDLock.Lock()
+	defer m.subscriptionIDLock.Unlock()
 	topic, ok := m.subscriptionTopic[id]
 	if !ok {
 		return ""
@@ -106,9 +113,6 @@ func (m *MQSrv) Subscribe(topic string, callbackFn func(cl *mqtt.Client, sub pac
 }
 
 func (m *MQSrv) Unsubscribe(id int) {
-	if id == -1 {
-		return
-	}
 	topic := m.getTopic(id)
 	if topic == "" {
 		return
