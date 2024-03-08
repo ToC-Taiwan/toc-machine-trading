@@ -53,6 +53,7 @@ func (w *WSTargetStock) getRank() ([]byte, error) {
 }
 
 func (w *WSTargetStock) sender() {
+	ticker := time.NewTicker(time.Second * 10)
 	for {
 		select {
 		case <-w.Ctx().Done():
@@ -61,7 +62,7 @@ func (w *WSTargetStock) sender() {
 		case v := <-w.dataChan:
 			w.SendBinaryBytesToClient(v)
 
-		case <-time.After(time.Second * 10):
+		case <-ticker.C:
 			m, err := w.getRank()
 			if err != nil {
 				continue

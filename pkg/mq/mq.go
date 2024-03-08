@@ -60,11 +60,12 @@ func Serve() error {
 			}
 		}()
 	})
+	ticker := time.NewTicker(time.Second)
 	for {
 		select {
 		case err := <-errChan:
 			return err
-		case <-time.After(1 * time.Second):
+		case <-ticker.C:
 			if utils.GetPortIsUsed("127.0.0.1", _defaultPort) {
 				srv = newServer
 				return nil

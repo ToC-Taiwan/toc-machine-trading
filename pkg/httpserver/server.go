@@ -77,11 +77,12 @@ func (s *Server) tryListen() error {
 		}
 	}()
 
+	ticker := time.NewTicker(time.Second)
 	for {
 		select {
 		case err := <-errChan:
 			return err
-		case <-time.After(1 * time.Second):
+		case <-ticker.C:
 			if s.getPortIsUsed(localHost, s.srv.Addr[1:]) {
 				s.Infof("API Server On %v", s.srv.Addr)
 				return nil

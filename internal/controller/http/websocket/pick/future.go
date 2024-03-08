@@ -33,8 +33,12 @@ func StartWSPickRealFuture(c *gin.Context, code string, s usecase.RealTime, h us
 		WSRouter: ginws.NewWSRouter(c),
 		tickChan: make(chan *pb.FutureRealTimeTickMessage),
 	}
-	go w.sendData()
+
+	w.sendInitData()
+
+	go w.sendRealTimeData()
 	go w.s.CreateRealTimePickFuture(w.Ctx(), w.code, w.tickChan)
+
 	w.Wait()
 }
 
@@ -135,7 +139,35 @@ func (w *WSPickRealFuture) getFutureSnapshot() *pb.WSMessage {
 	}
 }
 
-func (w *WSPickRealFuture) sendData() {
+func (w *WSPickRealFuture) sendRealTimeData() {
+	ticker := time.NewTicker(time.Second * 5)
+	minuteTicker := time.NewTicker(time.Minute)
+	for {
+		select {
+		case <-w.Ctx().Done():
+			return
+
+		case tick := <-w.tickChan:
+			w.sendMessage(&pb.WSMessage{
+				Data: &pb.WSMessage_FutureTick{
+					FutureTick: tick,
+				},
+			})
+
+		case <-ticker.C:
+			if data := w.generateTradeIndex(); data != nil {
+				w.sendMessage(data)
+			}
+
+		case <-minuteTicker.C:
+			if data := w.fetchKbar(); data != nil {
+				w.sendMessage(data)
+			}
+		}
+	}
+}
+
+func (w *WSPickRealFuture) sendInitData() {
 	if data := w.getFutureSnapshot(); data != nil {
 		w.sendMessage(data)
 	}
@@ -150,30 +182,6 @@ func (w *WSPickRealFuture) sendData() {
 
 	if future := w.getFutureDetail(); future != nil {
 		w.sendMessage(future)
-	}
-
-	for {
-		select {
-		case <-w.Ctx().Done():
-			return
-
-		case tick := <-w.tickChan:
-			w.sendMessage(&pb.WSMessage{
-				Data: &pb.WSMessage_FutureTick{
-					FutureTick: tick,
-				},
-			})
-
-		case <-time.After(time.Second * 5):
-			if data := w.generateTradeIndex(); data != nil {
-				w.sendMessage(data)
-			}
-
-		case <-time.After(time.Minute):
-			if data := w.fetchKbar(); data != nil {
-				w.sendMessage(data)
-			}
-		}
 	}
 }
 
