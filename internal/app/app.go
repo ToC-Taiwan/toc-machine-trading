@@ -9,9 +9,9 @@ import (
 	"tmt/internal/config"
 	"tmt/internal/controller/http/router"
 	"tmt/internal/usecase"
+	"tmt/pkg/embedbkr"
 	"tmt/pkg/httpserver"
 	"tmt/pkg/log"
-	"tmt/pkg/mq"
 
 	"github.com/robfig/cron/v3"
 )
@@ -20,7 +20,7 @@ func Run() {
 	logger := log.Get()
 	cfg := config.Get()
 
-	err := mq.Serve()
+	err := embedbkr.Serve()
 	if err != nil {
 		logger.Fatalf("MQ Server error: %s", err)
 	}

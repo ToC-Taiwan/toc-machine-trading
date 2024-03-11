@@ -10,7 +10,7 @@ import (
 	"tmt/internal/entity"
 	"tmt/internal/usecase/mqtt"
 	"tmt/pb"
-	"tmt/pkg/mq"
+	"tmt/pkg/embedbkr"
 
 	mqttSrv "github.com/mochi-mqtt/server/v2"
 
@@ -19,7 +19,7 @@ import (
 )
 
 type Inliner struct {
-	srv *mq.MQSrv
+	srv *embedbkr.MQSrv
 
 	subIDMap     map[int]struct{}
 	subIDMapLock sync.Mutex
@@ -27,7 +27,7 @@ type Inliner struct {
 
 func NewInliner() mqtt.MQTT {
 	return &Inliner{
-		srv:      mq.Get(),
+		srv:      embedbkr.Get(),
 		subIDMap: make(map[int]struct{}),
 	}
 }

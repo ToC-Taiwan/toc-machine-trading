@@ -1,5 +1,5 @@
-// Package mq package mq
-package mq
+// Package embedbkr package embedbkr
+package embedbkr
 
 import (
 	"fmt"
