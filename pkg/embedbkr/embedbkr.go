@@ -47,7 +47,7 @@ func Serve() error {
 	}
 	once.Do(func() {
 		_ = newServer.server.AddHook(&auth.AllowHook{}, nil)
-		tcp := listeners.NewTCP(uuid.NewString(), fmt.Sprintf("127.0.0.1:%s", _defaultPort), nil)
+		tcp := listeners.NewTCP(uuid.NewString(), fmt.Sprintf(":%s", _defaultPort), nil)
 		err := newServer.server.AddListener(tcp)
 		if err != nil {
 			errChan <- err
