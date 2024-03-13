@@ -20,7 +20,7 @@ import (
 )
 
 type FcmUseCase struct {
-	repo SystemRepo
+	repo repo.SystemRepo
 
 	cc       *cache.Cache
 	app      *firebase.App

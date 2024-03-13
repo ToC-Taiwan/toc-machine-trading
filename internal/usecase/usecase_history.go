@@ -22,8 +22,8 @@ import (
 
 // HistoryUseCase -.
 type HistoryUseCase struct {
-	repo    HistoryRepo
-	grpcapi HistorygRPCAPI
+	repo    repo.HistoryRepo
+	grpcapi grpc.HistorygRPCAPI
 
 	analyzeStockCfg config.AnalyzeStock
 

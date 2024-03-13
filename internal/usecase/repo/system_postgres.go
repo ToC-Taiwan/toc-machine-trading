@@ -11,16 +11,16 @@ import (
 	"github.com/jackc/pgx/v4"
 )
 
-// SystemRepo -.
-type SystemRepo struct {
+// system -.
+type system struct {
 	*postgres.Postgres
 }
 
-func NewSystemRepo(pg *postgres.Postgres) *SystemRepo {
-	return &SystemRepo{pg}
+func NewSystemRepo(pg *postgres.Postgres) SystemRepo {
+	return &system{pg}
 }
 
-func (r *SystemRepo) InsertUser(ctx context.Context, t *entity.NewUser) error {
+func (r *system) InsertUser(ctx context.Context, t *entity.NewUser) error {
 	builder := r.Builder.Insert(tableNameSystemAccount).
 		Columns("username, password, email").
 		Values(t.Username, t.Password, t.Email)
@@ -41,7 +41,7 @@ func (r *SystemRepo) InsertUser(ctx context.Context, t *entity.NewUser) error {
 	return nil
 }
 
-func (r *SystemRepo) EmailVerification(ctx context.Context, username string) error {
+func (r *system) EmailVerification(ctx context.Context, username string) error {
 	builder := r.Builder.Update(tableNameSystemAccount).
 		Set("email_verified", true).
 		Where("username = ?", username)
@@ -62,7 +62,7 @@ func (r *SystemRepo) EmailVerification(ctx context.Context, username string) err
 	return nil
 }
 
-func (r *SystemRepo) QueryUserByUsername(ctx context.Context, username string) (*entity.User, error) {
+func (r *system) QueryUserByUsername(ctx context.Context, username string) (*entity.User, error) {
 	sql, arg, err := r.Builder.
 		Select("username, password, email, email_verified, auth_trade").
 		From(tableNameSystemAccount).
@@ -83,7 +83,7 @@ func (r *SystemRepo) QueryUserByUsername(ctx context.Context, username string) (
 	return &e, nil
 }
 
-func (r *SystemRepo) queryUserIDByUsername(ctx context.Context, username string) (int, error) {
+func (r *system) queryUserIDByUsername(ctx context.Context, username string) (int, error) {
 	sql, arg, err := r.Builder.
 		Select("id").
 		From(tableNameSystemAccount).
@@ -104,7 +104,7 @@ func (r *SystemRepo) queryUserIDByUsername(ctx context.Context, username string)
 	return id, nil
 }
 
-func (r *SystemRepo) QueryAllUser(ctx context.Context) ([]*entity.User, error) {
+func (r *system) QueryAllUser(ctx context.Context) ([]*entity.User, error) {
 	sql, arg, err := r.Builder.
 		Select("username, email, email_verified, auth_trade").
 		From(tableNameSystemAccount).
@@ -130,7 +130,7 @@ func (r *SystemRepo) QueryAllUser(ctx context.Context) ([]*entity.User, error) {
 	return result, nil
 }
 
-func (r *SystemRepo) InsertOrUpdatePushToken(ctx context.Context, token, username string, enabled bool) error {
+func (r *system) InsertOrUpdatePushToken(ctx context.Context, token, username string, enabled bool) error {
 	dbToken, err := r.GetPushToken(ctx, token)
 	if err != nil {
 		return err
@@ -165,7 +165,7 @@ func (r *SystemRepo) InsertOrUpdatePushToken(ctx context.Context, token, usernam
 	return nil
 }
 
-func (r *SystemRepo) updatePushToken(ctx context.Context, token string, enabled bool) error {
+func (r *system) updatePushToken(ctx context.Context, token string, enabled bool) error {
 	builder := r.Builder.Update(tableNameSystemPushToken).
 		Set("created", time.Now()).
 		Set("enabled", enabled).
@@ -187,7 +187,7 @@ func (r *SystemRepo) updatePushToken(ctx context.Context, token string, enabled 
 	return nil
 }
 
-func (r *SystemRepo) GetPushToken(ctx context.Context, token string) (*entity.PushToken, error) {
+func (r *system) GetPushToken(ctx context.Context, token string) (*entity.PushToken, error) {
 	sql, arg, err := r.Builder.
 		Select("created, token, user_id, enabled").
 		From(tableNameSystemPushToken).
@@ -208,7 +208,7 @@ func (r *SystemRepo) GetPushToken(ctx context.Context, token string) (*entity.Pu
 	return &e, nil
 }
 
-func (r *SystemRepo) GetAllPushTokens(ctx context.Context) ([]string, error) {
+func (r *system) GetAllPushTokens(ctx context.Context) ([]string, error) {
 	sql, arg, err := r.Builder.
 		Select("token").
 		From(tableNameSystemPushToken).
@@ -238,7 +238,7 @@ func (r *SystemRepo) GetAllPushTokens(ctx context.Context) ([]string, error) {
 	return result, nil
 }
 
-func (r *SystemRepo) DeleteAllPushTokens(ctx context.Context) error {
+func (r *system) DeleteAllPushTokens(ctx context.Context) error {
 	builder := r.Builder.Delete(tableNameSystemPushToken)
 
 	tx, err := r.BeginTransaction()
@@ -257,7 +257,7 @@ func (r *SystemRepo) DeleteAllPushTokens(ctx context.Context) error {
 	return nil
 }
 
-func (r *SystemRepo) GetLastJWT(ctx context.Context) (string, error) {
+func (r *system) GetLastJWT(ctx context.Context) (string, error) {
 	sql, arg, err := r.Builder.
 		Select("key").
 		From(tableNameSystemJWT).
@@ -279,7 +279,7 @@ func (r *SystemRepo) GetLastJWT(ctx context.Context) (string, error) {
 	return result, nil
 }
 
-func (r *SystemRepo) InsertJWT(ctx context.Context, jwt string) error {
+func (r *system) InsertJWT(ctx context.Context, jwt string) error {
 	builder := r.Builder.Insert(tableNameSystemJWT).
 		Columns("key, created").
 		Values(jwt, time.Now())

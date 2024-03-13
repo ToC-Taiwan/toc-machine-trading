@@ -8,18 +8,18 @@ import (
 	"tmt/pkg/postgres"
 )
 
-// TargetRepo -.
-type TargetRepo struct {
+// target -.
+type target struct {
 	*postgres.Postgres
 }
 
 // NewTarget -.
-func NewTarget(pg *postgres.Postgres) *TargetRepo {
-	return &TargetRepo{pg}
+func NewTarget(pg *postgres.Postgres) TargetRepo {
+	return &target{pg}
 }
 
 // InsertOrUpdateTargetArr -.
-func (r *TargetRepo) InsertOrUpdateTargetArr(ctx context.Context, t []*entity.StockTarget) error {
+func (r *target) InsertOrUpdateTargetArr(ctx context.Context, t []*entity.StockTarget) error {
 	inDBTargets, err := r.QueryTargetsByTradeDay(ctx, t[0].TradeDay)
 	if err != nil {
 		return err
@@ -72,7 +72,7 @@ func (r *TargetRepo) InsertOrUpdateTargetArr(ctx context.Context, t []*entity.St
 }
 
 // QueryTargetsByTradeDay -.
-func (r *TargetRepo) QueryTargetsByTradeDay(ctx context.Context, tradeDay time.Time) ([]*entity.StockTarget, error) {
+func (r *target) QueryTargetsByTradeDay(ctx context.Context, tradeDay time.Time) ([]*entity.StockTarget, error) {
 	sql, args, err := r.Builder.
 		Select("id, rank, volume, trade_day, stock_num, number, name, exchange, category, day_trade, last_close, update_date").
 		From(tableNameTarget).

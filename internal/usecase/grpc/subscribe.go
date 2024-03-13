@@ -10,17 +10,17 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
-// SubscribegRPCAPI -.
-type SubscribegRPCAPI struct {
+// subscribe -.
+type subscribe struct {
 	pool *grpc.ConnPool
 }
 
-func NewSubscribe(client *grpc.ConnPool) *SubscribegRPCAPI {
-	return &SubscribegRPCAPI{client}
+func NewSubscribe(client *grpc.ConnPool) SubscribegRPCAPI {
+	return &subscribe{client}
 }
 
 // SubscribeStockTick return arry means fail to subscribe
-func (t *SubscribegRPCAPI) SubscribeStockTick(stockNumArr []string, odd bool) ([]string, error) {
+func (t *subscribe) SubscribeStockTick(stockNumArr []string, odd bool) ([]string, error) {
 	conn := t.pool.Get()
 	defer t.pool.Put(conn)
 
@@ -32,7 +32,7 @@ func (t *SubscribegRPCAPI) SubscribeStockTick(stockNumArr []string, odd bool) ([
 }
 
 // UnSubscribeStockTick return arry means fail to subscribe
-func (t *SubscribegRPCAPI) UnSubscribeStockTick(stockNumArr []string) ([]string, error) {
+func (t *subscribe) UnSubscribeStockTick(stockNumArr []string) ([]string, error) {
 	conn := t.pool.Get()
 	defer t.pool.Put(conn)
 
@@ -44,7 +44,7 @@ func (t *SubscribegRPCAPI) UnSubscribeStockTick(stockNumArr []string) ([]string,
 }
 
 // UnSubscribeAllTick -.
-func (t *SubscribegRPCAPI) UnSubscribeAllTick() (*pb.ErrorMessage, error) {
+func (t *subscribe) UnSubscribeAllTick() (*pb.ErrorMessage, error) {
 	conn := t.pool.Get()
 	defer t.pool.Put(conn)
 
@@ -56,7 +56,7 @@ func (t *SubscribegRPCAPI) UnSubscribeAllTick() (*pb.ErrorMessage, error) {
 }
 
 // SubscribeStockBidAsk return arry means fail to subscribe
-func (t *SubscribegRPCAPI) SubscribeStockBidAsk(stockNumArr []string) ([]string, error) {
+func (t *subscribe) SubscribeStockBidAsk(stockNumArr []string) ([]string, error) {
 	conn := t.pool.Get()
 	defer t.pool.Put(conn)
 
@@ -68,7 +68,7 @@ func (t *SubscribegRPCAPI) SubscribeStockBidAsk(stockNumArr []string) ([]string,
 }
 
 // UnSubscribeStockBidAsk return arry means fail to subscribe
-func (t *SubscribegRPCAPI) UnSubscribeStockBidAsk(stockNumArr []string) ([]string, error) {
+func (t *subscribe) UnSubscribeStockBidAsk(stockNumArr []string) ([]string, error) {
 	conn := t.pool.Get()
 	defer t.pool.Put(conn)
 
@@ -80,7 +80,7 @@ func (t *SubscribegRPCAPI) UnSubscribeStockBidAsk(stockNumArr []string) ([]strin
 }
 
 // UnSubscribeAllBidAsk -.
-func (t *SubscribegRPCAPI) UnSubscribeAllBidAsk() (*pb.ErrorMessage, error) {
+func (t *subscribe) UnSubscribeAllBidAsk() (*pb.ErrorMessage, error) {
 	conn := t.pool.Get()
 	defer t.pool.Put(conn)
 
@@ -92,7 +92,7 @@ func (t *SubscribegRPCAPI) UnSubscribeAllBidAsk() (*pb.ErrorMessage, error) {
 }
 
 // SubscribeFutureTick return arry means fail to subscribe
-func (t *SubscribegRPCAPI) SubscribeFutureTick(codeArr []string) ([]string, error) {
+func (t *subscribe) SubscribeFutureTick(codeArr []string) ([]string, error) {
 	conn := t.pool.Get()
 	defer t.pool.Put(conn)
 
@@ -104,7 +104,7 @@ func (t *SubscribegRPCAPI) SubscribeFutureTick(codeArr []string) ([]string, erro
 }
 
 // UnSubscribeFutureTick return arry means fail to subscribe
-func (t *SubscribegRPCAPI) UnSubscribeFutureTick(codeArr []string) ([]string, error) {
+func (t *subscribe) UnSubscribeFutureTick(codeArr []string) ([]string, error) {
 	conn := t.pool.Get()
 	defer t.pool.Put(conn)
 
@@ -116,7 +116,7 @@ func (t *SubscribegRPCAPI) UnSubscribeFutureTick(codeArr []string) ([]string, er
 }
 
 // SubscribeFutureBidAsk return arry means fail to subscribe
-func (t *SubscribegRPCAPI) SubscribeFutureBidAsk(codeArr []string) ([]string, error) {
+func (t *subscribe) SubscribeFutureBidAsk(codeArr []string) ([]string, error) {
 	conn := t.pool.Get()
 	defer t.pool.Put(conn)
 
@@ -128,7 +128,7 @@ func (t *SubscribegRPCAPI) SubscribeFutureBidAsk(codeArr []string) ([]string, er
 }
 
 // UnSubscribeFutureBidAsk return arry means fail to subscribe
-func (t *SubscribegRPCAPI) UnSubscribeFutureBidAsk(codeArr []string) ([]string, error) {
+func (t *subscribe) UnSubscribeFutureBidAsk(codeArr []string) ([]string, error) {
 	conn := t.pool.Get()
 	defer t.pool.Put(conn)
 

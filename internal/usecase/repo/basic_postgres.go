@@ -11,18 +11,18 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
-// BasicRepo -.
-type BasicRepo struct {
+// basic -.
+type basic struct {
 	*postgres.Postgres
 }
 
 // NewBasic -.
-func NewBasic(pg *postgres.Postgres) *BasicRepo {
-	return &BasicRepo{pg}
+func NewBasic(pg *postgres.Postgres) BasicRepo {
+	return &basic{pg}
 }
 
 // InsertOrUpdatetStockArr -.
-func (r *BasicRepo) InsertOrUpdatetStockArr(ctx context.Context, t []*entity.Stock) error {
+func (r *basic) InsertOrUpdatetStockArr(ctx context.Context, t []*entity.Stock) error {
 	inDBStock, err := r.queryAllStock(ctx)
 	if err != nil {
 		return err
@@ -76,7 +76,7 @@ func (r *BasicRepo) InsertOrUpdatetStockArr(ctx context.Context, t []*entity.Sto
 }
 
 // UpdateAllStockDayTradeToNo -.
-func (r *BasicRepo) UpdateAllStockDayTradeToNo(ctx context.Context) error {
+func (r *basic) UpdateAllStockDayTradeToNo(ctx context.Context) error {
 	tx, err := r.BeginTransaction()
 	if err != nil {
 		return err
@@ -98,7 +98,7 @@ func (r *BasicRepo) UpdateAllStockDayTradeToNo(ctx context.Context) error {
 }
 
 // queryAllStock -.
-func (r *BasicRepo) queryAllStock(ctx context.Context) (map[string]*entity.Stock, error) {
+func (r *basic) queryAllStock(ctx context.Context) (map[string]*entity.Stock, error) {
 	sql, _, err := r.Builder.
 		Select("number, name, exchange, category, day_trade, last_close, update_date").
 		From(tableNameStock).ToSql()
@@ -124,7 +124,7 @@ func (r *BasicRepo) queryAllStock(ctx context.Context) (map[string]*entity.Stock
 }
 
 // InsertOrUpdatetCalendarDateArr -.
-func (r *BasicRepo) InsertOrUpdatetCalendarDateArr(ctx context.Context, t []*entity.CalendarDate) error {
+func (r *basic) InsertOrUpdatetCalendarDateArr(ctx context.Context, t []*entity.CalendarDate) error {
 	inDBCalendar, err := r.queryAllCalendar(ctx)
 	if err != nil {
 		return err
@@ -171,7 +171,7 @@ func (r *BasicRepo) InsertOrUpdatetCalendarDateArr(ctx context.Context, t []*ent
 }
 
 // queryAllCalendar -.
-func (r *BasicRepo) queryAllCalendar(ctx context.Context) (map[time.Time]*entity.CalendarDate, error) {
+func (r *basic) queryAllCalendar(ctx context.Context) (map[time.Time]*entity.CalendarDate, error) {
 	sql, _, err := r.Builder.
 		Select("date, is_trade_day").
 		From(tableNameCalendar).
@@ -198,7 +198,7 @@ func (r *BasicRepo) queryAllCalendar(ctx context.Context) (map[time.Time]*entity
 }
 
 // InsertOrUpdatetFutureArr -.
-func (r *BasicRepo) InsertOrUpdatetFutureArr(ctx context.Context, t []*entity.Future) error {
+func (r *basic) InsertOrUpdatetFutureArr(ctx context.Context, t []*entity.Future) error {
 	inDBFuture, err := r.queryAllFuture(ctx)
 	if err != nil {
 		return err
@@ -255,7 +255,7 @@ func (r *BasicRepo) InsertOrUpdatetFutureArr(ctx context.Context, t []*entity.Fu
 }
 
 // queryAllFuture -.
-func (r *BasicRepo) queryAllFuture(ctx context.Context) (map[string]*entity.Future, error) {
+func (r *basic) queryAllFuture(ctx context.Context) (map[string]*entity.Future, error) {
 	sql, _, err := r.Builder.
 		Select("code, symbol, name, category, delivery_month, delivery_date, underlying_kind, unit, limit_up, limit_down, reference, update_date").
 		OrderBy("delivery_date ASC").
@@ -281,7 +281,7 @@ func (r *BasicRepo) queryAllFuture(ctx context.Context) (map[string]*entity.Futu
 	return entities, nil
 }
 
-func (r *BasicRepo) InsertOrUpdatetOptionArr(ctx context.Context, t []*entity.Option) error {
+func (r *basic) InsertOrUpdatetOptionArr(ctx context.Context, t []*entity.Option) error {
 	inDBOption, err := r.queryAllOption(ctx)
 	if err != nil {
 		return err
@@ -344,7 +344,7 @@ func (r *BasicRepo) InsertOrUpdatetOptionArr(ctx context.Context, t []*entity.Op
 	return nil
 }
 
-func (r *BasicRepo) queryAllOption(ctx context.Context) (map[string]*entity.Option, error) {
+func (r *basic) queryAllOption(ctx context.Context) (map[string]*entity.Option, error) {
 	sql, _, err := r.Builder.
 		Select("code, symbol, name, category, delivery_month, delivery_date, strike_price, option_right, underlying_kind, unit, limit_up, limit_down, reference, update_date").
 		OrderBy("delivery_date ASC").

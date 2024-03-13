@@ -11,17 +11,17 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
-// RealTimegRPCAPI -.
-type RealTimegRPCAPI struct {
+// realtime -.
+type realtime struct {
 	pool *grpc.ConnPool
 }
 
-func NewRealTime(client *grpc.ConnPool) *RealTimegRPCAPI {
-	return &RealTimegRPCAPI{client}
+func NewRealTime(client *grpc.ConnPool) RealTimegRPCAPI {
+	return &realtime{client}
 }
 
 // GetAllStockSnapshot -.
-func (t *RealTimegRPCAPI) GetAllStockSnapshot() ([]*pb.SnapshotMessage, error) {
+func (t *realtime) GetAllStockSnapshot() ([]*pb.SnapshotMessage, error) {
 	conn := t.pool.Get()
 	defer t.pool.Put(conn)
 
@@ -33,7 +33,7 @@ func (t *RealTimegRPCAPI) GetAllStockSnapshot() ([]*pb.SnapshotMessage, error) {
 }
 
 // GetStockSnapshotByNumArr -.
-func (t *RealTimegRPCAPI) GetStockSnapshotByNumArr(stockNumArr []string) ([]*pb.SnapshotMessage, error) {
+func (t *realtime) GetStockSnapshotByNumArr(stockNumArr []string) ([]*pb.SnapshotMessage, error) {
 	conn := t.pool.Get()
 	defer t.pool.Put(conn)
 
@@ -47,7 +47,7 @@ func (t *RealTimegRPCAPI) GetStockSnapshotByNumArr(stockNumArr []string) ([]*pb.
 }
 
 // GetStockSnapshotTSE -.
-func (t *RealTimegRPCAPI) GetStockSnapshotTSE() (*pb.SnapshotMessage, error) {
+func (t *realtime) GetStockSnapshotTSE() (*pb.SnapshotMessage, error) {
 	conn := t.pool.Get()
 	defer t.pool.Put(conn)
 
@@ -62,7 +62,7 @@ func (t *RealTimegRPCAPI) GetStockSnapshotTSE() (*pb.SnapshotMessage, error) {
 }
 
 // GetStockSnapshotOTC -.
-func (t *RealTimegRPCAPI) GetStockSnapshotOTC() (*pb.SnapshotMessage, error) {
+func (t *realtime) GetStockSnapshotOTC() (*pb.SnapshotMessage, error) {
 	conn := t.pool.Get()
 	defer t.pool.Put(conn)
 
@@ -77,7 +77,7 @@ func (t *RealTimegRPCAPI) GetStockSnapshotOTC() (*pb.SnapshotMessage, error) {
 }
 
 // GetFutureSnapshotByCode -.
-func (t *RealTimegRPCAPI) GetFutureSnapshotByCode(code string) (*pb.SnapshotMessage, error) {
+func (t *realtime) GetFutureSnapshotByCode(code string) (*pb.SnapshotMessage, error) {
 	conn := t.pool.Get()
 	defer t.pool.Put(conn)
 
@@ -94,7 +94,7 @@ func (t *RealTimegRPCAPI) GetFutureSnapshotByCode(code string) (*pb.SnapshotMess
 	return nil, errors.New("no data")
 }
 
-func (t *RealTimegRPCAPI) GetNasdaq() (*pb.YahooFinancePrice, error) {
+func (t *realtime) GetNasdaq() (*pb.YahooFinancePrice, error) {
 	conn := t.pool.Get()
 	defer t.pool.Put(conn)
 
@@ -105,7 +105,7 @@ func (t *RealTimegRPCAPI) GetNasdaq() (*pb.YahooFinancePrice, error) {
 	return r, nil
 }
 
-func (t *RealTimegRPCAPI) GetNasdaqFuture() (*pb.YahooFinancePrice, error) {
+func (t *realtime) GetNasdaqFuture() (*pb.YahooFinancePrice, error) {
 	conn := t.pool.Get()
 	defer t.pool.Put(conn)
 
@@ -117,7 +117,7 @@ func (t *RealTimegRPCAPI) GetNasdaqFuture() (*pb.YahooFinancePrice, error) {
 }
 
 // GetStockVolumeRank -.
-func (t *RealTimegRPCAPI) GetStockVolumeRank(date string) ([]*pb.StockVolumeRankMessage, error) {
+func (t *realtime) GetStockVolumeRank(date string) ([]*pb.StockVolumeRankMessage, error) {
 	conn := t.pool.Get()
 	defer t.pool.Put(conn)
 
@@ -131,7 +131,7 @@ func (t *RealTimegRPCAPI) GetStockVolumeRank(date string) ([]*pb.StockVolumeRank
 	return r.GetData(), nil
 }
 
-func (t *RealTimegRPCAPI) GetStockVolumeRankPB(date string) (*pb.StockVolumeRankResponse, error) {
+func (t *realtime) GetStockVolumeRankPB(date string) (*pb.StockVolumeRankResponse, error) {
 	conn := t.pool.Get()
 	defer t.pool.Put(conn)
 

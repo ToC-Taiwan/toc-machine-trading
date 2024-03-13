@@ -22,11 +22,11 @@ import (
 
 // RealTimeUseCase -.
 type RealTimeUseCase struct {
-	repo RealTimeRepo
+	repo repo.RealTimeRepo
 
-	gRPCRealtime RealTimegRPCAPI
-	gRPCSub      SubscribegRPCAPI
-	sc           TradegRPCAPI
+	gRPCRealtime grpc.RealTimegRPCAPI
+	gRPCSub      grpc.SubscribegRPCAPI
+	sc           grpc.TradegRPCAPI
 
 	commonMQ            mqtt.MQTT
 	clientRabbitMap     map[string]mqtt.MQTT

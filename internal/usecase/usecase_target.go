@@ -20,8 +20,8 @@ import (
 
 // TargetUseCase -.
 type TargetUseCase struct {
-	repo    TargetRepo
-	gRPCAPI RealTimegRPCAPI
+	repo    repo.TargetRepo
+	gRPCAPI grpc.RealTimegRPCAPI
 
 	cfg      *config.Config
 	tradeDay *calendar.Calendar

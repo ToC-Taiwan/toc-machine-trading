@@ -21,8 +21,8 @@ import (
 
 // TradeUseCase -.
 type TradeUseCase struct {
-	repo TradeRepo
-	sc   TradegRPCAPI
+	repo repo.TradeRepo
+	sc   grpc.TradegRPCAPI
 
 	quota    *quota.Quota
 	tradeDay *calendar.Calendar

@@ -21,7 +21,7 @@ import (
 )
 
 type SystemUseCase struct {
-	repo    SystemRepo
+	repo    repo.SystemRepo
 	smtpCfg config.SMTP
 
 	activationCodeMap     map[string]time.Time

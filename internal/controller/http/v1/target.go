@@ -4,7 +4,7 @@ package v1
 import (
 	"net/http"
 
-	"tmt/internal/controller/http/websocket/target"
+	wsTarget "tmt/internal/controller/http/websocket/target"
 	"tmt/internal/usecase"
 
 	"github.com/gin-gonic/gin"
@@ -38,5 +38,5 @@ func (r *targetRoutes) getTargets(c *gin.Context) {
 }
 
 func (r *targetRoutes) serveWS(c *gin.Context) {
-	target.StartWSTargetStock(c, r.t)
+	wsTarget.StartWSTargetStock(c, r.t)
 }

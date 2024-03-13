@@ -10,21 +10,21 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
-// BasicgRPCAPI -.
-type BasicgRPCAPI struct {
+// basic -.
+type basic struct {
 	pool *grpc.ConnPool
 }
 
 // NewBasic -.
-func NewBasic(client *grpc.ConnPool) *BasicgRPCAPI {
-	instance := &BasicgRPCAPI{
+func NewBasic(client *grpc.ConnPool) BasicgRPCAPI {
+	instance := &basic{
 		pool: client,
 	}
 	return instance
 }
 
 // CreateLongConnection -.
-func (t *BasicgRPCAPI) CreateLongConnection() error {
+func (t *basic) CreateLongConnection() error {
 	conn := t.pool.Get()
 	defer t.pool.Put(conn)
 	stream, err := pb.NewBasicDataInterfaceClient(conn).CreateLongConnection(context.Background())
@@ -41,7 +41,7 @@ func (t *BasicgRPCAPI) CreateLongConnection() error {
 }
 
 // GetAllStockDetail GetAllStockDetail
-func (t *BasicgRPCAPI) GetAllStockDetail() ([]*pb.StockDetailMessage, error) {
+func (t *basic) GetAllStockDetail() ([]*pb.StockDetailMessage, error) {
 	conn := t.pool.Get()
 	defer t.pool.Put(conn)
 
@@ -53,7 +53,7 @@ func (t *BasicgRPCAPI) GetAllStockDetail() ([]*pb.StockDetailMessage, error) {
 }
 
 // GetAllFutureDetail -.
-func (t *BasicgRPCAPI) GetAllFutureDetail() ([]*pb.FutureDetailMessage, error) {
+func (t *basic) GetAllFutureDetail() ([]*pb.FutureDetailMessage, error) {
 	conn := t.pool.Get()
 	defer t.pool.Put(conn)
 
@@ -65,7 +65,7 @@ func (t *BasicgRPCAPI) GetAllFutureDetail() ([]*pb.FutureDetailMessage, error) {
 }
 
 // GetAllOptionDetail -.
-func (t *BasicgRPCAPI) GetAllOptionDetail() ([]*pb.OptionDetailMessage, error) {
+func (t *basic) GetAllOptionDetail() ([]*pb.OptionDetailMessage, error) {
 	conn := t.pool.Get()
 	defer t.pool.Put(conn)
 
@@ -76,7 +76,7 @@ func (t *BasicgRPCAPI) GetAllOptionDetail() ([]*pb.OptionDetailMessage, error) {
 	return r.GetOption(), nil
 }
 
-func (t *BasicgRPCAPI) CheckUsage() (*pb.ShioajiUsage, error) {
+func (t *basic) CheckUsage() (*pb.ShioajiUsage, error) {
 	conn := t.pool.Get()
 	defer t.pool.Put(conn)
 
@@ -87,7 +87,7 @@ func (t *BasicgRPCAPI) CheckUsage() (*pb.ShioajiUsage, error) {
 	return r, nil
 }
 
-func (t *BasicgRPCAPI) Login() error {
+func (t *basic) Login() error {
 	conn := t.pool.Get()
 	defer t.pool.Put(conn)
 

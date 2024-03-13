@@ -7,17 +7,17 @@ import (
 	"tmt/pkg/postgres"
 )
 
-// RealTimeRepo -.
-type RealTimeRepo struct {
+// realtime -.
+type realtime struct {
 	*postgres.Postgres
 }
 
-func NewRealTime(pg *postgres.Postgres) *RealTimeRepo {
-	return &RealTimeRepo{pg}
+func NewRealTime(pg *postgres.Postgres) RealTimeRepo {
+	return &realtime{pg}
 }
 
 // InsertEvent -.
-func (r *RealTimeRepo) InsertEvent(ctx context.Context, t *entity.SinopacEvent) error {
+func (r *realtime) InsertEvent(ctx context.Context, t *entity.SinopacEvent) error {
 	builder := r.Builder.Insert(tableNameEvent).
 		Columns("event, event_code, info, response, event_time").
 		Values(t.Event, t.EventCode, t.Info, t.Response, t.EventTime)

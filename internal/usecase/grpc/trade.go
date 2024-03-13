@@ -11,20 +11,20 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
-type TradegRPCAPI struct {
+type trade struct {
 	pool *grpc.ConnPool
 	sim  bool
 }
 
-func NewTrade(client *grpc.ConnPool, sim bool) *TradegRPCAPI {
-	return &TradegRPCAPI{
+func NewTrade(client *grpc.ConnPool, sim bool) TradegRPCAPI {
+	return &trade{
 		pool: client,
 		sim:  sim,
 	}
 }
 
 // GetFuturePosition -.
-func (t *TradegRPCAPI) GetFuturePosition() (*pb.FuturePositionArr, error) {
+func (t *trade) GetFuturePosition() (*pb.FuturePositionArr, error) {
 	conn := t.pool.Get()
 	defer t.pool.Put(conn)
 
@@ -36,7 +36,7 @@ func (t *TradegRPCAPI) GetFuturePosition() (*pb.FuturePositionArr, error) {
 }
 
 // GetStockPosition -.
-func (t *TradegRPCAPI) GetStockPosition() (*pb.StockPositionArr, error) {
+func (t *trade) GetStockPosition() (*pb.StockPositionArr, error) {
 	conn := t.pool.Get()
 	defer t.pool.Put(conn)
 
@@ -48,7 +48,7 @@ func (t *TradegRPCAPI) GetStockPosition() (*pb.StockPositionArr, error) {
 }
 
 // GetAccountBalance -.
-func (t *TradegRPCAPI) GetAccountBalance() (*pb.AccountBalance, error) {
+func (t *trade) GetAccountBalance() (*pb.AccountBalance, error) {
 	conn := t.pool.Get()
 	defer t.pool.Put(conn)
 
@@ -60,7 +60,7 @@ func (t *TradegRPCAPI) GetAccountBalance() (*pb.AccountBalance, error) {
 }
 
 // GetMargin -.
-func (t *TradegRPCAPI) GetMargin() (*pb.Margin, error) {
+func (t *trade) GetMargin() (*pb.Margin, error) {
 	conn := t.pool.Get()
 	defer t.pool.Put(conn)
 
@@ -72,7 +72,7 @@ func (t *TradegRPCAPI) GetMargin() (*pb.Margin, error) {
 }
 
 // GetSettlement -.
-func (t *TradegRPCAPI) GetSettlement() (*pb.SettlementList, error) {
+func (t *trade) GetSettlement() (*pb.SettlementList, error) {
 	conn := t.pool.Get()
 	defer t.pool.Put(conn)
 
@@ -84,7 +84,7 @@ func (t *TradegRPCAPI) GetSettlement() (*pb.SettlementList, error) {
 }
 
 // BuyStock BuyStock
-func (t *TradegRPCAPI) BuyStock(order *entity.StockOrder) (*pb.TradeResult, error) {
+func (t *trade) BuyStock(order *entity.StockOrder) (*pb.TradeResult, error) {
 	conn := t.pool.Get()
 	defer t.pool.Put(conn)
 
@@ -101,7 +101,7 @@ func (t *TradegRPCAPI) BuyStock(order *entity.StockOrder) (*pb.TradeResult, erro
 }
 
 // SellStock SellStock
-func (t *TradegRPCAPI) SellStock(order *entity.StockOrder) (*pb.TradeResult, error) {
+func (t *trade) SellStock(order *entity.StockOrder) (*pb.TradeResult, error) {
 	conn := t.pool.Get()
 	defer t.pool.Put(conn)
 
@@ -117,7 +117,7 @@ func (t *TradegRPCAPI) SellStock(order *entity.StockOrder) (*pb.TradeResult, err
 	return r, nil
 }
 
-func (t *TradegRPCAPI) BuyOddStock(order *entity.StockOrder) (*pb.TradeResult, error) {
+func (t *trade) BuyOddStock(order *entity.StockOrder) (*pb.TradeResult, error) {
 	conn := t.pool.Get()
 	defer t.pool.Put(conn)
 
@@ -132,7 +132,7 @@ func (t *TradegRPCAPI) BuyOddStock(order *entity.StockOrder) (*pb.TradeResult, e
 	return r, nil
 }
 
-func (t *TradegRPCAPI) SellOddStock(order *entity.StockOrder) (*pb.TradeResult, error) {
+func (t *trade) SellOddStock(order *entity.StockOrder) (*pb.TradeResult, error) {
 	conn := t.pool.Get()
 	defer t.pool.Put(conn)
 
@@ -148,7 +148,7 @@ func (t *TradegRPCAPI) SellOddStock(order *entity.StockOrder) (*pb.TradeResult, 
 }
 
 // SellFirstStock SellFirstStock
-func (t *TradegRPCAPI) SellFirstStock(order *entity.StockOrder) (*pb.TradeResult, error) {
+func (t *trade) SellFirstStock(order *entity.StockOrder) (*pb.TradeResult, error) {
 	conn := t.pool.Get()
 	defer t.pool.Put(conn)
 
@@ -165,7 +165,7 @@ func (t *TradegRPCAPI) SellFirstStock(order *entity.StockOrder) (*pb.TradeResult
 }
 
 // CancelOrder -.
-func (t *TradegRPCAPI) CancelOrder(orderID string) (*pb.TradeResult, error) {
+func (t *trade) CancelOrder(orderID string) (*pb.TradeResult, error) {
 	conn := t.pool.Get()
 	defer t.pool.Put(conn)
 
@@ -180,7 +180,7 @@ func (t *TradegRPCAPI) CancelOrder(orderID string) (*pb.TradeResult, error) {
 }
 
 // GetLocalOrderStatusArr -.
-func (t *TradegRPCAPI) GetLocalOrderStatusArr() error {
+func (t *trade) GetLocalOrderStatusArr() error {
 	conn := t.pool.Get()
 	defer t.pool.Put(conn)
 
@@ -192,7 +192,7 @@ func (t *TradegRPCAPI) GetLocalOrderStatusArr() error {
 }
 
 // GetSimulateOrderStatusArr -.
-func (t *TradegRPCAPI) GetSimulateOrderStatusArr() error {
+func (t *trade) GetSimulateOrderStatusArr() error {
 	conn := t.pool.Get()
 	defer t.pool.Put(conn)
 
@@ -204,7 +204,7 @@ func (t *TradegRPCAPI) GetSimulateOrderStatusArr() error {
 }
 
 // BuyFuture -.
-func (t *TradegRPCAPI) BuyFuture(order *entity.FutureOrder) (*pb.TradeResult, error) {
+func (t *trade) BuyFuture(order *entity.FutureOrder) (*pb.TradeResult, error) {
 	conn := t.pool.Get()
 	defer t.pool.Put(conn)
 
@@ -221,7 +221,7 @@ func (t *TradegRPCAPI) BuyFuture(order *entity.FutureOrder) (*pb.TradeResult, er
 }
 
 // SellFuture -.
-func (t *TradegRPCAPI) SellFuture(order *entity.FutureOrder) (*pb.TradeResult, error) {
+func (t *trade) SellFuture(order *entity.FutureOrder) (*pb.TradeResult, error) {
 	conn := t.pool.Get()
 	defer t.pool.Put(conn)
 
@@ -238,7 +238,7 @@ func (t *TradegRPCAPI) SellFuture(order *entity.FutureOrder) (*pb.TradeResult, e
 }
 
 // SellFirstFuture -.
-func (t *TradegRPCAPI) SellFirstFuture(order *entity.FutureOrder) (*pb.TradeResult, error) {
+func (t *trade) SellFirstFuture(order *entity.FutureOrder) (*pb.TradeResult, error) {
 	conn := t.pool.Get()
 	defer t.pool.Put(conn)
 

@@ -2,7 +2,7 @@
 package v1
 
 import (
-	"tmt/internal/controller/http/websocket/history"
+	wsHistory "tmt/internal/controller/http/websocket/history"
 	"tmt/internal/usecase"
 
 	"github.com/gin-gonic/gin"
@@ -22,5 +22,5 @@ func NewHistoryRoutes(handler *gin.RouterGroup, t usecase.History) {
 }
 
 func (r *historyRoutes) serveWS(c *gin.Context) {
-	history.StartWSHistory(c, r.t)
+	wsHistory.StartWSHistory(c, r.t)
 }

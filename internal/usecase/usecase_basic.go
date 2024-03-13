@@ -17,8 +17,8 @@ import (
 )
 
 type BasicUseCase struct {
-	repo     BasicRepo
-	sc       BasicgRPCAPI
+	repo     repo.BasicRepo
+	sc       grpc.BasicgRPCAPI
 	cfg      *config.Config
 	tradeDay *calendar.Calendar
 

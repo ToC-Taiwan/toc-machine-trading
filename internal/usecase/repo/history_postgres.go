@@ -10,18 +10,18 @@ import (
 	"github.com/Masterminds/squirrel"
 )
 
-// HistoryRepo -.
-type HistoryRepo struct {
+// history -.
+type history struct {
 	*postgres.Postgres
 }
 
 // NewHistory -.
-func NewHistory(pg *postgres.Postgres) *HistoryRepo {
-	return &HistoryRepo{pg}
+func NewHistory(pg *postgres.Postgres) HistoryRepo {
+	return &history{pg}
 }
 
 // InsertHistoryCloseArr -.
-func (r *HistoryRepo) InsertHistoryCloseArr(ctx context.Context, t []*entity.StockHistoryClose) error {
+func (r *history) InsertHistoryCloseArr(ctx context.Context, t []*entity.StockHistoryClose) error {
 	split := [][]*entity.StockHistoryClose{}
 	if len(t) > batchSize {
 		count := len(t)/batchSize + 1
@@ -63,7 +63,7 @@ func (r *HistoryRepo) InsertHistoryCloseArr(ctx context.Context, t []*entity.Sto
 }
 
 // DeleteHistoryCloseByStockAndDate -.
-func (r *HistoryRepo) DeleteHistoryCloseByStockAndDate(ctx context.Context, stockNumArr []string, date time.Time) error {
+func (r *history) DeleteHistoryCloseByStockAndDate(ctx context.Context, stockNumArr []string, date time.Time) error {
 	tx, err := r.BeginTransaction()
 	if err != nil {
 		return err
@@ -84,7 +84,7 @@ func (r *HistoryRepo) DeleteHistoryCloseByStockAndDate(ctx context.Context, stoc
 }
 
 // QueryMutltiStockCloseByDate -.
-func (r *HistoryRepo) QueryMutltiStockCloseByDate(ctx context.Context, stockNumArr []string, date time.Time) (map[string]*entity.StockHistoryClose, error) {
+func (r *history) QueryMutltiStockCloseByDate(ctx context.Context, stockNumArr []string, date time.Time) (map[string]*entity.StockHistoryClose, error) {
 	sql, args, err := r.Builder.
 		Select("date, stock_num, close, number, name, exchange, category, day_trade, last_close, update_date").
 		From(tableNameHistoryStockClose).
@@ -116,7 +116,7 @@ func (r *HistoryRepo) QueryMutltiStockCloseByDate(ctx context.Context, stockNumA
 }
 
 // InsertHistoryTickArr -.
-func (r *HistoryRepo) InsertHistoryTickArr(ctx context.Context, t []*entity.StockHistoryTick) error {
+func (r *history) InsertHistoryTickArr(ctx context.Context, t []*entity.StockHistoryTick) error {
 	var split [][]*entity.StockHistoryTick
 	if len(t) > batchSize {
 		count := len(t)/batchSize + 1
@@ -158,7 +158,7 @@ func (r *HistoryRepo) InsertHistoryTickArr(ctx context.Context, t []*entity.Stoc
 }
 
 // DeleteHistoryTickByStockAndDate -.
-func (r *HistoryRepo) DeleteHistoryTickByStockAndDate(ctx context.Context, stockNumArr []string, date time.Time) error {
+func (r *history) DeleteHistoryTickByStockAndDate(ctx context.Context, stockNumArr []string, date time.Time) error {
 	tx, err := r.BeginTransaction()
 	if err != nil {
 		return err
@@ -180,7 +180,7 @@ func (r *HistoryRepo) DeleteHistoryTickByStockAndDate(ctx context.Context, stock
 }
 
 // QueryMultiStockTickArrByDate -.
-func (r *HistoryRepo) QueryMultiStockTickArrByDate(ctx context.Context, stockNumArr []string, date time.Time) (map[string][]*entity.StockHistoryTick, error) {
+func (r *history) QueryMultiStockTickArrByDate(ctx context.Context, stockNumArr []string, date time.Time) (map[string][]*entity.StockHistoryTick, error) {
 	sql, args, err := r.Builder.
 		Select("stock_num, tick_time, close, tick_type, volume, bid_price, bid_volume, ask_price, ask_volume, number, name, exchange, category, day_trade, last_close, update_date").
 		From(tableNameHistoryStockTick).
@@ -214,7 +214,7 @@ func (r *HistoryRepo) QueryMultiStockTickArrByDate(ctx context.Context, stockNum
 }
 
 // InsertHistoryKbarArr -.
-func (r *HistoryRepo) InsertHistoryKbarArr(ctx context.Context, t []*entity.StockHistoryKbar) error {
+func (r *history) InsertHistoryKbarArr(ctx context.Context, t []*entity.StockHistoryKbar) error {
 	var split [][]*entity.StockHistoryKbar
 	if len(t) > batchSize {
 		count := len(t)/batchSize + 1
@@ -256,7 +256,7 @@ func (r *HistoryRepo) InsertHistoryKbarArr(ctx context.Context, t []*entity.Stoc
 }
 
 // DeleteHistoryKbarByStockAndDate -.
-func (r *HistoryRepo) DeleteHistoryKbarByStockAndDate(ctx context.Context, stockNumArr []string, date time.Time) error {
+func (r *history) DeleteHistoryKbarByStockAndDate(ctx context.Context, stockNumArr []string, date time.Time) error {
 	tx, err := r.BeginTransaction()
 	if err != nil {
 		return err
@@ -278,7 +278,7 @@ func (r *HistoryRepo) DeleteHistoryKbarByStockAndDate(ctx context.Context, stock
 }
 
 // QueryMultiStockKbarArrByDate -.
-func (r *HistoryRepo) QueryMultiStockKbarArrByDate(ctx context.Context, stockNumArr []string, date time.Time) (map[string][]*entity.StockHistoryKbar, error) {
+func (r *history) QueryMultiStockKbarArrByDate(ctx context.Context, stockNumArr []string, date time.Time) (map[string][]*entity.StockHistoryKbar, error) {
 	sql, args, err := r.Builder.
 		Select("stock_num, kbar_time, open, high, low, close, volume, number, name, exchange, category, day_trade, last_close, update_date").
 		From(tableNameHistoryStockKbar).
@@ -312,7 +312,7 @@ func (r *HistoryRepo) QueryMultiStockKbarArrByDate(ctx context.Context, stockNum
 }
 
 // InsertQuaterMA -.
-func (r *HistoryRepo) InsertQuaterMA(ctx context.Context, t *entity.StockHistoryAnalyze) error {
+func (r *history) InsertQuaterMA(ctx context.Context, t *entity.StockHistoryAnalyze) error {
 	dbQuaterMA, err := r.QueryAllQuaterMAByStockNum(ctx, t.StockNum)
 	if err != nil {
 		return err
@@ -338,7 +338,7 @@ func (r *HistoryRepo) InsertQuaterMA(ctx context.Context, t *entity.StockHistory
 }
 
 // QueryAllQuaterMAByStockNum -.
-func (r *HistoryRepo) QueryAllQuaterMAByStockNum(ctx context.Context, stockNum string) (map[time.Time]*entity.StockHistoryAnalyze, error) {
+func (r *history) QueryAllQuaterMAByStockNum(ctx context.Context, stockNum string) (map[time.Time]*entity.StockHistoryAnalyze, error) {
 	sql, args, err := r.Builder.
 		Select("date, stock_num, quater_ma, number, name, exchange, category, day_trade, last_close, update_date").
 		From(tableNameHistoryStockAnalyze).

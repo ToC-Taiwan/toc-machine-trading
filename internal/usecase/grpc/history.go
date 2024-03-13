@@ -8,18 +8,18 @@ import (
 	"tmt/pkg/grpc"
 )
 
-// HistorygRPCAPI -.
-type HistorygRPCAPI struct {
+// history -.
+type history struct {
 	pool *grpc.ConnPool
 }
 
 // NewHistory -.
-func NewHistory(client *grpc.ConnPool) *HistorygRPCAPI {
-	return &HistorygRPCAPI{client}
+func NewHistory(client *grpc.ConnPool) HistorygRPCAPI {
+	return &history{client}
 }
 
 // GetStockHistoryTick GetStockHistoryTick
-func (t *HistorygRPCAPI) GetStockHistoryTick(stockNumArr []string, date string) ([]*pb.HistoryTickMessage, error) {
+func (t *history) GetStockHistoryTick(stockNumArr []string, date string) ([]*pb.HistoryTickMessage, error) {
 	conn := t.pool.Get()
 	defer t.pool.Put(conn)
 
@@ -34,7 +34,7 @@ func (t *HistorygRPCAPI) GetStockHistoryTick(stockNumArr []string, date string) 
 }
 
 // GetStockHistoryKbar GetStockHistoryKbar
-func (t *HistorygRPCAPI) GetStockHistoryKbar(stockNumArr []string, date string) ([]*pb.HistoryKbarMessage, error) {
+func (t *history) GetStockHistoryKbar(stockNumArr []string, date string) ([]*pb.HistoryKbarMessage, error) {
 	conn := t.pool.Get()
 	defer t.pool.Put(conn)
 
@@ -49,7 +49,7 @@ func (t *HistorygRPCAPI) GetStockHistoryKbar(stockNumArr []string, date string) 
 }
 
 // GetStockHistoryClose GetStockHistoryClose
-func (t *HistorygRPCAPI) GetStockHistoryClose(stockNumArr []string, date string) ([]*pb.HistoryCloseMessage, error) {
+func (t *history) GetStockHistoryClose(stockNumArr []string, date string) ([]*pb.HistoryCloseMessage, error) {
 	conn := t.pool.Get()
 	defer t.pool.Put(conn)
 
@@ -64,7 +64,7 @@ func (t *HistorygRPCAPI) GetStockHistoryClose(stockNumArr []string, date string)
 }
 
 // GetFutureHistoryKbar -.
-func (t *HistorygRPCAPI) GetFutureHistoryKbar(codeArr []string, date string) (*pb.HistoryKbarResponse, error) {
+func (t *history) GetFutureHistoryKbar(codeArr []string, date string) (*pb.HistoryKbarResponse, error) {
 	conn := t.pool.Get()
 	defer t.pool.Put(conn)
 

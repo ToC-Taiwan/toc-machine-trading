@@ -16,7 +16,7 @@ import (
 
 // AnalyzeUseCase -.
 type AnalyzeUseCase struct {
-	repo HistoryRepo
+	repo repo.HistoryRepo
 
 	targetArr []*entity.StockTarget
 
