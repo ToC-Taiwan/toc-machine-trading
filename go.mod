@@ -1,6 +1,6 @@
 module tmt
 
-go 1.21.7
+go 1.21.8
 
 require (
 	firebase.google.com/go/v4 v4.13.0
