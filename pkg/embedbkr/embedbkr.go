@@ -47,7 +47,11 @@ func Serve() error {
 	}
 	once.Do(func() {
 		_ = newServer.server.AddHook(&auth.AllowHook{}, nil)
-		tcp := listeners.NewTCP(uuid.NewString(), fmt.Sprintf(":%s", _defaultPort), nil)
+		cfg := listeners.Config{
+			ID:      uuid.NewString(),
+			Address: fmt.Sprintf(":%s", _defaultPort),
+		}
+		tcp := listeners.NewTCP(cfg)
 		err := newServer.server.AddListener(tcp)
 		if err != nil {
 			errChan <- err
