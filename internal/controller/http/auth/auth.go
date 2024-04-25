@@ -36,7 +36,7 @@ func NewAuthMiddleware(system usecase.System) (*jwt.GinJWTMiddleware, error) {
 	}
 
 	m := jwt.GinJWTMiddleware{
-		TokenLookup:      "header:Authorization",
+		TokenLookup:      "header:Authorization, query:token",
 		SigningAlgorithm: "HS256",
 		Timeout:          timeOut,
 		TimeFunc:         time.Now,
