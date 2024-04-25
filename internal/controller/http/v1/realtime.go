@@ -27,7 +27,7 @@ func NewRealTimeRoutes(handler *gin.RouterGroup, basic usecase.Basic, t usecase.
 	h := handler.Group("/stream")
 	{
 		h.PUT("/snapshot", r.getSnapshots)
-		h.GET("/ws/pick-future", r.servePickFutureWS)
+		h.GET("/ws/pick-future/:code", r.servePickFutureWS)
 		h.GET("/ws/pick-stock", r.servePickStockWS)
 		h.GET("/ws/pick-stock/odds", r.servePickStockOddsWS)
 	}
@@ -76,7 +76,7 @@ func (r *realTimeRoutes) servePickStockOddsWS(c *gin.Context) {
 }
 
 func (r *realTimeRoutes) servePickFutureWS(c *gin.Context) {
-	code := c.GetHeader("Code")
+	code := c.Param("code")
 	if code == "" {
 		resp.ErrorResponse(c, http.StatusBadRequest, "code is empty")
 		return
