@@ -27,7 +27,7 @@ func NewUserRoutes(public *gin.RouterGroup, private *gin.RouterGroup, jwtHandler
 	public.GET("/refresh", r.refreshTokenHandler)
 
 	public.POST("/user", r.newUserHandler)
-	public.GET("/user/verify/:user/:code", r.verifyEmailHandler)
+	public.POST("/user/verify/:user/:code", r.verifyEmailHandler)
 
 	private.GET("/user/info", r.getUserInfo)
 	private.PUT("/user/auth", r.updateAuthTradeUser)
@@ -73,21 +73,23 @@ func (u *userRoutes) newUserHandler(c *gin.Context) {
 //	@success	200
 //	@failure	400	{string}	string
 //	@failure	500	{string}	string
-//	@router		/v1/user/verify/{user}/{code} [get]
+//	@router		/v1/user/verify/{user}/{code} [post]
 func (u *userRoutes) verifyEmailHandler(c *gin.Context) {
-	result := "Success"
 	user := c.Param("user")
 	if user == "" || user == "undefined" || user == "{user}" {
-		result = "User is required"
+		resp.ErrorResponse(c, http.StatusBadRequest, "User is required")
+		return
 	}
 	code := c.Param("code")
 	if code == "" || code == "undefined" || code == "{code}" {
-		result = "Code is required"
+		resp.ErrorResponse(c, http.StatusBadRequest, "Code is required")
+		return
 	}
 	if err := u.system.VerifyEmail(c, user, code); err != nil {
-		result = err.Error()
+		resp.ErrorResponse(c, http.StatusBadRequest, err)
+		return
 	}
-	c.HTML(http.StatusOK, "mail_verification.tmpl", gin.H{"result": result})
+	c.JSON(http.StatusOK, nil)
 }
 
 // loginHandler _.

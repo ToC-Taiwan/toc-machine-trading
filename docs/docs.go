@@ -904,7 +904,7 @@ const docTemplate = `{
             }
         },
         "/v1/user/verify/{user}/{code}": {
-            "get": {
+            "post": {
                 "consumes": [
                     "application/json"
                 ],
