@@ -125,7 +125,7 @@ func (uc *SystemUseCase) SendOTP(ctx context.Context, t *entity.NewUser) error {
 	m.SetHeader("Subject", "Please verify your email address")
 	m.SetBody(
 		"text/html",
-		fmt.Sprintf("Please click the following link in 30 minutes to verify your email address: <a href='https://tocraw.com/tmt/v1/user/verify/%s/%s'>Verify</a>", t.Username, activationCode),
+		fmt.Sprintf("Please click the following link in 30 minutes to verify your email address: <a href='https://tocraw.com/user/verify/%s/%s'>Verify</a>", t.Username, activationCode),
 	)
 
 	d := gomail.NewDialer(uc.smtpCfg.Host, 587, uc.smtpCfg.Username, uc.smtpCfg.Password)
