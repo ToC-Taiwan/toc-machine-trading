@@ -8,6 +8,7 @@ import (
 	"tmt/internal/controller/http/websocket/pick"
 	"tmt/internal/entity"
 	"tmt/internal/usecase"
+	"tmt/internal/usecase/modules/searcher"
 
 	"github.com/gin-gonic/gin"
 )
@@ -25,6 +26,7 @@ func NewBasicRoutes(handler *gin.RouterGroup, t usecase.Basic) {
 		h.GET("/usage/shioaji", r.getShioajiUsage)
 		h.GET("/search/stock", r.serveStockSerchWS)
 		h.GET("/search/future", r.serveFutureSerchWS)
+		h.GET("/search/future/mxf", r.getNearestMXF)
 	}
 }
 
@@ -100,4 +102,24 @@ func (r *basicRoutes) serveStockSerchWS(c *gin.Context) {
 
 func (r *basicRoutes) serveFutureSerchWS(c *gin.Context) {
 	pick.StartWSTargetSearcher(c, r.t, pick.Future)
+}
+
+// getNearestMXF -.
+//
+//	@Tags		Basic V1
+//	@Summary	Get nearest MXF
+//	@security	JWT
+//	@Accept		json
+//	@Produce	json
+//	@Success	200	{object}	entity.Future
+//	@Failure	500	{object}	resp.Response{}
+//	@Router		/v1/basic/search/future/mxf [get]
+func (r *basicRoutes) getNearestMXF(c *gin.Context) {
+	searcher := searcher.Get()
+	futures := searcher.SearchFuture("MXF")
+	if len(futures) == 0 {
+		resp.ErrorResponse(c, http.StatusNotFound, "MXF not found")
+		return
+	}
+	c.JSON(http.StatusOK, futures[0])
 }
