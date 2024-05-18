@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/connectivity"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
@@ -48,19 +47,14 @@ func New(url string, opts ...Option) (*ConnPool, error) {
 		if len(conn.pool) == conn.maxPoolSize {
 			break
 		}
-
-		ctx, cancel := context.WithTimeout(context.Background(), conn.connTimeout)
-		newConn, err := grpc.DialContext(
-			ctx,
+		newConn, err := grpc.NewClient(
 			url,
 			grpc.WithTransportCredentials(insecure.NewCredentials()),
-			grpc.WithBlock(),
 			grpc.WithDefaultCallOptions(
 				grpc.MaxCallRecvMsgSize(1024*1024*1024),
 				grpc.MaxCallSendMsgSize(1024*1024*1024),
 			),
 		)
-		cancel()
 		if err != nil {
 			conn.connAttempts--
 			if errors.Is(err, context.DeadlineExceeded) {
@@ -69,12 +63,9 @@ func New(url string, opts ...Option) (*ConnPool, error) {
 			}
 			return nil, err
 		}
-
-		if newConn.GetState() == connectivity.Ready {
-			conn.connAttempts = _defaultConnAttempts
-			conn.pool = append(conn.pool, newConn)
-			conn.readyConn <- newConn
-		}
+		conn.connAttempts = _defaultConnAttempts
+		conn.pool = append(conn.pool, newConn)
+		conn.readyConn <- newConn
 	}
 
 	if len(conn.pool) != conn.maxPoolSize {

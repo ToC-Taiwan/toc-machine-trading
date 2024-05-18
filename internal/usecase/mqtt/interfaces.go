@@ -5,7 +5,8 @@ import (
 	"context"
 
 	"tmt/internal/entity"
-	"tmt/pb"
+
+	"github.com/toc-taiwan/toc-trade-protobuf/src/golang/pb"
 )
 
 type MQTT interface {

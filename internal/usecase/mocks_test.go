@@ -9,9 +9,9 @@ import (
 	reflect "reflect"
 	time "time"
 	entity "tmt/internal/entity"
-	pb "tmt/pb"
 
 	gomock "github.com/golang/mock/gomock"
+	pb "github.com/toc-taiwan/toc-trade-protobuf/src/golang/pb"
 )
 
 // MockAnalyze is a mock of Analyze interface.

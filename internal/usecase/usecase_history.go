@@ -8,7 +8,8 @@ import (
 	"time"
 
 	"tmt/internal/config"
-	"tmt/pb"
+
+	"github.com/toc-taiwan/toc-trade-protobuf/src/golang/pb"
 
 	"tmt/internal/entity"
 	"tmt/internal/usecase/cache"

@@ -15,9 +15,10 @@ import (
 	"tmt/internal/usecase/mqtt"
 	"tmt/internal/usecase/mqtt/inline"
 	"tmt/internal/usecase/repo"
-	"tmt/pb"
 	"tmt/pkg/eventbus"
 	"tmt/pkg/log"
+
+	"github.com/toc-taiwan/toc-trade-protobuf/src/golang/pb"
 )
 
 // RealTimeUseCase -.

@@ -8,7 +8,8 @@ import (
 	"tmt/internal/controller/http/websocket/ginws"
 	"tmt/internal/entity"
 	"tmt/internal/usecase"
-	"tmt/pb"
+
+	"github.com/toc-taiwan/toc-trade-protobuf/src/golang/pb"
 
 	"github.com/gin-gonic/gin"
 	"google.golang.org/protobuf/proto"

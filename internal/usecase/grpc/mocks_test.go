@@ -7,9 +7,9 @@ package grpc
 import (
 	reflect "reflect"
 	entity "tmt/internal/entity"
-	pb "tmt/pb"
 
 	gomock "github.com/golang/mock/gomock"
+	pb "github.com/toc-taiwan/toc-trade-protobuf/src/golang/pb"
 )
 
 // MockBasicgRPCAPI is a mock of BasicgRPCAPI interface.

@@ -4,7 +4,8 @@ package pick
 import (
 	"tmt/internal/controller/http/websocket/ginws"
 	"tmt/internal/usecase"
-	"tmt/pb"
+
+	"github.com/toc-taiwan/toc-trade-protobuf/src/golang/pb"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"

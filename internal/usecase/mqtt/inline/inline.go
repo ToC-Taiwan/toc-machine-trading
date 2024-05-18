@@ -9,8 +9,9 @@ import (
 
 	"tmt/internal/entity"
 	"tmt/internal/usecase/mqtt"
-	"tmt/pb"
 	"tmt/pkg/embedbkr"
+
+	"github.com/toc-taiwan/toc-trade-protobuf/src/golang/pb"
 
 	mqttSrv "github.com/mochi-mqtt/server/v2"
 

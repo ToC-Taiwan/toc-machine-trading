@@ -2,7 +2,8 @@ package grpc
 
 import (
 	"tmt/internal/entity"
-	"tmt/pb"
+
+	"github.com/toc-taiwan/toc-trade-protobuf/src/golang/pb"
 )
 
 //go:generate mockgen -source=interfaces.go -destination=./mocks_test.go -package=grpc

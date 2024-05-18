@@ -4,8 +4,9 @@ package grpc
 import (
 	"context"
 
-	"tmt/pb"
 	"tmt/pkg/grpc"
+
+	"github.com/toc-taiwan/toc-trade-protobuf/src/golang/pb"
 
 	"google.golang.org/protobuf/types/known/emptypb"
 )
