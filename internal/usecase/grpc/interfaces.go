@@ -1,7 +1,7 @@
 package grpc
 
 import (
-	"tmt/internal/entity"
+	"github.com/toc-taiwan/toc-machine-trading/internal/entity"
 
 	"github.com/toc-taiwan/toc-trade-protobuf/src/golang/pb"
 )

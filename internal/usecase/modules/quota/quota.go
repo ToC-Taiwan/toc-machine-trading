@@ -4,7 +4,7 @@ package quota
 import (
 	"math"
 
-	"tmt/internal/config"
+	"github.com/toc-taiwan/toc-machine-trading/internal/config"
 )
 
 const (

@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"time"
 
-	"tmt/internal/controller/http/resp"
-	"tmt/internal/usecase"
+	"github.com/toc-taiwan/toc-machine-trading/internal/controller/http/resp"
+	"github.com/toc-taiwan/toc-machine-trading/internal/usecase"
 
 	jwt "github.com/appleboy/gin-jwt/v2"
 	v4jwt "github.com/golang-jwt/jwt/v4"

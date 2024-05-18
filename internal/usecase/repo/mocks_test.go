@@ -8,9 +8,9 @@ import (
 	context "context"
 	reflect "reflect"
 	time "time"
-	entity "tmt/internal/entity"
 
 	gomock "github.com/golang/mock/gomock"
+	entity "github.com/toc-taiwan/toc-machine-trading/internal/entity"
 )
 
 // MockBasicRepo is a mock of BasicRepo interface.

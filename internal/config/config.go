@@ -10,9 +10,9 @@ import (
 	"sync"
 	"time"
 
-	"tmt/pkg/grpc"
-	"tmt/pkg/log"
-	"tmt/pkg/postgres"
+	"github.com/toc-taiwan/toc-machine-trading/pkg/grpc"
+	"github.com/toc-taiwan/toc-machine-trading/pkg/log"
+	"github.com/toc-taiwan/toc-machine-trading/pkg/postgres"
 
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/jackc/pgx/v4"

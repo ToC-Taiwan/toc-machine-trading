@@ -4,10 +4,10 @@ package router
 import (
 	"fmt"
 
-	"tmt/docs"
-	"tmt/internal/controller/http/auth"
-	v1 "tmt/internal/controller/http/v1"
-	"tmt/internal/usecase"
+	"github.com/toc-taiwan/toc-machine-trading/docs"
+	"github.com/toc-taiwan/toc-machine-trading/internal/controller/http/auth"
+	v1 "github.com/toc-taiwan/toc-machine-trading/internal/controller/http/v1"
+	"github.com/toc-taiwan/toc-machine-trading/internal/usecase"
 
 	jwt "github.com/appleboy/gin-jwt/v2"
 	"github.com/gin-gonic/gin"

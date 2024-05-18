@@ -4,8 +4,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"tmt/internal/app"
-	cfg "tmt/internal/config"
+	"github.com/toc-taiwan/toc-machine-trading/internal/app"
+	cfg "github.com/toc-taiwan/toc-machine-trading/internal/config"
 
 	"github.com/joho/godotenv"
 )

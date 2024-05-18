@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"tmt/internal/entity"
-	"tmt/pkg/postgres"
+	"github.com/toc-taiwan/toc-machine-trading/internal/entity"
+	"github.com/toc-taiwan/toc-machine-trading/pkg/postgres"
 )
 
 // target -.

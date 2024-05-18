@@ -9,8 +9,8 @@ import (
 	"sort"
 	"time"
 
-	"tmt/internal/entity"
-	"tmt/pkg/postgres"
+	"github.com/toc-taiwan/toc-machine-trading/internal/entity"
+	"github.com/toc-taiwan/toc-machine-trading/pkg/postgres"
 
 	"github.com/Masterminds/squirrel"
 	"github.com/google/go-cmp/cmp"

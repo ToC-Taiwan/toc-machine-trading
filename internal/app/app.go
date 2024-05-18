@@ -6,12 +6,12 @@ import (
 	"os/signal"
 	"syscall"
 
-	"tmt/internal/config"
-	"tmt/internal/controller/http/router"
-	"tmt/internal/usecase"
-	"tmt/pkg/embedbkr"
-	"tmt/pkg/httpserver"
-	"tmt/pkg/log"
+	"github.com/toc-taiwan/toc-machine-trading/internal/config"
+	"github.com/toc-taiwan/toc-machine-trading/internal/controller/http/router"
+	"github.com/toc-taiwan/toc-machine-trading/internal/usecase"
+	"github.com/toc-taiwan/toc-machine-trading/pkg/embedbkr"
+	"github.com/toc-taiwan/toc-machine-trading/pkg/httpserver"
+	"github.com/toc-taiwan/toc-machine-trading/pkg/log"
 
 	"github.com/robfig/cron/v3"
 )

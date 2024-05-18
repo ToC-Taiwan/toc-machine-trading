@@ -7,9 +7,9 @@ import (
 	"sync"
 	"time"
 
-	"tmt/internal/entity"
-	"tmt/internal/usecase/mqtt"
-	"tmt/pkg/embedbkr"
+	"github.com/toc-taiwan/toc-machine-trading/internal/entity"
+	"github.com/toc-taiwan/toc-machine-trading/internal/usecase/mqtt"
+	"github.com/toc-taiwan/toc-machine-trading/pkg/embedbkr"
 
 	"github.com/toc-taiwan/toc-trade-protobuf/src/golang/pb"
 

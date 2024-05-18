@@ -4,11 +4,11 @@ package v1
 import (
 	"net/http"
 
-	"tmt/internal/controller/http/resp"
-	"tmt/internal/controller/http/websocket/pick"
-	"tmt/internal/entity"
-	"tmt/internal/usecase"
-	"tmt/internal/usecase/modules/searcher"
+	"github.com/toc-taiwan/toc-machine-trading/internal/controller/http/resp"
+	"github.com/toc-taiwan/toc-machine-trading/internal/controller/http/websocket/pick"
+	"github.com/toc-taiwan/toc-machine-trading/internal/entity"
+	"github.com/toc-taiwan/toc-machine-trading/internal/usecase"
+	"github.com/toc-taiwan/toc-machine-trading/internal/usecase/modules/searcher"
 
 	"github.com/gin-gonic/gin"
 )

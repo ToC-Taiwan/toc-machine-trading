@@ -4,9 +4,9 @@ package v1
 import (
 	"net/http"
 
-	"tmt/internal/controller/http/auth"
-	"tmt/internal/controller/http/resp"
-	"tmt/internal/usecase"
+	"github.com/toc-taiwan/toc-machine-trading/internal/controller/http/auth"
+	"github.com/toc-taiwan/toc-machine-trading/internal/controller/http/resp"
+	"github.com/toc-taiwan/toc-machine-trading/internal/usecase"
 
 	"github.com/gin-gonic/gin"
 )

@@ -9,11 +9,11 @@ import (
 	"sync"
 	"time"
 
-	"tmt/internal/config"
-	"tmt/internal/entity"
-	"tmt/internal/usecase/repo"
-	"tmt/pkg/eventbus"
-	"tmt/pkg/log"
+	"github.com/toc-taiwan/toc-machine-trading/internal/config"
+	"github.com/toc-taiwan/toc-machine-trading/internal/entity"
+	"github.com/toc-taiwan/toc-machine-trading/internal/usecase/repo"
+	"github.com/toc-taiwan/toc-machine-trading/pkg/eventbus"
+	"github.com/toc-taiwan/toc-machine-trading/pkg/log"
 
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"

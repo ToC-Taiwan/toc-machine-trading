@@ -2,8 +2,8 @@
 package pick
 
 import (
-	"tmt/internal/controller/http/websocket/ginws"
-	"tmt/internal/usecase"
+	"github.com/toc-taiwan/toc-machine-trading/internal/controller/http/websocket/ginws"
+	"github.com/toc-taiwan/toc-machine-trading/internal/usecase"
 
 	"github.com/toc-taiwan/toc-trade-protobuf/src/golang/pb"
 

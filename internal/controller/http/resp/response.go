@@ -4,7 +4,7 @@ package resp
 import (
 	"fmt"
 
-	"tmt/internal/usecase"
+	"github.com/toc-taiwan/toc-machine-trading/internal/usecase"
 
 	"github.com/gin-gonic/gin"
 )

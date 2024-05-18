@@ -3,10 +3,10 @@ package v1
 import (
 	"net/http"
 
-	"tmt/internal/controller/http/auth"
-	"tmt/internal/controller/http/resp"
-	"tmt/internal/entity"
-	"tmt/internal/usecase"
+	"github.com/toc-taiwan/toc-machine-trading/internal/controller/http/auth"
+	"github.com/toc-taiwan/toc-machine-trading/internal/controller/http/resp"
+	"github.com/toc-taiwan/toc-machine-trading/internal/entity"
+	"github.com/toc-taiwan/toc-machine-trading/internal/usecase"
 
 	jwt "github.com/appleboy/gin-jwt/v2"
 	"github.com/gin-gonic/gin"

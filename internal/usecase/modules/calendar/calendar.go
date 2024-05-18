@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"tmt/internal/entity"
+	"github.com/toc-taiwan/toc-machine-trading/internal/entity"
 )
 
 //go:embed holidays.json

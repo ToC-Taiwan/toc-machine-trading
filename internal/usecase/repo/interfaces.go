@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"tmt/internal/entity"
+	"github.com/toc-taiwan/toc-machine-trading/internal/entity"
 )
 
 //go:generate mockgen -source=interfaces.go -destination=./mocks_test.go -package=repo

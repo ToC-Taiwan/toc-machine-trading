@@ -4,16 +4,16 @@ import (
 	"context"
 	"time"
 
-	"tmt/internal/config"
+	"github.com/toc-taiwan/toc-machine-trading/internal/config"
 
-	"tmt/internal/entity"
-	"tmt/internal/usecase/cache"
-	"tmt/internal/usecase/grpc"
-	"tmt/internal/usecase/modules/calendar"
-	"tmt/internal/usecase/modules/searcher"
-	"tmt/internal/usecase/repo"
-	"tmt/pkg/log"
-	"tmt/pkg/utils"
+	"github.com/toc-taiwan/toc-machine-trading/internal/entity"
+	"github.com/toc-taiwan/toc-machine-trading/internal/usecase/cache"
+	"github.com/toc-taiwan/toc-machine-trading/internal/usecase/grpc"
+	"github.com/toc-taiwan/toc-machine-trading/internal/usecase/modules/calendar"
+	"github.com/toc-taiwan/toc-machine-trading/internal/usecase/modules/searcher"
+	"github.com/toc-taiwan/toc-machine-trading/internal/usecase/repo"
+	"github.com/toc-taiwan/toc-machine-trading/pkg/log"
+	"github.com/toc-taiwan/toc-machine-trading/pkg/utils"
 )
 
 type BasicUseCase struct {

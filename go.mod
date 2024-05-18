@@ -1,4 +1,4 @@
-module tmt
+module github.com/toc-taiwan/toc-machine-trading
 
 go 1.22.3
 

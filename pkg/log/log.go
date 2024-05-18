@@ -10,8 +10,8 @@ import (
 	"strings"
 	"time"
 
-	"tmt/pkg/log/hook/file"
-	"tmt/pkg/log/hook/slack"
+	"github.com/toc-taiwan/toc-machine-trading/pkg/log/hook/file"
+	"github.com/toc-taiwan/toc-machine-trading/pkg/log/hook/slack"
 
 	"github.com/ilyakaznacheev/cleanenv"
 	"github.com/sirupsen/logrus"

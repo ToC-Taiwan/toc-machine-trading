@@ -6,7 +6,7 @@ import (
 	"strings"
 	"sync"
 
-	"tmt/internal/entity"
+	"github.com/toc-taiwan/toc-machine-trading/internal/entity"
 )
 
 var (

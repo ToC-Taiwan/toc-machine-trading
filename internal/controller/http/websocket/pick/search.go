@@ -5,9 +5,9 @@ import (
 	"context"
 	"encoding/json"
 
-	"tmt/internal/controller/http/websocket/ginws"
-	"tmt/internal/entity"
-	"tmt/internal/usecase"
+	"github.com/toc-taiwan/toc-machine-trading/internal/controller/http/websocket/ginws"
+	"github.com/toc-taiwan/toc-machine-trading/internal/entity"
+	"github.com/toc-taiwan/toc-machine-trading/internal/usecase"
 
 	"github.com/gin-gonic/gin"
 )

@@ -2,8 +2,8 @@
 package v1
 
 import (
-	"tmt/internal/controller/http/websocket/history"
-	"tmt/internal/usecase"
+	"github.com/toc-taiwan/toc-machine-trading/internal/controller/http/websocket/history"
+	"github.com/toc-taiwan/toc-machine-trading/internal/usecase"
 
 	"github.com/gin-gonic/gin"
 )
