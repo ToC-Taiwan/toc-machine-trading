@@ -19,8 +19,7 @@ type Server struct {
 
 // Sinopac -.
 type Sinopac struct {
-	PoolMax int    `json:"PoolMax" yaml:"PoolMax"`
-	URL     string `json:"URL" yaml:"URL"`
+	URL string `json:"URL" yaml:"URL"`
 }
 
 type SMTP struct {

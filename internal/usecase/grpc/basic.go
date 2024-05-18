@@ -4,29 +4,27 @@ package grpc
 import (
 	"context"
 
-	"github.com/toc-taiwan/toc-machine-trading/pkg/grpc"
 	"github.com/toc-taiwan/toc-trade-protobuf/src/golang/pb"
+	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 // basic -.
 type basic struct {
-	pool *grpc.ConnPool
+	conn *grpc.ClientConn
 }
 
 // NewBasic -.
-func NewBasic(client *grpc.ConnPool) BasicgRPCAPI {
+func NewBasic(client *grpc.ClientConn) BasicgRPCAPI {
 	instance := &basic{
-		pool: client,
+		conn: client,
 	}
 	return instance
 }
 
 // CreateLongConnection -.
 func (t *basic) CreateLongConnection() error {
-	conn := t.pool.Get()
-	defer t.pool.Put(conn)
-	stream, err := pb.NewBasicDataInterfaceClient(conn).CreateLongConnection(context.Background())
+	stream, err := pb.NewBasicDataInterfaceClient(t.conn).CreateLongConnection(context.Background())
 	if err != nil {
 		panic(err)
 	}
@@ -41,10 +39,7 @@ func (t *basic) CreateLongConnection() error {
 
 // GetAllStockDetail GetAllStockDetail
 func (t *basic) GetAllStockDetail() ([]*pb.StockDetailMessage, error) {
-	conn := t.pool.Get()
-	defer t.pool.Put(conn)
-
-	r, err := pb.NewBasicDataInterfaceClient(conn).GetAllStockDetail(context.Background(), &emptypb.Empty{})
+	r, err := pb.NewBasicDataInterfaceClient(t.conn).GetAllStockDetail(context.Background(), &emptypb.Empty{})
 	if err != nil {
 		return []*pb.StockDetailMessage{}, err
 	}
@@ -53,10 +48,7 @@ func (t *basic) GetAllStockDetail() ([]*pb.StockDetailMessage, error) {
 
 // GetAllFutureDetail -.
 func (t *basic) GetAllFutureDetail() ([]*pb.FutureDetailMessage, error) {
-	conn := t.pool.Get()
-	defer t.pool.Put(conn)
-
-	r, err := pb.NewBasicDataInterfaceClient(conn).GetAllFutureDetail(context.Background(), &emptypb.Empty{})
+	r, err := pb.NewBasicDataInterfaceClient(t.conn).GetAllFutureDetail(context.Background(), &emptypb.Empty{})
 	if err != nil {
 		return []*pb.FutureDetailMessage{}, err
 	}
@@ -65,10 +57,7 @@ func (t *basic) GetAllFutureDetail() ([]*pb.FutureDetailMessage, error) {
 
 // GetAllOptionDetail -.
 func (t *basic) GetAllOptionDetail() ([]*pb.OptionDetailMessage, error) {
-	conn := t.pool.Get()
-	defer t.pool.Put(conn)
-
-	r, err := pb.NewBasicDataInterfaceClient(conn).GetAllOptionDetail(context.Background(), &emptypb.Empty{})
+	r, err := pb.NewBasicDataInterfaceClient(t.conn).GetAllOptionDetail(context.Background(), &emptypb.Empty{})
 	if err != nil {
 		return []*pb.OptionDetailMessage{}, err
 	}
@@ -76,10 +65,7 @@ func (t *basic) GetAllOptionDetail() ([]*pb.OptionDetailMessage, error) {
 }
 
 func (t *basic) CheckUsage() (*pb.ShioajiUsage, error) {
-	conn := t.pool.Get()
-	defer t.pool.Put(conn)
-
-	r, err := pb.NewBasicDataInterfaceClient(conn).CheckUsage(context.Background(), &emptypb.Empty{})
+	r, err := pb.NewBasicDataInterfaceClient(t.conn).CheckUsage(context.Background(), &emptypb.Empty{})
 	if err != nil {
 		return &pb.ShioajiUsage{}, err
 	}
@@ -87,10 +73,7 @@ func (t *basic) CheckUsage() (*pb.ShioajiUsage, error) {
 }
 
 func (t *basic) Login() error {
-	conn := t.pool.Get()
-	defer t.pool.Put(conn)
-
-	_, err := pb.NewBasicDataInterfaceClient(conn).Login(context.Background(), &emptypb.Empty{})
+	_, err := pb.NewBasicDataInterfaceClient(t.conn).Login(context.Background(), &emptypb.Empty{})
 	if err != nil {
 		return err
 	}

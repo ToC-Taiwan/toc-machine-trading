@@ -16,9 +16,10 @@ import (
 	"github.com/jackc/pgx/v4"
 	"github.com/joho/godotenv"
 	"github.com/spf13/viper"
-	"github.com/toc-taiwan/toc-machine-trading/pkg/grpc"
 	"github.com/toc-taiwan/toc-machine-trading/pkg/log"
 	"github.com/toc-taiwan/toc-machine-trading/pkg/postgres"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 // Config -.
@@ -32,7 +33,7 @@ type Config struct {
 	TradeFuture  TradeFuture  `json:"TradeFuture" yaml:"TradeFuture"`
 
 	dbPool      *postgres.Postgres `json:"-" yaml:"-"`
-	sinopacPool *grpc.ConnPool     `json:"-" yaml:"-"`
+	sinopacPool *grpc.ClientConn   `json:"-" yaml:"-"`
 	EnvConfig   `json:"-" yaml:"-"`
 
 	logger   *log.Log     `json:"-" yaml:"-"`
@@ -98,8 +99,7 @@ func (c *Config) readEnv() {
 			HTTP: c.vp.GetString("HTTP"),
 		},
 		Sinopac: Sinopac{
-			PoolMax: c.vp.GetInt("SINOPAC_POOL_MAX"),
-			URL:     c.vp.GetString("SINOPAC_URL"),
+			URL: c.vp.GetString("SINOPAC_URL"),
 		},
 		SMTP: SMTP{
 			Host:     c.vp.GetString("SMTP_HOST"),
@@ -223,18 +223,21 @@ func (c *Config) GetPostgresPool() *postgres.Postgres {
 
 func (c *Config) setSinopacPool() {
 	c.logger.Info("Connecting to sinopac gRPC server")
-	sc, err := grpc.New(
+	newConn, err := grpc.NewClient(
 		c.Sinopac.URL,
-		grpc.MaxPoolSize(c.Sinopac.PoolMax),
-		grpc.AddLogger(c.logger),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithDefaultCallOptions(
+			grpc.MaxCallRecvMsgSize(1024*1024*1024),
+			grpc.MaxCallSendMsgSize(1024*1024*1024),
+		),
 	)
 	if err != nil {
 		c.logger.Fatal(err)
 	}
-	c.sinopacPool = sc
+	c.sinopacPool = newConn
 }
 
-func (c *Config) GetSinopacPool() *grpc.ConnPool {
+func (c *Config) GetSinopacPool() *grpc.ClientConn {
 	if c.sinopacPool == nil {
 		c.logger.Fatal("sinopac gRPC server not connected")
 	}

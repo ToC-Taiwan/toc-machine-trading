@@ -4,26 +4,23 @@ package grpc
 import (
 	"context"
 
-	"github.com/toc-taiwan/toc-machine-trading/pkg/grpc"
 	"github.com/toc-taiwan/toc-trade-protobuf/src/golang/pb"
+	"google.golang.org/grpc"
 )
 
 // history -.
 type history struct {
-	pool *grpc.ConnPool
+	conn *grpc.ClientConn
 }
 
 // NewHistory -.
-func NewHistory(client *grpc.ConnPool) HistorygRPCAPI {
+func NewHistory(client *grpc.ClientConn) HistorygRPCAPI {
 	return &history{client}
 }
 
 // GetStockHistoryTick GetStockHistoryTick
 func (t *history) GetStockHistoryTick(stockNumArr []string, date string) ([]*pb.HistoryTickMessage, error) {
-	conn := t.pool.Get()
-	defer t.pool.Put(conn)
-
-	r, err := pb.NewHistoryDataInterfaceClient(conn).GetStockHistoryTick(context.Background(), &pb.StockNumArrWithDate{
+	r, err := pb.NewHistoryDataInterfaceClient(t.conn).GetStockHistoryTick(context.Background(), &pb.StockNumArrWithDate{
 		StockNumArr: stockNumArr,
 		Date:        date,
 	})
@@ -35,10 +32,7 @@ func (t *history) GetStockHistoryTick(stockNumArr []string, date string) ([]*pb.
 
 // GetStockHistoryKbar GetStockHistoryKbar
 func (t *history) GetStockHistoryKbar(stockNumArr []string, date string) ([]*pb.HistoryKbarMessage, error) {
-	conn := t.pool.Get()
-	defer t.pool.Put(conn)
-
-	r, err := pb.NewHistoryDataInterfaceClient(conn).GetStockHistoryKbar(context.Background(), &pb.StockNumArrWithDate{
+	r, err := pb.NewHistoryDataInterfaceClient(t.conn).GetStockHistoryKbar(context.Background(), &pb.StockNumArrWithDate{
 		StockNumArr: stockNumArr,
 		Date:        date,
 	})
@@ -50,10 +44,7 @@ func (t *history) GetStockHistoryKbar(stockNumArr []string, date string) ([]*pb.
 
 // GetStockHistoryClose GetStockHistoryClose
 func (t *history) GetStockHistoryClose(stockNumArr []string, date string) ([]*pb.HistoryCloseMessage, error) {
-	conn := t.pool.Get()
-	defer t.pool.Put(conn)
-
-	r, err := pb.NewHistoryDataInterfaceClient(conn).GetStockHistoryClose(context.Background(), &pb.StockNumArrWithDate{
+	r, err := pb.NewHistoryDataInterfaceClient(t.conn).GetStockHistoryClose(context.Background(), &pb.StockNumArrWithDate{
 		StockNumArr: stockNumArr,
 		Date:        date,
 	})
@@ -65,10 +56,7 @@ func (t *history) GetStockHistoryClose(stockNumArr []string, date string) ([]*pb
 
 // GetFutureHistoryKbar -.
 func (t *history) GetFutureHistoryKbar(codeArr []string, date string) (*pb.HistoryKbarResponse, error) {
-	conn := t.pool.Get()
-	defer t.pool.Put(conn)
-
-	r, err := pb.NewHistoryDataInterfaceClient(conn).GetFutureHistoryKbar(context.Background(), &pb.FutureCodeArrWithDate{
+	r, err := pb.NewHistoryDataInterfaceClient(t.conn).GetFutureHistoryKbar(context.Background(), &pb.FutureCodeArrWithDate{
 		FutureCodeArr: codeArr,
 		Date:          date,
 	})

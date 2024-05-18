@@ -5,29 +5,26 @@ import (
 	"context"
 
 	"github.com/toc-taiwan/toc-machine-trading/internal/entity"
-	"github.com/toc-taiwan/toc-machine-trading/pkg/grpc"
 	"github.com/toc-taiwan/toc-trade-protobuf/src/golang/pb"
+	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 type trade struct {
-	pool *grpc.ConnPool
+	conn *grpc.ClientConn
 	sim  bool
 }
 
-func NewTrade(client *grpc.ConnPool, sim bool) TradegRPCAPI {
+func NewTrade(client *grpc.ClientConn, sim bool) TradegRPCAPI {
 	return &trade{
-		pool: client,
+		conn: client,
 		sim:  sim,
 	}
 }
 
 // GetFuturePosition -.
 func (t *trade) GetFuturePosition() (*pb.FuturePositionArr, error) {
-	conn := t.pool.Get()
-	defer t.pool.Put(conn)
-
-	r, err := pb.NewTradeInterfaceClient(conn).GetFuturePosition(context.Background(), &emptypb.Empty{})
+	r, err := pb.NewTradeInterfaceClient(t.conn).GetFuturePosition(context.Background(), &emptypb.Empty{})
 	if err != nil {
 		return nil, err
 	}
@@ -36,10 +33,7 @@ func (t *trade) GetFuturePosition() (*pb.FuturePositionArr, error) {
 
 // GetStockPosition -.
 func (t *trade) GetStockPosition() (*pb.StockPositionArr, error) {
-	conn := t.pool.Get()
-	defer t.pool.Put(conn)
-
-	r, err := pb.NewTradeInterfaceClient(conn).GetStockPosition(context.Background(), &emptypb.Empty{})
+	r, err := pb.NewTradeInterfaceClient(t.conn).GetStockPosition(context.Background(), &emptypb.Empty{})
 	if err != nil {
 		return nil, err
 	}
@@ -48,10 +42,7 @@ func (t *trade) GetStockPosition() (*pb.StockPositionArr, error) {
 
 // GetAccountBalance -.
 func (t *trade) GetAccountBalance() (*pb.AccountBalance, error) {
-	conn := t.pool.Get()
-	defer t.pool.Put(conn)
-
-	r, err := pb.NewTradeInterfaceClient(conn).GetAccountBalance(context.Background(), &emptypb.Empty{})
+	r, err := pb.NewTradeInterfaceClient(t.conn).GetAccountBalance(context.Background(), &emptypb.Empty{})
 	if err != nil {
 		return nil, err
 	}
@@ -60,10 +51,7 @@ func (t *trade) GetAccountBalance() (*pb.AccountBalance, error) {
 
 // GetMargin -.
 func (t *trade) GetMargin() (*pb.Margin, error) {
-	conn := t.pool.Get()
-	defer t.pool.Put(conn)
-
-	r, err := pb.NewTradeInterfaceClient(conn).GetMargin(context.Background(), &emptypb.Empty{})
+	r, err := pb.NewTradeInterfaceClient(t.conn).GetMargin(context.Background(), &emptypb.Empty{})
 	if err != nil {
 		return nil, err
 	}
@@ -72,10 +60,7 @@ func (t *trade) GetMargin() (*pb.Margin, error) {
 
 // GetSettlement -.
 func (t *trade) GetSettlement() (*pb.SettlementList, error) {
-	conn := t.pool.Get()
-	defer t.pool.Put(conn)
-
-	r, err := pb.NewTradeInterfaceClient(conn).GetSettlement(context.Background(), &emptypb.Empty{})
+	r, err := pb.NewTradeInterfaceClient(t.conn).GetSettlement(context.Background(), &emptypb.Empty{})
 	if err != nil {
 		return nil, err
 	}
@@ -84,10 +69,7 @@ func (t *trade) GetSettlement() (*pb.SettlementList, error) {
 
 // BuyStock BuyStock
 func (t *trade) BuyStock(order *entity.StockOrder) (*pb.TradeResult, error) {
-	conn := t.pool.Get()
-	defer t.pool.Put(conn)
-
-	r, err := pb.NewTradeInterfaceClient(conn).BuyStock(context.Background(), &pb.StockOrderDetail{
+	r, err := pb.NewTradeInterfaceClient(t.conn).BuyStock(context.Background(), &pb.StockOrderDetail{
 		StockNum: order.StockNum,
 		Price:    order.Price,
 		Quantity: order.Lot,
@@ -101,10 +83,7 @@ func (t *trade) BuyStock(order *entity.StockOrder) (*pb.TradeResult, error) {
 
 // SellStock SellStock
 func (t *trade) SellStock(order *entity.StockOrder) (*pb.TradeResult, error) {
-	conn := t.pool.Get()
-	defer t.pool.Put(conn)
-
-	r, err := pb.NewTradeInterfaceClient(conn).SellStock(context.Background(), &pb.StockOrderDetail{
+	r, err := pb.NewTradeInterfaceClient(t.conn).SellStock(context.Background(), &pb.StockOrderDetail{
 		StockNum: order.StockNum,
 		Price:    order.Price,
 		Quantity: order.Lot,
@@ -117,10 +96,7 @@ func (t *trade) SellStock(order *entity.StockOrder) (*pb.TradeResult, error) {
 }
 
 func (t *trade) BuyOddStock(order *entity.StockOrder) (*pb.TradeResult, error) {
-	conn := t.pool.Get()
-	defer t.pool.Put(conn)
-
-	r, err := pb.NewTradeInterfaceClient(conn).BuyOddStock(context.Background(), &pb.OddStockOrderDetail{
+	r, err := pb.NewTradeInterfaceClient(t.conn).BuyOddStock(context.Background(), &pb.OddStockOrderDetail{
 		StockNum: order.StockNum,
 		Price:    order.Price,
 		Share:    order.Share,
@@ -132,10 +108,7 @@ func (t *trade) BuyOddStock(order *entity.StockOrder) (*pb.TradeResult, error) {
 }
 
 func (t *trade) SellOddStock(order *entity.StockOrder) (*pb.TradeResult, error) {
-	conn := t.pool.Get()
-	defer t.pool.Put(conn)
-
-	r, err := pb.NewTradeInterfaceClient(conn).SellOddStock(context.Background(), &pb.OddStockOrderDetail{
+	r, err := pb.NewTradeInterfaceClient(t.conn).SellOddStock(context.Background(), &pb.OddStockOrderDetail{
 		StockNum: order.StockNum,
 		Price:    order.Price,
 		Share:    order.Share,
@@ -148,10 +121,7 @@ func (t *trade) SellOddStock(order *entity.StockOrder) (*pb.TradeResult, error) 
 
 // SellFirstStock SellFirstStock
 func (t *trade) SellFirstStock(order *entity.StockOrder) (*pb.TradeResult, error) {
-	conn := t.pool.Get()
-	defer t.pool.Put(conn)
-
-	r, err := pb.NewTradeInterfaceClient(conn).SellFirstStock(context.Background(), &pb.StockOrderDetail{
+	r, err := pb.NewTradeInterfaceClient(t.conn).SellFirstStock(context.Background(), &pb.StockOrderDetail{
 		StockNum: order.StockNum,
 		Price:    order.Price,
 		Quantity: order.Lot,
@@ -165,10 +135,7 @@ func (t *trade) SellFirstStock(order *entity.StockOrder) (*pb.TradeResult, error
 
 // CancelOrder -.
 func (t *trade) CancelOrder(orderID string) (*pb.TradeResult, error) {
-	conn := t.pool.Get()
-	defer t.pool.Put(conn)
-
-	r, err := pb.NewTradeInterfaceClient(conn).CancelOrder(context.Background(), &pb.OrderID{
+	r, err := pb.NewTradeInterfaceClient(t.conn).CancelOrder(context.Background(), &pb.OrderID{
 		OrderId:  orderID,
 		Simulate: t.sim,
 	})
@@ -180,10 +147,7 @@ func (t *trade) CancelOrder(orderID string) (*pb.TradeResult, error) {
 
 // GetLocalOrderStatusArr -.
 func (t *trade) GetLocalOrderStatusArr() error {
-	conn := t.pool.Get()
-	defer t.pool.Put(conn)
-
-	_, err := pb.NewTradeInterfaceClient(conn).GetLocalOrderStatusArr(context.Background(), &emptypb.Empty{})
+	_, err := pb.NewTradeInterfaceClient(t.conn).GetLocalOrderStatusArr(context.Background(), &emptypb.Empty{})
 	if err != nil {
 		return err
 	}
@@ -192,10 +156,7 @@ func (t *trade) GetLocalOrderStatusArr() error {
 
 // GetSimulateOrderStatusArr -.
 func (t *trade) GetSimulateOrderStatusArr() error {
-	conn := t.pool.Get()
-	defer t.pool.Put(conn)
-
-	_, err := pb.NewTradeInterfaceClient(conn).GetSimulateOrderStatusArr(context.Background(), &emptypb.Empty{})
+	_, err := pb.NewTradeInterfaceClient(t.conn).GetSimulateOrderStatusArr(context.Background(), &emptypb.Empty{})
 	if err != nil {
 		return err
 	}
@@ -204,10 +165,7 @@ func (t *trade) GetSimulateOrderStatusArr() error {
 
 // BuyFuture -.
 func (t *trade) BuyFuture(order *entity.FutureOrder) (*pb.TradeResult, error) {
-	conn := t.pool.Get()
-	defer t.pool.Put(conn)
-
-	r, err := pb.NewTradeInterfaceClient(conn).BuyFuture(context.Background(), &pb.FutureOrderDetail{
+	r, err := pb.NewTradeInterfaceClient(t.conn).BuyFuture(context.Background(), &pb.FutureOrderDetail{
 		Code:     order.Code,
 		Price:    order.Price,
 		Quantity: order.Position,
@@ -221,10 +179,7 @@ func (t *trade) BuyFuture(order *entity.FutureOrder) (*pb.TradeResult, error) {
 
 // SellFuture -.
 func (t *trade) SellFuture(order *entity.FutureOrder) (*pb.TradeResult, error) {
-	conn := t.pool.Get()
-	defer t.pool.Put(conn)
-
-	r, err := pb.NewTradeInterfaceClient(conn).SellFuture(context.Background(), &pb.FutureOrderDetail{
+	r, err := pb.NewTradeInterfaceClient(t.conn).SellFuture(context.Background(), &pb.FutureOrderDetail{
 		Code:     order.Code,
 		Price:    order.Price,
 		Quantity: order.Position,
@@ -238,10 +193,7 @@ func (t *trade) SellFuture(order *entity.FutureOrder) (*pb.TradeResult, error) {
 
 // SellFirstFuture -.
 func (t *trade) SellFirstFuture(order *entity.FutureOrder) (*pb.TradeResult, error) {
-	conn := t.pool.Get()
-	defer t.pool.Put(conn)
-
-	r, err := pb.NewTradeInterfaceClient(conn).SellFirstFuture(context.Background(), &pb.FutureOrderDetail{
+	r, err := pb.NewTradeInterfaceClient(t.conn).SellFirstFuture(context.Background(), &pb.FutureOrderDetail{
 		Code:     order.Code,
 		Price:    order.Price,
 		Quantity: order.Position,
