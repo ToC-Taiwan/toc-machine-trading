@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/toc-taiwan/toc-machine-trading/internal/config"
-
 	"github.com/toc-taiwan/toc-machine-trading/internal/entity"
 	"github.com/toc-taiwan/toc-machine-trading/internal/usecase/cache"
 	"github.com/toc-taiwan/toc-machine-trading/internal/usecase/grpc"

@@ -4,10 +4,9 @@ import (
 	"context"
 	"time"
 
+	"github.com/Masterminds/squirrel"
 	"github.com/toc-taiwan/toc-machine-trading/internal/entity"
 	"github.com/toc-taiwan/toc-machine-trading/pkg/postgres"
-
-	"github.com/Masterminds/squirrel"
 )
 
 // history -.

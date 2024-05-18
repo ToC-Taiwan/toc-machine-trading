@@ -5,10 +5,9 @@ import (
 	"errors"
 	"time"
 
+	"github.com/jackc/pgx/v4"
 	"github.com/toc-taiwan/toc-machine-trading/internal/entity"
 	"github.com/toc-taiwan/toc-machine-trading/pkg/postgres"
-
-	"github.com/jackc/pgx/v4"
 )
 
 // system -.

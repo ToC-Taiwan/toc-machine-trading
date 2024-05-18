@@ -7,14 +7,12 @@ import (
 	"net/http"
 	"time"
 
+	jwt "github.com/appleboy/gin-jwt/v2"
+	"github.com/gin-gonic/gin"
+	v4jwt "github.com/golang-jwt/jwt/v4"
+	"github.com/google/uuid"
 	"github.com/toc-taiwan/toc-machine-trading/internal/controller/http/resp"
 	"github.com/toc-taiwan/toc-machine-trading/internal/usecase"
-
-	jwt "github.com/appleboy/gin-jwt/v2"
-	v4jwt "github.com/golang-jwt/jwt/v4"
-
-	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
 const (

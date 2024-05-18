@@ -4,14 +4,13 @@ package router
 import (
 	"fmt"
 
+	jwt "github.com/appleboy/gin-jwt/v2"
+	"github.com/gin-gonic/gin"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/toc-taiwan/toc-machine-trading/docs"
 	"github.com/toc-taiwan/toc-machine-trading/internal/controller/http/auth"
 	v1 "github.com/toc-taiwan/toc-machine-trading/internal/controller/http/v1"
 	"github.com/toc-taiwan/toc-machine-trading/internal/usecase"
-
-	jwt "github.com/appleboy/gin-jwt/v2"
-	"github.com/gin-gonic/gin"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 const (

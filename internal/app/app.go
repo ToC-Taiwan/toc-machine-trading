@@ -6,14 +6,13 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/robfig/cron/v3"
 	"github.com/toc-taiwan/toc-machine-trading/internal/config"
 	"github.com/toc-taiwan/toc-machine-trading/internal/controller/http/router"
 	"github.com/toc-taiwan/toc-machine-trading/internal/usecase"
 	"github.com/toc-taiwan/toc-machine-trading/pkg/embedbkr"
 	"github.com/toc-taiwan/toc-machine-trading/pkg/httpserver"
 	"github.com/toc-taiwan/toc-machine-trading/pkg/log"
-
-	"github.com/robfig/cron/v3"
 )
 
 func Run() {

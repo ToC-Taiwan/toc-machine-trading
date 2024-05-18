@@ -2,10 +2,9 @@
 package v1
 
 import (
+	"github.com/gin-gonic/gin"
 	"github.com/toc-taiwan/toc-machine-trading/internal/controller/http/websocket/history"
 	"github.com/toc-taiwan/toc-machine-trading/internal/usecase"
-
-	"github.com/gin-gonic/gin"
 )
 
 type historyRoutes struct {

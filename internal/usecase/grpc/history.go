@@ -5,7 +5,6 @@ import (
 	"context"
 
 	"github.com/toc-taiwan/toc-machine-trading/pkg/grpc"
-
 	"github.com/toc-taiwan/toc-trade-protobuf/src/golang/pb"
 )
 

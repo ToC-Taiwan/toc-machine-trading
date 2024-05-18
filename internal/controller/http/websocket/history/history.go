@@ -5,13 +5,11 @@ import (
 	"encoding/json"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/toc-taiwan/toc-machine-trading/internal/controller/http/websocket/ginws"
 	"github.com/toc-taiwan/toc-machine-trading/internal/entity"
 	"github.com/toc-taiwan/toc-machine-trading/internal/usecase"
-
 	"github.com/toc-taiwan/toc-trade-protobuf/src/golang/pb"
-
-	"github.com/gin-gonic/gin"
 	"google.golang.org/protobuf/proto"
 )
 

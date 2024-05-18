@@ -2,13 +2,11 @@
 package pick
 
 import (
-	"github.com/toc-taiwan/toc-machine-trading/internal/controller/http/websocket/ginws"
-	"github.com/toc-taiwan/toc-machine-trading/internal/usecase"
-
-	"github.com/toc-taiwan/toc-trade-protobuf/src/golang/pb"
-
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/toc-taiwan/toc-machine-trading/internal/controller/http/websocket/ginws"
+	"github.com/toc-taiwan/toc-machine-trading/internal/usecase"
+	"github.com/toc-taiwan/toc-trade-protobuf/src/golang/pb"
 	"google.golang.org/protobuf/proto"
 )
 

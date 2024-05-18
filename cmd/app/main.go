@@ -4,10 +4,9 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/joho/godotenv"
 	"github.com/toc-taiwan/toc-machine-trading/internal/app"
 	cfg "github.com/toc-taiwan/toc-machine-trading/internal/config"
-
-	"github.com/joho/godotenv"
 )
 
 func main() {

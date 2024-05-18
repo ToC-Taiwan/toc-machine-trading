@@ -7,15 +7,12 @@ import (
 	"sync"
 	"time"
 
+	mqttSrv "github.com/mochi-mqtt/server/v2"
+	"github.com/mochi-mqtt/server/v2/packets"
 	"github.com/toc-taiwan/toc-machine-trading/internal/entity"
 	"github.com/toc-taiwan/toc-machine-trading/internal/usecase/mqtt"
 	"github.com/toc-taiwan/toc-machine-trading/pkg/embedbkr"
-
 	"github.com/toc-taiwan/toc-trade-protobuf/src/golang/pb"
-
-	mqttSrv "github.com/mochi-mqtt/server/v2"
-
-	"github.com/mochi-mqtt/server/v2/packets"
 	"google.golang.org/protobuf/proto"
 )
 

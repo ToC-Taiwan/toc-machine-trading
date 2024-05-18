@@ -8,13 +8,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/toc-taiwan/toc-machine-trading/pkg/utils"
-
 	"github.com/google/uuid"
 	mqtt "github.com/mochi-mqtt/server/v2"
 	"github.com/mochi-mqtt/server/v2/hooks/auth"
 	"github.com/mochi-mqtt/server/v2/listeners"
 	"github.com/mochi-mqtt/server/v2/packets"
+	"github.com/toc-taiwan/toc-machine-trading/pkg/utils"
 )
 
 const (

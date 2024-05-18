@@ -10,18 +10,15 @@ import (
 	"sync"
 	"time"
 
-	"github.com/toc-taiwan/toc-machine-trading/pkg/grpc"
-	"github.com/toc-taiwan/toc-machine-trading/pkg/log"
-	"github.com/toc-taiwan/toc-machine-trading/pkg/postgres"
-
 	"github.com/golang-migrate/migrate/v4"
+	_ "github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/jackc/pgx/v4"
 	"github.com/joho/godotenv"
 	"github.com/spf13/viper"
-
-	// migrate tools
-	_ "github.com/golang-migrate/migrate/v4/database/postgres"
-	_ "github.com/golang-migrate/migrate/v4/source/file"
+	"github.com/toc-taiwan/toc-machine-trading/pkg/grpc"
+	"github.com/toc-taiwan/toc-machine-trading/pkg/log"
+	"github.com/toc-taiwan/toc-machine-trading/pkg/postgres"
 )
 
 // Config -.

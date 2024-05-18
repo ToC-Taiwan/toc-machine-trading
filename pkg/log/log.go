@@ -10,11 +10,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/toc-taiwan/toc-machine-trading/pkg/log/hook/file"
-	"github.com/toc-taiwan/toc-machine-trading/pkg/log/hook/slack"
-
 	"github.com/ilyakaznacheev/cleanenv"
 	"github.com/sirupsen/logrus"
+	"github.com/toc-taiwan/toc-machine-trading/pkg/log/hook/file"
+	"github.com/toc-taiwan/toc-machine-trading/pkg/log/hook/slack"
 )
 
 const (

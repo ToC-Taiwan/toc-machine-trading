@@ -3,10 +3,9 @@ package v1
 import (
 	"net/http"
 
+	"github.com/gin-gonic/gin"
 	"github.com/toc-taiwan/toc-machine-trading/internal/controller/http/resp"
 	"github.com/toc-taiwan/toc-machine-trading/internal/usecase"
-
-	"github.com/gin-gonic/gin"
 )
 
 type fcmRoutes struct {

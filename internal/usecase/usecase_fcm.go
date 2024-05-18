@@ -6,6 +6,8 @@ import (
 	"os"
 	"sync"
 
+	firebase "firebase.google.com/go/v4"
+	"firebase.google.com/go/v4/messaging"
 	"github.com/toc-taiwan/toc-machine-trading/internal/config"
 	"github.com/toc-taiwan/toc-machine-trading/internal/entity"
 	"github.com/toc-taiwan/toc-machine-trading/internal/usecase/cache"
@@ -13,9 +15,6 @@ import (
 	"github.com/toc-taiwan/toc-machine-trading/internal/usecase/repo"
 	"github.com/toc-taiwan/toc-machine-trading/pkg/eventbus"
 	"github.com/toc-taiwan/toc-machine-trading/pkg/log"
-
-	firebase "firebase.google.com/go/v4"
-	"firebase.google.com/go/v4/messaging"
 	"google.golang.org/api/option"
 )
 

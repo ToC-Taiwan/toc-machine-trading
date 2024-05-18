@@ -6,8 +6,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/toc-taiwan/toc-machine-trading/internal/config"
-
 	"github.com/toc-taiwan/toc-machine-trading/internal/entity"
 	"github.com/toc-taiwan/toc-machine-trading/internal/usecase/grpc"
 	"github.com/toc-taiwan/toc-machine-trading/internal/usecase/modules/calendar"
@@ -15,8 +15,6 @@ import (
 	"github.com/toc-taiwan/toc-machine-trading/internal/usecase/repo"
 	"github.com/toc-taiwan/toc-machine-trading/pkg/eventbus"
 	"github.com/toc-taiwan/toc-machine-trading/pkg/log"
-
-	"github.com/google/uuid"
 )
 
 // TradeUseCase -.
