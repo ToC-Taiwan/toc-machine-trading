@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 	"time"
 
@@ -18,6 +19,7 @@ import (
 	"github.com/spf13/viper"
 	"github.com/toc-taiwan/toc-machine-trading/pkg/log"
 	"github.com/toc-taiwan/toc-machine-trading/pkg/postgres"
+	"github.com/toc-taiwan/toc-machine-trading/pkg/utils"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -223,6 +225,14 @@ func (c *Config) GetPostgresPool() *postgres.Postgres {
 
 func (c *Config) setSinopacPool() {
 	c.logger.Info("Connecting to sinopac gRPC server")
+	splits := strings.Split(c.Sinopac.URL, ":")
+	if len(splits) != 2 {
+		c.logger.Fatal("sinopac gRPC server URL format error")
+	}
+	host, port := splits[0], splits[1]
+	for !utils.GetPortIsUsed(host, port) {
+		time.Sleep(5 * time.Second)
+	}
 	newConn, err := grpc.NewClient(
 		c.Sinopac.URL,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
