@@ -18,7 +18,7 @@ require (
 	github.com/jackc/pgx/v4 v4.18.3
 	github.com/joho/godotenv v1.5.1
 	github.com/markcheno/go-talib v0.0.0-20190307022042-cd53a9264d70
-	github.com/mochi-mqtt/server/v2 v2.6.3
+	github.com/mochi-mqtt/server/v2 v2.6.4
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/prometheus/client_golang v1.19.1
 	github.com/robfig/cron/v3 v3.0.1
@@ -28,7 +28,7 @@ require (
 	github.com/swaggo/files v1.0.1
 	github.com/swaggo/gin-swagger v1.6.0
 	github.com/swaggo/swag v1.16.3
-	github.com/toc-taiwan/toc-trade-protobuf v0.1.4
+	github.com/toc-taiwan/toc-trade-protobuf v0.1.7
 	golang.org/x/crypto v0.23.0
 	google.golang.org/api v0.181.0
 	google.golang.org/grpc v1.64.0
