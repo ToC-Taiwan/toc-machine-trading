@@ -56,10 +56,10 @@ func NewRealTime() RealTime {
 
 		commonMQ: inline.NewInliner(),
 
-		gRPCRealtime: grpc.NewRealTime(cfg.GetSinopacPool()),
-		gRPCSub:      grpc.NewSubscribe(cfg.GetSinopacPool()),
+		gRPCRealtime: grpc.NewRealTime(cfg.GetSinopacConn()),
+		gRPCSub:      grpc.NewSubscribe(cfg.GetSinopacConn()),
 
-		sc: grpc.NewTrade(cfg.GetSinopacPool(), cfg.Simulation),
+		sc: grpc.NewTrade(cfg.GetSinopacConn(), cfg.Simulation),
 
 		cfg:                 cfg,
 		futureSwitchChanMap: make(map[string]chan bool),

@@ -33,7 +33,7 @@ func NewBasic() Basic {
 	cfg := config.Get()
 	uc := &BasicUseCase{
 		repo:     repo.NewBasic(cfg.GetPostgresPool()),
-		sc:       grpc.NewBasic(cfg.GetSinopacPool()),
+		sc:       grpc.NewBasic(cfg.GetSinopacConn()),
 		cfg:      cfg,
 		tradeDay: calendar.Get(),
 		logger:   log.Get(),

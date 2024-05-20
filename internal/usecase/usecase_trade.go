@@ -44,7 +44,7 @@ func NewTrade() Trade {
 	cfg := config.Get()
 	tradeDay := calendar.Get()
 	uc := &TradeUseCase{
-		sc:    grpc.NewTrade(cfg.GetSinopacPool(), cfg.Simulation),
+		sc:    grpc.NewTrade(cfg.GetSinopacConn(), cfg.Simulation),
 		repo:  repo.NewTrade(cfg.GetPostgresPool()),
 		quota: quota.NewQuota(cfg.Quota),
 

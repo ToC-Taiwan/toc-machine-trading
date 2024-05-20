@@ -36,7 +36,7 @@ func NewTarget() Target {
 	cfg := config.Get()
 	uc := &TargetUseCase{
 		repo:     repo.NewTarget(cfg.GetPostgresPool()),
-		gRPCAPI:  grpc.NewRealTime(cfg.GetSinopacPool()),
+		gRPCAPI:  grpc.NewRealTime(cfg.GetSinopacConn()),
 		cfg:      cfg,
 		tradeDay: calendar.Get(),
 		logger:   log.Get(),

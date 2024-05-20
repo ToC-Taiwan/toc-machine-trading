@@ -119,7 +119,7 @@ func Init() {
 		data.readConfig()
 		data.readEnv()
 		data.setPostgresPool()
-		data.setSinopacPool()
+		data.connectSinopac()
 		singleton = data
 	})
 }
@@ -223,7 +223,7 @@ func (c *Config) GetPostgresPool() *postgres.Postgres {
 	return c.dbPool
 }
 
-func (c *Config) setSinopacPool() {
+func (c *Config) connectSinopac() {
 	c.logger.Info("Connecting to sinopac gRPC server")
 	splits := strings.Split(c.Sinopac.URL, ":")
 	if len(splits) != 2 {
@@ -247,7 +247,7 @@ func (c *Config) setSinopacPool() {
 	c.sinopacPool = newConn
 }
 
-func (c *Config) GetSinopacPool() *grpc.ClientConn {
+func (c *Config) GetSinopacConn() *grpc.ClientConn {
 	if c.sinopacPool == nil {
 		c.logger.Fatal("sinopac gRPC server not connected")
 	}

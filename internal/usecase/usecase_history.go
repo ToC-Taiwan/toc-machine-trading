@@ -44,7 +44,7 @@ func NewHistory() History {
 	cfg := config.Get()
 	uc := &HistoryUseCase{
 		repo:            repo.NewHistory(cfg.GetPostgresPool()),
-		grpcapi:         grpc.NewHistory(cfg.GetSinopacPool()),
+		grpcapi:         grpc.NewHistory(cfg.GetSinopacConn()),
 		fetchList:       make(map[string]*entity.StockTarget),
 		tradeDay:        calendar.Get(),
 		analyzeStockCfg: cfg.AnalyzeStock,
