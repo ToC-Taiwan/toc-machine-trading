@@ -4,7 +4,7 @@ package grpc
 import (
 	"context"
 
-	"github.com/toc-taiwan/toc-trade-protobuf/src/golang/pb"
+	"github.com/toc-taiwan/toc-trade-protobuf/golang/pb"
 	"google.golang.org/grpc"
 )
 

@@ -16,7 +16,7 @@ import (
 	"github.com/toc-taiwan/toc-machine-trading/pkg/eventbus"
 	"github.com/toc-taiwan/toc-machine-trading/pkg/log"
 	"github.com/toc-taiwan/toc-machine-trading/pkg/utils"
-	"github.com/toc-taiwan/toc-trade-protobuf/src/golang/pb"
+	"github.com/toc-taiwan/toc-trade-protobuf/golang/pb"
 )
 
 // HistoryUseCase -.

@@ -11,7 +11,7 @@ import (
 
 	gomock "github.com/golang/mock/gomock"
 	entity "github.com/toc-taiwan/toc-machine-trading/internal/entity"
-	pb "github.com/toc-taiwan/toc-trade-protobuf/src/golang/pb"
+	pb "github.com/toc-taiwan/toc-trade-protobuf/golang/pb"
 )
 
 // MockAnalyze is a mock of Analyze interface.

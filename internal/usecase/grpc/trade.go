@@ -5,7 +5,7 @@ import (
 	"context"
 
 	"github.com/toc-taiwan/toc-machine-trading/internal/entity"
-	"github.com/toc-taiwan/toc-trade-protobuf/src/golang/pb"
+	"github.com/toc-taiwan/toc-trade-protobuf/golang/pb"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/emptypb"
 )

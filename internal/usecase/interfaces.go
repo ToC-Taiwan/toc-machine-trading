@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/toc-taiwan/toc-machine-trading/internal/entity"
-	"github.com/toc-taiwan/toc-trade-protobuf/src/golang/pb"
+	"github.com/toc-taiwan/toc-trade-protobuf/golang/pb"
 )
 
 //go:generate mockgen -source=interfaces.go -destination=./mocks_test.go -package=usecase

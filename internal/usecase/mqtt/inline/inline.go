@@ -12,7 +12,7 @@ import (
 	"github.com/toc-taiwan/toc-machine-trading/internal/entity"
 	"github.com/toc-taiwan/toc-machine-trading/internal/usecase/mqtt"
 	"github.com/toc-taiwan/toc-machine-trading/pkg/embedbkr"
-	"github.com/toc-taiwan/toc-trade-protobuf/src/golang/pb"
+	"github.com/toc-taiwan/toc-trade-protobuf/golang/pb"
 	"google.golang.org/protobuf/proto"
 )
 
