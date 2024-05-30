@@ -12,8 +12,8 @@ import (
 	"github.com/Masterminds/squirrel"
 	"github.com/google/go-cmp/cmp"
 	"github.com/jackc/pgx/v4"
+	"github.com/toc-taiwan/postgres"
 	"github.com/toc-taiwan/toc-machine-trading/internal/entity"
-	"github.com/toc-taiwan/toc-machine-trading/pkg/postgres"
 )
 
 type trade struct {
