@@ -7,14 +7,14 @@ run: swag
 	@echo "Copying default config..."
 	@cp ./configs/default.config.yml ./configs/config.yml
 	@echo "Building $(BIN_NAME)..."
-	@go build -o $(BIN_NAME) ./cmd/app
+	@go build -ldflags="-s -w" -o $(BIN_NAME) ./cmd/app
 	@echo "Running $(BIN_NAME)..."
 	@./$(BIN_NAME)
 
 build:
 	@go mod tidy
 	@go mod download
-	@go build -o $(BIN_NAME) ./cmd/app
+	@go build -ldflags="-s -w" -o $(BIN_NAME) ./cmd/app
 
 swag:
 	@./scripts/generate_swagger.sh

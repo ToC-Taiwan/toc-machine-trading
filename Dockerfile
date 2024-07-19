@@ -1,5 +1,5 @@
 # build-stage
-FROM golang:1.22.3-bullseye as build-stage
+FROM golang:1.22.5-bullseye AS build-stage
 USER root
 
 ENV TZ=Asia/Taipei
@@ -8,10 +8,10 @@ WORKDIR /
 RUN mkdir build_space
 WORKDIR /build_space
 COPY . .
-RUN CGO_ENABLED=0 go build -o toc-machine-trading -tags=prod ./cmd/app
+RUN CGO_ENABLED=0 go build -ldflags="-s -w" -o toc-machine-trading -tags=prod ./cmd/app
 
 # production-stage
-FROM debian:bullseye as production-stage
+FROM debian:bullseye AS production-stage
 USER root
 
 ENV TZ=Asia/Taipei
