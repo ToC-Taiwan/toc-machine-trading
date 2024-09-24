@@ -10,7 +10,6 @@ require (
 	github.com/gin-gonic/gin v1.10.0
 	github.com/golang-jwt/jwt/v4 v4.5.0
 	github.com/golang-migrate/migrate/v4 v4.18.1
-	github.com/golang/mock v1.6.0
 	github.com/google/go-cmp v0.6.0
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/websocket v1.5.3
@@ -30,6 +29,7 @@ require (
 	github.com/swaggo/swag v1.16.3
 	github.com/toc-taiwan/postgres v0.0.0-20240523104642-6744a4677a95
 	github.com/toc-taiwan/toc-trade-protobuf v0.1.11
+	go.uber.org/mock v0.4.0
 	golang.org/x/crypto v0.27.0
 	google.golang.org/api v0.198.0
 	google.golang.org/grpc v1.67.0

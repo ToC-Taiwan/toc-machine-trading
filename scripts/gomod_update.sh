@@ -8,7 +8,7 @@ go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
 
 go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
 go install github.com/swaggo/swag/cmd/swag@latest
-go install github.com/golang/mock/mockgen@latest
+go install go.uber.org/mock/mockgen@latest
 
 go mod init github.com/toc-taiwan/toc-machine-trading
 go mod tidy
