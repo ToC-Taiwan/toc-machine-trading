@@ -22,6 +22,7 @@ import (
 type MockBasicRepo struct {
 	ctrl     *gomock.Controller
 	recorder *MockBasicRepoMockRecorder
+	isgomock struct{}
 }
 
 // MockBasicRepoMockRecorder is the mock recorder for MockBasicRepo.
@@ -115,6 +116,7 @@ func (mr *MockBasicRepoMockRecorder) UpdateAllStockDayTradeToNo(ctx any) *gomock
 type MockHistoryRepo struct {
 	ctrl     *gomock.Controller
 	recorder *MockHistoryRepoMockRecorder
+	isgomock struct{}
 }
 
 // MockHistoryRepoMockRecorder is the mock recorder for MockHistoryRepo.
@@ -296,6 +298,7 @@ func (mr *MockHistoryRepoMockRecorder) QueryMutltiStockCloseByDate(ctx, stockNum
 type MockRealTimeRepo struct {
 	ctrl     *gomock.Controller
 	recorder *MockRealTimeRepoMockRecorder
+	isgomock struct{}
 }
 
 // MockRealTimeRepoMockRecorder is the mock recorder for MockRealTimeRepo.
@@ -333,6 +336,7 @@ func (mr *MockRealTimeRepoMockRecorder) InsertEvent(ctx, t any) *gomock.Call {
 type MockSystemRepo struct {
 	ctrl     *gomock.Controller
 	recorder *MockSystemRepoMockRecorder
+	isgomock struct{}
 }
 
 // MockSystemRepoMockRecorder is the mock recorder for MockSystemRepo.
@@ -501,6 +505,7 @@ func (mr *MockSystemRepoMockRecorder) QueryUserByUsername(ctx, username any) *go
 type MockTargetRepo struct {
 	ctrl     *gomock.Controller
 	recorder *MockTargetRepoMockRecorder
+	isgomock struct{}
 }
 
 // MockTargetRepoMockRecorder is the mock recorder for MockTargetRepo.
@@ -553,6 +558,7 @@ func (mr *MockTargetRepoMockRecorder) QueryTargetsByTradeDay(ctx, tradeDay any) 
 type MockTradeRepo struct {
 	ctrl     *gomock.Controller
 	recorder *MockTradeRepoMockRecorder
+	isgomock struct{}
 }
 
 // MockTradeRepoMockRecorder is the mock recorder for MockTradeRepo.

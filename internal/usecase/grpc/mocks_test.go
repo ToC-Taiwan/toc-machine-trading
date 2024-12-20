@@ -21,6 +21,7 @@ import (
 type MockBasicgRPCAPI struct {
 	ctrl     *gomock.Controller
 	recorder *MockBasicgRPCAPIMockRecorder
+	isgomock struct{}
 }
 
 // MockBasicgRPCAPIMockRecorder is the mock recorder for MockBasicgRPCAPI.
@@ -132,6 +133,7 @@ func (mr *MockBasicgRPCAPIMockRecorder) Login() *gomock.Call {
 type MockHistorygRPCAPI struct {
 	ctrl     *gomock.Controller
 	recorder *MockHistorygRPCAPIMockRecorder
+	isgomock struct{}
 }
 
 // MockHistorygRPCAPIMockRecorder is the mock recorder for MockHistorygRPCAPI.
@@ -215,6 +217,7 @@ func (mr *MockHistorygRPCAPIMockRecorder) GetStockHistoryTick(stockNumArr, date 
 type MockRealTimegRPCAPI struct {
 	ctrl     *gomock.Controller
 	recorder *MockRealTimegRPCAPIMockRecorder
+	isgomock struct{}
 }
 
 // MockRealTimegRPCAPIMockRecorder is the mock recorder for MockRealTimegRPCAPI.
@@ -373,6 +376,7 @@ func (mr *MockRealTimegRPCAPIMockRecorder) GetStockVolumeRankPB(date any) *gomoc
 type MockSubscribegRPCAPI struct {
 	ctrl     *gomock.Controller
 	recorder *MockSubscribegRPCAPIMockRecorder
+	isgomock struct{}
 }
 
 // MockSubscribegRPCAPIMockRecorder is the mock recorder for MockSubscribegRPCAPI.
@@ -546,6 +550,7 @@ func (mr *MockSubscribegRPCAPIMockRecorder) UnSubscribeStockTick(stockNumArr any
 type MockTradegRPCAPI struct {
 	ctrl     *gomock.Controller
 	recorder *MockTradegRPCAPIMockRecorder
+	isgomock struct{}
 }
 
 // MockTradegRPCAPIMockRecorder is the mock recorder for MockTradegRPCAPI.

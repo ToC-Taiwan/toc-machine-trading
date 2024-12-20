@@ -23,6 +23,7 @@ import (
 type MockAnalyze struct {
 	ctrl     *gomock.Controller
 	recorder *MockAnalyzeMockRecorder
+	isgomock struct{}
 }
 
 // MockAnalyzeMockRecorder is the mock recorder for MockAnalyze.
@@ -60,6 +61,7 @@ func (mr *MockAnalyzeMockRecorder) GetRebornMap(ctx any) *gomock.Call {
 type MockBasic struct {
 	ctrl     *gomock.Controller
 	recorder *MockBasicMockRecorder
+	isgomock struct{}
 }
 
 // MockBasicMockRecorder is the mock recorder for MockBasic.
@@ -150,6 +152,7 @@ func (mr *MockBasicMockRecorder) GetStockDetail(stockNum any) *gomock.Call {
 type MockHistory struct {
 	ctrl     *gomock.Controller
 	recorder *MockHistoryMockRecorder
+	isgomock struct{}
 }
 
 // MockHistoryMockRecorder is the mock recorder for MockHistory.
@@ -203,6 +206,7 @@ func (mr *MockHistoryMockRecorder) GetFutureHistoryPBKbarByDate(code, date any) 
 type MockRealTime struct {
 	ctrl     *gomock.Controller
 	recorder *MockRealTimeMockRecorder
+	isgomock struct{}
 }
 
 // MockRealTimeMockRecorder is the mock recorder for MockRealTime.
@@ -306,6 +310,7 @@ func (mr *MockRealTimeMockRecorder) GetTradeIndex() *gomock.Call {
 type MockTarget struct {
 	ctrl     *gomock.Controller
 	recorder *MockTargetMockRecorder
+	isgomock struct{}
 }
 
 // MockTargetMockRecorder is the mock recorder for MockTarget.
@@ -358,6 +363,7 @@ func (mr *MockTargetMockRecorder) GetTargets(ctx any) *gomock.Call {
 type MockTrade struct {
 	ctrl     *gomock.Controller
 	recorder *MockTradeMockRecorder
+	isgomock struct{}
 }
 
 // MockTradeMockRecorder is the mock recorder for MockTrade.
@@ -594,6 +600,7 @@ func (mr *MockTradeMockRecorder) SelloddStock(num, price, share any) *gomock.Cal
 type MockSystem struct {
 	ctrl     *gomock.Controller
 	recorder *MockSystemMockRecorder
+	isgomock struct{}
 }
 
 // MockSystemMockRecorder is the mock recorder for MockSystem.
@@ -758,6 +765,7 @@ func (mr *MockSystemMockRecorder) VerifyEmail(ctx, username, code any) *gomock.C
 type MockFCM struct {
 	ctrl     *gomock.Controller
 	recorder *MockFCMMockRecorder
+	isgomock struct{}
 }
 
 // MockFCMMockRecorder is the mock recorder for MockFCM.
