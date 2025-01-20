@@ -16,7 +16,7 @@ var files embed.FS
 
 const (
 	startTradeYear int = 2021
-	endTradeYear   int = 2024
+	endTradeYear   int = 2025
 )
 
 var (
